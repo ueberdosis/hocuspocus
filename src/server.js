@@ -31,7 +31,6 @@ io.on('connection', function (socket) {
     console.log('User', socket.id, 'joins room:', room)
     socket.join(room)
     getInstanceOfY(room).then(function (y) {
-      console.log('current y value:', y.root.get('x'))
       y.connector.userJoined(socket.id, 'slave')
       socket.on('yjsEvent', function (msg) {
         y.connector.receiveMessage(socket.id, msg)

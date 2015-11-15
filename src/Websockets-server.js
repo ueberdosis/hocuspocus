@@ -13,7 +13,8 @@ function extend (Y) {
       if (options.io == null) {
         throw new Error('You must define the socketio serve!')
       }
-      options.role = 'slave'
+      options.role = 'master'
+      options.forwardAppliedOperations = true
       super(y, options)
       this.options = options
       this.io = options.io
