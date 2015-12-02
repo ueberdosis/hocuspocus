@@ -1,8 +1,10 @@
-var io = require('socket.io')(1234)
+var io = require('socket.io')(2345)
 var Y = require('../../yjs/src/y.js')
 require('./Websockets-server.js')(Y)
 require('../../y-memory/src/Memory.js')(Y)
 require('../../y-array/src/Array.js')(Y)
+require('../../y-text/src/Text.js')(Y)
+require('../../y-map/src/Map.js')(Y)
 
 global.yInstances = {}
 
@@ -15,7 +17,8 @@ function getInstanceOfY (room) {
       connector: {
         name: 'websockets-server',
         room: room,
-        io: io
+        io: io,
+	debug: true
       }
     }).then(function (y) {
       global.yInstances[room] = y
