@@ -14,7 +14,8 @@ function getInstanceOfY (room) {
       connector: {
         name: 'websockets-server',
         room: room,
-        io: io
+        io: io,
+	debug: true
       }
     }).then(function (y) {
       global.yInstances[room] = y
