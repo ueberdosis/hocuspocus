@@ -1,8 +1,7 @@
-var io = require('socket.io')(1234)
+var io = require('socket.io')(2345)
 var Y = require('../../yjs/src/y.js')
-require('./Websockets-server.js')(Y)
 require('../../y-memory/src/Memory.js')(Y)
-require('../../y-array/src/Array.js')(Y)
+require('./Websockets-server.js')(Y)
 
 global.yInstances = {}
 
