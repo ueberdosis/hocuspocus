@@ -27,9 +27,11 @@ function extend (Y) {
       throw new Error('You must not disconnect with this connector!')
     }
     send (uid, message) {
+      message.room = this.options.room
       this.io.to(uid).emit('yjsEvent', message)
     }
     broadcast (message) {
+      message.room = this.options.room
       this.io.in(this.options.room).emit('yjsEvent', message)
     }
     isDisconnected () {
