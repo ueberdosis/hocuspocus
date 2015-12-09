@@ -15,7 +15,7 @@ function getInstanceOfY (room) {
         name: 'websockets-server',
         room: room,
         io: io,
-	      debug: true
+        debug: true
       }
     }).then(function (y) {
       global.yInstances[room] = y
@@ -32,14 +32,16 @@ io.on('connection', function (socket) {
     socket.join(room)
     getInstanceOfY(room).then(function (y) {
       y.connector.userJoined(socket.id, 'slave')
-      socket.on('yjsEvent', function (msg) {
-        if (msg.room === room) {
-          y.connector.receiveMessage(socket.id, msg)
-        }
-      })
-      socket.on('disconnect', function (msg) {
-        y.connector.userLeft(socket.id)
-      })
+    })
+  })
+  socket.on('yjsEvent', function (msg) {
+    getInstanceOfY(msg.room).then(function (y) {
+      y.connector.receiveMessage(socket.id, msg)
+    })
+  })
+  socket.on('disconnect', function (msg) {
+    getInstanceOfY(msg.room).then(function (y) {
+      y.connector.userLeft(socket.id)
     })
   })
 })
