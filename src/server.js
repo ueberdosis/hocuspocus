@@ -1,7 +1,20 @@
-var io = require('socket.io')(2345)
-var Y = require('../../yjs/src/y.js')
-require('../../y-memory/src/Memory.js')(Y)
+#!/usr/bin/env node
+
+var Y = require('yjs')
+var minimist = require('minimist')
+require('y-memory')(Y)
 require('./Websockets-server.js')(Y)
+
+var options = minimist(process.argv.slice(2), {
+    string: ['port', 'debug'],
+    default: {
+      port: '1234',
+      debug: false
+    }
+  })
+var port = Number.parseInt(options.port)
+var io = require('socket.io')(port)
+console.log("Running y-websockets-server on port "+port)
 
 global.yInstances = {}
 
@@ -10,12 +23,12 @@ function getInstanceOfY (room) {
     return Y({
       db: {
         name: 'memory'
-      },
+      },    
       connector: {
         name: 'websockets-server',
         room: room,
         io: io,
-        debug: true
+        debug: options.debug ? true : false
       }
     }).then(function (y) {
       global.yInstances[room] = y

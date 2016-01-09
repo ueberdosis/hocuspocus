@@ -1,8 +1,9 @@
 {
   "name": "y-websockets-server",
-  "version": "0.6.0",
+  "version": "0.7.4",
   "description": "Websockets Connector for Yjs (node server)",
   "main": "./src/Websockets.js",
+  "bin": "./src/server.js",
   "scripts": {
     "test": "node --harmony ./node_modules/.bin/gulp test",
     "lint": "./node_modules/.bin/standard"
@@ -33,7 +34,10 @@
   },
   "homepage": "http://y-js.org",
   "dependencies": {
-    "socket.io": "^1.3.7"
+    "minimist": "^1.2.0",
+    "socket.io": "^1.3.7",
+    "y-memory": "^0.7.0",
+    "yjs": "^0.7.2"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.4",
