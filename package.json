@@ -1,6 +1,6 @@
 {
   "name": "y-websockets-server",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Websockets Connector for Yjs (node server)",
   "main": "./src/Websockets.js",
   "bin": "./src/server.js",
@@ -37,7 +37,7 @@
     "minimist": "^1.2.0",
     "socket.io": "^1.3.7",
     "y-memory": "^0.7.0",
-    "yjs": "^0.7.2"
+    "yjs": "^0.7.3"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.4",

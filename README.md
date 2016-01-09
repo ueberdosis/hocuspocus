@@ -1,9 +1,14 @@
 # Websockets Connector for [Yjs](https://github.com/y-js/yjs)
 
-### Set up your own websocket-server installation:
-In order to start your own websockets-server follow the following steps:
+*y-websockets-server* is the connection point for *y-websocket-client*. It saves the shared data, an distributes it efficiently to all connected clients.
 
-1. Install y-websockets-server: `bower install y-js/y-websockets-server y-js/yjs`
-2. Change to the installed package: `cd bower_components/y-websockets-server`
-3. Start Server: `node src/server.js`
-4. Server will be available on port 2345
+### Set up your own websocket-server installation:
+1. Install package `npm install -g y-websocket-server`
+2. execute binary `y-websocket-server --port 1234` (also supports `--debug` flag)
+
+*y-websockets-server* installs *yjs* as a dependency. You have to make sure that the installed *yjs* package version matches the *yjs* version used on the client side!
+This is why I recommend to have your own server installation for productive systems.
+I can't guarantee that the standard server is always up, and/or matches your yjs version (I'll update the yjs version always to match the newest version).
+
+### TODO
+* Save shared data persistently in a database (e.g. choose a database adapter)
