@@ -1,10 +1,10 @@
 # Websockets Connector for [Yjs](https://github.com/y-js/yjs)
 
-*y-websockets-server* is the connection point for *y-websocket-client*. It saves the shared data, an distributes it efficiently to all connected clients.
+*y-websockets-server* is the connection point for *y-websockets-client*. It saves the shared data, an distributes it efficiently to all connected clients.
 
 ### Set up your own websocket-server installation:
-1. Install package `npm install -g y-websocket-server`
-2. execute binary `y-websocket-server --port 1234` (also supports `--debug` flag)
+1. Install package `npm install -g y-websockets-server`
+2. execute binary `y-websockets-server --port 1234` (also supports `--debug` flag)
 
 *y-websockets-server* installs *yjs* as a dependency. You have to make sure that the installed *yjs* package version matches the *yjs* version used on the client side!
 This is why I recommend to have your own server installation for productive systems.
