@@ -37,7 +37,7 @@
     "minimist": "^1.2.0",
     "socket.io": "^1.3.7",
     "y-memory": "^0.7.0",
-    "yjs": "^0.7.3"
+    "yjs": "^0.8.0"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.4",
