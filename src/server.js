@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global process, global */
 
 var Y = require('yjs')
 var minimist = require('minimist')
@@ -6,15 +7,15 @@ require('y-memory')(Y)
 require('./Websockets-server.js')(Y)
 
 var options = minimist(process.argv.slice(2), {
-    string: ['port', 'debug'],
-    default: {
-      port: '1234',
-      debug: false
-    }
-  })
-var port = Number.parseInt(options.port)
+  string: ['port', 'debug'],
+  default: {
+    port: '1234',
+    debug: false
+  }
+})
+var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
-console.log("Running y-websockets-server on port "+port)
+console.log('Running y-websockets-server on port ' + port)
 
 global.yInstances = {}
 
@@ -23,12 +24,12 @@ function getInstanceOfY (room) {
     return Y({
       db: {
         name: 'memory'
-      },    
+      },
       connector: {
         name: 'websockets-server',
         room: room,
         io: io,
-        debug: options.debug ? true : false
+        debug: !!options.debug
       }
     }).then(function (y) {
       global.yInstances[room] = y
@@ -48,13 +49,17 @@ io.on('connection', function (socket) {
     })
   })
   socket.on('yjsEvent', function (msg) {
-    getInstanceOfY(msg.room).then(function (y) {
-      y.connector.receiveMessage(socket.id, msg)
-    })
+    if (msg.room != null) {
+      getInstanceOfY(msg.room).then(function (y) {
+        y.connector.receiveMessage(socket.id, msg)
+      })
+    }
   })
   socket.on('disconnect', function (msg) {
-    getInstanceOfY(msg.room).then(function (y) {
-      y.connector.userLeft(socket.id)
-    })
+    if (msg.room != null) {
+      getInstanceOfY(msg.room).then(function (y) {
+        y.connector.userLeft(socket.id)
+      })
+    }
   })
 })
