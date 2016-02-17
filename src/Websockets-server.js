@@ -21,10 +21,14 @@ function extend (Y) {
       this.setUserId('server')
     }
     disconnect () {
-      throw new Error('You must not disconnect with this connector!')
+      // throw new Error('You must not disconnect with this connector!')
     }
     reconnect () {
-      throw new Error('You must not disconnect with this connector!')
+      // throw new Error('You must not disconnect with this connector!')
+    }
+    destroy () {
+      this.io = null
+      this.options = null
     }
     send (uid, message) {
       message.room = this.options.room
