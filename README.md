@@ -15,7 +15,7 @@ But don't worry - setting up your own installation is really easy!
 1. Install package `npm install -g y-websockets-server`
 2. Execute binary `y-websockets-server --port 1234` (also supports `--debug` flag)
 
-##### Locally (recommended if you intend to mody y-websockets-server)
+##### Locally (recommended if you intend to modify y-websockets-server)
 
 1. Set up a new project
         
