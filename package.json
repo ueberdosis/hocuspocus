@@ -2,7 +2,7 @@
   "name": "y-websockets-server",
   "version": "0.8.2",
   "description": "Websockets Connector for Yjs (node server)",
-  "main": "./src/Websockets.js",
+  "main": "./src/y-websockets-server.js",
   "bin": "./src/server.js",
   "scripts": {
     "test": "node --harmony ./node_modules/.bin/gulp test",

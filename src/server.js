@@ -5,12 +5,18 @@
 var Y = require('yjs')
 var minimist = require('minimist')
 require('y-memory')(Y)
-require('./Websockets-server.js')(Y)
+try {
+  // try to require local y-websockets-server
+  require('./y-websockets-server.js')(Y)
+} catch (err) {
+  // otherwise require global y-websockets-server
+  require('y-websockets-server')
+}
 
 var options = minimist(process.argv.slice(2), {
   string: ['port', 'debug'],
   default: {
-    port: '1234',
+    port: process.env.PORT || '1234',
     debug: false
   }
 })
