@@ -6,7 +6,8 @@
   "bin": "./src/server.js",
   "scripts": {
     "test": "node --harmony ./node_modules/.bin/gulp test",
-    "lint": "./node_modules/.bin/standard"
+    "lint": "./node_modules/.bin/standard",
+    "start": "node ./src/server.js"
   },
   "pre-commit": [
     "lint",
