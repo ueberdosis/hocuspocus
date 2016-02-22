@@ -18,9 +18,11 @@ But don't worry - setting up your own installation is really easy!
 ##### Locally (recommended if you intend to mody y-websockets-server)
 
 1. Set up a new project
+        
         ```
         mkdir my-y-websockets-server && cd $_ && git init && npm init && echo "node_modules" > .gitignore
         ```
+
 2. Install `npm i --save y-websockets-server`
 3. Copy executable `cp node_modules/y-websockets-server/src/server.js .`
 4. Start server `node server.js`
