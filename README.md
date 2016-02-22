@@ -18,7 +18,9 @@ But don't worry - setting up your own installation is really easy!
 ##### Locally (recommended if you intend to mody y-websockets-server)
 
 1. Set up a new project
+        ```
         mkdir my-y-websockets-server && cd $_ && git init && npm init && echo "node_modules" > .gitignore
+        ```
 2. Install `npm i --save y-websockets-server`
 3. Copy executable `cp node_modules/y-websockets-server/src/server.js .`
 4. Start server `node server.js`
@@ -30,9 +32,11 @@ Preliminarily you have to set up heroku - see this great [getting started guide]
 5. Perform the steps from the local installation
 6. Create Procfile `echo "web: node server.js" > Procfile`
 7. Specify nodejs environment. Add this to your package.json:
+        ```
         "engines": {
           "node": "5.0.0"
         }
+        ```
 8. Add heroku app `heroku create my-websockets-server`
 9. Commit & Push to heroku `git add -A && git commit -am 'init' && git push heroku master`
 10. Start app `heroku ps:scale web=1`
