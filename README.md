@@ -1,4 +1,4 @@
-# Websockets Connector for [Yjs](https://github.com/y-js/yjs)
+# Websockets Connector for [Yjs](https://github.com/y-js/yjs) (Server)
 
 *y-websockets-server* is the connection point for *y-websockets-client*. It saves the shared data, an distributes it efficiently to all connected clients.
 
