@@ -9,7 +9,7 @@ This is why I recommend to have your own server installation for productive syst
 I can't guarantee that the development server is always up, and/or matches your yjs version (I always update yjs to match the newest version). If something is not working, this is most likely the reason for it.
 But don't worry - setting up your own installation is really easy!
 
-### Set up your own y-websocket-server installation:
+### Set up your own y-websocket-server installation
 
 ##### Globally (easy)
 1. Install package `npm install -g y-websockets-server`
@@ -18,12 +18,19 @@ But don't worry - setting up your own installation is really easy!
 ##### Locally (recommended if you intend to modify y-websockets-server)
 
 1. Set up a new project
-        
+
         mkdir my-y-websockets-server && cd $_ && git init && npm init && echo "node_modules" > .gitignore
 
 2. Install `npm i --save y-websockets-server`
 3. Copy executable `cp node_modules/y-websockets-server/src/server.js .`
 4. Start server `node server.js`
+
+##### Using Docker
+
+1. Clone this repository and navigate to it.
+2. Build the image: `docker build -t y-websockets-server .`
+3. Run it: `docker run -it --rm -p 1234:1234 --name y-websockets-server y-websockets-server`
+4. Feel free to modify the port argument, e.g. to `-p 1773:1234` to run it at port 1773.
 
 ##### Locally + Heroku
 Heroku is really easy to set up, and you get a free *y-websockets-server* with https!
