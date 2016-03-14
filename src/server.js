@@ -37,7 +37,8 @@ function getInstanceOfY (room) {
         room: room,
         io: io,
         debug: !!options.debug
-      }
+      },
+      share: {}
     }).then(function (y) {
       global.yInstances[room] = y
       return y
