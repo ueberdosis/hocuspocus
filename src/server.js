@@ -20,6 +20,7 @@ var options = minimist(process.argv.slice(2), {
     debug: false
   }
 })
+
 var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
 console.log('Running y-websockets-server on port ' + port)
