@@ -10,7 +10,7 @@ try {
   require('./y-websockets-server.js')(Y)
 } catch (err) {
   // otherwise require global y-websockets-server
-  require('y-websockets-server')
+  require('y-websockets-server')(Y)
 }
 
 var options = minimist(process.argv.slice(2), {
