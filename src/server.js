@@ -67,9 +67,6 @@ io.on('connection', function (socket) {
     if (msg.room != null) {
       getInstanceOfY(msg.room).then(function (y) {
         y.connector.receiveMessage(socket.id, msg)
-        y.db.requestTransaction(function * () {
-          yield* this.os.logTable()
-        })
       })
     }
   })
