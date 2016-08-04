@@ -5,6 +5,8 @@
 var Y = require('yjs')
 var minimist = require('minimist')
 require('y-memory')(Y)
+require('y-leveldb')(Y)
+
 try {
   // try to require local y-websockets-server
   require('./y-websockets-server.js')(Y)
@@ -14,10 +16,11 @@ try {
 }
 
 var options = minimist(process.argv.slice(2), {
-  string: ['port', 'debug'],
+  string: ['port', 'debug', 'db'],
   default: {
     port: process.env.PORT || '1234',
-    debug: false
+    debug: false,
+    db: 'memory'
   }
 })
 
@@ -29,9 +32,11 @@ global.yInstances = {}
 
 function getInstanceOfY (room) {
   if (global.yInstances[room] == null) {
-    return Y({
+    global.yInstances[room] = Y({
       db: {
-        name: 'memory'
+        name: options.db,
+        dir: 'y-leveldb-databases',
+        namespace: room
       },
       connector: {
         name: 'websockets-server',
@@ -40,13 +45,9 @@ function getInstanceOfY (room) {
         debug: !!options.debug
       },
       share: {}
-    }).then(function (y) {
-      global.yInstances[room] = y
-      return y
     })
-  } else {
-    return Promise.resolve(global.yInstances[room])
   }
+  return global.yInstances[room]
 }
 
 io.on('connection', function (socket) {
@@ -55,6 +56,7 @@ io.on('connection', function (socket) {
     console.log('User', socket.id, 'joins room:', room)
     socket.join(room)
     getInstanceOfY(room).then(function (y) {
+      global.y = y // TODO: remove !!!
       if (rooms.indexOf(room) === -1) {
         y.connector.userJoined(socket.id, 'slave')
         rooms.push(room)
@@ -65,6 +67,9 @@ io.on('connection', function (socket) {
     if (msg.room != null) {
       getInstanceOfY(msg.room).then(function (y) {
         y.connector.receiveMessage(socket.id, msg)
+        y.db.requestTransaction(function * () {
+          yield* this.os.logTable()
+        })
       })
     }
   })
