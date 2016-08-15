@@ -5,7 +5,9 @@
 var Y = require('yjs')
 var minimist = require('minimist')
 require('y-memory')(Y)
-require('y-leveldb')(Y)
+try {
+  require('y-leveldb')(Y)
+} catch (err) {}
 
 try {
   // try to require local y-websockets-server
