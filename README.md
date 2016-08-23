@@ -1,6 +1,6 @@
 # Websockets Connector for [Yjs](https://github.com/y-js/yjs) (Server)
 
-*y-websockets-server* is the connection point for *y-websockets-client*. It saves the shared data, an distributes it efficiently to all connected clients.
+*y-websockets-server* is the connection point for *y-websockets-client*. It saves the shared data (using the [memory](https://github.com/y-js/y-memory) or the [leveldb](https://github.com/y-js/y-leveldb) database adapter), an distributes it efficiently to all connected clients.
 
 ### Notes
 
@@ -13,7 +13,7 @@ But don't worry - setting up your own installation is really easy!
 
 ##### Globally (easy)
 1. Install package `npm install -g y-websockets-server`
-2. Execute binary `y-websockets-server --port 1234` (also supports `--debug` flag)
+2. Execute binary `y-websockets-server [--port port] [--db db] [--debug]` (defaults: port = 1234, db = `memory` (choose either `leveldb` or `memory`)). 
 
 ##### Locally (recommended if you intend to modify y-websockets-server)
 
@@ -48,7 +48,3 @@ Preliminarily you have to set up heroku - see this great [getting started guide]
 9. Commit & Push to heroku `git add -A && git commit -am 'init' && git push heroku master`
 10. Start app `heroku ps:scale web=1`
 11. Get the url for your websockes-server instance `heroku app:info` (see *Web Url*).
-
-
-### TODO
-* Save shared data persistently in a database (e.g. choose a database adapter)
