@@ -38,13 +38,13 @@ Preliminarily you have to set up heroku - see this great [getting started guide]
 
 5. Perform the steps from the local installation
 6. Create Procfile `echo "web: node server.js" > Procfile`
-7. Specify nodejs environment. Add this to your package.json:
+7. Specify a node environment. Add this to your package.json:
 
         "engines": {
-          "node": "5.0.0"
+          "node": "6.9.1"
         }
 
 8. Add heroku app `heroku create my-websockets-server`
 9. Commit & Push to heroku `git add -A && git commit -am 'init' && git push heroku master`
 10. Start app `heroku ps:scale web=1`
-11. Get the url for your websockes-server instance `heroku app:info` (see *Web Url*).
+11. Get the url for your websockes-server instance `heroku info` (see *Web Url*).
