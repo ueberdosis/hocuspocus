@@ -9,11 +9,15 @@ This is why I recommend to have your own server installation for productive syst
 I can't guarantee that the development server is always up, and/or matches your yjs version (I always update yjs to match the newest version). If something is not working, this is most likely the reason for it.
 But don't worry - setting up your own installation is really easy!
 
+##### Instructions for [y-leveldb](https://github.com/y-js/y-leveldb)
+
+The memory database adapter is installed by default. If you intend to use the [y-leveldb](https://github.com/y-js/y-leveldb) database adapter, make sure to install it first.
+
 ### Set up your own y-websocket-server installation
 
 ##### Globally (easy)
 1. Install package `npm install -g y-websockets-server`
-2. Execute binary `y-websockets-server [--port port] [--db db] [--debug]` (defaults: port = 1234, db = `memory` (choose either `leveldb` or `memory`)). 
+2. Execute binary `y-websockets-server [--port port] [--db db] [--debug]` (defaults: port = 1234, db = `memory` (choose either `leveldb` or `memory`)).
 
 ##### Locally (recommended if you intend to modify y-websockets-server)
 
