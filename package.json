@@ -7,7 +7,7 @@
   "scripts": {
     "test": "node --harmony ./node_modules/.bin/gulp test",
     "lint": "./node_modules/.bin/standard",
-    "start": "node ./src/server.js"
+    "start": "DEBUG=y*,-y:connector-message node ./src/server.js"
   },
   "pre-commit": [
     "lint",
@@ -43,7 +43,7 @@
     "minimist": "^1.2.0",
     "socket.io": "1.3.7",
     "y-memory": "^8.0.0",
-    "yjs": "^11.0.0 || ^12.0.0"
+    "yjs": "^12.1.6"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.4",

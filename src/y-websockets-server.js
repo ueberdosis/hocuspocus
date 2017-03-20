@@ -33,10 +33,12 @@ function extend (Y) {
     send (uid, message) {
       message.room = this.options.room
       this.io.to(uid).emit('yjsEvent', message)
+      super.send(uid, message)
     }
     broadcast (message) {
       message.room = this.options.room
       this.io.in(this.options.room).emit('yjsEvent', message)
+      super.broadcast(message)
     }
     isDisconnected () {
       return false

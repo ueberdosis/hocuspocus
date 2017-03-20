@@ -3,6 +3,10 @@
 'use strict'
 
 var Y = require('yjs')
+
+Y.debug.log = console.log.bind(console)
+
+const log = Y.debug('y-websockets-server')
 var minimist = require('minimist')
 require('y-memory')(Y)
 try {
@@ -55,7 +59,7 @@ function getInstanceOfY (room) {
 io.on('connection', function (socket) {
   var rooms = []
   socket.on('joinRoom', function (room) {
-    console.log('User', socket.id, 'joins room:', room)
+    log('User "%s" joins room "%s"', socket.id, room)
     socket.join(room)
     getInstanceOfY(room).then(function (y) {
       global.y = y // TODO: remove !!!
