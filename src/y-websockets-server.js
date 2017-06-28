@@ -15,10 +15,10 @@ function extend (Y) {
       }
       options.role = 'master'
       options.forwardAppliedOperations = true
+      options.generateUserId = true
       super(y, options)
       this.options = options
       this.io = options.io
-      this.setUserId('server')
     }
     disconnect () {
       // throw new Error('You must not disconnect with this connector!')
