@@ -69,12 +69,12 @@ io.on('connection', function (socket) {
       }
     })
   })
-  socket.on('yjsEvent', function (msg) {
-    if (msg.room != null) {
-      getInstanceOfY(msg.room).then(function (y) {
-        y.connector.receiveMessage(socket.id, msg)
-      })
-    }
+  socket.on('yjsEvent', function (buffer) {
+    let decoder = new Y.utils.BinaryDecoder(buffer)
+    let roomname = decoder.readVarString()
+    getInstanceOfY(roomname).then(function (y) {
+      y.connector.receiveMessage(socket.id, buffer)
+    })
   })
   socket.on('disconnect', function () {
     for (var i = 0; i < rooms.length; i++) {
