@@ -1,6 +1,6 @@
 {
   "name": "y-websockets-server",
-  "version": "9.2.1",
+  "version": "10.0.0-0",
   "description": "Websockets Connector for Yjs (node server)",
   "main": "./src/y-websockets-server.js",
   "bin": "./src/server.js",
