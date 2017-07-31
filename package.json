@@ -9,10 +9,6 @@
     "lint": "standard",
     "start": "DEBUG=y*,-y:connector-message node ./src/server.js"
   },
-  "pre-commit": [
-    "lint",
-    "test"
-  ],
   "standard": {},
   "repository": {
     "type": "git",
@@ -37,7 +33,9 @@
     "minimist": "^1.2.0",
     "socket.io": "^2.0.3",
     "y-memory": "^9.0.0-1",
-    "yjs": "^13.0.0-6"
+    "yjs": "^13.0.0-8"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "standard": "^10.0.2"
+  }
 }
