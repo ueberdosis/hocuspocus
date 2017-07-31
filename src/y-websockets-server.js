@@ -35,7 +35,11 @@ function extend (Y) {
       super.send(uid, message)
     }
     broadcast (message) {
-      this.io.in(this.options.room).emit('yjsEvent', message)
+      this.connections.forEach((userConn, uid) => {
+        if (userConn.receivedSyncStep2) {
+          this.io.to(uid).emit('yjsEvent', message)
+        }
+      })
       super.broadcast(message)
     }
     isDisconnected () {
