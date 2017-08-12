@@ -22,23 +22,31 @@ try {
 }
 
 var options = minimist(process.argv.slice(2), {
-  string: ['port', 'debug', 'db'],
+  string: ['port', 'debug', 'db', 'persistence'],
   default: {
     port: process.env.PORT || '1234',
     debug: false,
-    db: 'memory'
+    db: 'memory',
+    redis: null
   }
 })
 
 var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
+let redis = null
+if (options.redis != null) {
+  require('y-redis')(Y)
+  redis = require('redis').createClient(options.redis, {
+    return_buffers: true
+  })
+}
 console.log('Running y-websockets-server on port ' + port)
 
 global.yInstances = {}
 
 function getInstanceOfY (room) {
   if (global.yInstances[room] == null) {
-    global.yInstances[room] = Y({
+    let yConfig = {
       db: {
         name: options.db,
         dir: 'y-leveldb-databases',
@@ -51,7 +59,14 @@ function getInstanceOfY (room) {
         debug: !!options.debug
       },
       share: {}
-    })
+    }
+    if (redis != null) {
+      yConfig.persistence = {
+        name: 'redis',
+        redis: redis
+      }
+    }
+    global.yInstances[room] = Y(yConfig)
   }
   return global.yInstances[room]
 }
