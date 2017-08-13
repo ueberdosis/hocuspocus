@@ -38,6 +38,14 @@ var options = minimist(process.argv.slice(2), {
   }
 })
 
+// if Y_RANDOM_PROCESS_KILL is set, the node app is randomly killed (within 8 seconds)
+if (process.env.Y_RANDOM_PROCESS_KILL != null) {
+  console.error('You set Y_RANDOM_PROCESS_KILL environment variable. The process is killed within 8 seconds!')
+  setInterval(() => {
+    process.exit(1)
+  }, Math.floor(Math.random() * 8000))
+}
+
 var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
 let redis = null
