@@ -34,7 +34,7 @@ var options = minimist(process.argv.slice(2), {
     port: process.env.PORT || config.port || '1234',
     debug: false,
     db: config.db || 'memory',
-    redis: config.redis || null
+    redis: process.env.REDIS || config.redis || null
   }
 })
 
@@ -47,7 +47,7 @@ if (options.redis != null) {
     return_buffers: true
   })
 }
-console.log('Running y-websockets-server: port: %s, redis: %s ', port, redis)
+console.log('Running y-websockets-server: port: %s, redis: %s ', port, options.redis)
 
 global.yInstances = {}
 
