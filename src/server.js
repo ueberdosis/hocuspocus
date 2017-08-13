@@ -42,8 +42,8 @@ var options = minimist(process.argv.slice(2), {
 if (process.env.Y_RANDOM_PROCESS_KILL != null) {
   console.error('You set Y_RANDOM_PROCESS_KILL environment variable. The process is killed within 8 seconds!')
   setInterval(() => {
-    process.exit(1)
-  }, Math.floor(Math.random() * 8000))
+    process.exit(0)
+  }, Math.floor(Math.random() * 20000))
 }
 
 var port = Number.parseInt(options.port, 10)
