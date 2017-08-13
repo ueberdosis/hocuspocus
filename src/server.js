@@ -3,11 +3,17 @@
 'use strict'
 
 var Y = require('yjs')
-var config = require('../config.json') || {}
+const log = Y.debug('y-websockets-server')
+const fs = require('fs')
+
+var config = {}
+try {
+  config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
+  log('Using provided config.json', config)
+} catch (e) {}
 
 Y.debug.log = console.log.bind(console)
 
-const log = Y.debug('y-websockets-server')
 var minimist = require('minimist')
 require('y-memory')(Y)
 try {
@@ -41,7 +47,7 @@ if (options.redis != null) {
     return_buffers: true
   })
 }
-console.log('Running y-websockets-server on port ' + port)
+console.log('Running y-websockets-server: port: %s, redis: %s ', port, redis)
 
 global.yInstances = {}
 
