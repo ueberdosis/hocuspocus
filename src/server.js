@@ -3,7 +3,7 @@
 'use strict'
 
 var Y = require('yjs')
-var config = require('./config.json') || {}
+var config = require('../config.json') || {}
 
 Y.debug.log = console.log.bind(console)
 
@@ -31,8 +31,6 @@ var options = minimist(process.argv.slice(2), {
     redis: config.redis || null
   }
 })
-
-console.log('dutiranedtuniaedtrnuditanre + ++++ ' + options['redis-auth'])
 
 var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
