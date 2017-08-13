@@ -9,6 +9,9 @@
     "lint": "standard",
     "start": "export DEBUG=y*,-y:connector-message && node ./src/server.js"
   },
+  "engines": {
+    "node": "^8.0.0"
+  },
   "standard": {},
   "repository": {
     "type": "git",
