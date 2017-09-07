@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run lint",
     "lint": "standard",
-    "start": "export DEBUG=y*,-y:connector-message && node ./src/server.js"
+    "start": "DEBUG=y*,-y:connector-message node ./src/server.js"
   },
   "engines": {
     "node": "^8.0.0"
@@ -38,7 +38,7 @@
     "socket.io": "^2.0.3",
     "y-memory": "^9.0.0-1",
     "y-redis": "0.0.1",
-    "yjs": "13.0.0-13"
+    "yjs": "13.0.0-16"
   },
   "devDependencies": {
     "standard": "^10.0.2"
