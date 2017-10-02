@@ -99,6 +99,12 @@ io.on('connection', function (socket) {
       }
     })
   })
+  socket.on('yjsResponsive', function (room, callback) {
+    log('User "%s" checks responsiveness of room "%s"', socket.id, room)
+    getInstanceOfY(room).then(function (y) {
+      y.db.whenTransactionsFinished().then(callback)
+    })
+  })
   socket.on('yjsEvent', function (buffer) {
     let decoder = new Y.utils.BinaryDecoder(buffer)
     let roomname = decoder.readVarString()
