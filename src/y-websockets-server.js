@@ -46,7 +46,7 @@ function extend (Y) {
       return false
     }
   }
-  Y.extend('websockets-server', Connector)
+  Y['websockets-server'] = Connector
 }
 
 module.exports = extend
