@@ -2,8 +2,9 @@
 /* global process, global */
 'use strict'
 
-var Y = require('yjs')
-const log = Y.debug('y-websockets-server')
+const Y = require('../../yjs/y.node.js')
+const debug = require('debug')
+const log = debug('y-websockets-server')
 const fs = require('fs')
 
 var config = {}
@@ -12,18 +13,15 @@ try {
   log('Using provided config.json', config)
 } catch (e) {}
 
-Y.debug.log = console.log.bind(console)
+debug.log = console.log.bind(console)
 
 var minimist = require('minimist')
-require('y-memory')(Y)
-try {
-  require('y-leveldb')(Y)
-} catch (err) {}
 
 try {
   // try to require local y-websockets-server
   require('./y-websockets-server.js')(Y)
 } catch (err) {
+  console.error(err)
   // otherwise require global y-websockets-server
   require('y-websockets-server')(Y)
 }
@@ -62,18 +60,12 @@ global.yInstances = {}
 function getInstanceOfY (room) {
   if (global.yInstances[room] == null) {
     let yConfig = {
-      db: {
-        name: options.db,
-        dir: 'y-leveldb-databases',
-        namespace: room
-      },
       connector: {
         name: 'websockets-server',
         room: room,
         io: io,
         debug: !!options.debug
-      },
-      share: {}
+      }
     }
     if (redis != null) {
       yConfig.persistence = {
@@ -81,7 +73,7 @@ function getInstanceOfY (room) {
         redis: redis
       }
     }
-    global.yInstances[room] = Y(yConfig)
+    global.yInstances[room] = Promise.resolve(new Y(yConfig))
   }
   return global.yInstances[room]
 }
