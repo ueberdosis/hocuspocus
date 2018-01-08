@@ -46,12 +46,14 @@ if (process.env.Y_RANDOM_PROCESS_KILL != null) {
 
 var port = Number.parseInt(options.port, 10)
 var io = require('socket.io')(port)
-let redis = null
+
+let persistence = null
 if (options.redis != null) {
-  require('y-redis')(Y)
-  redis = require('redis').createClient(options.redis, {
-    return_buffers: true
-  })
+  const YRedisPersistence = require('y-redis')(Y)
+  const checkContentChange = function checkContentChange (y, transaction) {
+    return transaction.changedParentTypes.has(y.define('xml', Y.XmlFragment))
+  }
+  persistence = new YRedisPersistence(options.redis, checkContentChange)
 }
 console.log('Running y-websockets-server: port: %s, redis: %s ', port, options.redis)
 
@@ -67,13 +69,12 @@ function getInstanceOfY (room) {
         debug: !!options.debug
       }
     }
-    if (redis != null) {
-      yConfig.persistence = {
-        name: 'redis',
-        redis: redis
-      }
-    }
-    global.yInstances[room] = Promise.resolve(new Y(yConfig))
+    global.yInstances[room] = new Promise(function (resolve) {
+      const y = new Y(yConfig, persistence)
+      y.once('connectorReady', function () {
+        resolve(y)
+      })
+    })
   }
   return global.yInstances[room]
 }
