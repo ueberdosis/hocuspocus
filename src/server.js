@@ -70,8 +70,8 @@ function getInstanceOfY (room) {
       }
     }
     global.yInstances[room] = new Promise(function (resolve) {
-      const y = new Y(yConfig, persistence)
-      y.once('connectorReady', function () {
+      const y = new Y(room, yConfig, persistence)
+      y.when('connectorReady').then(function () {
         resolve(y)
       })
     })
