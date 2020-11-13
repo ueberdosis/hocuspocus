@@ -2,7 +2,7 @@
 /* global process, global */
 'use strict'
 
-const Y = require('../../yjs/y.node.js')
+const Y = require('yjs')
 const debug = require('debug')
 const log = debug('y-websockets-server')
 const fs = require('fs')
