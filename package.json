@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run lint",
     "lint": "standard",
-    "start": "DEBUG=y*,-y:connector-message nodemon ./src/server.js"
+    "start": "DEBUG=y*,-y:connector-message node ./src/server.js"
   },
   "standard": {},
   "repository": {
@@ -31,13 +31,12 @@
   "homepage": "http://y-js.org",
   "dependencies": {
     "minimist": "^1.2.0",
-    "nodemon": "^2.0.6",
-    "redis": "^3.0.2",
-    "socket.io": "^3.0.1",
-    "y-redis": "1.0.2",
+    "redis": "^2.8.0",
+    "socket.io": "^2.0.3",
+    "y-redis": "0.0.4",
     "yjs": "^13.0.0-51"
   },
   "devDependencies": {
-    "standard": "^16.0.2"
+    "standard": "^10.0.2"
   }
 }
