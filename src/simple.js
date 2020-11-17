@@ -1,16 +1,17 @@
-const WebSocket = require('ws')
 const http = require('http')
-const setupWSConnection = require('y-websocket/bin/utils.js').setupWSConnection
-const port = process.env.PORT || 1234
 const server = http.createServer()
+const port = process.env.PORT || 1234
+
+const WebSocket = require('ws')
 const wss = new WebSocket.Server({ server })
+const setupWebSocketConnection = require('y-websocket/bin/utils.js').setupWSConnection
 
 wss.on('connection', (connection, request) => {
-  return setupWSConnection(connection, request, {
-    gc: request.url.slice(1) !== 'prosemirror-versions',
-  })
+  console.log(`[Websocket Server] New connection to ${request.url}`)
+
+  return setupWebSocketConnection(connection, request)
 })
 
 server.listen(port, () => {
-  console.log(`Listening to http://localhost:${port}`)
+  console.log(`[Websocket Server] Listening to ws://127.0.0.1:${port}`)
 })
