@@ -9,13 +9,11 @@ const server = http.createServer()
 const wss = new WebSocket.Server({ server })
 
 wss.on('connection', (connection, request) => {
-  return setupWSConnection(connection, request, {
-    gc: request.url.slice(1) !== 'prosemirror-versions',
-  })
+  return setupWSConnection(connection, request)
 })
 
 server.listen(port, () => {
-  console.log(`Listening to http://localhost:${port}`)
+  console.log(`[Websocket Server] Listening to http://localhost:${port}`)
 })
 
 global.yInstances = {}
@@ -42,15 +40,15 @@ function getInstanceOfY (room) {
 
 
 wss.on('connection', function (socket) {
-  console.log('[WSS] new connection')
+  console.log('[Websocket Server] New connection')
 
   socket.on('message', function incoming(message) {
-    console.log('[WSS] message received: %s', message)
+    console.log('[Websocket Server] Message received: %s', message)
   })
 
   var rooms = []
   socket.on('joinRoom', function (room) {
-    console.log(`[WSS] User ${socket.id} joins room ${room}`)
+    console.log(`[Websocket Server] User ${socket.id} joins room ${room}`)
 
     socket.join(room)
     getInstanceOfY(room).then(function (y) {
@@ -64,7 +62,7 @@ wss.on('connection', function (socket) {
   })
 
   socket.on('yjsResponsive', function (room, callback) {
-    console.log(`[WSS] User ${socket.id} checks responsiveness of room ${room}`)
+    console.log(`[Websocket Server] User ${socket.id} checks responsiveness of room ${room}`)
 
     getInstanceOfY(room).then(function (y) {
       y.db.whenTransactionsFinished().then(callback)
@@ -72,7 +70,7 @@ wss.on('connection', function (socket) {
   })
 
   socket.on('yjsEvent', function (buffer) {
-    console.log(`[WSS] yjsEvent`)
+    console.log(`[Websocket Server] yjsEvent`)
 
     let decoder = new Y.utils.BinaryDecoder(buffer)
     let roomname = decoder.readVarString()
@@ -82,7 +80,7 @@ wss.on('connection', function (socket) {
   })
 
   socket.on('disconnect', function () {
-    console.log(`[WSS] disconnect`)
+    console.log(`[Websocket Server] Disconnect`)
 
     for (var i = 0; i < rooms.length; i++) {
       let room = rooms[i]
@@ -97,7 +95,7 @@ wss.on('connection', function (socket) {
   })
 
   socket.on('leaveRoom', function (room) {
-    console.log(`[WSS] leaveRoom`)
+    console.log(`[Websocket Server] LeaveRoom`)
 
     getInstanceOfY(room).then(function (y) {
       var i = rooms.indexOf(room)
