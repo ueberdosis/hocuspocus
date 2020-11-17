@@ -1,14 +1,14 @@
 const Y = require('yjs')
 require('./y-websockets-server.js')(Y)
 
-const WebSocket = require('ws')
 const http = require('http')
 const setupWSConnection = require('y-websocket/bin/utils.js').setupWSConnection
 const port = process.env.PORT || 1234
 const server = http.createServer()
-const wss = new WebSocket.Server({ server })
+const wss = require('socket.io')(server)
 
 wss.on('connection', (connection, request) => {
+  console.log('[WSS] setupWSConnection')
   return setupWSConnection(connection, request, {
     gc: request.url.slice(1) !== 'prosemirror-versions',
   })
