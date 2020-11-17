@@ -5,8 +5,12 @@ const port = process.env.PORT || 1234
 const server = http.createServer()
 const wss = new WebSocket.Server({ server })
 
-wss.on('connection', (conn, req) => setupWSConnection(conn, req, { gc: req.url.slice(1) !== 'prosemirror-versions' }))
+wss.on('connection', (connection, request) => {
+  return setupWSConnection(connection, request, {
+    gc: request.url.slice(1) !== 'prosemirror-versions',
+  })
+})
 
-server.listen(port)
-
-console.log(`Listening to http://localhost:${port}`)
+server.listen(port, () => {
+  console.log(`Listening to http://localhost:${port}`)
+})
