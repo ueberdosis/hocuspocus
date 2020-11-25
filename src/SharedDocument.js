@@ -5,7 +5,7 @@ import encoding from 'lib0/dist/encoding.cjs'
 import mutex from 'lib0/dist/mutex.cjs'
 import {send} from './bin/utils.js'
 import Encoder from "./Encoder.js"
-import {MESSAGE_AWARENESS} from './enums.js'
+import {MESSAGE_AWARENESS, MESSAGE_SYNC} from './enums.js'
 
 const messageSync = 0
 const messageAwareness = 1
@@ -21,6 +21,7 @@ class SharedDocument extends Y.Doc {
 
     this.awareness = new awarenessProtocol.Awareness(this)
     this.awareness.setLocalState(null)
+
     this.awareness.on('update', this.awarenessChangeHandler.bind(this))
     this.on('update', this.updateHandler.bind(this))
 
@@ -91,11 +92,10 @@ class SharedDocument extends Y.Doc {
   }
 
   updateHandler(update, origin) {
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageSync)
-    syncProtocol.writeUpdate(encoder, update)
-    const message = encoding.toUint8Array(encoder)
-    this.connections.forEach((_, conn) => send(this, conn, message))
+    const message = new Encoder().int(MESSAGE_SYNC)
+
+    syncProtocol.writeUpdate(message.encoder, update)
+    this.connections.forEach((_, conn) => send(this, conn, message.get()))
   }
 }
 
