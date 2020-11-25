@@ -7,6 +7,7 @@
   "scripts": {
     "start": "DEBUG=* nodemon ./src/server.js",
     "start:simple": "DEBUG=* nodemon ./src/simple.js",
+    "start:future": "DEBUG=* nodemon ./src/future.js",
     "start:y-websocket": "PORT=1234 npx y-websocket-server"
   },
   "repository": {
@@ -30,7 +31,11 @@
   "homepage": "http://y-js.org",
   "dependencies": {
     "express": "^4.17.1",
+    "lib0": "^0.2.34",
+    "lodash": "^4.17.20",
     "socket.io": "^3.0.1",
+    "y-leveldb": "^0.1.0",
+    "y-protocols": "^1.0.1",
     "y-websocket": "^1.3.6",
     "yjs": "^13.4.4"
   },
