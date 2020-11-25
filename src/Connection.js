@@ -1,14 +1,8 @@
-import syncProtocol from 'y-protocols/dist/sync.cjs'
 import Encoder from './Encoder.js'
-import { messageListener } from './bin/utils.js'
-import awarenessProtocol from "y-protocols/dist/awareness.cjs";
-import encoding from "lib0/dist/encoding.cjs";
-
-const MESSAGE_SYNC = 0
-const MESSAGE_AWARENESS = 1
-
-const WS_READY_STATE_CLOSING = 2
-const WS_READY_STATE_CLOSED = 3
+import encoding from "lib0/dist/encoding.cjs"
+import {MESSAGE_SYNC, WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED} from './enums.js'
+import syncProtocol from 'y-protocols/dist/sync.cjs'
+import {messageListener} from './bin/utils.js'
 
 class Connection {
 
@@ -18,7 +12,8 @@ class Connection {
   timeout
 
   callbacks = {
-    onClose: () => {},
+    onClose: () => {
+    },
   }
 
   pingInterval
@@ -128,22 +123,13 @@ class Connection {
    * @private
    */
   _sendFirstSyncStep() {
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MESSAGE_SYNC)
-    syncProtocol.writeSyncStep1(encoder, this.document)
-    this.send(encoding.toUint8Array(encoder))
+    let syncMessage = new Encoder().int(MESSAGE_SYNC)
 
-    // let syncMessage = new Encoder().int(MESSAGE_SYNC)
-    //
-    // syncProtocol.writeSyncStep1(syncMessage.encoder, this.document)
-    // this.send(syncMessage.get())
+    syncProtocol.writeSyncStep1(syncMessage.encoder, this.document)
+    this.send(syncMessage.get())
 
-    const awarenessStates = this.document.awareness.getStates()
-    if (awarenessStates.size > 0) {
-      const encoder = encoding.createEncoder()
-      encoding.writeVarUint(encoder, MESSAGE_AWARENESS)
-      encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.document.awareness, Array.from(awarenessStates.keys())))
-      this.send(encoding.toUint8Array(encoder))
+    if (this.document.getAwarenessStates().size > 0) {
+      this.send(this.document.getAwarenessUpdateMessage())
     }
   }
 }

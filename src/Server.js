@@ -93,7 +93,7 @@ class Server {
   _createConnection(connection, request, document) {
     return new Connection(connection, request, document, this.configuration.timeout)
       .onClose((document) => {
-        if (document.conns.size === 0) {
+        if (document.connections.size === 0) {
           this.documents.delete(document.name)
         }
       })
