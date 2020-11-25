@@ -2,7 +2,6 @@ import Connection from './Connection.js'
 import SharedDocument from './SharedDocument.js'
 import WebSocket from 'ws'
 import {createServer} from 'http'
-import signale from 'signale'
 
 class Server {
 
@@ -30,7 +29,7 @@ class Server {
     })
 
     this.websocketServer.on('connection', (connection, request) => {
-      signale.debug(`New connection to ${request.url}`)
+      console.log(`New connection to ${request.url}`)
 
       return this._createConnection(connection, request, this._createDocument(request))
     })
@@ -56,7 +55,7 @@ class Server {
    */
   listen() {
     this.httpServer.listen(this.configuration.port, () => {
-      signale.success(`Listening on http://127.0.0.1:${this.configuration.port}`)
+      console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
     })
   }
 
