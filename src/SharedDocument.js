@@ -7,9 +7,6 @@ import {send} from './bin/utils.js'
 import Encoder from "./Encoder.js"
 import {MESSAGE_AWARENESS, MESSAGE_SYNC} from './enums.js'
 
-const messageSync = 0
-const messageAwareness = 1
-
 class SharedDocument extends Y.Doc {
 
   constructor(name) {
@@ -43,6 +40,7 @@ class SharedDocument extends Y.Doc {
   }
 
   removeConnection(connection) {
+
     awarenessProtocol.removeAwarenessStates(
       this.awareness,
       Array.from(this.connections.get(connection)),
@@ -86,16 +84,20 @@ class SharedDocument extends Y.Doc {
     encoding.writeVarUint(encoder, MESSAGE_AWARENESS)
     encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.awareness, changedClients))
     const buff = encoding.toUint8Array(encoder)
-    this.connections.forEach((_, c) => {
-      send(this, c, buff)
+
+    this.connections.forEach((set, connection) => {
+      connection.send(buff)
     })
   }
 
-  updateHandler(update, origin) {
+  updateHandler(update) {
     const message = new Encoder().int(MESSAGE_SYNC)
 
     syncProtocol.writeUpdate(message.encoder, update)
-    this.connections.forEach((_, conn) => send(this, conn, message.get()))
+
+    this.connections.forEach((set, connection) => {
+      connection.send(message.get())
+    })
   }
 }
 

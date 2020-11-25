@@ -1,8 +1,11 @@
 import Encoder from './Encoder.js'
-import encoding from "lib0/dist/encoding.cjs"
-import {MESSAGE_SYNC, WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED} from './enums.js'
 import syncProtocol from 'y-protocols/dist/sync.cjs'
 import {messageListener} from './bin/utils.js'
+import {
+  MESSAGE_SYNC,
+  WS_READY_STATE_CLOSING,
+  WS_READY_STATE_CLOSED
+} from './enums.js'
 
 class Connection {
 
@@ -11,13 +14,13 @@ class Connection {
   document
   timeout
 
+  pingInterval
+  pongReceived = true
+
   callbacks = {
     onClose: () => {
     },
   }
-
-  pingInterval
-  pongReceived = true
 
   constructor(connection, request, document, timeout) {
     this.connection = connection
@@ -26,7 +29,7 @@ class Connection {
     this.timeout = timeout
 
     this.connection.binaryType = 'arraybuffer'
-    this.document.addConnection(this.connection)
+    this.document.addConnection(this)
 
     this.connection.on('message', message => messageListener(this.connection, this.document, new Uint8Array(message)))
 
@@ -72,7 +75,7 @@ class Connection {
       return this.close()
     }
 
-    if (this.document.hasConnection(this.connection)) {
+    if (this.document.hasConnection(this)) {
       this.pongReceived = false
 
       try {
@@ -91,11 +94,11 @@ class Connection {
       clearInterval(this.pingInterval)
     }
 
-    if (!this.document.hasConnection(this.connection)) {
+    if (!this.document.hasConnection(this)) {
       return
     }
 
-    this.document.removeConnection(this.connection)
+    this.document.removeConnection(this)
 
     // TODO: persistence
     // if persisted, we store state and destroy ydocument
@@ -105,6 +108,14 @@ class Connection {
 
     this.callbacks.onClose(this.document)
     this.connection.close()
+  }
+
+  /**
+   * Get the underlying connection instance
+   * @returns {*}
+   */
+  instance() {
+    return this.connection
   }
 
   /**
