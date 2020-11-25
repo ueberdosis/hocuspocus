@@ -1,16 +1,19 @@
+import Connection from './Connection.js'
+import SharedDocument from './SharedDocument.js'
 import WebSocket from 'ws'
 import {createServer} from 'http'
-import {setupWSConnection} from './bin/utils.js'
 
 class Server {
 
   configuration = {
-    port: 8080,
     debounce: true,
+    port: 8080,
+    timeout: 30000,
   }
 
   httpServer
   websocketServer
+  documents = new Map()
 
   /**
    * Initialize
@@ -28,9 +31,10 @@ class Server {
     this.websocketServer.on('connection', (connection, request) => {
       this._log(`New connection to ${request.url}`)
 
-      return setupWSConnection(connection, request)
+      return this._createConnection(connection, request, this._createDocument(request))
     })
   }
+
 
   /**
    * Configure the server
@@ -53,6 +57,46 @@ class Server {
     this.httpServer.listen(this.configuration.port, () => {
       this._log(`Listening on: ${this.configuration.port}`)
     })
+  }
+
+  /**
+   * Create a new document by the given request
+   * @param request
+   * @private
+   */
+  _createDocument(request) {
+    const documentName = request.url.slice(1).split('?')[0]
+
+    if (this.documents.has(documentName)) {
+      return this.documents.get(documentName)
+    }
+
+    const document = new SharedDocument(documentName)
+
+    // TODO: persistence
+    // if (persistence !== null) {
+    //   persistence.bindState(docname, doc)
+    // }
+
+    this.documents.set(documentName, document)
+
+    return document
+  }
+
+  /**
+   *
+   * @param connection
+   * @param request
+   * @param document
+   * @returns {Connection}
+   * @private
+   */
+  _createConnection(connection, request, document) {
+    // return setupWSConnection(connection, request)
+    return new Connection(connection, request, document, this.configuration.timeout)
+      .onClose((document) => {
+        this.documents.delete(document.name)
+      })
   }
 
   /**

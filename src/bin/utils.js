@@ -124,8 +124,10 @@ class WSSharedDoc extends Y.Doc {
         send(this, c, buff)
       })
     }
+
     this.awareness.on('update', awarenessChangeHandler)
     this.on('update', updateHandler)
+
     if (isCallbackSet) {
       this.on('update', debounce(
         callbackHandler,
@@ -158,10 +160,12 @@ export const getYDoc = (docname, gc = true) => map.setIfUndefined(docs, docname,
  * @param {WSSharedDoc} doc
  * @param {Uint8Array} message
  */
-const messageListener = (conn, doc, message) => {
+export const messageListener = (conn, doc, message) => {
   const encoder = encoding.createEncoder()
   const decoder = decoding.createDecoder(message)
   const messageType = decoding.readVarUint(decoder)
+  console.log(messageType, doc)
+
   switch (messageType) {
     case messageSync:
       encoding.writeVarUint(encoder, messageSync)
@@ -206,10 +210,11 @@ const closeConn = (doc, conn) => {
  * @param {any} conn
  * @param {Uint8Array} m
  */
-const send = (doc, conn, m) => {
+export const send = (doc, conn, m) => {
   if (conn.readyState !== wsReadyStateConnecting && conn.readyState !== wsReadyStateOpen) {
     closeConn(doc, conn)
   }
+
   try {
     conn.send(m, /** @param {any} err */ err => { err != null && closeConn(doc, conn) })
   } catch (e) {
