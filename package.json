@@ -6,8 +6,8 @@
   "bin": "./src/server.js",
   "scripts": {
     "start": "DEBUG=* nodemon ./src/server.js",
-    "start:socket.io": "DEBUG=* nodemon ./src/socket.io.js",
-    "start:simple": "DEBUG=* nodemon ./src/simple.js"
+    "start:simple": "DEBUG=* nodemon ./src/simple.js",
+    "start:y-websocket": "PORT=1234 npx y-websocket-server"
   },
   "repository": {
     "type": "git",
