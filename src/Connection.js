@@ -59,8 +59,6 @@ class Connection {
       this.close()
     }
 
-    console.log(message)
-
     try {
       this.connection.send(message, error => {
         if (error != null) this.close()

@@ -1,5 +1,6 @@
 import Connection from './Connection.js'
 import SharedDocument from './SharedDocument.js'
+import map from "lib0/dist/map.cjs"
 import WebSocket from 'ws'
 import {createServer} from 'http'
 
@@ -35,7 +36,6 @@ class Server {
     })
   }
 
-
   /**
    * Configure the server
    * @param configuration
@@ -67,20 +67,19 @@ class Server {
   _createDocument(request) {
     const documentName = request.url.slice(1).split('?')[0]
 
-    if (this.documents.has(documentName)) {
-      return this.documents.get(documentName)
-    }
 
-    const document = new SharedDocument(documentName)
+    return map.setIfUndefined(this.documents, documentName, () => {
+      const document = new SharedDocument(documentName)
 
-    // TODO: persistence
-    // if (persistence !== null) {
-    //   persistence.bindState(docname, doc)
-    // }
+      // TODO: persistence
+      // if (persistence !== null) {
+      //   persistence.bindState(docname, doc)
+      // }
 
-    this.documents.set(documentName, document)
+      this.documents.set(documentName, document)
 
-    return document
+      return document
+    })
   }
 
   /**
@@ -92,10 +91,11 @@ class Server {
    * @private
    */
   _createConnection(connection, request, document) {
-    // return setupWSConnection(connection, request)
     return new Connection(connection, request, document, this.configuration.timeout)
       .onClose((document) => {
-        this.documents.delete(document.name)
+        if (document.conns.size === 0) {
+          this.documents.delete(document.name)
+        }
       })
   }
 }
