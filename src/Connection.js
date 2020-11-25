@@ -22,6 +22,13 @@ class Connection {
     },
   }
 
+  /**
+   * Constructor.
+   * @param connection
+   * @param request
+   * @param document
+   * @param timeout
+   */
   constructor(connection, request, document, timeout) {
     this.connection = connection
     this.request = request
@@ -33,7 +40,7 @@ class Connection {
 
     this.connection.on('message', message => messageListener(this.connection, this.document, new Uint8Array(message)))
 
-    this.pingInterval = setInterval(this.check.bind(this), this.timeout)
+    this.pingInterval = setInterval(this._check.bind(this), this.timeout)
 
     this.connection.on('pong', () => {
       this.pongReceived = true
@@ -44,6 +51,17 @@ class Connection {
     })
 
     this._sendFirstSyncStep()
+  }
+
+  /**
+   * Set a callback that will be triggered when the connection is closed
+   * @param callback
+   * @returns {Connection}
+   */
+  onClose(callback) {
+    this.callbacks.onClose = callback
+
+    return this
   }
 
   /**
@@ -63,26 +81,6 @@ class Connection {
       })
     } catch (exception) {
       this.close()
-    }
-  }
-
-  /**
-   *
-   * @returns {undefined}
-   */
-  check() {
-    if (!this.pongReceived) {
-      return this.close()
-    }
-
-    if (this.document.hasConnection(this)) {
-      this.pongReceived = false
-
-      try {
-        this.connection.ping()
-      } catch (exception) {
-        this.close()
-      }
     }
   }
 
@@ -111,32 +109,34 @@ class Connection {
   }
 
   /**
-   * Get the underlying connection instance
-   * @returns {*}
+   * Check if pong was received and close the connection otherwise
+   * @returns {undefined}
+   * @private
    */
-  instance() {
-    return this.connection
+  _check() {
+    if (!this.pongReceived) {
+      return this.close()
+    }
+
+    if (this.document.hasConnection(this)) {
+      this.pongReceived = false
+
+      try {
+        this.connection.ping()
+      } catch (exception) {
+        this.close()
+      }
+    }
   }
 
   /**
-   * Set a callback that will be triggered when the connection is closed
-   * @param callback
-   * @returns {Connection}
-   */
-  onClose(callback) {
-    this.callbacks.onClose = callback
-
-    return this
-  }
-
-  /**
-   *
+   * Send first sync step
    * @private
    */
   _sendFirstSyncStep() {
-    let syncMessage = new Encoder().int(MESSAGE_SYNC)
-
+    const syncMessage = new Encoder().int(MESSAGE_SYNC)
     syncProtocol.writeSyncStep1(syncMessage.encoder, this.document)
+
     this.send(syncMessage.get())
 
     if (this.document.getAwarenessStates().size > 0) {

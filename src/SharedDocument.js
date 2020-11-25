@@ -3,7 +3,6 @@ import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
 import syncProtocol from "y-protocols/dist/sync.cjs";
 import encoding from 'lib0/dist/encoding.cjs'
 import mutex from 'lib0/dist/mutex.cjs'
-import {send} from './bin/utils.js'
 import Encoder from "./Encoder.js"
 import {MESSAGE_AWARENESS, MESSAGE_SYNC} from './enums.js'
 
@@ -19,8 +18,8 @@ class SharedDocument extends Y.Doc {
     this.awareness = new awarenessProtocol.Awareness(this)
     this.awareness.setLocalState(null)
 
-    this.awareness.on('update', this.awarenessChangeHandler.bind(this))
-    this.on('update', this.updateHandler.bind(this))
+    this.awareness.on('update', this._handleAwarenessUpdate.bind(this))
+    this.on('update', this._handleUpdate.bind(this))
 
     // if (isCallbackSet) {
     //   this.on('update', debounce(
@@ -31,16 +30,28 @@ class SharedDocument extends Y.Doc {
     // }
   }
 
+  /**
+   * Register connection on this document
+   * @param connection
+   */
   addConnection(connection) {
     this.connections.set(connection, new Set())
   }
 
+  /**
+   * Is the given connection registered on this document
+   * @param connection
+   * @returns {boolean}
+   */
   hasConnection(connection) {
     return this.connections.has(connection)
   }
 
+  /**
+   * Remove the given connection from this document
+   * @param connection
+   */
   removeConnection(connection) {
-
     awarenessProtocol.removeAwarenessStates(
       this.awareness,
       Array.from(this.connections.get(connection)),
@@ -50,14 +61,23 @@ class SharedDocument extends Y.Doc {
     this.connections.delete(connection)
   }
 
+  /**
+   * Get awareness states
+   * @returns {*}
+   */
   getAwarenessStates() {
     return this.awareness.getStates()
   }
 
-  getAwarenessUpdateMessage() {
+  /**
+   * Get awareness update message
+   * @param changedClients
+   * @returns {*}
+   */
+  getAwarenessUpdateMessage(changedClients = null) {
     const message = awarenessProtocol.encodeAwarenessUpdate(
       this.awareness,
-      Array.from(this.getAwarenessStates().keys())
+      changedClients ? changedClients : Array.from(this.getAwarenessStates().keys())
     )
 
     return new Encoder()
@@ -66,37 +86,49 @@ class SharedDocument extends Y.Doc {
       .get()
   }
 
-  awarenessChangeHandler({added, updated, removed}, conn) {
+  /**
+   * Handle an awareness update and sync changes to clients
+   * @param clients
+   * @param connection
+   * @private
+   */
+  _handleAwarenessUpdate(clients, connection) {
+
+    const {added, updated, removed} = clients
     const changedClients = added.concat(updated, removed)
-    if (conn !== null) {
-      const connControlledIDs = /** @type {Set<number>} */ (this.connections.get(conn))
-      if (connControlledIDs !== undefined) {
+
+    if (connection !== null) {
+      const clientIDs = this.connections.get(connection)
+
+      if (clientIDs !== undefined) {
         added.forEach(clientID => {
-          connControlledIDs.add(clientID)
+          clientIDs.add(clientID)
         })
+
         removed.forEach(clientID => {
-          connControlledIDs.delete(clientID)
+          clientIDs.delete(clientID)
         })
       }
     }
-    // broadcast awareness update
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MESSAGE_AWARENESS)
-    encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.awareness, changedClients))
-    const buff = encoding.toUint8Array(encoder)
 
     this.connections.forEach((set, connection) => {
-      connection.send(buff)
+      connection.send(
+        this.getAwarenessUpdateMessage(changedClients)
+      )
     })
   }
 
-  updateHandler(update) {
-    const message = new Encoder().int(MESSAGE_SYNC)
-
-    syncProtocol.writeUpdate(message.encoder, update)
+  /**
+   * Handle an updated document and sync changes to clients
+   * @param update
+   * @private
+   */
+  _handleUpdate(update) {
+    const syncMessage = new Encoder().int(MESSAGE_SYNC)
+    syncProtocol.writeUpdate(syncMessage.encoder, update)
 
     this.connections.forEach((set, connection) => {
-      connection.send(message.get())
+      connection.send(syncMessage.get())
     })
   }
 }
