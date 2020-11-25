@@ -93,6 +93,7 @@ class Server {
   _createConnection(connection, request, document) {
     return new Connection(connection, request, document, this.configuration.timeout)
       .onClose((document) => {
+        // TODO: Document should only be deleted, when it’s persisted
         if (document.connections.size === 0) {
           this.documents.delete(document.name)
         }

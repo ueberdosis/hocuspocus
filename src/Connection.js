@@ -35,6 +35,7 @@ class Connection {
     this.connection.binaryType = 'arraybuffer'
     this.document.addConnection(this)
 
+    // TODO: Move messageListener here and refactor it
     this.connection.on('message', message => messageListener(this.connection, this.document, new Uint8Array(message)))
 
     this.pingInterval = setInterval(this._check.bind(this), this.timeout)
