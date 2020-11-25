@@ -4,7 +4,7 @@
   "description": "Websocket Server for Yjs",
   "type": "module",
   "scripts": {
-    "start": "nodemon ./node_modules/@babel/node/bin/babel-node.js ./src/server.js"
+    "start": "nodemon ./node_modules/@babel/node/bin/babel-node.js ./index.js"
   },
   "license": "MIT",
   "dependencies": {

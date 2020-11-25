@@ -9,8 +9,8 @@ class Server {
     debounce: true,
   }
 
-  httpServer = null
-  websocketServer = null
+  httpServer
+  websocketServer
 
   /**
    * Initialize
@@ -25,7 +25,11 @@ class Server {
       server: this.httpServer
     })
 
-    this.websocketServer.on('connection', this._handleConnection.bind(this))
+    this.websocketServer.on('connection', (connection, request) => {
+      this._log(`New connection to ${request.url}`)
+
+      return setupWSConnection(connection, request)
+    })
   }
 
   /**
@@ -49,18 +53,6 @@ class Server {
     this.httpServer.listen(this.configuration.port, () => {
       this._log(`Listening on: ${this.configuration.port}`)
     })
-  }
-
-  /**
-   * Handle an incoming connection request
-   * @param connection
-   * @param request
-   * @private
-   */
-  _handleConnection(connection, request) {
-    this._log(`New connection to ${request.url}`)
-
-    return setupWSConnection(connection, request)
   }
 
   /**

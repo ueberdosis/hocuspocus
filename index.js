@@ -1,4 +1,4 @@
-import { TiptapCollaborationServer } from './TiptapCollaborationServer.js'
+import { TiptapCollaborationServer } from './src/Server.js'
 
 const server = TiptapCollaborationServer.create({
 
