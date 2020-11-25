@@ -20,7 +20,7 @@ class Encoder {
     return this
   }
 
-  get() {
+  encode() {
     return encoding.toUint8Array(this.encoder)
   }
 }

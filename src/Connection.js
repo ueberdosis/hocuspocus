@@ -134,13 +134,13 @@ class Connection {
    * @private
    */
   _sendFirstSyncStep() {
-    const syncMessage = new Encoder().int(MESSAGE_SYNC)
-    syncProtocol.writeSyncStep1(syncMessage.encoder, this.document)
-
-    this.send(syncMessage.get())
+    const message = this.document.writeFirstSyncStep()
+    this.send(message.encode())
 
     if (this.document.getAwarenessStates().size > 0) {
-      this.send(this.document.getAwarenessUpdateMessage())
+      this.send(
+        this.document.getAwarenessUpdateMessage().encode()
+      )
     }
   }
 }

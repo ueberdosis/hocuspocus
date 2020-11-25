@@ -1,10 +1,12 @@
-import Y from 'yjs'
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
-import syncProtocol from "y-protocols/dist/sync.cjs";
-import encoding from 'lib0/dist/encoding.cjs'
-import mutex from 'lib0/dist/mutex.cjs'
 import Encoder from "./Encoder.js"
-import {MESSAGE_AWARENESS, MESSAGE_SYNC} from './enums.js'
+import mutex from 'lib0/dist/mutex.cjs'
+import syncProtocol from 'y-protocols/dist/sync.cjs'
+import Y from 'yjs'
+import {
+  MESSAGE_AWARENESS,
+  MESSAGE_SYNC,
+} from './enums.js'
 
 class SharedDocument extends Y.Doc {
 
@@ -80,10 +82,37 @@ class SharedDocument extends Y.Doc {
       changedClients ? changedClients : Array.from(this.getAwarenessStates().keys())
     )
 
-    return new Encoder()
-      .int(MESSAGE_AWARENESS)
-      .int8(message)
-      .get()
+    return new Encoder().int(MESSAGE_AWARENESS).int8(message)
+  }
+
+  /**
+   * Get sync message
+   * @returns {*}
+   */
+  getSyncMessage() {
+    return new Encoder().int(MESSAGE_SYNC)
+  }
+
+  /**
+   * Write first sync step
+   */
+  writeFirstSyncStep() {
+    const message = this.getSyncMessage()
+    syncProtocol.writeSyncStep1(message.encoder, this)
+
+    return message
+  }
+
+  /**
+   * Write update
+   * @param update
+   * @returns {*}
+   */
+  writeUpdate(update) {
+    const message = this.getSyncMessage()
+    syncProtocol.writeUpdate(message.encoder, update)
+
+    return message
   }
 
   /**
@@ -111,11 +140,9 @@ class SharedDocument extends Y.Doc {
       }
     }
 
-    this.connections.forEach((set, connection) => {
-      connection.send(
-        this.getAwarenessUpdateMessage(changedClients)
-      )
-    })
+    this.connections.forEach((set, connection) => connection.send(
+      this.getAwarenessUpdateMessage(changedClients).encode()
+    ))
   }
 
   /**
@@ -124,12 +151,11 @@ class SharedDocument extends Y.Doc {
    * @private
    */
   _handleUpdate(update) {
-    const syncMessage = new Encoder().int(MESSAGE_SYNC)
-    syncProtocol.writeUpdate(syncMessage.encoder, update)
+    const message = this.writeUpdate(update)
 
-    this.connections.forEach((set, connection) => {
-      connection.send(syncMessage.get())
-    })
+    this.connections.forEach((set, connection) => connection.send(
+      message.encode()
+    ))
   }
 }
 
