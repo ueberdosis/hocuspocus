@@ -1,4 +1,4 @@
-import {Doc} from 'yjs'
+import Y from 'yjs'
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
 import syncProtocol from "y-protocols/dist/sync.cjs";
 import encoding from 'lib0/dist/encoding.cjs'
@@ -8,7 +8,7 @@ import { send } from './bin/utils.js'
 const messageSync = 0
 const messageAwareness = 1
 
-class SharedDocument extends Doc {
+class SharedDocument extends Y.Doc {
 
   constructor(name) {
     super({gc: true})
