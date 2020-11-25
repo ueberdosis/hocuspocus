@@ -1,20 +1,45 @@
-const http = require('http')
-const server = http.createServer((request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' })
-  response.end('OK')
+import { TiptapCollaborationServer } from './TiptapCollaborationServer.js'
+
+const server = TiptapCollaborationServer.create({
+
+  port: 1234,
+  debounce: true, // or 2000
+
+  onConnect(data, resolve, reject) {
+    const {namespace, documentName, clientID, requestHeaders} = data
+
+    resolve()
+  },
+
+  onJoinDocument(data, resolve, reject) {
+    const {namespace, documentName, clientID, requestHeaders, clientsCount, document} = data
+
+    resolve()
+  },
+
+  onChange(data) {
+    const {namespace, documentName, clientID, requestHeaders, clientsCount, document} = data
+
+  },
+
+  onLeaveDocument(data) {
+    const {namespace, documentName, clientID, requestHeaders, clientsCount, document} = data
+
+  },
+
+  onDisconnect(data) {
+    const {namespace, documentName, clientID, requestHeaders} = data
+
+  },
+
 })
-const port = process.env.PORT || 1234
 
-const WebSocket = require('ws')
-const wss = new WebSocket.Server({ server })
-const setupWebSocketConnection = require('./bin/utils.js').setupWSConnection
+// server.configure({
+//   port: 1234,
+// })
 
-wss.on('connection', (connection, request) => {
-  console.log(`[Websocket Server] New connection to ${request.url}`)
+// server.onConnect((data, resolve) => {
+//   resolve()
+// })
 
-  return setupWebSocketConnection(connection, request)
-})
-
-server.listen(port, () => {
-  console.log(`[Websocket Server] Listening to ws://127.0.0.1:${port}`)
-})
+server.listen()
