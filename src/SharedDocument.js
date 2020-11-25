@@ -10,12 +10,17 @@ import {
 
 class SharedDocument extends Y.Doc {
 
+  connections = new Map()
+  mutex = mutex.createMutex()
+
+  /**
+   * Constructor.
+   * @param name
+   */
   constructor(name) {
     super({gc: true})
 
     this.name = name
-    this.mutex = mutex.createMutex()
-    this.connections = new Map()
 
     this.awareness = new awarenessProtocol.Awareness(this)
     this.awareness.setLocalState(null)

@@ -1,8 +1,5 @@
-import Encoder from './Encoder.js'
-import syncProtocol from 'y-protocols/dist/sync.cjs'
 import {messageListener} from './bin/utils.js'
 import {
-  MESSAGE_SYNC,
   WS_READY_STATE_CLOSING,
   WS_READY_STATE_CLOSED
 } from './enums.js'
