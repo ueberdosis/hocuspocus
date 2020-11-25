@@ -2,6 +2,7 @@ import Connection from './Connection.js'
 import SharedDocument from './SharedDocument.js'
 import WebSocket from 'ws'
 import {createServer} from 'http'
+import signale from 'signale'
 
 class Server {
 
@@ -29,7 +30,7 @@ class Server {
     })
 
     this.websocketServer.on('connection', (connection, request) => {
-      this._log(`New connection to ${request.url}`)
+      signale.debug(`New connection to ${request.url}`)
 
       return this._createConnection(connection, request, this._createDocument(request))
     })
@@ -55,7 +56,7 @@ class Server {
    */
   listen() {
     this.httpServer.listen(this.configuration.port, () => {
-      this._log(`Listening on: ${this.configuration.port}`)
+      signale.success(`Listening on http://127.0.0.1:${this.configuration.port}`)
     })
   }
 
@@ -97,14 +98,6 @@ class Server {
       .onClose((document) => {
         this.documents.delete(document.name)
       })
-  }
-
-  /**
-   * Log messages to console
-   * @param message
-   */
-  _log(message) {
-    console.log('\x1b[32m%s\x1b[0m', '🚀 [TiptapCollaborationServer]', message)
   }
 }
 
