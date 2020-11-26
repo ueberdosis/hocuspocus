@@ -93,10 +93,10 @@ class Server {
   _createConnection(connection, request, document) {
     return new Connection(connection, request, document, this.configuration.timeout)
       .onClose((document) => {
-        const nobodyElseIsConnected = document.connections.size === 0
-        const persistDocuments = this.configuration.persistence !== null
+        const nobodyElseConnected = document.connections.size === 0
+        const shouldPersistDocuments = this.configuration.persistence !== null
 
-        if (nobodyElseIsConnected && persistDocuments) {
+        if (nobodyElseConnected && shouldPersistDocuments) {
           this.configuration.persistence.store(document.name, document).then(() => {
             console.log(`Document ${document.name} stored.`)
             document.destroy()

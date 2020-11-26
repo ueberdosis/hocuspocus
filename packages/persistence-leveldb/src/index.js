@@ -1,5 +1,6 @@
-import Y from "yjs";
+import Y from 'yjs'
 import LevelDB from 'y-leveldb'
+const LevelDBPersistence = LevelDB.LeveldbPersistence
 
 export class PersistenceLevelDB {
   configuration = {
@@ -22,7 +23,7 @@ export class PersistenceLevelDB {
   }
 
   init() {
-    this.provider = new LevelDB.LeveldbPersistence(this.configuration.path)
+    this.provider = new LevelDBPersistence(this.configuration.path)
   }
 
   async connect(documentName, document) {
