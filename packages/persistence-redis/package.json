@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "@tiptap/persistence-redis",
   "version": "0.1.0",
   "description": "tiptap WebSocket server persistence driver for Redis",
