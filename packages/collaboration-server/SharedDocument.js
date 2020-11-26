@@ -6,7 +6,7 @@ import Y from 'yjs'
 import {
   MESSAGE_AWARENESS,
   MESSAGE_SYNC,
-} from './enums.js'
+} from './utils/messageTypes.js'
 
 class SharedDocument extends Y.Doc {
 

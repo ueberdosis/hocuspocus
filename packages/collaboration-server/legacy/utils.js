@@ -5,7 +5,7 @@ import encoding from "lib0/dist/encoding.cjs";
 import decoding from "lib0/dist/decoding.cjs";
 import mutex from "lib0/dist/mutex.cjs";
 import map from "lib0/dist/map.cjs";
-import debounce from 'lodash.debounce'
+import _ from 'lodash'
 
 // const callbackHandler = require('./callback.js').callbackHandler
 
@@ -129,7 +129,7 @@ class WSSharedDoc extends Y.Doc {
     this.on('update', updateHandler)
 
     if (isCallbackSet) {
-      this.on('update', debounce(
+      this.on('update', _.debounce(
         callbackHandler,
         CALLBACK_DEBOUNCE_WAIT,
         { maxWait: CALLBACK_DEBOUNCE_MAXWAIT }

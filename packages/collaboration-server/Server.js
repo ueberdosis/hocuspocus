@@ -1,6 +1,6 @@
 import Connection from './Connection.js'
 import SharedDocument from './SharedDocument.js'
-import map from "lib0/dist/map.cjs"
+import map from 'lib0/dist/map.cjs'
 import WebSocket from 'ws'
 import {createServer} from 'http'
 

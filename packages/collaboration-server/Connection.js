@@ -1,8 +1,8 @@
-import {messageListener} from './bin/utils.js'
+import {messageListener} from './legacy/utils.js'
 import {
   WS_READY_STATE_CLOSING,
   WS_READY_STATE_CLOSED
-} from './enums.js'
+} from './utils/readyStates.js'
 
 class Connection {
 
