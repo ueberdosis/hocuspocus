@@ -12,7 +12,7 @@ export class PersistenceLevelDB {
   constructor(configuration) {
     this.configuration = {
       ...this.configuration,
-      ...configuration
+      ...configuration,
     }
 
     console.log('LevelDB persistence configuration: ', this.configuration)

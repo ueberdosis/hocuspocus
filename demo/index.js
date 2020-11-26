@@ -2,7 +2,7 @@ import { CollaborationServer } from '@tiptap/collaboration-server'
 import { PersistenceLevelDB } from '@tiptap/persistence-leveldb'
 import { PersistenceRedis } from '@tiptap/persistence-redis'
 
-const server = CollaborationServer.create({
+const server = CollaborationServer.configure({
 
   port: 1234,
   debounce: 2000, // or true/false
@@ -22,29 +22,35 @@ const server = CollaborationServer.create({
   // persistence: new PersistenceRedis('redis://:authpassword@127.0.0.1:6380/4'),
 
   onConnect(data, resolve, reject) {
-    const {documentName, clientID, requestHeaders} = data
+    const { documentName, clientID, requestHeaders } = data
 
     resolve()
   },
 
   onJoinDocument(data, resolve, reject) {
-    const {documentName, clientID, requestHeaders, clientsCount, document} = data
+    const {
+      documentName, clientID, requestHeaders, clientsCount, document,
+    } = data
 
     resolve()
   },
 
   onChange(data) {
-    const {documentName, clientID, requestHeaders, clientsCount, document} = data
+    const {
+      documentName, clientID, requestHeaders, clientsCount, document,
+    } = data
 
   },
 
   onLeaveDocument(data) {
-    const {documentName, clientID, requestHeaders, clientsCount, document} = data
+    const {
+      documentName, clientID, requestHeaders, clientsCount, document,
+    } = data
 
   },
 
   onDisconnect(data) {
-    const {documentName, clientID, requestHeaders} = data
+    const { documentName, clientID, requestHeaders } = data
 
   },
 
@@ -54,8 +60,10 @@ const server = CollaborationServer.create({
 //   port: 1234,
 // })
 
-// server.onConnect((data, resolve) => {
-//   resolve()
+// server.configure({
+//   onConnect(data, resolve) {
+//     resolve()
+//   },
 // })
 
 server.listen()
