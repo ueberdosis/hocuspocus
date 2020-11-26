@@ -1,6 +1,6 @@
 import { CollaborationServer } from '@tiptap/collaboration-server'
-// import { PersistenceLevelDB } from '@tiptap/persistance-leveldb'
-// import { PersistenceRedis } from '@tiptap/persistance-redis'
+import { PersistenceLevelDB } from '@tiptap/persistence-leveldb'
+import { PersistenceRedis } from '@tiptap/persistence-redis'
 
 const server = CollaborationServer.create({
 
@@ -8,9 +8,9 @@ const server = CollaborationServer.create({
   debounce: 2000, // or true/false
   debounceMaximum: 10000,
 
-  // persistence: new PersistenceLevelDB({
-  //   path: './database',
-  // }),
+  persistence: new PersistenceLevelDB({
+    path: './database',
+  }),
   // persistence: new PersistenceRedis({
   //   port: 6379,
   //   host: '127.0.0.1',

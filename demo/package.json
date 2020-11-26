@@ -10,6 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "@tiptap/collaboration-server": "^0.1.0",
+    "@tiptap/persistence-leveldb": "^0.1.0",
+    "@tiptap/persistence-redis": "^0.1.0",
     "nodemon": "^2.0.6"
   }
 }

@@ -1,0 +1,14 @@
+{
+  "name": "@tiptap/persistence-redis",
+  "version": "0.1.0",
+  "description": "tiptap WebSocket server persistence driver for Redis",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "y-redis": "^1.0.2"
+  }
+}
