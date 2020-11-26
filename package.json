@@ -6,6 +6,13 @@
   ],
   "scripts": {
     "start": "yarn --cwd ./demo start",
-    "start:development": "yarn --cwd ./demo start:development"
+    "start:development": "yarn --cwd ./demo start:development",
+    "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
+    "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./"
+  },
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
   }
 }
