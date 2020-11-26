@@ -1,20 +1,26 @@
-import { TiptapCollaborationServer } from './src/Server.js'
+// import { CollaborationServer } from '@tiptap/collaboration-server'
+// import { PersistenceLevelDB } from '@tiptap/persistance-leveldb'
+// import { PersistenceRedis } from '@tiptap/persistance-redis'
+import { CollaborationServer } from './src/Server.js'
 
-const server = TiptapCollaborationServer.create({
+const server = CollaborationServer.create({
 
   port: 1234,
   debounce: 2000, // or true/false
   debounceMaximum: 10000,
-  databaseDirectory: null, // or ./database
-  redis: {
-    port: 6379,
-    host: '127.0.0.1',
-    family: 4, // 4 (IPv4) or 6 (IPv6)
-    password: null,
-    db: 0,
-  },
-  // redis: '/tmp/redis.sock',
-  // redis: 'redis://:authpassword@127.0.0.1:6380/4',
+
+  // persistence: new PersistenceLevelDB({
+  //   path: './database',
+  // }),
+  // persistence: new PersistenceRedis({
+  //   port: 6379,
+  //   host: '127.0.0.1',
+  //   family: 4, // 4 (IPv4) or 6 (IPv6)
+  //   password: null,
+  //   db: 0,
+  // }),
+  // persistence: new PersistenceRedis('/tmp/redis.sock'),
+  // persistence: new PersistenceRedis('redis://:authpassword@127.0.0.1:6380/4'),
 
   onConnect(data, resolve, reject) {
     const {documentName, clientID, requestHeaders} = data
