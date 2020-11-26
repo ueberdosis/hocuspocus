@@ -8,7 +8,7 @@ class Server {
 
   configuration = {
     debounce: true,
-    port: 8080,
+    port: 80,
     timeout: 30000,
   }
 
@@ -42,6 +42,15 @@ class Server {
    * @returns {Server}
    */
   create(configuration) {
+    return this.configure(configuration)
+  }
+
+  /**
+   * Configure the server
+   * @param configuration
+   * @returns {Server}
+   */
+  configure(configuration) {
     this.configuration = {
       ...this.configuration,
       ...configuration

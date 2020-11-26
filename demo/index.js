@@ -54,8 +54,10 @@ const server = CollaborationServer.create({
 //   port: 1234,
 // })
 
-// server.onConnect((data, resolve) => {
-//   resolve()
+// server.configure({
+//   onConnect(data, resolve) {
+//     resolve()
+//   },
 // })
 
 server.listen()
