@@ -26,12 +26,14 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 2. Start the development server `$ yarn start:development`
 
 ## Tasks
-- [ ] Publish package on GitHub registry
+Required
+- [ ] Publish on npm
 - [ ] Create new repository for the tiptap documentation example server (e. g. `tiptap-collaboration-server-demo`)
 - [ ] Add Docker Setup
 - [ ] Deploy demo to Servivum
+
+Optional
 - [ ] Write tests?
-- [ ] Publish on npm
 - [ ] HTTP Callbacks
 - [ ] Test with a dummy Laravel application
 - [ ] Add Redis support

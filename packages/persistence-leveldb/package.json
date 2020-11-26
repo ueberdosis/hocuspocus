@@ -1,14 +1,14 @@
 {
-    "name": "@tiptap/persistence-leveldb",
-    "version": "0.1.0",
-    "description": "tiptap WebSocket server persistence driver for LevelDB",
-    "type": "module",
-    "license": "MIT",
-    "main": "./src/index.js",
-    "files": [
-      "src"
-    ],
-    "dependencies": {
-      "y-leveldb": "^0.1.0"
-    }
+  "name": "@tiptap/persistence-leveldb",
+  "version": "0.1.0",
+  "description": "tiptap WebSocket server persistence driver for LevelDB",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "y-leveldb": "^0.1.0"
   }
+}
