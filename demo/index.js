@@ -2,7 +2,7 @@ import { CollaborationServer } from '@tiptap/collaboration-server'
 import { PersistenceLevelDB } from '@tiptap/persistence-leveldb'
 import { PersistenceRedis } from '@tiptap/persistence-redis'
 
-const server = CollaborationServer.create({
+const server = CollaborationServer.configure({
 
   port: 1234,
   debounce: 2000, // or true/false

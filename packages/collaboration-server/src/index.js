@@ -41,15 +41,6 @@ class Server {
    * @param configuration
    * @returns {Server}
    */
-  create(configuration) {
-    return this.configure(configuration)
-  }
-
-  /**
-   * Configure the server
-   * @param configuration
-   * @returns {Server}
-   */
   configure(configuration) {
     this.configuration = {
       ...this.configuration,
