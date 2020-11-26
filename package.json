@@ -8,14 +8,20 @@
     "start": "yarn --cwd ./demo start",
     "start:development": "yarn --cwd ./demo start:development",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
-    "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./"
+    "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
+    "release": "yarn lint && lerna publish",
+    "reset": "rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/eslint-parser": "^7.12.1",
     "@babel/preset-env": "^7.12.7",
+    "@lerna/batch-packages": "^3.16.0",
+    "@lerna/filter-packages": "^3.18.0",
+    "@lerna/project": "^3.21.0",
     "eslint": "^7.14.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1"
+    "eslint-plugin-import": "^2.22.1",
+    "lerna": "^3.22.1"
   }
 }
