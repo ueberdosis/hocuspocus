@@ -1,4 +1,6 @@
 module.exports = {
+  ignorePatterns: ['**/legacy/*'],
+  parser: '@babel/eslint-parser',
   parserOptions: {
     sourceType: 'module',
   },
@@ -19,6 +21,7 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
+        'no-shadow': 'off',
         'no-alert': 'off',
         'no-console': ['warn', { allow: ['warn', 'error'] }],
         semi: ['error', 'never'],

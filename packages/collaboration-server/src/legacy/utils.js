@@ -1,10 +1,10 @@
-import Y from "yjs";
-import syncProtocol from "y-protocols/dist/sync.cjs";
-import awarenessProtocol from "y-protocols/dist/awareness.cjs";
-import encoding from "lib0/dist/encoding.cjs";
-import decoding from "lib0/dist/decoding.cjs";
-import mutex from "lib0/dist/mutex.cjs";
-import map from "lib0/dist/map.cjs";
+import Y from 'yjs'
+import syncProtocol from 'y-protocols/dist/sync.cjs'
+import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
+import encoding from 'lib0/dist/encoding.cjs'
+import decoding from 'lib0/dist/decoding.cjs'
+import mutex from 'lib0/dist/mutex.cjs'
+import map from 'lib0/dist/map.cjs'
 import _ from 'lodash'
 
 // const callbackHandler = require('./callback.js').callbackHandler
@@ -28,9 +28,9 @@ const persistenceDir = process.env.YPERSISTENCE
  */
 let persistence = null
 if (typeof persistenceDir === 'string') {
-  console.info('Persisting documents to "' + persistenceDir + '"')
+  console.info(`Persisting documents to "${persistenceDir}"`)
   // @ts-ignore
-  const LeveldbPersistence = require('y-leveldb').LeveldbPersistence
+  const { LeveldbPersistence } = require('y-leveldb')
   const ldb = new LeveldbPersistence(persistenceDir)
   persistence = {
     provider: ldb,
@@ -43,7 +43,7 @@ if (typeof persistenceDir === 'string') {
         ldb.storeUpdate(docName, update)
       })
     },
-    writeState: async (docName, ydoc) => {}
+    writeState: async (docName, ydoc) => {},
   }
 }
 
@@ -88,7 +88,7 @@ class WSSharedDoc extends Y.Doc {
   /**
    * @param {string} name
    */
-  constructor (name) {
+  constructor(name) {
     super({ gc: gcEnabled })
     this.name = name
     this.mux = mutex.createMutex()
@@ -132,7 +132,7 @@ class WSSharedDoc extends Y.Doc {
       this.on('update', _.debounce(
         callbackHandler,
         CALLBACK_DEBOUNCE_WAIT,
-        { maxWait: CALLBACK_DEBOUNCE_MAXWAIT }
+        { maxWait: CALLBACK_DEBOUNCE_MAXWAIT },
       ))
     }
   }

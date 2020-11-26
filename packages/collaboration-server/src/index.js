@@ -1,8 +1,8 @@
-import Connection from './Connection.js'
-import SharedDocument from './SharedDocument.js'
 import map from 'lib0/dist/map.cjs'
 import WebSocket from 'ws'
-import {createServer} from 'http'
+import { createServer } from 'http'
+import SharedDocument from './SharedDocument.js'
+import Connection from './Connection.js'
 
 class Server {
 
@@ -13,7 +13,9 @@ class Server {
   }
 
   httpServer
+
   websocketServer
+
   documents = new Map()
 
   /**
@@ -21,18 +23,18 @@ class Server {
    */
   constructor() {
     this.httpServer = createServer((request, response) => {
-      response.writeHead(200, {'Content-Type': 'text/plain'})
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
       response.end('OK')
     })
 
     this.websocketServer = new WebSocket.Server({
-      server: this.httpServer
+      server: this.httpServer,
     })
 
     this.websocketServer.on('connection', (connection, request) => {
       console.log(`New connection to ${request.url}`)
 
-      return this._createConnection(connection, request, this._createDocument(request))
+      return this.createConnection(connection, request, this.createDocument(request))
     })
   }
 
@@ -44,7 +46,7 @@ class Server {
   create(configuration) {
     this.configuration = {
       ...this.configuration,
-      ...configuration
+      ...configuration,
     }
 
     return this
@@ -64,9 +66,8 @@ class Server {
    * @param request
    * @private
    */
-  _createDocument(request) {
+  createDocument(request) {
     const documentName = request.url.slice(1).split('?')[0]
-
 
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new SharedDocument(documentName)
@@ -90,9 +91,9 @@ class Server {
    * @returns {Connection}
    * @private
    */
-  _createConnection(connection, request, document) {
+  createConnection(connection, request, document) {
     return new Connection(connection, request, document, this.configuration.timeout)
-      .onClose((document) => {
+      .onClose(document => {
         // TODO: Document should only be deleted, when it’s persisted
         if (document.connections.size === 0) {
           this.documents.delete(document.name)
@@ -101,4 +102,4 @@ class Server {
   }
 }
 
-export const CollaborationServer = new Server
+export const CollaborationServer = new Server()
