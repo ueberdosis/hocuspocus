@@ -27,7 +27,6 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 
 ## Tasks
 Required
-- [ ] Set up lerna
 - [ ] Publish on npm
 - [ ] Create new repository for the tiptap documentation example server (e. g. `tiptap-collaboration-server-demo`)
 - [ ] Add Docker Setup
