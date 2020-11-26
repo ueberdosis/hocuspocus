@@ -1,17 +1,21 @@
-import {messageListener} from './legacy/utils.js'
+import { messageListener } from './legacy/utils.js'
 import {
   WS_READY_STATE_CLOSING,
-  WS_READY_STATE_CLOSED
+  WS_READY_STATE_CLOSED,
 } from './utils/readyStates.js'
 
 class Connection {
 
   connection
+
   request
+
   document
+
   timeout
 
   pingInterval
+
   pongReceived = true
 
   callbacks = {
@@ -38,7 +42,7 @@ class Connection {
     // TODO: Move messageListener here and refactor it
     this.connection.on('message', message => messageListener(this.connection, this.document, new Uint8Array(message)))
 
-    this.pingInterval = setInterval(this._check.bind(this), this.timeout)
+    this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
     this.connection.on('pong', () => {
       this.pongReceived = true
@@ -48,7 +52,7 @@ class Connection {
       this.close()
     })
 
-    this._sendFirstSyncStep()
+    this.sendFirstSyncStep()
   }
 
   /**
@@ -111,7 +115,7 @@ class Connection {
    * @returns {undefined}
    * @private
    */
-  _check() {
+  check() {
     if (!this.pongReceived) {
       return this.close()
     }
@@ -131,13 +135,13 @@ class Connection {
    * Send first sync step
    * @private
    */
-  _sendFirstSyncStep() {
+  sendFirstSyncStep() {
     const message = this.document.writeFirstSyncStep()
     this.send(message.encode())
 
     if (this.document.getAwarenessStates().size > 0) {
       this.send(
-        this.document.getAwarenessUpdateMessage().encode()
+        this.document.getAwarenessUpdateMessage().encode(),
       )
     }
   }

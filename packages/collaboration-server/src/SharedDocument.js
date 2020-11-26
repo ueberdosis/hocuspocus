@@ -1,8 +1,8 @@
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
-import Encoder from "./Encoder.js"
 import mutex from 'lib0/dist/mutex.cjs'
 import syncProtocol from 'y-protocols/dist/sync.cjs'
 import Y from 'yjs'
+import Encoder from './Encoder.js'
 import {
   MESSAGE_AWARENESS,
   MESSAGE_SYNC,
@@ -11,6 +11,7 @@ import {
 class SharedDocument extends Y.Doc {
 
   connections = new Map()
+
   mutex = mutex.createMutex()
 
   /**
@@ -18,15 +19,15 @@ class SharedDocument extends Y.Doc {
    * @param name
    */
   constructor(name) {
-    super({gc: true})
+    super({ gc: true })
 
     this.name = name
 
     this.awareness = new awarenessProtocol.Awareness(this)
     this.awareness.setLocalState(null)
 
-    this.awareness.on('update', this._handleAwarenessUpdate.bind(this))
-    this.on('update', this._handleUpdate.bind(this))
+    this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
+    this.on('update', this.handleUpdate.bind(this))
 
     // if (isCallbackSet) {
     //   this.on('update', debounce(
@@ -62,7 +63,7 @@ class SharedDocument extends Y.Doc {
     awarenessProtocol.removeAwarenessStates(
       this.awareness,
       Array.from(this.connections.get(connection)),
-      null
+      null,
     )
 
     this.connections.delete(connection)
@@ -84,7 +85,7 @@ class SharedDocument extends Y.Doc {
   getAwarenessUpdateMessage(changedClients = null) {
     const message = awarenessProtocol.encodeAwarenessUpdate(
       this.awareness,
-      changedClients ? changedClients : Array.from(this.getAwarenessStates().keys())
+      changedClients || Array.from(this.getAwarenessStates().keys()),
     )
 
     return new Encoder().int(MESSAGE_AWARENESS).int8(message)
@@ -126,9 +127,9 @@ class SharedDocument extends Y.Doc {
    * @param connection
    * @private
    */
-  _handleAwarenessUpdate(clients, connection) {
+  handleAwarenessUpdate(clients, connection) {
 
-    const {added, updated, removed} = clients
+    const { added, updated, removed } = clients
     const changedClients = added.concat(updated, removed)
 
     if (connection !== null) {
@@ -146,7 +147,7 @@ class SharedDocument extends Y.Doc {
     }
 
     this.connections.forEach((set, connection) => connection.send(
-      this.getAwarenessUpdateMessage(changedClients).encode()
+      this.getAwarenessUpdateMessage(changedClients).encode(),
     ))
   }
 
@@ -155,11 +156,11 @@ class SharedDocument extends Y.Doc {
    * @param update
    * @private
    */
-  _handleUpdate(update) {
+  handleUpdate(update) {
     const message = this.writeUpdate(update)
 
     this.connections.forEach((set, connection) => connection.send(
-      message.encode()
+      message.encode(),
     ))
   }
 }
