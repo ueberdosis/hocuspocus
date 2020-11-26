@@ -101,4 +101,4 @@ class Server {
   }
 }
 
-export const TiptapCollaborationServer = new Server
+export const CollaborationServer = new Server
