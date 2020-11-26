@@ -4,9 +4,9 @@
 [![License](https://img.shields.io/npm/l/@tiptap/collaboration-server.svg)](https://www.npmjs.com/package/@tiptap/collaboration-server) -->
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
-This is a WebSocket Server based on [Y.js](https://github.com/yjs/yjs) by Kevin Jahns, which plays really well with tiptap, a headless rich text editor based on [ProseMirror](https://github.com/ProseMirror/prosemirror). It’s the easiest way to get a collaborative backend up and running.
+This is a WebSocket Server based on [Y.js](https://github.com/yjs/yjs), which plays really well with tiptap, a headless rich text editor based on [ProseMirror](https://github.com/ProseMirror/prosemirror). It’s the easiest way to get a collaborative backend up and running.
 
-## Basic usage
+## Usage
 ```js
 import { CollaborationServer } from '@tiptap/collaboration-server'
 
