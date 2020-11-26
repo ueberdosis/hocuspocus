@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./index.js",
-    "start:development": "nodemon ./index.js"
+    "start:development": "nodemon --watch ./ --watch ../packages ./index.js"
   },
   "license": "MIT",
   "devDependencies": {

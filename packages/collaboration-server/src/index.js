@@ -10,6 +10,7 @@ class Server {
     debounce: true,
     port: 8080,
     timeout: 30000,
+    persistence: null,
   }
 
   httpServer
@@ -71,10 +72,9 @@ class Server {
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new SharedDocument(documentName)
 
-      // TODO: persistence
-      // if (persistence !== null) {
-      //   persistence.bindState(docname, doc)
-      // }
+      if (this.configuration.persistence) {
+        this.configuration.persistence.connect(documentName, document)
+      }
 
       this.documents.set(documentName, document)
 
@@ -93,8 +93,15 @@ class Server {
   _createConnection(connection, request, document) {
     return new Connection(connection, request, document, this.configuration.timeout)
       .onClose((document) => {
-        // TODO: Document should only be deleted, when it’s persisted
-        if (document.connections.size === 0) {
+        const nobodyElseIsConnected = document.connections.size === 0
+        const persistDocuments = this.configuration.persistence !== null
+
+        if (nobodyElseIsConnected && persistDocuments) {
+          this.configuration.persistence.store(document.name, document).then(() => {
+            console.log(`Document ${document.name} stored.`)
+            document.destroy()
+          })
+
           this.documents.delete(document.name)
         }
       })
