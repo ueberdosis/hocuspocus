@@ -1,22 +1,11 @@
 {
-  "name": "tiptap-collaboration-server",
-  "version": "0.1.0",
-  "description": "WebSocket Server for tiptap",
-  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "demo"
+  ],
   "scripts": {
-    "start": "node ./index.js",
-    "start:development": "nodemon ./index.js"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "lib0": "^0.2.34",
-    "lodash": "^4.17.20",
-    "ws": "^7.4.0",
-    "y-leveldb": "^0.1.0",
-    "y-protocols": "^1.0.1",
-    "yjs": "^13.4.5"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.6"
+    "start": "yarn --cwd ./demo start",
+    "start:development": "yarn --cwd ./demo start:development"
   }
 }

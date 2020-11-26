@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "tiptap-collaboration-demo",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.js",
+    "start:development": "nodemon ./index.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@tiptap/collaboration-server": "^0.1.0",
+    "nodemon": "^2.0.6"
+  }
+}

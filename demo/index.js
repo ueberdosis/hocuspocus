@@ -1,7 +1,6 @@
-// import { CollaborationServer } from '@tiptap/collaboration-server'
+import { CollaborationServer } from '@tiptap/collaboration-server'
 // import { PersistenceLevelDB } from '@tiptap/persistance-leveldb'
 // import { PersistenceRedis } from '@tiptap/persistance-redis'
-import { CollaborationServer } from './packages/collaboration-server/Server.js'
 
 const server = CollaborationServer.create({
 

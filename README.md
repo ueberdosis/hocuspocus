@@ -1,6 +1,14 @@
 # tiptap websocket server
 
+## Production
+
+`$ yarn install`
 `$ yarn start`
+
+## Development
+
+`$ yarn install`
+`$ yarn start:development`
 
 ## Tasks
 - [ ] Separate demo code from package (in different folders, e. g. src/ and demo/)
