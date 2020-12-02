@@ -15,9 +15,11 @@ class Hocuspocus {
     port: 80,
     timeout: 30000,
 
-    onChange: data => {},
+    onChange: data => {
+    },
     onConnect: (data, resolve) => resolve(),
-    onDisconnect: data => {},
+    onDisconnect: data => {
+    },
     onJoinDocument: (data, resolve) => resolve(),
 
   }
@@ -82,6 +84,7 @@ class Hocuspocus {
   handleUpgrade(request, socket, head) {
     const data = {
       requestHeaders: request.headers,
+      requestParameters: this.getParameters(request),
     }
 
     this.websocketServer.handleUpgrade(request, socket, head, connection => {
@@ -119,6 +122,7 @@ class Hocuspocus {
       document,
       documentName: document.name,
       requestHeaders: request.headers,
+      requestParameters: this.getParameters(request),
     }
 
     new Promise((resolve, reject) => {
@@ -148,6 +152,7 @@ class Hocuspocus {
       document,
       documentName: document.name,
       requestHeaders: request.headers,
+      requestParameters: this.getParameters(request),
     }
 
     if (!this.configuration.debounce) {
@@ -181,7 +186,8 @@ class Hocuspocus {
    * @private
    */
   createDocument(request) {
-    const documentName = request.url.slice(1).split('?')[0]
+    const documentName = request.url.slice(1)
+      .split('?')[0]
 
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new Document(documentName)
@@ -241,6 +247,21 @@ class Hocuspocus {
   now() {
     const hrTime = process.hrtime()
     return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
+  }
+
+  /**
+   * Get parameters by the given request
+   * @param request
+   * @returns {{}|URLSearchParams}
+   */
+  getParameters(request) {
+    const query = request.url.split('?')
+
+    if (!query[1]) {
+      return {}
+    }
+
+    return new URLSearchParams(query[1])
   }
 
   /**

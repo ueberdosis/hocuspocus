@@ -24,7 +24,7 @@ const server = Server.configure({
   // persistence: new Redis('redis://:authpassword@127.0.0.1:6380/4'),
 
   onConnect(data, resolve, reject) {
-    const { requestHeaders } = data
+    const { requestHeaders, requestParameters } = data
 
     // authenticate using request headers
     // if (requestHeaders.access_token !== 'super-secret-token') {
@@ -43,6 +43,7 @@ const server = Server.configure({
       document,
       documentName,
       requestHeaders,
+      requestParameters,
     } = data
 
     // authorize user
@@ -59,6 +60,7 @@ const server = Server.configure({
       document,
       documentName,
       requestHeaders,
+      requestParameters,
     } = data
 
     // handle
@@ -70,6 +72,7 @@ const server = Server.configure({
       document,
       documentName,
       requestHeaders,
+      requestParameters,
     } = data
 
     // handle
