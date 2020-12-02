@@ -6,10 +6,16 @@
   "keywords": [
     "hocuspocus",
     "tiptap",
-    "yjs"
+    "yjs",
+    "yjs-websocket",
+    "prosemirror"
   ],
-  "type": "module",
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ueberdosis"
+  },
+  "type": "module",
   "main": "./src/index.js",
   "files": [
     "src"
