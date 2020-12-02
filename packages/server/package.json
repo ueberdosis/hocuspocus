@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/server",
   "description": "collaborative editing backend for tiptap",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.0",
   "homepage": "https://tiptap.dev",
   "keywords": [
     "hocuspocus",
@@ -26,5 +26,8 @@
     "y-leveldb": "^0.1.0",
     "y-protocols": "^1.0.1",
     "yjs": "^13.4.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
