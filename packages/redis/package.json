@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "@hocuspocus/redis",
+  "description": "hocuspocus persistence driver for Redis",
+  "version": "1.0.0-alpha.1",
+  "homepage": "https://tiptap.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "redis",
+    "yjs"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "y-redis": "^1.0.2"
+  }
+}

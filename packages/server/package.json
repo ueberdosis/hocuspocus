@@ -1,0 +1,25 @@
+{
+  "name": "@hocuspocus/server",
+  "description": "collaborative editing backend for tiptap",
+  "version": "1.0.0-alpha.1",
+  "homepage": "https://tiptap.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "yjs"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "lib0": "^0.2.34",
+    "lodash.debounce": "^4.0.8",
+    "ws": "^7.4.0",
+    "y-leveldb": "^0.1.0",
+    "y-protocols": "^1.0.1",
+    "yjs": "^13.4.5"
+  }
+}

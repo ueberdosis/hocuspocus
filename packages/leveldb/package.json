@@ -1,0 +1,22 @@
+{
+  "name": "@hocuspocus/leveldb",
+  "description": "hocuspocus persistence driver for LevelDB",
+  "version": "1.0.0-alpha.1",
+  "homepage": "https://tiptap.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "leveldb",
+    "yjs"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "y-leveldb": "^0.1.0",
+    "yjs": "^13.4.5"
+  }
+}

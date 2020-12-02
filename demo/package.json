@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "hocuspocus-demo",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.js",
+    "start:development": "nodemon --watch ./ --watch ../packages ./index.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.1",
+    "@hocuspocus/leveldb": "^1.0.0-alpha.1",
+    "@hocuspocus/redis": "^1.0.0-alpha.1",
+    "nodemon": "^2.0.6"
+  }
+}
