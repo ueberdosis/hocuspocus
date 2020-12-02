@@ -48,7 +48,7 @@ class Connection {
 
     this.connection.on('close', () => this.close())
     this.connection.on('message', message => this.handleMessage(message))
-    this.connection.on('pong', () => this.pongReceived = true)
+    this.connection.on('pong', () => { this.pongReceived = true })
 
     this.sendFirstSyncStep()
   }

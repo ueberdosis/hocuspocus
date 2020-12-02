@@ -245,7 +245,7 @@ class Hocuspocus {
    * @returns {number}
    */
   get debounceDuration() {
-    return isNaN(this.configuration.debounce)
+    return Number.isNaN(this.configuration.debounce)
       ? 2000
       : this.configuration.debounce
   }
