@@ -15,8 +15,9 @@ class Hocuspocus {
     port: 80,
     timeout: 30000,
 
-    onChange: (data, resolve) => resolve(),
+    onChange: data => {},
     onConnect: (data, resolve) => resolve(),
+    onDisconnect: data => {},
     onJoinDocument: (data, resolve) => resolve(),
 
   }
@@ -209,6 +210,14 @@ class Hocuspocus {
       context,
     )
       .onClose(document => {
+
+        this.configuration.onDisconnect({
+          document,
+          documentName: document.name,
+          requestHeaders: request.headers,
+          clientsCount: document.connectionsCount(),
+        })
+
         if (document.connectionsCount() > 0 || this.configuration.persistence === null) {
           return
         }

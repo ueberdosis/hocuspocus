@@ -37,10 +37,10 @@ const server = Server.configure({
   onJoinDocument(data, resolve, reject) {
     const {
       clientsCount,
+      context,
       document,
       documentName,
       requestHeaders,
-      context,
     } = data
 
     // authorize user
@@ -53,27 +53,25 @@ const server = Server.configure({
 
   onChange(data) {
     const {
-      documentName,
-      requestHeaders,
       clientsCount,
       document,
+      documentName,
+      requestHeaders,
     } = data
 
-    // handle the data
+    // handle
   },
 
-  // onLeaveDocument(data) {
-  //   const {
-  //     documentName, clientID, requestHeaders, clientsCount, document,
-  //   } = data
-  //
-  // },
-  //
-  // onDisconnect(data) {
-  //   const { documentName, clientID, requestHeaders } = data
-  //
-  // },
+  onDisconnect(data) {
+    const {
+      clientsCount,
+      document,
+      documentName,
+      requestHeaders,
+    } = data
 
+    // handle
+  },
 })
 
 server.listen()
