@@ -16,7 +16,6 @@
   ],
   "dependencies": {
     "lib0": "^0.2.34",
-    "lodash.debounce": "^4.0.8",
     "ws": "^7.4.0",
     "y-leveldb": "^0.1.0",
     "y-protocols": "^1.0.1",

@@ -1,7 +1,6 @@
 import map from 'lib0/dist/map.cjs'
 import WebSocket from 'ws'
 import { createServer } from 'http'
-import debounce from 'lodash.debounce'
 import Document from './Document.js'
 import Connection from './Connection.js'
 
@@ -27,6 +26,10 @@ class Hocuspocus {
   websocketServer
 
   documents = new Map()
+
+  debounceTimeout
+
+  debounceStart
 
   /**
    * Constructor
@@ -127,6 +130,45 @@ class Hocuspocus {
   }
 
   /**
+   * Handle update of the given document
+   * @param document
+   * @param request
+   * @returns {*}
+   */
+  handleDocumentUpdate(document, request) {
+    const data = {
+      clientsCount: document.connectionsCount(),
+      document,
+      documentName: document.name,
+      requestHeaders: request.headers,
+    }
+
+    if (!this.configuration.debounce) {
+      this.configuration.onChange(data)
+      return
+    }
+
+    if (!this.debounceStart) {
+      this.debounceStart = this.now()
+    }
+
+    if (this.now() - this.debounceStart >= this.configuration.debounceMaxWait) {
+      this.configuration.onChange(data)
+      this.debounceStart = null
+      return
+    }
+
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout)
+    }
+
+    this.debounceTimeout = setTimeout(
+      () => this.configuration.onChange(data),
+      this.debounceDuration,
+    )
+  }
+
+  /**
    * Create a new document by the given request
    * @param request
    * @private
@@ -137,29 +179,7 @@ class Hocuspocus {
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new Document(documentName)
 
-      const debounceDuration = isNaN(this.configuration.debounce)
-        ? 2000
-        : this.configuration.debounce
-
-      document.onUpdate(document => {
-        const data = {
-          clientsCount: document.connectionsCount(),
-          document,
-          documentName: document.name,
-          requestHeaders: request.headers,
-        }
-
-        if (!this.configuration.debounce) {
-          return this.configuration.onChange(data)
-        }
-
-        // TODO: WHY U NOT WORKING?
-        // debounce(
-        //   () => { this.configuration.onChange(data) },
-        //   debounceDuration,
-        //   { maxWait: this.configuration.debounceMaxWait },
-        // )
-      })
+      document.onUpdate(document => this.handleDocumentUpdate(document, request))
 
       if (this.configuration.persistence) {
         this.configuration.persistence.connect(documentName, document)
@@ -200,6 +220,25 @@ class Hocuspocus {
 
         this.documents.delete(document.name)
       })
+  }
+
+  /**
+   * Get the current process time in milliseconds
+   * @returns {number}
+   */
+  now() {
+    const hrTime = process.hrtime()
+    return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
+  }
+
+  /**
+   * Get debounce duration
+   * @returns {number}
+   */
+  get debounceDuration() {
+    return isNaN(this.configuration.debounce)
+      ? 2000
+      : this.configuration.debounce
   }
 }
 
