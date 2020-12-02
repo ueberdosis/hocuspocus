@@ -133,10 +133,16 @@ class Hocuspocus {
   /**
    * Handle update of the given document
    * @param document
+   * @param update
    * @param request
    * @returns {*}
    */
-  handleDocumentUpdate(document, request) {
+  handleDocumentUpdate(document, update, request) {
+    if (this.configuration.persistence) {
+      this.configuration.persistence.store(document.name, update)
+      console.log(`Document ${document.name} saved`)
+    }
+
     const data = {
       clientsCount: document.connectionsCount(),
       document,
@@ -180,7 +186,9 @@ class Hocuspocus {
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new Document(documentName)
 
-      document.onUpdate(document => this.handleDocumentUpdate(document, request))
+      document.onUpdate(
+        (document, update) => this.handleDocumentUpdate(document, update, request),
+      )
 
       if (this.configuration.persistence) {
         this.configuration.persistence.connect(documentName, document)
@@ -218,14 +226,9 @@ class Hocuspocus {
           clientsCount: document.connectionsCount(),
         })
 
-        if (document.connectionsCount() > 0 || this.configuration.persistence === null) {
+        if (document.connectionsCount() > 0) {
           return
         }
-
-        this.configuration.persistence.store(document.name, document).then(() => {
-          document.destroy()
-          console.log(`Document ${document.name} stored.`)
-        })
 
         this.documents.delete(document.name)
       })
