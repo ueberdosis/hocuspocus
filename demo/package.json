@@ -1,7 +1,5 @@
 {
   "private": true,
-  "name": "hocuspocus-demo",
-  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start": "node ./index.js",
