@@ -2,7 +2,7 @@
   "private": true,
   "name": "@hocuspocus/redis",
   "description": "hocuspocus persistence driver for Redis",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.0",
   "homepage": "https://tiptap.dev",
   "keywords": [
     "hocuspocus",
