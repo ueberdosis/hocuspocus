@@ -103,7 +103,7 @@ const server = Server.configure({
       requestHeaders,
     } = data
 
-    // Check the context (or do an API call, ask the database, or whatever)
+    // Check the context (or whatever you want to do)
     if (context.user_id !== 1234) {
       // Unauthorized
       return reject()
@@ -111,6 +111,35 @@ const server = Server.configure({
 
     // Authorized
     resolve()
+  },
+})
+
+server.listen()
+```
+
+## Update documents
+You can store changed documents in a database, a REST API, a GraphQL API or wherever you want. The `onChange()` callback enables you to control where you documents should be stored.
+
+While the LevelDB persistence is needed to store all changes that are ever made to the document, the `onChange()` callback has the current state of the document.
+
+With the `debounce` setting you can make sure the callback won’t be executed to often. With the `debounceMaxWait` setting you can make sure the callback is executed at least after a specified amount of milliseconds, even if the document changes constantly.
+
+```js
+import { Server } from '@hocuspocus/server'
+import { LevelDB } from '@hocuspocus/leveldb'
+
+const server = Server.configure({
+  debounce: 2000, // or true/false
+  debounceMaxWait: 10000,
+  onChange(data) {
+    const {
+      clientsCount,
+      document,
+      documentName,
+      requestHeaders,
+    } = data
+
+    // handle
   },
 })
 
