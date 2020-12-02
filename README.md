@@ -50,11 +50,68 @@ import { Server } from '@hocuspocus/server'
 import { LevelDB } from '@hocuspocus/leveldb'
 
 const server = Server.configure({
-  port: 1234,
-
   persistence: new LevelDB({
     path: './database',
   }),
+})
+
+server.listen()
+```
+
+### Authentication
+Add a callback to authenticate your users. You can query a database, request a REST API GraphQL API, whatever you need to do. Just make sure to call `resolve()` when the user is allowed to connect, and `reject()` if the user isn’t allowed to connect to the server.
+
+```js
+import { Server } from '@hocuspocus/server'
+import { LevelDB } from '@hocuspocus/leveldb'
+
+const server = Server.configure({
+  onConnect(data, resolve, reject) {
+    const { requestHeaders } = data
+
+    // Authenticate using request headers
+    // if (requestHeaders.access_token !== 'super-secret-token') {
+    //   return reject()
+    // }
+
+    // Set context for later usage (optional)
+    const context = {
+      user_id: 1234,
+    }
+
+    resolve(context)
+  },
+})
+
+server.listen()
+```
+
+### Authorization
+Add a callback to check if a user can access a specific document. You have access to a previously set context, but you can also query the database or send an API request here. Call `resolve()` when the user is authorized, and `reject()` if the user isn’t allowed to access the document.
+
+```js
+import { Server } from '@hocuspocus/server'
+import { LevelDB } from '@hocuspocus/leveldb'
+
+const server = Server.configure({
+  onJoinDocument(data, resolve, reject) {
+    const {
+      clientsCount,
+      context,
+      document,
+      documentName,
+      requestHeaders,
+    } = data
+
+    // Check the context (or do an API call, ask the database, or whatever)
+    if (context.user_id !== 1234) {
+      // Unauthorized
+      return reject()
+    }
+
+    // Authorized
+    resolve()
+  },
 })
 
 server.listen()
@@ -69,17 +126,14 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 
 ## Tasks
 ### Required
-- [ ] Publish on npm
 - [ ] Create new repository in GitLab for the tiptap documentation example server (e. g. `hocuspocus-demo`)
 - [ ] Add Docker Setup
 - [ ] Create a Node.js template from that setup
 - [ ] Deploy demo to Servivum
 
 ### Optional
-- [ ] Authorization hooks
 - [ ] Connect with existing express instance
 - [ ] Get server instance from hocuspocus
-- [ ] HTTP Callbacks
 - [ ] Add Redis support
 - [ ] Test with a dummy Laravel application?
 - [ ] Support for level DB meta data?
@@ -89,6 +143,8 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 ## Questions
 - Are documents persisted if the server crashes?
 - How do you back up LevelDB folders?
+- Can users join/leave documents without closing the connection?
+- How can you pass HTTP headers with the WebSocket client?
 
 ## 💖 Sponsor the development
 Are you using tiptap in production? We need your sponsorship to maintain, update and develop tiptap. [Become a Sponsor now!](https://github.com/sponsors/ueberdosis)
