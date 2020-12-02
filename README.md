@@ -154,23 +154,15 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 2. Start the development server `$ yarn start:development`
 
 ## Tasks
-### Required
-- [ ] Create new repository in GitLab for the tiptap documentation example server (e. g. `hocuspocus-demo`)
-- [ ] Add Docker Setup
-- [ ] Create a Node.js template from that setup
-- [ ] Deploy demo to Servivum
-
-### Optional
+- [ ] Add Redis support
 - [ ] Connect with existing express instance
 - [ ] Get server instance from hocuspocus
-- [ ] Add Redis support
 - [ ] Test with a dummy Laravel application?
 - [ ] Support for level DB meta data?
 - [ ] TypeScript
 - [ ] Write tests?
 
 ## Questions
-- Are documents persisted if the server crashes?
 - How do you back up LevelDB folders?
 - Can users join/leave documents without closing the connection?
 - How can you pass HTTP headers with the WebSocket client?
