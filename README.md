@@ -117,7 +117,7 @@ const server = Server.configure({
 server.listen()
 ```
 
-## Update documents
+## Changes
 You can store changed documents in a database, a REST API, a GraphQL API or wherever you want. The `onChange()` callback enables you to control where you documents should be stored.
 
 While the LevelDB persistence is needed to store all changes that are ever made to the document, the `onChange()` callback has the current state of the document.
