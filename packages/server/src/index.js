@@ -83,20 +83,20 @@ class Hocuspocus {
       requestHeaders: request.headers,
     }
 
-    new Promise((resolve, reject) => {
-      this.configuration.onConnect(data, resolve, reject)
-    })
-      .then(context => {
-        this.websocketServer.handleUpgrade(request, socket, head, connection => {
+    this.websocketServer.handleUpgrade(request, socket, head, connection => {
+
+      new Promise((resolve, reject) => {
+        this.configuration.onConnect(data, resolve, reject)
+      })
+        .then(context => {
           this.websocketServer.emit('connection', connection, request, context)
         })
-      })
-      .catch(() => {
-        this.websocketServer.handleUpgrade(request, socket, head, connection => {
+        .catch(() => {
           connection.close()
           console.log('unauthenticated')
         })
-      })
+
+    })
   }
 
   /**
@@ -214,8 +214,8 @@ class Hocuspocus {
         }
 
         this.configuration.persistence.store(document.name, document).then(() => {
-          console.log(`Document ${document.name} stored.`)
           document.destroy()
+          console.log(`Document ${document.name} stored.`)
         })
 
         this.documents.delete(document.name)
