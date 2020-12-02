@@ -9,7 +9,7 @@
     "start:development": "yarn --cwd ./demo start:development",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
-    "release": "yarn lint && lerna publish --access public",
+    "release": "yarn lint && lerna publish",
     "reset": "rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install"
   },
   "devDependencies": {
