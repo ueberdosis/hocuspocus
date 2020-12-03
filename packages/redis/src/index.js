@@ -22,12 +22,6 @@ export class Redis {
     return this
   }
 
-  isCluster() {
-    this.cluster = true
-
-    return this
-  }
-
   /**
    * Connect to the given document
    * @param documentName
@@ -47,4 +41,10 @@ export class Redis {
   // eslint-disable-next-line no-empty-function
   async store(documentName, update) {
   }
+}
+
+export class RedisCluster extends Redis {
+
+  cluster = true
+
 }
