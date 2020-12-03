@@ -166,6 +166,7 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 - How do you back up LevelDB folders?
 - Can users join/leave documents without closing the connection?
 - How would that work with a read-only mode? Any chance, the server would broadcast changes, but won’t accept changes from specific clients?
+- How can I “import” existing JSON documents?
 
 ## 💖 Sponsor the development
 Are you using tiptap in production? We need your sponsorship to maintain, update and develop tiptap. [Become a Sponsor now!](https://github.com/sponsors/ueberdosis)
