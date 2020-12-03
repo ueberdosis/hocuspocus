@@ -4,21 +4,26 @@ export class Redis {
 
   configuration = {}
 
+  cluster = false
+
+  persistance
+
   /**
    * Constructor
    * @param configuration
-   * @param cluster
    * @returns {Redis}
    */
-  constructor(configuration = {}, cluster = false) {
+  constructor(configuration = {}) {
     this.configuration = {
       ...this.configuration,
       ...configuration,
     }
 
-    this.persistance = new RedisPersistence(
-      cluster ? { redisClusterOpts: this.configuration } : { redisOpts: this.configuration },
-    )
+    return this
+  }
+
+  isCluster() {
+    this.cluster = true
 
     return this
   }
@@ -30,6 +35,12 @@ export class Redis {
    * @returns {Promise<void>}
    */
   async connect(documentName, document) {
+    this.persistance = new RedisPersistence(
+      this.cluster
+        ? { redisClusterOpts: this.configuration }
+        : { redisOpts: this.configuration },
+    )
+
     await this.persistance.bindState(documentName, document).synced
   }
 
