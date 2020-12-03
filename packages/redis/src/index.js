@@ -2,34 +2,23 @@ import { RedisPersistence } from 'y-redis'
 
 export class Redis {
 
-  configuration = {
-    redisOpts: {},
-    redisClusterOpts: {},
-  }
+  configuration = {}
 
   /**
    * Constructor
    * @param configuration
-   * @param clusterConfiguration
+   * @param cluster
    * @returns {Redis}
    */
-  constructor(configuration = {}, clusterConfiguration = {}) {
+  constructor(configuration = {}, cluster = false) {
     this.configuration = {
-      redisOpts: {
-        ...this.configuration.redisOpts,
-        ...configuration,
-      },
-      redisClusterOpts: {
-        ...this.configuration.redisClusterOpts,
-        ...clusterConfiguration,
-      },
+      ...this.configuration,
+      ...configuration,
     }
 
-    if (Object.keys(this.configuration.redisClusterOpts).length === 0) {
-      this.configuration.redisClusterOpts = null
-    }
-
-    this.persistance = new RedisPersistence(this.configuration)
+    this.persistance = new RedisPersistence(
+      cluster ? { redisClusterOpts: this.configuration } : { redisOpts: this.configuration },
+    )
 
     return this
   }
