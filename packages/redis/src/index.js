@@ -1,26 +1,50 @@
-export class PersistenceRedis {
+import { RedisPersistence } from 'y-redis'
+
+export class Redis {
+
   configuration = {
-    port: 6379,
-    host: '127.0.0.1',
-    family: 4, // 4 (IPv4) or 6 (IPv6)
-    password: null,
-    db: 0,
+    redisOpts: {},
+    redisClusterOpts: {},
   }
 
-  constructor(configuration) {
-    if (typeof configuration === 'object') {
-      this.configuration = {
-        ...this.configuration,
+  /**
+   * Constructor
+   * @param configuration
+   * @param clusterConfiguration
+   * @returns {Redis}
+   */
+  constructor(configuration = {}, clusterConfiguration = {}) {
+    this.configuration = {
+      redisOpts: {
+        ...this.configuration.redisOpts,
         ...configuration,
-      }
+      },
+      redisClusterOpts: {
+        ...this.configuration.redisClusterOpts,
+        ...clusterConfiguration,
+      },
     }
 
-    if (typeof configuration === 'string') {
-      this.configuration = configuration
+    if (Object.keys(this.configuration.redisClusterOpts).length === 0) {
+      this.configuration.redisClusterOpts = null
     }
 
-    console.log('Redis persistence configuration: ', this.configuration)
+    this.persistance = new RedisPersistence(this.configuration)
 
     return this
+  }
+
+  /**
+   * Connect to the given document
+   * @param documentName
+   * @param document
+   * @returns {Promise<void>}
+   */
+  async connect(documentName, document) {
+    await this.persistance.bindState(documentName, document).synced
+  }
+
+  // eslint-disable-next-line no-empty-function
+  async store(documentName, update) {
   }
 }
