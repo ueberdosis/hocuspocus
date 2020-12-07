@@ -19,7 +19,7 @@
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^3.18.0",
     "@lerna/project": "^3.21.0",
-    "eslint": "^7.14.0",
+    "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "lerna": "^3.22.1"

@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "y-leveldb": "^0.1.0",
-    "yjs": "^13.4.5"
+    "yjs": "^13.4.6"
   },
   "publishConfig": {
     "access": "public"
