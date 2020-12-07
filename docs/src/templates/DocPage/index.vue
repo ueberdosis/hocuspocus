@@ -31,7 +31,7 @@ export default {
         },
         {
           property: 'og:image',
-          content: 'https://next.tiptap.dev/og-image.png',
+          content: 'https://hocuspocus.dev/og-image.png',
         },
         /* Twitter */
         {
@@ -44,7 +44,7 @@ export default {
         },
         {
           name: 'twitter:image',
-          content: 'https://next.tiptap.dev/og-image.png',
+          content: 'https://hocuspocus.dev/og-image.png',
         },
         {
           name: 'twitter:site',
