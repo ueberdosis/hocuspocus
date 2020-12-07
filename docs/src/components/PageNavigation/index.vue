@@ -65,7 +65,7 @@ export default {
 
     currentIndex() {
       return this.flattenedItems.findIndex(item => {
-        return item.link.replace(/\/$/, '') === this.$route.path.replace(/\/$/, '')
+        return item.link && item.link.replace(/\/$/, '') === this.$route.path.replace(/\/$/, '')
       })
     },
 

@@ -183,7 +183,7 @@ export default {
   },
 
   mounted() {
-    this.initSearch()
+    // this.initSearch()
     this.handleResize()
 
     window.addEventListener('resize', this.handleResize)
