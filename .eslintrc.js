@@ -21,6 +21,7 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
+        'max-classes-per-file': 'off',
         'no-shadow': 'off',
         'no-alert': 'off',
         'no-console': ['warn', { allow: ['warn', 'error'] }],
