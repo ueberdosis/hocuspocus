@@ -1,0 +1,42 @@
+- title: Overview
+  items:
+    - title: Introduction
+      link: /
+    - title: Installation
+      link: /installation
+    - title: License
+      link: /license
+
+- title: Examples
+  items:
+    - title: tiptap
+      link: /examples/tiptap
+
+- title: Guide
+  items:
+    - title: Documents
+      link: /guide/documents
+    - title: Authentication
+      link: /guide/authentication
+    - title: Authorization
+      link: /guide/authorization
+    - title: Persistence
+      link: /guide/persistence
+    - title: Export
+      link: /guide/export
+    - title: Scaling
+      link: /guide/scaling
+
+- title: Packages
+  items:
+    - title: '@hocuspocus/server'
+      link: #
+    - title: '@hocuspocus/leveldb'
+      link: #
+
+- title: Knowledge
+  items:
+    - title: What’s a CRDT?
+      link: /knowledge/crdt
+    - title: How does Y.js work?
+      link: /knowledge/yjs
