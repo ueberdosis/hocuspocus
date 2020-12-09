@@ -1,5 +1,4 @@
 module.exports = {
-  ignorePatterns: ['**/legacy/*'],
   parser: '@babel/eslint-parser',
   parserOptions: {
     sourceType: 'module',
@@ -11,7 +10,7 @@ module.exports = {
   overrides: [
     {
       files: [
-        './**/*.js',
+        './packages/**/*.js',
       ],
       globals: {
         document: false,
