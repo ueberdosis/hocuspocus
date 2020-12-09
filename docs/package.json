@@ -1,4 +1,5 @@
 {
+  "name": "@hocuspocus/docs",
   "private": true,
   "scripts": {
     "start": "gridsome develop",
