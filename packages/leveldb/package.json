@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/leveldb",
   "description": "hocuspocus persistence driver for LevelDB",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "homepage": "https://tiptap.dev",
   "keywords": [
     "hocuspocus",
@@ -24,6 +24,6 @@
     "yjs": "^13.4.6"
   },
   "publishConfig": {
-    "registry":"https://registry.ueber.io"
+    "registry": "https://registry.ueber.io"
   }
 }
