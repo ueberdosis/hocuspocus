@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/server",
   "description": "collaborative editing backend for tiptap",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.0",
   "homepage": "https://tiptap.dev",
   "keywords": [
     "hocuspocus",
@@ -28,6 +28,6 @@
     "yjs": "^13.4.6"
   },
   "publishConfig": {
-    "access": "public"
+    "registry":"https://registry.ueber.io"
   }
 }
