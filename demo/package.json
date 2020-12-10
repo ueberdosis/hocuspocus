@@ -6,7 +6,6 @@
     "start": "node ./index.js",
     "start:development": "nodemon --watch ./ --watch ../packages ./index.js"
   },
-  "license": "MIT",
   "devDependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.0",
     "@hocuspocus/leveldb": "^1.0.0-alpha.0",

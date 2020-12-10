@@ -1,8 +1,8 @@
 {
   "name": "@hocuspocus/server",
-  "description": "collaborative editing backend for tiptap",
+  "description": "plug & play collaboration backend",
   "version": "1.0.0-alpha.5",
-  "homepage": "https://tiptap.dev",
+  "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
     "tiptap",
@@ -10,11 +10,6 @@
     "yjs-websocket",
     "prosemirror"
   ],
-  "license": "MIT",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/ueberdosis"
-  },
   "type": "module",
   "main": "./src/index.js",
   "files": [
