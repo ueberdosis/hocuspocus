@@ -16,11 +16,11 @@
     "src"
   ],
   "dependencies": {
-    "lib0": "^0.2.34",
+    "lib0": "^0.2.35",
     "ws": "^7.4.0",
     "y-leveldb": "^0.1.0",
     "y-protocols": "^1.0.1",
-    "yjs": "^13.4.6"
+    "yjs": "^13.4.7"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"
