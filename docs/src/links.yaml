@@ -4,13 +4,16 @@
       link: /
     - title: Installation
       link: /installation
+      draft: true
     - title: License
       link: /license
+      draft: true
 
 - title: Examples
   items:
     - title: tiptap
       link: /examples/tiptap
+      draft: true
 
 - title: Guide
   items:
@@ -31,12 +34,16 @@
   items:
     - title: '@hocuspocus/server'
       link: #
+      draft: true
     - title: '@hocuspocus/leveldb'
       link: #
+      draft: true
 
 - title: Knowledge
   items:
     - title: What’s a CRDT?
       link: /knowledge/crdt
+      draft: true
     - title: How does Y.js work?
       link: /knowledge/yjs
+      draft: true
