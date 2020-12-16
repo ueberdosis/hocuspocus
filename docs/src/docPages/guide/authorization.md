@@ -1,5 +1,5 @@
 # Authorization
-With the `onJoinDocument` hook you can check if a user is authorized to edit the current document. This works in the same way the [Authentication](#authentication) works.
+With the `onJoinDocument` hook you can check if a user is authorized to edit the current document. This works in the same way the [Authentication](/guide/authentication) works.
 
 ```js
 import { Server } from '@hocuspocus/server'

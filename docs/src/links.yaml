@@ -4,7 +4,6 @@
       link: /
     - title: Installation
       link: /installation
-      draft: true
     - title: License
       link: /license
       draft: true
@@ -25,18 +24,18 @@
       link: /guide/authorization
     - title: Persistence
       link: /guide/persistence
-    - title: Export
+    - title: Mirror to an API
       link: /guide/export
     - title: Scaling
       link: /guide/scaling
 
-- title: Packages
+- title: Buy packages
   items:
     - title: '@hocuspocus/server'
-      link: #
+      link: https://store.ueber.io/products/hocuspocus
       draft: true
     - title: '@hocuspocus/leveldb'
-      link: #
+      link: https://store.ueber.io/products/hocuspocus
       draft: true
 
 - title: Knowledge

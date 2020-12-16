@@ -1,12 +1,23 @@
 # Installation
 
 ## 1. Buy a license
-TODO
+You can buy a licenses in [our store](https://store.ueber.io). For a single developer it’s $99/year, for teams it’s $499/year (local taxes may apply). You can cancel your subscription at any time.
 
 ## 2. Installation
-Install the server to get started quickly. You can install Redis support and other packages later.
+Add a `.npmrc` file to your project folder. This will make your package manager look for packages prefixed with @hocuspocus in our registry and passes [your individual token](https://store.ueber.io/purchases):
+
+```
+@hocuspocus:registry=https://registry.ueber.io
+//registry.ueber.io/:_authToken=YOUR_TOKEN
+```
+
+Now, you should be able to install the core package. You can install other packages later, let’s start with a basic version for now:
 
 ```bash
+# with npm
+npm install @hocuspocus/server
+
+# with Yarn
 yarn add @hocuspocus/server
 ```
 

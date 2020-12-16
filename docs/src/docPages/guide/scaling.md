@@ -1,6 +1,6 @@
 # Scaling
-:::warning Keep in mind
-The redis adapter only syncs document changes. Collaboration cursors are not yet supported.
+:::warning Work in progress
+Currently, the Redis adapter only syncs document changes. Awareness states, for example cursors, are not yet supported.
 :::
 
 To scale the WebSocket server, you can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis. Import the Redis adapter and register it with hocuspocus. For a full documentation on all available redis and redis cluster options, check out the [ioredis API docs](https://github.com/luin/ioredis/blob/master/API.md).

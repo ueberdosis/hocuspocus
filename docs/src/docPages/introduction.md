@@ -17,4 +17,4 @@ You can use it, to keep multiple instances of text editors in sync, work offline
 **Actively maintained.** Hocuspocus comes with a price tag, but that ensures constant development, maintenance and suppport.
 
 ## License
-TODO
+You can use hocuspocus in all kinds of projects, you can [buy an appropriate license and download the package](https://store.ueber.io/products/hocuspocus) for $99/year for single developers, and $499/year for teams. Local taxes may apply.
