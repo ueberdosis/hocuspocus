@@ -1,13 +1,13 @@
 {
   "private": true,
   "workspaces": [
+    "demo",
     "docs",
-    "packages/*",
-    "demo"
+    "packages/*"
   ],
   "scripts": {
-    "start": "yarn --cwd ./demo start",
-    "start:development": "yarn --cwd ./demo start:development",
+    "start": "yarn start:demo & yarn start:docs",
+    "start:demo": "yarn --cwd ./demo start:development",
     "start:docs": "yarn --cwd ./docs start",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
@@ -26,6 +26,5 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "lerna": "^3.22.1"
-  },
-  "dependencies": {}
+  }
 }
