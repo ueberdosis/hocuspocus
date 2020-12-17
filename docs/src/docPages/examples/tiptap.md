@@ -1,3 +1,7 @@
+---
+title: Collaborative editing with tiptap
+---
+
 # tiptap
 
 ## toc

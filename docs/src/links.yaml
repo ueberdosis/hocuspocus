@@ -14,6 +14,9 @@
   items:
     - title: tiptap
       link: /examples/tiptap
+    - title: Quill
+      link: /examples/quill
+      draft: true
 
 - title: Guide
   items:
