@@ -6,8 +6,11 @@
       link: /installation
     - title: License
       link: /license
+    - title: Support
+      link: /support
+      draft: true
 
-- title: Integrations
+- title: Examples
   items:
     - title: tiptap
       link: /examples/tiptap
@@ -27,7 +30,7 @@
     - title: Scaling
       link: /guide/scaling
 
-- title: Buy packages
+- title: Packages
   items:
     - title: '@hocuspocus/server'
       link: https://store.ueber.io/products/hocuspocus

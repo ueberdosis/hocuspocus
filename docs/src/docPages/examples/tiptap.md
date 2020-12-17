@@ -3,15 +3,11 @@
 ## toc
 
 ## Introduction
-[tiptap](https://tiptap.dev) is a headless text editor. The following example shows a full-blown version, with a whole bunch of different features, connected to a hocuspocus instance that syncs changes between clients. Open multiple browser windows and try it out!
+[tiptap](https://tiptap.dev) is a headless text editor, that’s fully customizable and has a first-class collaborative editing integration that’s compatible with hocuspocus.
 
-## Example
-<demo name="Tiptap" />
-
-## Integration
+## Getting started
 The above examples has a lot of bells and whistles. Let’s focus on the collaborative editing part. The below example code shows everything you need to create an instance of tiptap, with all default extension, start your collaboration backend with hocuspocus and connect everything.
 
-### Frontend
 Add an element to your HTML document where tiptap should be initialized:
 ```html
 <div class="element"></div>
@@ -46,18 +42,7 @@ new Editor({
 })
 ```
 
-### Backend
-[Install hocuspocus](/installation) and create your collaboration backend:
+## Example
+The following example shows a full-blown version, with a whole bunch of different features, connected to a hocuspocus instance that syncs changes between clients. Open multiple browser windows and try it out!
 
-```js
-import { Server } from '@hocuspocus/server'
-import { LevelDB } from '@hocuspocus/leveldb'
-
-const server = Server.configure({
-  persistence: new LevelDB({
-    path: './database',
-  }),
-})
-
-server.listen()
-```
+<demo name="Examples/Tiptap" />

@@ -8,7 +8,13 @@ hocuspocus is a plug & play collaboration backend. It’s based on Y.js, a CRDT 
 You can use it, to keep multiple instances of text editors in sync, work offline and sync changes later, or sync text between different devices. Also, you can use it to build anything else, that needs to be collaboration, for example a collaborative drawing app.
 
 ## Features
-**Conflict-free.** Y.js is a performant, conflict-free replicated data type implementation. Sync all your changes, no matter when they come in, they’ll be merged without conflicts.
+**Real-time collaboration.** Share changes, cursors and selection, or even an application state between with other people in real-time.
+
+**Sync multiple devices.** Enable people to edit their data on multiple devices, and keep everything in sync with hocuspocus.
+
+**Work offline.** Store changes in the browser, and wait to upload them. hocuspocus will merge this changes, no matter when they are delivered.
+
+**Conflict-free.** Y.js is a performant, conflict-free replicated data type implementation. Sync all your changes. No matter when they come in, they’ll be merged without conflicts.
 
 **Well documented.** The documentation is a top priority for us, you’ll find a lot of guides, examples and even background knowledge here.
 
