@@ -25,4 +25,7 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 2. Start the development server `$ yarn start:development`
 
 ## Release
-TODO
+1. Sign up on https://store.ueber.io
+2. Ask Hans or Kris to upgrade your account.
+3. Log in to our private registry: `$ npm login --registry=https://registry.ueber.io`
+4. Release a new version: `$ yarn release`
