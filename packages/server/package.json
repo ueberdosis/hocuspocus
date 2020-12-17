@@ -24,5 +24,8 @@
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"
+  },
+  "devDependencies": {
+    "@types/ws": "^7.4.0"
   }
 }

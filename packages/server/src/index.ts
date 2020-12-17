@@ -1,3 +1,4 @@
+// @ts-ignore
 import map from 'lib0/dist/map.cjs'
 import WebSocket from 'ws'
 import { createServer } from 'http'
@@ -15,12 +16,12 @@ class Hocuspocus {
     port: 80,
     timeout: 30000,
 
-    onChange: data => {
+    onChange: (data: any) => {
     },
-    onConnect: (data, resolve) => resolve(),
-    onDisconnect: data => {
+    onConnect: (data: any, resolve: any) => resolve(),
+    onDisconnect: (data: any) => {
     },
-    onJoinDocument: (data, resolve) => resolve(),
+    onJoinDocument: (data: any, resolve: any) => resolve(),
 
   }
 
@@ -30,9 +31,9 @@ class Hocuspocus {
 
   documents = new Map()
 
-  debounceTimeout
+  debounceTimeout!: NodeJS.Timeout
 
-  debounceStart
+  debounceStart!: number | null
 
   /**
    * Constructor
@@ -56,7 +57,7 @@ class Hocuspocus {
    * @param configuration
    * @returns {Hocuspocus}
    */
-  configure(configuration) {
+  configure(configuration: any) {
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -81,7 +82,7 @@ class Hocuspocus {
    * @param head
    * @private
    */
-  handleUpgrade(request, socket, head) {
+  handleUpgrade(request: any, socket: any, head: any) {
     const data = {
       requestHeaders: request.headers,
       requestParameters: this.getParameters(request),
@@ -90,15 +91,16 @@ class Hocuspocus {
     this.websocketServer.handleUpgrade(request, socket, head, connection => {
 
       new Promise((resolve, reject) => {
+        // @ts-ignore
         this.configuration.onConnect(data, resolve, reject)
       })
-        .then(context => {
-          this.websocketServer.emit('connection', connection, request, context)
-        })
-        .catch(() => {
-          connection.close()
-          console.log('unauthenticated')
-        })
+      .then(context => {
+        this.websocketServer.emit('connection', connection, request, context)
+      })
+      .catch(() => {
+        connection.close()
+        console.log('unauthenticated')
+      })
 
     })
   }
@@ -110,7 +112,7 @@ class Hocuspocus {
    * @param context
    * @private
    */
-  handleConnection(incoming, request, context = null) {
+  handleConnection(incoming: any, request: any, context = null) {
     console.log(`New connection to ${request.url}`)
 
     const document = this.createDocument(request)
@@ -141,7 +143,7 @@ class Hocuspocus {
    * @param request
    * @returns {*}
    */
-  handleDocumentUpdate(document, update, request) {
+  handleDocumentUpdate(document: any, update: any, request: any) {
     if (this.configuration.persistence) {
       this.configuration.persistence.store(document.name, update)
       console.log(`Document ${document.name} saved`)
@@ -185,7 +187,7 @@ class Hocuspocus {
    * @param request
    * @private
    */
-  createDocument(request) {
+  createDocument(request: any) {
     const documentName = request.url.slice(1)
       .split('?')[0]
 
@@ -193,7 +195,7 @@ class Hocuspocus {
       const document = new Document(documentName)
 
       document.onUpdate(
-        (document, update) => this.handleDocumentUpdate(document, update, request),
+        (document: any, update: any) => this.handleDocumentUpdate(document, update, request),
       )
 
       if (this.configuration.persistence) {
@@ -215,7 +217,7 @@ class Hocuspocus {
    * @returns {Connection}
    * @private
    */
-  createConnection(connection, request, document, context = null) {
+  createConnection(connection: any, request: any, document: any, context = null) {
     return new Connection(
       connection,
       request,
@@ -223,7 +225,7 @@ class Hocuspocus {
       this.configuration.timeout,
       context,
     )
-      .onClose(document => {
+      .onClose((document: any) => {
 
         this.configuration.onDisconnect({
           document,
@@ -254,7 +256,7 @@ class Hocuspocus {
    * @param request
    * @returns {{}|URLSearchParams}
    */
-  getParameters(request) {
+  getParameters(request: any) {
     const query = request.url.split('?')
 
     if (!query[1]) {

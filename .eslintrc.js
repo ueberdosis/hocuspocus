@@ -1,6 +1,6 @@
 module.exports = {
-  parser: '@babel/eslint-parser',
   parserOptions: {
+    parser: '@typescript-eslint/parser',
     sourceType: 'module',
   },
   env: {

@@ -17,7 +17,6 @@
     "reset": "rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
     "build:docs": "yarn --cwd ./docs build"
   },
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/eslint-parser": "^7.12.1",
@@ -25,10 +24,14 @@
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^3.18.0",
     "@lerna/project": "^3.21.0",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "lerna": "^3.22.1",
-    "mocha": "^8.2.1"
+    "microbundle": "^0.12.4",
+    "mocha": "^8.2.1",
+    "typescript": "^4.1.3"
   }
 }
