@@ -4,9 +4,10 @@
 hocuspocus is a plug & play collaboration backend. It’s based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
 
 ## Installation
-```bash
-yarn add @hocuspocus/server
-```
+1. Sign up on https://store.ueber.io
+2. Ask Hans or Kris to upgrade your account
+3. Get your personal `.npmrc` file and store it in your project folder
+4. Install the package `$ yarn add @hocuspocus/server`
 
 ## Usage
 The following example is the bare minimum you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or with the WebSocket protocol on ws://127.0.0.1):
@@ -26,6 +27,6 @@ Read more about collaborative editing with tiptap, the configuration of the serv
 
 ## Release
 1. Sign up on https://store.ueber.io
-2. Ask Hans or Kris to upgrade your account.
+2. Ask Hans or Kris to upgrade your account
 3. Log in to our private registry: `$ npm login --registry=https://registry.ueber.io`
 4. Release a new version: `$ yarn release`
