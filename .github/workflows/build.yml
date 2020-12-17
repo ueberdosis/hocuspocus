@@ -55,3 +55,36 @@ jobs:
     - name: Lint code
       id: lint
       run: yarn lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14]
+
+    steps:
+
+    - uses: actions/checkout@v2.3.4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2.1.3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Load cached dependencies
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+
+    - name: Install dependencies
+      id: install-dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: yarn install
+
+    - name: Run tests
+      id: test
+      run: yarn test
