@@ -1,3 +1,4 @@
+// @ts-ignore
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
 import Y from 'yjs'
 import Messages from './Messages.js'

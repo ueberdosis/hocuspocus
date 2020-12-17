@@ -24,7 +24,7 @@ const server = Server.configure({
   //    // Redis Cluster Options
   // ),
 
-  onConnect(data, resolve, reject) {
+  onConnect(data: any, resolve: any, reject: any) {
     const { requestHeaders, requestParameters } = data
 
     // authenticate using request headers
@@ -37,7 +37,7 @@ const server = Server.configure({
     resolve(context)
   },
 
-  onJoinDocument(data, resolve, reject) {
+  onJoinDocument(data: any, resolve: any, reject: any) {
     const {
       clientsCount,
       context,
@@ -55,7 +55,7 @@ const server = Server.configure({
     resolve()
   },
 
-  onChange(data) {
+  onChange(data: any) {
     const {
       clientsCount,
       document,
@@ -67,7 +67,7 @@ const server = Server.configure({
     // handle
   },
 
-  onDisconnect(data) {
+  onDisconnect(data: any) {
     const {
       clientsCount,
       document,

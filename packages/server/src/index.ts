@@ -1,17 +1,34 @@
 // @ts-ignore
 import map from 'lib0/dist/map.cjs'
 import WebSocket from 'ws'
-import { createServer } from 'http'
-import Document from './Document.js'
-import Connection from './Connection.js'
+import { URLSearchParams } from 'url'
+import { createServer, Server as HTTPServer } from 'http'
+import Document from './Document'
+import Connection from './Connection'
+
+interface Configuration {
+  debounce: number,
+  debounceMaxWait: number,
+  httpServer: HTTPServer,
+  persistence: any,
+  port: number,
+  timeout: number,
+  onChange: any,
+  onConnect: any,
+  onDisconnect: any,
+  onJoinDocument: any,
+}
 
 class Hocuspocus {
 
-  configuration = {
+  configuration: Configuration = {
 
-    debounce: true,
+    debounce: 0,
     debounceMaxWait: 10000,
-    httpServer: null,
+    httpServer: createServer((request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
+      response.end('OK')
+    }),
     persistence: null,
     port: 80,
     timeout: 30000,
@@ -40,14 +57,7 @@ class Hocuspocus {
    */
   constructor() {
     this.httpServer = this.configuration.httpServer
-      ? this.configuration.httpServer
-      : createServer((request, response) => {
-        response.writeHead(200, { 'Content-Type': 'text/plain' })
-        response.end('OK')
-      })
-
     this.websocketServer = new WebSocket.Server({ noServer: true })
-
     this.httpServer.on('upgrade', this.handleUpgrade.bind(this))
     this.websocketServer.on('connection', this.handleConnection.bind(this))
   }
@@ -57,7 +67,7 @@ class Hocuspocus {
    * @param configuration
    * @returns {Hocuspocus}
    */
-  configure(configuration: any) {
+  configure(configuration: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
       ...configuration,
