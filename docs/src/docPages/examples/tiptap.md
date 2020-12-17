@@ -3,7 +3,7 @@
 ## toc
 
 ## Introduction
-[tiptap](https://tiptap.dev) is a headless text editor. The following example shows a full-blown version, with a whole bunch of different features, connected to a hocuspocus instance that syncs changes between clients.
+[tiptap](https://tiptap.dev) is a headless text editor. The following example shows a full-blown version, with a whole bunch of different features, connected to a hocuspocus instance that syncs changes between clients. Open multiple browser windows and try it out!
 
 ## Example
 <demo name="Tiptap" />
