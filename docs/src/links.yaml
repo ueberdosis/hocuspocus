@@ -17,6 +17,9 @@
     - title: Quill
       link: /examples/quill
       draft: true
+    - title: Quill (CDN)
+      link: /examples/quill-cdn
+      draft: true
 
 - title: Guide
   items:
