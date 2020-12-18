@@ -14,6 +14,7 @@
   "source": "src/index.ts",
   "main": "dist/hocuspocus-redis.js",
   "module": "dist/hocuspocus-redis.esm.js",
+  "types": "dist/packages/redis/src/index.d.ts",
   "files": [
     "src"
   ],
