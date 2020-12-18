@@ -2,7 +2,7 @@ import { decoding } from 'lib0'
 
 class Decoder {
 
-  decoder: any
+  decoder: decoding.Decoder
 
   /**
    * Constructor
