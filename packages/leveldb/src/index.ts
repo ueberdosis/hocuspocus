@@ -1,7 +1,5 @@
 import * as Y from 'yjs'
-import * as YLevelDB from 'y-leveldb'
-
-const LevelDBPersistence = YLevelDB.LeveldbPersistence
+import { LeveldbPersistence } from 'y-leveldb'
 
 export class LevelDB {
 
@@ -22,7 +20,7 @@ export class LevelDB {
       ...configuration,
     }
 
-    this.provider = new LevelDBPersistence(this.configuration.path)
+    this.provider = new LeveldbPersistence(this.configuration.path)
 
     return this
   }

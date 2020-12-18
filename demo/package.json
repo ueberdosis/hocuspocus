@@ -2,9 +2,10 @@
   "name": "@hocuspocus/demo",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "node ./index.js",
-    "start:development": "nodemon --watch ./ --watch ../packages ./index.ts"
+    "start": "node --loader ts-node/esm --experimental-specifier-resolution=node ./index.ts",
+    "start:development": "nodemon --watch ./ --watch ../packages --exec npm start"
   },
   "devDependencies": {
     "@hocuspocus/leveldb": "^1.0.0-alpha.0",

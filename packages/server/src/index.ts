@@ -1,5 +1,4 @@
-// @ts-ignore
-import map from 'lib0/dist/map.cjs'
+import { map } from 'lib0'
 import WebSocket from 'ws'
 import { URLSearchParams } from 'url'
 import { createServer, Server as HTTPServer } from 'http'

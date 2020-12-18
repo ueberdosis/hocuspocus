@@ -1,5 +1,4 @@
-// @ts-ignore
-import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
+import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 import Messages from './Messages'
 
@@ -24,7 +23,7 @@ class Document extends Y.Doc {
 
     this.name = name
 
-    this.awareness = new awarenessProtocol.Awareness(this)
+    this.awareness = new Awareness(this)
     this.awareness.setLocalState(null)
 
     this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
@@ -68,7 +67,7 @@ class Document extends Y.Doc {
    * @param connection
    */
   removeConnection(connection: any) {
-    awarenessProtocol.removeAwarenessStates(
+    removeAwarenessStates(
       this.awareness,
       Array.from(this.getClients(connection.instance)),
       null,
@@ -118,7 +117,7 @@ class Document extends Y.Doc {
    * @param update
    */
   applyAwarenessUpdate(connection: any, update: any) {
-    awarenessProtocol.applyAwarenessUpdate(
+    applyAwarenessUpdate(
       this.awareness,
       update,
       connection.instance,

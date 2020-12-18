@@ -9,6 +9,7 @@
     "leveldb",
     "yjs"
   ],
+  "type": "module",
   "main": "./src/index.ts",
   "files": [
     "src"

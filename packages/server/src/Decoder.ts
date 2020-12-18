@@ -1,5 +1,4 @@
-// @ts-ignore
-import decoding from 'lib0/dist/decoding.cjs'
+import { decoding } from 'lib0'
 
 class Decoder {
 

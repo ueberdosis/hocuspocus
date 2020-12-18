@@ -1,5 +1,4 @@
-// @ts-ignore
-import encoding from 'lib0/dist/encoding.cjs'
+import { encoding } from 'lib0'
 
 class Encoder {
 
