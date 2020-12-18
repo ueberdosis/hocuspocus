@@ -1,3 +1,4 @@
+import WebSocket from 'ws'
 import Decoder from './Decoder'
 import Messages from './Messages'
 import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
@@ -5,7 +6,7 @@ import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStat
 
 class Connection {
 
-  connection: any
+  connection: WebSocket
 
   context: any
 
@@ -32,7 +33,7 @@ class Connection {
    * @param timeout
    * @param context
    */
-  constructor(connection: any, request: any, document: any, timeout: any, context: any) {
+  constructor(connection: WebSocket, request: any, document: any, timeout: any, context: any) {
     this.connection = connection
     this.context = context
     this.document = document
