@@ -15,7 +15,7 @@
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "test": "mocha --exit",
-    "release": "yarn lint && lerna publish",
+    "release": "yarn lint && yarn build:packages && lerna publish",
     "reset": "yarn clean:packages && rm -rf ./**/.cache && rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
     "clean:packages": "rm -rf ./packages/*/dist"
   },
