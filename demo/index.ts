@@ -1,5 +1,5 @@
 import { Server } from '@hocuspocus/server'
-// import { LevelDB } from '@hocuspocus/leveldb'
+import { LevelDB } from '@hocuspocus/leveldb'
 // import { Redis } from '@hocuspocus/redis'
 
 console.log(process.cwd())
@@ -10,9 +10,9 @@ const server = Server.configure({
   debounce: 2000, // or true/false
   debounceMaxWait: 10000,
 
-  // persistence: new LevelDB({
-  //   path: './database',
-  // }),
+  persistence: new LevelDB({
+    path: './database',
+  }),
   // persistence: new Redis({
   //   port: 6379,
   //   host: '127.0.0.1',

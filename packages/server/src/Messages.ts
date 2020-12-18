@@ -1,7 +1,9 @@
+// @ts-ignore
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
+// @ts-ignore
 import syncProtocol from 'y-protocols/dist/sync.cjs'
-import Encoder from './Encoder.js'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes.js'
+import Encoder from './Encoder'
+import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
 
 class Messages {
 
@@ -19,7 +21,7 @@ class Messages {
    * @param changedClients
    * @returns {Encoder}
    */
-  awarenessUpdate(awareness, changedClients = null) {
+  awarenessUpdate(awareness: any, changedClients = null) {
     const message = awarenessProtocol.encodeAwarenessUpdate(
       awareness,
       changedClients || Array.from(awareness.getStates().keys()),
@@ -33,7 +35,7 @@ class Messages {
    * @param document
    * @returns {Encoder}
    */
-  firstSyncStep(document) {
+  firstSyncStep(document: any) {
     const message = this.sync()
 
     syncProtocol.writeSyncStep1(message.encoder, document)
@@ -46,7 +48,7 @@ class Messages {
    * @param update
    * @returns {Encoder}
    */
-  update(update) {
+  update(update: any) {
     const message = this.sync()
 
     syncProtocol.writeUpdate(message.encoder, update)
@@ -60,7 +62,7 @@ class Messages {
    * @param document
    * @returns {Encoder}
    */
-  read(decoder, document) {
+  read(decoder: any, document: any) {
     const message = this.sync()
 
     syncProtocol.readSyncMessage(decoder.decoder, message.encoder, document, null)

@@ -1,3 +1,4 @@
+// @ts-ignore
 import decoding from 'lib0/dist/decoding.cjs'
 
 class Decoder {
@@ -8,7 +9,7 @@ class Decoder {
    * Constructor
    * @param message
    */
-  constructor(message) {
+  constructor(message: any) {
     this.decoder = decoding.createDecoder(message)
   }
 

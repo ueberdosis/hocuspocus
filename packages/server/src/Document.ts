@@ -1,21 +1,25 @@
 // @ts-ignore
 import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
-import Y from 'yjs'
-import Messages from './Messages.js'
+import * as Y from 'yjs'
+import Messages from './Messages'
 
 class Document extends Y.Doc {
 
-  callbacks= {
-    onUpdate: () => {},
+  callbacks = {
+    onUpdate: (...args: any) => {},
   }
 
   connections = new Map()
+
+  name: string
+
+  awareness: any
 
   /**
    * Constructor.
    * @param name
    */
-  constructor(name) {
+  constructor(name: string) {
     super({ gc: true })
 
     this.name = name
@@ -32,7 +36,7 @@ class Document extends Y.Doc {
    * @param callback
    * @returns {Document}
    */
-  onUpdate(callback) {
+  onUpdate(callback: any) {
     this.callbacks.onUpdate = callback
 
     return this
@@ -43,7 +47,7 @@ class Document extends Y.Doc {
    * underlying websocket connection
    * @param connection
    */
-  addConnection(connection) {
+  addConnection(connection: any) {
     this.connections.set(connection.instance, {
       connection,
       clients: new Set(),
@@ -55,7 +59,7 @@ class Document extends Y.Doc {
    * @param connection
    * @returns {boolean}
    */
-  hasConnection(connection) {
+  hasConnection(connection: any) {
     return this.connections.has(connection.instance)
   }
 
@@ -63,7 +67,7 @@ class Document extends Y.Doc {
    * Remove the given connection from this document
    * @param connection
    */
-  removeConnection(connection) {
+  removeConnection(connection: any) {
     awarenessProtocol.removeAwarenessStates(
       this.awareness,
       Array.from(this.getClients(connection.instance)),
@@ -94,7 +98,7 @@ class Document extends Y.Doc {
    * @param connectionInstance
    * @returns {Set}
    */
-  getClients(connectionInstance) {
+  getClients(connectionInstance: any) {
     const connection = this.connections.get(connectionInstance)
 
     return connection.clients === undefined ? new Set() : connection.clients
@@ -113,7 +117,7 @@ class Document extends Y.Doc {
    * @param connection
    * @param update
    */
-  applyAwarenessUpdate(connection, update) {
+  applyAwarenessUpdate(connection: any, update: any) {
     awarenessProtocol.applyAwarenessUpdate(
       this.awareness,
       update,
@@ -127,13 +131,13 @@ class Document extends Y.Doc {
    * @param connectionInstance
    * @private
    */
-  handleAwarenessUpdate({ added, updated, removed }, connectionInstance) {
+  handleAwarenessUpdate({ added, updated, removed }: any, connectionInstance: any) {
     const changedClients = added.concat(updated, removed)
     const connection = this.connections.get(connectionInstance)
 
     if (connectionInstance !== null) {
-      added.forEach(clientId => connection.clients.add(clientId))
-      removed.forEach(clientId => connection.clients.delete(clientId))
+      added.forEach((clientId: any) => connection.clients.add(clientId))
+      removed.forEach((clientId: any) => connection.clients.delete(clientId))
 
       this.connections.set(connectionInstance, connection)
     }
@@ -148,7 +152,7 @@ class Document extends Y.Doc {
    * @param update
    * @private
    */
-  handleUpdate(update) {
+  handleUpdate(update: any) {
     this.callbacks.onUpdate(this, update)
 
     const message = Messages.update(update)

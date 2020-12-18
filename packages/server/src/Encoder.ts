@@ -1,3 +1,4 @@
+// @ts-ignore
 import encoding from 'lib0/dist/encoding.cjs'
 
 class Encoder {
@@ -16,7 +17,7 @@ class Encoder {
    * @param int
    * @returns {Encoder}
    */
-  int(int) {
+  int(int: any) {
     encoding.writeVarUint(this.encoder, int)
 
     return this
@@ -27,7 +28,7 @@ class Encoder {
    * @param int
    * @returns {Encoder}
    */
-  int8(int) {
+  int8(int: any) {
     encoding.writeVarUint8Array(this.encoder, int)
 
     return this

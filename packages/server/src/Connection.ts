@@ -1,7 +1,7 @@
-import Decoder from './Decoder.js'
-import Messages from './Messages.js'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes.js'
-import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates.js'
+import Decoder from './Decoder'
+import Messages from './Messages'
+import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
+import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates'
 
 class Connection {
 
@@ -20,9 +20,9 @@ class Connection {
   timeout
 
   callbacks = {
-    onClose: () => {
+    onClose: (...args: any) => {
     },
-    onChange: () => {
+    onChange: (...args: any) => {
     },
   }
 
@@ -34,7 +34,7 @@ class Connection {
    * @param timeout
    * @param context
    */
-  constructor(connection, request, document, timeout, context) {
+  constructor(connection: any, request: any, document: any, timeout: any, context: any) {
     this.connection = connection
     this.context = context
     this.document = document
@@ -47,7 +47,7 @@ class Connection {
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
     this.connection.on('close', () => this.close())
-    this.connection.on('message', message => this.handleMessage(message))
+    this.connection.on('message', (message: any) => this.handleMessage(message))
     this.connection.on('pong', () => { this.pongReceived = true })
 
     this.sendFirstSyncStep()
@@ -58,7 +58,7 @@ class Connection {
    * @param callback
    * @returns {Connection}
    */
-  onClose(callback) {
+  onClose(callback: any) {
     this.callbacks.onClose = callback
 
     return this
@@ -67,7 +67,7 @@ class Connection {
   /**
    * Send the given message
    */
-  send(message) {
+  send(message: any) {
     if (
       this.connection.readyState === WS_READY_STATE_CLOSING
       || this.connection.readyState === WS_READY_STATE_CLOSED
@@ -76,7 +76,7 @@ class Connection {
     }
 
     try {
-      this.connection.send(message, error => {
+      this.connection.send(message, (error: any) => {
         if (error != null) this.close()
       })
     } catch (exception) {
@@ -146,7 +146,7 @@ class Connection {
    * @param input
    * @private
    */
-  handleMessage(input) {
+  handleMessage(input: any) {
     const message = new Decoder(new Uint8Array(input))
     const messageType = message.int()
 

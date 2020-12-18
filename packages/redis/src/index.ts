@@ -2,11 +2,11 @@ import { RedisPersistence } from 'y-redis'
 
 export class Redis {
 
-  configuration = {}
+  configuration: any = {}
 
-  cluster = false
+  cluster: boolean = false
 
-  persistance
+  persistance: any
 
   /**
    * Constructor
@@ -28,7 +28,7 @@ export class Redis {
    * @param document
    * @returns {Promise<void>}
    */
-  async connect(documentName, document) {
+  async connect(documentName: any, document: any) {
     this.persistance = new RedisPersistence(
       this.cluster
         ? { redisClusterOpts: this.configuration }
@@ -39,7 +39,7 @@ export class Redis {
   }
 
   // eslint-disable-next-line no-empty-function
-  async store(documentName, update) {
+  async store(documentName: any, update: any) {
   }
 }
 
