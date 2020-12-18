@@ -5,7 +5,7 @@ import Messages from './Messages'
 class Document extends Y.Doc {
 
   callbacks = {
-    onUpdate: (...args: any) => {},
+    onUpdate: (...args: any) => null,
   }
 
   connections = new Map()

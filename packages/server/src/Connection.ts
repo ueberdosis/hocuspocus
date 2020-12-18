@@ -13,17 +13,15 @@ class Connection {
 
   pingInterval: any
 
-  pongReceived: boolean = true
+  pongReceived = true
 
   request: any
 
   timeout: any
 
   callbacks: any = {
-    onClose: (...args: any) => {
-    },
-    onChange: (...args: any) => {
-    },
+    onClose: (...args: any) => null,
+    onChange: (...args: any) => null,
   }
 
   /**

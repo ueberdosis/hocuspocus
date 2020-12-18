@@ -8,7 +8,6 @@
   "browserslist": [
     "maintained node versions"
   ],
-  "type": "module",
   "scripts": {
     "start": "yarn start:demo & yarn start:docs",
     "start:demo": "yarn --cwd ./demo start:development",
@@ -37,7 +36,10 @@
     "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-html": "^6.1.1",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-vue": "^7.3.0",
     "lerna": "^3.22.1",
     "minimist": "^1.2.5",
     "mocha": "^8.2.1",

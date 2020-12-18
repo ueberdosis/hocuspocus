@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Server } from '@hocuspocus/server/src/index'
 import { LevelDB } from '@hocuspocus/leveldb/src/index'
 // import { Redis } from '@hocuspocus/redis'

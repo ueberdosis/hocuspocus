@@ -1,19 +1,20 @@
+/* eslint-disable */
 import assert from 'assert'
 import { Server } from '@hocuspocus/server'
 
-context('.listen()', () => {
+context('.listen()', function() {
   const originalConsoleLog = console.log
   let output
 
   beforeEach(() => {
     output = []
 
-    console.log = (msg) => {
+    console.log = msg => {
       output.push(msg)
     }
   })
 
-  afterEach(function() {
+  afterEach(function () {
     console.log = originalConsoleLog
 
     if (this.currentTest.state === 'failed') {

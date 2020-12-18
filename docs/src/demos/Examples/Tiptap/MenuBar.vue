@@ -1,6 +1,10 @@
 <template>
   <div>
-    <menu-item v-for="(item, index) in items" :key="index" v-bind="item" />
+    <menu-item
+      v-for="(item, index) in items"
+      :key="index"
+      v-bind="item"
+    />
   </div>
 </template>
 

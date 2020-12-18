@@ -32,13 +32,10 @@ class Hocuspocus {
     port: 80,
     timeout: 30000,
 
-    onChange: (data: any) => {
-    },
+    onChange: (data: any) => null,
     onConnect: (data: any, resolve: any) => resolve(),
-    onDisconnect: (data: any) => {
-    },
+    onDisconnect: (data: any) => null,
     onJoinDocument: (data: any, resolve: any) => resolve(),
-
   }
 
   httpServer: any
@@ -103,13 +100,13 @@ class Hocuspocus {
         // @ts-ignore
         this.configuration.onConnect(data, resolve, reject)
       })
-      .then(context => {
-        this.websocketServer.emit('connection', connection, request, context)
-      })
-      .catch(() => {
-        connection.close()
-        console.log('unauthenticated')
-      })
+        .then(context => {
+          this.websocketServer.emit('connection', connection, request, context)
+        })
+        .catch(() => {
+          connection.close()
+          console.log('unauthenticated')
+        })
 
     })
   }

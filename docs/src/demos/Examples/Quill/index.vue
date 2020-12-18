@@ -1,5 +1,5 @@
 <template>
-  <div ref="editor"></div>
+  <div ref="editor" />
 </template>
 
 <script>
@@ -13,12 +13,13 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.bubble.css'
 
 import QuillCursors from 'quill-cursors'
+
 Quill.register('modules/cursors', QuillCursors)
 
 export default {
   data() {
     return {
-      editor: null
+      editor: null,
     }
   },
 
@@ -32,23 +33,23 @@ export default {
         cursors: true,
         toolbar: [
           [
-            { header: [1, 2, 3, 4, false] }
+            { header: [1, 2, 3, 4, false] },
           ],
           [
             'bold', 'italic', 'underline',
-          ]
+          ],
         ],
         history: {
-          userOnly: true
+          userOnly: true,
         },
       },
       theme: 'bubble',
       formats: [
-        'bold', 'underline', 'header', 'italic'
+        'bold', 'underline', 'header', 'italic',
       ],
     })
 
     const binding = new QuillBinding(type, this.editor, provider.awareness)
-  }
+  },
 }
 </script>
