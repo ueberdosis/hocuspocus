@@ -10,12 +10,9 @@ module.exports = {
   overrides: [
     {
       files: [
-        './packages/**/*.js',
+        './**/*.ts',
+        './**/*.js',
       ],
-      globals: {
-        document: false,
-        window: false,
-      },
       extends: [
         'airbnb-base',
       ],

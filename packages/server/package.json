@@ -16,7 +16,8 @@
   "module": "dist/hocuspocus-server.esm.js",
   "types": "dist/packages/server/src/index.d.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "dependencies": {
     "lib0": "^0.2.35",

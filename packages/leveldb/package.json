@@ -15,7 +15,8 @@
   "module": "dist/hocuspocus-leveldb.esm.js",
   "types": "dist/packages/leveldb/src/index.d.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "dependencies": {
     "y-leveldb": "^0.1.0",

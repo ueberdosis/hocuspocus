@@ -16,7 +16,8 @@
   "module": "dist/hocuspocus-redis.esm.js",
   "types": "dist/packages/redis/src/index.d.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "dependencies": {
     "y-redis": "^1.0.2"

@@ -5,12 +5,15 @@
     "docs",
     "packages/*"
   ],
+  "browserslist": [
+    "maintained node versions"
+  ],
   "type": "module",
   "scripts": {
     "start": "yarn start:demo & yarn start:docs",
     "start:demo": "yarn --cwd ./demo start:development",
     "start:docs": "yarn --cwd ./docs start",
-    "build:packages": "yarn clean:packages && lerna exec --ignore @hocuspocus/docs --ignore @hocuspocus/demo -- microbundle --raw --compress --target node",
+    "build:packages": "yarn clean:packages && rollup -c",
     "build:docs": "yarn --cwd ./docs build",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
@@ -20,20 +23,28 @@
     "clean:packages": "rm -rf ./packages/*/dist"
   },
   "devDependencies": {
+    "@atomico/rollup-plugin-sizes": "^1.1.4",
     "@babel/core": "^7.12.9",
     "@babel/eslint-parser": "^7.12.1",
     "@babel/preset-env": "^7.12.10",
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^3.18.0",
     "@lerna/project": "^3.21.0",
+    "@rollup/plugin-babel": "^5.2.2",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "lerna": "^3.22.1",
-    "microbundle": "^0.12.4",
+    "minimist": "^1.2.5",
     "mocha": "^8.2.1",
+    "rollup": "^2.35.1",
+    "rollup-plugin-auto-external": "^2.0.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.1.3"
   }
 }
