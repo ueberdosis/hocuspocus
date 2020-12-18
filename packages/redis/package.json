@@ -11,7 +11,9 @@
     "yjs"
   ],
   "type": "module",
-  "main": "./src/index.ts",
+  "source": "src/index.ts",
+  "main": "dist/hocuspocus-redis.js",
+  "module": "dist/hocuspocus-redis.esm.js",
   "files": [
     "src"
   ],

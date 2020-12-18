@@ -1,2 +1,13 @@
+*.log
+.cache
+.DS_Store
+.temp
 node_modules
-config.json
+dist
+.env
+.env.*
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -5,21 +5,21 @@ import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStat
 
 class Connection {
 
-  connection
+  connection: any
 
-  context
+  context: any
 
-  document
+  document: any
 
-  pingInterval
+  pingInterval: any
 
-  pongReceived = true
+  pongReceived: boolean = true
 
-  request
+  request: any
 
-  timeout
+  timeout: any
 
-  callbacks = {
+  callbacks: any = {
     onClose: (...args: any) => {
     },
     onChange: (...args: any) => {

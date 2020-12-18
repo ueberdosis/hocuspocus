@@ -10,7 +10,9 @@
     "yjs"
   ],
   "type": "module",
-  "main": "./src/index.ts",
+  "source": "src/index.ts",
+  "main": "dist/hocuspocus-leveldb.js",
+  "module": "dist/hocuspocus-leveldb.esm.js",
   "files": [
     "src"
   ],

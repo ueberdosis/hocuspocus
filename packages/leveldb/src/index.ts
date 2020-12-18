@@ -7,7 +7,7 @@ export class LevelDB {
     path: './database',
   }
 
-  provider
+  provider: any
 
   /**
    * Constructor

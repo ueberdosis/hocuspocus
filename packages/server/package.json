@@ -11,7 +11,9 @@
     "prosemirror"
   ],
   "type": "module",
-  "main": "./src/index.ts",
+  "source": "src/index.ts",
+  "main": "dist/hocuspocus-server.js",
+  "module": "dist/hocuspocus-server.esm.js",
   "files": [
     "src"
   ],

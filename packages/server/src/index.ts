@@ -41,9 +41,9 @@ class Hocuspocus {
 
   }
 
-  httpServer
+  httpServer: any
 
-  websocketServer
+  websocketServer: WebSocket.Server
 
   documents = new Map()
 
