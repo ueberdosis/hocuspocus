@@ -1,19 +1,23 @@
+import * as Y from 'yjs'
 import { RedisPersistence } from 'y-redis'
+
+export interface Configuration {
+}
 
 export class Redis {
 
-  configuration: any = {}
+  configuration: Configuration = {}
 
   cluster = false
 
-  persistance: any
+  persistance!: RedisPersistence
 
   /**
    * Constructor
    * @param configuration
    * @returns {Redis}
    */
-  constructor(configuration = {}) {
+  constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -28,8 +32,9 @@ export class Redis {
    * @param document
    * @returns {Promise<void>}
    */
-  async connect(documentName: any, document: any) {
+  async connect(documentName: string, document: Y.Doc) {
     this.persistance = new RedisPersistence(
+      // @ts-ignore
       this.cluster
         ? { redisClusterOpts: this.configuration }
         : { redisOpts: this.configuration },
@@ -39,6 +44,6 @@ export class Redis {
   }
 
   // eslint-disable-next-line
-  async store(documentName: any, update: any) {}
+  async store(documentName: string, update: Uint8Array) {}
 
 }

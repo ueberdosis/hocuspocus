@@ -6,7 +6,7 @@ import { createServer, Server as HTTPServer, IncomingMessage } from 'http'
 import Document from './Document'
 import Connection from './Connection'
 
-interface Configuration {
+export interface Configuration {
   debounce: number,
   debounceMaxWait: number,
   httpServer: HTTPServer,

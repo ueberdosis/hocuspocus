@@ -66,7 +66,7 @@ class Connection {
   /**
    * Send the given message
    */
-  send(message: any) {
+  send(message: any): void {
     if (
       this.connection.readyState === WS_READY_STATE_CLOSING
       || this.connection.readyState === WS_READY_STATE_CLOSED
@@ -86,7 +86,7 @@ class Connection {
   /**
    * Close the connection
    */
-  close() {
+  close(): void {
     if (this.pingInterval) {
       clearInterval(this.pingInterval)
     }
@@ -106,7 +106,7 @@ class Connection {
    * @returns {undefined}
    * @private
    */
-  check() {
+  check(): void {
     if (!this.pongReceived) {
       return this.close()
     }
@@ -126,7 +126,7 @@ class Connection {
    * Send first sync step
    * @private
    */
-  sendFirstSyncStep() {
+  sendFirstSyncStep(): void {
     this.send(
       Messages.firstSyncStep(this.document).encode(),
     )
@@ -166,7 +166,7 @@ class Connection {
    * Get the underlying connection instance
    * @returns {*}
    */
-  get instance() {
+  get instance(): WebSocket {
     return this.connection
   }
 }

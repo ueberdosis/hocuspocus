@@ -35,7 +35,7 @@ class Document extends Y.Doc {
    * @param callback
    * @returns {Document}
    */
-  onUpdate(callback: any) {
+  onUpdate(callback: any): Document {
     this.callbacks.onUpdate = callback
 
     return this
@@ -46,7 +46,7 @@ class Document extends Y.Doc {
    * underlying websocket connection
    * @param connection
    */
-  addConnection(connection: any) {
+  addConnection(connection: any): void {
     this.connections.set(connection.instance, {
       connection,
       clients: new Set(),
@@ -58,7 +58,7 @@ class Document extends Y.Doc {
    * @param connection
    * @returns {boolean}
    */
-  hasConnection(connection: any) {
+  hasConnection(connection: any): boolean {
     return this.connections.has(connection.instance)
   }
 
@@ -66,7 +66,7 @@ class Document extends Y.Doc {
    * Remove the given connection from this document
    * @param connection
    */
-  removeConnection(connection: any) {
+  removeConnection(connection: any): void {
     removeAwarenessStates(
       this.awareness,
       Array.from(this.getClients(connection.instance)),
@@ -80,7 +80,7 @@ class Document extends Y.Doc {
    * Get the number of active connections
    * @returns {number}
    */
-  connectionsCount() {
+  connectionsCount(): number {
     return this.connections.size
   }
 
@@ -88,7 +88,7 @@ class Document extends Y.Doc {
    * Get an array of registered connections
    * @returns {array}
    */
-  getConnections() {
+  getConnections(): any[] {
     return Array.from(this.connections.values()).map(data => data.connection)
   }
 
@@ -97,7 +97,7 @@ class Document extends Y.Doc {
    * @param connectionInstance
    * @returns {Set}
    */
-  getClients(connectionInstance: any) {
+  getClients(connectionInstance: any): any {
     const connection = this.connections.get(connectionInstance)
 
     return connection.clients === undefined ? new Set() : connection.clients
@@ -107,7 +107,7 @@ class Document extends Y.Doc {
    * Has the document awareness states
    * @returns {boolean}
    */
-  hasAwarenessStates() {
+  hasAwarenessStates(): boolean {
     return this.awareness.getStates().size > 0
   }
 
@@ -116,7 +116,7 @@ class Document extends Y.Doc {
    * @param connection
    * @param update
    */
-  applyAwarenessUpdate(connection: any, update: any) {
+  applyAwarenessUpdate(connection: any, update: any): void {
     applyAwarenessUpdate(
       this.awareness,
       update,
@@ -130,7 +130,7 @@ class Document extends Y.Doc {
    * @param connectionInstance
    * @private
    */
-  handleAwarenessUpdate({ added, updated, removed }: any, connectionInstance: any) {
+  handleAwarenessUpdate({ added, updated, removed }: any, connectionInstance: any): void {
     const changedClients = added.concat(updated, removed)
     const connection = this.connections.get(connectionInstance)
 
@@ -151,7 +151,7 @@ class Document extends Y.Doc {
    * @param update
    * @private
    */
-  handleUpdate(update: any) {
+  handleUpdate(update: any): void {
     this.callbacks.onUpdate(this, update)
 
     const message = Messages.update(update)
