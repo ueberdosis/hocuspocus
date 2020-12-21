@@ -2133,9 +2133,9 @@
     prosemirror-inputrules "^1.1.3"
 
 "@tiptap/extension-highlight@^2.0.0-alpha.4":
-  version "2.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-alpha.4.tgz#b19822f7d06b72b43fab5b7dbc97944e48e9beac"
-  integrity sha512-z7S81YjmuGKRgen27MnRlYPHYWAxuGlGgdK1VWC9z0+cgLFBwjtxUa4uRtQtt/ptfTwPqU7blble3NDivy7gsQ==
+  version "2.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-alpha.5.tgz#45a6f7b1a06772a1b0880a03bad995da69e9fcd2"
+  integrity sha512-pa3GG0Zc7Bj/IPI3bOIKhofFWZX4QCdFa16oH2FUAvczipXmPryMCOLJKBfoNI5dLwEB5oxrCm1Wavcjc3Yh1g==
 
 "@tiptap/extension-history@^2.0.0-alpha.4":
   version "2.0.0-alpha.4"
