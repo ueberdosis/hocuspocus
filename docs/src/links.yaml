@@ -17,8 +17,8 @@
     - title: Quill
       link: /examples/quill
       draft: true
-    - title: Quill (CDN)
-      link: /examples/quill-cdn
+    - title: Monaco
+      link: /examples/monaco
       draft: true
 
 - title: Guide
