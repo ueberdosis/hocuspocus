@@ -1,52 +1,58 @@
-import map from 'lib0/dist/map.cjs'
+import { map } from 'lib0'
 import WebSocket from 'ws'
-import { createServer } from 'http'
-import Document from './Document.js'
-import Connection from './Connection.js'
+import { URLSearchParams } from 'url'
+import { Socket } from 'net'
+import { createServer, Server as HTTPServer, IncomingMessage } from 'http'
+import Document from './Document'
+import Connection from './Connection'
+
+export interface Configuration {
+  debounce: number,
+  debounceMaxWait: number,
+  httpServer: HTTPServer,
+  persistence: any,
+  port: number,
+  timeout: number,
+  onChange: (data: any) => void,
+  onConnect: (data: any, resolve: Function, reject: Function) => void,
+  onDisconnect: (data: any) => void,
+  onJoinDocument: (data: any, resolve: Function, reject: Function) => void,
+}
 
 class Hocuspocus {
 
-  configuration = {
-
-    debounce: true,
+  configuration: Configuration = {
+    debounce: 0,
     debounceMaxWait: 10000,
-    httpServer: null,
+    httpServer: createServer((request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
+      response.end('OK')
+    }),
     persistence: null,
     port: 80,
     timeout: 30000,
-
-    onChange: data => {
-    },
-    onConnect: (data, resolve) => resolve(),
-    onDisconnect: data => {
-    },
+    onChange: () => null,
+    onConnect: (data, resolve: any) => resolve(),
+    onDisconnect: data => null,
     onJoinDocument: (data, resolve) => resolve(),
-
   }
 
-  httpServer
+  httpServer: HTTPServer
 
-  websocketServer
+  websocketServer: WebSocket.Server
 
   documents = new Map()
 
-  debounceTimeout
+  debounceTimeout!: NodeJS.Timeout
 
-  debounceStart
+  debounceStart!: number | null
 
   /**
    * Constructor
    */
   constructor() {
     this.httpServer = this.configuration.httpServer
-      ? this.configuration.httpServer
-      : createServer((request, response) => {
-        response.writeHead(200, { 'Content-Type': 'text/plain' })
-        response.end('OK')
-      })
-
     this.websocketServer = new WebSocket.Server({ noServer: true })
-
     this.httpServer.on('upgrade', this.handleUpgrade.bind(this))
     this.websocketServer.on('connection', this.handleConnection.bind(this))
   }
@@ -56,7 +62,7 @@ class Hocuspocus {
    * @param configuration
    * @returns {Hocuspocus}
    */
-  configure(configuration) {
+  configure(configuration: Partial<Configuration>): Hocuspocus {
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -68,7 +74,7 @@ class Hocuspocus {
   /**
    * Start the server
    */
-  listen() {
+  listen(): void {
     this.httpServer.listen(this.configuration.port, () => {
       console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
     })
@@ -81,7 +87,7 @@ class Hocuspocus {
    * @param head
    * @private
    */
-  handleUpgrade(request, socket, head) {
+  handleUpgrade(request: IncomingMessage, socket: Socket, head: Buffer): void {
     const data = {
       requestHeaders: request.headers,
       requestParameters: this.getParameters(request),
@@ -110,7 +116,7 @@ class Hocuspocus {
    * @param context
    * @private
    */
-  handleConnection(incoming, request, context = null) {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
     console.log(`New connection to ${request.url}`)
 
     const document = this.createDocument(request)
@@ -141,7 +147,7 @@ class Hocuspocus {
    * @param request
    * @returns {*}
    */
-  handleDocumentUpdate(document, update, request) {
+  handleDocumentUpdate(document: Document, update: any, request: IncomingMessage): void {
     if (this.configuration.persistence) {
       this.configuration.persistence.store(document.name, update)
       console.log(`Document ${document.name} saved`)
@@ -185,15 +191,14 @@ class Hocuspocus {
    * @param request
    * @private
    */
-  createDocument(request) {
-    const documentName = request.url.slice(1)
-      .split('?')[0]
+  createDocument(request: IncomingMessage): Document {
+    const documentName = request.url?.slice(1)?.split('?')[0] || ''
 
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new Document(documentName)
 
       document.onUpdate(
-        (document, update) => this.handleDocumentUpdate(document, update, request),
+        (document: any, update: any) => this.handleDocumentUpdate(document, update, request),
       )
 
       if (this.configuration.persistence) {
@@ -215,7 +220,7 @@ class Hocuspocus {
    * @returns {Connection}
    * @private
    */
-  createConnection(connection, request, document, context = null) {
+  createConnection(connection: WebSocket, request: IncomingMessage, document: Document, context = null): Connection {
     return new Connection(
       connection,
       request,
@@ -223,7 +228,7 @@ class Hocuspocus {
       this.configuration.timeout,
       context,
     )
-      .onClose(document => {
+      .onClose((document: any) => {
 
         this.configuration.onDisconnect({
           document,
@@ -244,7 +249,7 @@ class Hocuspocus {
    * Get the current process time in milliseconds
    * @returns {number}
    */
-  now() {
+  now(): number {
     const hrTime = process.hrtime()
     return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
   }
@@ -254,8 +259,8 @@ class Hocuspocus {
    * @param request
    * @returns {{}|URLSearchParams}
    */
-  getParameters(request) {
-    const query = request.url.split('?')
+  getParameters(request: IncomingMessage): {} {
+    const query = request?.url?.split('?') || []
 
     if (!query[1]) {
       return {}
@@ -268,7 +273,7 @@ class Hocuspocus {
    * Get debounce duration
    * @returns {number}
    */
-  get debounceDuration() {
+  get debounceDuration(): number {
     return Number.isNaN(this.configuration.debounce)
       ? 2000
       : this.configuration.debounce

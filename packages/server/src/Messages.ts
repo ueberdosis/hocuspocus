@@ -1,7 +1,9 @@
-import awarenessProtocol from 'y-protocols/dist/awareness.cjs'
-import syncProtocol from 'y-protocols/dist/sync.cjs'
-import Encoder from './Encoder.js'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes.js'
+import { encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { writeSyncStep1, writeUpdate, readSyncMessage } from 'y-protocols/sync'
+import Document from './Document'
+import Encoder from './Encoder'
+import Decoder from './Decoder'
+import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
 
 class Messages {
 
@@ -9,7 +11,7 @@ class Messages {
    * Sync message
    * @returns {Encoder}
    */
-  sync() {
+  sync(): Encoder {
     return new Encoder().int(MESSAGE_SYNC)
   }
 
@@ -19,8 +21,8 @@ class Messages {
    * @param changedClients
    * @returns {Encoder}
    */
-  awarenessUpdate(awareness, changedClients = null) {
-    const message = awarenessProtocol.encodeAwarenessUpdate(
+  awarenessUpdate(awareness: any, changedClients = null): Encoder {
+    const message = encodeAwarenessUpdate(
       awareness,
       changedClients || Array.from(awareness.getStates().keys()),
     )
@@ -33,10 +35,10 @@ class Messages {
    * @param document
    * @returns {Encoder}
    */
-  firstSyncStep(document) {
+  firstSyncStep(document: Document): Encoder {
     const message = this.sync()
 
-    syncProtocol.writeSyncStep1(message.encoder, document)
+    writeSyncStep1(message.encoder, document)
 
     return message
   }
@@ -46,10 +48,10 @@ class Messages {
    * @param update
    * @returns {Encoder}
    */
-  update(update) {
+  update(update: Uint8Array): Encoder {
     const message = this.sync()
 
-    syncProtocol.writeUpdate(message.encoder, update)
+    writeUpdate(message.encoder, update)
 
     return message
   }
@@ -60,10 +62,10 @@ class Messages {
    * @param document
    * @returns {Encoder}
    */
-  read(decoder, document) {
+  read(decoder: Decoder, document: Document): Encoder {
     const message = this.sync()
 
-    syncProtocol.readSyncMessage(decoder.decoder, message.encoder, document, null)
+    readSyncMessage(decoder.decoder, message.encoder, document, null)
 
     return message
   }

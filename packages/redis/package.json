@@ -11,11 +11,16 @@
     "yjs"
   ],
   "type": "module",
-  "main": "./src/index.js",
+  "source": "src/index.ts",
+  "main": "dist/hocuspocus-redis.js",
+  "module": "dist/hocuspocus-redis.esm.js",
+  "types": "dist/packages/redis/src/index.d.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "dependencies": {
-    "y-redis": "^1.0.2"
+    "y-redis": "^1.0.2",
+    "yjs": "^13.4.7"
   }
 }

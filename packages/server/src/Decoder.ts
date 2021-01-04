@@ -1,14 +1,14 @@
-import decoding from 'lib0/dist/decoding.cjs'
+import { decoding } from 'lib0'
 
 class Decoder {
 
-  decoder
+  decoder: decoding.Decoder
 
   /**
    * Constructor
    * @param message
    */
-  constructor(message) {
+  constructor(message: Uint8Array) {
     this.decoder = decoding.createDecoder(message)
   }
 
@@ -16,7 +16,7 @@ class Decoder {
    * Integer
    * @returns {*}
    */
-  int() {
+  int(): number {
     return decoding.readVarUint(this.decoder)
   }
 
@@ -24,7 +24,7 @@ class Decoder {
    * Integer 8bit
    * @returns {*}
    */
-  int8() {
+  int8(): Uint8Array {
     return decoding.readVarUint8Array(this.decoder)
   }
 }

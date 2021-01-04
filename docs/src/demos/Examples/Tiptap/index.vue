@@ -1,8 +1,17 @@
 <template>
   <div>
-    <div class="editor" v-if="editor">
-      <menu-bar class="editor__menu" :editor="editor" />
-      <editor-content class="editor__content" :editor="editor" />
+    <div
+      class="editor"
+      v-if="editor"
+    >
+      <menu-bar
+        class="editor__menu"
+        :editor="editor"
+      />
+      <editor-content
+        class="editor__content"
+        :editor="editor"
+      />
       <div class="editor__bottom-bar">
         <div :class="`editor__status editor__status--${status}`">
           {{ status }}

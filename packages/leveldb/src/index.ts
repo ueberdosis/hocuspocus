@@ -1,28 +1,30 @@
-import Y from 'yjs'
-import YLevelDB from 'y-leveldb'
+import * as Y from 'yjs'
+import { LeveldbPersistence } from 'y-leveldb'
 
-const LevelDBPersistence = YLevelDB.LeveldbPersistence
+export interface Configuration {
+  path: string
+}
 
 export class LevelDB {
 
-  configuration = {
+  configuration: Configuration = {
     path: './database',
   }
 
-  provider
+  provider: LeveldbPersistence
 
   /**
    * Constructor
    * @param configuration
    * @returns {LevelDB}
    */
-  constructor(configuration) {
+  constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
       ...configuration,
     }
 
-    this.provider = new LevelDBPersistence(this.configuration.path)
+    this.provider = new LeveldbPersistence(this.configuration.path)
 
     return this
   }
@@ -33,7 +35,7 @@ export class LevelDB {
    * @param document
    * @returns {Promise<void>}
    */
-  async connect(documentName, document) {
+  async connect(documentName: string, document: Y.Doc) {
     const storedDocument = await this.provider.getYDoc(documentName)
     const update = Y.encodeStateAsUpdate(document)
 
@@ -48,7 +50,7 @@ export class LevelDB {
    * @param update
    * @returns {Promise<void>}
    */
-  async store(documentName, update) {
+  async store(documentName: string, update: Uint8Array) {
     await this.provider.storeUpdate(documentName, update)
   }
 }

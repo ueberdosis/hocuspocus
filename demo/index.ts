@@ -1,5 +1,6 @@
-import { Server } from '@hocuspocus/server'
-import { LevelDB } from '@hocuspocus/leveldb'
+/* eslint-disable */
+import { Server } from '@hocuspocus/server/src/index'
+import { LevelDB } from '@hocuspocus/leveldb/src/index'
 // import { Redis } from '@hocuspocus/redis'
 
 console.log(process.cwd())
@@ -24,7 +25,7 @@ const server = Server.configure({
   //    // Redis Cluster Options
   // ),
 
-  onConnect(data, resolve, reject) {
+  onConnect(data: any, resolve: any, reject: any) {
     const { requestHeaders, requestParameters } = data
 
     // authenticate using request headers
@@ -37,7 +38,7 @@ const server = Server.configure({
     resolve(context)
   },
 
-  onJoinDocument(data, resolve, reject) {
+  onJoinDocument(data: any, resolve: any, reject: any) {
     const {
       clientsCount,
       context,
@@ -55,7 +56,7 @@ const server = Server.configure({
     resolve()
   },
 
-  onChange(data) {
+  onChange(data: any) {
     const {
       clientsCount,
       document,
@@ -67,7 +68,7 @@ const server = Server.configure({
     // handle
   },
 
-  onDisconnect(data) {
+  onDisconnect(data: any) {
     const {
       clientsCount,
       document,

@@ -1,29 +1,28 @@
-import Decoder from './Decoder.js'
-import Messages from './Messages.js'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes.js'
-import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates.js'
+import WebSocket from 'ws'
+import Decoder from './Decoder'
+import Messages from './Messages'
+import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
+import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates'
 
 class Connection {
 
-  connection
+  connection: WebSocket
 
-  context
+  context: any
 
-  document
+  document: any
 
-  pingInterval
+  pingInterval: any
 
   pongReceived = true
 
-  request
+  request: any
 
-  timeout
+  timeout: any
 
-  callbacks = {
-    onClose: () => {
-    },
-    onChange: () => {
-    },
+  callbacks: any = {
+    onClose: (...args: any) => null,
+    onChange: (...args: any) => null,
   }
 
   /**
@@ -34,7 +33,7 @@ class Connection {
    * @param timeout
    * @param context
    */
-  constructor(connection, request, document, timeout, context) {
+  constructor(connection: WebSocket, request: any, document: any, timeout: any, context: any) {
     this.connection = connection
     this.context = context
     this.document = document
@@ -47,7 +46,7 @@ class Connection {
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
     this.connection.on('close', () => this.close())
-    this.connection.on('message', message => this.handleMessage(message))
+    this.connection.on('message', (message: any) => this.handleMessage(message))
     this.connection.on('pong', () => { this.pongReceived = true })
 
     this.sendFirstSyncStep()
@@ -58,7 +57,7 @@ class Connection {
    * @param callback
    * @returns {Connection}
    */
-  onClose(callback) {
+  onClose(callback: any) {
     this.callbacks.onClose = callback
 
     return this
@@ -67,7 +66,7 @@ class Connection {
   /**
    * Send the given message
    */
-  send(message) {
+  send(message: any): void {
     if (
       this.connection.readyState === WS_READY_STATE_CLOSING
       || this.connection.readyState === WS_READY_STATE_CLOSED
@@ -76,7 +75,7 @@ class Connection {
     }
 
     try {
-      this.connection.send(message, error => {
+      this.connection.send(message, (error: any) => {
         if (error != null) this.close()
       })
     } catch (exception) {
@@ -87,7 +86,7 @@ class Connection {
   /**
    * Close the connection
    */
-  close() {
+  close(): void {
     if (this.pingInterval) {
       clearInterval(this.pingInterval)
     }
@@ -107,7 +106,7 @@ class Connection {
    * @returns {undefined}
    * @private
    */
-  check() {
+  check(): void {
     if (!this.pongReceived) {
       return this.close()
     }
@@ -127,7 +126,7 @@ class Connection {
    * Send first sync step
    * @private
    */
-  sendFirstSyncStep() {
+  sendFirstSyncStep(): void {
     this.send(
       Messages.firstSyncStep(this.document).encode(),
     )
@@ -146,7 +145,7 @@ class Connection {
    * @param input
    * @private
    */
-  handleMessage(input) {
+  handleMessage(input: any) {
     const message = new Decoder(new Uint8Array(input))
     const messageType = message.int()
 
@@ -167,7 +166,7 @@ class Connection {
    * Get the underlying connection instance
    * @returns {*}
    */
-  get instance() {
+  get instance(): WebSocket {
     return this.connection
   }
 }

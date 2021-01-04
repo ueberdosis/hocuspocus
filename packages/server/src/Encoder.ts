@@ -1,8 +1,8 @@
-import encoding from 'lib0/dist/encoding.cjs'
+import { encoding } from 'lib0'
 
 class Encoder {
 
-  encoder
+  encoder: encoding.Encoder
 
   /**
    * Constructor
@@ -16,7 +16,7 @@ class Encoder {
    * @param int
    * @returns {Encoder}
    */
-  int(int) {
+  int(int: number): Encoder {
     encoding.writeVarUint(this.encoder, int)
 
     return this
@@ -27,7 +27,7 @@ class Encoder {
    * @param int
    * @returns {Encoder}
    */
-  int8(int) {
+  int8(int: Uint8Array): Encoder {
     encoding.writeVarUint8Array(this.encoder, int)
 
     return this
@@ -37,7 +37,7 @@ class Encoder {
    * Length
    * @returns {int}
    */
-  length() {
+  length(): number {
     return encoding.length(this.encoder)
   }
 
@@ -45,7 +45,7 @@ class Encoder {
    * Encode to 8bit integer
    * @returns {*}
    */
-  encode() {
+  encode(): Uint8Array {
     return encoding.toUint8Array(this.encoder)
   }
 }

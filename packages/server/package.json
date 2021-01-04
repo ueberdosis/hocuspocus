@@ -11,9 +11,13 @@
     "prosemirror"
   ],
   "type": "module",
-  "main": "./src/index.js",
+  "source": "src/index.ts",
+  "main": "dist/hocuspocus-server.js",
+  "module": "dist/hocuspocus-server.esm.js",
+  "types": "dist/packages/server/src/index.d.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "dependencies": {
     "lib0": "^0.2.35",
@@ -24,5 +28,8 @@
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"
+  },
+  "devDependencies": {
+    "@types/ws": "^7.4.0"
   }
 }
