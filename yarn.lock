@@ -8259,7 +8259,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-lib0@^0.2.12, lib0@^0.2.13, lib0@^0.2.28, lib0@^0.2.31, lib0@^0.2.33, lib0@^0.2.34, lib0@^0.2.35:
+lib0@^0.2.12, lib0@^0.2.13, lib0@^0.2.31, lib0@^0.2.33, lib0@^0.2.34, lib0@^0.2.35:
   version "0.2.35"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.35.tgz#1d62adb3feefce70c84f3eb664c5e50286de41ca"
   integrity sha512-drVD3EscB3TIxiFzceuZg7oF5Z6I8a0KX+7FowNcAXOEsTej/hlHB+ElJ8Pa/Ge73Gy3fklSJtPxpNd2PajdWg==
@@ -13976,11 +13976,11 @@ y-prosemirror@^1.0.0:
     lib0 "^0.2.34"
 
 y-protocols@^1.0.0, y-protocols@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.1.tgz#7855c900039a02b369590b8ae78bc6e1cbc13c9f"
-  integrity sha512-QP3fCM7c2gGfUi2nqf8gspyO4VW23zv3kNqPNdD3wNxMbuNQenMyoDVZYEo12jzR4RQ3aaDfPK62Sf31SVOmfg==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.2.tgz#32c7a2f656b82f435058d28406aa51780a1eb486"
+  integrity sha512-V6ZAmokdogW52+VsIg/YC0R6CHWgG8/hjO3rYL10hAzeT5j464kDiRki31O+GzTj+dMgNYZNd6IDP9X35FLXrw==
   dependencies:
-    lib0 "^0.2.28"
+    lib0 "^0.2.35"
 
 y-redis@^1.0.2:
   version "1.0.2"
