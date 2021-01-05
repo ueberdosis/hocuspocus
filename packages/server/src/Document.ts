@@ -12,7 +12,7 @@ class Document extends Y.Doc {
 
   name: string
 
-  awareness: any
+  awareness: Awareness
 
   /**
    * Constructor.
@@ -24,7 +24,7 @@ class Document extends Y.Doc {
     this.name = name
 
     // TODO: Class extends value undefined is not a constructor or null
-    this.awareness = new Awareness(this) as any
+    this.awareness = new Awareness(this)
     this.awareness.setLocalState(null)
 
     this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
