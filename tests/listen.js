@@ -1,4 +1,3 @@
-// @ts-nocheck
 /* eslint-disable */
 import assert from 'assert'
 import { Server } from '@hocuspocus/server/src/index'
