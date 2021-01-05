@@ -9,7 +9,7 @@
     "maintained node versions"
   ],
   "scripts": {
-    "start": "yarn start:demo & yarn start:docs",
+    "start": "concurrently --kill-others \"yarn start:demo\" \"yarn start:docs\"",
     "start:demo": "yarn --cwd ./demo start:development",
     "start:docs": "yarn --cwd ./docs start",
     "build:packages": "yarn clean:packages && rollup -c",
@@ -34,6 +34,7 @@
     "@rollup/plugin-node-resolve": "^11.0.1",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
     "@typescript-eslint/parser": "^4.12.0",
+    "concurrently": "^5.3.0",
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-html": "^6.1.1",
