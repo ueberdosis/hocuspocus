@@ -1,6 +1,7 @@
+// @ts-nocheck
 /* eslint-disable */
 import assert from 'assert'
-import { Server } from '@hocuspocus/server'
+import { Server } from '@hocuspocus/server/src/index'
 
 context('.listen()', function() {
   const originalConsoleLog = console.log
