@@ -23,7 +23,8 @@ class Document extends Y.Doc {
 
     this.name = name
 
-    this.awareness = new Awareness(this)
+    // TODO: Class extends value undefined is not a constructor or null
+    this.awareness = new Awareness(this) as any
     this.awareness.setLocalState(null)
 
     this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
