@@ -6,7 +6,10 @@
     "packages/*"
   ],
   "browserslist": [
-    "maintained node versions"
+    "> 1%",
+    "last 2 versions",
+    "not IE <= 11",
+    "not IE_Mob <= 11"
   ],
   "type": "module",
   "scripts": {
