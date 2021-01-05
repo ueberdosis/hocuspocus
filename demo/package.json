@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node --loader ts-node/esm --experimental-specifier-resolution=node ./index.ts",
-    "start:development": "nodemon --watch ./ --watch ../packages --exec npm start"
+    "start:development": "nodemon -e ts --watch ./ --watch ../packages --exec npm start"
   },
   "devDependencies": {
     "@hocuspocus/leveldb": "^1.0.0-alpha.0",
