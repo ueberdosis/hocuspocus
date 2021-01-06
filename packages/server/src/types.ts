@@ -1,5 +1,6 @@
 import { IncomingHttpHeaders, Server as HTTPServer } from 'http'
 import { URLSearchParams } from 'url'
+import Document from './Document'
 
 export interface Configuration {
   debounce: number,
@@ -21,7 +22,7 @@ export interface onConnectPayload {
 
 export interface onChangePayload extends onConnectPayload {
   clientsCount: number,
-  document: any,
+  document: Document,
   documentName: string,
 }
 

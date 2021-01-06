@@ -1,8 +1,10 @@
 import WebSocket from 'ws'
+import { IncomingMessage } from 'http'
 import Decoder from './Decoder'
 import Messages from './Messages'
 import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
 import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates'
+import Document from './Document'
 
 class Connection {
 
@@ -10,30 +12,30 @@ class Connection {
 
   context: any
 
-  document: any
+  document: Document
 
-  pingInterval: any
+  pingInterval: NodeJS.Timeout
 
   pongReceived = true
 
-  request: any
+  request: IncomingMessage
 
-  timeout: any
+  timeout: number
 
   callbacks: any = {
-    onClose: (...args: any) => null,
-    onChange: (...args: any) => null,
+    onClose: (document: Document) => null,
   }
 
   /**
    * Constructor.
-   * @param connection
-   * @param request
-   * @param document
-   * @param timeout
-   * @param context
    */
-  constructor(connection: WebSocket, request: any, document: any, timeout: any, context: any) {
+  constructor(
+    connection: WebSocket,
+    request: IncomingMessage,
+    document: Document,
+    timeout: number,
+    context: any,
+  ) {
     this.connection = connection
     this.context = context
     this.document = document
@@ -45,8 +47,8 @@ class Connection {
 
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
-    this.connection.on('close', () => this.close())
-    this.connection.on('message', (message: any) => this.handleMessage(message))
+    this.connection.on('close', this.close.bind(this))
+    this.connection.on('message', this.handleMessage.bind(this))
     this.connection.on('pong', () => { this.pongReceived = true })
 
     this.sendFirstSyncStep()
@@ -54,10 +56,8 @@ class Connection {
 
   /**
    * Set a callback that will be triggered when the connection is closed
-   * @param callback
-   * @returns {Connection}
    */
-  onClose(callback: any) {
+  onClose(callback: (document: Document) => void): Connection {
     this.callbacks.onClose = callback
 
     return this
@@ -103,10 +103,9 @@ class Connection {
 
   /**
    * Check if pong was received and close the connection otherwise
-   * @returns {undefined}
    * @private
    */
-  check(): void {
+  private check(): void {
     if (!this.pongReceived) {
       return this.close()
     }
@@ -126,7 +125,7 @@ class Connection {
    * Send first sync step
    * @private
    */
-  sendFirstSyncStep(): void {
+  private sendFirstSyncStep(): void {
     this.send(
       Messages.firstSyncStep(this.document).encode(),
     )
@@ -142,10 +141,9 @@ class Connection {
 
   /**
    * Handle an incoming message
-   * @param input
    * @private
    */
-  handleMessage(input: any) {
+  private handleMessage(input: any): void {
     const message = new Decoder(new Uint8Array(input))
     const messageType = message.int()
 
@@ -164,7 +162,6 @@ class Connection {
 
   /**
    * Get the underlying connection instance
-   * @returns {*}
    */
   get instance(): WebSocket {
     return this.connection

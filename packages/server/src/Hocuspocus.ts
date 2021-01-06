@@ -216,7 +216,7 @@ class Hocuspocus {
       this.configuration.timeout,
       context,
     )
-      .onClose((document: any) => {
+      .onClose(document => {
 
         this.configuration.onDisconnect({
           clientsCount: document.connectionsCount(),
