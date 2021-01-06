@@ -16,13 +16,13 @@ class Hocuspocus {
       response.writeHead(200, { 'Content-Type': 'text/plain' })
       response.end('OK')
     }),
+    onChange: () => null,
+    onConnect: (data, resolve) => resolve(),
+    onDisconnect: () => null,
+    onJoinDocument: (data, resolve) => resolve(),
     persistence: null,
     port: 80,
     timeout: 30000,
-    onChange: () => null,
-    onConnect: (data, resolve: any) => resolve(),
-    onDisconnect: data => null,
-    onJoinDocument: (data, resolve) => resolve(),
   }
 
   httpServer: HTTPServer
@@ -219,10 +219,11 @@ class Hocuspocus {
       .onClose((document: any) => {
 
         this.configuration.onDisconnect({
+          clientsCount: document.connectionsCount(),
           document,
           documentName: document.name,
           requestHeaders: request.headers,
-          clientsCount: document.connectionsCount(),
+          requestParameters: this.getParameters(request),
         })
 
         if (document.connectionsCount() > 0) {
@@ -245,16 +246,12 @@ class Hocuspocus {
   /**
    * Get parameters by the given request
    * @param request
-   * @returns {{}|URLSearchParams}
+   * @returns {URLSearchParams}
    */
-  getParameters(request: IncomingMessage): {} {
+  getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
 
-    if (!query[1]) {
-      return {}
-    }
-
-    return new URLSearchParams(query[1])
+    return new URLSearchParams(query[1] ? query[1] : '')
   }
 
   /**
