@@ -6,23 +6,20 @@ class Decoder {
 
   /**
    * Constructor
-   * @param message
    */
   constructor(message: Uint8Array) {
     this.decoder = decoding.createDecoder(message)
   }
 
   /**
-   * Integer
-   * @returns {*}
+   * Read an integer
    */
   int(): number {
     return decoding.readVarUint(this.decoder)
   }
 
   /**
-   * Integer 8bit
-   * @returns {*}
+   * Read an array of unsigned 8bit integers
    */
   int8(): Uint8Array {
     return decoding.readVarUint8Array(this.decoder)

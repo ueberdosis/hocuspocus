@@ -12,9 +12,7 @@ class Encoder {
   }
 
   /**
-   * Integer
-   * @param int
-   * @returns {Encoder}
+   * Write an integer
    */
   int(int: number): Encoder {
     encoding.writeVarUint(this.encoder, int)
@@ -23,9 +21,7 @@ class Encoder {
   }
 
   /**
-   * 8bit integer
-   * @param int
-   * @returns {Encoder}
+   * Write an array of unsigned 8bit integers
    */
   int8(int: Uint8Array): Encoder {
     encoding.writeVarUint8Array(this.encoder, int)
@@ -34,16 +30,14 @@ class Encoder {
   }
 
   /**
-   * Length
-   * @returns {int}
+   * Get the length
    */
   length(): number {
     return encoding.length(this.encoder)
   }
 
   /**
-   * Encode to 8bit integer
-   * @returns {*}
+   * Encode to array of unsigned 8bit integers
    */
   encode(): Uint8Array {
     return encoding.toUint8Array(this.encoder)
