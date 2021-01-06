@@ -19,14 +19,14 @@ export interface onConnectPayload {
   requestParameters: URLSearchParams,
 }
 
-export interface onDisconnectPayload extends onConnectPayload {
+export interface onChangePayload extends onConnectPayload {
   clientsCount: number,
   document: any,
   documentName: string,
 }
 
-export interface onJoinDocumentPayload extends onDisconnectPayload {
+export interface onDisconnectPayload extends onChangePayload {
   context: any,
 }
 
-export interface onChangePayload extends onDisconnectPayload {}
+export interface onJoinDocumentPayload extends onDisconnectPayload {}

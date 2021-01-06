@@ -1,5 +1,11 @@
 /* eslint-disable */
-import { Server } from '@hocuspocus/server/src/index'
+import {
+  Server,
+  onConnectPayload,
+  onJoinDocumentPayload,
+  onChangePayload,
+  onDisconnectPayload,
+} from '@hocuspocus/server/src'
 // TODO: The requested module 'y-leveldb' is expected to be of type CommonJS, which does not support named exports.
 // import { LevelDB } from '@hocuspocus/leveldb/src/index'
 // import { Redis } from '@hocuspocus/redis'
@@ -7,7 +13,7 @@ import { Server } from '@hocuspocus/server/src/index'
 const server = Server.configure({
 
   port: 1234,
-  debounce: 2000, // or true/false
+  debounce: 2000, // numeric or true/false
   debounceMaxWait: 10000,
 
   // persistence: new LevelDB({
@@ -24,59 +30,35 @@ const server = Server.configure({
   //    // Redis Cluster Options
   // ),
 
-  onConnect(data: any, resolve: any, reject: any) {
-    const { requestHeaders, requestParameters } = data
-
+  onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
     // authenticate using request headers
-    // if (requestHeaders.access_token !== 'super-secret-token') {
+    // if (data.requestHeaders.access_token === 'super-secret-token') {
     //   return reject()
     // }
 
     // set context for later usage
     const context = { user_id: 1234 }
+
     resolve(context)
   },
 
-  onJoinDocument(data: any, resolve: any, reject: any) {
-    const {
-      clientsCount,
-      context,
-      document,
-      documentName,
-      requestHeaders,
-      requestParameters,
-    } = data
-
+  onJoinDocument(data: onJoinDocumentPayload, resolve: Function, reject: Function) {
     // authorize user
-    // if (context.user_id !== 1234) {
+    // if (data.context.user_id !== 1234) {
     //   return reject()
     // }
 
     resolve()
   },
 
-  onChange(data: any) {
-    const {
-      clientsCount,
-      document,
-      documentName,
-      requestHeaders,
-      requestParameters,
-    } = data
-
-    // handle
+  onChange(data: onChangePayload) {
+    // do something with the data
+    console.log(`${data.documentName} was sent to an API!`)
   },
 
-  onDisconnect(data: any) {
-    const {
-      clientsCount,
-      document,
-      documentName,
-      requestHeaders,
-      requestParameters,
-    } = data
-
-    // handle
+  onDisconnect(data: onDisconnectPayload) {
+    // handle disconnect
+    console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
   },
 })
 
