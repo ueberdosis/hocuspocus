@@ -185,9 +185,9 @@ class Hocuspocus {
     return map.setIfUndefined(this.documents, documentName, () => {
       const document = new Document(documentName)
 
-      document.onUpdate(
-        (document: any, update: any) => this.handleDocumentUpdate(document, update, request),
-      )
+      document.onUpdate((document, update) => {
+        this.handleDocumentUpdate(document, update, request)
+      })
 
       if (this.configuration.persistence) {
         this.configuration.persistence.connect(documentName, document)

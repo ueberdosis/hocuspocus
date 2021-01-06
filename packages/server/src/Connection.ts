@@ -148,7 +148,8 @@ class Connection {
     const messageType = message.int()
 
     if (messageType === MESSAGE_AWARENESS) {
-      return this.document.applyAwarenessUpdate(this, message.int8())
+      this.document.applyAwarenessUpdate(this, message.int8())
+      return
     }
 
     const syncMessage = Messages.read(message, this.document)

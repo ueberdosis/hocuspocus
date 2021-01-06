@@ -1,22 +1,24 @@
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
+import WebSocket from 'ws'
 import Messages from './Messages'
+import Connection from './Connection'
 
 class Document extends Y.Doc {
 
+  awareness: Awareness
+
   callbacks = {
-    onUpdate: (...args: any) => null,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onUpdate: (document: Document, update: any) => {},
   }
 
   connections = new Map()
 
   name: string
 
-  awareness: Awareness
-
   /**
    * Constructor.
-   * @param name
    */
   constructor(name: string) {
     super({ gc: true })
@@ -33,41 +35,37 @@ class Document extends Y.Doc {
 
   /**
    * Set a callback that will be triggered when the document is updated
-   * @param callback
-   * @returns {Document}
    */
-  onUpdate(callback: any): Document {
+  onUpdate(callback: (document: Document, update: any) => void): Document {
     this.callbacks.onUpdate = callback
 
     return this
   }
 
   /**
-   * Register connection on this document based on the
+   * Register a connection and a set of clients on this document keyed by the
    * underlying websocket connection
-   * @param connection
    */
-  addConnection(connection: any): void {
+  addConnection(connection: Connection): Document {
     this.connections.set(connection.instance, {
-      connection,
       clients: new Set(),
+      connection,
     })
+
+    return this
   }
 
   /**
    * Is the given connection registered on this document
-   * @param connection
-   * @returns {boolean}
    */
-  hasConnection(connection: any): boolean {
+  hasConnection(connection: Connection): boolean {
     return this.connections.has(connection.instance)
   }
 
   /**
    * Remove the given connection from this document
-   * @param connection
    */
-  removeConnection(connection: any): void {
+  removeConnection(connection: Connection): Document {
     removeAwarenessStates(
       this.awareness,
       Array.from(this.getClients(connection.instance)),
@@ -75,11 +73,12 @@ class Document extends Y.Doc {
     )
 
     this.connections.delete(connection.instance)
+
+    return this
   }
 
   /**
    * Get the number of active connections
-   * @returns {number}
    */
   connectionsCount(): number {
     return this.connections.size
@@ -87,18 +86,15 @@ class Document extends Y.Doc {
 
   /**
    * Get an array of registered connections
-   * @returns {array}
    */
-  getConnections(): any[] {
+  getConnections(): Array<Connection> {
     return Array.from(this.connections.values()).map(data => data.connection)
   }
 
   /**
    * Get the client ids for the given connection instance
-   * @param connectionInstance
-   * @returns {Set}
    */
-  getClients(connectionInstance: any): any {
+  getClients(connectionInstance: WebSocket): Set<any> {
     const connection = this.connections.get(connectionInstance)
 
     return connection.clients === undefined ? new Set() : connection.clients
@@ -106,7 +102,6 @@ class Document extends Y.Doc {
 
   /**
    * Has the document awareness states
-   * @returns {boolean}
    */
   hasAwarenessStates(): boolean {
     return this.awareness.getStates().size > 0
@@ -114,24 +109,25 @@ class Document extends Y.Doc {
 
   /**
    * Apply the given awareness update
-   * @param connection
-   * @param update
    */
-  applyAwarenessUpdate(connection: any, update: any): void {
+  applyAwarenessUpdate(connection: Connection, update: any): Document {
     applyAwarenessUpdate(
       this.awareness,
       update,
       connection.instance,
     )
+
+    return this
   }
 
   /**
    * Handle an awareness update and sync changes to clients
-   * @param clients
-   * @param connectionInstance
    * @private
    */
-  handleAwarenessUpdate({ added, updated, removed }: any, connectionInstance: any): void {
+  private handleAwarenessUpdate(
+    { added, updated, removed }: any,
+    connectionInstance: WebSocket,
+  ): Document {
     const changedClients = added.concat(updated, removed)
     const connection = this.connections.get(connectionInstance)
 
@@ -145,14 +141,14 @@ class Document extends Y.Doc {
     this.getConnections().forEach(connection => connection.send(
       Messages.awarenessUpdate(this.awareness, changedClients).encode(),
     ))
+
+    return this
   }
 
   /**
    * Handle an updated document and sync changes to clients
-   * @param update
-   * @private
    */
-  handleUpdate(update: any): void {
+  private handleUpdate(update: any): Document {
     this.callbacks.onUpdate(this, update)
 
     const message = Messages.update(update)
@@ -160,6 +156,8 @@ class Document extends Y.Doc {
     this.getConnections().forEach(connection => connection.send(
       message.encode(),
     ))
+
+    return this
   }
 }
 
