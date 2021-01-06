@@ -1,8 +1,9 @@
-import { Doc } from 'yjs'
 import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
+import { Doc } from 'yjs'
 import Connection from './Connection'
 import Messages from './Messages'
+import { AwarenessUpdate } from './types'
 
 class Document extends Doc {
 
@@ -125,7 +126,7 @@ class Document extends Doc {
    * @private
    */
   private handleAwarenessUpdate(
-    { added, updated, removed }: any,
+    { added, updated, removed }: AwarenessUpdate,
     connectionInstance: WebSocket,
   ): Document {
     const changedClients = added.concat(updated, removed)

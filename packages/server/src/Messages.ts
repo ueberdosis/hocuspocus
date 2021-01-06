@@ -1,4 +1,4 @@
-import { encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate, readSyncMessage } from 'y-protocols/sync'
 import Decoder from './utils/Decoder'
 import Document from './Document'
@@ -9,7 +9,6 @@ class Messages {
 
   /**
    * Sync message
-   * @returns {Encoder}
    */
   sync(): Encoder {
     return new Encoder().int(MessageTypes.Sync)
@@ -17,11 +16,8 @@ class Messages {
 
   /**
    * Awareness update message
-   * @param awareness
-   * @param changedClients
-   * @returns {Encoder}
    */
-  awarenessUpdate(awareness: any, changedClients = null): Encoder {
+  awarenessUpdate(awareness: Awareness, changedClients?: Array<any>): Encoder {
     const message = encodeAwarenessUpdate(
       awareness,
       changedClients || Array.from(awareness.getStates().keys()),
@@ -32,8 +28,6 @@ class Messages {
 
   /**
    * First sync step message
-   * @param document
-   * @returns {Encoder}
    */
   firstSyncStep(document: Document): Encoder {
     const message = this.sync()
@@ -45,8 +39,6 @@ class Messages {
 
   /**
    * Update message
-   * @param update
-   * @returns {Encoder}
    */
   update(update: Uint8Array): Encoder {
     const message = this.sync()
@@ -58,9 +50,6 @@ class Messages {
 
   /**
    * Read the given message and return an encoded version
-   * @param decoder
-   * @param document
-   * @returns {Encoder}
    */
   read(decoder: Decoder, document: Document): Encoder {
     const message = this.sync()

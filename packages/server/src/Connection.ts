@@ -142,7 +142,7 @@ class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(input: any): void {
+  private handleMessage(input: Iterable<number>): void {
     const message = new Decoder(new Uint8Array(input))
     const messageType = message.int()
 

@@ -12,6 +12,12 @@ export enum WsReadyStates {
   Closed = 3,
 }
 
+export interface AwarenessUpdate {
+  added: Array<any>,
+  updated: Array<any>,
+  removed: Array<any>,
+}
+
 export interface Configuration {
   debounce: number,
   debounceMaxWait: number,
