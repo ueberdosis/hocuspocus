@@ -2,6 +2,16 @@ import { IncomingHttpHeaders, Server as HTTPServer } from 'http'
 import { URLSearchParams } from 'url'
 import Document from './Document'
 
+export enum MessageTypes {
+  Sync = 0,
+  Awareness = 1,
+}
+
+export enum WsReadyStates {
+  Closing = 2,
+  Closed = 3,
+}
+
 export interface Configuration {
   debounce: number,
   debounceMaxWait: number,

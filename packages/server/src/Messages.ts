@@ -1,9 +1,9 @@
 import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate, readSyncMessage } from 'y-protocols/sync'
 import Document from './Document'
-import Encoder from './Encoder'
-import Decoder from './Decoder'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
+import Encoder from './utils/Encoder'
+import Decoder from './utils/Decoder'
+import { MessageTypes } from './types'
 
 class Messages {
 
@@ -12,7 +12,7 @@ class Messages {
    * @returns {Encoder}
    */
   sync(): Encoder {
-    return new Encoder().int(MESSAGE_SYNC)
+    return new Encoder().int(MessageTypes.Sync)
   }
 
   /**
@@ -27,7 +27,7 @@ class Messages {
       changedClients || Array.from(awareness.getStates().keys()),
     )
 
-    return new Encoder().int(MESSAGE_AWARENESS).int8(message)
+    return new Encoder().int(MessageTypes.Awareness).int8(message)
   }
 
   /**

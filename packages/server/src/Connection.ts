@@ -1,10 +1,9 @@
 import WebSocket from 'ws'
 import { IncomingMessage } from 'http'
-import Decoder from './Decoder'
+import Decoder from './utils/Decoder'
 import Messages from './Messages'
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from './utils/messageTypes'
-import { WS_READY_STATE_CLOSING, WS_READY_STATE_CLOSED } from './utils/readyStates'
 import Document from './Document'
+import { MessageTypes, WsReadyStates } from './types'
 
 class Connection {
 
@@ -68,8 +67,8 @@ class Connection {
    */
   send(message: any): void {
     if (
-      this.connection.readyState === WS_READY_STATE_CLOSING
-      || this.connection.readyState === WS_READY_STATE_CLOSED
+      this.connection.readyState === WsReadyStates.Closing
+      || this.connection.readyState === WsReadyStates.Closed
     ) {
       this.close()
     }
@@ -147,18 +146,16 @@ class Connection {
     const message = new Decoder(new Uint8Array(input))
     const messageType = message.int()
 
-    if (messageType === MESSAGE_AWARENESS) {
+    if (messageType === MessageTypes.Awareness) {
       this.document.applyAwarenessUpdate(this, message.int8())
       return
     }
 
     const syncMessage = Messages.read(message, this.document)
 
-    if (messageType === MESSAGE_SYNC && syncMessage.length() > 1) {
-      return this.send(
-        syncMessage.encode(),
-      )
-    }
+    return this.send(
+      syncMessage.encode(),
+    )
   }
 
   /**
