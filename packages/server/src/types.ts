@@ -1,5 +1,6 @@
 import { IncomingHttpHeaders, Server as HTTPServer } from 'http'
 import { URLSearchParams } from 'url'
+import { Doc } from 'yjs'
 import Document from './Document'
 
 export enum MessageTypes {
@@ -18,6 +19,11 @@ export interface AwarenessUpdate {
   removed: Array<any>,
 }
 
+export interface Persistence {
+  connect(documentName: string, document: Doc): Promise<any>,
+  store(documentName: string, update: Uint8Array): Promise<any>,
+}
+
 export interface Configuration {
   debounce: number,
   debounceMaxWait: number,
@@ -26,7 +32,7 @@ export interface Configuration {
   onConnect: (data: onConnectPayload, resolve: Function, reject: Function) => void,
   onDisconnect: (data: onDisconnectPayload) => void,
   onJoinDocument: (data: onJoinDocumentPayload, resolve: Function, reject: Function) => void,
-  persistence: any,
+  persistence: Persistence | null,
   port: number,
   timeout: number,
 }

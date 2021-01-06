@@ -1,21 +1,20 @@
-import * as Y from 'yjs'
+import { Doc } from 'yjs'
 import { RedisPersistence } from 'y-redis'
+import { Persistence } from '@hocuspocus/server'
 
 export interface Configuration {
 }
 
-export class Redis {
+export class Redis implements Persistence {
 
   configuration: Configuration = {}
 
   cluster = false
 
-  persistance!: RedisPersistence
+  persistence!: RedisPersistence
 
   /**
    * Constructor
-   * @param configuration
-   * @returns {Redis}
    */
   constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
@@ -28,22 +27,18 @@ export class Redis {
 
   /**
    * Connect to the given document
-   * @param documentName
-   * @param document
-   * @returns {Promise<void>}
    */
-  async connect(documentName: string, document: Y.Doc) {
-    this.persistance = new RedisPersistence(
+  async connect(documentName: string, document: Doc): Promise<any> {
+    this.persistence = new RedisPersistence(
       // @ts-ignore
       this.cluster
         ? { redisClusterOpts: this.configuration }
         : { redisOpts: this.configuration },
     )
 
-    await this.persistance.bindState(documentName, document).synced
+    await this.persistence.bindState(documentName, document).synced
   }
 
   // eslint-disable-next-line
-  async store(documentName: string, update: Uint8Array) {}
-
+  async store(documentName: string, update: Uint8Array): Promise<any> {}
 }

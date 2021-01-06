@@ -6,8 +6,7 @@ import {
   onChangePayload,
   onDisconnectPayload,
 } from '@hocuspocus/server/src'
-// TODO: The requested module 'y-leveldb' is expected to be of type CommonJS, which does not support named exports.
-// import { LevelDB } from '@hocuspocus/leveldb/src/index'
+import { LevelDB } from '@hocuspocus/leveldb/src/index'
 // import { Redis } from '@hocuspocus/redis'
 
 const server = Server.configure({
@@ -16,9 +15,10 @@ const server = Server.configure({
   debounce: 2000, // numeric or true/false
   debounceMaxWait: 10000,
 
-  // persistence: new LevelDB({
-  //   path: './database',
-  // }),
+  persistence: new LevelDB({
+    path: './database',
+  }),
+
   // persistence: new Redis({
   //   port: 6379,
   //   host: '127.0.0.1',

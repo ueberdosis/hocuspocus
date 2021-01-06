@@ -1,11 +1,12 @@
-import * as Y from 'yjs'
+import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
+import { Persistence } from '@hocuspocus/server'
 
 export interface Configuration {
-  path: string
+  path: string,
 }
 
-export class LevelDB {
+export class LevelDB implements Persistence {
 
   configuration: Configuration = {
     path: './database',
@@ -15,8 +16,6 @@ export class LevelDB {
 
   /**
    * Constructor
-   * @param configuration
-   * @returns {LevelDB}
    */
   constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
@@ -31,26 +30,20 @@ export class LevelDB {
 
   /**
    * Connect to the given document
-   * @param documentName
-   * @param document
-   * @returns {Promise<void>}
    */
-  async connect(documentName: string, document: Y.Doc) {
+  async connect(documentName: string, document: Doc): Promise<any> {
     const storedDocument = await this.provider.getYDoc(documentName)
-    const update = Y.encodeStateAsUpdate(document)
+    const update = encodeStateAsUpdate(document)
 
     await this.store(documentName, update)
 
-    Y.applyUpdate(document, Y.encodeStateAsUpdate(storedDocument))
+    applyUpdate(document, encodeStateAsUpdate(storedDocument))
   }
 
   /**
    * Store the given update
-   * @param documentName
-   * @param update
-   * @returns {Promise<void>}
    */
-  async store(documentName: string, update: Uint8Array) {
+  async store(documentName: string, update: Uint8Array): Promise<any> {
     await this.provider.storeUpdate(documentName, update)
   }
 }
