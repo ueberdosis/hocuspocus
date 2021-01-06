@@ -1,8 +1,8 @@
 import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate, readSyncMessage } from 'y-protocols/sync'
+import Decoder from './utils/Decoder'
 import Document from './Document'
 import Encoder from './utils/Encoder'
-import Decoder from './utils/Decoder'
 import { MessageTypes } from './types'
 
 class Messages {

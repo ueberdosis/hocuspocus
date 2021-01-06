@@ -1,8 +1,8 @@
 import WebSocket from 'ws'
 import { IncomingMessage } from 'http'
 import Decoder from './utils/Decoder'
-import Messages from './Messages'
 import Document from './Document'
+import Messages from './Messages'
 import { MessageTypes, WsReadyStates } from './types'
 
 class Connection {

@@ -1,11 +1,11 @@
-import { map } from 'lib0'
 import WebSocket from 'ws'
-import { URLSearchParams } from 'url'
-import { Socket } from 'net'
 import { createServer, Server as HTTPServer, IncomingMessage } from 'http'
+import { map } from 'lib0'
+import { Socket } from 'net'
+import { URLSearchParams } from 'url'
+import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Configuration } from './types'
 
 /**
  * Hocuspocus y-js websocket server

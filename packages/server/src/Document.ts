@@ -1,8 +1,8 @@
-import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import Messages from './Messages'
+import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import Connection from './Connection'
+import Messages from './Messages'
 
 class Document extends Y.Doc {
 
