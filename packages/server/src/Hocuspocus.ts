@@ -5,19 +5,7 @@ import { Socket } from 'net'
 import { createServer, Server as HTTPServer, IncomingMessage } from 'http'
 import Document from './Document'
 import Connection from './Connection'
-
-export interface Configuration {
-  debounce: number,
-  debounceMaxWait: number,
-  httpServer: HTTPServer,
-  persistence: any,
-  port: number,
-  timeout: number,
-  onChange: (data: any) => void,
-  onConnect: (data: any, resolve: Function, reject: Function) => void,
-  onDisconnect: (data: any) => void,
-  onJoinDocument: (data: any, resolve: Function, reject: Function) => void,
-}
+import { Configuration } from './types'
 
 class Hocuspocus {
 
