@@ -1,16 +1,16 @@
-import * as Y from 'yjs'
+import { Doc } from 'yjs'
 import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import Connection from './Connection'
 import Messages from './Messages'
 
-class Document extends Y.Doc {
+class Document extends Doc {
 
   awareness: Awareness
 
   callbacks = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onUpdate: (document: Document, update: any) => {},
+    onUpdate: (document: Document, update: Uint8Array) => {},
   }
 
   connections = new Map()
@@ -36,7 +36,7 @@ class Document extends Y.Doc {
   /**
    * Set a callback that will be triggered when the document is updated
    */
-  onUpdate(callback: (document: Document, update: any) => void): Document {
+  onUpdate(callback: (document: Document, update: Uint8Array) => void): Document {
     this.callbacks.onUpdate = callback
 
     return this
@@ -110,7 +110,7 @@ class Document extends Y.Doc {
   /**
    * Apply the given awareness update
    */
-  applyAwarenessUpdate(connection: Connection, update: any): Document {
+  applyAwarenessUpdate(connection: Connection, update: Uint8Array): Document {
     applyAwarenessUpdate(
       this.awareness,
       update,
@@ -148,7 +148,7 @@ class Document extends Y.Doc {
   /**
    * Handle an updated document and sync changes to clients
    */
-  private handleUpdate(update: any): Document {
+  private handleUpdate(update: Uint8Array): Document {
     this.callbacks.onUpdate(this, update)
 
     const message = Messages.update(update)

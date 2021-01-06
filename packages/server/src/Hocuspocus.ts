@@ -132,7 +132,7 @@ class Hocuspocus {
   /**
    * Handle update of the given document
    */
-  private handleDocumentUpdate(document: Document, update: any, request: IncomingMessage): void {
+  private handleDocumentUpdate(document: Document, update: Uint8Array, request: IncomingMessage): void {
     if (!this.configuration.debounce) {
       return this.saveDocument(document, update, request)
     }
@@ -161,7 +161,7 @@ class Hocuspocus {
    * and execute the configured onChange hook
    * @private
    */
-  private saveDocument(document: Document, update: any, request:IncomingMessage): void {
+  private saveDocument(document: Document, update: Uint8Array, request:IncomingMessage): void {
     if (this.configuration.persistence) {
       this.configuration.persistence.store(document.name, update)
       console.log(`Document ${document.name} saved`)
