@@ -2075,9 +2075,9 @@
     defer-to-connect "^1.0.1"
 
 "@tiptap/core@^2.0.0-alpha.7":
-  version "2.0.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-alpha.9.tgz#365f94fce16eefa8cee677f5fcc1964b9d21a38a"
-  integrity sha512-g1THdmEREeSxusPin9SkTDLRutbppT9AWQBzpEX8qAXSbKYz3Fl+J2fftVMxPq/st7n+QmrzczirdeQng/4WRQ==
+  version "2.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-alpha.10.tgz#459ff82c2b4e871169a2f50e8e0c277fd283f3c7"
+  integrity sha512-RAstfhIcQBCZ0dUHU+CYz2lLjnhVCMK1Wjme1EnmUBHAW3IpDya8hIfnQlIonrSQkukJ1TMkbBWUATkbk8ihYg==
   dependencies:
     "@types/prosemirror-commands" "^1.0.3"
     "@types/prosemirror-inputrules" "^1.0.3"
