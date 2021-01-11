@@ -2,7 +2,6 @@
 import {
   Server,
   onConnectPayload,
-  onJoinDocumentPayload,
   onChangePayload,
   onDisconnectPayload,
 } from '@hocuspocus/server/src'
@@ -39,14 +38,12 @@ const server = Server.configure({
     // set context for later usage
     const context = { user_id: 1234 }
 
-    resolve(context)
-  },
-
-  onJoinDocument(data: onJoinDocumentPayload, resolve: Function, reject: Function) {
     // authorize user
-    // if (data.context.user_id !== 1234) {
+    // if (context.user_id !== 1234) {
     //   return reject()
     // }
+
+    console.log(`User ${context.user_id} connected to ${data.documentName}`)
 
     resolve()
   },

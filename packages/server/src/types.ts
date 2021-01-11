@@ -1,6 +1,7 @@
+import { Doc } from 'yjs'
 import { IncomingHttpHeaders, Server as HTTPServer } from 'http'
 import { URLSearchParams } from 'url'
-import { Doc } from 'yjs'
+import WebSocket from 'ws'
 import Document from './Document'
 
 export enum MessageTypes {
@@ -27,29 +28,26 @@ export interface Persistence {
 export interface Configuration {
   debounce: number,
   debounceMaxWait: number,
-  httpServer: HTTPServer,
+  httpServer: HTTPServer | null,
   onChange: (data: onChangePayload) => void,
   onConnect: (data: onConnectPayload, resolve: Function, reject: Function) => void,
   onDisconnect: (data: onDisconnectPayload) => void,
-  onJoinDocument: (data: onJoinDocumentPayload, resolve: Function, reject: Function) => void,
   persistence: Persistence | null,
-  port: number,
+  port: number | null,
   timeout: number,
+  websocketServer: WebSocket.Server | null,
 }
 
 export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
-}
-
-export interface onChangePayload extends onConnectPayload {
   clientsCount: number,
   document: Document,
   documentName: string,
 }
 
+export interface onChangePayload extends onConnectPayload {}
+
 export interface onDisconnectPayload extends onChangePayload {
   context: any,
 }
-
-export interface onJoinDocumentPayload extends onDisconnectPayload {}

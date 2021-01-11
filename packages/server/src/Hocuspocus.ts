@@ -1,9 +1,8 @@
 import WebSocket from 'ws'
-import { createServer, Server as HTTPServer, IncomingMessage } from 'http'
+import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { map } from 'lib0'
-import { Socket } from 'net'
 import { URLSearchParams } from 'url'
-import { Configuration, Persistence } from './types'
+import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
 
@@ -15,17 +14,14 @@ class Hocuspocus {
   configuration: Configuration = {
     debounce: 0,
     debounceMaxWait: 10000,
-    httpServer: createServer((request, response) => {
-      response.writeHead(200, { 'Content-Type': 'text/plain' })
-      response.end('OK')
-    }),
+    httpServer: null,
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
-    onJoinDocument: (data, resolve) => resolve(),
     persistence: null,
     port: 80,
     timeout: 30000,
+    websocketServer: null,
   }
 
   debounceStart!: number | null
@@ -43,9 +39,16 @@ class Hocuspocus {
    */
   constructor() {
     this.httpServer = this.configuration.httpServer
-    this.websocketServer = new WebSocket.Server({ noServer: true })
+      ? this.configuration.httpServer
+      : createServer((request, response) => {
+        response.writeHead(200, { 'Content-Type': 'text/plain' })
+        response.end('OK')
+      })
 
-    this.httpServer.on('upgrade', this.handleUpgrade.bind(this))
+    this.websocketServer = this.configuration.websocketServer
+      ? this.configuration.websocketServer
+      : new WebSocket.Server({ server: this.httpServer })
+
     this.websocketServer.on('connection', this.handleConnection.bind(this))
   }
 
@@ -65,34 +68,12 @@ class Hocuspocus {
    * Start the server
    */
   listen(): void {
-    this.httpServer.listen(this.configuration.port, () => {
-      console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
-    })
-  }
-
-  /**
-   * Handle upgrade request
-   * @private
-   */
-  private handleUpgrade(request: IncomingMessage, socket: Socket, head: Buffer): void {
-    console.log(`Connection request for ${request.url}`)
-
-    const hookPayload = {
-      requestHeaders: request.headers,
-      requestParameters: this.getParameters(request),
+    if (this.configuration.httpServer) {
+      return
     }
 
-    this.websocketServer.handleUpgrade(request, socket, head, connection => {
-      new Promise((resolve, reject) => {
-        this.configuration.onConnect(hookPayload, resolve, reject)
-      })
-        .then(context => {
-          this.websocketServer.emit('connection', connection, request, context)
-        })
-        .catch(() => {
-          connection.close()
-          console.log(`Unauthenticated request to ${request.url}`)
-        })
+    this.httpServer.listen(this.configuration.port, () => {
+      console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
     })
   }
 
@@ -118,7 +99,7 @@ class Hocuspocus {
     }
 
     new Promise((resolve, reject) => {
-      this.configuration.onJoinDocument(hookPayload, resolve, reject)
+      this.configuration.onConnect(hookPayload, resolve, reject)
     })
       .then(() => {
         console.log(`Connection established to ${request.url}`)
