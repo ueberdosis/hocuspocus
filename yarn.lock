@@ -2074,10 +2074,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@tiptap/core@^2.0.0-alpha.7":
-  version "2.0.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-alpha.9.tgz#365f94fce16eefa8cee677f5fcc1964b9d21a38a"
-  integrity sha512-g1THdmEREeSxusPin9SkTDLRutbppT9AWQBzpEX8qAXSbKYz3Fl+J2fftVMxPq/st7n+QmrzczirdeQng/4WRQ==
+"@tiptap/core@^2.0.0-alpha.10":
+  version "2.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-alpha.10.tgz#459ff82c2b4e871169a2f50e8e0c277fd283f3c7"
+  integrity sha512-RAstfhIcQBCZ0dUHU+CYz2lLjnhVCMK1Wjme1EnmUBHAW3IpDya8hIfnQlIonrSQkukJ1TMkbBWUATkbk8ihYg==
   dependencies:
     "@types/prosemirror-commands" "^1.0.3"
     "@types/prosemirror-inputrules" "^1.0.3"
@@ -2268,18 +2268,18 @@
     "@tiptap/extension-text" "^2.0.0-alpha.5"
     "@tiptap/extension-underline" "^2.0.0-alpha.5"
 
-"@tiptap/vue-starter-kit@^2.0.0-alpha.6":
-  version "2.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@tiptap/vue-starter-kit/-/vue-starter-kit-2.0.0-alpha.8.tgz#d8cdb7ea8b62840bc8e25a6bc4dcdf8094a22ba8"
-  integrity sha512-o46K2rRC5vllCq15259s+CITkPaFWFiY9yD4mHwOT4IE55ObMdQy2cQ3aFoU02rEClBtsp6UbAjjt5xgog4aWg==
+"@tiptap/vue-starter-kit@^2.0.0-alpha.9":
+  version "2.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@tiptap/vue-starter-kit/-/vue-starter-kit-2.0.0-alpha.9.tgz#18165e6da040993ec728ec27222d9ecfc379c244"
+  integrity sha512-tIYD0WiC1xX7XGyAxlt6SPTmTSH1NY3BSLMIlbDXb5OUsXkn+Y7dau4RVm/hD6VJRmkIFjBgPqujbk65rX55gw==
   dependencies:
     "@tiptap/starter-kit" "^2.0.0-alpha.7"
-    "@tiptap/vue" "^2.0.0-alpha.5"
+    "@tiptap/vue" "^2.0.0-alpha.6"
 
-"@tiptap/vue@^2.0.0-alpha.5":
-  version "2.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@tiptap/vue/-/vue-2.0.0-alpha.5.tgz#d9ce06ef3b95297c73ab1cce51c1cfd63d878705"
-  integrity sha512-7yHczZbN6bVgiboytRuTNqezdFWB4He8q6EAERELxsmKrrwC4xgEDQk3s5GcLhnjjytbPmnmgEAbtow1kfn/CQ==
+"@tiptap/vue@^2.0.0-alpha.6":
+  version "2.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@tiptap/vue/-/vue-2.0.0-alpha.6.tgz#6da518894dde796a7d8327a62e5ef55f85b4382f"
+  integrity sha512-UEnYD1uAtwPl4fB5cc5ZhSamO0bvbOvXLjoRh+uRc7R7UpVe5VvC1dgMZjrdLan7Q8XXxRBrCDc6/gCZOIIqAg==
   dependencies:
     prosemirror-view "^1.16.3"
 
@@ -6785,10 +6785,22 @@ globby@10.0.0:
     merge2 "^1.2.3"
     slash "^3.0.0"
 
-globby@^11.0.0, globby@^11.0.1:
+globby@^11.0.1:
   version "11.0.1"
   resolved "https://registry.yarnpkg.com/globby/-/globby-11.0.1.tgz#9a2bf107a068f3ffeabc49ad702c79ede8cfd357"
   integrity sha512-iH9RmgwCmUJHi2z5o2l3eTtGBtXek1OYlHrbcxOYugyHLmAsZrPj43OtHThd62Buh/Vv6VyCBD2bdyWcGNQqoQ==
+  dependencies:
+    array-union "^2.1.0"
+    dir-glob "^3.0.1"
+    fast-glob "^3.1.1"
+    ignore "^5.1.4"
+    merge2 "^1.3.0"
+    slash "^3.0.0"
+
+globby@^11.0.2:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/globby/-/globby-11.0.2.tgz#1af538b766a3b540ebfb58a32b2e2d5897321d83"
+  integrity sha512-2ZThXDvvV8fYFRVIxnrMQBipZQDr7MxKAmQK1vujaj9/7eF0efG7BPUKJ7jP7G5SLF37xKDXvO4S/KKLj/Z0og==
   dependencies:
     array-union "^2.1.0"
     dir-glob "^3.0.1"
@@ -7547,10 +7559,10 @@ iferr@^0.1.5:
   resolved "https://registry.yarnpkg.com/iferr/-/iferr-0.1.5.tgz#c60eed69e6d8fdb6b3104a1fcbca1c192dc5b501"
   integrity sha1-xg7taebY/bazEEofy8ocGS3FtQE=
 
-iframe-resizer@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/iframe-resizer/-/iframe-resizer-4.3.0.tgz#e07533e6c290f7fdce9425baa53b25655a4aee23"
-  integrity sha512-o/MZ4xIir4ch9ycL0tUsVrJuqWr+gS1XVAvlUigPnBDjnfXvctjHdlhb6CX2rav8CRY42rMstmg+NwyUPuIimw==
+iframe-resizer@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/iframe-resizer/-/iframe-resizer-4.3.1.tgz#7aca964ac02ba1fd2b8099b8ef30bc9a1f4f72ca"
+  integrity sha512-PkoTPNF6EYhTbDjogdKu7JVgKqRwwNBXMeywZaQyzEYM3BNltA8O9fIIrtUkmj+8VZGckXpwtXsWsaQ5lrhd0w==
 
 ignore-by-default@^1.0.1:
   version "1.0.1"
@@ -8641,7 +8653,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-lib0@^0.2.13, lib0@^0.2.31, lib0@^0.2.33, lib0@^0.2.34, lib0@^0.2.35:
+lib0@^0.2.13, lib0@^0.2.31, lib0@^0.2.34, lib0@^0.2.35:
   version "0.2.35"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.35.tgz#1d62adb3feefce70c84f3eb664c5e50286de41ca"
   integrity sha512-drVD3EscB3TIxiFzceuZg7oF5Z6I8a0KX+7FowNcAXOEsTej/hlHB+ElJ8Pa/Ge73Gy3fklSJtPxpNd2PajdWg==
@@ -9763,10 +9775,10 @@ node-sass@^5.0.0:
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
 
-nodemon@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.6.tgz#1abe1937b463aaf62f0d52e2b7eaadf28cc2240d"
-  integrity sha512-4I3YDSKXg6ltYpcnZeHompqac4E6JeAMpGm8tJnB9Y3T0ehasLa4139dJOcCrB93HHrUMsCrKtoAlXTqT5n4AQ==
+nodemon@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.7.tgz#6f030a0a0ebe3ea1ba2a38f71bf9bab4841ced32"
+  integrity sha512-XHzK69Awgnec9UzHr1kc8EomQh4sjTQ8oRf8TsGrSmHDx9/UmiGG9E/mM3BuTfNeFwdNBvrqQq/RHL0xIeyFOA==
   dependencies:
     chokidar "^3.2.2"
     debug "^3.2.6"
@@ -12067,10 +12079,10 @@ rollup-plugin-typescript2@^0.29.0:
     resolve "1.17.0"
     tslib "2.0.1"
 
-rollup@^2.36.0:
-  version "2.36.0"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.36.0.tgz#af2cdea36f70fa3de586840c2604882dfb4d0aac"
-  integrity sha512-L38QyQK77bkJy9nPyeydnHFK6xMofqumh4scTV2d4RG4EFq6pGdxnn67dVHFUDJ9J0PSEQx8zn1FiVS5TydsKg==
+rollup@^2.36.1:
+  version "2.36.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.36.1.tgz#2174f0c25c7b400d57b05628d0e732c7ae8d2178"
+  integrity sha512-eAfqho8dyzuVvrGqpR0ITgEdq0zG2QJeWYh+HeuTbpcaXk8vNFc48B7bJa1xYosTCKx0CuW+447oQOW8HgBIZQ==
   optionalDependencies:
     fsevents "~2.1.2"
 
@@ -12150,10 +12162,10 @@ sass-graph@2.2.5:
     scss-tokenizer "^0.2.3"
     yargs "^13.3.2"
 
-sass-loader@^10.0.3:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.1.0.tgz#1727fcc0c32ab3eb197cda61d78adf4e9174a4b3"
-  integrity sha512-ZCKAlczLBbFd3aGAhowpYEy69Te3Z68cg8bnHHl6WnSCvnKpbM6pQrz957HWMa8LKVuhnD9uMplmMAHwGQtHeg==
+sass-loader@^10.1.1:
+  version "10.1.1"
+  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.1.1.tgz#4ddd5a3d7638e7949065dd6e9c7c04037f7e663d"
+  integrity sha512-W6gVDXAd5hR/WHsPicvZdjAWHBcEJ44UahgxcIE196fW2ong0ZHMPO1kZuI5q0VlvMQZh32gpv69PLWQm70qrw==
   dependencies:
     klona "^2.0.4"
     loader-utils "^2.0.0"
@@ -14517,7 +14529,7 @@ y-prosemirror@^1.0.5:
   dependencies:
     lib0 "^0.2.34"
 
-y-protocols@^1.0.0, y-protocols@^1.0.1:
+y-protocols@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.2.tgz#32c7a2f656b82f435058d28406aa51780a1eb486"
   integrity sha512-V6ZAmokdogW52+VsIg/YC0R6CHWgG8/hjO3rYL10hAzeT5j464kDiRki31O+GzTj+dMgNYZNd6IDP9X35FLXrw==
@@ -14532,15 +14544,15 @@ y-redis@^1.0.2:
     ioredis "^4.14.1"
     lib0 "^0.2.13"
 
-y-websocket@^1.3.8:
-  version "1.3.8"
-  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-1.3.8.tgz#1ee881ff20b3d0e3a50ac4e472253757ebdb9ffe"
-  integrity sha512-ut2srey5upZQPYfBiT0mHhSxa50Fd0mOmfKR+F8Gxx/zwZ3y3tSNUOfblLcJtqY583gjH0s/zMOU+FKjhTCuog==
+y-websocket@^1.3.9:
+  version "1.3.9"
+  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-1.3.9.tgz#9a66ac337d248d6c428348c00079c533f777954c"
+  integrity sha512-iOi1shywIkf7jw10iq6zE/2d7nyKXmD91szdhGTgorcmApVzTte5K9yWVO+XVAcZcdQBT8ho1Nzw43ZFdfhS/A==
   dependencies:
     lib0 "^0.2.31"
     lodash.debounce "^4.0.8"
     y-leveldb "^0.1.0"
-    y-protocols "^1.0.0"
+    y-protocols "^1.0.1"
   optionalDependencies:
     ws "^6.2.1"
 
@@ -14643,12 +14655,12 @@ yauzl@^2.4.2:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
 
-yjs@^13.4.7:
-  version "13.4.9"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.4.9.tgz#8416d47eed7b1baa5a999840f01a790794af45fb"
-  integrity sha512-TJ6C7PPyiVP9HnSx40hm47FfacXcvMNy/70msnhXaebIFDDsVX6AOFTzLktCB6vY/SoCfpkIKO/hzhulfDTsMA==
+yjs@^13.4.12:
+  version "13.4.12"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.4.12.tgz#74e7fe5adaeb0056f500ed3a6765f5de08abfaf1"
+  integrity sha512-ABmFknpmjcGOOWx6m4dTsjEWsN77+jHTI5DbjbwUu5t9ni1teUPOrdZtsNwQDuNPTdwGpiU9MJtIr7W6dgr9aw==
   dependencies:
-    lib0 "^0.2.33"
+    lib0 "^0.2.35"
 
 yn@3.1.1:
   version "3.1.1"

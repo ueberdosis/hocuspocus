@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "y-leveldb": "^0.1.0",
-    "yjs": "^13.4.7"
+    "yjs": "^13.4.12"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"

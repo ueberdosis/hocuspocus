@@ -24,7 +24,7 @@
     "ws": "^7.4.0",
     "y-leveldb": "^0.1.0",
     "y-protocols": "^1.0.1",
-    "yjs": "^13.4.7"
+    "yjs": "^13.4.12"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"
