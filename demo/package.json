@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/demo",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,9 +8,9 @@
     "start:development": "nodemon -e ts --watch ./ --watch ../packages --exec npm start"
   },
   "devDependencies": {
-    "@hocuspocus/leveldb": "^1.0.0-alpha.0",
-    "@hocuspocus/redis": "^1.0.0-alpha.0",
-    "@hocuspocus/server": "^1.0.0-alpha.0",
+    "@hocuspocus/leveldb": "^1.0.0-alpha.7",
+    "@hocuspocus/redis": "^1.0.0-alpha.1",
+    "@hocuspocus/server": "^1.0.0-alpha.8",
     "nodemon": "^2.0.6",
     "ts-node": "^9.1.1"
   }
