@@ -30,7 +30,6 @@ class Document extends Doc {
     this.name = name
     this.mux = createMutex()
 
-    // TODO: Class extends value undefined is not a constructor or null
     this.awareness = new Awareness(this)
     this.awareness.setLocalState(null)
 
