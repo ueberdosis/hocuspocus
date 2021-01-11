@@ -153,6 +153,10 @@ class Connection {
 
     const syncMessage = Messages.read(message, this.document)
 
+    if (syncMessage.length() <= 1) {
+      return
+    }
+
     return this.send(
       syncMessage.encode(),
     )

@@ -1,6 +1,7 @@
 import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { Doc } from 'yjs'
+import { mutex, createMutex } from 'lib0/mutex'
 import Connection from './Connection'
 import Messages from './Messages'
 import { AwarenessUpdate } from './types'
@@ -18,6 +19,8 @@ class Document extends Doc {
 
   name: string
 
+  mux: mutex
+
   /**
    * Constructor.
    */
@@ -25,6 +28,7 @@ class Document extends Doc {
     super({ gc: true })
 
     this.name = name
+    this.mux = createMutex()
 
     // TODO: Class extends value undefined is not a constructor or null
     this.awareness = new Awareness(this)
