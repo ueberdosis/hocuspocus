@@ -1,11 +1,12 @@
-import { Doc } from 'yjs'
 import { RedisPersistence } from 'y-redis'
-import { Persistence } from '@hocuspocus/server'
+import {
+  Extension, onChangePayload, onConnectPayload, onDisconnectPayload,
+} from '@hocuspocus/server'
 
 export interface Configuration {
 }
 
-export class Redis implements Persistence {
+export class Redis implements Extension {
 
   configuration: Configuration = {}
 
@@ -22,13 +23,6 @@ export class Redis implements Persistence {
       ...configuration,
     }
 
-    return this
-  }
-
-  /**
-   * Connect to the given document
-   */
-  async connect(documentName: string, document: Doc): Promise<any> {
     this.persistence = new RedisPersistence(
       // @ts-ignore
       this.cluster
@@ -36,9 +30,26 @@ export class Redis implements Persistence {
         : { redisOpts: this.configuration },
     )
 
-    await this.persistence.bindState(documentName, document).synced
+    return this
   }
 
-  // eslint-disable-next-line
-  async store(documentName: string, update: Uint8Array): Promise<any> {}
+  /*
+   * onConnect hook
+   */
+  async onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+    await this.persistence.bindState(data.documentName, data.document).synced
+  }
+
+  /*
+   * onChange hook
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onChange(data: onChangePayload) {}
+
+  /*
+   * onDisconnect hook
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onDisconnect(data: onDisconnectPayload) {}
+
 }
