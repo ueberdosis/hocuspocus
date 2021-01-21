@@ -1,12 +1,14 @@
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
+import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
-import { Persistence } from '@hocuspocus/server'
+import {
+  Extension, onChangePayload, onConnectPayload, onDisconnectPayload,
+} from '@hocuspocus/server'
 
 export interface Configuration {
   path: string,
 }
 
-export class LevelDB implements Persistence {
+export class LevelDB implements Extension {
 
   configuration: Configuration = {
     path: './database',
@@ -28,22 +30,36 @@ export class LevelDB implements Persistence {
     return this
   }
 
-  /**
-   * Connect to the given document
+  /*
+   * onConnect hook
    */
-  async connect(documentName: string, document: Doc): Promise<any> {
-    const storedDocument = await this.provider.getYDoc(documentName)
-    const update = encodeStateAsUpdate(document)
+  async onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+    const storedDocument = await this.provider.getYDoc(data.documentName)
+    const update = encodeStateAsUpdate(data.document)
 
-    await this.store(documentName, update)
+    await this.store(data.documentName, update)
 
-    applyUpdate(document, encodeStateAsUpdate(storedDocument))
+    applyUpdate(data.document, encodeStateAsUpdate(storedDocument))
   }
 
-  /**
-   * Store the given update
+  /*
+   * onChange hook
    */
-  async store(documentName: string, update: Uint8Array): Promise<any> {
-    await this.provider.storeUpdate(documentName, update)
+  onChange(data: onChangePayload) {
+    this.store(data.documentName, data.update)
+  }
+
+  /*
+   * onDisconnect hook
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onDisconnect(data: onDisconnectPayload) {}
+
+  /**
+   * Store the given update in the database
+   * @private
+   */
+  private store(documentName: string, update: Uint8Array) {
+    this.provider.storeUpdate(documentName, update)
   }
 }
