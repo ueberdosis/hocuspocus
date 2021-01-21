@@ -14,14 +14,13 @@ class Hocuspocus {
   configuration: Configuration = {
     debounce: 0,
     debounceMaxWait: 10000,
-    httpServer: null,
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
     persistence: null,
     port: 80,
     timeout: 30000,
-    websocketServer: null,
+    external: false,
   }
 
   debounceStart!: number | null
@@ -30,25 +29,24 @@ class Hocuspocus {
 
   documents = new Map()
 
-  httpServer: HTTPServer
+  httpServer?: HTTPServer
 
-  websocketServer: WebSocket.Server
+  websocketServer?: WebSocket.Server
 
   /**
    * Constructor
    */
   constructor() {
-    this.httpServer = this.configuration.httpServer
-      ? this.configuration.httpServer
-      : createServer((request, response) => {
-        response.writeHead(200, { 'Content-Type': 'text/plain' })
-        response.end('OK')
-      })
+    if (this.configuration.external) {
+      return
+    }
 
-    this.websocketServer = this.configuration.websocketServer
-      ? this.configuration.websocketServer
-      : new WebSocket.Server({ server: this.httpServer })
+    this.httpServer = createServer((request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
+      response.end('OK')
+    })
 
+    this.websocketServer = new WebSocket.Server({ server: this.httpServer })
     this.websocketServer.on('connection', this.handleConnection.bind(this))
   }
 
@@ -68,7 +66,7 @@ class Hocuspocus {
    * Start the server
    */
   listen(): void {
-    if (this.configuration.httpServer) {
+    if (!this.httpServer) {
       return
     }
 
@@ -81,7 +79,7 @@ class Hocuspocus {
    * Handle the incoming websocket connection
    * @private
    */
-  private handleConnection(
+  handleConnection(
     incoming: WebSocket,
     request: IncomingMessage,
     context: any = null,

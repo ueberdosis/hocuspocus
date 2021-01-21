@@ -15,6 +15,7 @@
   "scripts": {
     "start": "concurrently --kill-others \"yarn start:demo\" \"yarn start:docs\"",
     "start:demo": "yarn --cwd ./demo start:development",
+    "start:demo:express": "yarn --cwd ./demo start:development:express",
     "start:docs": "yarn --cwd ./docs start",
     "build:packages": "yarn clean:packages && rollup -c",
     "build:docs": "yarn --cwd ./docs build",
