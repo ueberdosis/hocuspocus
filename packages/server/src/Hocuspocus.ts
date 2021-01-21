@@ -37,6 +37,7 @@ class Hocuspocus {
    * Constructor
    */
   constructor() {
+
     if (this.configuration.external) {
       return
     }
@@ -48,12 +49,14 @@ class Hocuspocus {
 
     this.websocketServer = new WebSocket.Server({ server: this.httpServer })
     this.websocketServer.on('connection', this.handleConnection.bind(this))
+
   }
 
   /**
    * Configure the server
    */
   configure(configuration: Partial<Configuration>): Hocuspocus {
+
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -63,12 +66,14 @@ class Hocuspocus {
     this.configuration.extensions.push({ onConnect, onChange, onDisconnect })
 
     return this
+
   }
 
   /**
    * Start the server
    */
   listen(): void {
+
     if (!this.httpServer) {
       return
     }
@@ -76,17 +81,14 @@ class Hocuspocus {
     this.httpServer.listen(this.configuration.port, () => {
       console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
     })
+
   }
 
   /**
    * Handle the incoming websocket connection
-   * @private
    */
-  handleConnection(
-    incoming: WebSocket,
-    request: IncomingMessage,
-    context: any = null,
-  ): void {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
+
     const document = this.createDocument(request)
     const connection = this.createConnection(incoming, request, document, context)
 
@@ -96,7 +98,7 @@ class Hocuspocus {
       document,
       documentName: document.name,
       requestHeaders: request.headers,
-      requestParameters: this.getParameters(request),
+      requestParameters: Hocuspocus.getParameters(request),
     }
 
     const chain = this.runHook('onConnect', 0, hookPayload)
@@ -113,12 +115,15 @@ class Hocuspocus {
         connection.close()
         console.log(`Connection to ${request.url} was refused`)
       })
+
   }
 
   /**
    * Handle update of the given document
+   * @private
    */
   private handleDocumentUpdate(document: Document, update: Uint8Array, request: IncomingMessage): void {
+
     if (!this.configuration.debounce) {
       return this.saveDocument(document, update, request)
     }
@@ -126,11 +131,11 @@ class Hocuspocus {
     const { name } = document
 
     if (!this.debounceStart.get(name)) {
-      this.debounceStart.set(name, this.now())
+      this.debounceStart.set(name, Hocuspocus.now())
     }
 
     // @ts-ignore
-    if (this.now() - this.debounceStart.get(name) >= this.configuration.debounceMaxWait) {
+    if (Hocuspocus.now() - this.debounceStart.get(name) >= this.configuration.debounceMaxWait) {
       this.debounceStart.set(name, null)
       return this.saveDocument(document, update, request)
     }
@@ -144,6 +149,7 @@ class Hocuspocus {
       () => this.saveDocument(document, update, request),
       this.debounceDuration,
     ))
+
   }
 
   /**
@@ -151,20 +157,23 @@ class Hocuspocus {
    * @private
    */
   private saveDocument(document: Document, update: Uint8Array, request:IncomingMessage): void {
+
     this.configuration.extensions.forEach(extension => extension.onChange({
       clientsCount: document.connectionsCount(),
       document,
       documentName: document.name,
       requestHeaders: request.headers,
-      requestParameters: this.getParameters(request),
+      requestParameters: Hocuspocus.getParameters(request),
       update,
     }))
+
   }
 
   /**
    * Create a new document by the given request
    */
   private createDocument(request: IncomingMessage): Document {
+
     const documentName = request.url?.slice(1)?.split('?')[0] || ''
 
     return map.setIfUndefined(this.documents, documentName, () => {
@@ -178,25 +187,16 @@ class Hocuspocus {
 
       return document
     })
+
   }
 
   /**
    * Create a new connection by the given request and document
    * @private
    */
-  private createConnection(
-    connection: WebSocket,
-    request: IncomingMessage,
-    document: Document,
-    context = null,
-  ): Connection {
-    return new Connection(
-      connection,
-      request,
-      document,
-      this.configuration.timeout,
-      context,
-    )
+  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, context = null): Connection {
+
+    return new Connection(connection, request, document, this.configuration.timeout, context)
       .onClose(document => {
 
         this.configuration.extensions.forEach(extension => extension.onDisconnect({
@@ -205,7 +205,7 @@ class Hocuspocus {
           document,
           documentName: document.name,
           requestHeaders: request.headers,
-          requestParameters: this.getParameters(request),
+          requestParameters: Hocuspocus.getParameters(request),
         }))
 
         if (document.connectionsCount() > 0) {
@@ -214,6 +214,7 @@ class Hocuspocus {
 
         this.documents.delete(document.name)
       })
+
   }
 
   /**
@@ -222,38 +223,45 @@ class Hocuspocus {
    * @private
    */
   private runHook(name: string, extensionIndex: number, hookPayload: any): Promise<any> {
+
     return new Promise((resolve, reject) => {
       // @ts-ignore
       this.configuration.extensions[extensionIndex][name](hookPayload, resolve, reject)
     })
+
   }
 
   /**
    * Get the current process time in milliseconds
    * @private
    */
-  private now(): number {
+  private static now(): number {
+
     const hrTime = process.hrtime()
     return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
+
   }
 
   /**
    * Get parameters by the given request
    * @private
    */
-  private getParameters(request: IncomingMessage): URLSearchParams {
-    const query = request?.url?.split('?') || []
+  private static getParameters(request: IncomingMessage): URLSearchParams {
 
+    const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
+
   }
 
   /**
    * Get debounce duration
    */
   get debounceDuration(): number {
+
     return Number.isNaN(this.configuration.debounce)
       ? 2000
       : this.configuration.debounce
+
   }
 }
 
