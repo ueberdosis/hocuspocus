@@ -12,7 +12,7 @@ import Connection from './Connection'
 class Hocuspocus {
 
   configuration: Configuration = {
-    debounce: 0,
+    debounce: 3000,
     debounceMaxWait: 10000,
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
@@ -23,9 +23,9 @@ class Hocuspocus {
     external: false,
   }
 
-  debounceStart!: number | null
+  debounceStart: Map<string, number|null> = new Map()
 
-  debounceTimeout!: NodeJS.Timeout
+  debounceTimeout: Map<string, NodeJS.Timeout> = new Map()
 
   documents = new Map()
 
@@ -116,23 +116,27 @@ class Hocuspocus {
       return this.saveDocument(document, update, request)
     }
 
-    if (!this.debounceStart) {
-      this.debounceStart = this.now()
+    const { name } = document
+
+    if (!this.debounceStart.get(name)) {
+      this.debounceStart.set(name, this.now())
     }
 
-    if (this.now() - this.debounceStart >= this.configuration.debounceMaxWait) {
-      this.debounceStart = null
+    // @ts-ignore
+    if (this.now() - this.debounceStart.get(name) >= this.configuration.debounceMaxWait) {
+      this.debounceStart.set(name, null)
       return this.saveDocument(document, update, request)
     }
 
-    if (this.debounceTimeout) {
-      clearTimeout(this.debounceTimeout)
+    if (this.debounceTimeout.get(name)) {
+      // @ts-ignore
+      clearTimeout(this.debounceTimeout.get(name))
     }
 
-    this.debounceTimeout = setTimeout(
+    this.debounceTimeout.set(name, setTimeout(
       () => this.saveDocument(document, update, request),
       this.debounceDuration,
-    )
+    ))
   }
 
   /**
