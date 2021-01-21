@@ -13,34 +13,30 @@ const server = Server.configure({
 
   onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
     // authenticate using request headers
-    if (data.requestHeaders.access_token === 'super-secret-token') {
-      return reject()
-    }
-
-    // set context for later usage
-    const context = { user_id: 1234 }
-
-    // authorize user
-    if (context.user_id !== 1234) {
-      return reject()
-    }
-
-    console.log(`User ${context.user_id} connected to ${data.documentName}`)
+    // if (data.requestHeaders.access_token === 'super-secret-token') {
+    //   return reject()
+    // }
+    //
+    // // set context for later usage
+    // const context = { user_id: 1234 }
+    //
+    // // authorize user
+    // if (context.user_id !== 1234) {
+    //   return reject()
+    // }
 
     resolve()
   },
 
   onChange(data: onChangePayload) {
 
-    data.document.getText()
-
     // do something with the data
-    console.log(`${data.documentName} was sent to an API!`)
+    // console.log(`${data.documentName} was sent to an API!`)
   },
 
   onDisconnect(data: onDisconnectPayload) {
     // handle disconnect
-    console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
+    // console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
   },
 })
 
