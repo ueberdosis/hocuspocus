@@ -19,18 +19,16 @@ export interface AwarenessUpdate {
   removed: Array<any>,
 }
 
-export interface Persistence {
-  connect(documentName: string, document: Doc): Promise<any>,
-  store(documentName: string, update: Uint8Array): Promise<any>,
+export interface Extension {
+  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
+  onChange(data: onChangePayload): void,
+  onDisconnect(data: onDisconnectPayload): void
 }
 
-export interface Configuration {
+export interface Configuration extends Extension {
   debounce: number,
   debounceMaxWait: number,
-  onChange: (data: onChangePayload) => void,
-  onConnect: (data: onConnectPayload, resolve: Function, reject: Function) => void,
-  onDisconnect: (data: onDisconnectPayload) => void,
-  persistence: Persistence | null,
+  extensions: Array<Extension>,
   port: number | null,
   timeout: number,
   external: boolean | null,
@@ -44,8 +42,10 @@ export interface onConnectPayload {
   documentName: string,
 }
 
-export interface onChangePayload extends onConnectPayload {}
+export interface onChangePayload extends onConnectPayload {
+  update: Uint8Array,
+}
 
-export interface onDisconnectPayload extends onChangePayload {
+export interface onDisconnectPayload extends onConnectPayload {
   context: any,
 }

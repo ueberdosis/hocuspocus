@@ -2,7 +2,7 @@ import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import * as map from 'lib0/map'
 import { URLSearchParams } from 'url'
-import { Configuration } from './types'
+import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'
 
@@ -12,12 +12,12 @@ import Connection from './Connection'
 class Hocuspocus {
 
   configuration: Configuration = {
-    debounce: 3000,
+    debounce: 1000,
     debounceMaxWait: 10000,
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
-    persistence: null,
+    extensions: [],
     port: 80,
     timeout: 30000,
     external: false,
@@ -59,6 +59,9 @@ class Hocuspocus {
       ...configuration,
     }
 
+    const { onConnect, onChange, onDisconnect } = this.configuration
+    this.configuration.extensions.push({ onConnect, onChange, onDisconnect })
+
     return this
   }
 
@@ -96,9 +99,13 @@ class Hocuspocus {
       requestParameters: this.getParameters(request),
     }
 
-    new Promise((resolve, reject) => {
-      this.configuration.onConnect(hookPayload, resolve, reject)
-    })
+    const chain = this.runHook('onConnect', 0, hookPayload)
+
+    for (let i = 1; i < this.configuration.extensions.length; i += 1) {
+      chain.then(() => this.runHook('onConnect', i, hookPayload))
+    }
+
+    chain
       .then(() => {
         console.log(`Connection established to ${request.url}`)
       })
@@ -140,23 +147,18 @@ class Hocuspocus {
   }
 
   /**
-   * Save the given document using the configured persistence
-   * and execute the configured onChange hook
+   * Save the given document using the configured extensions
    * @private
    */
   private saveDocument(document: Document, update: Uint8Array, request:IncomingMessage): void {
-    if (this.configuration.persistence) {
-      this.configuration.persistence.store(document.name, update)
-      console.log(`Document ${document.name} saved`)
-    }
-
-    this.configuration.onChange({
+    this.configuration.extensions.forEach(extension => extension.onChange({
       clientsCount: document.connectionsCount(),
       document,
       documentName: document.name,
       requestHeaders: request.headers,
       requestParameters: this.getParameters(request),
-    })
+      update,
+    }))
   }
 
   /**
@@ -171,10 +173,6 @@ class Hocuspocus {
       document.onUpdate((document, update) => {
         this.handleDocumentUpdate(document, update, request)
       })
-
-      if (this.configuration.persistence) {
-        this.configuration.persistence.connect(documentName, document)
-      }
 
       this.documents.set(documentName, document)
 
@@ -201,14 +199,14 @@ class Hocuspocus {
     )
       .onClose(document => {
 
-        this.configuration.onDisconnect({
+        this.configuration.extensions.forEach(extension => extension.onDisconnect({
           clientsCount: document.connectionsCount(),
           context,
           document,
           documentName: document.name,
           requestHeaders: request.headers,
           requestParameters: this.getParameters(request),
-        })
+        }))
 
         if (document.connectionsCount() > 0) {
           return
@@ -219,17 +217,31 @@ class Hocuspocus {
   }
 
   /**
-   * Get the current process time in milliseconds
+   * Run a hook that reacts to a promise by the given name on the
+   * extension with the given index
+   * @private
    */
-  now(): number {
+  private runHook(name: string, extensionIndex: number, hookPayload: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      this.configuration.extensions[extensionIndex][name](hookPayload, resolve, reject)
+    })
+  }
+
+  /**
+   * Get the current process time in milliseconds
+   * @private
+   */
+  private now(): number {
     const hrTime = process.hrtime()
     return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
   }
 
   /**
    * Get parameters by the given request
+   * @private
    */
-  getParameters(request: IncomingMessage): URLSearchParams {
+  private getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
 
     return new URLSearchParams(query[1] ? query[1] : '')
