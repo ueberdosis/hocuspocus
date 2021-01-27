@@ -12,7 +12,7 @@
   ],
   "type": "module",
   "source": "src/index.ts",
-  "main": "dist/hocuspocus-server.js",
+  "main": "dist/hocuspocus-server.esm.js",
   "module": "dist/hocuspocus-server.esm.js",
   "types": "dist/packages/server/src/index.d.ts",
   "exports": {
