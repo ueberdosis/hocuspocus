@@ -37,6 +37,13 @@ server.listen()
 
 Coming soon…
 
+* Shutdown the server
+* Copy files & folders
+* Start the server
+
+https://blog.senx.io/demystifying-leveldb/
+https://stackoverflow.com/a/18167774
+
 
 ### Redis extension
 
