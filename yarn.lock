@@ -2229,9 +2229,9 @@
     prosemirror-inputrules "^1.1.3"
 
 "@tiptap/extension-task-list@^2.0.0-alpha.4":
-  version "2.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-list/-/extension-task-list-2.0.0-alpha.5.tgz#2d901e5d69e2b9a84c6c2f687459f14e0cf702e3"
-  integrity sha512-u6uo72r84p2mOsfB6j+xF+6sMzIMs60ZRrEjLZdhHe3/Csn2XdcenpOfo7Xzjur5Yn1eaalNksQbmo/ZhiO3LQ==
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-list/-/extension-task-list-2.0.0-alpha.8.tgz#56f5474db3730c37e77535e04476fdcb01265f99"
+  integrity sha512-69oRBF2v8qqDwLcQpoY/jmFoEu+Z7o+7MkG1RFw8xCx9nm9IFsVoLqSvUTGU8QM6+kvpJvGQ0XrPvpaF8DcYMQ==
 
 "@tiptap/extension-text@^2.0.0-alpha.5":
   version "2.0.0-alpha.5"
