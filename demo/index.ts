@@ -1,7 +1,5 @@
-import {
-  Server, onChangePayload, onDisconnectPayload, onConnectPayload,
-} from '@hocuspocus/server'
-import { LevelDB } from '@hocuspocus/leveldb'
+import { Server } from '../packages/server/src/index'
+import { LevelDB } from '../packages/leveldb/src/index'
 
 const server = Server.configure({
 
@@ -11,7 +9,7 @@ const server = Server.configure({
     path: './database',
   }),
 
-  onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+  onConnect(data, resolve, reject) {
     // authenticate using request headers
     // if (data.requestHeaders.access_token === 'super-secret-token') {
     //   return reject()
@@ -28,13 +26,13 @@ const server = Server.configure({
     resolve()
   },
 
-  onChange(data: onChangePayload) {
+  onChange(data) {
 
     // do something with the data
     // console.log(`${data.documentName} was sent to an API!`)
   },
 
-  onDisconnect(data: onDisconnectPayload) {
+  onDisconnect(data) {
     // handle disconnect
     // console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
   },

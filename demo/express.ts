@@ -1,7 +1,7 @@
 import express from 'express'
 import expressWebsockets from 'express-ws'
 import WebSocket from 'ws'
-import { Server, onChangePayload, onDisconnectPayload } from '@hocuspocus/server/src'
+import { Server } from '../packages/server/src/index'
 
 /*
  * Setup the collaborative editing backend and set external to true
@@ -12,11 +12,11 @@ import { Server, onChangePayload, onDisconnectPayload } from '@hocuspocus/server
 const server = Server.configure({
   external: true,
 
-  onChange(data: onChangePayload) {
+  onChange(data) {
     // do something with the data
   },
 
-  onDisconnect(data: onDisconnectPayload) {
+  onDisconnect(data) {
     // handle disconnect
   },
 })
@@ -26,7 +26,7 @@ const server = Server.configure({
  */
 const { app } = expressWebsockets(express())
 
-app.get('/', (request: any, response:any) => {
+app.get('/', (request, response) => {
   response.send('Hello World!')
 })
 
@@ -37,7 +37,7 @@ app.get('/', (request: any, response:any) => {
  * You can set any contextual data like in the onConnect hook
  * and pass it to the handleConnection method.
  */
-app.ws('/collaboration/:document', (websocket: WebSocket, request: any) => {
+app.ws('/collaboration/:document', (websocket, request: any) => {
   const context = { user_id: 1234 }
   server.handleConnection(websocket, request, context)
 })
