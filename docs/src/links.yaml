@@ -23,15 +23,12 @@
 
 - title: Guide
   items:
-    - title: Hooks
-      link: /guide/hooks
-      draft: true
-    - title: Documents
-      link: /guide/documents
-      draft: true
+    - title: Configuration
+      link: /guide/configuration
     - title: Authentication & Authorization
       link: /guide/authentication-and-authorization
-      draft: true
+    - title: Working with Documents
+      link: /guide/documents
     - title: Extensions
       link: /guide/extensions
       draft: true

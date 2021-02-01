@@ -1,20 +1,83 @@
-# Documents
+# Working with Documents
 
 ## toc
 
-## Introduction
-The document name is `'example-document'` in all examples here, but it could be any string.
+## Document names
 
-## Real-world examples
-In a real-world app you would probably add the name of your entity, an unique ID of the entity and in some cases even the field (if you have multiple fields that you want to make collaborative). Here is how that could look like for a CMS:
+The `y-websocket` provider passes a document name string to hocuspocus. This document name can be
+used to identify the document the current user is editing. (Throughout these docs we
+used `example-document`)
+
+### Real-world example
+
+In a real-world app you would probably add the name of your entity, a unique ID of the entity and in
+some cases even the field (if you have multiple fields that you want to make collaborative). Here is
+how that could look like for a CMS:
 
 ```js
 const documentName = 'page.140.content'
 ```
 
-In the backend, you can split the string to know the user is typing on a `page` with the ID `140` in the `content` field to manage authorization and such accordingly.
+Now you can easily split this to get all desired information separately:
 
-New documents are created on the fly, no need to tell the backend about them, besides passing a string to the provider.
+```js
+const [ entityType, entityID, field ] = documentName.split('.')
 
-## Parse names
-TODO
+console.log(entityType) // prints "page"
+console.log(entityID) // prints "140"
+console.log(field) // prints "content"
+```
+
+## Handling Document changes
+
+With the `onChange` hook you can listen to changes of the document and handle them. In a real-world
+application you would probably save the resulting document to a database, send a webhook to an API
+or something else.
+
+The `onChange` hook is debounced, take a look [here](/guide/configuration) on how
+to configure this.
+
+```typescript
+import { writeFile } from 'fs'
+import { Server } from '@hocuspocus/server'
+import { yDocToProsemirrorJSON } from 'y-prosemirror'
+
+const hocuspocus = Server.configure({
+  onChange(data) {
+
+    // Get the underlying Y-Doc
+    const ydoc = data.document
+
+    // Convert the y-doc to the format your editor uses, in this
+    // example Prosemirror JSON for the tiptap editor
+    const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+
+    // Save your document. In a real-world app this could be a database query
+    // a webhook or something else
+    writeFile(
+      `/path/to/your/documents/${data.documentName}.json`,
+      prosemirrorDocument
+    )
+
+  },
+})
+
+hocuspocus.listen()
+```
+
+The `data` passed to the `onChange` hook has the following attributes:
+
+```typescript
+import { IncomingHttpHeaders } from 'http'
+import { URLSearchParams } from 'url'
+import { Document } from '@hocuspocus/server'
+
+const data = {
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  clientsCount: number,
+  document: Document,
+  documentName: string,
+  update: Uint8Array,
+}
+```

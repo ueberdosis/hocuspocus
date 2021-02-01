@@ -1,4 +1,3 @@
-import { Doc } from 'yjs'
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import Document from './Document'
