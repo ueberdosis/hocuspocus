@@ -65,6 +65,8 @@ const hocuspocus = Server.configure({
 hocuspocus.listen()
 ```
 
+### Payload attributes
+
 The `data` passed to the `onChange` hook has the following attributes:
 
 ```typescript
@@ -80,4 +82,41 @@ const data = {
   documentName: string,
   update: Uint8Array,
 }
+```
+
+## Importing documents
+
+Coming soon…
+
+## Full example
+
+```typescript
+import { writeFile } from 'fs'
+import { Server } from '@hocuspocus/server'
+import { yDocToProsemirrorJSON } from 'y-prosemirror'
+
+const hocuspocus = Server.configure({
+  onChange(data) {
+
+    // Get entity and field information from the document name
+    const [ entityType, entityID, field ] = data.documentName.split('.')
+
+    // Get the underlying Y-Doc
+    const ydoc = data.document
+
+    // Convert the y-doc to the format your editor uses, in this
+    // example Prosemirror JSON for the tiptap editor
+    const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+
+    // Save your document. In a real-world app this could be a database query
+    // a webhook or something else
+    writeFile(
+      `/path/to/your/documents/${entityType}/${entityID}/${field}.json`,
+      prosemirrorDocument
+    )
+
+  },
+})
+
+hocuspocus.listen()
 ```

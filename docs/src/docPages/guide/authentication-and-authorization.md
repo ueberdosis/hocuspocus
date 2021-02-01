@@ -17,7 +17,7 @@ const server = Server.configure({
        return reject()
     }
 
-    // You can set contextual data
+    // You can set contextual data…
     const context = {
         user: {
             id: 1234,
@@ -25,13 +25,15 @@ const server = Server.configure({
         },
     }
 
-    // And pass it along to use in other hooks
+    // …and pass it along to use it in other hooks
     resolve(context)
   },
 })
 
 server.listen()
 ```
+
+### Hook payload
 
 The `data` passed to the `onConnect` hook has the following attributes:
 

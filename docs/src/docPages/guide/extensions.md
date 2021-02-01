@@ -3,32 +3,45 @@
 ## toc
 
 ## Introduction
-By default, hocuspocus store documents in the memory only. Hence they are deleted when the server is stopped. It’s probably sufficient for your first experiments, but it’s unlikely that you want this behaviour in a production environment.
 
-No worries, though. You can use a persistence driver to store and restore changes, for example from the hard disk.
+Extensions augment hocuspocus and add additional features. They use the same API and the same hooks you saw in the previous chapters.
 
-## LevelDB
-LevelDB is fast key-value storage written at Google. With the LevelDB persistence adapter document changes are stored on the hard disk.
+## Official extensions
 
-When you restart the server, it’ll restore documents from the hard disk, in the following example from the `./database` folder:
+### LevelDB persistence
+
+By default, hocuspocus stores documents in memory only, so they will be deleted when the server is stopped. It’s probably sufficient for your first experiments, but it’s unlikely that you want this behavior in a production environment.
+
+LevelDB is fast key-value storage written at Google. With the LevelDB persistence adapter document changes are stored on the hard disk. When you restart the server, it’ll restore documents from the hard disk.
+
+#### Configuration
+
+In this example we configured the LevelDB extension to persist data in the `./database` folder:
 
 ```js
 import { Server } from '@hocuspocus/server'
 import { LevelDB } from '@hocuspocus/leveldb'
 
 const server = Server.configure({
-  persistence: new LevelDB({
-    path: './database',
-  }),
+
+  extensions: [
+    new LevelDB({ path: './database' })
+  ],
+
 })
 
 server.listen()
 ```
 
-That’s also the exact same backend code that we use for all examples here. Nice, isn’t it?
+#### Backups
 
-### Backups
-TODO
+Coming soon…
 
-### Initial import
-TODO
+
+### Redis extension
+
+Coming soon…
+
+## Create your own extension
+
+Coming soon…
