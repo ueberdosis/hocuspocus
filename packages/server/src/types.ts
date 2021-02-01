@@ -19,6 +19,7 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
+  onCreateDocument(data: onCreateDocumentPayload): void,
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onChange(data: onChangePayload): void,
   onDisconnect(data: onDisconnectPayload): void
@@ -33,12 +34,15 @@ export interface Configuration extends Extension {
   external: boolean | null,
 }
 
-export interface onConnectPayload {
+export interface onCreateDocumentPayload {
+  document: Document,
+  documentName: string,
+}
+
+export interface onConnectPayload extends onCreateDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   clientsCount: number,
-  document: Document,
-  documentName: string,
 }
 
 export interface onChangePayload extends onConnectPayload {

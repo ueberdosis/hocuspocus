@@ -1,7 +1,11 @@
-import {
-  Server, onChangePayload, onDisconnectPayload, onConnectPayload,
-} from '@hocuspocus/server'
 import { LevelDB } from '@hocuspocus/leveldb'
+import {
+  Server,
+  onChangePayload,
+  onDisconnectPayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
+} from '@hocuspocus/server'
 
 const server = Server.configure({
 
@@ -11,6 +15,10 @@ const server = Server.configure({
     new LevelDB({ path: './database' }),
   ],
 
+  onCreateDocument(data: onCreateDocumentPayload) {
+    console.log('document created')
+  },
+
   onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
     console.log('connected')
 
@@ -19,16 +27,10 @@ const server = Server.configure({
 
   onChange(data: onChangePayload) {
     console.log('changed')
-
-    // do something with the data
-    // console.log(`${data.documentName} was sent to an API!`)
   },
 
   onDisconnect(data: onDisconnectPayload) {
     console.log('disconnected')
-
-    // handle disconnect
-    // console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
   },
 })
 

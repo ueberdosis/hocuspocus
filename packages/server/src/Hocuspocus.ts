@@ -14,6 +14,7 @@ class Hocuspocus {
   configuration: Configuration = {
     debounce: 1000,
     debounceMaxWait: 10000,
+    onCreateDocument: () => null,
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
@@ -62,8 +63,16 @@ class Hocuspocus {
       ...configuration,
     }
 
-    const { onConnect, onChange, onDisconnect } = this.configuration
-    this.configuration.extensions.push({ onConnect, onChange, onDisconnect })
+    const {
+      onConnect,
+      onChange,
+      onDisconnect,
+      onCreateDocument,
+    } = this.configuration
+
+    this.configuration.extensions.push({
+      onConnect, onChange, onDisconnect, onCreateDocument,
+    })
 
     return this
 
@@ -101,13 +110,7 @@ class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    const chain = this.runHook('onConnect', 0, hookPayload)
-
-    for (let i = 1; i < this.configuration.extensions.length; i += 1) {
-      chain.then(() => this.runHook('onConnect', i, hookPayload))
-    }
-
-    chain
+    this.runAllHooks('onConnect', hookPayload)
       .then(() => {
         console.log(`Connection established to ${request.url}`)
       })
@@ -176,12 +179,14 @@ class Hocuspocus {
 
     const documentName = request.url?.slice(1)?.split('?')[0] || ''
 
-    return map.setIfUndefined(this.documents, documentName, () => {
+    return map.setIfUndefined(this.documents, documentName, async () => {
       const document = new Document(documentName)
 
       document.onUpdate((document, update) => {
         this.handleDocumentUpdate(document, update, request)
       })
+
+      await this.runAllHooks('onCreateDocument', { document, documentName })
 
       this.documents.set(documentName, document)
 
@@ -214,6 +219,22 @@ class Hocuspocus {
 
         this.documents.delete(document.name)
       })
+
+  }
+
+  /**
+   * Run all the given hook on all configured extensions
+   * @private
+   */
+  private runAllHooks(name: string, hookPayload: any): Promise<any> {
+
+    const chain = this.runHook(name, 0, hookPayload)
+
+    for (let i = 1; i < this.configuration.extensions.length; i += 1) {
+      chain.then(() => this.runHook(name, i, hookPayload))
+    }
+
+    return chain
 
   }
 

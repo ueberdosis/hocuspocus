@@ -1,7 +1,7 @@
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
 import {
-  Extension, onChangePayload, onConnectPayload, onDisconnectPayload,
+  Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -33,7 +33,7 @@ export class LevelDB implements Extension {
   /*
    * onConnect hook
    */
-  async onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {
+  async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
     const storedDocument = await this.provider.getYDoc(data.documentName)
     const update = encodeStateAsUpdate(data.document)
 
@@ -48,6 +48,12 @@ export class LevelDB implements Extension {
   onChange(data: onChangePayload): void {
     this.store(data.documentName, data.update)
   }
+
+  /*
+   * onConnect hook
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onConnect(data: onConnectPayload): void {}
 
   /*
    * onDisconnect hook
