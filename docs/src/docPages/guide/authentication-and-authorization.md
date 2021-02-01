@@ -1,4 +1,7 @@
-# Authentication
+# Authentication & Authorization
+
+
+
 With the `onConnect` hook you can write a custom Promise to check if a client is authenticated. That can be a request to an API, to a microservice, a database query, or whatever is needed, as long as it’s executing `resolve()` at some point. You can also pass contextual data to the `resolve()` method which will be accessible in other hooks.
 
 ```js

@@ -1,38 +1,32 @@
-import { Server } from '@hocuspocus/server'
+import {
+  Server, onChangePayload, onDisconnectPayload, onConnectPayload,
+} from '@hocuspocus/server'
 import { LevelDB } from '@hocuspocus/leveldb'
 
 const server = Server.configure({
 
   port: 1234,
 
-  persistence: new LevelDB({
-    path: './database',
-  }),
+  extensions: [
+    new LevelDB({ path: './database' }),
+  ],
 
-  onConnect(data, resolve, reject) {
-    // authenticate using request headers
-    // if (data.requestHeaders.access_token === 'super-secret-token') {
-    //   return reject()
-    // }
-    //
-    // // set context for later usage
-    // const context = { user_id: 1234 }
-    //
-    // // authorize user
-    // if (context.user_id !== 1234) {
-    //   return reject()
-    // }
+  onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+    console.log('connected')
 
     resolve()
   },
 
-  onChange(data) {
+  onChange(data: onChangePayload) {
+    console.log('changed')
 
     // do something with the data
     // console.log(`${data.documentName} was sent to an API!`)
   },
 
-  onDisconnect(data) {
+  onDisconnect(data: onDisconnectPayload) {
+    console.log('disconnected')
+
     // handle disconnect
     // console.log(`User ${data.context.user_id} disconnected from ${data.documentName}`)
   },

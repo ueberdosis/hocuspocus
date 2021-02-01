@@ -33,7 +33,7 @@ export class LevelDB implements Extension {
   /*
    * onConnect hook
    */
-  async onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+  async onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {
     const storedDocument = await this.provider.getYDoc(data.documentName)
     const update = encodeStateAsUpdate(data.document)
 
@@ -45,7 +45,7 @@ export class LevelDB implements Extension {
   /*
    * onChange hook
    */
-  onChange(data: onChangePayload) {
+  onChange(data: onChangePayload): void {
     this.store(data.documentName, data.update)
   }
 
@@ -53,13 +53,13 @@ export class LevelDB implements Extension {
    * onDisconnect hook
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDisconnect(data: onDisconnectPayload) {}
+  onDisconnect(data: onDisconnectPayload): void {}
 
   /**
    * Store the given update in the database
    * @private
    */
-  private store(documentName: string, update: Uint8Array) {
+  private store(documentName: string, update: Uint8Array): void {
     this.provider.storeUpdate(documentName, update)
   }
 }
