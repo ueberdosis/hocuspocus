@@ -14,10 +14,8 @@
   "module": "dist/hocuspocus-leveldb.esm.js",
   "types": "dist/packages/leveldb/src/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/hocuspocus-leveldb.esm.js",
-      "require": "./dist/hocuspocus-leveldb.js"
-    }
+    "import": "./dist/hocuspocus-leveldb.esm.js",
+    "require": "./dist/hocuspocus-leveldb.js"
   },
   "files": [
     "src",

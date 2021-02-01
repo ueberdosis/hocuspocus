@@ -15,10 +15,8 @@
   "module": "dist/hocuspocus-redis.esm.js",
   "types": "dist/packages/redis/src/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/hocuspocus-redis.esm.js",
-      "require": "./dist/hocuspocus-redis.js"
-    }
+    "import": "./dist/hocuspocus-redis.esm.js",
+    "require": "./dist/hocuspocus-redis.js"
   },
   "files": [
     "src",

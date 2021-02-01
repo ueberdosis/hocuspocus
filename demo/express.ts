@@ -1,7 +1,7 @@
 import express from 'express'
 import expressWebsockets from 'express-ws'
 import WebSocket from 'ws'
-import { Server } from '../packages/server/src/index'
+import { Server } from '@hocuspocus/server'
 
 /*
  * Setup the collaborative editing backend and set external to true

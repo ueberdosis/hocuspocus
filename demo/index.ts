@@ -1,5 +1,5 @@
-import { Server } from '../packages/server/src/index'
-import { LevelDB } from '../packages/leveldb/src/index'
+import { Server } from '@hocuspocus/server'
+import { LevelDB } from '@hocuspocus/leveldb'
 
 const server = Server.configure({
 

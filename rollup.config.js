@@ -37,8 +37,7 @@ async function build(commandLineArgs) {
     const input = path.join(basePath, 'src/index.ts')
     const {
       name,
-      main,
-      module,
+      exports,
     } = pkg.toJSON()
 
     const basePlugins = [
@@ -58,19 +57,20 @@ async function build(commandLineArgs) {
       output: [
         {
           name,
-          file: path.join(basePath, main),
+          file: path.join(basePath, exports.require),
           format: 'cjs',
           sourcemap: true,
           exports: 'auto',
         },
         {
           name,
-          file: path.join(basePath, module),
+          file: path.join(basePath, exports.import),
           format: 'es',
           sourcemap: true,
         },
       ],
       plugins: [
+
         autoExternal({
           packagePath: path.join(basePath, 'package.json'),
         }),
