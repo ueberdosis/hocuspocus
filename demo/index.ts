@@ -1,7 +1,7 @@
 import {
   Server, onChangePayload, onDisconnectPayload, onConnectPayload,
-} from '@hocuspocus/server/src'
-import { LevelDB } from '@hocuspocus/leveldb/src'
+} from '@hocuspocus/server'
+import { LevelDB } from '@hocuspocus/leveldb'
 
 const server = Server.configure({
 

@@ -1,4 +1,4 @@
-import { decoding } from 'lib0'
+import * as decoding from 'lib0/decoding.js'
 
 class Decoder {
 

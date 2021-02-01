@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { Doc } from 'yjs'
-import { mutex, createMutex } from 'lib0/mutex'
+import { mutex, createMutex } from 'lib0/mutex.js'
 import Connection from './Connection'
 import Messages from './Messages'
 import { AwarenessUpdate } from './types'

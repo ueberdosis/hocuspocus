@@ -1,4 +1,4 @@
-import { encoding } from 'lib0'
+import * as encoding from 'lib0/encoding.js'
 
 class Encoder {
 

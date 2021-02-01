@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
-import { map } from 'lib0'
+import * as map from 'lib0/map'
 import { URLSearchParams } from 'url'
 import { Configuration } from './types'
 import Document from './Document'
