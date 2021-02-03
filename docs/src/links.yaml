@@ -36,6 +36,9 @@
     - title: Scaling
       link: /guide/scaling
       draft: true
+    - title: Full example
+      link: /guide/full-example
+      draft: true
 
 - title: Packages
   items:

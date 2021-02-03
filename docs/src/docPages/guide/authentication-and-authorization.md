@@ -40,13 +40,13 @@ The `data` passed to the `onConnect` hook has the following attributes:
 ```typescript
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
-import { Document } from '@hocuspocus/server'
+import { Doc } from "yjs"
 
 const data = {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   clientsCount: number,
-  document: Document,
+  document: Doc,
   documentName: string,
 }
 ```

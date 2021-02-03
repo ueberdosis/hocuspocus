@@ -2,13 +2,25 @@
 
 ## toc
 
-hocuspocus provides a few different configuration options. It's as simple as calling the `configure` method on it.
+## Introduction
+
+hocuspocus provides a few useful options and configuring it is as easy as calling `configure` and passing it your custom configuration:
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server.configure({
+  // your config
+})
+
+hocuspocus.listen()
+```
 
 ## List of available settings
 
 ### debounce
 
-By default hocuspocus debounces changes on a document with a delay of 1000ms until triggering the onChange hook. There's also a maximum time (default 10000ms) after that this hook will always be triggered. Both can be configured:
+By default, hocuspocus debounces changes on a document with a delay of `1000ms` until triggering the onChange hook (and thus for example saving changes). There's also a maximum wait time that defaults to `10000ms`, so even if someone is typing continuously changes will be saved by default every 10 seconds. Both can be configured:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
@@ -23,7 +35,7 @@ hocuspocus.listen()
 
 ### port
 
-By default hocuspocus listens on port 80. But you're free to change it to whatever port you like:
+hocuspocus listens on port `80`. But you're free to change it to whatever port you like:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
@@ -37,7 +49,7 @@ hocuspocus.listen()
 
 ### timeout
 
-By default hocuspocus has a connection timeout of 30000ms (= 30s). After this timeout non responding websocket connections are automatically terminated.
+There's a default connection timeout of `30000ms`. After this timeout non responding websocket connections are automatically terminated.
 
 ```typescript
 import { Server } from '@hocuspocus/server'
