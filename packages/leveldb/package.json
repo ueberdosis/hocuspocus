@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/leveldb",
   "description": "hocuspocus persistence driver for LevelDB",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
