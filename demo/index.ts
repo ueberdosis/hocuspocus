@@ -1,18 +1,21 @@
-import { LevelDB } from '@hocuspocus/leveldb'
+import { LevelDB } from '../packages/leveldb/src'
 import {
   Server,
   onChangePayload,
   onDisconnectPayload,
   onConnectPayload,
   onCreateDocumentPayload,
-} from '@hocuspocus/server'
+} from '../packages/server/src'
 
 const server = Server.configure({
 
   port: 1234,
 
   extensions: [
-    new LevelDB({ path: './database' }),
+    new LevelDB({
+      path: './database',
+      useRocksDB: true,
+    }),
   ],
 
   onCreateDocument(data: onCreateDocumentPayload) {

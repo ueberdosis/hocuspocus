@@ -3,15 +3,21 @@ import { LeveldbPersistence } from 'y-leveldb'
 import {
   Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload,
 } from '@hocuspocus/server'
+import rocksDB from 'rocksdb'
+import levelup from 'levelup'
 
 export interface Configuration {
+  options: object | undefined,
   path: string,
+  useRocksDB: boolean | undefined,
 }
 
 export class LevelDB implements Extension {
 
   configuration: Configuration = {
+    options: {},
     path: './database',
+    useRocksDB: true,
   }
 
   provider: LeveldbPersistence
@@ -25,7 +31,15 @@ export class LevelDB implements Extension {
       ...configuration,
     }
 
-    this.provider = new LeveldbPersistence(this.configuration.path)
+    this.provider = new LeveldbPersistence(
+      this.configuration.path,
+      {
+        level: this.configuration.useRocksDB
+          ? (location: string, options: any) => levelup(rocksDB(location), options)
+          : undefined,
+        levelOptions: this.configuration.options,
+      },
+    )
 
     return this
   }

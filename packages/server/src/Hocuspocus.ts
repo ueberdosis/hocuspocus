@@ -179,20 +179,21 @@ class Hocuspocus {
 
     const documentName = request.url?.slice(1)?.split('?')[0] || ''
 
-    return map.setIfUndefined(this.documents, documentName, async () => {
-      const document = new Document(documentName)
+    if (this.documents.has(documentName)) {
+      return this.documents.get(documentName)
+    }
 
-      document.onUpdate((document, update) => {
-        this.handleDocumentUpdate(document, update, request)
-      })
+    const document = new Document(documentName)
 
-      await this.runAllHooks('onCreateDocument', { document, documentName })
-
-      this.documents.set(documentName, document)
-
-      return document
+    document.onUpdate((document, update) => {
+      this.handleDocumentUpdate(document, update, request)
     })
 
+    this.runAllHooks('onCreateDocument', { document, documentName })
+
+    this.documents.set(documentName, document)
+
+    return document
   }
 
   /**

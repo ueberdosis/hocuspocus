@@ -31,13 +31,14 @@
       link: /guide/documents
     - title: Extensions
       link: /guide/extensions
+    - title: Using your own server
+      link: /guide/using-your-own-server
       draft: true
     - title: Scaling
       link: /guide/scaling
       draft: true
     - title: Full example
       link: /guide/full-example
-      draft: true
 
 - title: API
   items:

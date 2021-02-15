@@ -82,11 +82,10 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 
 const hocuspocus = Server.configure({
   onCreateDocument(data) {
-
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
     const prosemirrorDocument = JSON.parse(
-      readFileSync(`/path/to/your/documents/${data.documentName}.json`)
+      readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
     )
 
     // We need the prosemirror schema you're using in the editor
