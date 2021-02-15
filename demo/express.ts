@@ -1,6 +1,5 @@
 import express from 'express'
 import expressWebsockets from 'express-ws'
-import WebSocket from 'ws'
 import { Server } from '@hocuspocus/server'
 
 /*

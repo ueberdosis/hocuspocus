@@ -8,7 +8,7 @@ Extensions are a quick way to add additional features to hocuspocus. They use th
 
 ## Official extensions
 
-### LevelDB/RocksDB persistence
+### @hocuspocus/leveldb
 
 By default, hocuspocus stores documents in memory only, so they will be deleted when the server is stopped. It’s probably sufficient for your first experiments, but it’s unlikely that you want this behavior in a production environment.
 
@@ -17,8 +17,12 @@ LevelDB is fast key-value storage written at Google and RocksDB is Facebook's fo
 With this extension, document changes can be easily stored on the hard disk. When you restart the server, it’ll restore documents from the hard disk. It's the quickest and easiest way to persist documents.
 
 :::warning RocksDB vs. LevelDB
-The API may be the same but the data stored on your hard drive isn't. You cannot change from one to the other without losing your data. So choose one from the beginning and stick with it.
+The API may be the same, but the data stored on your hard drive isn't. You cannot change from one to the other without losing your data. So choose one from the beginning and stick with it.
 :::
+
+#### Installation
+
+// TODO
 
 #### Configuration
 

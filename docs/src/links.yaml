@@ -31,9 +31,8 @@
       link: /guide/documents
     - title: Extensions
       link: /guide/extensions
-    - title: Using your own server
-      link: /guide/using-your-own-server
-      draft: true
+    - title: Framework integration
+      link: /guide/framework-integration
     - title: Scaling
       link: /guide/scaling
       draft: true
