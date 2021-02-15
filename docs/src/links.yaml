@@ -29,7 +29,6 @@
       link: /guide/authentication-and-authorization
     - title: Working with Documents
       link: /guide/documents
-      draft: true
     - title: Extensions
       link: /guide/extensions
       draft: true

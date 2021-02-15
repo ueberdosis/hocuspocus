@@ -4,13 +4,15 @@
 
 ## Introducing hooks
 
-hocuspocus offers hooks to extend it's functionality and integrate it into existing applications. Hooks are configured the same way as [other configuration options](/guide/configuration).
+hocuspocus offers hooks to extend it's functionality and integrate it into existing applications. Hooks are configured as simple methods the same way as [other configuration options](/guide/configuration) are.
 
-## onConnect hook
+Hooks accept a hook payload as first argument. The payload is an object that contains data you can use and manipulate, allowing you to built complex things on top of this simple mechanic. Some hooks also give you `resolve()` and `reject()` methods as second and third argument. You probably heard of them if you worked with [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) before. Those allow you to react to a hook and for example terminate a connection if the user isn't authenticated.
 
-With the `onConnect` hook you can check if a client is authenticated and authorized to view the current document. That can be a request to an API, to a microservice, a database query, or whatever is needed, as long as it’s executing `resolve()` at some point. You can also pass contextual data to the `resolve()` method which will be accessible in other hooks.
+## Authorizing & authenticating requests
 
-Calling `reject()` will terminate the connection.
+With the `onConnect` hook you can check if a client is authenticated and authorized to view the current document. In a real world application this would probably be a request to an API, a database query or something else.
+
+When the user is authorized, call the `resolve()` method. Calling `reject()` on the other hand will terminate the connection. You can also pass contextual data to `resolve()` which will be accessible in other hooks.
 
 ```typescript
 import { Server } from '@hocuspocus/server'
@@ -41,14 +43,14 @@ const server = Server.configure({
 server.listen()
 ```
 
-### Hook payload
+### onConnect hook payload
 
 The `data` passed to the `onConnect` hook has the following attributes:
 
 ```typescript
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
-import { Doc } from "yjs"
+import { Doc } from 'yjs'
 
 const data = {
   requestHeaders: IncomingHttpHeaders,

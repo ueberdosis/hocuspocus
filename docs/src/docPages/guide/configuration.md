@@ -18,21 +18,6 @@ hocuspocus.listen()
 
 ## List of available settings
 
-### debounce
-
-By default, hocuspocus debounces changes on a document with a delay of `1000ms` until triggering the onChange hook (and thus for example saving changes). There's also a maximum wait time that defaults to `10000ms`, so even if someone is typing continuously changes will be saved by default every 10 seconds. Both can be configured:
-
-```typescript
-import { Server } from '@hocuspocus/server'
-
-const hocuspocus = Server.configure({
-  debounce: 1000,
-  debounceMaxWait: 10000,
-})
-
-hocuspocus.listen()
-```
-
 ### port
 
 hocuspocus listens on port `80`. But you're free to change it to whatever port you like:
@@ -56,6 +41,21 @@ import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
   timeout: 30000,
+})
+
+hocuspocus.listen()
+```
+
+### debounce
+
+By default, hocuspocus debounces changes on a document with a delay of `1000ms` until triggering the [onChange hook](/guide/documents) and thus for example save changes. This doesn't affect the synchronization between clients: this will always be instantaneous. There's also a maximum wait time that defaults to `10000ms`, so even if someone is typing continuously changes will be saved by default every 10 seconds. Both can be configured:
+
+```typescript
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server.configure({
+  debounce: 1000,
+  debounceMaxWait: 10000,
 })
 
 hocuspocus.listen()
