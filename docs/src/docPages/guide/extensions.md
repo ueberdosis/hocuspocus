@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Extensions augment hocuspocus and add additional features. They use the same API and the same hooks you saw in the previous chapters.
+Extensions are a quick way to add additional features to hocuspocus. They use the same API and the same hooks you saw in the previous chapters.
 
 ## Official extensions
 

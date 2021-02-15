@@ -39,6 +39,21 @@
       link: /guide/full-example
       draft: true
 
+- title: API
+  items:
+  - title: onConnect
+    link: /api/on-connect
+    draft: true
+  - title: onCreateDocument
+    link: /api/on-create-document
+    draft: true
+  - title: onChange
+    link: /api/on-change
+    draft: true
+  - title: onDisconnect
+    link: /api/on-disconnect
+    draft: true
+
 - title: Packages
   items:
     - title: '@hocuspocus/server'

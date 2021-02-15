@@ -14,6 +14,8 @@ With the `onConnect` hook you can check if a client is authenticated and authori
 
 When the user is authorized, call the `resolve()` method. Calling `reject()` on the other hand will terminate the connection. You can also pass contextual data to `resolve()` which will be accessible in other hooks.
 
+For more information on the hook and it's payload checkout it's [API section](/api/on-connect).
+
 ```typescript
 import { Server } from '@hocuspocus/server'
 
@@ -41,22 +43,4 @@ const server = Server.configure({
 })
 
 server.listen()
-```
-
-### onConnect hook payload
-
-The `data` passed to the `onConnect` hook has the following attributes:
-
-```typescript
-import { IncomingHttpHeaders } from 'http'
-import { URLSearchParams } from 'url'
-import { Doc } from 'yjs'
-
-const data = {
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
-  clientsCount: number,
-  document: Doc,
-  documentName: string,
-}
 ```

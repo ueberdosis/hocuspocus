@@ -35,6 +35,8 @@ or something else.
 The `onChange` hook itself is debounced, take a look [here](/guide/configuration) on how
 to configure this. The synchronization of documents will always be instantaneous and is not affected by debouncing or things you do in this hook.
 
+For more information on the hook and it's payload checkout it's [API section](/api/on-change).
+
 ```typescript
 import { writeFile } from 'fs'
 import { Server } from '@hocuspocus/server'
@@ -63,30 +65,13 @@ const hocuspocus = Server.configure({
 hocuspocus.listen()
 ```
 
-### onConnect hook payload
-
-The `data` passed to the `onChange` hook has the following attributes:
-
-```typescript
-import { IncomingHttpHeaders } from 'http'
-import { URLSearchParams } from 'url'
-import { Doc } from 'yjs'
-
-const data = {
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
-  clientsCount: number,
-  document: Doc,
-  documentName: string,
-  update: Uint8Array,
-}
-```
-
 ## Loading documents
 
 By default hocuspocus creates a new Y-Doc instance for each new document and stores all those document instances in memory. If you restart the server all changes are gone. So you likely want to persist the document somewhere. You can use one of our [prebuilt extensions](/guide/extensions) and skip this section to get you started as quick and simple as possible.
 
 If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system.
+
+For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
 ```typescript
 import { readFileSync } from 'fs'
@@ -124,19 +109,6 @@ const hocuspocus = Server.configure({
 })
 
 hocuspocus.listen()
-```
-
-### onCreateDocument hook payload
-
-The `data` passed to the `onCreateDocument` hook has the following attributes:
-
-```typescript
-import { Doc } from 'yjs'
-
-const data = {
-  document: Doc,
-  documentName: string,
-}
 ```
 
 ## Converting a Y-Doc
