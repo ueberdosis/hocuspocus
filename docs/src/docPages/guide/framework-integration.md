@@ -20,13 +20,13 @@ import expressWebsockets from 'express-ws'
 import { Server } from '@hocuspocus/server'
 import { IncomingMessage } from 'http'
 
-// Setup hocuspocus and set external to true
+// Configure hocuspocus and set external to true
 const server = Server.configure({
   external: true,
 })
 
 // Setup your express instance using the express-ws extension
-const {app} = expressWebsockets(express())
+const { app } = expressWebsockets(express())
 
 // A basic http route
 app.get('/', (request, response) => {
