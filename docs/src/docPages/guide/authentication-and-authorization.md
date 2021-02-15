@@ -1,5 +1,13 @@
 # Authentication & Authorization
 
+## toc
+
+## Introducing hooks
+
+hocuspocus offers hooks to extend it's functionality and integrate it into existing applications. Hooks are configured the same way as [other configuration options](/guide/configuration).
+
+## onConnect hook
+
 With the `onConnect` hook you can check if a client is authenticated and authorized to view the current document. That can be a request to an API, to a microservice, a database query, or whatever is needed, as long as it’s executing `resolve()` at some point. You can also pass contextual data to the `resolve()` method which will be accessible in other hooks.
 
 Calling `reject()` will terminate the connection.
