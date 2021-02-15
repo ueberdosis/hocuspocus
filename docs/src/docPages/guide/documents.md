@@ -86,7 +86,7 @@ const data = {
 
 By default hocuspocus creates a new Y-Doc instance for each new document and stores all those document instances in memory. If you restart the server all changes are gone. So you likely want to persist the document somewhere. You can use one of our [prebuilt extensions](/guide/extensions) and skip this section to get you started as quick and simple as possible.
 
-If you want to alter the Y-Doc when hocuspocus creates it you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system.
+If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system.
 
 ```typescript
 import { readFileSync } from 'fs'
@@ -143,7 +143,7 @@ const data = {
 
 In the previous example we used the `y-prosemirror` package to transform the Yjs Document (short: Y-Doc) to the format the tiptap editor uses and vice versa.
 
-hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below.
+hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start.
 
 
 ### tiptap / prosemirror
@@ -151,9 +151,30 @@ hocuspocus doesn't care how you structure your data, you can use any Yjs Shared 
 ```typescript
 import { Doc } from 'yjs'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
+import { Schema } from 'prosemirror-model'
 
+// We need the prosemirror schema you're using in the editor.
+// In a real world example you would probably store this in a
+// separate file and simply import it
+const schema = new Schema({
+  nodes: {
+    text: {},
+    doc: { content: "text*" }
+  }
+})
+
+// Convert a Y-Doc to prosemirror JSON
 const ydoc = new Doc()
 const prosemirrorDocument = yDocToProsemirrorJSON(ydoc);
+
+// Convert prosemirror JSON to a Y-Doc
+const newProsemirrorDocument = {
+    type: 'doc',
+    content: [
+        // ...
+    ],
+}
+const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument)
 ```
 
 ### Quill
