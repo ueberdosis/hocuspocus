@@ -1,6 +1,7 @@
 import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { URLSearchParams } from 'url'
+import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -13,7 +14,7 @@ class Hocuspocus {
   configuration: Configuration = {
     debounce: 1000,
     debounceMaxWait: 10000,
-    onCreateDocument: () => null,
+    onCreateDocument: (data, resolve) => resolve(),
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
@@ -172,7 +173,15 @@ class Hocuspocus {
       this.handleDocumentUpdate(document, update, request)
     })
 
-    this.runAllHooks('onCreateDocument', { document, documentName })
+    this.runAllHooks(
+      'onCreateDocument',
+      { document, documentName },
+      (loadedDocument: Doc | undefined) => {
+        if (loadedDocument instanceof Doc) {
+          applyUpdate(document, encodeStateAsUpdate(loadedDocument))
+        }
+      },
+    )
 
     this.documents.set(documentName, document)
 
@@ -210,12 +219,11 @@ class Hocuspocus {
    * Run all the given hook on all configured extensions
    * @private
    */
-  private runAllHooks(name: string, hookPayload: any): Promise<any> {
-
-    const chain = this.runHook(name, 0, hookPayload)
+  private runAllHooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
+    const chain = this.runHook(name, 0, hookPayload, callback)
 
     for (let i = 1; i < this.configuration.extensions.length; i += 1) {
-      chain.then(() => this.runHook(name, i, hookPayload))
+      chain.then(() => this.runHook(name, i, hookPayload, callback))
     }
 
     return chain
@@ -227,11 +235,14 @@ class Hocuspocus {
    * extension with the given index
    * @private
    */
-  private runHook(name: string, extensionIndex: number, hookPayload: any): Promise<any> {
+  private runHook(name: string, extensionIndex: number, hookPayload: any, callback: Function | null = null): Promise<any> {
 
     return new Promise((resolve, reject) => {
       // @ts-ignore
       this.configuration.extensions[extensionIndex][name](hookPayload, resolve, reject)
+    }).then((...args) => {
+      if (callback) callback(...args)
+      return new Promise<void>(resolve => resolve())
     })
 
   }

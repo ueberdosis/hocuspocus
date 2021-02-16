@@ -78,10 +78,9 @@ import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
 import { Schema } from 'prosemirror-model'
-import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 
 const hocuspocus = Server.configure({
-  onCreateDocument(data) {
+  onCreateDocument(data, resolve) {
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
     const prosemirrorDocument = JSON.parse(
@@ -99,11 +98,8 @@ const hocuspocus = Server.configure({
     // Convert the prosemirror JSON to a ydoc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
 
-    // Encode the current state as a Yjs update
-    const update = encodeStateAsUpdate(ydoc)
-
-    // And apply the update to the Y-Doc hocuspocus provides
-    applyUpdate(data.document, update)
+    // And pass it to the resolve method
+    resolve(ydoc)
   },
 })
 

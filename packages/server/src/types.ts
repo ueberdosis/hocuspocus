@@ -19,7 +19,7 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
-  onCreateDocument(data: onCreateDocumentPayload): void,
+  onCreateDocument(data: onCreateDocumentPayload, resolve: Function): void,
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onChange(data: onChangePayload): void,
   onDisconnect(data: onDisconnectPayload): void

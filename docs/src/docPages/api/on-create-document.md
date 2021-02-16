@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The `onCreateDocument` hook will be called when a new document is created. A new document will be created if it's not in memory, thus it may exist but was not edited since the server started.
+The `onCreateDocument` hook will be called when a new document is created. A new document will be created if it's not in memory, so it may exist in your application but was not edited since the server started. The `onCreateDocument` hook accepts a `resolve()` method as second argument. Pass your Y-Doc to the resolve method to this method to load an existing document.
 
 ## Hook payload
 
@@ -26,10 +26,9 @@ import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
 import { Schema } from 'prosemirror-model'
-import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 
 const hocuspocus = Server.configure({
-  onCreateDocument(data) {
+  onCreateDocument(data, resolve) {
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
     const prosemirrorDocument = JSON.parse(
@@ -47,11 +46,8 @@ const hocuspocus = Server.configure({
     // Convert the prosemirror JSON to a ydoc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
 
-    // Encode the current state as a Yjs update
-    const update = encodeStateAsUpdate(ydoc)
-
-    // And apply the update to the Y-Doc hocuspocus provides
-    applyUpdate(data.document, update)
+    // And pass it to the resolve method
+    resolve(ydoc)
   },
 })
 

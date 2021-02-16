@@ -3,8 +3,10 @@ import {
 } from '@hocuspocus/server'
 
 export class Logger implements Extension {
-  onCreateDocument(data: onCreateDocumentPayload): void {
+  onCreateDocument(data: onCreateDocumentPayload, resolve: Function): void {
     console.log(`Created document "${data.documentName}"…`)
+
+    resolve()
   }
 
   onChange(data: onChangePayload): void {
@@ -13,6 +15,8 @@ export class Logger implements Extension {
 
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {
     console.log(`New connection to "${data.documentName}"…`)
+
+    resolve()
   }
 
   onDisconnect(data: onDisconnectPayload): void {
