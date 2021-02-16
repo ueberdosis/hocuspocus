@@ -60,15 +60,3 @@ const hocuspocus = Server.configure({
 
 hocuspocus.listen()
 ```
-
-### external
-
-If set to `true`, hocuspocus will not start a WebSocket server itself but rather handles connections by calling the `handleConnection()` method manually. This way, you yan use it with your existing WebSocket server or framework. Check out the [framework integration](/guide/framework-integration) section of the guide for more information.
-
-```typescript
-import { Server } from '@hocuspocus/server'
-
-const hocuspocus = Server.configure({
-  external: true,
-})
-```

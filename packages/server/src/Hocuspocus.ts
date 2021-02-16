@@ -20,7 +20,6 @@ class Hocuspocus {
     extensions: [],
     port: 80,
     timeout: 30000,
-    external: false,
   }
 
   debounceStart: Map<string, number|null> = new Map()
@@ -32,25 +31,6 @@ class Hocuspocus {
   httpServer?: HTTPServer
 
   websocketServer?: WebSocket.Server
-
-  /**
-   * Constructor
-   */
-  constructor() {
-
-    if (this.configuration.external) {
-      return
-    }
-
-    this.httpServer = createServer((request, response) => {
-      response.writeHead(200, { 'Content-Type': 'text/plain' })
-      response.end('OK')
-    })
-
-    this.websocketServer = new WebSocket.Server({ server: this.httpServer })
-    this.websocketServer.on('connection', this.handleConnection.bind(this))
-
-  }
 
   /**
    * Configure the server
@@ -82,9 +62,13 @@ class Hocuspocus {
    */
   listen(): void {
 
-    if (!this.httpServer) {
-      return
-    }
+    this.httpServer = createServer((request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
+      response.end('OK')
+    })
+
+    this.websocketServer = new WebSocket.Server({ server: this.httpServer })
+    this.websocketServer.on('connection', this.handleConnection.bind(this))
 
     this.httpServer.listen(this.configuration.port, () => {
       console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)

@@ -31,7 +31,6 @@ export interface Configuration extends Extension {
   extensions: Array<Extension>,
   port: number | null,
   timeout: number,
-  external: boolean | null,
 }
 
 export interface onCreateDocumentPayload {

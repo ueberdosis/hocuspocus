@@ -4,7 +4,7 @@
 
 ## Introduction
 
-hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When using the `external` configuration option, it will not start a WebSocket server itself but rather relies on you calling it's `handleConnection()` method manually.
+hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When you don't call `listen()` on hocuspocus, it will not start a WebSocket server itself but rather relies on you calling it's `handleConnection()` method manually.
 
 It requires the WebSocket connection instance as first argument, the HTTP request as second, and the context as used in the `onConnect` hook as third.
 
@@ -20,9 +20,9 @@ import expressWebsockets from 'express-ws'
 import { Server } from '@hocuspocus/server'
 import { IncomingMessage } from 'http'
 
-// Configure hocuspocus and set external to true
+// Configure hocuspocus
 const server = Server.configure({
-  external: true,
+  // ...
 })
 
 // Setup your express instance using the express-ws extension
