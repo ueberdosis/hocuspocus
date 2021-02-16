@@ -6,8 +6,6 @@
 
 Most Yjs connection providers (including the `y-websocket` provider) use a concept called room-names. The client will pass a room-name parameter to hocuspocus which will then be used to identify the document which is currently being edited. The room-name will be called document name throughout this documentation.
 
-### Real-world example
-
 In a real-world app you would probably add the name of your entity, a unique ID of the entity and in
 some cases even the field (if you have multiple fields that you want to make collaborative). Here is
 how that could look like for a CMS:
@@ -25,6 +23,8 @@ console.log(entityType) // prints "page"
 console.log(entityID) // prints "140"
 console.log(field) // prints "content"
 ```
+
+This is a recommendation, of course you can name your documents however you want!
 
 ## Handling Document changes
 

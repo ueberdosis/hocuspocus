@@ -33,9 +33,6 @@
       link: /guide/extensions
     - title: Framework integration
       link: /guide/framework-integration
-    - title: Scaling
-      link: /guide/scaling
-      draft: true
     - title: Full example
       link: /guide/full-example
 
@@ -43,16 +40,12 @@
   items:
   - title: onConnect
     link: /api/on-connect
-    draft: true
   - title: onCreateDocument
     link: /api/on-create-document
-    draft: true
   - title: onChange
     link: /api/on-change
-    draft: true
   - title: onDisconnect
     link: /api/on-disconnect
-    draft: true
 
 - title: Packages
   items:
