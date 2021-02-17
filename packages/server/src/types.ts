@@ -26,8 +26,6 @@ export interface Extension {
 }
 
 export interface Configuration extends Extension {
-  debounce: number,
-  debounceMaxWait: number,
   extensions: Array<Extension>,
   port: number | null,
   timeout: number,

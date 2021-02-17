@@ -32,32 +32,41 @@ With the `onChange` hook you can listen to changes of the document and handle th
 application you would probably save the resulting document to a database, send a webhook to an API
 or something else.
 
-The `onChange` hook itself is debounced, take a look [here](/guide/configuration) on how
-to configure this. The synchronization of documents will always be instantaneous and is not affected by debouncing or things you do in this hook.
-
 For more information on the hook and it's payload checkout it's [API section](/api/on-change).
+
+:::warning Consider debouncing!
+It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
+:::
 
 ```typescript
 import { writeFile } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
+import { debounce } from 'debounce'
+
+let debouncer
 
 const hocuspocus = Server.configure({
   onChange(data) {
 
-    // Get the underlying Y-Doc
-    const ydoc = data.document
+    debouncer.clear()
+    debouncer = debounce(() => {
 
-    // Convert the y-doc to the format your editor uses, in this
-    // example Prosemirror JSON for the tiptap editor
-    const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      // Get the underlying Y-Doc
+      const ydoc = data.document
 
-    // Save your document. In a real-world app this could be a database query
-    // a webhook or something else
-    writeFile(
-      `/path/to/your/documents/${data.documentName}.json`,
-      prosemirrorDocument
-    )
+      // Convert the y-doc to the format your editor uses, in this
+      // example Prosemirror JSON for the tiptap editor
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+
+      // Save your document. In a real-world app this could be a database query
+      // a webhook or something else
+      writeFile(
+        `/path/to/your/documents/${data.documentName}.json`,
+        prosemirrorDocument
+      )
+
+    }, 4000)
 
   },
 })

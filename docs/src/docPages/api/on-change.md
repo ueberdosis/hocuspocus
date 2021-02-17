@@ -4,7 +4,11 @@
 
 ## Introduction
 
-The `onChange` hook is called when the document itself changes. This hook is [debounced](/guide/configuration#debounce).
+The `onChange` hook is called when the document itself changes.
+
+:::warning Consider debouncing!
+It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
+:::
 
 ## Hook payload
 
@@ -31,23 +35,31 @@ const data = {
 import { writeFile } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
+import { debounce } from 'debounce'
+
+let debouncer
 
 const hocuspocus = Server.configure({
   onChange(data) {
 
-    // Get the underlying Y-Doc
-    const ydoc = data.document
+    debouncer.clear()
+    debouncer = debounce(() => {
 
-    // Convert the y-doc to the format your editor uses, in this
-    // example Prosemirror JSON for the tiptap editor
-    const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      // Get the underlying Y-Doc
+      const ydoc = data.document
 
-    // Save your document. In a real-world app this could be a database query
-    // a webhook or something else
-    writeFile(
-      `/path/to/your/documents/${data.documentName}.json`,
-      prosemirrorDocument
-    )
+      // Convert the y-doc to the format your editor uses, in this
+      // example Prosemirror JSON for the tiptap editor
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+
+      // Save your document. In a real-world app this could be a database query
+      // a webhook or something else
+      writeFile(
+        `/path/to/your/documents/${data.documentName}.json`,
+        prosemirrorDocument
+      )
+
+    }, 4000)
 
   },
 })

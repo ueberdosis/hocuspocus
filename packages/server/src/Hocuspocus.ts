@@ -12,8 +12,6 @@ import Connection from './Connection'
 class Hocuspocus {
 
   configuration: Configuration = {
-    debounce: 1000,
-    debounceMaxWait: 10000,
     onCreateDocument: (data, resolve) => resolve(),
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
@@ -22,10 +20,6 @@ class Hocuspocus {
     port: 80,
     timeout: 30000,
   }
-
-  debounceStart: Map<string, number|null> = new Map()
-
-  debounceTimeout: Map<string, NodeJS.Timeout> = new Map()
 
   documents = new Map()
 
@@ -110,40 +104,6 @@ class Hocuspocus {
    * @private
    */
   private handleDocumentUpdate(document: Document, update: Uint8Array, request: IncomingMessage): void {
-
-    if (!this.configuration.debounce) {
-      return this.saveDocument(document, update, request)
-    }
-
-    const { name } = document
-
-    if (!this.debounceStart.get(name)) {
-      this.debounceStart.set(name, Hocuspocus.now())
-    }
-
-    // @ts-ignore
-    if (Hocuspocus.now() - this.debounceStart.get(name) >= this.configuration.debounceMaxWait) {
-      this.debounceStart.set(name, null)
-      return this.saveDocument(document, update, request)
-    }
-
-    if (this.debounceTimeout.get(name)) {
-      // @ts-ignore
-      clearTimeout(this.debounceTimeout.get(name))
-    }
-
-    this.debounceTimeout.set(name, setTimeout(
-      () => this.saveDocument(document, update, request),
-      this.debounceDuration,
-    ))
-
-  }
-
-  /**
-   * Save the given document using the configured extensions
-   * @private
-   */
-  private saveDocument(document: Document, update: Uint8Array, request:IncomingMessage): void {
 
     this.configuration.extensions.forEach(extension => extension.onChange({
       clientsCount: document.connectionsCount(),
@@ -248,17 +208,6 @@ class Hocuspocus {
   }
 
   /**
-   * Get the current process time in milliseconds
-   * @private
-   */
-  private static now(): number {
-
-    const hrTime = process.hrtime()
-    return Math.round(hrTime[0] * 1000 + hrTime[1] / 1000000)
-
-  }
-
-  /**
    * Get parameters by the given request
    * @private
    */
@@ -266,17 +215,6 @@ class Hocuspocus {
 
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
-
-  }
-
-  /**
-   * Get debounce duration
-   */
-  get debounceDuration(): number {
-
-    return Number.isNaN(this.configuration.debounce)
-      ? 2000
-      : this.configuration.debounce
 
   }
 }
