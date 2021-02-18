@@ -23,7 +23,6 @@ export default function (Vue, { head }) {
   Vue.use(PortalVue)
   Vue.component('Layout', App)
   Vue.component('Demo', () => import(/* webpackChunkName: "demo" */ '~/components/Demo'))
-  Vue.component('LiveDemo', () => import(/* webpackChunkName: "live-demo" */ '~/components/LiveDemo'))
 
   Vue.directive('resize', {
     bind(el, { value = {} }) {

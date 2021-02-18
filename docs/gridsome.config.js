@@ -36,6 +36,7 @@ function tableWrapper() {
 module.exports = {
   siteName: 'hocuspocus',
   titleTemplate: '%s | hocuspocus',
+  icon: './src/favicon.svg',
   port: 3000,
   plugins: [
     {
@@ -44,7 +45,6 @@ module.exports = {
         typeName: 'DocPage',
         baseDir: './src/docPages',
         template: './src/templates/DocPage/index.vue',
-        index: './introduction',
         plugins: [
           '@gridsome/remark-prismjs',
           'remark-container',

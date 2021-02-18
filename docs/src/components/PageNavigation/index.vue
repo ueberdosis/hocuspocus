@@ -1,32 +1,38 @@
 <template>
-  <nav class="page-navigation">
-    <div class="page-navigation__previous">
-      <g-link
-        class="page-navigation__link"
-        exact
-        :to="previousPage.link"
-        v-if="previousPage"
-      >
-        ← {{ previousPage.title }}
-      </g-link>
-    </div>
-    <div class="page-navigation__next">
-      <g-link
-        class="page-navigation__link"
-        exact
-        :to="nextPage.redirect || nextPage.link"
-        v-if="nextPage"
-      >
-        {{ nextPage.title }} →
-      </g-link>
-    </div>
-  </nav>
+  <btn-wrapper class="page-navigation">
+    <btn
+      class="page-navigation__previous"
+      type="secondary"
+      icon="arrow-left"
+      icon-position="before"
+      :to="previousPage.link"
+      v-if="previousPage"
+    >
+      {{ previousPage.title }}
+    </btn>
+    <btn
+      class="page-navigation__next"
+      type="secondary"
+      icon="arrow-right"
+      :to="nextPage.redirect || nextPage.link"
+      v-if="nextPage"
+    >
+      {{ nextPage.title }}
+    </btn>
+  </btn-wrapper>
 </template>
 
 <script>
 import linkGroups from '@/links.yaml'
+import BtnWrapper from '~/components/BtnWrapper'
+import Btn from '~/components/Btn'
 
 export default {
+  components: {
+    BtnWrapper,
+    Btn,
+  },
+
   data() {
     return {
       linkGroups,
@@ -65,7 +71,7 @@ export default {
 
     currentIndex() {
       return this.flattenedItems.findIndex(item => {
-        return item.link && item.link.replace(/\/$/, '') === this.$route.path.replace(/\/$/, '')
+        return item.link.replace(/\/$/, '') === this.$route.path.replace(/\/$/, '')
       })
     },
 
