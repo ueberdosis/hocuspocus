@@ -137,9 +137,7 @@ query {
 
 <script>
 import linkGroups from '@/links.yaml'
-import Icon from '@/components/Icon'
 import PageFooter from '@/components/PageFooter'
-// import GithubButton from 'vue-github-button'
 
 export default {
   props: {
@@ -150,9 +148,7 @@ export default {
   },
 
   components: {
-    Icon,
     PageFooter,
-    // GithubButton,
   },
 
   data() {
