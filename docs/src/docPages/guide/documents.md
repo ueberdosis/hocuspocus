@@ -44,14 +44,11 @@ import { Server } from '@hocuspocus/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
 import { debounce } from 'debounce'
 
-let debouncer
+let debounced
 
 const hocuspocus = Server.configure({
   onChange(data) {
-
-    debouncer.clear()
-    debouncer = debounce(() => {
-
+    const save = () => {
       // Get the underlying Y-Doc
       const ydoc = data.document
 
@@ -65,9 +62,11 @@ const hocuspocus = Server.configure({
         `/path/to/your/documents/${data.documentName}.json`,
         prosemirrorDocument
       )
+    }
 
-    }, 4000)
-
+    debounced?.clear()
+    debounced = debounce(() => save, 4000)
+    debounced()
   },
 })
 
