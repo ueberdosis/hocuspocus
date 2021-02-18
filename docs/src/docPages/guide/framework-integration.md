@@ -18,7 +18,6 @@ To use hocuspocus with [Express](https://expressjs.com), you need to use the `ex
 import express from 'express'
 import expressWebsockets from 'express-ws'
 import { Server } from '@hocuspocus/server'
-import { IncomingMessage } from 'http'
 
 // Configure hocuspocus
 const server = Server.configure({
@@ -37,7 +36,7 @@ app.get('/', (request, response) => {
 // Note: make sure to include a parameter for the document name.
 // You can set any contextual data like in the onConnect hook
 // and pass it to the handleConnection method.
-app.ws('/collaboration/:document', (websocket, request: IncomingMessage) => {
+app.ws('/collaboration/:document', (websocket, request) => {
   const context = {
     user: {
       id: 1234,
