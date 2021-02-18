@@ -31,12 +31,10 @@ const data = {
 import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
-
   onDisconnect(data) {
     // Output some information
     process.stdout.write(`"${data.context.user.name}" has disconnected!`)
-  }
-
+  },
 })
 
 hocuspocus.listen()

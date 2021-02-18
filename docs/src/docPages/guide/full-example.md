@@ -59,8 +59,8 @@ const hocuspocus = Server.configure({
     const schema = new Schema({
       nodes: {
         text: {},
-        doc: { content: "text*" }
-      }
+        doc: { content: "text*" },
+      },
     })
 
     // Convert the prosemirror JSON to a Y-Doc
@@ -101,7 +101,7 @@ const hocuspocus = Server.configure({
   onDisconnect(data) {
     // Output some information
     process.stdout.write(`"${data.context.user.name}" has disconnected!`)
-  }
+  },
 })
 
 hocuspocus.listen()

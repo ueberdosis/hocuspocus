@@ -41,10 +41,10 @@ const server = Server.configure({
 
     // You can set contextual data…
     const context = {
-        user: {
-            id: 1234,
-            name: 'John',
-        },
+      user: {
+        id: 1234,
+        name: 'John',
+      },
     }
 
     // …and pass it along to use it in other hooks
