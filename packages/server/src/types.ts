@@ -1,5 +1,7 @@
-import { IncomingHttpHeaders } from 'http'
+import { Server as HTTPServer, IncomingHttpHeaders, IncomingMessage } from 'http'
+import { Server as WebSocketServer } from 'ws'
 import { URLSearchParams } from 'url'
+import { Socket } from 'net'
 import Document from './Document'
 
 export enum MessageTypes {
@@ -19,10 +21,12 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
-  onCreateDocument(data: onCreateDocumentPayload, resolve: Function): void,
+  onCreateDocument(data: onCreateDocumentPayload, resolve: Function, reject: Function): void,
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onChange(data: onChangePayload): void,
   onDisconnect(data: onDisconnectPayload): void
+  onListen(data: onListenPayload, resolve: Function, reject: Function): void,
+  onUpgrade(data: onUpgradePayload, resolve: Function, reject: Function): void,
 }
 
 export interface Configuration extends Extension {
@@ -48,4 +52,16 @@ export interface onChangePayload extends onConnectPayload {
 
 export interface onDisconnectPayload extends onConnectPayload {
   context: any,
+}
+
+export interface onListenPayload {
+  port: number,
+  server: HTTPServer,
+  websocketServer: WebSocketServer,
+}
+
+export interface onUpgradePayload {
+  head: any,
+  request: IncomingMessage,
+  socket: Socket,
 }

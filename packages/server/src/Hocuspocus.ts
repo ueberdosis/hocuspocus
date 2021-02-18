@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
-import { URLSearchParams } from 'url'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
+import { URLSearchParams } from 'url'
 import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -16,6 +16,8 @@ class Hocuspocus {
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onDisconnect: () => null,
+    onListen: (data, resolve) => resolve(),
+    onUpgrade: (data, resolve) => resolve(),
     extensions: [],
     port: 80,
     timeout: 30000,
@@ -38,14 +40,11 @@ class Hocuspocus {
     }
 
     const {
-      onConnect,
-      onChange,
-      onDisconnect,
-      onCreateDocument,
+      onConnect, onChange, onDisconnect, onCreateDocument, onListen, onUpgrade,
     } = this.configuration
 
     this.configuration.extensions.push({
-      onConnect, onChange, onDisconnect, onCreateDocument,
+      onConnect, onChange, onDisconnect, onCreateDocument, onListen, onUpgrade,
     })
 
     return this
@@ -57,17 +56,35 @@ class Hocuspocus {
    */
   listen(): void {
 
-    this.httpServer = createServer((request, response) => {
+    const server = createServer((request, response) => {
       response.writeHead(200, { 'Content-Type': 'text/plain' })
       response.end('OK')
     })
 
-    this.websocketServer = new WebSocket.Server({ server: this.httpServer })
-    this.websocketServer.on('connection', this.handleConnection.bind(this))
+    const websocketServer = new WebSocket.Server({ noServer: true })
+    websocketServer.on('connection', this.handleConnection.bind(this))
 
-    this.httpServer.listen(this.configuration.port, () => {
-      console.log(`Listening on http://127.0.0.1:${this.configuration.port}`)
+    server.on('upgrade', (request, socket, head) => {
+
+      this.runAllHooks('onUpgrade', {})
+        .then(() => websocketServer.handleUpgrade(request, socket, head, ws => {
+          websocketServer.emit('connection', ws, request)
+        }))
+        .catch(() => {
+          console.log('upgrade')
+        })
+
     })
+
+    this.runAllHooks('onListen', {
+      server,
+      websocketServer,
+      port: this.configuration.port,
+    })
+      .then(() => server.listen(this.configuration.port))
+
+    this.httpServer = server
+    this.websocketServer = websocketServer
 
   }
 
@@ -88,14 +105,7 @@ class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    this.runAllHooks('onConnect', hookPayload)
-      .then(() => {
-        console.log(`Connection established to ${request.url}`)
-      })
-      .catch(() => {
-        connection.close()
-        console.log(`Connection to ${request.url} was refused`)
-      })
+    this.runAllHooks('onConnect', hookPayload).catch(() => connection.close())
 
   }
 
@@ -176,8 +186,7 @@ class Hocuspocus {
   }
 
   /**
-   * Run all the given hook on all configured extensions
-   * @private
+   * Run the given hook on all configured extensions
    */
   private runAllHooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
     const chain = this.runHook(name, 0, hookPayload, callback)
@@ -193,7 +202,6 @@ class Hocuspocus {
   /**
    * Run a hook that reacts to a promise by the given name on the
    * extension with the given index
-   * @private
    */
   private runHook(name: string, extensionIndex: number, hookPayload: any, callback: Function | null = null): Promise<any> {
 
