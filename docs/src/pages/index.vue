@@ -8,6 +8,12 @@
         <p class="is-large">
           hocuspocus is a plug & play collaboration backend. It’s based on Y.js, a CRDT framework with a powerful abstraction of shared data. You can use it, to keep multiple instances of text editors in sync, work offline and sync changes later, or sync text between different devices. Also, you can use it to build anything else, that needs to be collaboration, for example a collaborative drawing app.
         </p>
+        <div>
+          <newsletter-form
+            id="d6ab5e0a-5c27-47e1-bad1-e8b8fb869925"
+            button-label="Request Early Access"
+          />
+        </div>
       </div>
     </app-section>
 
@@ -104,16 +110,14 @@
 import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
-import Btn from '~/components/Btn'
-import BtnWrapper from '~/components/BtnWrapper'
+import NewsletterForm from '@/components/NewsletterForm'
 
 export default {
   components: {
     AppSection,
     FeatureList,
     FeatureItem,
-    Btn,
-    BtnWrapper,
+    NewsletterForm,
   },
 
   metaInfo() {

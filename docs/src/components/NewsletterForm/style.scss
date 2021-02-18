@@ -1,0 +1,79 @@
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 26rem;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba($colorBlack, 0.04);
+    border-radius: 7px;
+    padding: 0.3rem;
+    transition: box-shadow 0.2s $ease;
+    border-radius: 12px;
+
+    &:focus-within {
+      box-shadow: 0 0 0 3px $colorBlack;
+    }
+
+    @media screen and (min-width: 500px) {
+      flex-direction: row;
+    }
+  }
+
+  &__error,
+  &__success {
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    border: 3px solid $colorBlack;
+    margin-top: 0.5rem;
+  }
+
+  &__error {
+    background-color: $colorRed;
+  }
+
+  &__success {
+    background-color: $colorYellow;
+  }
+
+  &__input {
+    width: 100%;
+    min-width: 0;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    flex: 1 1 auto;
+    padding: 0.4rem 0.6rem;
+    border: none;
+    background: none;
+    color: $colorBlack;
+    text-align: center;
+    margin-bottom: 0.4rem;
+
+    @media screen and (min-width: 500px) {
+      text-align: left;
+      margin-bottom: 0;
+    }
+  }
+
+  &__button {
+    flex: 0 0 auto;
+    background-color: $colorBlack;
+    color: $colorWhite;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font: inherit;
+    font-weight: 700;
+    line-height: 1;
+    transition: opacity 0.2s $ease;
+
+    &:disabled {
+      opacity: 0.7;
+    }
+  }
+
+}

@@ -9,16 +9,16 @@
           <img src="~@/assets/images/logo.svg">
         </g-link>
 
-        <div class="app__menu">
-          <!-- <span class="app__menu-item">
+        <!-- <div class="app__menu">
+          <span class="app__menu-item">
             Search
             <div class="app__search-docsearch" />
-          </span> -->
+          </span>
 
           <portal-target name="desktop-menu" />
-        </div>
+        </div> -->
 
-        <button
+        <!-- <button
           class="app__menu-icon"
           @click="menuIsVisible = true"
           v-if="!menuIsVisible"
@@ -31,7 +31,7 @@
           v-if="menuIsVisible"
         >
           <icon name="close" />
-        </button>
+        </button> -->
       </div>
       <div
         class="app__mobile-menu"
