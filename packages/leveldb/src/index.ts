@@ -5,6 +5,7 @@ import {
 } from '@hocuspocus/server'
 import rocksDB from 'rocksdb'
 import levelup from 'levelup'
+import debounce from 'lodash.debounce'
 
 export interface Configuration {
   options: object | undefined,
@@ -21,6 +22,8 @@ export class LevelDB implements Extension {
   }
 
   provider: LeveldbPersistence
+
+  debounced: any
 
   /**
    * Constructor
@@ -60,20 +63,28 @@ export class LevelDB implements Extension {
    * onChange hook
    */
   onChange(data: onChangePayload): void {
-    this.store(data.documentName, data.update)
+    const store = () => this.store(data.documentName, data.update)
+
+    this.debounced?.cancel()
+    this.debounced = debounce(store, 1000)
+    this.debounced()
   }
 
   /*
    * onConnect hook
    */
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onConnect(data: onConnectPayload): void {}
+  onConnect(data: onConnectPayload): void {
+  }
 
   /*
    * onDisconnect hook
    */
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDisconnect(data: onDisconnectPayload): void {}
+  onDisconnect(data: onDisconnectPayload): void {
+  }
 
   /**
    * Store the given update in the database
