@@ -4,7 +4,7 @@ createDefaultOpenGraphImage('The plug & play collaboration backend. ', 'static/i
 
 module.exports = function (api) {
   api.onCreateNode(options => {
-    if (/* process.env.NODE_ENV === 'production' && */options.internal.typeName === 'DocPage') {
+    if (process.env.NODE_ENV === 'production' && options.internal.typeName === 'DocPage') {
       createSpecificOpenGraphImage(options.title, options.content, `static/images${options.path}og-image.png`)
     }
   })

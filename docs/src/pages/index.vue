@@ -3,10 +3,10 @@
     <app-section>
       <div class="text">
         <h1 class="is-large">
-          hocuspocus
+          The plug & play collaboration backend
         </h1>
         <p class="is-large">
-          hocuspocus is a plug & play collaboration backend. It’s based on Y.js, a CRDT framework with a powerful abstraction of shared data. You can use it, to keep multiple instances of text editors in sync, work offline and sync changes later, or sync text between different devices. Also, you can use it to build anything else, that needs to be collaboration, for example a collaborative drawing app.
+          Real-time collaboration, syncing between different devices and working offline isn’t hard anymore. Keep everything in sync with the magic of Y.js.
         </p>
         <div>
           <newsletter-form
@@ -93,16 +93,13 @@
       </feature-list>
     </app-section>
 
-    <app-section>
+    <!-- <app-section>
       <div class="text">
         <h2 class="is-h1">
           License
         </h2>
-        <p>
-          You can use hocuspocus in all kinds of projects, you can <g-link to="https://store.ueber.io/products/hocuspocus">buy an appropriate license and download the package</g-link> for $99/year for single developers, and $499/year for teams. Local taxes may apply.
-        </p>
       </div>
-    </app-section>
+    </app-section> -->
   </Layout>
 </template>
 
