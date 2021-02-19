@@ -87,7 +87,7 @@
             Actively maintained
           </h3>
           <p>
-            hocuspocus comes with a price tag, but that ensures constant development, maintenance and suppport.
+            hocuspocus comes with a price tag, but that ensures constant development, maintenance and support.
           </p>
         </feature-item>
       </feature-list>
