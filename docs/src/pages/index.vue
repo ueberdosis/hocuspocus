@@ -121,7 +121,7 @@ export default {
   },
 
   metaInfo() {
-    const title = 'Headless WYSIWYG Text Editor'
+    const title = 'Collaboration backend for text editing and more.'
 
     return {
       title,
@@ -133,7 +133,7 @@ export default {
         },
         {
           property: 'og:image',
-          content: 'https://next.tiptap.dev/images/og-image.png',
+          content: 'https://hocuspocus.dev/images/og-image.png',
         },
         /* Twitter */
         {
@@ -146,7 +146,7 @@ export default {
         },
         {
           name: 'twitter:image',
-          content: 'https://next.tiptap.dev/images/og-image.png',
+          content: 'https://hocuspocus.dev/images/og-image.png',
         },
         {
           name: 'twitter:site',

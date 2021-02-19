@@ -3,11 +3,11 @@
 ## toc
 
 ## Introduction
-We value your privacy and question everything that stores or processes your personal information. With that in mind, we still need a few external services to publish tiptap.
+We value your privacy and question everything that stores or processes your personal information. With that in mind, we still need a few external services to publish hocuspocus.
 
 Missing the cookie banner? Sorry, we don’t use cookies here. 🍪
 
-We don’t provide email support for tiptap, but if you have some legal issues, privacy or security concerns, send us an email to [humans@tiptap.dev](mailto:humans@tiptap.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/tiptap-next/issues).
+We don’t provide email support for hocuspocus, but if you have some legal issues, privacy or security concerns, send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus-issues/issues).
 
 ## List of external services
 
@@ -25,4 +25,4 @@ We use [Algolia DocSearch](https://docsearch.algolia.com/) to offer search funct
 If you want to know more about what data they collect and process, [read their privacy policy](https://www.algolia.com/policies/privacy/).
 
 ## Suggesting alternatives
-If you know a good self-hosted version of any of the mentioned services, create an issue on GitHub or send us an email to [humans@tiptap.dev](mailto:humans@tiptap.dev).
+If you know a good self-hosted version of any of the mentioned services, create an issue on GitHub or send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev).
