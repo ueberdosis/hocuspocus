@@ -78,11 +78,16 @@ If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCr
 
 For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
+If you're using the tiptap editor you need
+
 ```typescript
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { Schema } from 'prosemirror-model'
+import { getSchema } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
   onCreateDocument(data, resolve) {
@@ -92,13 +97,10 @@ const hocuspocus = Server.configure({
       readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
     )
 
-    // We need the prosemirror schema you're using in the editor
-    const schema = new Schema({
-      nodes: {
-        text: {},
-        doc: { content: "text*" },
-      },
-    })
+    // When using the tiptap editor we need the schema to create
+    // a prosemirror JSON. You can use the `getSchema` method and
+    // pass it all the tiptap extensions you're using in the frontend
+    const schema = getSchema([ Document, Paragraph, Text ])
 
     // Convert the prosemirror JSON to a ydoc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
@@ -120,32 +122,36 @@ hocuspocus doesn't care how you structure your data, you can use any Yjs Shared 
 
 ### tiptap / prosemirror
 
+**Convert a Y-Doc to prosemirror JSON:**
+
 ```typescript
 import { Doc } from 'yjs'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
-import { Schema } from 'prosemirror-model'
 
-// We need the prosemirror schema you're using in the editor.
-// In a real world example you would probably store this in a
-// separate file and simply import it
-const schema = new Schema({
-  nodes: {
-    text: {},
-    doc: { content: "text*" },
-  },
-})
-
-// Convert a Y-Doc to prosemirror JSON
 const ydoc = new Doc()
-const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name');
+const newProsemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name');
+```
 
-// Convert prosemirror JSON to a Y-Doc
-const newProsemirrorDocument = {
+**Convert prosemirror JSON to a Y-Doc:**
+
+```typescript
+import { prosemirrorJSONToYDoc } from 'y-prosemirror'
+import { getSchema } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+
+const prosemirrorDocument = {
   type: 'doc',
   content: [
     // ...
   ],
 }
+
+// We need the schema to create a prosemirror JSON. You can use
+// the `getSchema` method of the tiptap editor and pass it all
+// the tiptap extensions you're using in the frontend
+const schema = getSchema([ Document, Paragraph, Text ])
 
 const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument)
 ```
