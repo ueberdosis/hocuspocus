@@ -104,16 +104,12 @@
 import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
-import Btn from '~/components/Btn'
-import BtnWrapper from '~/components/BtnWrapper'
 
 export default {
   components: {
     AppSection,
     FeatureList,
     FeatureItem,
-    Btn,
-    BtnWrapper,
   },
 
   metaInfo() {
