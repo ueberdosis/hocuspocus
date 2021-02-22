@@ -75,18 +75,8 @@ export class Monitor implements Extension {
   }
 
   onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
-    const { request, response } = data
-    const { dashboardPath } = this.configuration
-
-    if (request.url === dashboardPath || request.url === `${dashboardPath}/`) {
-      const index = join(dirname(fileURLToPath(import.meta.url)), 'client', 'dist', 'index.html')
-
-      response.writeHead(200, { 'Content-Type': 'text/html' })
-      createReadStream(index).pipe(response)
-
-      reject()
-    }
-
-    resolve()
+    this.dashboard?.handleRequest(data.request, data.response)
+      ? reject()
+      : resolve()
   }
 }

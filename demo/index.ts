@@ -5,8 +5,8 @@ import { Server } from '../packages/server/src'
 const server = Server.configure({
   port: 1234,
   extensions: [
-    new Monitor(),
     new Logger(),
+    new Monitor(),
   ],
 })
 
