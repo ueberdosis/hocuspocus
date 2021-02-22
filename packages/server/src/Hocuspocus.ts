@@ -2,23 +2,23 @@ import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
-import { Configuration } from './types'
+import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'
 
 /**
- * Hocuspocus y-js websocket server
+ * Hocuspocus yjs websocket server
  */
 class Hocuspocus {
 
   configuration: Configuration = {
-    onCreateDocument: (data, resolve) => resolve(),
+    extensions: [],
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
+    onCreateDocument: (data, resolve) => resolve(),
     onDisconnect: () => null,
-    onListen: (data, resolve) => resolve(),
+    onRequest: (data, resolve) => resolve(),
     onUpgrade: (data, resolve) => resolve(),
-    extensions: [],
     port: 80,
     timeout: 30000,
   }
@@ -40,11 +40,11 @@ class Hocuspocus {
     }
 
     const {
-      onConnect, onChange, onDisconnect, onCreateDocument, onListen, onUpgrade,
+      onConnect, onChange, onDisconnect, onCreateDocument, onRequest, onUpgrade,
     } = this.configuration
 
     this.configuration.extensions.push({
-      onConnect, onChange, onDisconnect, onCreateDocument, onListen, onUpgrade,
+      onConnect, onChange, onDisconnect, onCreateDocument, onRequest, onUpgrade,
     })
 
     return this
@@ -57,31 +57,37 @@ class Hocuspocus {
   listen(): void {
 
     const server = createServer((request, response) => {
-      response.writeHead(200, { 'Content-Type': 'text/plain' })
-      response.end('OK')
+      this.hooks('onRequest', { request, response })
+        .then(() => {
+          // default response if all prior hooks don't interfere
+          response.writeHead(200, { 'Content-Type': 'text/plain' })
+          response.end('OK')
+        })
+        .catch(() => {
+          // if a hook rejects, catch the exception and do nothing
+          // this is only meant to prevent further hooks and the
+          // default handler to do something
+        })
     })
 
     const websocketServer = new WebSocket.Server({ noServer: true })
     websocketServer.on('connection', this.handleConnection.bind(this))
 
     server.on('upgrade', (request, socket, head) => {
-
-      this.runAllHooks('onUpgrade', {})
+      this.hooks('onUpgrade', { request, socket, head })
         .then(() => websocketServer.handleUpgrade(request, socket, head, ws => {
+          // let the default websocket server handle the connection if
+          // prior hooks don't interfere
           websocketServer.emit('connection', ws, request)
         }))
         .catch(() => {
-          console.log('upgrade')
+          // if a hook rejects, catch the exception and do nothing
+          // this is only meant to prevent further hooks and the
+          // default handler to do something
         })
-
     })
 
-    this.runAllHooks('onListen', {
-      server,
-      websocketServer,
-      port: this.configuration.port,
-    })
-      .then(() => server.listen(this.configuration.port))
+    server.listen(this.configuration.port)
 
     this.httpServer = server
     this.websocketServer = websocketServer
@@ -105,7 +111,7 @@ class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    this.runAllHooks('onConnect', hookPayload).catch(() => connection.close())
+    this.hooks('onConnect', hookPayload).catch(() => connection.close())
 
   }
 
@@ -143,7 +149,7 @@ class Hocuspocus {
       this.handleDocumentUpdate(document, update, request)
     })
 
-    this.runAllHooks(
+    this.hooks(
       'onCreateDocument',
       { document, documentName },
       (loadedDocument: Doc | undefined) => {
@@ -188,31 +194,34 @@ class Hocuspocus {
   /**
    * Run the given hook on all configured extensions
    */
-  private runAllHooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
-    const chain = this.runHook(name, 0, hookPayload, callback)
+  private async hooks(name: string, hookPayload: any, callback: Function | null = null) {
+    const { extensions } = this.configuration
 
-    for (let i = 1; i < this.configuration.extensions.length; i += 1) {
-      chain.then(() => this.runHook(name, i, hookPayload, callback))
+    for (let i = 0; i < extensions.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.hook(name, extensions[i], hookPayload, callback)
     }
-
-    return chain
-
   }
 
   /**
-   * Run a hook that reacts to a promise by the given name on the
-   * extension with the given index
+   * Run the given hook of the given extension.
    */
-  private runHook(name: string, extensionIndex: number, hookPayload: any, callback: Function | null = null): Promise<any> {
-
-    return new Promise((resolve, reject) => {
+  private hook(name: string, extension: Extension, hookPayload: any, callback: Function | null = null) {
+    const promise = new Promise((resolve, reject) => {
       // @ts-ignore
-      this.configuration.extensions[extensionIndex][name](hookPayload, resolve, reject)
-    }).then((...args) => {
-      if (callback) callback(...args)
-      return new Promise<void>(resolve => resolve())
+      if (!extension[name]) resolve()
+      // @ts-ignore
+      extension[name](hookPayload, resolve, reject)
     })
 
+    if (callback) {
+      promise.then((...args) => {
+        callback(...args)
+        return new Promise<void>(resolve => resolve())
+      })
+    }
+
+    return promise
   }
 
   /**

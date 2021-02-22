@@ -3,8 +3,7 @@ import {
   onChangePayload,
   onConnectPayload,
   onCreateDocumentPayload,
-  onDisconnectPayload,
-  onListenPayload,
+  onDisconnectPayload, onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
 import { Storage } from './Storage'
@@ -67,11 +66,11 @@ export class Monitor implements Extension {
     this.storage.decrement('connectionCount')
   }
 
-  onListen(data: onListenPayload, resolve: Function): void {
+  onUpgrade(data: onUpgradePayload, resolve: Function): void {
     resolve()
   }
 
-  onUpgrade(data: onUpgradePayload, resolve: Function): void {
+  onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
     resolve()
   }
 }

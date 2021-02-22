@@ -4,7 +4,8 @@ import {
   onConnectPayload,
   onCreateDocumentPayload,
   onDisconnectPayload,
-  onListenPayload, onUpgradePayload,
+  onRequestPayload,
+  onUpgradePayload,
 } from '@hocuspocus/server'
 
 export class Logger implements Extension {
@@ -28,14 +29,14 @@ export class Logger implements Extension {
     console.log(`Connection to "${data.documentName}" closed…`)
   }
 
-  onListen(data: onListenPayload, resolve: Function): void {
-    console.log(`Listening on port "${data.port}"`)
+  onUpgrade(data: onUpgradePayload, resolve: Function): void {
+    console.log('Upgrading connection…')
 
     resolve()
   }
 
-  onUpgrade(data: onUpgradePayload, resolve: Function): void {
-    console.log('Upgrading connection')
+  onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
+    console.log('Incoming HTTP Request…')
 
     resolve()
   }
