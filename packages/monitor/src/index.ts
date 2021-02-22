@@ -6,6 +6,10 @@ import {
   onDisconnectPayload, onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
+import { dirname, join } from 'path'
+import { createReadStream, existsSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { split } from 'ts-node'
 import { Storage } from './Storage'
 import { Dashboard } from './Dashboard'
 
@@ -71,6 +75,18 @@ export class Monitor implements Extension {
   }
 
   onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
+    const { request, response } = data
+    const { dashboardPath } = this.configuration
+
+    if (request.url === dashboardPath || request.url === `${dashboardPath}/`) {
+      const index = join(dirname(fileURLToPath(import.meta.url)), 'client', 'dist', 'index.html')
+
+      response.writeHead(200, { 'Content-Type': 'text/html' })
+      createReadStream(index).pipe(response)
+
+      reject()
+    }
+
     resolve()
   }
 }
