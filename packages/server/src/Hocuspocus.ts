@@ -63,10 +63,11 @@ class Hocuspocus {
           response.writeHead(200, { 'Content-Type': 'text/plain' })
           response.end('OK')
         })
-        .catch(() => {
+        .catch(e => {
           // if a hook rejects, catch the exception and do nothing
           // this is only meant to prevent further hooks and the
           // default handler to do something
+          if (e) throw e
         })
     })
 
@@ -80,10 +81,11 @@ class Hocuspocus {
           // prior hooks don't interfere
           websocketServer.emit('connection', ws, request)
         }))
-        .catch(() => {
+        .catch(e => {
           // if a hook rejects, catch the exception and do nothing
           // this is only meant to prevent further hooks and the
           // default handler to do something
+          if (e) throw e
         })
     })
 
