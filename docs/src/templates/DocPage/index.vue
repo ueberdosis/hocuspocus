@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <Layout :show-sidebar="!['impressum.md', 'privacy-policy.md'].includes($page.docPage.fileInfo.path)">
     <app-section>
       <VueRemarkContent class="text" />
     </app-section>

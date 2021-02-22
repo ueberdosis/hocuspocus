@@ -39,8 +39,8 @@ const hocuspocus = Server.configure({
     const schema = new Schema({
       nodes: {
         text: {},
-        doc: { content: "text*" }
-      }
+        doc: { content: "text*" },
+      },
     })
 
     // Convert the prosemirror JSON to a ydoc

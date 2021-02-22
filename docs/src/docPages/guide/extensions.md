@@ -47,7 +47,7 @@ const server = Server.configure({
         // This option is only a example. See here for a full list:
         // https://www.npmjs.com/package/leveldown#options
         createIfMissing: true,
-      }
+      },
     })
   ],
 
@@ -65,7 +65,7 @@ You can use the [RocksDB API in C++ or Java](https://rocksdb.org/blog/2014/03/27
 ```bash
 # Install the rocks cli by downloading it to your machine and making it executable
 curl -o /usr/local/bin/rocks -L https://github.com/indix/rocks/releases/download/v0.0.5/rocks-linux-amd64 \
-    && chmod +x /usr/local/bin/rocks
+  && chmod +x /usr/local/bin/rocks
 
 # Run a single backup
 rocks backup --src=/path/to/your/database --dest=/path/to/your/backups
@@ -94,7 +94,6 @@ import { Server } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/redis'
 
 const server = Server.configure({
-
   extensions: [
     new Redis({
       // [required] Hostname of your Redis instance
@@ -103,7 +102,6 @@ const server = Server.configure({
       port: 6379,
     })
   ],
-
 })
 
 server.listen()
@@ -116,17 +114,15 @@ import { Server } from '@hocuspocus/server'
 import { RedisCluster } from '@hocuspocus/redis'
 
 const server = Server.configure({
-
   extensions: [
     new RedisCluster({
       scaleReads: 'all',
       redisOptions: {
         host: '127.0.0.1',
         port: 6379,
-      }
+      },
     })
   ],
-
 })
 
 server.listen()
@@ -140,7 +136,11 @@ First step: Create a new class that implements the `Extension` interface and add
 
 ```typescript
 import {
-  Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload
+  Extension,
+  onChangePayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
+  onDisconnectPayload,
 } from '@hocuspocus/server'
 
 export class MyHocuspocusExtension implements Extension {
@@ -164,7 +164,11 @@ You need to keep all those methods, even if you don't use them. If you want to g
 
 ```typescript
 import {
-  Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload
+  Extension,
+  onChangePayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
+  onDisconnectPayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -205,14 +209,12 @@ import { Server } from '@hocuspocus/server'
 import { MyHocuspocusExtension } from './extension/my-hocuspocus-extension'
 
 const server = Server.configure({
-
   extensions: [
     new MyHocuspocusExtension({
       myConfigurationOption: 'baz',
       myOptionalConfigurationOption: 1337,
     })
   ],
-
 })
 
 server.listen()

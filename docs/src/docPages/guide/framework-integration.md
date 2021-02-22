@@ -41,7 +41,7 @@ app.ws('/collaboration/:document', (websocket, request) => {
     user: {
       id: 1234,
       name: 'Jane',
-    }
+    },
   }
 
   server.handleConnection(websocket, request, context)

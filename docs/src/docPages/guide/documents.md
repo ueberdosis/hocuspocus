@@ -99,8 +99,8 @@ const hocuspocus = Server.configure({
     const schema = new Schema({
       nodes: {
         text: {},
-        doc: { content: "text*" }
-      }
+        doc: { content: "text*" },
+      },
     })
 
     // Convert the prosemirror JSON to a ydoc
@@ -134,8 +134,8 @@ import { Schema } from 'prosemirror-model'
 const schema = new Schema({
   nodes: {
     text: {},
-    doc: { content: "text*" }
-  }
+    doc: { content: "text*" },
+  },
 })
 
 // Convert a Y-Doc to prosemirror JSON
@@ -144,11 +144,12 @@ const prosemirrorDocument = yDocToProsemirrorJSON(ydoc);
 
 // Convert prosemirror JSON to a Y-Doc
 const newProsemirrorDocument = {
-    type: 'doc',
-    content: [
-        // ...
-    ],
+  type: 'doc',
+  content: [
+    // ...
+  ],
 }
+
 const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument)
 ```
 
