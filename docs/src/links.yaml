@@ -50,7 +50,7 @@
     - title: '@hocuspocus/server'
       link: https://store.ueber.io/products/hocuspocus
       draft: true
-    - title: '@hocuspocus/leveldb'
+    - title: '@hocuspocus/rocksdb'
       link: https://store.ueber.io/products/hocuspocus
       draft: true
 

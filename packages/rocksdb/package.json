@@ -1,7 +1,7 @@
 {
-  "name": "@hocuspocus/leveldb",
-  "description": "hocuspocus persistence driver for LevelDB/RocksDB",
-  "version": "1.0.0-alpha.13",
+  "name": "@hocuspocus/rocksdb",
+  "description": "hocuspocus persistence driver for RocksDB",
+  "version": "1.0.0-alpha.15",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -30,7 +30,7 @@
     "lodash.debounce": "^4.0.8",
     "rocksdb": "^4.1.0",
     "y-leveldb": "^0.1.0",
-    "yjs": "^13.4.12"
+    "yjs": "^13.5.0"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"

@@ -25,7 +25,10 @@ const data = {
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { Schema } from 'prosemirror-model'
+import { getSchema } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
   onCreateDocument(data, resolve) {
@@ -35,13 +38,10 @@ const hocuspocus = Server.configure({
       readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
     )
 
-    // We need the prosemirror schema you're using in the editor
-    const schema = new Schema({
-      nodes: {
-        text: {},
-        doc: { content: "text*" }
-      }
-    })
+    // When using the tiptap editor we need the schema to create
+    // a prosemirror JSON. You can use the `getSchema` method and
+    // pass it all the tiptap extensions you're using in the frontend
+    const schema = getSchema([ Document, Paragraph, Text ])
 
     // Convert the prosemirror JSON to a ydoc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)

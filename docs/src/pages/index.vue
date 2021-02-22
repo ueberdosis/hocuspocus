@@ -3,11 +3,17 @@
     <app-section>
       <div class="text">
         <h1 class="is-large">
-          hocuspocus
+          The plug & play collaboration backend
         </h1>
         <p class="is-large">
-          hocuspocus is a plug & play collaboration backend. It’s based on Y.js, a CRDT framework with a powerful abstraction of shared data. You can use it, to keep multiple instances of text editors in sync, work offline and sync changes later, or sync text between different devices. Also, you can use it to build anything else, that needs to be collaboration, for example a collaborative drawing app.
+          Real-time collaboration, syncing between different devices and working offline isn’t hard anymore. Keep everything in sync with the magic of Y.js.
         </p>
+        <div>
+          <newsletter-form
+            id="d6ab5e0a-5c27-47e1-bad1-e8b8fb869925"
+            button-label="Request Early Access"
+          />
+        </div>
       </div>
     </app-section>
 
@@ -81,22 +87,19 @@
             Actively maintained
           </h3>
           <p>
-            hocuspocus comes with a price tag, but that ensures constant development, maintenance and suppport.
+            hocuspocus comes with a price tag, but that ensures constant development, maintenance and support.
           </p>
         </feature-item>
       </feature-list>
     </app-section>
 
-    <app-section>
+    <!-- <app-section>
       <div class="text">
         <h2 class="is-h1">
           License
         </h2>
-        <p>
-          You can use hocuspocus in all kinds of projects, you can <g-link to="https://store.ueber.io/products/hocuspocus">buy an appropriate license and download the package</g-link> for $99/year for single developers, and $499/year for teams. Local taxes may apply.
-        </p>
       </div>
-    </app-section>
+    </app-section> -->
   </Layout>
 </template>
 
@@ -104,20 +107,18 @@
 import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
-import Btn from '~/components/Btn'
-import BtnWrapper from '~/components/BtnWrapper'
+import NewsletterForm from '@/components/NewsletterForm'
 
 export default {
   components: {
     AppSection,
     FeatureList,
     FeatureItem,
-    Btn,
-    BtnWrapper,
+    NewsletterForm,
   },
 
   metaInfo() {
-    const title = 'Headless WYSIWYG Text Editor'
+    const title = 'Collaboration backend for text editing and more.'
 
     return {
       title,
@@ -129,7 +130,7 @@ export default {
         },
         {
           property: 'og:image',
-          content: 'https://next.tiptap.dev/images/og-image.png',
+          content: 'https://hocuspocus.dev/images/og-image.png',
         },
         /* Twitter */
         {
@@ -142,7 +143,7 @@ export default {
         },
         {
           name: 'twitter:image',
-          content: 'https://next.tiptap.dev/images/og-image.png',
+          content: 'https://hocuspocus.dev/images/og-image.png',
         },
         {
           name: 'twitter:site',

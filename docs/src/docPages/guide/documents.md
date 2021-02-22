@@ -6,22 +6,19 @@
 
 Most Yjs connection providers (including the `y-websocket` provider) use a concept called room-names. The client will pass a room-name parameter to hocuspocus which will then be used to identify the document which is currently being edited. The room-name will be called document name throughout this documentation.
 
-In a real-world app you would probably add the name of your entity, a unique ID of the entity and in
-some cases even the field (if you have multiple fields that you want to make collaborative). Here is
-how that could look like for a CMS:
+In a real-world app you would probably use the name of your entity and a unique ID. Here is how that could look like for a CMS:
 
 ```js
-const documentName = 'page.140.content'
+const documentName = 'page.140'
 ```
 
 Now you can easily split this to get all desired information separately:
 
 ```js
-const [ entityType, entityID, field ] = documentName.split('.')
+const [ entityType, entityID ] = documentName.split('.')
 
 console.log(entityType) // prints "page"
-console.log(entityID) // prints "140"
-console.log(field) // prints "content"
+console.log(entityID) // prints "140
 ```
 
 This is a recommendation, of course you can name your documents however you want!
@@ -54,7 +51,7 @@ const hocuspocus = Server.configure({
 
       // Convert the y-doc to the format your editor uses, in this
       // example Prosemirror JSON for the tiptap editor
-      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
@@ -81,11 +78,16 @@ If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCr
 
 For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
+If you're using the tiptap editor you need
+
 ```typescript
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { Schema } from 'prosemirror-model'
+import { getSchema } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
   onCreateDocument(data, resolve) {
@@ -95,13 +97,10 @@ const hocuspocus = Server.configure({
       readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
     )
 
-    // We need the prosemirror schema you're using in the editor
-    const schema = new Schema({
-      nodes: {
-        text: {},
-        doc: { content: "text*" }
-      }
-    })
+    // When using the tiptap editor we need the schema to create
+    // a prosemirror JSON. You can use the `getSchema` method and
+    // pass it all the tiptap extensions you're using in the frontend
+    const schema = getSchema([ Document, Paragraph, Text ])
 
     // Convert the prosemirror JSON to a ydoc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
@@ -123,32 +122,37 @@ hocuspocus doesn't care how you structure your data, you can use any Yjs Shared 
 
 ### tiptap / prosemirror
 
+**Convert a Y-Doc to prosemirror JSON:**
+
 ```typescript
 import { Doc } from 'yjs'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
-import { Schema } from 'prosemirror-model'
 
-// We need the prosemirror schema you're using in the editor.
-// In a real world example you would probably store this in a
-// separate file and simply import it
-const schema = new Schema({
-  nodes: {
-    text: {},
-    doc: { content: "text*" }
-  }
-})
-
-// Convert a Y-Doc to prosemirror JSON
 const ydoc = new Doc()
-const prosemirrorDocument = yDocToProsemirrorJSON(ydoc);
+const newProsemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name');
+```
 
-// Convert prosemirror JSON to a Y-Doc
-const newProsemirrorDocument = {
-    type: 'doc',
-    content: [
-        // ...
-    ],
+**Convert prosemirror JSON to a Y-Doc:**
+
+```typescript
+import { prosemirrorJSONToYDoc } from 'y-prosemirror'
+import { getSchema } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+
+const prosemirrorDocument = {
+  type: 'doc',
+  content: [
+    // ...
+  ],
 }
+
+// We need the schema to create a prosemirror JSON. You can use
+// the `getSchema` method of the tiptap editor and pass it all
+// the tiptap extensions you're using in the frontend
+const schema = getSchema([ Document, Paragraph, Text ])
+
 const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument)
 ```
 

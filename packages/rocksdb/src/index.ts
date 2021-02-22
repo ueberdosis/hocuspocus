@@ -10,15 +10,15 @@ import debounce from 'lodash.debounce'
 export interface Configuration {
   options: object | undefined,
   path: string,
-  useRocksDB: boolean | undefined,
+  useLevelDb: boolean | undefined,
 }
 
-export class LevelDB implements Extension {
+export class RocksDB implements Extension {
 
   configuration: Configuration = {
     options: {},
     path: './database',
-    useRocksDB: true,
+    useLevelDb: false,
   }
 
   provider: LeveldbPersistence
@@ -37,9 +37,9 @@ export class LevelDB implements Extension {
     this.provider = new LeveldbPersistence(
       this.configuration.path,
       {
-        level: this.configuration.useRocksDB
-          ? (location: string, options: any) => levelup(rocksDB(location), options)
-          : undefined,
+        level: this.configuration.useLevelDb
+          ? undefined
+          : (location: string, options: any) => levelup(rocksDB(location), options),
         levelOptions: this.configuration.options,
       },
     )

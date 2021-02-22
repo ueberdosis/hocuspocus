@@ -1,4 +1,4 @@
-# @hocuspocus/leveldb
+# @hocuspocus/rocksdb
 [![Version](https://img.shields.io/npm/v/@hocuspocus/leveldb.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/leveldb)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/leveldb.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/leveldb.svg)](https://www.npmjs.com/package/@hocuspocus/leveldb)

@@ -26,15 +26,15 @@ const server = Server.configure({
     // Example test if a user is authenticated using a
     // request parameter
     if (requestParameters.access_token !== 'super-secret-token') {
-       return reject()
+      return reject()
     }
 
     // You can set contextual data…
     const context = {
-        user: {
-            id: 1234,
-            name: 'John',
-        },
+      user: {
+        id: 1234,
+        name: 'John',
+      },
     }
 
     // …and pass it along to use it in other hooks
