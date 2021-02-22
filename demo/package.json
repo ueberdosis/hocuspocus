@@ -10,7 +10,7 @@
     "start:development:express": "nodemon -e ts --watch ./ --watch ../packages --exec npm run start:express"
   },
   "devDependencies": {
-    "@hocuspocus/leveldb": "^1.0.0-alpha.13",
+    "@hocuspocus/rocksdb": "^1.0.0-alpha.13",
     "@hocuspocus/redis": "^1.0.0-alpha.6",
     "@hocuspocus/server": "^1.0.0-alpha.15",
     "@types/express": "^4.17.11",
