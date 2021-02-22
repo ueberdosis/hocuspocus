@@ -41,8 +41,9 @@
     "yjs": "^13.4.12"
   },
   "devDependencies": {
+    "@simonb04/parcel-plugin-inline-source": "^1.0.0",
     "browserslist": "^4.14.5",
     "parcel-bundler": "^1.12.4",
-    "@simonb04/parcel-plugin-inline-source": "^1.0.0"
+    "vue": "^2.6.12"
   }
 }
