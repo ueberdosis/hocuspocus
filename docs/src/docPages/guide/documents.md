@@ -6,22 +6,19 @@
 
 Most Yjs connection providers (including the `y-websocket` provider) use a concept called room-names. The client will pass a room-name parameter to hocuspocus which will then be used to identify the document which is currently being edited. The room-name will be called document name throughout this documentation.
 
-In a real-world app you would probably add the name of your entity, a unique ID of the entity and in
-some cases even the field (if you have multiple fields that you want to make collaborative). Here is
-how that could look like for a CMS:
+In a real-world app you would probably use the name of your entity and a unique ID. Here is how that could look like for a CMS:
 
 ```js
-const documentName = 'page.140.content'
+const documentName = 'page.140'
 ```
 
 Now you can easily split this to get all desired information separately:
 
 ```js
-const [ entityType, entityID, field ] = documentName.split('.')
+const [ entityType, entityID ] = documentName.split('.')
 
 console.log(entityType) // prints "page"
-console.log(entityID) // prints "140"
-console.log(field) // prints "content"
+console.log(entityID) // prints "140
 ```
 
 This is a recommendation, of course you can name your documents however you want!
@@ -54,7 +51,7 @@ const hocuspocus = Server.configure({
 
       // Convert the y-doc to the format your editor uses, in this
       // example Prosemirror JSON for the tiptap editor
-      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
@@ -140,7 +137,7 @@ const schema = new Schema({
 
 // Convert a Y-Doc to prosemirror JSON
 const ydoc = new Doc()
-const prosemirrorDocument = yDocToProsemirrorJSON(ydoc);
+const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name');
 
 // Convert prosemirror JSON to a Y-Doc
 const newProsemirrorDocument = {

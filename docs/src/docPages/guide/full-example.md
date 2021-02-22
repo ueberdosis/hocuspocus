@@ -6,12 +6,11 @@ This is a full example of how to integrate hocuspocus in your own application an
 import { writeFile } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
+import { debounce } from 'debounce'
 
 const hocuspocus = Server.configure({
 
   port: 6001, // Listen on port 6001
-  debounce: 500, // Debounce onChange hook for 0.5s
-  debounceMaxWait: 4000, // Set max wait time for debouncing to 4s
   timeout: 20000, // Set connection timeout to 20s
 
   /* ---------------------------------
@@ -47,12 +46,12 @@ const hocuspocus = Server.configure({
   onCreateDocument(data) {
     // Get entity and field information from the document name
     // In this example we would use a document name like "page.140.content"
-    const [ entityType, entityID, field ] = data.documentName.split('.')
+    const [ entityType, entityID ] = data.documentName.split('.')
 
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
     const prosemirrorDocument = JSON.parse(
-      readFileSync(`/path/to/your/documents/${entityType}/${entityID}/${field}.json`) || "{}"
+      readFileSync(`/path/to/your/documents/${entityType}/${entityID}.json`) || "{}"
     )
 
     // We need the prosemirror schema you're using in the editor
@@ -66,33 +65,36 @@ const hocuspocus = Server.configure({
     // Convert the prosemirror JSON to a Y-Doc
     const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
 
-    // Encode the current state as a Yjs update
-    const update = encodeStateAsUpdate(ydoc)
-
-    // And apply the update to the Y-Doc hocuspocus provides
-    applyUpdate(data.document, update)
+    // And pass it to the resolve method
+    resolve(ydoc)
   },
 
   /* ---------------------------------
    * Handle document changes
    * --------------------------------- */
   onChange(data) {
-    // Get entity and field information from the document name
-    const [ entityType, entityID, field ] = data.documentName.split('.')
+    const save = () => {
+      // Get entity and field information from the document name
+      const [ entityType, entityID ] = data.documentName.split('.')
 
-    // Get the underlying Y-Doc
-    const ydoc = data.document
+      // Get the underlying Y-Doc
+      const ydoc = data.document
 
-    // Convert the y-doc to the format your editor uses, in this
-    // example Prosemirror JSON for the tiptap editor
-    const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      // Convert the y-doc to the format your editor uses, in this
+      // example Prosemirror JSON for the tiptap editor
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
 
-    // Save your document. In a real-world app this could be a database query
-    // a webhook or something else
-    writeFile(
-      `/path/to/your/documents/${entityType}/${entityID}/${field}.json`,
-      prosemirrorDocument
-    )
+      // Save your document. In a real-world app this could be a database query
+      // a webhook or something else
+      writeFile(
+        `/path/to/your/documents/${entityType}/${entityID}.json`,
+        prosemirrorDocument
+      )
+    }
+
+    debounced?.clear()
+    debounced = debounce(() => save, 4000)
+    debounced()
   },
 
   /* ---------------------------------
