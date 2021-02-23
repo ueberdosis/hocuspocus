@@ -13,14 +13,14 @@ export class Hocuspocus {
 
   configuration: Configuration = {
     extensions: [],
-    onChange: () => null,
-    onConnect: (data, resolve) => resolve(),
-    onCreateDocument: (data, resolve) => resolve(),
-    onDestroy: (data, resolve) => resolve(),
-    onDisconnect: () => null,
-    onListen: (data, resolve) => resolve(),
-    onRequest: (data, resolve) => resolve(),
-    onUpgrade: (data, resolve) => resolve(),
+    onChange: () => new Promise(r => r()),
+    onConnect: () => new Promise(r => r()),
+    onCreateDocument: () => new Promise(r => r()),
+    onDestroy: () => new Promise(r => r()),
+    onDisconnect: () => new Promise(r => r()),
+    onListen: () => new Promise(r => r()),
+    onRequest: () => new Promise(r => r()),
+    onUpgrade: () => new Promise(r => r()),
     port: 80,
     timeout: 30000,
   }
@@ -41,26 +41,15 @@ export class Hocuspocus {
       ...configuration,
     }
 
-    const {
-      onChange,
-      onConnect,
-      onCreateDocument,
-      onDestroy,
-      onDisconnect,
-      onListen,
-      onRequest,
-      onUpgrade,
-    } = this.configuration
-
     this.configuration.extensions.push({
-      onChange,
-      onConnect,
-      onCreateDocument,
-      onDestroy,
-      onDisconnect,
-      onListen,
-      onRequest,
-      onUpgrade,
+      onChange: this.configuration.onChange,
+      onConnect: this.configuration.onConnect,
+      onCreateDocument: this.configuration.onCreateDocument,
+      onDestroy: this.configuration.onDestroy,
+      onDisconnect: this.configuration.onDisconnect,
+      onListen: this.configuration.onListen,
+      onRequest: this.configuration.onRequest,
+      onUpgrade: this.configuration.onUpgrade,
     })
 
     return this
@@ -70,7 +59,10 @@ export class Hocuspocus {
   /**
    * Start the server
    */
-  async listen(): Promise<any> {
+  async listen(): Promise<void> {
+
+    const websocketServer = new WebSocket.Server({ noServer: true })
+    websocketServer.on('connection', this.handleConnection.bind(this))
 
     const server = createServer((request, response) => {
       this.hooks('onRequest', { request, response })
@@ -80,29 +72,28 @@ export class Hocuspocus {
           response.end('OK')
         })
         .catch(e => {
-          // if a hook rejects, catch the exception and do nothing
-          // this is only meant to prevent further hooks and the
+          // if a hook rejects and the error is empty, do nothing
+          // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
-          // rethrow it
+          // just rethrow it
           if (e) throw e
         })
     })
 
-    const websocketServer = new WebSocket.Server({ noServer: true })
-    websocketServer.on('connection', this.handleConnection.bind(this))
-
     server.on('upgrade', (request, socket, head) => {
       this.hooks('onUpgrade', { request, socket, head })
-        .then(() => websocketServer.handleUpgrade(request, socket, head, ws => {
+        .then(() => {
           // let the default websocket server handle the connection if
           // prior hooks don't interfere
-          websocketServer.emit('connection', ws, request)
-        }))
+          websocketServer.handleUpgrade(request, socket, head, ws => {
+            websocketServer.emit('connection', ws, request)
+          })
+        })
         .catch(e => {
-          // if a hook rejects, catch the exception and do nothing
-          // this is only meant to prevent further hooks and the
+          // if a hook rejects and the error is empty, do nothing
+          // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
-          // rethrow it
+          // just rethrow it
           if (e) throw e
         })
     })
@@ -234,7 +225,11 @@ export class Hocuspocus {
   /**
    * Run the given hook on all configured extensions
    */
-  private async hooks(name: string, hookPayload: any, callback: Function | null = null) {
+  private async hooks(
+    name: string,
+    hookPayload: any,
+    callback: Function | null = null,
+  ): Promise<any> {
     const { extensions } = this.configuration
 
     for (let i = 0; i < extensions.length; i += 1) {
@@ -244,22 +239,17 @@ export class Hocuspocus {
   }
 
   /**
-   * Run the given hook of the given extension.
+   * Run the given hook on the given extension.
    */
-  private hook(name: string, extension: Extension, hookPayload: any, callback: Function | null = null) {
-    const promise = new Promise((resolve, reject) => {
-      // @ts-ignore
-      if (!extension[name]) resolve()
-      // @ts-ignore
-      extension[name](hookPayload, resolve, reject)
-    })
-
-    if (callback) {
-      promise.then((...args) => {
-        callback(...args)
-        return new Promise<void>(resolve => resolve())
-      })
-    }
+  private hook(
+    name: string,
+    extension: Extension,
+    hookPayload: any,
+    callback: Function | null = null,
+  ): Promise<any> {
+    // @ts-ignore
+    const promise = extension[name] ? extension[name](hookPayload) : new Promise(r => r())
+    if (callback) promise.then((...args: any[]) => callback(...args))
 
     return promise
   }
@@ -269,10 +259,8 @@ export class Hocuspocus {
    * @private
    */
   private static getParameters(request: IncomingMessage): URLSearchParams {
-
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
-
   }
 }
 

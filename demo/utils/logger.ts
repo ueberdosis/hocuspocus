@@ -3,41 +3,49 @@ import {
   onChangePayload,
   onConnectPayload,
   onCreateDocumentPayload,
+  onDestroyPayload,
   onDisconnectPayload,
+  onListenPayload,
   onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
 
 export class Logger implements Extension {
-  onCreateDocument(data: onCreateDocumentPayload, resolve: Function): void {
-    console.log(`Created document "${data.documentName}"…`)
 
-    resolve()
+  async onCreateDocument(data: onCreateDocumentPayload) {
+    Logger.log(`Created document "${data.documentName}"`)
   }
 
-  onChange(data: onChangePayload): void {
-    console.log(`Document "${data.documentName}" changed…`)
+  async onChange(data: onChangePayload) {
+    Logger.log(`Document "${data.documentName}" changed`)
   }
 
-  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {
-    console.log(`New connection to "${data.documentName}"…`)
-
-    resolve()
+  async onConnect(data: onConnectPayload) {
+    Logger.log(`New connection to "${data.documentName}"`)
   }
 
-  onDisconnect(data: onDisconnectPayload): void {
-    console.log(`Connection to "${data.documentName}" closed…`)
+  async onDisconnect(data: onDisconnectPayload) {
+    Logger.log(`Connection to "${data.documentName}" closed`)
   }
 
-  onUpgrade(data: onUpgradePayload, resolve: Function): void {
-    console.log('Upgrading connection…')
-
-    resolve()
+  async onUpgrade(data: onUpgradePayload) {
+    Logger.log('Upgrading connection')
   }
 
-  onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
-    console.log('Incoming HTTP Request…')
-
-    resolve()
+  async onRequest(data: onRequestPayload) {
+    Logger.log(`Incoming HTTP Request to "${data.request.url}"`)
   }
+
+  async onListen(data: onListenPayload) {
+    Logger.log(`Listening on port "${data.port}"`)
+  }
+
+  async onDestroy(data: onDestroyPayload) {
+    Logger.log('Server shutting down')
+  }
+
+  private static log(message: string) {
+    process.stdout.write(`[${(new Date()).toISOString()}] ${message} … \n`)
+  }
+
 }
