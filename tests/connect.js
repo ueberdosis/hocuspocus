@@ -21,7 +21,7 @@ context('connect', () => {
     Server.destroy()
   })
 
-  it('should be able to connect to the websocket server', async () => {
+  it.skip('should be able to connect to the websocket server', async () => {
     Server.configure({
       port: defaultPort,
       onListen(data, resolve, reject) {
