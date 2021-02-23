@@ -16,7 +16,9 @@ export class Hocuspocus {
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onCreateDocument: (data, resolve) => resolve(),
+    onDestroy: () => null,
     onDisconnect: () => null,
+    onListen: (data, resolve) => resolve(),
     onRequest: (data, resolve) => resolve(),
     onUpgrade: (data, resolve) => resolve(),
     port: 80,
@@ -40,11 +42,25 @@ export class Hocuspocus {
     }
 
     const {
-      onConnect, onChange, onDisconnect, onCreateDocument, onRequest, onUpgrade,
+      onChange,
+      onConnect,
+      onCreateDocument,
+      onDestroy,
+      onDisconnect,
+      onListen,
+      onRequest,
+      onUpgrade,
     } = this.configuration
 
     this.configuration.extensions.push({
-      onConnect, onChange, onDisconnect, onCreateDocument, onRequest, onUpgrade,
+      onChange,
+      onConnect,
+      onCreateDocument,
+      onDestroy,
+      onDisconnect,
+      onListen,
+      onRequest,
+      onUpgrade,
     })
 
     return this
@@ -54,7 +70,7 @@ export class Hocuspocus {
   /**
    * Start the server
    */
-  listen(): void {
+  async listen(): Promise<any> {
 
     const server = createServer((request, response) => {
       this.hooks('onRequest', { request, response })
@@ -89,10 +105,25 @@ export class Hocuspocus {
         })
     })
 
-    server.listen(this.configuration.port)
-
     this.httpServer = server
     this.websocketServer = websocketServer
+
+    await new Promise((resolve: Function, reject: Function) => {
+      server.listen(this.configuration.port, () => {
+        this.hooks('onListen', { port: this.configuration.port })
+          .then(() => resolve())
+          .catch(e => reject(e))
+      })
+    })
+
+  }
+
+  destroy(): Promise<any> {
+
+    this.httpServer?.close()
+    this.websocketServer?.close()
+
+    return this.hooks('onDestroy', {})
 
   }
 
@@ -113,7 +144,10 @@ export class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    this.hooks('onConnect', hookPayload).catch(() => connection.close())
+    this.hooks('onConnect', hookPayload).catch(e => {
+      if (e) throw e
+      connection.close()
+    })
 
   }
 
@@ -159,7 +193,9 @@ export class Hocuspocus {
           applyUpdate(document, encodeStateAsUpdate(loadedDocument))
         }
       },
-    )
+    ).catch(e => {
+      throw e
+    })
 
     this.documents.set(documentName, document)
 

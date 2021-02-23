@@ -25,7 +25,9 @@ export interface Extension {
   onChange(data: onChangePayload): void,
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onCreateDocument(data: onCreateDocumentPayload, resolve: Function, reject: Function): void,
+  onDestroy(data: onDestroyPayload): void,
   onDisconnect(data: onDisconnectPayload): void
+  onListen(data: onListenPayload, resolve: Function, reject: Function): void,
   onRequest(data: onRequestPayload, resolve: Function, reject: Function): void,
   onUpgrade(data: onUpgradePayload, resolve: Function, reject: Function): void,
 }
@@ -64,4 +66,11 @@ export interface onUpgradePayload {
   head: any,
   request: IncomingMessage,
   socket: Socket,
+}
+
+export interface onListenPayload {
+  port: number,
+}
+
+export interface onDestroyPayload {
 }
