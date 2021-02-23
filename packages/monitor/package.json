@@ -29,19 +29,20 @@
     "dist"
   ],
   "scripts": {
-    "start": "parcel watch -d src/client/dist src/client/index.html",
-    "build": "parcel build -d src/client/dist src/client/index.html"
+    "start": "parcel watch -d src/client/dist src/client/index.js",
+    "build": "parcel build -d src/client/dist src/client/index.js"
   },
   "dependencies": {
     "@types/levelup": "^4.3.0",
+    "@types/node-static": "^0.7.6",
     "@types/rocksdb": "^3.0.0",
     "levelup": "^4.4.0",
     "moment": "^2.29.1",
+    "node-static": "^0.7.11",
     "rocksdb": "^4.1.0",
     "yjs": "^13.4.12"
   },
   "devDependencies": {
-    "@simonb04/parcel-plugin-inline-source": "^1.0.0",
     "browserslist": "^4.14.5",
     "parcel-bundler": "^1.12.4",
     "vue": "^2.6.12"

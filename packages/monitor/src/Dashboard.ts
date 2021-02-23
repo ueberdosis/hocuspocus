@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import { createReadStream } from 'fs'
+import { Server } from 'node-static'
 
 export interface Configuration {
   path: string,
@@ -11,7 +11,7 @@ export interface Configuration {
 export class Dashboard {
 
   configuration: Configuration = {
-    path: './dashboard',
+    path: 'dashboard',
   }
 
   /**
@@ -27,11 +27,13 @@ export class Dashboard {
   handleRequest(request: IncomingMessage, response: ServerResponse): boolean {
     const { path } = this.configuration
 
-    if (request.url === path || request.url === `${path}/`) {
-      const index = join(dirname(fileURLToPath(import.meta.url)), 'client', 'dist', 'index.html')
+    if (request.url?.split('/')[1] === path) {
+      request.url = request.url.replace(path, '')
 
-      response.writeHead(200, { 'Content-Type': 'text/html' })
-      createReadStream(index).pipe(response)
+      const publicPath = join(dirname(fileURLToPath(import.meta.url)), 'client', 'public')
+      const server = new Server(publicPath, { cache: 0 })
+
+      request.addListener('end', () => server.serve(request, response)).resume()
 
       return true
     }

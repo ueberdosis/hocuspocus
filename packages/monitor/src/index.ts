@@ -23,7 +23,7 @@ export interface Configuration {
 export class Monitor implements Extension {
 
   configuration: Configuration = {
-    dashboardPath: '/dashboard',
+    dashboardPath: 'dashboard',
     enableDashboard: true,
     interval: 5,
     storagePath: './dashboard',
