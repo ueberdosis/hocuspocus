@@ -6,10 +6,6 @@ import {
   onDisconnectPayload, onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
-import { dirname, join } from 'path'
-import { createReadStream, existsSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { split } from 'ts-node'
 import { Storage } from './Storage'
 import { Dashboard } from './Dashboard'
 
@@ -18,6 +14,7 @@ export interface Configuration {
   enableDashboard: boolean,
   interval: number,
   storagePath: string,
+  port: number | undefined,
 }
 
 export class Monitor implements Extension {
@@ -27,6 +24,7 @@ export class Monitor implements Extension {
     enableDashboard: true,
     interval: 5,
     storagePath: './dashboard',
+    port: undefined,
   }
 
   storage: Storage

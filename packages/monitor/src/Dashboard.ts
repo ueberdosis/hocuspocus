@@ -44,17 +44,4 @@ export class Dashboard {
   handleWebsocketConnection(websocket: WebSocket, request: IncomingMessage): void {
 
   }
-
-  listen() {
-    // this.ws.on('connection', ws => {
-    //   ws.on('message', message => {
-    //     console.log('received: %s', message)
-    //   })
-    //
-    //   ws.send('something')
-    // })
-    //
-    // this.http.listen()
-  }
-
 }
