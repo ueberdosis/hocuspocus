@@ -16,7 +16,7 @@ export class Hocuspocus {
     onChange: () => null,
     onConnect: (data, resolve) => resolve(),
     onCreateDocument: (data, resolve) => resolve(),
-    onDestroy: () => null,
+    onDestroy: (data, resolve) => resolve(),
     onDisconnect: () => null,
     onListen: (data, resolve) => resolve(),
     onRequest: (data, resolve) => resolve(),
@@ -82,7 +82,8 @@ export class Hocuspocus {
         .catch(e => {
           // if a hook rejects, catch the exception and do nothing
           // this is only meant to prevent further hooks and the
-          // default handler to do something
+          // default handler to do something. if a error is present
+          // rethrow it
           if (e) throw e
         })
     })
@@ -100,7 +101,8 @@ export class Hocuspocus {
         .catch(e => {
           // if a hook rejects, catch the exception and do nothing
           // this is only meant to prevent further hooks and the
-          // default handler to do something
+          // default handler to do something. if a error is present
+          // rethrow it
           if (e) throw e
         })
     })
@@ -115,16 +117,16 @@ export class Hocuspocus {
           .catch(e => reject(e))
       })
     })
-
   }
 
-  destroy(): Promise<any> {
-
+  /**
+   * Destroy the server
+   */
+  async destroy(): Promise<any> {
     this.httpServer?.close()
     this.websocketServer?.close()
 
-    return this.hooks('onDestroy', {})
-
+    await this.hooks('onDestroy', {})
   }
 
   /**

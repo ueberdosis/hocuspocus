@@ -25,7 +25,7 @@ export interface Extension {
   onChange(data: onChangePayload): void,
   onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onCreateDocument(data: onCreateDocumentPayload, resolve: Function, reject: Function): void,
-  onDestroy(data: onDestroyPayload): void,
+  onDestroy(data: onDestroyPayload, resolve: Function, reject: Function): void,
   onDisconnect(data: onDisconnectPayload): void
   onListen(data: onListenPayload, resolve: Function, reject: Function): void,
   onRequest(data: onRequestPayload, resolve: Function, reject: Function): void,

@@ -68,21 +68,19 @@ context('.listen()', () => {
 
     Server.configure({
       port: defaultPort,
-      async onListen(data, resolve) {
+      onListen(data, resolve, reject) {
 
-        const response = await fetch(`http://localhost:${defaultPort}`)
-        console.log(response)
-
-        expect(response.ok).to.equal(true)
-        // expect(await response.text()).to.equal('TEST')
-
-        resolve()
+        fetch(`http://localhost:${defaultPort}`)
+          .then(response => {
+            expect(response.ok).to.equal(true)
+            resolve()
+          })
+          .catch(e => reject(e))
       }
     })
 
     await Server.listen()
     await Server.destroy()
   })
-
 
 })
