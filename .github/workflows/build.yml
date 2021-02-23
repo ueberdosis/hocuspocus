@@ -59,6 +59,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
     strategy:
       matrix:
         node-version: [14]
@@ -88,3 +91,11 @@ jobs:
     - name: Run tests
       id: test
       run: yarn test
+
+    - name: Send Slack notifications
+      uses: act10ns/slack@v1
+      if: failure()
+      with:
+        status: ${{ job.status }}
+        steps: ${{ toJson(steps) }}
+        channel: '#hocuspocus-notifications'
