@@ -1,5 +1,11 @@
 import {
-  Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload,
+  Extension,
+  onChangePayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
+  onDisconnectPayload,
+  onRequestPayload,
+  onUpgradePayload,
 } from '@hocuspocus/server'
 
 export class Logger implements Extension {
@@ -21,5 +27,17 @@ export class Logger implements Extension {
 
   onDisconnect(data: onDisconnectPayload): void {
     console.log(`Connection to "${data.documentName}" closed…`)
+  }
+
+  onUpgrade(data: onUpgradePayload, resolve: Function): void {
+    console.log('Upgrading connection…')
+
+    resolve()
+  }
+
+  onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
+    console.log('Incoming HTTP Request…')
+
+    resolve()
   }
 }

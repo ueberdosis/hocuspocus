@@ -1,5 +1,8 @@
-import { IncomingHttpHeaders } from 'http'
+import {
+  IncomingHttpHeaders, IncomingMessage, ServerResponse,
+} from 'http'
 import { URLSearchParams } from 'url'
+import { Socket } from 'net'
 import Document from './Document'
 
 export enum MessageTypes {
@@ -19,10 +22,12 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
-  onCreateDocument(data: onCreateDocumentPayload, resolve: Function): void,
-  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
   onChange(data: onChangePayload): void,
+  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void,
+  onCreateDocument(data: onCreateDocumentPayload, resolve: Function, reject: Function): void,
   onDisconnect(data: onDisconnectPayload): void
+  onRequest(data: onRequestPayload, resolve: Function, reject: Function): void,
+  onUpgrade(data: onUpgradePayload, resolve: Function, reject: Function): void,
 }
 
 export interface Configuration extends Extension {
@@ -48,4 +53,15 @@ export interface onChangePayload extends onConnectPayload {
 
 export interface onDisconnectPayload extends onConnectPayload {
   context: any,
+}
+
+export interface onRequestPayload {
+  request: IncomingMessage,
+  response: ServerResponse,
+}
+
+export interface onUpgradePayload {
+  head: any,
+  request: IncomingMessage,
+  socket: Socket,
 }
