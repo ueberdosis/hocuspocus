@@ -47,8 +47,8 @@ export class Monitor implements Extension {
     this.storage = new Storage({ storagePath, interval })
 
     if (this.configuration.enableDashboard) {
-      const { dashboardPath } = this.configuration
-      this.dashboard = new Dashboard({ path: dashboardPath })
+      const { dashboardPath, port } = this.configuration
+      this.dashboard = new Dashboard({ path: dashboardPath, port })
     }
   }
 

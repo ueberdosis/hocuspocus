@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import { createServer, IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -7,12 +7,14 @@ import { Socket } from 'net'
 
 export interface Configuration {
   path: string,
+  port: number | undefined,
 }
 
 export class Dashboard {
 
   configuration: Configuration = {
     path: 'dashboard',
+    port: undefined,
   }
 
   websocketServer: WebSocket.Server
@@ -28,6 +30,23 @@ export class Dashboard {
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
     this.websocketServer.on('connection', this.handleConnection.bind(this))
+
+    if (this.configuration.port) {
+      const server = createServer((request, response) => {
+        if (!this.handleRequest(request, response)) {
+          response.writeHead(404)
+          response.end('Not Found')
+        }
+      })
+
+      server.on('upgrade', (request, socket, head) => {
+        this.handleUpgrade(request, socket, head)
+      })
+
+      server.listen(this.configuration.port, () => {
+        process.stdout.write(`[${(new Date()).toISOString()}] Dashboard listening on port "${this.configuration.port}" … \n`)
+      })
+    }
   }
 
   handleRequest(request: IncomingMessage, response: ServerResponse): boolean {
