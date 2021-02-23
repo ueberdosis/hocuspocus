@@ -5,25 +5,7 @@ import { Hocuspocus } from '../packages/server/src'
 
 const defaultPort = parseInt(process.env.DEFAULT_PORT || 1234)
 
-context('.listen()', () => {
-  // const originalConsoleLog = console.log
-  // let output
-  //
-  // beforeEach(() => {
-  //   output = []
-  //
-  //   console.log = msg => {
-  //     output.push(msg)
-  //   }
-  // })
-  //
-  // afterEach(function () {
-  //   console.log = originalConsoleLog
-  //
-  //   if (this.currentTest.state === 'failed') {
-  //     console.log(output.join('\n'))
-  //   }
-  // })
+context('listen', () => {
 
   it('should start an instance', (done) => {
     const Server = new Hocuspocus
