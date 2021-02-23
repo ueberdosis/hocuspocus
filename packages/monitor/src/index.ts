@@ -2,21 +2,26 @@ import {
   Extension,
   onChangePayload,
   onConnectPayload,
-  onCreateDocumentPayload, onDestroyPayload,
-  onDisconnectPayload, onListenPayload, onRequestPayload,
+  onCreateDocumentPayload,
+  onDestroyPayload,
+  onDisconnectPayload,
+  onListenPayload,
+  onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import { Storage } from './Storage'
+import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
 
 export interface Configuration {
   dashboardPath: string,
   enableDashboard: boolean,
+  enableStorage: boolean,
   interval: number,
-  storagePath: string,
   port: number | undefined,
+  storagePath: string,
 }
 
 export class Monitor implements Extension {
@@ -24,9 +29,10 @@ export class Monitor implements Extension {
   configuration: Configuration = {
     dashboardPath: 'dashboard',
     enableDashboard: true,
+    enableStorage: false,
     interval: 5,
-    storagePath: './dashboard',
     port: undefined,
+    storagePath: './dashboard',
   }
 
   storage: Storage
@@ -44,7 +50,12 @@ export class Monitor implements Extension {
     }
 
     const { storagePath, interval } = this.configuration
-    this.storage = new Storage({ storagePath, interval })
+
+    if (this.configuration.enableStorage) {
+      this.storage = new RocksDB({ storagePath, interval })
+    } else {
+      this.storage = new Storage({ interval })
+    }
 
     if (this.configuration.enableDashboard) {
       const { dashboardPath, port } = this.configuration
