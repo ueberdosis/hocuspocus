@@ -9,7 +9,7 @@ import Connection from './Connection'
 /**
  * Hocuspocus y-js websocket server
  */
-class Hocuspocus {
+export class Hocuspocus {
 
   configuration: Configuration = {
     onCreateDocument: (data, resolve) => resolve(),

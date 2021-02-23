@@ -1,29 +1,29 @@
 /* eslint-disable */
 import assert from 'assert'
-import { Server } from '@hocuspocus/server/src/index'
+import { Hocuspocus } from '../packages/server/src'
 
-context('.listen()', function() {
-  const originalConsoleLog = console.log
-  let output
-
-  beforeEach(() => {
-    output = []
-
-    console.log = msg => {
-      output.push(msg)
-    }
-  })
-
-  afterEach(function () {
-    console.log = originalConsoleLog
-
-    if (this.currentTest.state === 'failed') {
-      console.log(output.join('\n'))
-    }
-  })
-
-  it('should start an instance', function(done) {
+context('.listen()', () => {
+  it('should start an instance', (done) => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 1234,
+    })
     Server.listen()
+
+    done()
+  })
+
+  it('should respond with ok', (done) => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 1234,
+    })
+    Server.listen()
+
+    console.log(
+      fetch('localhost:1234')
+    )
+
     done()
   })
 })
