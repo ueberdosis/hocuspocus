@@ -7,6 +7,7 @@ import {
   onUpgradePayload,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
+import WebSocket from 'ws'
 import { Storage } from './Storage'
 import { Dashboard } from './Dashboard'
 
@@ -35,6 +36,7 @@ export class Monitor implements Extension {
   /**
    * Constructor
    */
+
   constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
@@ -50,8 +52,40 @@ export class Monitor implements Extension {
     }
   }
 
+  /*
+   * Public API
+   */
+
   handleRequest(request: IncomingMessage, response: ServerResponse) {
     return this.dashboard?.handleRequest(request, response)
+  }
+
+  handleConnection(websocket: WebSocket, request: IncomingMessage) {
+    return this.dashboard?.handleConnection(websocket, request)
+  }
+
+  /*
+   * Hooks
+   */
+
+  onRequest({ request, response }: onRequestPayload): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.configuration.port && this.handleRequest(request, response)) {
+        reject()
+      } else {
+        resolve()
+      }
+    })
+  }
+
+  onUpgrade({ request, socket, head }: onUpgradePayload): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.configuration.port && this.dashboard?.handleUpgrade(request, socket, head)) {
+        reject()
+      } else {
+        resolve()
+      }
+    })
   }
 
   async onConnect(data: onConnectPayload) {
@@ -62,26 +96,12 @@ export class Monitor implements Extension {
     await this.storage.decrement('connectionCount')
   }
 
-  onRequest(data: onRequestPayload): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (this.handleRequest(data.request, data.response)) {
-        reject()
-      } else {
-        resolve()
-      }
-    })
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onCreateDocument(data: onCreateDocumentPayload) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
-  async onUpgrade(data: onUpgradePayload) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function

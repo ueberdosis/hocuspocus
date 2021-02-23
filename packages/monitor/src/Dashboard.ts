@@ -3,6 +3,7 @@ import WebSocket from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { Server } from 'node-static'
+import { Socket } from 'net'
 
 export interface Configuration {
   path: string,
@@ -14,6 +15,8 @@ export class Dashboard {
     path: 'dashboard',
   }
 
+  websocketServer: WebSocket.Server
+
   /**
    * Constructor
    */
@@ -22,6 +25,9 @@ export class Dashboard {
       ...this.configuration,
       ...configuration,
     }
+
+    this.websocketServer = new WebSocket.Server({ noServer: true })
+    this.websocketServer.on('connection', this.handleConnection.bind(this))
   }
 
   handleRequest(request: IncomingMessage, response: ServerResponse): boolean {
@@ -41,7 +47,21 @@ export class Dashboard {
     return false
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  handleWebsocketConnection(websocket: WebSocket, request: IncomingMessage): void {
+  handleUpgrade(request: IncomingMessage, socket: Socket, head: any) {
+    const { path } = this.configuration
+
+    if (request.url?.split('/')[1] === path) {
+      this.websocketServer.handleUpgrade(request, socket, head, ws => {
+        this.websocketServer.emit('connection', ws, request)
+      })
+
+      return true
+    }
+
+    return false
+  }
+
+  handleConnection(websocket: WebSocket, request: IncomingMessage): void {
+    console.log('connected yay')
   }
 }
