@@ -1,1 +1,3 @@
 **/dist/**
+**/node_modules/**
+packages/monitor/src/client/public

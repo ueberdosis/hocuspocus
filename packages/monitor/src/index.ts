@@ -73,8 +73,12 @@ export class Monitor implements Extension {
   }
 
   onRequest(data: onRequestPayload, resolve: Function, reject: Function): void {
-    this.dashboard?.handleRequest(data.request, data.response)
-      ? reject()
-      : resolve()
+    const interrupt = this.dashboard?.handleRequest(data.request, data.response)
+
+    if (interrupt) {
+      reject()
+    } else {
+      resolve()
+    }
   }
 }

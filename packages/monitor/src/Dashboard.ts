@@ -41,7 +41,7 @@ export class Dashboard {
     return false
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   handleWebsocketConnection(websocket: WebSocket, request: IncomingMessage): void {
-
   }
 }
