@@ -2,8 +2,9 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import { Server } from 'node-static'
+import nodeStatic from 'node-static'
 import { Socket } from 'net'
+import process from 'process'
 import { Storage } from './Storage'
 
 export interface Configuration {
@@ -34,7 +35,7 @@ export class Dashboard {
     }
 
     this.configuration.storage?.on('update', data => {
-      this.send(JSON.stringify({ event: 'update', data: [data] }))
+      this.send(JSON.stringify({ event: 'update', metrics: [data] }))
     })
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
@@ -71,7 +72,7 @@ export class Dashboard {
       request.url = request.url.replace(path, '')
 
       const publicPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dashboard', 'dist')
-      const server = new Server(publicPath, { cache: 0 })
+      const server = new nodeStatic.Server(publicPath, { cache: 0 })
 
       request.addListener('end', () => server.serve(request, response)).resume()
 
@@ -101,7 +102,15 @@ export class Dashboard {
     if (this.configuration.storage) {
       this.configuration.storage.all().then(data => {
         setTimeout(() => {
-          connection.send(JSON.stringify({ event: 'initial', data }))
+          connection.send(JSON.stringify({
+            event: 'initial',
+            metrics: data,
+            info: {
+              version: process.version,
+              platform: process.platform,
+              uptime: process.uptime(),
+            },
+          }))
         }, 1000)
       })
     }

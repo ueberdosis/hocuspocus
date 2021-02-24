@@ -51,11 +51,12 @@ export class Monitor implements Extension {
 
     const { storagePath, interval } = this.configuration
 
-    if (this.configuration.enableStorage) {
-      this.storage = new RocksDB({ storagePath, interval })
-    } else {
-      this.storage = new Storage({ interval })
-    }
+    this.storage = new Storage({ interval })
+    // if (this.configuration.enableStorage) {
+    // TODO: fix rocksdb
+    // this.storage = new RocksDB({ storagePath, interval })
+    // } else {
+    // }
 
     if (this.configuration.enableDashboard) {
       this.dashboard = new Dashboard({

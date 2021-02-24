@@ -4,15 +4,17 @@
     <p>
       {{ current.cpu.usage }}% across all {{ current.cpu.count }} cores
     </p>
-    <div class="-ml-4 -mr-4">
+    <div class="-ml-4 -mr-4 -mb-12">
       <plotly
         :data="cpuUsage"
         :layout="{
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
           title: false,
           showlegend: false,
           margin: {
-            l: 35,
-            r: 30,
+            l: 0,
+            r: 0,
             b: 40,
             t: 40,
           },
@@ -23,7 +25,7 @@
           },
           yaxis: {
             showgrid: true,
-            zeroline: true,
+            zeroline: false,
             range: [0,100],
           }
         }"

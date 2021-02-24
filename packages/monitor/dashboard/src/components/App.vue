@@ -3,14 +3,14 @@
     <h1 class="text-2xl font-bold">@hocuspocus/monitor 📈</h1>
 
     <div class="flex mt-8 mr-1">
-      <div class="flex-1">
+      <div class="flex-1 mr-2">
         <memory :data="data" />
       </div>
-      <div class="flex-1 mx-1">
+      <div class="flex-1 mx-2">
         <cpu :data="data" />
       </div>
-      <div class="flex-1 ml-1">
-        test
+      <div class="flex-1 ml-2">
+        <info :info="info" />
       </div>
     </div>
   </div>
@@ -21,25 +21,30 @@ import Vue from 'vue'
 import collect from 'collect.js'
 import Memory from './Memory'
 import Cpu from './Cpu'
+import Info from './Info'
 
 export default Vue.extend({
   components: {
-    Memory,
     Cpu,
+    Info,
+    Memory,
   },
 
   data() {
     return {
       socket: null,
       data: [],
+      info: {},
     }
   },
 
   methods: {
     handleMessage(event) {
-      const { data } = JSON.parse(event.data)
+      const { metrics, info } = JSON.parse(event.data)
 
-      data?.forEach(data => {
+      this.info = info || this.info
+
+      metrics?.forEach(data => {
         const oldData = collect(this.data)
           .search(item => item.key === data.key)
 
