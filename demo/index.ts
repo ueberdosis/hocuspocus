@@ -8,10 +8,7 @@ const server = Server.configure({
   port: 1234,
   extensions: [
     new Logger(),
-    new Monitor({
-      port: 8080,
-      dashboardPath: '',
-    }),
+    new Monitor(),
     // new RocksDB(),
     // new Redis(),
   ],

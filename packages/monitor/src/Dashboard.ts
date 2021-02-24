@@ -70,7 +70,7 @@ export class Dashboard {
     if (request.url?.split('/')[1] === path) {
       request.url = request.url.replace(path, '')
 
-      const publicPath = join(dirname(fileURLToPath(import.meta.url)), 'client', 'public')
+      const publicPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dashboard', 'dist')
       const server = new Server(publicPath, { cache: 0 })
 
       request.addListener('end', () => server.serve(request, response)).resume()
