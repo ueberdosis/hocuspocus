@@ -34,7 +34,7 @@ export class Dashboard {
     }
 
     this.configuration.storage?.on('update', data => {
-      this.send(JSON.stringify({ event: 'update', data }))
+      this.send(JSON.stringify({ event: 'update', data: [data] }))
     })
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
@@ -97,6 +97,14 @@ export class Dashboard {
 
   handleConnection(connection: WebSocket, request: IncomingMessage): void {
     this.connections.set(connection, {})
+
+    if (this.configuration.storage) {
+      this.configuration.storage.all().then(data => {
+        setTimeout(() => {
+          connection.send(JSON.stringify({ event: 'initial', data }))
+        }, 1000)
+      })
+    }
 
     connection.on('close', () => {
       this.close(connection)

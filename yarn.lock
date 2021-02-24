@@ -2443,6 +2443,11 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.1.tgz#f3f3ae4590c5386fc7c543aae9b78d4cf30ffee9"
   integrity sha512-NysN+bNqj6E0Hv4CTGWSlPzMW6vTKjDpOteycDkV4IWBsO+PU48JonrPzV9ODjiI2XrjmA05KInLgF5ivZ/YGQ==
 
+"@types/node-os-utils@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/node-os-utils/-/node-os-utils-1.2.0.tgz#d03286eca0642f861cbee506bc1f4dd868a15826"
+  integrity sha512-sstDo2s8gQR/Qh2Bd6yNQ5xJv+D4ttyB9ZVjB3mBm3VkGl2RoqjV7fiw9mIHLbshHSRm2m8uf0XrIRQNWB/z6A==
+
 "@types/node-static@^0.7.6":
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/@types/node-static/-/node-static-0.7.6.tgz#18d1464c5e8d1e525a467f304433b2f84cb41d55"
@@ -9931,6 +9936,11 @@ node-libs-browser@^2.2.1:
     url "^0.11.0"
     util "^0.11.0"
     vm-browserify "^1.0.1"
+
+node-os-utils@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/node-os-utils/-/node-os-utils-1.3.2.tgz#f7f2a856ffc463658f84bad3e7eacf1fed6518b2"
+  integrity sha512-wUo/q6u77y9+DBaXkn57IDyJlQuN7xP6VU9h6yeIGhKocc9rDQPyc3WmLgX+x5jf4WmbLcEaA3raM05+v5jW3g==
 
 node-pre-gyp@^0.11.0:
   version "0.11.0"

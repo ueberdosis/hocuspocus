@@ -1,14 +1,12 @@
 <template>
   <div class="shadow-xl bg-white px-4 pt-4 pb-2">
-    <div class="text-xl font-bold">Memory usage</div>
+    <div class="text-xl font-bold">CPU usage</div>
     <p>
-      {{ Math.floor(current.memory.total - current.memory.free) }}Mb of
-      {{ current.memory.total }}Mb used
-      ({{ Math.round(current.memory.usage * 100) / 100 }}%)
+      {{ current.cpu.usage }}% across all {{ current.cpu.count }} cores
     </p>
     <div class="-ml-4 -mr-4">
       <plotly
-        :data="memoryUsage"
+        :data="cpuUsage"
         :layout="{
           title: false,
           showlegend: false,
@@ -26,7 +24,7 @@
           yaxis: {
             showgrid: true,
             zeroline: true,
-            range: [0,100]
+            range: [0,100],
           }
         }"
         :display-mode-bar="false"
@@ -55,21 +53,20 @@ export default {
   computed: {
     filtered() {
       return collect(this.data)
-        .where('value.memory')
+        .where('value.cpu')
         .toArray()
     },
 
     current() {
       return this.filtered[this.filtered.length - 1]?.value || {
-        memory: {
+        cpu: {
           usage: 0,
-          free: 0,
-          total: 0,
+          count: 0,
         },
       }
     },
 
-    memoryUsage() {
+    cpuUsage() {
       const data = [
         {
           x: [],
@@ -82,7 +79,7 @@ export default {
 
       this.filtered.forEach(item => {
         data[0].x.push(item.key)
-        data[0].y.push(item.value.memory.usage)
+        data[0].y.push(item.value.cpu.usage)
       })
 
       return data

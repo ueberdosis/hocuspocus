@@ -30,6 +30,16 @@ export class Storage extends EventEmitter {
    * Default API
    */
 
+  async all(): Promise<any> {
+    const data: Array<any> = []
+
+    this.storage.forEach((value, key) => {
+      data.push({ key, value })
+    })
+
+    return data
+  }
+
   async get(key: string, defaultValue: any = null): Promise<any> {
     return this.storage.get(key) || defaultValue
   }

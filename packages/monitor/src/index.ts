@@ -10,8 +10,8 @@ import {
   onUpgradePayload,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
+import osu from 'node-os-utils'
 import WebSocket from 'ws'
-import { cpus, freemem, totalmem } from 'os'
 import { Storage } from './Storage'
 import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
@@ -69,9 +69,18 @@ export class Monitor implements Extension {
   }
 
   private async collectOsMetrics() {
-    await this.storage.setTimedValue('memoryFree', freemem(), true)
-    await this.storage.setTimedValue('memoryTotal', totalmem(), true)
-    await this.storage.setTimedValue('cpus', cpus(), true)
+    const memory = await osu.mem.info()
+
+    await this.storage.setTimedValue('memory', {
+      usage: 100 - memory.freeMemPercentage,
+      free: memory.freeMemMb,
+      total: memory.totalMemMb,
+    }, true)
+
+    await this.storage.setTimedValue('cpu', {
+      usage: await osu.cpu.usage(),
+      count: osu.cpu.count(),
+    }, true)
   }
 
   /*
