@@ -4,10 +4,12 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { Server } from 'node-static'
 import { Socket } from 'net'
+import { Storage } from './Storage'
 
 export interface Configuration {
   path: string,
   port: number | undefined,
+  storage: Storage | undefined,
 }
 
 export class Dashboard {
@@ -15,9 +17,12 @@ export class Dashboard {
   configuration: Configuration = {
     path: 'dashboard',
     port: undefined,
+    storage: undefined,
   }
 
   websocketServer: WebSocket.Server
+
+  connections: Map<WebSocket, any> = new Map()
 
   /**
    * Constructor
@@ -28,25 +33,35 @@ export class Dashboard {
       ...configuration,
     }
 
+    this.configuration.storage?.on('update', data => {
+      this.send(JSON.stringify({ event: 'update', data }))
+    })
+
     this.websocketServer = new WebSocket.Server({ noServer: true })
     this.websocketServer.on('connection', this.handleConnection.bind(this))
 
     if (this.configuration.port) {
-      const server = createServer((request, response) => {
-        if (!this.handleRequest(request, response)) {
-          response.writeHead(404)
-          response.end('Not Found')
-        }
-      })
-
-      server.on('upgrade', (request, socket, head) => {
-        this.handleUpgrade(request, socket, head)
-      })
-
-      server.listen(this.configuration.port, () => {
-        process.stdout.write(`[${(new Date()).toISOString()}] Dashboard listening on port "${this.configuration.port}" … \n`)
-      })
+      this.createServer()
     }
+  }
+
+  createServer(): void {
+    const { port } = this.configuration
+
+    const server = createServer((request, response) => {
+      if (!this.handleRequest(request, response)) {
+        response.writeHead(404)
+        response.end('Not Found')
+      }
+    })
+
+    server.on('upgrade', (request, socket, head) => {
+      this.handleUpgrade(request, socket, head)
+    })
+
+    server.listen(port, () => process.stdout.write(
+      `[${(new Date()).toISOString()}] Dashboard listening on port "${port}" … \n`,
+    ))
   }
 
   handleRequest(request: IncomingMessage, response: ServerResponse): boolean {
@@ -80,7 +95,32 @@ export class Dashboard {
     return false
   }
 
-  handleConnection(websocket: WebSocket, request: IncomingMessage): void {
-    console.log('connected yay')
+  handleConnection(connection: WebSocket, request: IncomingMessage): void {
+    this.connections.set(connection, {})
+
+    connection.on('close', () => {
+      this.close(connection)
+    })
+  }
+
+  close(connection: WebSocket): void {
+    this.connections.delete(connection)
+    connection.close()
+  }
+
+  send(message: string) {
+    this.connections.forEach((value, connection) => {
+      if (connection.readyState === 2 || connection.readyState === 3) {
+        return
+      }
+
+      try {
+        connection.send(message, (error: any) => {
+          if (error != null) this.close(connection)
+        })
+      } catch (exception) {
+        this.close(connection)
+      }
+    })
   }
 }

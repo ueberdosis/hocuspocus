@@ -11,7 +11,7 @@ export class RocksDB extends Storage {
 
   configuration: Configuration = {
     storagePath: './dashboard',
-    interval: 5,
+    interval: 1,
   }
 
   db: LevelUp

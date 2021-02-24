@@ -11,6 +11,7 @@ import {
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
+import { cpus, freemem, totalmem } from 'os'
 import { Storage } from './Storage'
 import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
@@ -30,7 +31,7 @@ export class Monitor implements Extension {
     dashboardPath: 'dashboard',
     enableDashboard: true,
     enableStorage: false,
-    interval: 5,
+    interval: 1,
     port: undefined,
     storagePath: './dashboard',
   }
@@ -42,7 +43,6 @@ export class Monitor implements Extension {
   /**
    * Constructor
    */
-
   constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
@@ -58,9 +58,20 @@ export class Monitor implements Extension {
     }
 
     if (this.configuration.enableDashboard) {
-      const { dashboardPath, port } = this.configuration
-      this.dashboard = new Dashboard({ path: dashboardPath, port })
+      this.dashboard = new Dashboard({
+        path: this.configuration.dashboardPath,
+        port: this.configuration.port,
+        storage: this.storage,
+      })
     }
+
+    setInterval(this.collectOsMetrics.bind(this), 5000)
+  }
+
+  private async collectOsMetrics() {
+    await this.storage.setTimedValue('memoryFree', freemem(), true)
+    await this.storage.setTimedValue('memoryTotal', totalmem(), true)
+    await this.storage.setTimedValue('cpus', cpus(), true)
   }
 
   /*
@@ -100,11 +111,11 @@ export class Monitor implements Extension {
   }
 
   async onConnect(data: onConnectPayload) {
-    await this.storage.increment('connectionCount')
+    // await this.storage.increment('connectionCount')
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    await this.storage.decrement('connectionCount')
+    // await this.storage.decrement('connectionCount')
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
