@@ -12,7 +12,7 @@ Kurfürstenstraße 56<br>
 
 Represented by: Sven Adlung, Patrick Baber, Nick Hirche, Philip Isik, Timo Isik, Philipp Kühn, Hans Pagel, Sebastian Schrama
 
-We don’t provide email support for hocuspocus, but if you have some legal issues, privacy or security concerns, send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus-issues/issues).
+We don’t provide email support for hocuspocus, but if you have some legal issues, privacy or security concerns, send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus-issues/issues). We’ll make sure to get back to you quickly.
 
 ## Dispute resolution
 The European Commission provides a platform for online dispute resolution (OS): https://ec.europa.eu/consumers/odr.

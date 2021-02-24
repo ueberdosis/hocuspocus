@@ -6,7 +6,7 @@
           The plug & play collaboration backend
         </h1>
         <p class="is-large">
-          Real-time collaboration, syncing between different devices and working offline isn’t hard anymore. Keep everything in sync with the magic of Y.js.
+          Real-time collaboration, offline-first apps and syncing devices isn’t hard anymore. With the conflict-free magic of hocuspocus.
         </p>
         <div>
           <newsletter-form
@@ -24,25 +24,25 @@
             Real-time collaboration
           </h3>
           <p>
-            Share changes, cursors and selection, or even an application state between with other people in real-time.
+            Share changes, cursor positions, text selections, or even the whole application state with other people in real-time.
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            Sync multiple devices
+            Everything in sync
           </h3>
           <p>
-            Enable people to edit their data on multiple devices, and keep everything in sync with hocuspocus.
+            Enable people to edit their data on multiple devices, and keep everything in sync with hocuspocus
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            Work offline
+            Offline-first
           </h3>
           <p>
-            Store changes in the browser, and wait to upload them. hocuspocus will merge this changes, no matter when they are delivered.
+            Store changes in the browser, and send them later. hocuspocus will merge them, no matter when they are delivered.
           </p>
         </feature-item>
 
@@ -51,16 +51,16 @@
             Conflict-free
           </h3>
           <p>
-            Y.js is a performant, conflict-free replicated data type implementation. Sync all your changes. No matter when they come in, they’ll be merged without conflicts.
+            hocuspocus is based on the performant and conflict-free Y.js. It’s like a superfast Git, without the merge conflicts.
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            TypeScript
+            TypeScript code base
           </h3>
           <p>
-            hocuspocus is written in TypeScript. That helps us to find bugs early and gives you a nice autocomplete for the API (if your IDE supports that) on top of the extensive human written documentation.
+            TypeScript ensures code quality and gives a nice autocomplete for the API on top of the extensive human written documentation.
           </p>
         </feature-item>
 
@@ -69,25 +69,25 @@
             Well documented
           </h3>
           <p>
-            The documentation is a top priority for us, you’ll find a lot of guides, examples and even background knowledge here.
+            We write the documentation while we write the code. You’ll find a lot of guides, examples and even background knowledge here.
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            Scalable
+            Scalable with Redis
           </h3>
           <p>
-            You can spin up multiple instances of it and keep everything in sync with Redis. Support for Redis clusters is also baked-in.
+            You can spin up multiple instances of hocuspocus and keep them in sync with Redis. Support for Redis clusters is already baked-in.
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            Actively maintained
+            Support from humans
           </h3>
           <p>
-            hocuspocus comes with a price tag, but that ensures constant development, maintenance and support.
+            hocuspocus receives regular updates, maintenance and reliable support, directly from the developers.
           </p>
         </feature-item>
       </feature-list>

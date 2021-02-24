@@ -1,9 +1,9 @@
 <template>
-  <Layout :show-sidebar="!['impressum.md', 'privacy-policy.md'].includes($page.docPage.fileInfo.path)">
+  <Layout :show-sidebar="showSidebar">
     <app-section>
       <VueRemarkContent class="text" />
     </app-section>
-    <app-section>
+    <app-section v-if="showSidebar">
       <page-navigation />
     </app-section>
   </Layout>
@@ -29,6 +29,12 @@ export default {
   components: {
     AppSection,
     PageNavigation,
+  },
+
+  computed: {
+    showSidebar() {
+      return !['impressum.md', 'privacy-policy.md'].includes(this.$page.docPage.fileInfo.path)
+    },
   },
 
   metaInfo() {
