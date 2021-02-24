@@ -6,14 +6,21 @@ import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'
 
+export const defaultConfiguration = {
+  port: 80,
+  timeout: 30000,
+}
+
 /**
  * Hocuspocus yjs websocket server
  */
 export class Hocuspocus {
 
   configuration: Configuration = {
+    ...defaultConfiguration,
     extensions: [],
     onChange: () => new Promise(r => r()),
+    onConfigure: () => new Promise(r => r()),
     onConnect: () => new Promise(r => r()),
     onCreateDocument: () => new Promise(r => r()),
     onDestroy: () => new Promise(r => r()),
@@ -21,8 +28,6 @@ export class Hocuspocus {
     onListen: () => new Promise(r => r()),
     onRequest: () => new Promise(r => r()),
     onUpgrade: () => new Promise(r => r()),
-    port: 80,
-    timeout: 30000,
   }
 
   documents = new Map()
@@ -43,6 +48,7 @@ export class Hocuspocus {
 
     this.configuration.extensions.push({
       onChange: this.configuration.onChange,
+      onConfigure: this.configuration.onConfigure,
       onConnect: this.configuration.onConnect,
       onCreateDocument: this.configuration.onCreateDocument,
       onDestroy: this.configuration.onDestroy,
@@ -51,6 +57,8 @@ export class Hocuspocus {
       onRequest: this.configuration.onRequest,
       onUpgrade: this.configuration.onUpgrade,
     })
+
+    this.hooks('onConfigure', { configuration: this.configuration })
 
     return this
 

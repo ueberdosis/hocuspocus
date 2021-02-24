@@ -1,6 +1,6 @@
 import {
   Extension,
-  onChangePayload,
+  onChangePayload, onConfigurePayload,
   onConnectPayload,
   onCreateDocumentPayload,
   onDestroyPayload,
@@ -42,6 +42,10 @@ export class Logger implements Extension {
 
   async onDestroy(data: onDestroyPayload) {
     Logger.log('Server shutting down')
+  }
+
+  async onConfigure(data: onConfigurePayload) {
+    Logger.log('Server configured')
   }
 
   private static log(message: string) {

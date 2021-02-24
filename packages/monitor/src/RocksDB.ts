@@ -8,7 +8,6 @@ export interface Configuration {
 }
 
 export class RocksDB extends Storage {
-
   configuration: Configuration = {
     storagePath: './dashboard',
     interval: 1,

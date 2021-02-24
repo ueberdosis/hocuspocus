@@ -24,6 +24,7 @@ export interface AwarenessUpdate {
 export interface Extension {
   onChange(data: onChangePayload): Promise<void>,
   onConnect(data: onConnectPayload): Promise<void>,
+  onConfigure(data: onConfigurePayload): Promise<void>,
   onCreateDocument(data: onCreateDocumentPayload): Promise<void>,
   onDestroy(data: onDestroyPayload): Promise<void>,
   onDisconnect(data: onDisconnectPayload): Promise<void>
@@ -73,4 +74,8 @@ export interface onListenPayload {
 }
 
 export interface onDestroyPayload {
+}
+
+export interface onConfigurePayload {
+  configuration: Configuration,
 }

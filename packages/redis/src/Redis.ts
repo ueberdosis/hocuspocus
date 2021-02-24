@@ -1,6 +1,11 @@
 import { RedisPersistence } from 'y-redis'
 import {
-  Extension, onChangePayload, onConnectPayload, onDisconnectPayload,
+  Extension,
+  onChangePayload, onConfigurePayload,
+  onConnectPayload, onCreateDocumentPayload,
+  onDestroyPayload,
+  onDisconnectPayload,
+  onListenPayload, onRequestPayload, onUpgradePayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -36,20 +41,40 @@ export class Redis implements Extension {
   /*
    * onConnect hook
    */
-  async onConnect(data: onConnectPayload, resolve: Function, reject: Function) {
+  async onConnect(data: onConnectPayload) {
     await this.persistence.bindState(data.documentName, data.document).synced
   }
 
-  /*
-   * onChange hook
-   */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onChange(data: onChangePayload) {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onCreateDocument(data: onCreateDocumentPayload) {
+  }
 
-  /*
-   * onDisconnect hook
-   */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDisconnect(data: onDisconnectPayload) {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onChange(data: onChangePayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onDisconnect(data: onDisconnectPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onListen(data: onListenPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onDestroy(data: onDestroyPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onConfigure(data: onConfigurePayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onRequest(data: onRequestPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onUpgrade(data: onUpgradePayload) {
+  }
 
 }

@@ -15,7 +15,7 @@
   "scripts": {
     "build:docs": "yarn --cwd ./docs build",
     "build:packages": "yarn clean:packages && yarn --cwd ./packages/monitor build && rollup -c",
-    "clean:packages": "rm -rf ./packages/*/dist && rm -rf ./packages/monitor/src/client/dist",
+    "clean:packages": "rm -rf ./packages/*/dist",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "release": "yarn lint && yarn build:packages && lerna publish",

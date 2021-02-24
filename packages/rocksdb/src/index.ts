@@ -1,8 +1,18 @@
+import {
+  Extension,
+  onChangePayload,
+  onConfigurePayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
+  onDestroyPayload,
+  onDisconnectPayload,
+  onListenPayload,
+  onRequestPayload,
+  onUpgradePayload,
+} from '@hocuspocus/server'
+
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
-import {
-  Extension, onChangePayload, onConnectPayload, onCreateDocumentPayload, onDisconnectPayload,
-} from '@hocuspocus/server'
 import rocksDB from 'rocksdb'
 import levelup from 'levelup'
 import debounce from 'lodash.debounce'
@@ -47,9 +57,6 @@ export class RocksDB implements Extension {
     return this
   }
 
-  /*
-   * onConnect hook
-   */
   async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
     const storedDocument = await this.provider.getYDoc(data.documentName)
     const update = encodeStateAsUpdate(data.document)
@@ -59,31 +66,12 @@ export class RocksDB implements Extension {
     applyUpdate(data.document, encodeStateAsUpdate(storedDocument))
   }
 
-  /*
-   * onChange hook
-   */
-  onChange(data: onChangePayload): void {
+  async onChange(data: onChangePayload): Promise<any> {
     const store = () => this.store(data.documentName, data.update)
 
     this.debounced?.cancel()
-    this.debounced = debounce(store, 1000)
+    this.debounced = debounce(store, 2000)
     this.debounced()
-  }
-
-  /*
-   * onConnect hook
-   */
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onConnect(data: onConnectPayload): void {
-  }
-
-  /*
-   * onDisconnect hook
-   */
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDisconnect(data: onDisconnectPayload): void {
   }
 
   /**
@@ -92,5 +80,33 @@ export class RocksDB implements Extension {
    */
   private store(documentName: string, update: Uint8Array): void {
     this.provider.storeUpdate(documentName, update)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onConnect(data: onConnectPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onDisconnect(data: onDisconnectPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onListen(data: onListenPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onDestroy(data: onDestroyPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onConfigure(data: onConfigurePayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onRequest(data: onRequestPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onUpgrade(data: onUpgradePayload) {
   }
 }

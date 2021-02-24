@@ -1,6 +1,6 @@
 import {
   Extension,
-  onChangePayload,
+  onChangePayload, onConfigurePayload,
   onConnectPayload,
   onCreateDocumentPayload,
   onDestroyPayload,
@@ -8,6 +8,7 @@ import {
   onListenPayload,
   onRequestPayload,
   onUpgradePayload,
+  defaultConfiguration,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
 import osu from 'node-os-utils'
@@ -63,6 +64,7 @@ export class Monitor implements Extension {
         path: this.configuration.dashboardPath,
         port: this.configuration.port,
         storage: this.storage,
+        serverConfiguration: defaultConfiguration,
       })
     }
 
@@ -142,5 +144,15 @@ export class Monitor implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDestroy(data: onDestroyPayload) {
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onConfigure(data: onConfigurePayload) {
+    if (this.dashboard) {
+      this.dashboard.configuration.serverConfiguration = {
+        port: data.configuration.port,
+        timeout: data.configuration.timeout,
+      }
+    }
   }
 }

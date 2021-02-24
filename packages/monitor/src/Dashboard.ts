@@ -5,12 +5,14 @@ import { fileURLToPath } from 'url'
 import nodeStatic from 'node-static'
 import { Socket } from 'net'
 import process from 'process'
+import { Configuration as ServerConfiguration } from '@hocuspocus/server'
 import { Storage } from './Storage'
 
 export interface Configuration {
   path: string,
   port: number | undefined,
   storage: Storage | undefined,
+  serverConfiguration: Partial<ServerConfiguration>,
 }
 
 export class Dashboard {
@@ -19,6 +21,7 @@ export class Dashboard {
     path: 'dashboard',
     port: undefined,
     storage: undefined,
+    serverConfiguration: {},
   }
 
   websocketServer: WebSocket.Server
@@ -109,6 +112,7 @@ export class Dashboard {
               version: process.version,
               platform: process.platform,
               uptime: process.uptime(),
+              configuration: this.configuration.serverConfiguration,
             },
           }))
         }, 1000)

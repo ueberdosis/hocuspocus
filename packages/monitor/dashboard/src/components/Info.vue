@@ -10,8 +10,8 @@
     <p>
       Started: <span class="text-gray-600">{{ started }}</span>
     </p>
-    <div class="text-xl font-bold mt-6">Configuration</div>
-    <pre />
+    <div class="text-xl font-bold mt-6 mb-2">Configuration</div>
+    <pre class="text-xs text-gray-600">{{ info.configuration }}</pre>
   </div>
 </template>
 
@@ -26,10 +26,23 @@ export default {
     },
   },
 
-  computed: {
-    started() {
-      return moment().subtract(this.info.uptime, 'seconds').fromNow()
-    },
+  data() {
+    return {
+      started: '',
+      interval: null,
+    }
+  },
+
+  created() {
+    this.interval = setInterval(() => {
+      this.started = moment()
+        .subtract(this.info.uptime, 'seconds')
+        .fromNow()
+    }, 1000)
+  },
+
+  beforeDestroy() {
+    clearInterval(this.interval)
   },
 }
 </script>
