@@ -2,8 +2,7 @@ module.exports = {
   future: {
     removeDeprecatedGapUtilities: true,
   },
-  experimental: {
-  },
+  experimental: {},
   purge: {
     content: ['./src/index.html', './src/**/*.vue'],
   },
@@ -12,7 +11,8 @@ module.exports = {
       default: ['calt', 'liga', 'kern'],
       numeric: ['tnum', 'salt', 'ss02'],
     },
-    extend: {},
+    extend: {
+    },
   },
   variants: {},
   plugins: [
