@@ -18,6 +18,9 @@
     - title: Monaco
       link: /examples/monaco
       draft: true
+    - title: CodeMirror 5
+      link: /examples/codemirror
+      draft: true
 
 - title: Guide
   items:
