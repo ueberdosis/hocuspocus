@@ -1,10 +1,10 @@
 # Installation
 
 ## 1. Buy a license
-You can buy a licenses in [our store](https://store.ueber.io). For a single developer it’s $99/year, for teams it’s $499/year (local taxes may apply). You can cancel your subscription at any time.
+You can buy a licenses in [our store](#) (soon). For a single developer it’s $99/year, for teams it’s $499/year (local taxes may apply). You can cancel your subscription at any time.
 
 ## 2. Installation
-Add a `.npmrc` file to your project folder. This will make your package manager look for packages prefixed with @hocuspocus in our registry and passes [your individual token](https://store.ueber.io/purchases):
+Add a `.npmrc` file to your project folder. This will make your package manager look for packages prefixed with @hocuspocus in our registry and passes [your individual token](#) (soon):
 
 ```
 @hocuspocus:registry=https://registry.ueber.io

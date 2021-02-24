@@ -45,14 +45,14 @@
   - title: onDisconnect
     link: /api/on-disconnect
 
-- title: Packages
-  items:
-    - title: '@hocuspocus/server'
-      link: https://store.ueber.io/products/hocuspocus
-      draft: true
-    - title: '@hocuspocus/rocksdb'
-      link: https://store.ueber.io/products/hocuspocus
-      draft: true
+# - title: Packages
+#   items:
+#     - title: '@hocuspocus/server'
+#       link: https://store.ueber.io/products/hocuspocus
+#       draft: true
+#     - title: '@hocuspocus/rocksdb'
+#       link: https://store.ueber.io/products/hocuspocus
+#       draft: true
 
 - title: Knowledge
   items:

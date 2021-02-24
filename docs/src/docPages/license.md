@@ -1,5 +1,5 @@
 # License
-In order to use hocuspocus, you must buy a license. You can buy a license at [our store](https://store.ueber.io).
+In order to use hocuspocus, you must buy a license. You can buy a license at [our store](#) (soon).
 
 * **Single developer licenses** are made for makers, developers, freelancers, webmasters and everyone who’s building something cool, but is the only one working with code.
 
