@@ -38,6 +38,5 @@
     "rocksdb": "^4.1.0",
     "yjs": "^13.4.12"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

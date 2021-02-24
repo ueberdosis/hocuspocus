@@ -76,6 +76,6 @@ export class Storage extends EventEmitter {
         .seconds(0)
     }
 
-    return `${time.format('YYYY-MM-DD-HH-mm-ss')}`
+    return `${time.format('YYYY-MM-DD HH:mm:ss')}`
   }
 }

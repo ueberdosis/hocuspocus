@@ -22,14 +22,15 @@
   },
   "dependencies": {
     "autoprefixer": "^9.7.3",
+    "collect.js": "^4.28.6",
     "parcel-bundler": "^1.12.4",
     "postcss": "^7.0.26",
     "postcss-load-config": "^3.0.0",
     "postcss-preset-env": "^6.7.0",
     "tailwindcss": "^1.8.10",
     "tailwindcss-font-inter": "^1.0.8",
-    "vue": "^2.6.12"
+    "vue": "^2.6.12",
+    "vue-plotly": "^1.1.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
