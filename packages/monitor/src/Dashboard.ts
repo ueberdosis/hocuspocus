@@ -6,6 +6,7 @@ import nodeStatic from 'node-static'
 import { Socket } from 'net'
 import process from 'process'
 import { Configuration as ServerConfiguration } from '@hocuspocus/server'
+import moment from 'moment'
 import { Storage } from './Storage'
 
 export interface Configuration {
@@ -111,7 +112,7 @@ export class Dashboard {
           value: {
             version: process.version,
             platform: process.platform,
-            uptime: process.uptime(),
+            started: moment().subtract(process.uptime(), 'second').toISOString(),
             configuration: this.configuration.serverConfiguration,
           },
         })

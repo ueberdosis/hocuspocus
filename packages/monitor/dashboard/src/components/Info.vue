@@ -39,9 +39,7 @@ export default {
 
   created() {
     this.interval = setInterval(() => {
-      this.started = moment()
-        .subtract(this.info.uptime, 'seconds')
-        .fromNow()
+      this.started = moment(this.info.started).fromNow()
     }, 1000)
   },
 
