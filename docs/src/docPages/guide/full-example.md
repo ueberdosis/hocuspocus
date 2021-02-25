@@ -16,34 +16,28 @@ const hocuspocus = Server.configure({
   /* ---------------------------------
    * Authorization and authentication
    * --------------------------------- */
-  onConnect(data, resolve, reject) {
+  async onConnect(data) {
     const { requestParameters } = data
 
     // Example test if a user is authenticated using a
     // request parameter
     if (requestParameters.access_token !== 'super-secret-token') {
-      return reject()
+      throw new Error('Not authorized!')
     }
 
-    // You can set contextual data…
-    const context = {
+    // You can set contextual data to use it in other hooks
+    return {
       user: {
         id: 1234,
         name: 'John',
       },
     }
-
-    // Output some information
-    process.stdout.write(`"${context.user.name}" has connected!`)
-
-    // …and pass it along to use it in other hooks
-    resolve(context)
   },
 
   /* ---------------------------------
    * Load the document
    * --------------------------------- */
-  onCreateDocument(data) {
+  async onCreateDocument(data) {
     // Get entity and field information from the document name
     // In this example we would use a document name like "page.140.content"
     const [ entityType, entityID ] = data.documentName.split('.')
@@ -62,17 +56,14 @@ const hocuspocus = Server.configure({
       },
     })
 
-    // Convert the prosemirror JSON to a Y-Doc
-    const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument)
-
-    // And pass it to the resolve method
-    resolve(ydoc)
+    // Convert the prosemirror JSON to a Y-Doc and simply return it
+    return prosemirrorJSONToYDoc(schema, prosemirrorDocument)
   },
 
   /* ---------------------------------
    * Handle document changes
    * --------------------------------- */
-  onChange(data) {
+  async onChange(data) {
     const save = () => {
       // Get entity and field information from the document name
       const [ entityType, entityID ] = data.documentName.split('.')
@@ -95,14 +86,6 @@ const hocuspocus = Server.configure({
     debounced?.clear()
     debounced = debounce(() => save, 4000)
     debounced()
-  },
-
-  /* ---------------------------------
-   * Handle disconnect
-   * --------------------------------- */
-  onDisconnect(data) {
-    // Output some information
-    process.stdout.write(`"${data.context.user.name}" has disconnected!`)
   },
 })
 
