@@ -10,7 +10,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in log" :class="{ 'bg-gray-100': index % 2 === 1 }">
+        <tr
+          v-for="(item, index) in log"
+          :class="{ 'bg-gray-100': index % 2 === 1 }"
+          :key="index"
+        >
           <td class="border px-4 py-2">
             <span
               class="px-2 py-1 rounded text-sm"
@@ -24,7 +28,9 @@
             <span class="text-sm text-gray-600">{{ item.socket }}</span>
           </td>
           <td class="border px-4 py-2">
-            <pre class="text-xs text-gray-600">{{ item.details }}</pre>
+            <toggle>
+              <pre class="text-xs text-gray-600 whitespace-pre-wrap">{{ item.details }}</pre>
+            </toggle>
           </td>
           <td class="border px-4 py-2">
             <span class="text-sm text-gray-600">{{ item.time }}</span>
@@ -39,12 +45,14 @@
 import collect from 'collect.js'
 import moment from 'moment'
 import Card from './Card'
+import Toggle from './Toggle'
 
 const formatTime = timestamp => moment(timestamp).format('HH:mm:ss')
 
 export default {
   components: {
     Card,
+    Toggle,
   },
 
   props: {
@@ -59,19 +67,26 @@ export default {
     },
   },
 
+  data() {
+    return {
+      toggle: [],
+    }
+  },
+
   computed: {
     log() {
       return collect()
         .merge(this.connections)
         .merge(this.documents)
         .sortByDesc('timestamp')
-        .map(item => this.mapper(item))
+        .values()
+        .map((item, index) => this.mapper(item, index))
         .toArray()
     },
   },
 
   methods: {
-    mapper(item) {
+    mapper(item, index) {
       const handlers = {
         connections(data) {
           return {
@@ -79,25 +94,27 @@ export default {
             details: { documentName: data.documentName },
             label: data.action,
             socket: '',
-            time: formatTime(item.timestamp),
           }
         },
 
         documents(data) {
           return {
-            color: data.action === 'created' ? 'blue' : 'gray',
-            details: { documentName: data.documentName },
+            color: data.action === 'created' ? 'blue' : 'yellow',
+            details: { documentName: data.documentName, document: data.document },
             label: data.action,
             socket: '',
-            time: formatTime(item.timestamp),
           }
         },
       }
 
-      return handlers[item.key] ? handlers[item.key](item.value) : {
+      const data = handlers[item.key] ? handlers[item.key](item.value) : {
         details: '',
         label: false,
         socket: '',
+      }
+
+      return {
+        ...data,
         time: formatTime(item.timestamp),
       }
     },

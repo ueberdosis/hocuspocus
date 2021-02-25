@@ -5,8 +5,11 @@ import {
   defaultConfiguration,
   Configuration,
   onConnectPayload,
-  onDisconnectPayload, onCreateDocumentPayload,
+  onDisconnectPayload, onCreateDocumentPayload, onChangePayload,
 } from '@hocuspocus/server'
+import {
+  AbstractType, Doc, encodeStateAsUpdate, YEvent,
+} from 'yjs'
 
 export class Collector {
 
@@ -49,11 +52,22 @@ export class Collector {
   }
 
   createDocument(data: onCreateDocumentPayload) {
-    const { documentName } = data
+    const { documentName, document } = data
 
     return {
       action: 'created',
       documentName,
+      document: Collector.readableYDoc(document),
+    }
+  }
+
+  changeDocument(data: onChangePayload) {
+    const { documentName, document } = data
+
+    return {
+      action: 'changed',
+      documentName,
+      document: Collector.readableYDoc(document),
     }
   }
 
@@ -64,6 +78,29 @@ export class Collector {
       started: moment().subtract(process.uptime(), 'second').toISOString(),
       configuration: this.serverConfiguration,
     }
+  }
+
+  private static readableYDoc(doc: Doc): any {
+    const data = {}
+
+    doc.share.forEach((item, key) => {
+      // Y DO I HAVE TO DO IT THIS WAY KEVIN? 🙈
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const type = item._start.content.type.constructor.name
+
+      const handlers = {
+        YXmlElement() {
+          return doc.getXmlFragment(key).toJSON()
+        },
+        // TODO: add more handlers for other shared types
+      }
+
+      // @ts-ignore
+      data[key] = handlers[type] ? handlers[type]() : null
+    })
+
+    return data
   }
 
 }

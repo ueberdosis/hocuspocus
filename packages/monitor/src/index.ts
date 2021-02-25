@@ -136,6 +136,7 @@ export class Monitor implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
+    await this.storage.add('documents', this.collector.changeDocument(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
