@@ -8,14 +8,13 @@ import {
   onListenPayload,
   onRequestPayload,
   onUpgradePayload,
-  defaultConfiguration,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
-import osu from 'node-os-utils'
 import WebSocket from 'ws'
 import { Storage } from './Storage'
 import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
+import { Collector } from './Collector'
 
 export interface Configuration {
   dashboardPath: string,
@@ -39,12 +38,15 @@ export class Monitor implements Extension {
 
   storage: Storage
 
+  collector: Collector
+
   dashboard?: Dashboard
 
   /**
    * Constructor
    */
   constructor(configuration?: Partial<Configuration>) {
+
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -52,19 +54,21 @@ export class Monitor implements Extension {
 
     const { storagePath } = this.configuration
 
+    this.collector = new Collector()
     this.storage = new Storage()
-    // if (this.configuration.enableStorage) {
+
     // TODO: fix rocksdb
+    // if (this.configuration.enableStorage) {
     // this.storage = new RocksDB({ storagePath, interval })
     // } else {
     // }
 
     if (this.configuration.enableDashboard) {
       this.dashboard = new Dashboard({
+        collector: this.collector,
         path: this.configuration.dashboardPath,
         port: this.configuration.port,
         storage: this.storage,
-        serverConfiguration: defaultConfiguration,
       })
     }
 
@@ -77,19 +81,8 @@ export class Monitor implements Extension {
    */
 
   private async collectOsMetrics() {
-    const memory = await osu.mem.info()
-
-    await this.storage.add('memory', {
-      free: memory.freeMemMb,
-      total: memory.totalMemMb,
-      usage: 100 - memory.freeMemPercentage,
-    })
-
-    await this.storage.add('cpu', {
-      count: osu.cpu.count(),
-      model: osu.cpu.model(),
-      usage: await osu.cpu.usage(),
-    })
+    await this.storage.add('memory', await this.collector.memory())
+    await this.storage.add('cpu', await this.collector.cpu())
   }
 
   /*
@@ -129,11 +122,11 @@ export class Monitor implements Extension {
   }
 
   async onConnect(data: onConnectPayload) {
-    // await this.storage.increment('connectionCount')
+    await this.storage.add('connections', this.collector.connect(data))
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    // await this.storage.decrement('connectionCount')
+    await this.storage.add('connections', this.collector.disconnect(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
@@ -154,11 +147,9 @@ export class Monitor implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
-    if (this.dashboard) {
-      this.dashboard.configuration.serverConfiguration = {
-        port: data.configuration.port,
-        timeout: data.configuration.timeout,
-      }
+    this.collector.serverConfiguration = {
+      port: data.configuration.port,
+      timeout: data.configuration.timeout,
     }
   }
 }

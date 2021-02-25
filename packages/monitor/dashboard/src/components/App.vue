@@ -15,6 +15,10 @@
         <info :info="info" />
       </div>
     </div>
+
+    <div class="mt-16 z-10 relative">
+      <log :connections="connections" />
+    </div>
   </div>
 </template>
 
@@ -23,9 +27,11 @@ import Vue from 'vue'
 import Cpu from './Cpu'
 import Info from './Info'
 import Memory from './Memory'
+import Log from './Log'
 
 export default Vue.extend({
   components: {
+    Log,
     Cpu,
     Info,
     Memory,
@@ -33,10 +39,11 @@ export default Vue.extend({
 
   data() {
     return {
-      socket: null,
+      connections: [],
       cpu: [],
-      memory: [],
       info: {},
+      memory: [],
+      socket: null,
     }
   },
 
@@ -56,15 +63,17 @@ export default Vue.extend({
 
         if (!Array.isArray(value)) {
           this[key].push({
-            value,
+            key,
             timestamp,
+            value,
           })
           return
         }
 
         this[key] = this[key].concat(value.map(value => ({
-          value,
+          key,
           timestamp,
+          value,
         })))
       })
     },
