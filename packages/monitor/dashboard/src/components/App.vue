@@ -17,7 +17,10 @@
     </div>
 
     <div class="mt-16 z-10 relative">
-      <log :connections="connections" />
+      <log
+        :connections="connections"
+        :documents="documents"
+      />
     </div>
   </div>
 </template>
@@ -41,6 +44,7 @@ export default Vue.extend({
     return {
       connections: [],
       cpu: [],
+      documents: [],
       info: {},
       memory: [],
       socket: null,

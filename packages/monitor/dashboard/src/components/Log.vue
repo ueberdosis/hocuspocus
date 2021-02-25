@@ -52,11 +52,18 @@ export default {
       type: Array,
       required: true,
     },
+
+    documents: {
+      type: Array,
+      required: true,
+    },
   },
 
   computed: {
     log() {
-      return collect(this.connections)
+      return collect()
+        .merge(this.connections)
+        .merge(this.documents)
         .sortByDesc('timestamp')
         .map(item => this.mapper(item))
         .toArray()
@@ -66,7 +73,6 @@ export default {
   methods: {
     mapper(item) {
       const handlers = {
-
         connections(data) {
           return {
             color: data.action === 'connected' ? 'green' : 'gray',
@@ -77,12 +83,22 @@ export default {
           }
         },
 
+        documents(data) {
+          return {
+            color: data.action === 'created' ? 'blue' : 'gray',
+            details: { documentName: data.documentName },
+            label: data.action,
+            socket: '',
+            time: formatTime(item.timestamp),
+          }
+        },
       }
 
       return handlers[item.key] ? handlers[item.key](item.value) : {
         details: '',
         label: false,
-        timestamp: item.timestamp,
+        socket: '',
+        time: formatTime(item.timestamp),
       }
     },
   },

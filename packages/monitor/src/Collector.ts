@@ -5,7 +5,7 @@ import {
   defaultConfiguration,
   Configuration,
   onConnectPayload,
-  onDisconnectPayload,
+  onDisconnectPayload, onCreateDocumentPayload,
 } from '@hocuspocus/server'
 
 export class Collector {
@@ -44,6 +44,15 @@ export class Collector {
 
     return {
       action: 'disconnected',
+      documentName,
+    }
+  }
+
+  createDocument(data: onCreateDocumentPayload) {
+    const { documentName } = data
+
+    return {
+      action: 'created',
       documentName,
     }
   }
