@@ -4,11 +4,13 @@
 
     <div class="flex mt-8 mr-1">
       <div class="flex-1 mr-2">
-        <memory :data="data" />
+        <memory :data="memory" />
       </div>
+
       <div class="flex-1 mx-2">
-        <cpu :data="data" />
+        <cpu :data="cpu" />
       </div>
+
       <div class="flex-1 ml-2">
         <info :info="info" />
       </div>
@@ -18,10 +20,9 @@
 
 <script>
 import Vue from 'vue'
-import collect from 'collect.js'
-import Memory from './Memory'
 import Cpu from './Cpu'
 import Info from './Info'
+import Memory from './Memory'
 
 export default Vue.extend({
   components: {
@@ -33,33 +34,41 @@ export default Vue.extend({
   data() {
     return {
       socket: null,
-      data: [],
+      cpu: [],
+      memory: [],
       info: {},
     }
   },
 
   methods: {
     handleMessage(event) {
-      const { metrics, info } = JSON.parse(event.data)
+      const {
+        timestamp,
+        key,
+        value,
+      } = JSON.parse(event.data)
 
-      this.info = info || this.info
+      if (!this[key]) {
+        return
+      }
 
-      metrics?.forEach(data => {
-        const oldData = collect(this.data)
-          .search(item => item.key === data.key)
+      if (!Array.isArray(this[key])) {
+        this[key] = value
+        return
+      }
 
-        if (oldData === false) {
-          return this.data.push(data)
-        }
+      if (!Array.isArray(value)) {
+        this[key].push({
+          value,
+          timestamp,
+        })
+        return
+      }
 
-        this.data[oldData] = {
-          key: data.key,
-          value: {
-            ...this.data[oldData].value,
-            ...data.value,
-          },
-        }
-      })
+      this[key] = this[key].concat(value.map(value => ({
+        value,
+        timestamp,
+      })))
     },
   },
 

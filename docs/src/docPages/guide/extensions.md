@@ -64,6 +64,16 @@ rocks backup --src=/path/to/your/database --dest=/path/to/your/backups
 
 The CLI can also restore backups with the `rocks restore` command. Backups are always incremental, so the only thing you have to do next, is adding the backup line above to your crontab and you're done.
 
+### @hocuspocus/monitor
+
+#### Installation
+
+// TODO
+
+#### Configuration
+
+// TODO
+
 ### @hocuspocus/redis
 
 hocuspocus can be scaled indefinitely using the official Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.

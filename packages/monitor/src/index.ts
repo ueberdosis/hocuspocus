@@ -21,7 +21,7 @@ export interface Configuration {
   dashboardPath: string,
   enableDashboard: boolean,
   enableStorage: boolean,
-  interval: number,
+  osMetricsInterval: number,
   port: number | undefined,
   storagePath: string,
 }
@@ -32,7 +32,7 @@ export class Monitor implements Extension {
     dashboardPath: 'dashboard',
     enableDashboard: true,
     enableStorage: false,
-    interval: 1,
+    osMetricsInterval: 10000,
     port: undefined,
     storagePath: './dashboard',
   }
@@ -50,9 +50,9 @@ export class Monitor implements Extension {
       ...configuration,
     }
 
-    const { storagePath, interval } = this.configuration
+    const { storagePath } = this.configuration
 
-    this.storage = new Storage({ interval })
+    this.storage = new Storage()
     // if (this.configuration.enableStorage) {
     // TODO: fix rocksdb
     // this.storage = new RocksDB({ storagePath, interval })
@@ -68,22 +68,28 @@ export class Monitor implements Extension {
       })
     }
 
-    setInterval(this.collectOsMetrics.bind(this), 5000)
+    setInterval(this.collectOsMetrics.bind(this), this.configuration.osMetricsInterval)
+    this.collectOsMetrics()
   }
+
+  /*
+   * Collect metrics
+   */
 
   private async collectOsMetrics() {
     const memory = await osu.mem.info()
 
-    await this.storage.setTimedValue('memory', {
-      usage: 100 - memory.freeMemPercentage,
+    await this.storage.add('memory', {
       free: memory.freeMemMb,
       total: memory.totalMemMb,
-    }, true)
+      usage: 100 - memory.freeMemPercentage,
+    })
 
-    await this.storage.setTimedValue('cpu', {
-      usage: await osu.cpu.usage(),
+    await this.storage.add('cpu', {
       count: osu.cpu.count(),
-    }, true)
+      model: osu.cpu.model(),
+      usage: await osu.cpu.usage(),
+    })
   }
 
   /*
