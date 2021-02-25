@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The `onDisconnect` hook is called when a connection is terminated.
+The `onDisconnect` hook is called when a connection is terminated. It should return a Promise.
 
 ## Hook payload
 
@@ -31,7 +31,7 @@ const data = {
 import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
-  onDisconnect(data) {
+  async onDisconnect(data) {
     // Output some information
     process.stdout.write(`"${data.context.user.name}" has disconnected!`)
   },

@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The `onConnect` hook will be called when a new connection is established. It accepts a `resolve()` and `reject()` method that allow you to either keep the connection alive or terminate it.
+The `onConnect` hook will be called when a new connection is established. It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.
 
 ## Hook payload
 
@@ -30,26 +30,22 @@ const data = {
 import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
-  onConnect(data, resolve, reject) {
+  async onConnect(data) {
     const { requestParameters } = data
 
     // Example test if a user is authenticated using a
-    // request parameter, reject terminates the connection
+    // request parameter
     if (requestParameters.access_token !== 'super-secret-token') {
-       return reject()
+      throw new Error('Not authorized!')
     }
 
-    // You can set contextual data…
-    const context = {
+    // You can set contextual data to use it in other hooks
+    return {
       user: {
         id: 1234,
         name: 'John',
       },
     }
-
-    // …and pass it along to use it in other hooks
-    // resolve will keep the connection alive
-    resolve(context)
   },
 })
 

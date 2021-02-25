@@ -50,3 +50,7 @@ app.ws('/collaboration/:document', (websocket, request) => {
 // Start the server
 app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234'))
 ```
+
+## Extensions
+
+// TODO

@@ -125,6 +125,8 @@ hocuspocus is written in TypeScript. You don't have to use TypeScript to write e
 
 First step: Create a new class that implements the `Extension` interface and add the method stubs the interface requires.
 
+As every hook needs to return a Promise, the easiest way is to mark them as `async`.
+
 ```typescript
 import {
   Extension,
@@ -136,18 +138,28 @@ import {
 
 export class MyHocuspocusExtension implements Extension {
 
-  onCreateDocument(data: onCreateDocumentPayload): void {}
+  async onCreateDocument(data: onCreateDocumentPayload): Promise<void> {}
 
-  onChange(data: onChangePayload): void {}
+  async onChange(data: onChangePayload): Promise<void> {}
 
-  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {}
+  async onConnect(data: onConnectPayload): Promise<void> {}
 
-  onDisconnect(data: onDisconnectPayload): void {}
+  async onDisconnect(data: onDisconnectPayload): Promise<void> {}
+
+  async onRequest(data: onRequestPayload): Promise<void> {}
+
+  async onUpgrade(data: onUpgradePayload): Promise<void> {}
+
+  async onListen(data: onListenPayload): Promise<void> {}
+
+  async onDestroy(data: onDestroyPayload): Promise<void> {}
+
+  async onConfigure(data: onConfigurePayload): Promise<void> {}
 
 }
 ```
 
-Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the API section of this documentation which explains them in more detail.
+Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the HOOKS section of this documentation which explains them in more detail.
 
 Now you can add a constructor that accepts your extension's configuration and merges the default one. It's good practise at this point to create an interface for your configuration too.
 
@@ -179,16 +191,31 @@ export class MyHocuspocusExtension implements Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onCreateDocument(data: onCreateDocumentPayload): void {}
+  async onCreateDocument(data: onCreateDocumentPayload): Promise<void> {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onChange(data: onChangePayload): void {}
+  async onChange(data: onChangePayload): Promise<void> {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onConnect(data: onConnectPayload, resolve: Function, reject: Function): void {}
+  async onConnect(data: onConnectPayload): Promise<void> {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDisconnect(data: onDisconnectPayload): void {}
+  async onDisconnect(data: onDisconnectPayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onRequest(data: onRequestPayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onUpgrade(data: onUpgradePayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onListen(data: onListenPayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onDestroy(data: onDestroyPayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onConfigure(data: onConfigurePayload): Promise<void> {}
 
 }
 ```
@@ -197,7 +224,7 @@ That's it. The only thing missing now is your code. Happy extension writing! Whe
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { MyHocuspocusExtension } from './extension/my-hocuspocus-extension'
+import { MyHocuspocusExtension } from './extensions/my-hocuspocus-extension'
 
 const server = Server.configure({
   extensions: [

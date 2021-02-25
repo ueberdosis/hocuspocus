@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The `onChange` hook is called when the document itself changes.
+The `onChange` hook is called when the document itself changes. It should return a Promise.
 
 :::warning Consider debouncing!
 It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
@@ -40,7 +40,7 @@ import { debounce } from 'debounce'
 let debounced
 
 const hocuspocus = Server.configure({
-  onChange(data) {
+  async onChange(data) {
     const save = () => {
       // Get the underlying Y-Doc
       const ydoc = data.document
