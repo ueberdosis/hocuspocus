@@ -26,6 +26,8 @@
   items:
     - title: Configuration
       link: /guide/configuration
+    - title: Introducing hooks
+      link: /guide/hooks
     - title: Authentication & Authorization
       link: /guide/authentication-and-authorization
     - title: Working with Documents
@@ -39,6 +41,12 @@
 
 - title: API
   items:
+  - title: Methods
+    link: /api/methods
+    draft: true
+
+- title: Hooks
+  items:
   - title: onConnect
     link: /api/on-connect
   - title: onCreateDocument
@@ -47,6 +55,16 @@
     link: /api/on-change
   - title: onDisconnect
     link: /api/on-disconnect
+  - title: onListen
+    link: /api/on-listen
+  - title: onDestroy
+    link: /api/on-destroy
+  - title: onConfigure
+    link: /api/on-configure
+  - title: onRequest
+    link: /api/on-request
+  - title: onUpgrade
+    link: /api/on-upgrade
 
 # - title: Packages
 #   items:

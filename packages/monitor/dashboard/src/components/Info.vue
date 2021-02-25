@@ -1,6 +1,5 @@
 <template>
-  <div class="shadow-xl bg-white px-4 pt-4 pb-2">
-    <div class="text-xl font-bold">Info</div>
+  <card title="Info">
     <p>
       Node.js version: <span class="text-gray-600">{{ info.version }}</span>
     </p>
@@ -12,13 +11,18 @@
     </p>
     <div class="text-xl font-bold mt-6 mb-2">Configuration</div>
     <pre class="text-xs text-gray-600">{{ info.configuration }}</pre>
-  </div>
+  </card>
 </template>
 
 <script>
 import moment from 'moment'
+import Card from './Card'
 
 export default {
+  components: {
+    Card,
+  },
+
   props: {
     info: {
       type: Object,
@@ -35,9 +39,7 @@ export default {
 
   created() {
     this.interval = setInterval(() => {
-      this.started = moment()
-        .subtract(this.info.uptime, 'seconds')
-        .fromNow()
+      this.started = moment(this.info.started).fromNow()
     }, 1000)
   },
 
