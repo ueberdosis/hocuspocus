@@ -38,7 +38,7 @@ export class Dashboard {
     }
 
     this.configuration.storage?.on('add', data => {
-      this.send(JSON.stringify(data))
+      this.send(JSON.stringify({ data: [data] }))
     })
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
@@ -103,20 +103,22 @@ export class Dashboard {
     this.connections.set(connection, {})
 
     if (this.configuration.storage) {
-      // this.configuration.storage.all().then(data => {
-      // setTimeout(() => {
-      //   connection.send(JSON.stringify({
-      //     event: 'initial',
-      //     metrics: data,
-      //     info: {
-      //       version: process.version,
-      //       platform: process.platform,
-      //       uptime: process.uptime(),
-      //       configuration: this.configuration.serverConfiguration,
-      //     },
-      //   }))
-      // }, 1000)
-      // })
+      this.configuration.storage.all().then(data => {
+
+        data.push({
+          key: 'info',
+          timestamp: null,
+          value: {
+            version: process.version,
+            platform: process.platform,
+            uptime: process.uptime(),
+            configuration: this.configuration.serverConfiguration,
+          },
+        })
+
+        setTimeout(() => connection.send(JSON.stringify({ data })), 1000)
+
+      })
     }
 
     connection.on('close', () => {

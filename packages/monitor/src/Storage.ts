@@ -1,4 +1,5 @@
 import moment from 'moment'
+import collect from 'collect.js'
 import EventEmitter from 'events'
 
 export class Storage extends EventEmitter {
@@ -8,6 +9,12 @@ export class Storage extends EventEmitter {
   /*
    * Default API
    */
+
+  async all(): Promise<any> {
+    return collect(
+      Array.from(this.storage.values()),
+    ).flatten(1).toArray()
+  }
 
   async get(key: string, defaultValue: any = null): Promise<any> {
     return this.storage.get(key) || defaultValue

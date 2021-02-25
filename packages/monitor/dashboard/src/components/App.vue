@@ -42,33 +42,31 @@ export default Vue.extend({
 
   methods: {
     handleMessage(event) {
-      const {
-        timestamp,
-        key,
-        value,
-      } = JSON.parse(event.data)
+      const { data } = JSON.parse(event.data)
 
-      if (!this[key]) {
-        return
-      }
+      data.forEach(({ timestamp, key, value }) => {
+        if (!this[key]) {
+          return
+        }
 
-      if (!Array.isArray(this[key])) {
-        this[key] = value
-        return
-      }
+        if (!Array.isArray(this[key])) {
+          this[key] = value
+          return
+        }
 
-      if (!Array.isArray(value)) {
-        this[key].push({
+        if (!Array.isArray(value)) {
+          this[key].push({
+            value,
+            timestamp,
+          })
+          return
+        }
+
+        this[key] = this[key].concat(value.map(value => ({
           value,
           timestamp,
-        })
-        return
-      }
-
-      this[key] = this[key].concat(value.map(value => ({
-        value,
-        timestamp,
-      })))
+        })))
+      })
     },
   },
 
