@@ -58,6 +58,11 @@ export class Storage extends EventEmitter {
    * Special API
    */
 
+  async getTimedValue(key: string, time: Moment | undefined = undefined): Promise<any> {
+    const timestamp = this.timestamp(time)
+
+  }
+
   async setTimedValue(key: string, value: any, now = false): Promise<any> {
     const timestamp = this.timestamp(now ? moment() : undefined)
     const data = await this.get(timestamp, {})
@@ -69,12 +74,10 @@ export class Storage extends EventEmitter {
   }
 
   async increment(name: string): Promise<any> {
-    // const key = this.key(name)
-    // await this.set(key, await this.get(key, 0) + 1)
+    // await this.setTimedValue(key, await this.get(key, 0) + 1)
   }
 
   async decrement(name: string): Promise<any> {
-    // const key = this.key(name)
     // await this.set(key, await this.get(key, 0) - 1)
   }
 
