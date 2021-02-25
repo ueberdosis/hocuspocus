@@ -83,21 +83,20 @@ export class Collector {
   private static readableYDoc(doc: Doc): any {
     const data = {}
 
-    doc.share.forEach((item, key) => {
-      // Y DO I HAVE TO DO IT THIS WAY KEVIN? 🙈
+    doc.share?.forEach((item, key) => {
+      // TODO: fix crapcode
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
-      const type = item._start.content.type.constructor.name
-
-      const handlers = {
-        YXmlElement() {
-          return doc.getXmlFragment(key).toJSON()
-        },
-        // TODO: add more handlers for other shared types
-      }
-
-      // @ts-ignore
-      data[key] = handlers[type] ? handlers[type]() : null
+      // const type = item._start?.content?.type?.constructor?.name
+      //
+      // const handlers = {
+      //   YXmlElement() {
+      //     return doc.getXmlFragment(key).toJSON()
+      //   },
+      // }
+      //
+      // // @ts-ignore
+      // data[key] = handlers[type] ? handlers[type]() : null
     })
 
     return data
