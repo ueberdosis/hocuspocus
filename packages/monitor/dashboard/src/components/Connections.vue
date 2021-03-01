@@ -82,7 +82,10 @@ export default {
     },
 
     totalMessagesSent() {
-      return collect(this.messageCount).reduce((carry, item) => carry += item.value.count)
+      return collect(this.messageCount).reduce((carry, item) => {
+        return carry += item.value.count
+      })
+    }
     },
 
     latestDocument() {
