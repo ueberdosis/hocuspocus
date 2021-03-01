@@ -21,6 +21,7 @@ export interface Configuration {
   enableDashboard: boolean,
   enableStorage: boolean,
   osMetricsInterval: number,
+  metricsInterval: number,
   port: number | undefined,
   storagePath: string,
 }
@@ -32,6 +33,7 @@ export class Monitor implements Extension {
     enableDashboard: true,
     enableStorage: false,
     osMetricsInterval: 10000,
+    metricsInterval: 10000,
     port: undefined,
     storagePath: './dashboard',
   }
@@ -73,7 +75,10 @@ export class Monitor implements Extension {
     }
 
     setInterval(this.collectOsMetrics.bind(this), this.configuration.osMetricsInterval)
+    setInterval(this.collectConnectionMetrics.bind(this), this.configuration.metricsInterval)
+
     this.collectOsMetrics()
+    this.collectConnectionMetrics()
   }
 
   /*
@@ -83,6 +88,12 @@ export class Monitor implements Extension {
   private async collectOsMetrics() {
     await this.storage.add('memory', await this.collector.memory())
     await this.storage.add('cpu', await this.collector.cpu())
+  }
+
+  private async collectConnectionMetrics() {
+    await this.storage.add('documentCount', await this.collector.documentCount())
+    await this.storage.add('connectionCount', await this.collector.connectionCount())
+    await this.storage.add('messageCount', await this.collector.messageCount())
   }
 
   /*

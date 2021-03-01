@@ -15,6 +15,12 @@ export class Collector {
 
   serverConfiguration: Partial<Configuration> = defaultConfiguration
 
+  connections = 0
+
+  messages = 0
+
+  documents = 0
+
   async memory() {
     const memory = await osu.mem.info()
 
@@ -36,6 +42,8 @@ export class Collector {
   connect(data: onConnectPayload) {
     const { documentName } = data
 
+    this.connections += 1
+
     return {
       action: 'connected',
       documentName,
@@ -45,14 +53,24 @@ export class Collector {
   disconnect(data: onDisconnectPayload) {
     const { documentName } = data
 
+    this.connections -= 1
+
     return {
       action: 'disconnected',
       documentName,
     }
   }
 
+  connectionCount() {
+    return {
+      count: this.connections,
+    }
+  }
+
   createDocument(data: onCreateDocumentPayload) {
     const { documentName, document } = data
+
+    this.documents += 1
 
     return {
       action: 'created',
@@ -64,11 +82,27 @@ export class Collector {
   changeDocument(data: onChangePayload) {
     const { documentName, document } = data
 
+    this.messages += 1
+
     return {
       action: 'changed',
       documentName,
       document: Collector.readableYDoc(document),
     }
+  }
+
+  messageCount() {
+    const count = this.messages
+    this.messages = 0
+
+    return { count }
+  }
+
+  documentCount() {
+    const count = this.documents
+    this.documents = 0
+
+    return { count }
   }
 
   info() {
@@ -84,6 +118,7 @@ export class Collector {
     const data = {}
 
     doc.share?.forEach((item, key) => {
+      console.log(item.toJSON(), key)
       // TODO: fix crapcode
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
