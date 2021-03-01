@@ -25,5 +25,8 @@
   "dependencies": {
     "y-redis": "^1.0.2",
     "yjs": "^13.5.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.ueber.io"
   }
 }

@@ -5,7 +5,9 @@ import {
   defaultConfiguration,
   Configuration,
   onConnectPayload,
-  onDisconnectPayload, onCreateDocumentPayload, onChangePayload,
+  onDisconnectPayload,
+  onCreateDocumentPayload,
+  onChangePayload,
 } from '@hocuspocus/server'
 import {
   AbstractType, Doc, encodeStateAsUpdate, YEvent,

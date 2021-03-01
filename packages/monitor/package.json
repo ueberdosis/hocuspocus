@@ -1,20 +1,13 @@
 {
-  "private": true,
   "name": "@hocuspocus/monitor",
-  "version": "1.0.0-alpha.1",
   "description": "hocuspocus monitoring",
+  "version": "1.0.0-alpha.1",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
     "tiptap",
     "redis",
     "yjs"
-  ],
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not IE <= 11",
-    "not IE_Mob <= 11"
   ],
   "type": "module",
   "main": "dist/hocuspocus-monitor.esm.js",
@@ -45,5 +38,8 @@
     "rocksdb": "^4.1.0",
     "yjs": "^13.4.12"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "publishConfig": {
+    "registry": "https://registry.ueber.io"
+  }
 }
