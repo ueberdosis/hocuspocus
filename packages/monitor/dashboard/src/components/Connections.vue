@@ -2,8 +2,8 @@
   <card title="Metrics">
     <div>
       <div>
-        Currently active connections: {{ latest.count }}<br>
-        <div class="text-gray-600 text-sm">Total messages sent: {{ totalMessagesSent }}, Total documents created: {{ totalDocumentsCreated }}</div>
+        Currently active connections: {{ latestConnection.count || 0 }}<br>
+        <div class="text-gray-600 text-sm">Total messages sent: {{ totalMessagesSent }}, Total documents created: {{ latestDocument.count || 0 }}</div>
       </div>
       <div class="-ml-4 -mr-4 -mb-12">
         <plotly
@@ -75,11 +75,11 @@ export default {
       return collect(this.messageCount).reduce((carry, item) => carry += item.value.count)
     },
 
-    totalDocumentsCreated() {
-      return collect(this.documentCount).reduce((carry, item) => carry += item.value.count)
+    latestDocument() {
+      return this.documentCount[this.documentCount.length - 1]?.value
     },
 
-    latest() {
+    latestConnection() {
       return this.connectionCount[this.connectionCount.length - 1]?.value
     },
 

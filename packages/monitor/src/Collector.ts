@@ -99,10 +99,9 @@ export class Collector {
   }
 
   documentCount() {
-    const count = this.documents
-    this.documents = 0
-
-    return { count }
+    return {
+      count: this.documents,
+    }
   }
 
   info() {
