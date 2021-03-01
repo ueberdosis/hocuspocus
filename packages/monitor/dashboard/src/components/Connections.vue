@@ -1,9 +1,9 @@
 <template>
   <card title="Metrics">
     <div>
-      <div>
-        Currently active connections: {{ latestConnection.count || 0 }}<br>
-        <div class="text-gray-600 text-sm">Total messages sent: {{ totalMessagesSent }}, Total documents created: {{ latestDocument.count || 0 }}</div>
+      <div v-if="latestConnection && latestDocument">
+        Currently active connections: {{ latestConnection.count }}<br>
+        <div class="text-gray-600 text-sm">Total messages sent: {{ totalMessagesSent }}, Total documents created: {{ latestDocument.count }}</div>
       </div>
       <div class="-ml-4 -mr-4 -mb-12">
         <plotly
@@ -24,10 +24,12 @@
               showgrid: true,
               zeroline: true,
               visible: false,
+              range: [ start, end ],
             },
             yaxis: {
               showgrid: true,
               zeroline: false,
+              fixedrange: true,
             },
           }"
           :scrool-zoom="false"
@@ -64,13 +66,21 @@ export default {
       required: true,
     },
 
-    interval: {
+    max: {
       type: Number,
-      default: 30,
+      default: 24,
     },
   },
 
   computed: {
+    start() {
+      return this.connectionCount[this.connectionCount.length > this.max ? this.connectionCount.length - this.max : 0]?.timestamp
+    },
+
+    end() {
+      return this.connectionCount[this.connectionCount.length - 1]?.timestamp
+    },
+
     totalMessagesSent() {
       return collect(this.messageCount).reduce((carry, item) => carry += item.value.count)
     },

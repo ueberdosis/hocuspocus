@@ -117,7 +117,6 @@ export class Collector {
     const data = {}
 
     doc.share?.forEach((item, key) => {
-      console.log(item.toJSON(), key)
       // TODO: fix crapcode
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
