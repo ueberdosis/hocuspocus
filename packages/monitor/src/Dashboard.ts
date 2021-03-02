@@ -73,6 +73,8 @@ export class Dashboard {
     const { path } = this.configuration
 
     if (request.url?.split('/')[1] === path) {
+      Dashboard.basicAuth(request, response)
+
       request.url = request.url.replace(path, '')
 
       const publicPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dashboard', 'dist')
@@ -145,5 +147,16 @@ export class Dashboard {
     setTimeout(() => {
       connection.send(JSON.stringify({ data }))
     }, 1000)
+  }
+
+  private static basicAuth(request: IncomingMessage, response: ServerResponse) {
+    const header = request.headers.authorization || ''
+    const token = header.split(/\s+/).pop() || ''
+    const auth = Buffer.from(token, 'base64').toString()
+    const parts = auth.split(/:/)
+    const username = parts.shift()
+    const password = parts.join(':')
+
+    console.log(username, password)
   }
 }
