@@ -161,16 +161,9 @@ export class Dashboard {
     }
 
     const header = request.headers.authorization || ''
-    console.log('header', header)
-
     const token = header.split(/\s+/).pop() || ''
-    console.log('token', token)
-
     const auth = Buffer.from(token, 'base64').toString()
-    console.log('auth', auth)
-
     const parts = auth.split(/:/)
-    console.log('parts', parts)
 
     const username = parts.shift()
     const password = parts.join(':')
@@ -183,6 +176,5 @@ export class Dashboard {
     }
 
     return false
-    console.log(username, password)
   }
 }
