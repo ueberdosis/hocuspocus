@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/monitor",
   "description": "hocuspocus monitoring",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -39,7 +39,6 @@
     "rocksdb": "^4.1.0",
     "yjs": "^13.4.12"
   },
-  "devDependencies": {},
   "publishConfig": {
     "registry": "https://registry.ueber.io"
   }
