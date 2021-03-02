@@ -139,8 +139,6 @@ class Document extends Doc {
 
       added.forEach((clientId: any) => connection.clients.add(clientId))
       removed.forEach((clientId: any) => connection.clients.delete(clientId))
-
-      this.connections.set(connectionInstance, connection)
     }
 
     this.getConnections().forEach(connection => connection.send(
