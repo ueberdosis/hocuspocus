@@ -12,6 +12,7 @@ import {
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
+import moment from 'moment'
 import { Storage } from './Storage'
 import { Dashboard } from './Dashboard'
 import { Collector } from './Collector'
@@ -70,6 +71,7 @@ export class Monitor implements Extension {
 
     setInterval(this.collectOsMetrics.bind(this), this.configuration.osMetricsInterval)
     setInterval(this.collectConnectionMetrics.bind(this), this.configuration.metricsInterval)
+    setInterval(this.cleanMetrics.bind(this), 120000)
 
     this.collectOsMetrics()
     this.collectConnectionMetrics()
@@ -88,6 +90,16 @@ export class Monitor implements Extension {
     await this.storage.add('documentCount', await this.collector.documentCount())
     await this.storage.add('connectionCount', await this.collector.connectionCount())
     await this.storage.add('messageCount', await this.collector.messageCount())
+  }
+
+  private async cleanMetrics() {
+    const data = await this.storage.all()
+
+    data.forEach((item: any, index: any) => {
+      if (moment(item.timestamp).add(1, 'hour').isBefore(moment())) {
+        this.storage.remove(item.key, item.timestamp)
+      }
+    })
   }
 
   /*
