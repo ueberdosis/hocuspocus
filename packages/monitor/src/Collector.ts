@@ -10,7 +10,10 @@ import {
   onChangePayload,
 } from '@hocuspocus/server'
 import {
-  AbstractType, Doc, encodeStateAsUpdate, YEvent,
+  AbstractType,
+  Doc,
+  encodeStateAsUpdate,
+  YEvent,
 } from 'yjs'
 
 export class Collector {
