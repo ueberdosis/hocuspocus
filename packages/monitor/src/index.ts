@@ -12,18 +12,17 @@ import {
 import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import { Storage } from './Storage'
-import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
 import { Collector } from './Collector'
 
 export interface Configuration {
   dashboardPath: string,
   enableDashboard: boolean,
-  enableStorage: boolean,
-  osMetricsInterval: number,
   metricsInterval: number,
+  osMetricsInterval: number,
+  password: string | undefined,
   port: number | undefined,
-  storagePath: string,
+  user: string | undefined,
 }
 
 export class Monitor implements Extension {
@@ -31,11 +30,11 @@ export class Monitor implements Extension {
   configuration: Configuration = {
     dashboardPath: 'dashboard',
     enableDashboard: true,
-    enableStorage: false,
-    osMetricsInterval: 10000,
     metricsInterval: 10000,
+    osMetricsInterval: 10000,
+    password: undefined,
     port: undefined,
-    storagePath: './dashboard',
+    user: undefined,
   }
 
   storage: Storage
@@ -54,23 +53,17 @@ export class Monitor implements Extension {
       ...configuration,
     }
 
-    const { storagePath } = this.configuration
-
     this.collector = new Collector()
     this.storage = new Storage()
-
-    // TODO: fix rocksdb
-    // if (this.configuration.enableStorage) {
-    // this.storage = new RocksDB({ storagePath, interval })
-    // } else {
-    // }
 
     if (this.configuration.enableDashboard) {
       this.dashboard = new Dashboard({
         collector: this.collector,
+        password: this.configuration.password,
         path: this.configuration.dashboardPath,
         port: this.configuration.port,
         storage: this.storage,
+        user: this.configuration.user,
       })
     }
 

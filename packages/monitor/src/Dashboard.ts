@@ -9,19 +9,23 @@ import { Storage } from './Storage'
 import { Collector } from './Collector'
 
 export interface Configuration {
+  collector: Collector | undefined,
+  password: string | undefined,
   path: string,
   port: number | undefined,
   storage: Storage | undefined,
-  collector: Collector | undefined,
+  user: string | undefined,
 }
 
 export class Dashboard {
 
   configuration: Configuration = {
+    collector: undefined,
+    password: undefined,
     path: 'dashboard',
     port: undefined,
     storage: undefined,
-    collector: undefined,
+    user: undefined,
   }
 
   websocketServer: WebSocket.Server
@@ -73,7 +77,9 @@ export class Dashboard {
     const { path } = this.configuration
 
     if (request.url?.split('/')[1] === path) {
-      Dashboard.basicAuth(request, response)
+      if (this.basicAuth(request, response)) {
+        return true
+      }
 
       request.url = request.url.replace(path, '')
 
@@ -149,14 +155,34 @@ export class Dashboard {
     }, 1000)
   }
 
-  private static basicAuth(request: IncomingMessage, response: ServerResponse) {
+  private basicAuth(request: IncomingMessage, response: ServerResponse) {
+    if (!this.configuration.user || !this.configuration.password) {
+      return false
+    }
+
     const header = request.headers.authorization || ''
+    console.log('header', header)
+
     const token = header.split(/\s+/).pop() || ''
+    console.log('token', token)
+
     const auth = Buffer.from(token, 'base64').toString()
+    console.log('auth', auth)
+
     const parts = auth.split(/:/)
+    console.log('parts', parts)
+
     const username = parts.shift()
     const password = parts.join(':')
 
+    if (this.configuration.user !== username || this.configuration.password !== password) {
+      response.writeHead(401, 'Unauthorized', ['WWW-Authenticate', 'Basic realm="@hocuspocus/monitor"'])
+      response.end()
+
+      return true
+    }
+
+    return false
     console.log(username, password)
   }
 }
