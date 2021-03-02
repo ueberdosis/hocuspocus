@@ -1,5 +1,8 @@
 <template>
   <card>
+    <!-- fix for purgeCss -->
+    <div class="hidden bg-gray-400 bg-green-400 bg-blue-400 bg-yellow-400" />
+
     <table class="table-auto w-full text-left">
       <thead>
         <tr>
