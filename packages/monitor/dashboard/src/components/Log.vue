@@ -18,7 +18,12 @@
           <td class="border px-4 py-2">
             <span
               class="px-2 py-1 rounded text-sm"
-              :class="`bg-${item.color}-400`"
+              :class="{
+                'bg-gray-400': item.color === 'gray',
+                'bg-green-400': item.color === 'green',
+                'bg-blue-400': item.color === 'blue',
+                'bg-yellow-400': item.color === 'yellow',
+              }"
               v-if="item.label"
             >
               {{ item.label }}
