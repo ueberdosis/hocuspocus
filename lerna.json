@@ -1,6 +1,9 @@
 {
   "packages": [
-    "packages/*"
+    "packages/server",
+    "packages/rocksdb",
+    "packages/redis",
+    "packages/monitor"
   ],
   "npmClient": "yarn",
   "version": "independent",
