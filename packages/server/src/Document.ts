@@ -137,8 +137,10 @@ class Document extends Doc {
     if (connectionInstance !== null) {
       const connection = this.connections.get(connectionInstance)
 
-      added.forEach((clientId: any) => connection.clients.add(clientId))
-      removed.forEach((clientId: any) => connection.clients.delete(clientId))
+      if (connection) {
+        added.forEach((clientId: any) => connection.clients.add(clientId))
+        removed.forEach((clientId: any) => connection.clients.delete(clientId))
+      }
     }
 
     this.getConnections().forEach(connection => connection.send(
