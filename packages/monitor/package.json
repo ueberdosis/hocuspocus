@@ -18,8 +18,9 @@
     "require": "./dist/hocuspocus-monitor.js"
   },
   "files": [
-    "src",
-    "dist"
+    "dashboard",
+    "dist",
+    "src"
   ],
   "scripts": {
     "start": "yarn --cwd dashboard start",
