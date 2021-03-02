@@ -15,6 +15,21 @@
         <info :info="info" />
       </div>
     </div>
+
+    <div class="mt-8">
+      <connections
+        :connection-count="connectionCount"
+        :document-count="documentCount"
+        :message-count="messageCount"
+      />
+    </div>
+
+    <div class="mt-8 z-10 relative">
+      <log
+        :connections="connections"
+        :documents="documents"
+      />
+    </div>
   </div>
 </template>
 
@@ -23,20 +38,29 @@ import Vue from 'vue'
 import Cpu from './Cpu'
 import Info from './Info'
 import Memory from './Memory'
+import Log from './Log'
+import Connections from './Connections'
 
 export default Vue.extend({
   components: {
+    Log,
     Cpu,
     Info,
     Memory,
+    Connections,
   },
 
   data() {
     return {
-      socket: null,
+      connections: [],
+      connectionCount: [],
+      documentCount: [],
+      messageCount: [],
       cpu: [],
-      memory: [],
+      documents: [],
       info: {},
+      memory: [],
+      socket: null,
     }
   },
 
@@ -56,15 +80,17 @@ export default Vue.extend({
 
         if (!Array.isArray(value)) {
           this[key].push({
-            value,
+            key,
             timestamp,
+            value,
           })
           return
         }
 
         this[key] = this[key].concat(value.map(value => ({
-          value,
+          key,
           timestamp,
+          value,
         })))
       })
     },

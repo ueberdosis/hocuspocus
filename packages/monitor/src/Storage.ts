@@ -48,4 +48,15 @@ export class Storage extends EventEmitter {
 
     await this.set(key, data)
   }
+
+  async remove(key: string, timestamp: string): Promise<any> {
+    let data = await this.get(key, [])
+    data = Array.isArray(data) ? data : []
+
+    data = collect(data)
+      .where('timestamp', '!=', timestamp)
+      .toArray()
+
+    await this.set(key, data)
+  }
 }

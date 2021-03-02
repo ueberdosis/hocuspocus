@@ -20,6 +20,10 @@
     "start": "parcel watch --public-url '.' -d dist src/index.html",
     "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps -d dist src/index.html"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "dependencies": {
     "autoprefixer": "^9.7.3",
     "collect.js": "^4.28.6",

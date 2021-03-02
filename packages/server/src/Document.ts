@@ -133,13 +133,14 @@ class Document extends Doc {
     connectionInstance: WebSocket,
   ): Document {
     const changedClients = added.concat(updated, removed)
-    const connection = this.connections.get(connectionInstance)
 
     if (connectionInstance !== null) {
-      added.forEach((clientId: any) => connection.clients.add(clientId))
-      removed.forEach((clientId: any) => connection.clients.delete(clientId))
+      const connection = this.connections.get(connectionInstance)
 
-      this.connections.set(connectionInstance, connection)
+      if (connection) {
+        added.forEach((clientId: any) => connection.clients.add(clientId))
+        removed.forEach((clientId: any) => connection.clients.delete(clientId))
+      }
     }
 
     this.getConnections().forEach(connection => connection.send(

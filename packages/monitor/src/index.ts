@@ -1,6 +1,7 @@
 import {
   Extension,
-  onChangePayload, onConfigurePayload,
+  onChangePayload,
+  onConfigurePayload,
   onConnectPayload,
   onCreateDocumentPayload,
   onDestroyPayload,
@@ -8,22 +9,22 @@ import {
   onListenPayload,
   onRequestPayload,
   onUpgradePayload,
-  defaultConfiguration,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
-import osu from 'node-os-utils'
 import WebSocket from 'ws'
+import moment from 'moment'
 import { Storage } from './Storage'
-import { RocksDB } from './RocksDB'
 import { Dashboard } from './Dashboard'
+import { Collector } from './Collector'
 
 export interface Configuration {
   dashboardPath: string,
   enableDashboard: boolean,
-  enableStorage: boolean,
+  metricsInterval: number,
   osMetricsInterval: number,
+  password: string | undefined,
   port: number | undefined,
-  storagePath: string,
+  user: string | undefined,
 }
 
 export class Monitor implements Extension {
@@ -31,13 +32,16 @@ export class Monitor implements Extension {
   configuration: Configuration = {
     dashboardPath: 'dashboard',
     enableDashboard: true,
-    enableStorage: false,
+    metricsInterval: 10000,
     osMetricsInterval: 10000,
+    password: undefined,
     port: undefined,
-    storagePath: './dashboard',
+    user: undefined,
   }
 
   storage: Storage
+
+  collector: Collector
 
   dashboard?: Dashboard
 
@@ -45,31 +49,32 @@ export class Monitor implements Extension {
    * Constructor
    */
   constructor(configuration?: Partial<Configuration>) {
+
     this.configuration = {
       ...this.configuration,
       ...configuration,
     }
 
-    const { storagePath } = this.configuration
-
+    this.collector = new Collector()
     this.storage = new Storage()
-    // if (this.configuration.enableStorage) {
-    // TODO: fix rocksdb
-    // this.storage = new RocksDB({ storagePath, interval })
-    // } else {
-    // }
 
     if (this.configuration.enableDashboard) {
       this.dashboard = new Dashboard({
+        collector: this.collector,
+        password: this.configuration.password,
         path: this.configuration.dashboardPath,
         port: this.configuration.port,
         storage: this.storage,
-        serverConfiguration: defaultConfiguration,
+        user: this.configuration.user,
       })
     }
 
     setInterval(this.collectOsMetrics.bind(this), this.configuration.osMetricsInterval)
+    setInterval(this.collectConnectionMetrics.bind(this), this.configuration.metricsInterval)
+    setInterval(this.cleanMetrics.bind(this), 120000)
+
     this.collectOsMetrics()
+    this.collectConnectionMetrics()
   }
 
   /*
@@ -77,18 +82,23 @@ export class Monitor implements Extension {
    */
 
   private async collectOsMetrics() {
-    const memory = await osu.mem.info()
+    await this.storage.add('memory', await this.collector.memory())
+    await this.storage.add('cpu', await this.collector.cpu())
+  }
 
-    await this.storage.add('memory', {
-      free: memory.freeMemMb,
-      total: memory.totalMemMb,
-      usage: 100 - memory.freeMemPercentage,
-    })
+  private async collectConnectionMetrics() {
+    await this.storage.add('documentCount', await this.collector.documentCount())
+    await this.storage.add('connectionCount', await this.collector.connectionCount())
+    await this.storage.add('messageCount', await this.collector.messageCount())
+  }
 
-    await this.storage.add('cpu', {
-      count: osu.cpu.count(),
-      model: osu.cpu.model(),
-      usage: await osu.cpu.usage(),
+  private async cleanMetrics() {
+    const data = await this.storage.all()
+
+    data.forEach((item: any, index: any) => {
+      if (moment(item.timestamp).add(1, 'hour').isBefore(moment())) {
+        this.storage.remove(item.key, item.timestamp)
+      }
     })
   }
 
@@ -129,19 +139,21 @@ export class Monitor implements Extension {
   }
 
   async onConnect(data: onConnectPayload) {
-    // await this.storage.increment('connectionCount')
+    await this.storage.add('connections', this.collector.connect(data))
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    // await this.storage.decrement('connectionCount')
+    await this.storage.add('connections', this.collector.disconnect(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onCreateDocument(data: onCreateDocumentPayload) {
+    await this.storage.add('documents', this.collector.createDocument(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
+    await this.storage.add('documents', this.collector.changeDocument(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
@@ -154,11 +166,9 @@ export class Monitor implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
-    if (this.dashboard) {
-      this.dashboard.configuration.serverConfiguration = {
-        port: data.configuration.port,
-        timeout: data.configuration.timeout,
-      }
+    this.collector.serverConfiguration = {
+      port: data.configuration.port,
+      timeout: data.configuration.timeout,
     }
   }
 }

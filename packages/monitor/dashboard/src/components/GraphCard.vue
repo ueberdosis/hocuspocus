@@ -71,9 +71,22 @@ export default {
         return {}
       },
     },
+
+    max: {
+      type: Number,
+      default: 24,
+    },
   },
 
   computed: {
+    start() {
+      return this.data[this.data.length > this.max ? (this.data.length - this.max) : 0]?.timestamp
+    },
+
+    end() {
+      return this.data[this.data.length - 1]?.timestamp
+    },
+
     latest() {
       return this.data[this.data.length - 1]?.value
     },
@@ -98,10 +111,14 @@ export default {
     },
 
     computedLayout() {
-      return {
+      const layout = {
         ...defaultLayout,
         ...this.layout,
       }
+
+      layout.xaxis.range = [this.start, this.end]
+
+      return layout
     },
   },
 }
