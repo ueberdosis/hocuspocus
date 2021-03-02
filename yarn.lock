@@ -1156,6 +1156,15 @@
     log-update "^2.3.0"
     p-map "^1.2.0"
 
+"@hocuspocus/server@^1.0.0-alpha.16":
+  version "1.0.0-alpha.15"
+  dependencies:
+    lib0 "^0.2.35"
+    ws "^7.4.3"
+    y-leveldb "^0.1.0"
+    y-protocols "^1.0.4"
+    yjs "^13.5.0"
+
 "@jest/types@^26.6.2":
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
