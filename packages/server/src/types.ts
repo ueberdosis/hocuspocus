@@ -47,12 +47,14 @@ export interface onConnectPayload {
 }
 
 export interface onCreateDocumentPayload {
+  context: any,
   document: Document,
   documentName: string,
 }
 
 export interface onChangePayload {
   clientsCount: number,
+  context: any,
   document: Document,
   documentName: string,
   requestHeaders: IncomingHttpHeaders,

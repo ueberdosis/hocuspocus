@@ -156,7 +156,7 @@ export class Hocuspocus {
       }
     })
       .then(() => {
-        const document = this.createDocument(request)
+        const document = this.createDocument(request, context)
         this.createConnection(incoming, request, document, context)
       })
       .catch(e => {
@@ -170,22 +170,23 @@ export class Hocuspocus {
    * @private
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage): void {
-
-    this.configuration.extensions.forEach(extension => extension.onChange({
+    const hookPayload = {
       clientsCount: document.connectionsCount(),
+      context: connection.context,
       document,
       documentName: document.name,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
       update,
-    }))
+    }
 
+    this.hooks('onChange', hookPayload)
   }
 
   /**
    * Create a new document by the given request
    */
-  private createDocument(request: IncomingMessage): Document {
+  private createDocument(request: IncomingMessage, context?: any): Document {
 
     const documentName = Hocuspocus.getDocumentName(request)
 
@@ -199,7 +200,13 @@ export class Hocuspocus {
       this.handleDocumentUpdate(document, connection, update, request)
     })
 
-    this.hooks('onCreateDocument', { document, documentName }, (loadedDocument: Doc | undefined) => {
+    const hookPayload = {
+      context,
+      document,
+      documentName,
+    }
+
+    this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
       if (loadedDocument instanceof Doc) {
         applyUpdate(document, encodeStateAsUpdate(loadedDocument))
       }
