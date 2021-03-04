@@ -1,10 +1,11 @@
 import WebSocket from 'ws'
-import { IncomingMessage } from 'http'
+import { IncomingMessage as HTTPIncomingMessage } from 'http'
 import AsyncLock from 'async-lock'
 import Decoder from './utils/Decoder'
 import Document from './Document'
 import Messages from './Messages'
 import { MessageTypes, WsReadyStates } from './types'
+import { IncomingMessage } from './IncomingMessage'
 
 class Connection {
 
@@ -18,7 +19,7 @@ class Connection {
 
   pongReceived = true
 
-  request: IncomingMessage
+  request: HTTPIncomingMessage
 
   timeout: number
 
@@ -33,7 +34,7 @@ class Connection {
    */
   constructor(
     connection: WebSocket,
-    request: IncomingMessage,
+    request: HTTPIncomingMessage,
     document: Document,
     timeout: number,
     context: any,
@@ -152,23 +153,20 @@ class Connection {
    * @private
    */
   private handleMessage(input: Iterable<number>): void {
-    const message = new Decoder(new Uint8Array(input))
-    const messageType = message.int()
+    const message = new IncomingMessage(input)
 
-    if (messageType === MessageTypes.Awareness) {
-      this.document.applyAwarenessUpdate(this, message.int8())
+    if (message.messageType === MessageTypes.Awareness) {
+      this.document.applyAwarenessUpdate(this, message.readUint8Array())
       return
     }
 
-    const syncMessage = Messages.read(message, this.document)
+    message.readSyncMessageAndApplyItTo(this.document)
 
-    if (syncMessage.length() <= 1) {
+    if (message.length <= 1) {
       return
     }
 
-    return this.send(
-      syncMessage.encode(),
-    )
+    return this.send(message.toUint8Array())
   }
 
   /**
