@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@hocuspocus/redis",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "description": "hocuspocus persistence driver for Redis",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -23,7 +23,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.21",
+    "@hocuspocus/server": "^1.0.0-alpha.22",
     "y-redis": "^1.0.2",
     "yjs": "^13.5.0"
   },
