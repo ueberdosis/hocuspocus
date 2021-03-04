@@ -6,6 +6,7 @@ import Document from './Document'
 import Messages from './Messages'
 import { MessageTypes, WsReadyStates } from './types'
 import { IncomingMessage } from './IncomingMessage'
+import { OutgoingMessage } from './OutgoingMessage'
 
 class Connection {
 
@@ -136,7 +137,10 @@ class Connection {
    */
   private sendFirstSyncStep(): void {
     this.send(
-      Messages.firstSyncStep(this.document).encode(),
+      new OutgoingMessage()
+        .createSyncMessage()
+        .writeFirstSyncStepFor(this.document)
+        .toUint8Array(),
     )
 
     if (!this.document.hasAwarenessStates()) {
@@ -144,7 +148,9 @@ class Connection {
     }
 
     this.send(
-      Messages.awarenessUpdate(this.document.awareness).encode(),
+      new OutgoingMessage()
+        .createAwarenessUpdateMessage(this.document.awareness)
+        .toUint8Array(),
     )
   }
 
@@ -166,7 +172,9 @@ class Connection {
       return
     }
 
-    return this.send(message.toUint8Array())
+    return this.send(
+      message.toUint8Array(),
+    )
   }
 
   /**
