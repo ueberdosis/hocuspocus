@@ -134,6 +134,7 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
+    // create a unique identifier for every socket connection
     const socketId = uuid()
 
     // @ts-ignore
@@ -146,10 +147,10 @@ export class Hocuspocus {
       clientsCount: document.connectionsCount(),
       context,
       document,
-      socketId,
       documentName: document.name,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
+      socketId,
     }
 
     this.hooks('onConnect', hookPayload).catch(e => {
@@ -193,15 +194,11 @@ export class Hocuspocus {
       this.handleDocumentUpdate(document, update, request)
     })
 
-    this.hooks(
-      'onCreateDocument',
-      { document, documentName },
-      (loadedDocument: Doc | undefined) => {
-        if (loadedDocument instanceof Doc) {
-          applyUpdate(document, encodeStateAsUpdate(loadedDocument))
-        }
-      },
-    ).catch(e => {
+    this.hooks('onCreateDocument', { document, documentName }, (loadedDocument: Doc | undefined) => {
+      if (loadedDocument instanceof Doc) {
+        applyUpdate(document, encodeStateAsUpdate(loadedDocument))
+      }
+    }).catch(e => {
       throw e
     })
 
