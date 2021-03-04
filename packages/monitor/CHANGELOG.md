@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.18](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/monitor@1.0.0-alpha.17...@hocuspocus/monitor@1.0.0-alpha.18) (2021-03-04)
+
+**Note:** Version bump only for package @hocuspocus/monitor
+
+
+
+
+
 # [1.0.0-alpha.17](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/monitor@1.0.0-alpha.16...@hocuspocus/monitor@1.0.0-alpha.17) (2021-03-04)
 
 **Note:** Version bump only for package @hocuspocus/monitor
