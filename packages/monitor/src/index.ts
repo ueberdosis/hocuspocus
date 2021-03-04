@@ -96,7 +96,7 @@ export class Monitor implements Extension {
     const data = await this.storage.all()
 
     for (let i = 0; i < data.length; i += 1) {
-      if (moment(data[i].timestamp).add(1, 'minute').isBefore(moment())) {
+      if (moment(data[i].timestamp).add(1, 'hour').isBefore(moment())) {
         // eslint-disable-next-line no-await-in-loop
         await this.storage.remove(data[i].key, data[i].timestamp)
       }
