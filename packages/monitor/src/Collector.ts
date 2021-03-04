@@ -1,6 +1,7 @@
 import osu from 'node-os-utils'
 import process from 'process'
 import moment from 'moment'
+import publicIp from 'public-ip'
 import {
   defaultConfiguration,
   Configuration,
@@ -117,9 +118,10 @@ export class Collector {
     }
   }
 
-  info() {
+  async info() {
     return {
       configuration: this.serverConfiguration,
+      ipAddress: await publicIp.v4(),
       nodeVersion: process.version,
       platform: process.platform,
       started: moment().subtract(process.uptime(), 'second').toISOString(),

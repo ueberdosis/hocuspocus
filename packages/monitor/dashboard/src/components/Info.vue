@@ -10,6 +10,9 @@
       Platform: <span class="text-gray-600">{{ info.platform }}</span>
     </p>
     <p>
+      Public IP: <span class="text-gray-600">{{ info.ipAddress }}</span>
+    </p>
+    <p>
       Started: <span class="text-gray-600">{{ started }}</span>
     </p>
     <div class="text-xl font-bold mt-6 mb-2">Configuration</div>

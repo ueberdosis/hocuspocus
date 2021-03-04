@@ -89,6 +89,7 @@ export default {
         .sortByDesc('timestamp')
         .values()
         .map((item, index) => this.mapper(item, index))
+        .take(100)
         .toArray()
     },
   },

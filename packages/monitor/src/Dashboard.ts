@@ -147,7 +147,7 @@ export class Dashboard {
     data.push({
       key: 'info',
       timestamp: null,
-      value: this.configuration.collector?.info(),
+      value: await this.configuration.collector?.info(),
     })
 
     setTimeout(() => {
