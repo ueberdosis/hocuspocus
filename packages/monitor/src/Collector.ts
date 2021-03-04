@@ -45,24 +45,26 @@ export class Collector {
   }
 
   connect(data: onConnectPayload) {
-    const { documentName } = data
+    const { documentName, socketId } = data
 
     this.connections += 1
 
     return {
       action: 'connected',
       documentName,
+      socketId,
     }
   }
 
   disconnect(data: onDisconnectPayload) {
-    const { documentName } = data
+    const { documentName, socketId } = data
 
     this.connections -= 1
 
     return {
       action: 'disconnected',
       documentName,
+      socketId,
     }
   }
 

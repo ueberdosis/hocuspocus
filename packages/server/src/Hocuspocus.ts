@@ -2,6 +2,7 @@ import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
+import { v4 as uuid } from 'uuid'
 import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -133,6 +134,11 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
+    const socketId = uuid()
+
+    // @ts-ignore
+    incoming.socketId = socketId
+
     const document = this.createDocument(request)
     const connection = this.createConnection(incoming, request, document, context)
 
@@ -140,6 +146,7 @@ export class Hocuspocus {
       clientsCount: document.connectionsCount(),
       context,
       document,
+      socketId,
       documentName: document.name,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
@@ -216,6 +223,8 @@ export class Hocuspocus {
           clientsCount: document.connectionsCount(),
           context,
           document,
+          // @ts-ignore
+          socketId: connection.socketId,
           documentName: document.name,
           requestHeaders: request.headers,
           requestParameters: Hocuspocus.getParameters(request),

@@ -48,10 +48,14 @@ export interface onConnectPayload extends onCreateDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   clientsCount: number,
+  socketId: string,
 }
 
-export interface onChangePayload extends onConnectPayload {
+export interface onChangePayload extends onCreateDocumentPayload {
   update: Uint8Array,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  clientsCount: number,
 }
 
 export interface onDisconnectPayload extends onConnectPayload {

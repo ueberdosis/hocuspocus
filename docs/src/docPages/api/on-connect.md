@@ -16,11 +16,12 @@ import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
 
 const data = {
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
   clientsCount: number,
   document: Doc,
   documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
 }
 ```
 

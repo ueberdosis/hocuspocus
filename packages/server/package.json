@@ -23,7 +23,9 @@
     "dist"
   ],
   "dependencies": {
+    "@types/uuid": "^8.3.0",
     "lib0": "^0.2.35",
+    "uuid": "^8.3.2",
     "ws": "^7.4.3",
     "y-leveldb": "^0.1.0",
     "y-protocols": "^1.0.4",

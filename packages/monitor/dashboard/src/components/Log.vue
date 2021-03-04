@@ -101,7 +101,7 @@ export default {
             color: data.action === 'connected' ? 'green' : 'gray',
             details: { documentName: data.documentName },
             label: data.action,
-            socket: '',
+            socket: data.socketId,
           }
         },
 
