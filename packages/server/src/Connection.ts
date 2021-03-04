@@ -1,5 +1,6 @@
 import WebSocket from 'ws'
 import { IncomingMessage } from 'http'
+import AsyncLock from 'async-lock'
 import Decoder from './utils/Decoder'
 import Document from './Document'
 import Messages from './Messages'
@@ -25,6 +26,8 @@ class Connection {
     onClose: (document: Document) => null,
   }
 
+  lock: AsyncLock
+
   /**
    * Constructor.
    */
@@ -40,6 +43,7 @@ class Connection {
     this.document = document
     this.request = request
     this.timeout = timeout
+    this.lock = new AsyncLock()
 
     this.connection.binaryType = 'arraybuffer'
     this.document.addConnection(this)
@@ -86,17 +90,23 @@ class Connection {
    * Close the connection
    */
   close(): void {
-    if (this.pingInterval) {
-      clearInterval(this.pingInterval)
-    }
+    this.lock.acquire('close', (done: Function) => {
 
-    if (!this.document.hasConnection(this)) {
-      return
-    }
+      if (this.pingInterval) {
+        clearInterval(this.pingInterval)
+      }
 
-    this.document.removeConnection(this)
-    this.callbacks.onClose(this.document)
-    this.connection.close()
+      if (!this.document.hasConnection(this)) {
+        return
+      }
+
+      this.document.removeConnection(this)
+      this.callbacks.onClose(this.document)
+      this.connection.close()
+
+      done()
+
+    })
   }
 
   /**
