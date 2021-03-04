@@ -166,7 +166,7 @@ class Connection {
       return
     }
 
-    message.readSyncMessageAndApplyItTo(this.document)
+    message.readSyncMessageAndApplyItTo(this.document, this)
 
     if (message.length <= 1) {
       return

@@ -15,6 +15,7 @@ import {
 
 import Document from './Document'
 import { MessageTypes } from './types'
+import Connection from './Connection'
 
 export class IncomingMessage {
 
@@ -30,9 +31,9 @@ export class IncomingMessage {
     this.decoder = createDecoder(input)
   }
 
-  readSyncMessageAndApplyItTo(document: Document): void {
+  readSyncMessageAndApplyItTo(document: Document, connection?: Connection): void {
     writeVarUint(this.encoder, MessageTypes.Sync)
-    readSyncMessage(this.decoder, this.encoder, document, null)
+    readSyncMessage(this.decoder, this.encoder, document, connection)
   }
 
   readUint8Array(): Uint8Array {

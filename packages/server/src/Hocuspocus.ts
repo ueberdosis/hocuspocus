@@ -141,23 +141,27 @@ export class Hocuspocus {
     // @ts-ignore
     incoming.socketId = socketId
 
-    const document = this.createDocument(request)
-    const connection = this.createConnection(incoming, request, document, context)
-
     const hookPayload = {
-      clientsCount: document.connectionsCount(),
-      context,
-      document,
-      documentName: document.name,
+      documentName: Hocuspocus.getDocumentName(request),
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
       socketId,
     }
 
-    this.hooks('onConnect', hookPayload).catch(e => {
-      if (e) throw e
-      connection.close()
+    this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
+      // merge context from all hooks
+      context = {
+        ...context,
+        ...contextAdditions,
+      }
     })
+      .then(() => {
+        const document = this.createDocument(request)
+        this.createConnection(incoming, request, document, context)
+      })
+      .catch(e => {
+        if (e) throw e
+      })
 
   }
 
@@ -165,7 +169,7 @@ export class Hocuspocus {
    * Handle update of the given document
    * @private
    */
-  private handleDocumentUpdate(document: Document, update: Uint8Array, request: IncomingMessage): void {
+  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage): void {
 
     this.configuration.extensions.forEach(extension => extension.onChange({
       clientsCount: document.connectionsCount(),
@@ -183,7 +187,7 @@ export class Hocuspocus {
    */
   private createDocument(request: IncomingMessage): Document {
 
-    const documentName = request.url?.slice(1)?.split('?')[0] || ''
+    const documentName = Hocuspocus.getDocumentName(request)
 
     if (this.documents.has(documentName)) {
       return this.documents.get(documentName)
@@ -191,8 +195,8 @@ export class Hocuspocus {
 
     const document = new Document(documentName)
 
-    document.onUpdate((document, update) => {
-      this.handleDocumentUpdate(document, update, request)
+    document.onUpdate((document, connection, update) => {
+      this.handleDocumentUpdate(document, connection, update, request)
     })
 
     this.hooks('onCreateDocument', { document, documentName }, (loadedDocument: Doc | undefined) => {
@@ -240,11 +244,7 @@ export class Hocuspocus {
   /**
    * Run the given hook on all configured extensions
    */
-  private async hooks(
-    name: string,
-    hookPayload: any,
-    callback: Function | null = null,
-  ): Promise<any> {
+  private async hooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
     for (let i = 0; i < extensions.length; i += 1) {
@@ -256,12 +256,7 @@ export class Hocuspocus {
   /**
    * Run the given hook on the given extension.
    */
-  private hook(
-    name: string,
-    extension: Extension,
-    hookPayload: any,
-    callback: Function | null = null,
-  ): Promise<any> {
+  private hook(name: string, extension: Extension, hookPayload: any, callback: Function | null = null): Promise<any> {
     // @ts-ignore
     const promise = extension[name] ? extension[name](hookPayload) : new Promise(r => r())
     if (callback) promise.then((...args: any[]) => callback(...args))
@@ -276,6 +271,14 @@ export class Hocuspocus {
   private static getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
+  }
+
+  /**
+   * Get document name by the given request
+   * @private
+   */
+  private static getDocumentName(request: IncomingMessage): string {
+    return request.url?.slice(1)?.split('?')[0] || ''
   }
 }
 

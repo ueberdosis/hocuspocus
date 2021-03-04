@@ -13,7 +13,7 @@ class Document extends Doc {
 
   callbacks = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onUpdate: (document: Document, update: Uint8Array) => {},
+    onUpdate: (document: Document, connection: Connection, update: Uint8Array) => {},
   }
 
   connections = new Map()
@@ -41,7 +41,7 @@ class Document extends Doc {
   /**
    * Set a callback that will be triggered when the document is updated
    */
-  onUpdate(callback: (document: Document, update: Uint8Array) => void): Document {
+  onUpdate(callback: (document: Document, connection: Connection, update: Uint8Array) => void): Document {
     this.callbacks.onUpdate = callback
 
     return this
@@ -156,8 +156,8 @@ class Document extends Doc {
   /**
    * Handle an updated document and sync changes to clients
    */
-  private handleUpdate(update: Uint8Array): Document {
-    this.callbacks.onUpdate(this, update)
+  private handleUpdate(update: Uint8Array, connection: Connection): Document {
+    this.callbacks.onUpdate(this, connection, update)
 
     const message = new OutgoingMessage()
       .createSyncMessage()

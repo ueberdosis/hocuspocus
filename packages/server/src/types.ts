@@ -39,27 +39,35 @@ export interface Configuration extends Extension {
   timeout: number,
 }
 
+export interface onConnectPayload {
+  documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+}
+
 export interface onCreateDocumentPayload {
   document: Document,
   documentName: string,
 }
 
-export interface onConnectPayload extends onCreateDocumentPayload {
+export interface onChangePayload {
+  clientsCount: number,
+  document: Document,
+  documentName: string,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
-  clientsCount: number,
-  socketId: string,
-}
-
-export interface onChangePayload extends onCreateDocumentPayload {
   update: Uint8Array,
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
-  clientsCount: number,
 }
 
-export interface onDisconnectPayload extends onConnectPayload {
+export interface onDisconnectPayload {
+  clientsCount: number,
   context: any,
+  document: Document,
+  documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
 }
 
 export interface onRequestPayload {
