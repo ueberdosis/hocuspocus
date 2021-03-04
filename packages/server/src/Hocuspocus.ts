@@ -3,6 +3,7 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
+
 import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'

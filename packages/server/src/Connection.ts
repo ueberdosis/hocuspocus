@@ -1,11 +1,10 @@
+import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
 import { IncomingMessage as HTTPIncomingMessage } from 'http'
-import AsyncLock from 'async-lock'
-import Decoder from './utils/Decoder'
+
 import Document from './Document'
-import Messages from './Messages'
-import { MessageTypes, WsReadyStates } from './types'
 import { IncomingMessage } from './IncomingMessage'
+import { MessageTypes, WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
 
 class Connection {
@@ -45,6 +44,7 @@ class Connection {
     this.document = document
     this.request = request
     this.timeout = timeout
+
     this.lock = new AsyncLock()
 
     this.connection.binaryType = 'arraybuffer'

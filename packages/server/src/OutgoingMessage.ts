@@ -4,8 +4,9 @@ import {
   toUint8Array,
   writeVarUint,
 } from 'lib0/encoding'
-import { writeSyncStep1 } from 'y-protocols/sync'
+import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+
 import { MessageTypes } from './types'
 import Document from './Document'
 
@@ -36,6 +37,12 @@ export class OutgoingMessage {
 
   writeFirstSyncStepFor(document: Document): OutgoingMessage {
     writeSyncStep1(this.encoder, document)
+
+    return this
+  }
+
+  writeUpdate(update: Uint8Array): OutgoingMessage {
+    writeUpdate(this.encoder, update)
 
     return this
   }

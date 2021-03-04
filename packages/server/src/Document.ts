@@ -2,9 +2,10 @@ import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { Doc } from 'yjs'
 import { mutex, createMutex } from 'lib0/mutex.js'
-import Connection from './Connection'
-import Messages from './Messages'
+
 import { AwarenessUpdate } from './types'
+import Connection from './Connection'
+import { OutgoingMessage } from './OutgoingMessage'
 
 class Document extends Doc {
 
@@ -144,7 +145,9 @@ class Document extends Doc {
     }
 
     this.getConnections().forEach(connection => connection.send(
-      Messages.awarenessUpdate(this.awareness, changedClients).encode(),
+      new OutgoingMessage()
+        .createAwarenessUpdateMessage(this.awareness, changedClients)
+        .toUint8Array(),
     ))
 
     return this
@@ -156,10 +159,12 @@ class Document extends Doc {
   private handleUpdate(update: Uint8Array): Document {
     this.callbacks.onUpdate(this, update)
 
-    const message = Messages.update(update)
+    const message = new OutgoingMessage()
+      .createSyncMessage()
+      .writeUpdate(update)
 
     this.getConnections().forEach(connection => connection.send(
-      message.encode(),
+      message.toUint8Array(),
     ))
 
     return this
