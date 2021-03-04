@@ -58,6 +58,12 @@ const hocuspocus = Server.configure({
         `/path/to/your/documents/${data.documentName}.json`,
         prosemirrorDocument
       )
+
+      // Maybe you want to store the user who changed the document?
+      // Guess what, you have access to your custom context from the
+      // onConnect hook here. See authorization & authentication for more
+      // details
+      console.log(`Document ${data.documentName} changed by ${data.context.user.name}`)
     }
 
     debounced?.clear()
