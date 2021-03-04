@@ -1,7 +1,10 @@
 <template>
   <card title="Info">
     <p>
-      Node.js version: <span class="text-gray-600">{{ info.version }}</span>
+      hocuspocus version: <span class="text-gray-600">{{ info.version }}</span>
+    </p>
+    <p>
+      Node.js version: <span class="text-gray-600">{{ info.nodeVersion }}</span>
     </p>
     <p>
       Platform: <span class="text-gray-600">{{ info.platform }}</span>

@@ -22,7 +22,9 @@ The `data` passed to the `onConfigure` hook has the following attributes:
 import { Configuration } from '@hocuspocus/server'
 
 const data = {
-  configuration: Configuration
+  configuration: Configuration,
+  version: string,
+  yjsVersion: string,
 }
 ```
 

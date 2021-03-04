@@ -166,6 +166,9 @@ export class Monitor implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
+    this.collector.version = data.version
+    this.collector.yjsVersion = data.yjsVersion
+
     this.collector.serverConfiguration = {
       port: data.configuration.port,
       timeout: data.configuration.timeout,

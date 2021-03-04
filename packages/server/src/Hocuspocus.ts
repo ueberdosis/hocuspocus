@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid'
 import { Configuration, Extension } from './types'
 import Document from './Document'
 import Connection from './Connection'
+import packageJson from '../package.json'
 
 export const defaultConfiguration = {
   port: 80,
@@ -60,7 +61,11 @@ export class Hocuspocus {
       onUpgrade: this.configuration.onUpgrade,
     })
 
-    this.hooks('onConfigure', { configuration: this.configuration })
+    this.hooks('onConfigure', {
+      configuration: this.configuration,
+      version: packageJson.version,
+      yjsVersion: null,
+    })
 
     return this
 

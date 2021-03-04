@@ -20,6 +20,10 @@ export class Collector {
 
   serverConfiguration: Partial<Configuration> = defaultConfiguration
 
+  version = ''
+
+  yjsVersion = ''
+
   connections = 0
 
   messages = 0
@@ -116,9 +120,11 @@ export class Collector {
   info() {
     return {
       configuration: this.serverConfiguration,
+      nodeVersion: process.version,
       platform: process.platform,
       started: moment().subtract(process.uptime(), 'second').toISOString(),
-      version: process.version,
+      version: this.version,
+      yjsVersion: this.yjsVersion,
     }
   }
 

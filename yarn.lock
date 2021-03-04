@@ -14812,7 +14812,7 @@ y-prosemirror@^1.0.6:
   dependencies:
     lib0 "^0.2.34"
 
-y-protocols@^1.0.3, y-protocols@^1.0.4:
+y-protocols@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.4.tgz#810978c6172474be87457c3bcd669e529c5ba3a1"
   integrity sha512-5/Hd6DJ5Y2SlbqLIKq86BictdOS0iAcWJZCVop8MKqx0XWwA+BbMn4538n4Z0CGjFMUGnG1kGzagk3BKGz5SvQ==

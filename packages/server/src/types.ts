@@ -94,4 +94,6 @@ export interface onDestroyPayload {
 
 export interface onConfigurePayload {
   configuration: Configuration,
+  version: string,
+  yjsVersion: string,
 }
