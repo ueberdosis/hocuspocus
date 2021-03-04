@@ -71,7 +71,7 @@ export class Monitor implements Extension {
 
     setInterval(this.collectOsMetrics.bind(this), this.configuration.osMetricsInterval)
     setInterval(this.collectConnectionMetrics.bind(this), this.configuration.metricsInterval)
-    setInterval(this.cleanMetrics.bind(this), 120000)
+    setInterval(this.cleanMetrics.bind(this), 60000)
 
     this.collectOsMetrics()
     this.collectConnectionMetrics()
@@ -95,11 +95,12 @@ export class Monitor implements Extension {
   private async cleanMetrics() {
     const data = await this.storage.all()
 
-    data.forEach((item: any, index: any) => {
-      if (moment(item.timestamp).add(1, 'hour').isBefore(moment())) {
-        this.storage.remove(item.key, item.timestamp)
+    for (let i = 0; i < data.length; i += 1) {
+      if (moment(data[i].timestamp).add(1, 'minute').isBefore(moment())) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.storage.remove(data[i].key, data[i].timestamp)
       }
-    })
+    }
   }
 
   /*
