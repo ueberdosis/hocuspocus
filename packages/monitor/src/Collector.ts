@@ -10,6 +10,7 @@ import {
   onCreateDocumentPayload,
   onChangePayload,
 } from '@hocuspocus/server'
+import collect from 'collect.js'
 import {
   AbstractType,
   Doc,
@@ -25,11 +26,11 @@ export class Collector {
 
   yjsVersion = ''
 
-  connections = 0
+  connections = {}
 
-  messages = 0
+  messages = {}
 
-  documents = 0
+  messageCounter = 0
 
   async memory() {
     const memory = await osu.mem.info()
@@ -52,7 +53,8 @@ export class Collector {
   connect(data: onConnectPayload) {
     const { documentName, socketId } = data
 
-    this.connections += 1
+    // @ts-ignore
+    this.connections[documentName] = (this.connections[documentName] || 0) + 1
 
     return {
       action: 'connected',
@@ -64,7 +66,8 @@ export class Collector {
   disconnect(data: onDisconnectPayload) {
     const { documentName, socketId } = data
 
-    this.connections -= 1
+    // @ts-ignore
+    this.connections[documentName] = (this.connections[documentName] || 0) - 1
 
     return {
       action: 'disconnected',
@@ -75,14 +78,12 @@ export class Collector {
 
   connectionCount() {
     return {
-      count: this.connections,
+      count: collect(Object.values(this.connections)).sum(),
     }
   }
 
   createDocument(data: onCreateDocumentPayload) {
     const { documentName, document, socketId } = data
-
-    this.documents += 1
 
     return {
       action: 'created',
@@ -95,7 +96,9 @@ export class Collector {
   changeDocument(data: onChangePayload) {
     const { documentName, document, socketId } = data
 
-    this.messages += 1
+    // @ts-ignore
+    this.messages[documentName] = (this.messages[documentName] || 0) + 1
+    this.messageCounter += 1
 
     return {
       action: 'changed',
@@ -106,16 +109,20 @@ export class Collector {
   }
 
   messageCount() {
-    const count = this.messages
-    this.messages = 0
+    const count = this.messageCounter
+    this.messageCounter = 0
 
     return { count }
   }
 
   documentCount() {
     return {
-      count: this.documents,
+      count: Object.keys(this.connections).length,
     }
+  }
+
+  documents() {
+    return this.connections
   }
 
   async info() {
