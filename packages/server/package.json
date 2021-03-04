@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/server",
   "description": "plug & play collaboration backend",
-  "version": "1.0.0-alpha.25",
+  "version": "1.0.0-alpha.26",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -34,7 +34,5 @@
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"
-  },
-  "devDependencies": {
   }
 }
