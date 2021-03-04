@@ -90,10 +90,11 @@ class Connection {
       clearInterval(this.pingInterval)
     }
 
-    if (this.document.hasConnection(this)) {
-      this.document.removeConnection(this)
+    if (!this.document.hasConnection(this)) {
+      return
     }
 
+    this.document.removeConnection(this)
     this.callbacks.onClose(this.document)
     this.connection.close()
   }
