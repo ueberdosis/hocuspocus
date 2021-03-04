@@ -118,16 +118,19 @@ export class Hocuspocus {
           .catch(e => reject(e))
       })
     })
+
   }
 
   /**
    * Destroy the server
    */
   async destroy(): Promise<any> {
+
     this.httpServer?.close()
     this.websocketServer?.close()
 
     await this.hooks('onDestroy', {})
+
   }
 
   /**
@@ -156,10 +159,13 @@ export class Hocuspocus {
       }
     })
       .then(() => {
+        // if no hook interrupts create a document and connection
         const document = this.createDocument(request, context)
         this.createConnection(incoming, request, document, context)
       })
       .catch(e => {
+        // if a hook interrupts, close the websocket connection
+        incoming.close()
         if (e) throw e
       })
 
@@ -170,6 +176,7 @@ export class Hocuspocus {
    * @private
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage): void {
+
     const hookPayload = {
       clientsCount: document.connectionsCount(),
       context: connection.context,
@@ -180,11 +187,15 @@ export class Hocuspocus {
       update,
     }
 
-    this.hooks('onChange', hookPayload)
+    this.hooks('onChange', hookPayload).catch(e => {
+      throw e
+    })
+
   }
 
   /**
    * Create a new document by the given request
+   * @private
    */
   private createDocument(request: IncomingMessage, context?: any): Document {
 
@@ -207,6 +218,8 @@ export class Hocuspocus {
     }
 
     this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
+      // if a hook returns a Y-Doc, encode the document state as update
+      // and apply it to the newly created document
       if (loadedDocument instanceof Doc) {
         applyUpdate(document, encodeStateAsUpdate(loadedDocument))
       }
@@ -223,33 +236,39 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    * @private
    */
-  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, context = null): Connection {
+  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, context?: any): Connection {
 
-    return new Connection(connection, request, document, this.configuration.timeout, context)
-      .onClose(document => {
+    const instance = new Connection(connection, request, document, this.configuration.timeout, context)
 
-        this.configuration.extensions.forEach(extension => extension.onDisconnect({
-          clientsCount: document.connectionsCount(),
-          context,
-          document,
-          // @ts-ignore
-          socketId: connection.socketId,
-          documentName: document.name,
-          requestHeaders: request.headers,
-          requestParameters: Hocuspocus.getParameters(request),
-        }))
+    instance.onClose(document => {
+      const hookPayload = {
+        clientsCount: document.connectionsCount(),
+        context,
+        document,
+        // @ts-ignore
+        socketId: connection.socketId,
+        documentName: document.name,
+        requestHeaders: request.headers,
+        requestParameters: Hocuspocus.getParameters(request),
+      }
 
-        if (document.connectionsCount() > 0) {
-          return
-        }
-
-        this.documents.delete(document.name)
+      this.hooks('onDisconnect', hookPayload).catch(e => {
+        throw e
       })
+
+      if (document.connectionsCount() <= 0) {
+        this.documents.delete(document.name)
+      }
+    })
+
+    return instance
 
   }
 
   /**
    * Run the given hook on all configured extensions
+   * Runs the given callback after each hook
+   * @private
    */
   private async hooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
@@ -262,6 +281,7 @@ export class Hocuspocus {
 
   /**
    * Run the given hook on the given extension.
+   * @private
    */
   private hook(name: string, extension: Extension, hookPayload: any, callback: Function | null = null): Promise<any> {
     // @ts-ignore
