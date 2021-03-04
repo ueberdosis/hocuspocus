@@ -8,6 +8,7 @@ import typescript from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
+import json from '@rollup/plugin-json'
 import sizes from '@atomico/rollup-plugin-sizes'
 import autoExternal from 'rollup-plugin-auto-external'
 
@@ -49,6 +50,7 @@ async function build(commandLineArgs) {
         exclude: 'node_modules/**',
       }),
       sizes(),
+      json(),
     ]
 
     config.push({
