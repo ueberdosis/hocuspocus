@@ -14,10 +14,13 @@ The `data` passed to the `onCreateDocument` hook has the following attributes:
 import { Doc } from 'yjs'
 
 const data = {
+  context: any,
   document: Doc,
   documentName: string,
 }
 ```
+
+Context contains the data provided in former `onConnect` hooks.
 
 ## Example
 

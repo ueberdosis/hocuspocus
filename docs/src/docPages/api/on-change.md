@@ -20,14 +20,17 @@ import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
 
 const data = {
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
   clientsCount: number,
+  context: any,
   document: Doc,
   documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
   update: Uint8Array,
 }
 ```
+
+Context contains the data provided in former `onConnect` hooks.
 
 ## Example
 

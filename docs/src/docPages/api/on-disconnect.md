@@ -17,6 +17,7 @@ import { Doc } from 'yjs'
 
 const data = {
   clientsCount: number,
+  context: any,
   document: Doc,
   documentName: string,
   requestHeaders: IncomingHttpHeaders,
@@ -25,6 +26,8 @@ const data = {
   update: Uint8Array,
 }
 ```
+
+Context contains the data provided in former `onConnect` hooks.
 
 ## Example
 
