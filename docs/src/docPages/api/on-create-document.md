@@ -17,6 +17,7 @@ const data = {
   context: any,
   document: Doc,
   documentName: string,
+  socketId: string,
 }
 ```
 

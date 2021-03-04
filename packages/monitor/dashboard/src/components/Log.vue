@@ -110,7 +110,7 @@ export default {
             color: data.action === 'created' ? 'blue' : 'yellow',
             details: { documentName: data.documentName, document: data.document },
             label: data.action,
-            socket: '',
+            socket: data.socketId,
           }
         },
       }

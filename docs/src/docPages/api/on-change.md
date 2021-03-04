@@ -27,6 +27,7 @@ const data = {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,
+  socketId: string,
 }
 ```
 

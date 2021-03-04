@@ -75,26 +75,28 @@ export class Collector {
   }
 
   createDocument(data: onCreateDocumentPayload) {
-    const { documentName, document } = data
+    const { documentName, document, socketId } = data
 
     this.documents += 1
 
     return {
       action: 'created',
-      documentName,
       document: Collector.readableYDoc(document),
+      documentName,
+      socketId,
     }
   }
 
   changeDocument(data: onChangePayload) {
-    const { documentName, document } = data
+    const { documentName, document, socketId } = data
 
     this.messages += 1
 
     return {
       action: 'changed',
-      documentName,
       document: Collector.readableYDoc(document),
+      documentName,
+      socketId,
     }
   }
 
@@ -113,10 +115,10 @@ export class Collector {
 
   info() {
     return {
-      version: process.version,
+      configuration: this.serverConfiguration,
       platform: process.platform,
       started: moment().subtract(process.uptime(), 'second').toISOString(),
-      configuration: this.serverConfiguration,
+      version: process.version,
     }
   }
 

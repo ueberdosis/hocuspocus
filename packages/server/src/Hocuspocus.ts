@@ -160,7 +160,7 @@ export class Hocuspocus {
     })
       .then(() => {
         // if no hook interrupts create a document and connection
-        const document = this.createDocument(request, context)
+        const document = this.createDocument(request, socketId, context)
         this.createConnection(incoming, request, document, context)
       })
       .catch(e => {
@@ -175,7 +175,7 @@ export class Hocuspocus {
    * Handle update of the given document
    * @private
    */
-  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage): void {
+  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
 
     const hookPayload = {
       clientsCount: document.connectionsCount(),
@@ -184,6 +184,7 @@ export class Hocuspocus {
       documentName: document.name,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
+      socketId,
       update,
     }
 
@@ -197,7 +198,7 @@ export class Hocuspocus {
    * Create a new document by the given request
    * @private
    */
-  private createDocument(request: IncomingMessage, context?: any): Document {
+  private createDocument(request: IncomingMessage, socketId: string, context?: any): Document {
 
     const documentName = Hocuspocus.getDocumentName(request)
 
@@ -208,13 +209,14 @@ export class Hocuspocus {
     const document = new Document(documentName)
 
     document.onUpdate((document, connection, update) => {
-      this.handleDocumentUpdate(document, connection, update, request)
+      this.handleDocumentUpdate(document, connection, update, request, socketId)
     })
 
     const hookPayload = {
       context,
       document,
       documentName,
+      socketId,
     }
 
     this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {

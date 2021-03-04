@@ -50,6 +50,7 @@ export interface onCreateDocumentPayload {
   context: any,
   document: Document,
   documentName: string,
+  socketId: string,
 }
 
 export interface onChangePayload {
@@ -60,6 +61,7 @@ export interface onChangePayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,
+  socketId: string,
 }
 
 export interface onDisconnectPayload {
