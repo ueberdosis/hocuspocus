@@ -93,6 +93,33 @@
       </feature-list>
     </app-section>
 
+    <app-section>
+      <div class="text">
+        <h2>
+          A tiny preview
+        </h2>
+        <p>
+          Not teased enough? Here is some example code.
+        </p>
+<!-- eslint-disable -->
+<prism language="js" :code="`import { Server } from '@hocuspocus/server'
+
+Server.listen({
+  port: 80,
+
+  async onConnect() {
+    console.log('🔮')
+  }
+
+  extensions: [
+    new RocksDB({
+      path: './database',
+    }),
+  ],
+})`" />
+      </div>
+    </app-section>
+
     <!-- <app-section>
       <div class="text">
         <h2 class="is-h1">
@@ -108,6 +135,7 @@ import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
 import NewsletterForm from '@/components/NewsletterForm'
+import Prism from '~/components/Prism'
 
 export default {
   components: {
@@ -115,6 +143,7 @@ export default {
     FeatureList,
     FeatureItem,
     NewsletterForm,
+    Prism,
   },
 
   metaInfo() {
