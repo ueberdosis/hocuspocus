@@ -103,6 +103,7 @@
         </p>
 <!-- eslint-disable -->
 <prism language="js" :code="`import { Server } from '@hocuspocus/server'
+import { RocksDB } from '@hocuspocus/rocksdb'
 
 Server.listen({
   port: 80,
