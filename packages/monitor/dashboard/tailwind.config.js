@@ -6,7 +6,7 @@ module.exports = {
   },
   experimental: {},
   purge: {
-    content: ['./src/index.html', './src/**/*.vue'],
+    // content: ['./src/index.html', './src/**/*.vue'],
   },
   theme: {
     interFontFeatures: {
