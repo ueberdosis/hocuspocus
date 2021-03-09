@@ -3,22 +3,22 @@
     <!-- fix for purgeCss -->
     <div class="hidden bg-gray-400 bg-green-400 bg-blue-400 bg-yellow-400">&nbsp;</div>
 
-    <table class="table-auto w-full text-left">
+    <table class="table-auto w-full text-left text-sm">
       <thead>
         <tr>
-          <th class="px-4 py-2">Event</th>
-          <th class="px-4 py-2">Socket</th>
-          <th class="px-4 py-2">Details</th>
-          <th class="px-4 py-2">Time</th>
+          <th class="border-b-2 border-black py-2">Event</th>
+          <th class="border-b-2 border-black py-2">Socket</th>
+          <th class="border-b-2 border-black py-2">Document Name</th>
+          <th class="border-b-2 border-black py-2">Time</th>
         </tr>
       </thead>
       <tbody>
         <tr
           v-for="(item, index) in log"
-          :class="{ 'bg-gray-100': index % 2 === 1 }"
+          class="hover:bg-yellow-300"
           :key="index"
         >
-          <td class="border px-4 py-2">
+          <td class="border-t border-black py-3">
             <span
               class="px-2 py-1 rounded text-sm"
               :class="{
@@ -32,17 +32,9 @@
               {{ item.label }}
             </span>
           </td>
-          <td class="border px-4 py-2">
-            <span class="text-sm text-gray-600">{{ item.socket }}</span>
-          </td>
-          <td class="border px-4 py-2">
-            <toggle>
-              <pre class="text-xs text-gray-600 whitespace-pre-wrap">{{ item.details }}</pre>
-            </toggle>
-          </td>
-          <td class="border px-4 py-2">
-            <span class="text-sm text-gray-600">{{ item.time }}</span>
-          </td>
+          <td class="border-t border-black py-3">{{ item.socket }}</td>
+          <td class="border-t border-black py-3">{{ item.details }}</td>
+          <td class="border-t border-black py-3">{{ item.time }}</td>
         </tr>
       </tbody>
     </table>
@@ -100,7 +92,7 @@ export default {
         connectionLog(data) {
           return {
             color: data.action === 'connected' ? 'green' : 'gray',
-            details: { documentName: data.documentName },
+            details: data.documentName,
             label: data.action,
             socket: data.socketId,
           }
@@ -109,7 +101,7 @@ export default {
         documentLog(data) {
           return {
             color: data.action === 'created' ? 'blue' : 'yellow',
-            details: { documentName: data.documentName, document: data.document },
+            details: data.documentName,
             label: data.action,
             socket: data.socketId,
           }

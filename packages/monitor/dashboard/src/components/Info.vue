@@ -1,5 +1,5 @@
 <template>
-  <card title="Info">
+  <card title="Info" :border="true" :full-height="true">
     <p>
       hocuspocus version: <span class="text-gray-600">{{ info.version }}</span>
     </p>
@@ -15,8 +15,8 @@
     <p>
       Started: <span class="text-gray-600">{{ started }}</span>
     </p>
-    <div class="text-xl font-bold mt-6 mb-2">Configuration</div>
-    <pre class="text-xs text-gray-600">{{ info.configuration }}</pre>
+    <div class="uppercase text-sm font-bold mb-3 mt-8">Configuration</div>
+    <pre class="text-xs bg-black text-white px-3 py-3 rounded-xl">{{ info.configuration }}</pre>
   </card>
 </template>
 

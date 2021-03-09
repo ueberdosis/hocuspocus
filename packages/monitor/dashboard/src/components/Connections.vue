@@ -1,5 +1,5 @@
 <template>
-  <card title="Metrics">
+  <card title="Metrics" :border="true">
     <div>
       <div v-if="latestConnection && latestDocument">
         Currently active connections: {{ latestConnection.count }}<br>

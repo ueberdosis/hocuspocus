@@ -1,25 +1,22 @@
 <template>
   <card>
-    <table class="table-auto w-full text-left">
+    <table class="table-auto w-full text-left text-sm">
       <thead>
         <tr>
-          <th class="px-4 py-2">Document</th>
-          <th class="px-4 py-2">Active connections</th>
-          <th class="px-4 py-2">Messages</th>
+          <th class="border-b-2 border-black py-2">Document</th>
+          <th class="border-b-2 border-black py-2">Active connections</th>
+          <th class="border-b-2 border-black py-2">Messages</th>
         </tr>
       </thead>
       <tbody>
         <tr
           v-for="(document, index) in sortedDocuments"
+          class="hover:bg-yellow-300"
           :key="index"
         >
-          <td class="border px-4 py-2">{{ document.name }}</td>
-          <td class="border px-4 py-2">
-            <span class="text-sm text-gray-600">{{ document.connections }}</span>
-          </td>
-          <td class="border px-4 py-2">
-            <span class="text-sm text-gray-600">{{ document.messages }}</span>
-          </td>
+          <td class="border-t border-black py-3">{{ document.name }}</td>
+          <td class="border-t border-black py-3">{{ document.connections }}</td>
+          <td class="border-t border-black py-3">{{ document.messages }}</td>
         </tr>
       </tbody>
     </table>
