@@ -87,6 +87,7 @@ export class Monitor implements Extension {
   }
 
   private async collectConnectionMetrics() {
+    await this.storage.set('documents', this.collector.documents())
     await this.storage.add('documentCount', await this.collector.documentCount())
     await this.storage.add('connectionCount', await this.collector.connectionCount())
     await this.storage.add('messageCount', await this.collector.messageCount())
@@ -140,21 +141,21 @@ export class Monitor implements Extension {
   }
 
   async onConnect(data: onConnectPayload) {
-    await this.storage.add('connections', this.collector.connect(data))
+    await this.storage.add('connectionLog', this.collector.connect(data))
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    await this.storage.add('connections', this.collector.disconnect(data))
+    await this.storage.add('connectionLog', this.collector.disconnect(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onCreateDocument(data: onCreateDocumentPayload) {
-    await this.storage.add('documents', this.collector.createDocument(data))
+    await this.storage.add('documentLog', this.collector.createDocument(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
-    await this.storage.add('documents', this.collector.changeDocument(data))
+    await this.storage.add('documentLog', this.collector.changeDocument(data))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function

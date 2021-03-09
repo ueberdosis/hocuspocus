@@ -122,7 +122,19 @@ export class Collector {
   }
 
   documents() {
-    return this.connections
+    const data = {}
+
+    Object.keys(this.connections).forEach(documentName => {
+      // @ts-ignore
+      data[documentName] = {
+        // @ts-ignore
+        connections: this.connections[documentName],
+        // @ts-ignore
+        messages: this.messages[documentName],
+      }
+    })
+
+    return data
   }
 
   async info() {

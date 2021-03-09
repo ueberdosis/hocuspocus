@@ -46,7 +46,7 @@ export class Storage extends EventEmitter {
 
     this.emit('add', event)
 
-    await this.set(key, data)
+    await this.storage.set(key, data)
   }
 
   async remove(key: string, timestamp: string): Promise<any> {
@@ -57,6 +57,6 @@ export class Storage extends EventEmitter {
       .where('timestamp', '!=', timestamp)
       .toArray()
 
-    await this.set(key, data)
+    await this.storage.set(key, data)
   }
 }

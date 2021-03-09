@@ -43,7 +43,11 @@ export class Dashboard {
 
     // subscribe to storage additions and send them to the client
     this.configuration.storage?.on('add', data => {
-      this.send(JSON.stringify({ data: [data] }))
+      this.send(JSON.stringify({ event: 'add', data: [data] }))
+    })
+
+    this.configuration.storage?.on('set', data => {
+      this.send(JSON.stringify({ event: 'set', data }))
     })
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
@@ -151,7 +155,7 @@ export class Dashboard {
     })
 
     setTimeout(() => {
-      connection.send(JSON.stringify({ data }))
+      connection.send(JSON.stringify({ event: 'add', data }))
     }, 1000)
   }
 

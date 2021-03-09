@@ -97,7 +97,7 @@ export default {
   methods: {
     mapper(item, index) {
       const handlers = {
-        connections(data) {
+        connectionLog(data) {
           return {
             color: data.action === 'connected' ? 'green' : 'gray',
             details: { documentName: data.documentName },
@@ -106,7 +106,7 @@ export default {
           }
         },
 
-        documents(data) {
+        documentLog(data) {
           return {
             color: data.action === 'created' ? 'blue' : 'yellow',
             details: { documentName: data.documentName, document: data.document },

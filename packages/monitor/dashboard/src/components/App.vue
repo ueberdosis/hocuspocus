@@ -24,10 +24,14 @@
       />
     </div>
 
+    <div class="mt-8">
+      <documents :documents="documents" />
+    </div>
+
     <div class="mt-8 z-10 relative">
       <log
-        :connections="connections"
-        :documents="documents"
+        :connections="connectionLog"
+        :documents="documentLog"
       />
     </div>
   </div>
@@ -35,64 +39,84 @@
 
 <script>
 import Vue from 'vue'
-import Cpu from './Cpu'
-import Info from './Info'
-import Memory from './Memory'
-import Log from './Log'
 import Connections from './Connections'
+import Cpu from './Cpu'
+import Documents from './Documents'
+import Info from './Info'
+import Log from './Log'
+import Memory from './Memory'
 
 export default Vue.extend({
   components: {
-    Log,
-    Cpu,
-    Info,
-    Memory,
     Connections,
+    Cpu,
+    Documents,
+    Info,
+    Log,
+    Memory,
   },
 
   data() {
     return {
-      connections: [],
       connectionCount: [],
-      documentCount: [],
-      messageCount: [],
+      connectionLog: [],
       cpu: [],
-      documents: [],
+      documentCount: [],
+      documentLog: [],
+      documents: {},
       info: {},
       memory: [],
+      messageCount: [],
       socket: null,
     }
   },
 
   methods: {
-    handleMessage(event) {
-      const { data } = JSON.parse(event.data)
+    handleMessage(input) {
+      const { data, event } = JSON.parse(input.data)
 
-      data.forEach(({ timestamp, key, value }) => {
-        if (!this[key]) {
-          return
-        }
+      if (event === 'add') {
+        data.forEach(({
+          timestamp,
+          key,
+          value,
+        }) => {
+          if (!this[key]) {
+            return
+          }
 
-        if (!Array.isArray(this[key])) {
-          this[key] = value
-          return
-        }
+          if (!Array.isArray(this[key])) {
+            this[key] = value
+            return
+          }
 
-        if (!Array.isArray(value)) {
-          this[key].push({
+          if (!Array.isArray(value)) {
+            this[key].push({
+              key,
+              timestamp,
+              value,
+            })
+            return
+          }
+
+          this[key] = this[key].concat(value.map(value => ({
             key,
             timestamp,
             value,
-          })
+          })))
+        })
+      }
+
+      if (event === 'set') {
+        if (!this[data.key]) {
           return
         }
 
-        this[key] = this[key].concat(value.map(value => ({
-          key,
-          timestamp,
-          value,
-        })))
-      })
+        this[data.key] = {
+          ...this[data.key],
+          ...data.value,
+        }
+      }
     },
   },
 
