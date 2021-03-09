@@ -45,14 +45,12 @@
 import collect from 'collect.js'
 import moment from 'moment'
 import Card from './Card'
-import Toggle from './Toggle'
 
 const formatTime = timestamp => moment(timestamp).format('HH:mm:ss')
 
 export default {
   components: {
     Card,
-    Toggle,
   },
 
   props: {
