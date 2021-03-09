@@ -1,5 +1,5 @@
 <template>
-  <card title="Documents">
+  <card>
     <table class="table-auto w-full text-left">
       <thead>
         <tr>
