@@ -3,7 +3,6 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
-import collect from 'collect.js'
 
 import { Configuration, Extension } from './types'
 import Document from './Document'
@@ -13,6 +12,8 @@ import packageJson from '../package.json'
 export const defaultConfiguration = {
   port: 80,
   timeout: 30000,
+  throttle: 5,
+  banTime: 5,
 }
 
 /**
@@ -334,10 +335,13 @@ export class Hocuspocus {
    * @private
    */
   private throttle(ip: String): Boolean {
-    const bannedAt = this.bannedIps.get(ip) || 0
-    const fiveMinutes = 5 * 60 * 1000
+    if (!this.configuration.throttle) {
+      return false
+    }
 
-    if (Date.now() < (bannedAt + fiveMinutes)) {
+    const bannedAt = this.bannedIps.get(ip) || 0
+
+    if (Date.now() < (bannedAt + (this.configuration.banTime * 60 * 1000))) {
       return true
     }
 
@@ -353,7 +357,7 @@ export class Hocuspocus {
 
     this.connectionsByIp.set(ip, previousConnectionsInTheLastMinute)
 
-    if (previousConnectionsInTheLastMinute.length > 5) {
+    if (previousConnectionsInTheLastMinute.length > this.configuration.throttle) {
       this.bannedIps.set(ip, Date.now())
       return true
     }
