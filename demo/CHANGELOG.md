@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.25](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.24...@hocuspocus/demo@0.1.25) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
 ## [0.1.24](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.23...@hocuspocus/demo@0.1.24) (2021-03-10)
 
 **Note:** Version bump only for package @hocuspocus/demo
