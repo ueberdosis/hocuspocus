@@ -1,4 +1,5 @@
 import {
+  defaultConfiguration,
   Extension,
   onChangePayload,
   onConfigurePayload,
@@ -171,9 +172,13 @@ export class Monitor implements Extension {
     this.collector.version = data.version
     this.collector.yjsVersion = data.yjsVersion
 
-    this.collector.serverConfiguration = {
-      port: data.configuration.port,
-      timeout: data.configuration.timeout,
-    }
+    const sanitizedConfiguration = {}
+
+    Object.keys(defaultConfiguration).forEach(key => {
+      // @ts-ignore
+      sanitizedConfiguration[key] = data.configuration[key] || null
+    })
+
+    this.collector.serverConfiguration = sanitizedConfiguration
   }
 }

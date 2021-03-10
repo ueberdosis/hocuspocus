@@ -45,3 +45,22 @@ const hocuspocus = Server.configure({
 
 hocuspocus.listen()
 ```
+
+### throttling
+
+hocuspocus throttles connection attempts and bans ip addresses for the given time if it crosses the configured threshold within a minute:
+
+```typescript
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server.configure({
+  // allows up to 5 connection attempts per ip address per minute.
+  // set to null or false to disable throttling
+  throttle: 5,
+  // bans ip addresses for 5 minutes after reaching the throttling
+  // threshold
+  banTime: 5,
+})
+
+hocuspocus.listen()
+```
