@@ -3,6 +3,8 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
+import collect from 'collect.js'
+import moment, { Moment } from 'moment'
 
 import { Configuration, Extension } from './types'
 import Document from './Document'
@@ -34,6 +36,8 @@ export class Hocuspocus {
   }
 
   documents = new Map()
+
+  throttle: Map<String, Array<Moment>> = new Map()
 
   httpServer?: HTTPServer
 
@@ -143,9 +147,14 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
+    if (this.shouldThrottle(request)) {
+      return incoming.close()
+    }
+
     // create a unique identifier for every socket connection
     const socketId = uuid()
 
+    // set the socket id on the websocket connection
     // @ts-ignore
     incoming.socketId = socketId
 
@@ -313,6 +322,28 @@ export class Hocuspocus {
    */
   private static getDocumentName(request: IncomingMessage): string {
     return request.url?.slice(1)?.split('?')[0] || ''
+  }
+
+  /**
+   * Should the given request be throttled?
+   * @private
+   */
+  private shouldThrottle(request: IncomingMessage): Boolean {
+    // get the remote ip address
+    const ip = <String> request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
+
+    // add this connection try to the list of previous connections
+    const previousConnections = this.throttle.get(ip) || []
+    previousConnections.push(moment())
+
+    // calculate the previous connections in the last minute
+    const previousConnectionsInTheLastMinute = <Array<Moment>> collect(previousConnections)
+      .filter(date => date.add(1, 'minutes').isBefore(moment()))
+      .toArray()
+
+    this.throttle.set(ip, previousConnectionsInTheLastMinute)
+
+    return previousConnectionsInTheLastMinute.length > 5
   }
 }
 
