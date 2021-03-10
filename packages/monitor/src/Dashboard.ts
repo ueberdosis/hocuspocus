@@ -5,9 +5,7 @@ import { fileURLToPath } from 'url'
 import nodeStatic from 'node-static'
 import { Socket } from 'net'
 import process from 'process'
-import { collect } from 'collect.js'
 import { Storage } from './Storage'
-import { Collector } from './Collector'
 
 export interface Configuration {
   password: string | undefined,
