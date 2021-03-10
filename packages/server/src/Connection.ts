@@ -158,31 +158,24 @@ class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(input: ArrayBuffer): void {
+  private handleMessage(input: Iterable<number>): void {
     const message = new IncomingMessage(input)
 
-    try {
-      if (message.messageType === MessageTypes.Awareness) {
-        this.document.applyAwarenessUpdate(this, message.readUint8Array())
-        return
-      }
-
-      if (message.messageType === MessageTypes.Sync) {
-        message.readSyncMessageAndApplyItTo(this.document, this)
-
-        if (message.length <= 1) {
-          return
-        }
-
-        return this.send(
-          message.toUint8Array(),
-        )
-      }
-    } catch (error) {
-      console.error(error)
-
-      this.close()
+    if (message.messageType === MessageTypes.Awareness) {
+      this.document.applyAwarenessUpdate(this, message.readUint8Array())
+      return
     }
+
+    message.readSyncMessageAndApplyItTo(this.document, this)
+
+    if (message.length <= 1) {
+      return
+    }
+
+    return this.send(
+      message.toUint8Array(),
+    )
+
   }
 
   /**
