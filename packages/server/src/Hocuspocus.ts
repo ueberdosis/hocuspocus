@@ -150,7 +150,9 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
     // get the remote ip address
-    const ip = <String> request.headers['x-real-ip'] || request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
+    const ip = <String> request.headers['x-real-ip']
+      || request.headers['x-forwarded-for']
+      || request.socket.remoteAddress || ''
 
     // throttle the connection
     if (this.throttle(ip)) {
@@ -159,10 +161,6 @@ export class Hocuspocus {
 
     // create a unique identifier for every socket connection
     const socketId = uuid()
-
-    // set the socket id on the websocket connection
-    // @ts-ignore
-    incoming.socketId = socketId
 
     const hookPayload = {
       documentName: Hocuspocus.getDocumentName(request),
@@ -181,7 +179,7 @@ export class Hocuspocus {
       .then(() => {
         // if no hook interrupts create a document and connection
         const document = this.createDocument(request, socketId, context)
-        this.createConnection(incoming, request, document, context)
+        this.createConnection(incoming, request, document, socketId, context)
       })
       .catch(e => {
         // if a hook interrupts, close the websocket connection
@@ -195,7 +193,7 @@ export class Hocuspocus {
    * Handle update of the given document
    * @private
    */
-  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
+  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: String): void {
 
     const hookPayload = {
       clientsCount: document.connectionsCount(),
@@ -229,7 +227,7 @@ export class Hocuspocus {
     const document = new Document(documentName)
 
     document.onUpdate((document, connection, update) => {
-      this.handleDocumentUpdate(document, connection, update, request, socketId)
+      this.handleDocumentUpdate(document, connection, update, request, connection.socketId)
     })
 
     const hookPayload = {
@@ -258,17 +256,16 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    * @private
    */
-  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, context?: any): Connection {
+  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: String, context?: any): Connection {
 
-    const instance = new Connection(connection, request, document, this.configuration.timeout, context)
+    const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context)
 
     instance.onClose(document => {
       const hookPayload = {
         clientsCount: document.connectionsCount(),
         context,
         document,
-        // @ts-ignore
-        socketId: connection.socketId,
+        socketId,
         documentName: document.name,
         requestHeaders: request.headers,
         requestParameters: Hocuspocus.getParameters(request),
