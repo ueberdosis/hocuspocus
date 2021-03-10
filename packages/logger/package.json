@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "@hocuspocus/logger",
   "version": "1.0.0-alpha.1",
   "description": "hocuspocus logging extension",
