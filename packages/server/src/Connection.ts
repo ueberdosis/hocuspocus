@@ -158,7 +158,7 @@ class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(input: Iterable<number>): void {
+  private handleMessage(input: ArrayBuffer): void {
     const message = new IncomingMessage(input)
 
     if (message.messageType === MessageTypes.Awareness) {
@@ -166,15 +166,17 @@ class Connection {
       return
     }
 
-    message.readSyncMessageAndApplyItTo(this.document, this)
+    if (message.messageType === MessageTypes.Sync) {
+      message.readSyncMessageAndApplyItTo(this.document, this)
 
-    if (message.length <= 1) {
-      return
+      if (message.length <= 1) {
+        return
+      }
+
+      return this.send(
+        message.toUint8Array(),
+      )
     }
-
-    return this.send(
-      message.toUint8Array(),
-    )
   }
 
   /**
