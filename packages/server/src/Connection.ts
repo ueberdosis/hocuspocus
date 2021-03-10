@@ -161,21 +161,27 @@ class Connection {
   private handleMessage(input: ArrayBuffer): void {
     const message = new IncomingMessage(input)
 
-    if (message.messageType === MessageTypes.Awareness) {
-      this.document.applyAwarenessUpdate(this, message.readUint8Array())
-      return
-    }
-
-    if (message.messageType === MessageTypes.Sync) {
-      message.readSyncMessageAndApplyItTo(this.document, this)
-
-      if (message.length <= 1) {
+    try {
+      if (message.messageType === MessageTypes.Awareness) {
+        this.document.applyAwarenessUpdate(this, message.readUint8Array())
         return
       }
 
-      return this.send(
-        message.toUint8Array(),
-      )
+      if (message.messageType === MessageTypes.Sync) {
+        message.readSyncMessageAndApplyItTo(this.document, this)
+
+        if (message.length <= 1) {
+          return
+        }
+
+        return this.send(
+          message.toUint8Array(),
+        )
+      }
+    } catch (error) {
+      console.error(error)
+
+      this.close()
     }
   }
 
