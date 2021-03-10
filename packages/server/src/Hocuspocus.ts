@@ -149,9 +149,7 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
     // get the remote ip address
-    const ip = <String> request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
-
-    console.log(request.headers, request.socket.remoteAddress)
+    const ip = <String> request.headers['x-real-ip'] || request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
 
     // throttle the connection
     if (this.throttle(ip)) {
