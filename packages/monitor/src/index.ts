@@ -61,7 +61,6 @@ export class Monitor implements Extension {
 
     if (this.configuration.enableDashboard) {
       this.dashboard = new Dashboard({
-        collector: this.collector,
         password: this.configuration.password,
         path: this.configuration.dashboardPath,
         port: this.configuration.port,
@@ -88,14 +87,15 @@ export class Monitor implements Extension {
   }
 
   private async collectConnectionMetrics() {
-    await this.storage.set('documents', this.collector.documents())
     await this.storage.add('documentCount', await this.collector.documentCount())
     await this.storage.add('connectionCount', await this.collector.connectionCount())
     await this.storage.add('messageCount', await this.collector.messageCount())
+    await this.storage.set('documents', await this.collector.documents())
+    await this.storage.set('info', await this.collector.info())
   }
 
   private async cleanMetrics() {
-    const data = await this.storage.all()
+    const data = await this.storage.allTimed()
 
     for (let i = 0; i < data.length; i += 1) {
       if (moment(data[i].timestamp).add(1, 'hour').isBefore(moment())) {

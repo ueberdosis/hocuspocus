@@ -128,9 +128,9 @@ export class Collector {
       // @ts-ignore
       data[documentName] = {
         // @ts-ignore
-        connections: this.connections[documentName],
+        connections: this.connections[documentName] || 0,
         // @ts-ignore
-        messages: this.messages[documentName],
+        messages: this.messages[documentName] || 0,
       }
     })
 

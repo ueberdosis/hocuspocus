@@ -9,7 +9,7 @@ const server = Server.configure({
   throttle: false,
   extensions: [
     new Logger(),
-    // new Monitor(),
+    new Monitor(),
     // new RocksDB(),
     // new Redis(),
   ],

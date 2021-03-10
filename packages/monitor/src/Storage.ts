@@ -4,41 +4,65 @@ import EventEmitter from 'events'
 
 export class Storage extends EventEmitter {
 
-  storage: Map<string, any> = new Map()
+  timed: Map<string, any> = new Map()
+
+  constant: Map<string, any> = new Map()
 
   /*
    * Default API
    */
 
+  /**
+   * Get all constant values.
+   */
   async all(): Promise<any> {
-    return collect(
-      Array.from(this.storage.values()),
-    ).flatten(1).toArray()
+    const data: Array<{key: String, value: any}> = []
+    this.constant.forEach((value, key) => data.push({ key, value }))
+    return data
   }
 
+  /**
+   * Get a constant value by the given key.
+   */
   async get(key: string, defaultValue: any = null): Promise<any> {
-    return this.storage.get(key) || defaultValue
+    return this.constant.get(key) || defaultValue
   }
 
+  /**
+   * Set a constant value by the given key.
+   */
   async set(key: string, value: any): Promise<any> {
     this.emit('set', { key, value })
 
-    return this.storage.set(key, value)
+    return this.constant.set(key, value)
   }
 
+  /**
+   * Delete a constant value by the given key.
+   * @param key
+   */
   async delete(key: string): Promise<any> {
     this.emit('delete', { key })
 
-    this.storage.delete(key)
+    this.constant.delete(key)
   }
 
+  /**
+   * Get all timed values.
+   */
+  async allTimed(): Promise<any> {
+    return collect(Array.from(this.timed.values())).flatten(1).toArray()
+  }
+
+  /**
+   * Add a timed value by the given key.
+   */
   async add(key: string, value: any): Promise<any> {
-    let data = await this.get(key, [])
-    data = Array.isArray(data) ? data : []
+    const data = <Array<any>> await this.timed.get(key) || []
 
     const event = {
-      timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
       key,
+      timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
       value,
     }
 
@@ -46,17 +70,19 @@ export class Storage extends EventEmitter {
 
     this.emit('add', event)
 
-    await this.storage.set(key, data)
+    await this.timed.set(key, data)
   }
 
+  /**
+   * Remove a timed value by the given timestamp and key.
+   */
   async remove(key: string, timestamp: string): Promise<any> {
-    let data = await this.get(key, [])
-    data = Array.isArray(data) ? data : []
+    let data = <Array<any>> await this.timed.get(key) || []
 
     data = collect(data)
       .where('timestamp', '!=', timestamp)
       .toArray()
 
-    await this.storage.set(key, data)
+    await this.timed.set(key, data)
   }
 }
