@@ -151,6 +151,8 @@ export class Hocuspocus {
     // get the remote ip address
     const ip = <String> request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
 
+    console.log(request.headers, request.socket.remoteAddress)
+
     // throttle the connection
     if (this.throttle(ip)) {
       return incoming.close()
