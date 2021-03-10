@@ -4,7 +4,6 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import collect from 'collect.js'
-import moment, { Moment } from 'moment'
 
 import { Configuration, Extension } from './types'
 import Document from './Document'
@@ -37,7 +36,9 @@ export class Hocuspocus {
 
   documents = new Map()
 
-  throttle: Map<String, Array<Moment>> = new Map()
+  connectionsByIp: Map<String, Array<number>> = new Map()
+
+  bannedIps: Map<String, number> = new Map()
 
   httpServer?: HTTPServer
 
@@ -147,7 +148,11 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
-    if (this.shouldThrottle(request)) {
+    // get the remote ip address
+    const ip = <String> request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
+
+    // throttle the connection
+    if (this.throttle(ip)) {
       return incoming.close()
     }
 
@@ -325,25 +330,35 @@ export class Hocuspocus {
   }
 
   /**
-   * Should the given request be throttled?
+   * Throttle requests
    * @private
    */
-  private shouldThrottle(request: IncomingMessage): Boolean {
-    // get the remote ip address
-    const ip = <String> request.headers['x-forwarded-for'] || request.socket.remoteAddress || ''
+  private throttle(ip: String): Boolean {
+    const bannedAt = this.bannedIps.get(ip) || 0
+    const fiveMinutes = 5 * 60 * 1000
+
+    if (Date.now() < (bannedAt + fiveMinutes)) {
+      return true
+    }
+
+    this.bannedIps.delete(ip)
 
     // add this connection try to the list of previous connections
-    const previousConnections = this.throttle.get(ip) || []
-    previousConnections.push(moment())
+    const previousConnections = this.connectionsByIp.get(ip) || []
+    previousConnections.push(Date.now())
 
     // calculate the previous connections in the last minute
-    const previousConnectionsInTheLastMinute = <Array<Moment>> collect(previousConnections)
-      .filter(date => date.add(1, 'minutes').isBefore(moment()))
-      .toArray()
+    const previousConnectionsInTheLastMinute = previousConnections
+      .filter(timestamp => timestamp + (60 * 1000) > Date.now())
 
-    this.throttle.set(ip, previousConnectionsInTheLastMinute)
+    this.connectionsByIp.set(ip, previousConnectionsInTheLastMinute)
 
-    return previousConnectionsInTheLastMinute.length > 5
+    if (previousConnectionsInTheLastMinute.length > 5) {
+      this.bannedIps.set(ip, Date.now())
+      return true
+    }
+
+    return false
   }
 }
 
