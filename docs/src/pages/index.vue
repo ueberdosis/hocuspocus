@@ -104,7 +104,7 @@
 <!-- eslint-disable -->
 <prism language="js" :code="`import { Server } from '@hocuspocus/server'
 
-Server.listen({
+const server = Server.configure({
   port: 80,
 
   async onConnect() {
@@ -116,7 +116,9 @@ Server.listen({
       path: './database',
     }),
   ],
-})`" />
+})
+
+server.listen()`" />
       </div>
     </app-section>
 
