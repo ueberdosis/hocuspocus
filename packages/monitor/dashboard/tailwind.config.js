@@ -1,24 +1,14 @@
 module.exports = {
-  future: {
-    removeDeprecatedGapUtilities: true,
-  },
-  experimental: {},
-  purge: {
-    content: ['./src/index.html', './src/**/*.vue'],
-  },
+  purge: [
+    './src/**/*.vue',
+    './src/*.html',
+  ],
   theme: {
-    interFontFeatures: {
-      default: ['calt', 'liga', 'kern'],
-      numeric: ['tnum', 'salt', 'ss02'],
-    },
-    extend: {
-    },
+    extend: {},
   },
-  variants: {},
+  variants: {
+  },
   plugins: [
-    require('tailwindcss-font-inter')({
-      importFontFace: true,
-      disableUnusedFeatures: true,
-    }),
+    require('tailwindcss-font-inter')(),
   ],
 }

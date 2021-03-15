@@ -34,8 +34,10 @@ export interface Extension {
 }
 
 export interface Configuration extends Extension {
+  banTime: number,
   extensions: Array<Extension>,
   port: number | null,
+  throttle: number | null | false,
   timeout: number,
 }
 

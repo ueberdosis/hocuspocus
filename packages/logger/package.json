@@ -1,0 +1,30 @@
+{
+  "name": "@hocuspocus/logger",
+  "version": "1.0.0-alpha.10",
+  "description": "hocuspocus logging extension",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "redis",
+    "yjs"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-logger.esm.js",
+  "module": "dist/hocuspocus-logger.esm.js",
+  "types": "dist/packages/logger/src/index.d.ts",
+  "exports": {
+    "import": "./dist/hocuspocus-logger.esm.js",
+    "require": "./dist/hocuspocus-logger.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.35"
+  },
+  "publishConfig": {
+    "registry": "https://registry.ueber.io"
+  }
+}

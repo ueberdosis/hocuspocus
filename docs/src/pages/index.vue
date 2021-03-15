@@ -103,6 +103,7 @@
         </p>
 <!-- eslint-disable -->
 <prism language="js" :code="`import { Server } from '@hocuspocus/server'
+import { RocksDB } from '@hocuspocus/rocksdb'
 
 const server = Server.configure({
   port: 80,

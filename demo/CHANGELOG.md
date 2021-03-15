@@ -3,6 +3,86 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.31](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.30...@hocuspocus/demo@0.1.31) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.30](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.29...@hocuspocus/demo@0.1.30) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.29](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.28...@hocuspocus/demo@0.1.29) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.28](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.27...@hocuspocus/demo@0.1.28) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.27](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.26...@hocuspocus/demo@0.1.27) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.26](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.25...@hocuspocus/demo@0.1.26) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.25](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.24...@hocuspocus/demo@0.1.25) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.24](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.23...@hocuspocus/demo@0.1.24) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.23](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.22...@hocuspocus/demo@0.1.23) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
+## [0.1.22](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.21...@hocuspocus/demo@0.1.22) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/demo
+
+
+
+
+
 ## [0.1.21](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/demo@0.1.20...@hocuspocus/demo@0.1.21) (2021-03-04)
 
 **Note:** Version bump only for package @hocuspocus/demo

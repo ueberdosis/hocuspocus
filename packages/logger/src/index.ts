@@ -1,6 +1,7 @@
 import {
   Extension,
-  onChangePayload, onConfigurePayload,
+  onChangePayload,
+  onConfigurePayload,
   onConnectPayload,
   onCreateDocumentPayload,
   onDestroyPayload,

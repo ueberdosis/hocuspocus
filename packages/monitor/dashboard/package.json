@@ -21,21 +21,23 @@
     "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps -d dist src/index.html"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
-  "dependencies": {
+  "resolutions": {
+    "@babel/preset-env": "7.13.8"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^3.0.0",
+    "@tailwindcss/postcss7-compat": "^2.0.3",
     "autoprefixer": "^9.7.3",
     "collect.js": "^4.28.6",
     "moment": "^2.29.1",
-    "parcel-bundler": "^1.12.4",
-    "postcss": "^7.0.26",
-    "postcss-load-config": "^3.0.0",
-    "postcss-preset-env": "^6.7.0",
-    "tailwindcss": "^1.8.10",
-    "tailwindcss-font-inter": "^1.0.8",
+    "parcel-bundler": "^1.12.3",
+    "postcss": "^7",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
+    "tailwindcss-font-inter": "^2.0.2",
     "vue": "^2.6.12",
     "vue-plotly": "^1.1.0"
-  },
-  "devDependencies": {}
+  }
 }

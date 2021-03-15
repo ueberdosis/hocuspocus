@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.26](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.25...@hocuspocus/redis@1.0.0-alpha.26) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.25](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.24...@hocuspocus/redis@1.0.0-alpha.25) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.24](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.23...@hocuspocus/redis@1.0.0-alpha.24) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.23](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.22...@hocuspocus/redis@1.0.0-alpha.23) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.22](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.21...@hocuspocus/redis@1.0.0-alpha.22) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.21](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.20...@hocuspocus/redis@1.0.0-alpha.21) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.20](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.19...@hocuspocus/redis@1.0.0-alpha.20) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.19](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.18...@hocuspocus/redis@1.0.0-alpha.19) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
+# [1.0.0-alpha.18](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.17...@hocuspocus/redis@1.0.0-alpha.18) (2021-03-10)
+
+**Note:** Version bump only for package @hocuspocus/redis
+
+
+
+
+
 # [1.0.0-alpha.17](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/redis@1.0.0-alpha.16...@hocuspocus/redis@1.0.0-alpha.17) (2021-03-04)
 
 **Note:** Version bump only for package @hocuspocus/redis

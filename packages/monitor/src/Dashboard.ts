@@ -6,10 +6,8 @@ import nodeStatic from 'node-static'
 import { Socket } from 'net'
 import process from 'process'
 import { Storage } from './Storage'
-import { Collector } from './Collector'
 
 export interface Configuration {
-  collector: Collector | undefined,
   password: string | undefined,
   path: string,
   port: number | undefined,
@@ -20,7 +18,6 @@ export interface Configuration {
 export class Dashboard {
 
   configuration: Configuration = {
-    collector: undefined,
     password: undefined,
     path: 'dashboard',
     port: undefined,
@@ -43,7 +40,11 @@ export class Dashboard {
 
     // subscribe to storage additions and send them to the client
     this.configuration.storage?.on('add', data => {
-      this.send(JSON.stringify({ data: [data] }))
+      this.send(JSON.stringify({ event: 'add', data: [data] }))
+    })
+
+    this.configuration.storage?.on('set', data => {
+      this.send(JSON.stringify({ event: 'set', data }))
     })
 
     this.websocketServer = new WebSocket.Server({ noServer: true })
@@ -142,16 +143,14 @@ export class Dashboard {
   }
 
   private async sendInitialDataToClient(connection: WebSocket) {
-    const data = await this.configuration.storage?.all() || []
-
-    data.push({
-      key: 'info',
-      timestamp: null,
-      value: await this.configuration.collector?.info(),
-    })
+    const timed = await this.configuration.storage?.allTimed() || []
+    const constant = await this.configuration.storage?.all()
 
     setTimeout(() => {
-      connection.send(JSON.stringify({ data }))
+
+      connection.send(JSON.stringify({ event: 'add', data: timed }))
+      constant.forEach((data: any) => connection.send(JSON.stringify({ event: 'set', data })))
+
     }, 1000)
   }
 
