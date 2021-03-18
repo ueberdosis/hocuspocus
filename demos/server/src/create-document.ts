@@ -18,6 +18,7 @@ const server = Server.configure({
   async onCreateDocument(data: onCreateDocumentPayload) {
     const fieldName = 'default'
 
+    // eslint-disable-next-line no-underscore-dangle
     if (data.document.get(fieldName)._start) {
       return
     }
