@@ -67,11 +67,7 @@ export class RocksDB implements Extension {
   }
 
   async onChange(data: onChangePayload): Promise<any> {
-    const store = () => this.store(data.documentName, data.update)
-
-    this.debounced?.cancel()
-    this.debounced = debounce(store, 2000)
-    this.debounced()
+    this.store(data.documentName, data.update)
   }
 
   /**
