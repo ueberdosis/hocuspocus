@@ -15,7 +15,6 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
 import rocksDB from 'rocksdb'
 import levelup from 'levelup'
-import debounce from 'lodash.debounce'
 
 export interface Configuration {
   options: object | undefined,
