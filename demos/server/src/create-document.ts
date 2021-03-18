@@ -3,6 +3,7 @@ import { defaultExtensions } from '@tiptap/starter-kit'
 import { prosemirrorJSONToYDoc } from 'y-prosemirror'
 
 import { Logger } from '../../../packages/logger/src'
+import { RocksDB } from '../../../packages/rocksdb/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
 const server = Server.configure({
@@ -11,9 +12,16 @@ const server = Server.configure({
 
   extensions: [
     new Logger(),
+    new RocksDB(),
   ],
 
   async onCreateDocument(data: onCreateDocumentPayload) {
+    const fieldName = 'default'
+
+    if (data.document.get(fieldName)._start) {
+      return
+    }
+
     const prosemirrorDocument = {
       type: 'doc',
       content: [
@@ -30,9 +38,7 @@ const server = Server.configure({
     }
 
     const schema = getSchema(defaultExtensions())
-    const ydoc = prosemirrorJSONToYDoc(schema, prosemirrorDocument, 'default')
-
-    return ydoc
+    return prosemirrorJSONToYDoc(schema, prosemirrorDocument, fieldName)
   },
 })
 

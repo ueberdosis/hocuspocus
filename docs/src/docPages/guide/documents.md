@@ -25,14 +25,12 @@ This is a recommendation, of course you can name your documents however you want
 
 ## Handling Document changes
 
-With the `onChange` hook you can listen to changes of the document and handle them. It should return a Promise. In a real-world application you would probably save the resulting document to a database, send a webhook to an API
+With the `onChange` hook you can listen to changes of the document and handle them. It should return a Promise. It's payload contains the resulting document as well as the actual update in the Y-Doc binary format. For more information on the hook and it's payload checkout it's [API section](/api/on-change).
+
+In a real-world application you would probably save the current document to a database, send it via webhook to an API
 or something else.
 
-For more information on the hook and it's payload checkout it's [API section](/api/on-change).
-
-:::warning Consider debouncing!
-It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
-:::
+It's highly recommended to debounce extensive operations (like API calls) as this hook can be fired up to multiple times a second:
 
 ```typescript
 import { writeFile } from 'fs'
@@ -49,7 +47,11 @@ const hocuspocus = Server.configure({
       const ydoc = data.document
 
       // Convert the y-doc to the format your editor uses, in this
-      // example Prosemirror JSON for the tiptap editor
+      // example Prosemirror JSON for the tiptap editor.
+      // The tiptap collaboration extension uses shared types of a single y-doc
+      // to store different fields in the same document. You can target a specific
+      // field by providing a second argument with the name of the field.
+      // The default field in tiptap is simply called "default"
       const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
 
       // Save your document. In a real-world app this could be a database query
@@ -75,13 +77,17 @@ const hocuspocus = Server.configure({
 hocuspocus.listen()
 ```
 
-## Loading documents
+## Using a primary storage
 
-By default hocuspocus creates a new Y-Doc instance for each new document and stores all those document instances in memory. If you restart the server all changes are gone. So you likely want to persist the document somewhere. You can use one of our [prebuilt extensions](/guide/extensions) and skip this section to get you started as quick and simple as possible.
+The example above is **not intended** to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application.
 
-If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system.
+No worries, we have you covered! We built an extension that's meant to be used as primary storage: the [RocksDB extension](/guide/extensions#hocuspocusrocksdb). It's just a couple of lines to integrate and it already ships with the default hocuspocus license.
 
-For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
+Make sure to always include this extension in your production setups!
+
+## Importing documents
+
+If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system if they are **not present** in your [primary storage](#using-a-primary-storage). For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
 If you're using the tiptap editor you will need the schema to create a Y-Doc from the prosemirror JSON. Fortunately tiptap has you covered with it's `getSchema` function.
 
@@ -96,6 +102,17 @@ import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
   async onCreateDocument(data) {
+      // The tiptap collaboration extension uses shared types of a single y-doc
+      // to store different fields in the same document.
+      // The default field in tiptap is simply called "default"
+      const fieldName = 'default'
+
+    // Check if the given field already exists in the given y-doc.
+    // Only import a document if it doesn't exist in the primary data storage
+    if (data.document.get(fieldName)._start) {
+      return
+    }
+
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
     const prosemirrorDocument = JSON.parse(
@@ -107,8 +124,9 @@ const hocuspocus = Server.configure({
     // pass it all the tiptap extensions you're using in the frontend
     const schema = getSchema([ Document, Paragraph, Text ])
 
-    // Convert the prosemirror JSON to a ydoc and simply return it
-    return prosemirrorJSONToYDoc(schema, prosemirrorDocument)
+    // Convert the prosemirror JSON to a ydoc and simply return it.
+    // You can target a specific field by providing a third argument with the name of the field.
+    return prosemirrorJSONToYDoc(schema, prosemirrorDocument, fieldName)
   },
 })
 
@@ -155,7 +173,7 @@ const prosemirrorDocument = {
 // the tiptap extensions you're using in the frontend
 const schema = getSchema([ Document, Paragraph, Text ])
 
-const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument)
+const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument, 'field-name')
 ```
 
 ### Quill
