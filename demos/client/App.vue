@@ -27,7 +27,7 @@ export default {
     const ydoc = new Y.Doc()
 
     // Registered with a WebRTC provider
-    const provider = new WebsocketProvider('ws://127.0.0.1:80', 'example-document', ydoc)
+    const provider = new WebsocketProvider('ws://localhost:1234', 'example-document', ydoc)
 
     this.editor = new Editor({
       extensions: [

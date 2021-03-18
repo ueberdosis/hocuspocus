@@ -8,6 +8,8 @@ import { Logger } from '../../packages/logger/src'
 import { Server, onCreateDocumentPayload } from '../../packages/server/src'
 
 const server = Server.configure({
+  port: 1234,
+
   async onCreateDocument(data: onCreateDocumentPayload) {
     const prosemirrorDocument = {
       type: 'doc',

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --loader ts-node/esm --experimental-specifier-resolution=node",
     "watch": "nodemon -e ts --watch ./ --watch ../packages --exec npm start",
-    "client": "parcel client/index.html"
+    "client": "parcel -p 3000 client/index.html"
   },
   "dependencies": {
     "@hocuspocus/rocksdb": "^1.0.0-alpha.35",

@@ -16,14 +16,16 @@
     "build:docs": "yarn --cwd ./docs build",
     "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/monitor build",
     "clean:packages": "rm -rf ./packages/*/dist",
+    "demo:create-documents": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/create-documents.ts\"",
+    "demo:express": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/express.ts\"",
+    "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/monitor.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "release": "yarn lint && yarn build:packages && lerna publish",
     "reset": "yarn clean:packages && rm -rf ./**/.cache && rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
     "start": "concurrently --kill-others \"yarn start:demo\" \"yarn start:docs\"",
     "start:docs": "yarn --cwd ./docs start",
-    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit",
-    "demo:create-documents": "concurrently --kill-others \"yarn --cwd ./demo client\" \"yarn --cwd ./demos watch src/create-documents.ts\""
+    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
