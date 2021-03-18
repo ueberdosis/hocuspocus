@@ -2187,7 +2187,7 @@
     prosemirror-transform "^1.2.12"
     prosemirror-view "^1.17.8"
 
-"@tiptap/core@^2.0.0-beta.1":
+"@tiptap/core@^2.0.0-beta.2":
   version "2.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.4.tgz#f80f22e2c697f2eb779a923888005dcd3b86667c"
   integrity sha512-j2pL68ivuu+GvLp2s7IJY8zPT9pCLZyllRf7o4/I+wQRnQ1sk3xlSPvJn/GKgJZ1IVSsh6EHWeDIRhHnc76zdQ==
@@ -2254,7 +2254,7 @@
   dependencies:
     y-prosemirror "^1.0.7"
 
-"@tiptap/extension-collaboration@^2.0.0-beta.4":
+"@tiptap/extension-collaboration@^2.0.0-beta.3":
   version "2.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-collaboration/-/extension-collaboration-2.0.0-beta.4.tgz#ca0f8db4e5eaf7ae5ab25cf4287eda0f392b01d2"
   integrity sha512-cS9ExvodWnu+kGn4jsaA/ZlgE5lRkJ1wG7/EAbAwWR1MKfku60veyWkKVe/6qRTm/JkZ+YVavAInfB5HFoXyWw==
@@ -2380,7 +2380,7 @@
     "@tiptap/extension-strike" "^2.0.0-beta.1"
     "@tiptap/extension-text" "^2.0.0-beta.1"
 
-"@tiptap/vue-2@^2.0.0-beta.3":
+"@tiptap/vue-2@^2.0.0-beta.1":
   version "2.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@tiptap/vue-2/-/vue-2-2.0.0-beta.4.tgz#76899e64bb4359aa3373f4819c52f514c53eb1d1"
   integrity sha512-egOkN2XlgqCUc7U3r7vUwhz3fXCE6Rl5DCpE0ikcs1VZUhLPr2Dqsa5IKQI3z6KLzTDxLl+v55t+OG+n/6VmCg==
