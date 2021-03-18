@@ -197,7 +197,7 @@ export class Hocuspocus {
 
     const hookPayload = {
       clientsCount: document.connectionsCount(),
-      context: connection.context,
+      context: connection?.context || {},
       document,
       documentName: document.name,
       requestHeaders: request.headers,
@@ -227,7 +227,7 @@ export class Hocuspocus {
     const document = new Document(documentName)
 
     document.onUpdate((document, connection, update) => {
-      this.handleDocumentUpdate(document, connection, update, request, connection.socketId)
+      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
     })
 
     const hookPayload = {
@@ -240,7 +240,7 @@ export class Hocuspocus {
     this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
-      if (loadedDocument instanceof Doc) {
+      if (loadedDocument?.constructor.name === 'Doc') {
         applyUpdate(document, encodeStateAsUpdate(loadedDocument))
       }
     }).catch(e => {
