@@ -1,7 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "demo",
+    "demos",
     "docs",
     "packages/*"
   ],
@@ -21,9 +21,9 @@
     "release": "yarn lint && yarn build:packages && lerna publish",
     "reset": "yarn clean:packages && rm -rf ./**/.cache && rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
     "start": "concurrently --kill-others \"yarn start:demo\" \"yarn start:docs\"",
-    "start:demo": "concurrently --kill-others \"yarn --cwd ./demo start:development\" \"yarn --cwd ./packages/monitor start\"",
     "start:docs": "yarn --cwd ./docs start",
-    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit"
+    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit",
+    "demo:create-documents": "concurrently --kill-others \"yarn --cwd ./demo client\" \"yarn --cwd ./demos watch src/create-documents.ts\""
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
