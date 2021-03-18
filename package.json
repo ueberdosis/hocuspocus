@@ -25,7 +25,6 @@
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "release": "yarn lint && yarn build:packages && lerna publish",
     "reset": "yarn clean:packages && rm -rf ./**/.cache && rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
-    "start": "concurrently --kill-others \"yarn start:demo\" \"yarn start:docs\"",
     "start:docs": "yarn --cwd ./docs start",
     "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit"
   },
