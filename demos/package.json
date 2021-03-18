@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/demo",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,8 +9,8 @@
     "client": "parcel -p 3000 client/index.html"
   },
   "dependencies": {
-    "@hocuspocus/rocksdb": "^1.0.0-alpha.35",
-    "@hocuspocus/server": "^1.0.0-alpha.35",
+    "@hocuspocus/rocksdb": "^1.0.0-alpha.37",
+    "@hocuspocus/server": "^1.0.0-alpha.37",
     "@tiptap/core": "^2.0.0-beta.2",
     "@tiptap/extension-collaboration": "^2.0.0-beta.3",
     "@tiptap/extension-document": "^2.0.0-beta.1",
