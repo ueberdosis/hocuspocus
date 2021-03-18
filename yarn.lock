@@ -2165,32 +2165,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@tiptap/core@^2.0.0-alpha.18":
-  version "2.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.2.tgz#1b6192919636a4e48bc1892e6d491e767a9d4968"
-  integrity sha512-hnH/4Ejdz/WkZos31bTsL5zzGcQh7JfuxVbjnvy7jz7D662pkzsKE/sgEMD5q4Bjp7eIlP4Z09G03v+gTiyqwA==
-  dependencies:
-    "@types/prosemirror-commands" "^1.0.4"
-    "@types/prosemirror-inputrules" "^1.0.4"
-    "@types/prosemirror-keymap" "^1.0.4"
-    "@types/prosemirror-model" "^1.11.3"
-    "@types/prosemirror-schema-list" "^1.0.3"
-    "@types/prosemirror-state" "^1.2.6"
-    "@types/prosemirror-transform" "^1.1.2"
-    "@types/prosemirror-view" "^1.17.1"
-    prosemirror-commands "^1.1.7"
-    prosemirror-inputrules "^1.1.3"
-    prosemirror-keymap "^1.1.3"
-    prosemirror-model "^1.13.3"
-    prosemirror-schema-list "^1.1.4"
-    prosemirror-state "^1.3.4"
-    prosemirror-transform "^1.2.12"
-    prosemirror-view "^1.17.8"
-
-"@tiptap/core@^2.0.0-beta.2":
-  version "2.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.4.tgz#f80f22e2c697f2eb779a923888005dcd3b86667c"
-  integrity sha512-j2pL68ivuu+GvLp2s7IJY8zPT9pCLZyllRf7o4/I+wQRnQ1sk3xlSPvJn/GKgJZ1IVSsh6EHWeDIRhHnc76zdQ==
+"@tiptap/core@^2.0.0-alpha.18", "@tiptap/core@^2.0.0-beta.2":
+  version "2.0.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.5.tgz#49a49b1c952072f81a0ebd763c8ae37b28ecbbc7"
+  integrity sha512-I7WFCiC5wVM7bm6MQmA1Q7ZpRd1dlV3rBZHJ3nEYCCeBwhfdx02phBoelcsemm7IBj9+hEIFhKcVRg+qZM8QfQ==
   dependencies:
     "@types/prosemirror-commands" "^1.0.4"
     "@types/prosemirror-inputrules" "^1.0.4"
@@ -12268,16 +12246,7 @@ prosemirror-transform@^1.0.0, prosemirror-transform@^1.1.0, prosemirror-transfor
   dependencies:
     prosemirror-model "^1.0.0"
 
-prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.17.8:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/prosemirror-view/-/prosemirror-view-1.18.0.tgz#92d27b2583877938c529e173e6e3a0f3f6aa0e1c"
-  integrity sha512-UoY29oeWruT6RKhH7wGytUBVrlaszNx43wvOxZPCMjYPvKBT21EIXR8Ezr/3XstvFVBQAWdDh6Ke0qHmF43y/A==
-  dependencies:
-    prosemirror-model "^1.1.0"
-    prosemirror-state "^1.0.0"
-    prosemirror-transform "^1.1.0"
-
-prosemirror-view@^1.18.1:
+prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.17.8, prosemirror-view@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/prosemirror-view/-/prosemirror-view-1.18.1.tgz#52ad1c67f51144e27e368bba129142ce87c7791e"
   integrity sha512-TZd8byDRfdopLiokBY7T27msCSfWqqRxWs/LnBbdI030F+iI2kS+tO59/XFnpZxMLFKlJgOgGGhM9SzD1Nwdxw==
