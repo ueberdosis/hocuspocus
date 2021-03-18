@@ -1,14 +1,17 @@
 <template>
-  <editor-content :editor="editor" />
+  <div>
+    <p>Status: {{ status }}</p>
+    <div v-if="editor">
+      <editor-content :editor="editor" />
+    </div>
+  </div>
 </template>
 
 <script>
-import * as Y from 'yjs'
-import Collaboration from '@tiptap/extension-collaboration'
-import { Document } from '@tiptap/extension-document'
 import { Editor, EditorContent } from '@tiptap/vue-2'
-import { Paragraph } from '@tiptap/extension-paragraph'
-import { Text } from '@tiptap/extension-text'
+import { defaultExtensions } from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
 export default {
@@ -18,22 +21,25 @@ export default {
 
   data() {
     return {
+      provider: null,
       editor: null,
+      status: 'connecting',
     }
   },
 
   mounted() {
-    // A new Y document
     const ydoc = new Y.Doc()
+    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'tiptap-collaboration-example', ydoc)
 
-    // Registered with a WebRTC provider
-    const provider = new WebsocketProvider('ws://localhost:1234', 'example-document', ydoc)
+    this.provider.on('status', event => {
+      this.status = event.status
+    })
+
+    window.ydoc = ydoc
 
     this.editor = new Editor({
       extensions: [
-        Document,
-        Paragraph,
-        Text,
+        ...defaultExtensions().filter(extension => extension.config.name !== 'history'),
         Collaboration.configure({
           document: ydoc,
         }),
@@ -43,6 +49,7 @@ export default {
 
   beforeDestroy() {
     this.editor.destroy()
+    this.provider.destroy()
   },
 }
 </script>

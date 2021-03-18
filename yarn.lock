@@ -2247,6 +2247,13 @@
   dependencies:
     y-prosemirror "^1.0.7"
 
+"@tiptap/extension-collaboration-cursor@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-collaboration-cursor/-/extension-collaboration-cursor-2.0.0-beta.4.tgz#86197672f410dcb14a37be3c2a50c5ff9ca3e895"
+  integrity sha512-Qs3ZZMSzoq+Ir3iapP9iwHaEK7nyG5ewg631/BR1mPVdW+p6LsTHBbWXW8G/6Eo5DhPHGMxW3JHiBH11SL+0rQ==
+  dependencies:
+    y-prosemirror "^1.0.7"
+
 "@tiptap/extension-collaboration@^2.0.0-alpha.11":
   version "2.0.0-beta.3"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-collaboration/-/extension-collaboration-2.0.0-beta.3.tgz#f5af931549c6bae892e08f802f5659c9bae16302"
@@ -2278,6 +2285,14 @@
   version "2.0.0-beta.3"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-gapcursor/-/extension-gapcursor-2.0.0-beta.3.tgz#fb562f3c3ab445ab168ec3f0ca053db379ab636c"
   integrity sha512-5sHD8EjTlxlnfM/Dx8pXjVefBkF2OElvVPjrVA7qC4Nz+81E59DYtAYFvQoTF32u6PZZ8dBM4JN5Em9zkEsT9A==
+  dependencies:
+    "@types/prosemirror-gapcursor" "^1.0.3"
+    prosemirror-gapcursor "^1.1.5"
+
+"@tiptap/extension-gapcursor@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-gapcursor/-/extension-gapcursor-2.0.0-beta.4.tgz#1a55ae8f6326208fe4bae8731b7296948f733856"
+  integrity sha512-CYyqtAj1zityCGxCPcYflcnTfdy0TnE4x+gBeWQ2nc6SWmbMX9OeBhSdP8L1ft4cVBdeIKDVmjfmi47j1NPzYQ==
   dependencies:
     "@types/prosemirror-gapcursor" "^1.0.3"
     prosemirror-gapcursor "^1.1.5"
@@ -2369,6 +2384,30 @@
     "@tiptap/extension-document" "^2.0.0-beta.1"
     "@tiptap/extension-dropcursor" "^2.0.0-beta.1"
     "@tiptap/extension-gapcursor" "^2.0.0-beta.3"
+    "@tiptap/extension-hard-break" "^2.0.0-beta.1"
+    "@tiptap/extension-heading" "^2.0.0-beta.1"
+    "@tiptap/extension-history" "^2.0.0-beta.1"
+    "@tiptap/extension-horizontal-rule" "^2.0.0-beta.1"
+    "@tiptap/extension-italic" "^2.0.0-beta.1"
+    "@tiptap/extension-list-item" "^2.0.0-beta.1"
+    "@tiptap/extension-ordered-list" "^2.0.0-beta.1"
+    "@tiptap/extension-paragraph" "^2.0.0-beta.1"
+    "@tiptap/extension-strike" "^2.0.0-beta.1"
+    "@tiptap/extension-text" "^2.0.0-beta.1"
+
+"@tiptap/starter-kit@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.4.tgz#ef961e848f4ed06b6ea5e4eada15539209061fc8"
+  integrity sha512-YGZdfhuTpT0jGJaFEuyQJvZ0/+tljAp/azMSQ179Ry84zLXlL7yRoLroGPOvCE92m03LwFDC6aVKQ7+8auf1gA==
+  dependencies:
+    "@tiptap/extension-blockquote" "^2.0.0-beta.1"
+    "@tiptap/extension-bold" "^2.0.0-beta.1"
+    "@tiptap/extension-bullet-list" "^2.0.0-beta.1"
+    "@tiptap/extension-code" "^2.0.0-beta.1"
+    "@tiptap/extension-code-block" "^2.0.0-beta.1"
+    "@tiptap/extension-document" "^2.0.0-beta.1"
+    "@tiptap/extension-dropcursor" "^2.0.0-beta.1"
+    "@tiptap/extension-gapcursor" "^2.0.0-beta.4"
     "@tiptap/extension-hard-break" "^2.0.0-beta.1"
     "@tiptap/extension-heading" "^2.0.0-beta.1"
     "@tiptap/extension-history" "^2.0.0-beta.1"

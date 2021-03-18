@@ -19,6 +19,7 @@
     "demo:create-document": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/create-document.ts\"",
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/express.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/monitor.ts\"",
+    "demo:minimal": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/minimal.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "release": "yarn lint && yarn build:packages && lerna publish",
