@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/rocksdb",
   "description": "hocuspocus persistence driver for RocksDB",
-  "version": "1.0.0-alpha.37",
+  "version": "1.0.0-alpha.38",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
