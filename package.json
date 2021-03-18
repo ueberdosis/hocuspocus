@@ -16,7 +16,7 @@
     "build:docs": "yarn --cwd ./docs build",
     "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/monitor build",
     "clean:packages": "rm -rf ./packages/*/dist",
-    "demo:create-documents": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/create-documents.ts\"",
+    "demo:create-document": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/create-document.ts\"",
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/express.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos client\" \"yarn --cwd ./demos watch src/monitor.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
