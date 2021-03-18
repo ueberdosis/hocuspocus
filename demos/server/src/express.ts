@@ -4,6 +4,8 @@ import { Server } from '../../../packages/server/src'
 import { Logger } from '../../../packages/logger/src'
 
 const server = Server.configure({
+  throttle: false,
+
   extensions: [
     new Logger(),
   ],
@@ -15,7 +17,7 @@ app.get('/', (request, response) => {
   response.send('Hello World!')
 })
 
-app.ws('/collaboration/:document', (websocket, request: any) => {
+app.ws('/:document', (websocket, request: any) => {
   const context = { user_id: 1234 }
   server.handleConnection(websocket, request, context)
 })
