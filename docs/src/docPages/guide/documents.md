@@ -23,6 +23,16 @@ console.log(entityID) // prints "140
 
 This is a recommendation, of course you can name your documents however you want!
 
+## Using a primary storage
+
+One thing up front:
+
+The following examples are **not intended** to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. These examples are only meant to store the resulting document for the views of your application or to import it if it doesn't exist in your primary storage.
+
+No worries, we have you covered! We built an extension that's meant to be used as primary storage: the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate and it already ships with the default hocuspocus license.
+
+Make sure to always include this extension in your production setups!
+
 ## Handling Document changes
 
 With the `onChange` hook you can listen to changes of the document and handle them. It should return a Promise. It's payload contains the resulting document as well as the actual update in the Y-Doc binary format. For more information on the hook and it's payload checkout it's [API section](/api/on-change).
@@ -76,14 +86,6 @@ const hocuspocus = Server.configure({
 
 hocuspocus.listen()
 ```
-
-## Using a primary storage
-
-The example above is **not intended** to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application.
-
-No worries, we have you covered! We built an extension that's meant to be used as primary storage: the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate and it already ships with the default hocuspocus license.
-
-Make sure to always include this extension in your production setups!
 
 ## Importing documents
 
