@@ -81,7 +81,7 @@ hocuspocus.listen()
 
 The example above is **not intended** to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application.
 
-No worries, we have you covered! We built an extension that's meant to be used as primary storage: the [RocksDB extension](/guide/extensions#hocuspocusrocksdb). It's just a couple of lines to integrate and it already ships with the default hocuspocus license.
+No worries, we have you covered! We built an extension that's meant to be used as primary storage: the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate and it already ships with the default hocuspocus license.
 
 Make sure to always include this extension in your production setups!
 

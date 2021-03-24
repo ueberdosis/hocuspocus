@@ -79,5 +79,5 @@ hocuspocus.listen()
 ```
 
 :::warning Usa a primary storage
-This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/guide/extensions#hocuspocusrocksdb).
+This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
 :::

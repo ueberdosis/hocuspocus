@@ -32,39 +32,48 @@
       link: /guide/authentication-and-authorization
     - title: Working with Documents
       link: /guide/documents
-    - title: Extensions
-      link: /guide/extensions
     - title: Framework integration
       link: /guide/framework-integration
-    - title: Full example
-      link: /guide/full-example
+    - title: Extensions
+      link: /guide/extensions
+
+- title: Extensions
+  items:
+    - title: RocksDB
+      link: /extensions/rocksdb
+    - title: Monitor
+      link: /extensions/monitor
+    - title: Redis
+      link: /extensions/redis
+    - title: Logger
+      link: /extensions/logger
 
 - title: API
   items:
-  - title: Methods
-    link: /api/methods
-    draft: true
+    - title: Methods
+      link: /api/methods
+      draft: true
 
 - title: Hooks
   items:
-  - title: onConnect
-    link: /api/on-connect
-  - title: onCreateDocument
-    link: /api/on-create-document
-  - title: onChange
-    link: /api/on-change
-  - title: onDisconnect
-    link: /api/on-disconnect
-  - title: onListen
-    link: /api/on-listen
-  - title: onDestroy
-    link: /api/on-destroy
-  - title: onConfigure
-    link: /api/on-configure
-  - title: onRequest
-    link: /api/on-request
-  - title: onUpgrade
-    link: /api/on-upgrade
+    - title: onConnect
+      link: /api/on-connect
+    - title: onCreateDocument
+      link: /api/on-create-document
+    - title: onChange
+      link: /api/on-change
+    - title: onDisconnect
+      link: /api/on-disconnect
+    - title: onListen
+      link: /api/on-listen
+    - title: onDestroy
+      link: /api/on-destroy
+    - title: onConfigure
+      link: /api/on-configure
+    - title: onRequest
+      link: /api/on-request
+    - title: onUpgrade
+      link: /api/on-upgrade
 
 # - title: Packages
 #   items:

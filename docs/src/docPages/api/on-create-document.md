@@ -68,5 +68,5 @@ hocuspocus.listen()
 ```
 
 :::warning Usa a primary storage
-This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/guide/extensions#hocuspocusrocksdb).
+This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
 :::

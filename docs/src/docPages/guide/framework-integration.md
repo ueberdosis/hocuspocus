@@ -53,4 +53,4 @@ app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234'))
 
 ## Extensions
 
-// TODO
+Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario. Please read the docs of each extension on how to use them when integrating hocuspocus in your framework of choice.

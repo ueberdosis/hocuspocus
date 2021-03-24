@@ -12,7 +12,7 @@ Hooks are required to return a [Promise](https://developer.mozilla.org/en-US/doc
 
 ## Lifecycle
 
-// TODO
+Hooks
 
 ## Promises
 
