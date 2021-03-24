@@ -6,9 +6,7 @@
 
 The `onChange` hook is called when the document itself changes. It should return a Promise.
 
-:::warning Consider debouncing!
 It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
-:::
 
 ## Hook payload
 
@@ -50,8 +48,12 @@ const hocuspocus = Server.configure({
       const ydoc = data.document
 
       // Convert the y-doc to the format your editor uses, in this
-      // example Prosemirror JSON for the tiptap editor
-      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc)
+      // example Prosemirror JSON for the tiptap editor.
+      // The tiptap collaboration extension uses shared types of a single y-doc
+      // to store different fields in the same document. You can target a specific
+      // field by providing a second argument with the name of the field.
+      // The default field in tiptap is simply called "default"
+      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
@@ -59,6 +61,12 @@ const hocuspocus = Server.configure({
         `/path/to/your/documents/${data.documentName}.json`,
         prosemirrorDocument
       )
+
+      // Maybe you want to store the user who changed the document?
+      // Guess what, you have access to your custom context from the
+      // onConnect hook here. See authorization & authentication for more
+      // details
+      console.log(`Document ${data.documentName} changed by ${data.context.user.name}`)
     }
 
     debounced?.clear()
@@ -69,3 +77,7 @@ const hocuspocus = Server.configure({
 
 hocuspocus.listen()
 ```
+
+:::warning Usa a primary storage
+This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/guide/extensions#hocuspocusrocksdb).
+:::
