@@ -10,16 +10,51 @@ hocuspocus offers several methods to interact with it.
 
 ### configure
 
-// TODO
+Configure your server:
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server.configure({
+  // your config
+})
+```
 
 ### listen
 
-// TODO
+Start listening on the configured port.
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server
+
+hocuspocus.listen()
+```
 
 ### destroy
 
-// TODO
+Destroy and shutdown the server.
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server
+
+hocuspocus.listen()
+hocuspocus.destroy()
+```
 
 ### handleConnection
 
-// TODO
+Handle an incoming websocket connection.
+
+```typescript
+import WebSocket from 'ws'
+import { IncomingMessage } from 'http'
+import { Server } from '@hocuspocus/server'
+
+const hocuspocus = Server
+
+hocuspocus.handleConnection(<Websocket> websocket, <IncomingMessage> request, <any> context)
+```

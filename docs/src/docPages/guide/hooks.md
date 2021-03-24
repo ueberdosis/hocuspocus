@@ -12,8 +12,12 @@ Hooks are required to return a [Promise](https://developer.mozilla.org/en-US/doc
 
 ## Lifecycle
 
-Hooks
+Hooks will be called on different stages of the hocuspocus lifecycle. For example the `onListen` hook will be called when you call the `listen()` method on the server instance.
 
-## Promises
+Some hooks allow you not only to react to those events but also to intercept them. For example the `onConnect` hook will be fired when a new connection is made to underlying websocket server. By rejecting the Promise in your hook (or throwing an empty exception if using async) you can terminate the connection and stop the chain.
 
-// TODO
+## The hook chain
+
+The chain? Well, extensions use hooks as well to add additional functionality to hocuspocus. They will be called after another in the order of their registration with your configuration as the last part of the chain.
+
+If the Promise in a hook is rejected it will not be called for the following extensions or your configuration. It's like a stack of middlewares a request has to go through. Keep that in mind when working with hooks.
