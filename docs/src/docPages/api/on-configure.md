@@ -34,9 +34,9 @@ const data = {
 import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
-  async onDestroy(data) {
+  async onConfigure(data) {
     // Output some information
-    process.stdout.write(`Server was shut down!`)
+    process.stdout.write(`Server was configured!`)
   },
 })
 
