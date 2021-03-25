@@ -3,7 +3,7 @@
     <!-- fix for purgeCss -->
     <div class="hidden bg-gray-400 bg-green-400 bg-blue-400 bg-yellow-400">&nbsp;</div>
 
-    <div class="flex flex-col text-sm">
+    <div class="text-sm">
       <div class="flex items-stretch border-b-2 border-black font-bold py-2">
         <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">Event</div>
         <div class="flex-grow flex-shrink-0" style="flex-basis: 15rem;">Socket</div>
@@ -13,12 +13,10 @@
 
       <RecycleScroller
         :items="log"
-        :item-size="32"
+        :item-size="46"
         v-slot="{ item }"
       >
-        <div
-          class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch"
-        >
+        <div class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch">
           <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">
             <span
               class="px-2 py-1 rounded text-sm"

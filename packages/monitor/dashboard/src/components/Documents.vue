@@ -1,25 +1,25 @@
 <template>
   <card>
-    <table class="table-auto w-full text-left text-sm">
-      <thead>
-        <tr>
-          <th class="border-b-2 border-black py-2">Document</th>
-          <th class="border-b-2 border-black py-2">Active connections</th>
-          <th class="border-b-2 border-black py-2">Messages</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(document, index) in sortedDocuments"
-          class="hover:bg-yellow-300"
-          :key="index"
-        >
-          <td class="border-t border-black py-3">{{ document.name }}</td>
-          <td class="border-t border-black py-3">{{ document.connections }}</td>
-          <td class="border-t border-black py-3">{{ document.messages }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="flex flex-col text-sm">
+      <div class="flex items-stretch border-b-2 border-black font-bold py-2">
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Document</div>
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Active connections</div>
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Messages</div>
+      </div>
+
+      <RecycleScroller
+        :items="sortedDocuments"
+        :item-size="46"
+        key-field="name"
+        v-slot="{ item }"
+      >
+        <div class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch">
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.name }}</div>
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.connections }}</div>
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.messages }}</div>
+        </div>
+      </RecycleScroller>
+    </div>
   </card>
 </template>
 
