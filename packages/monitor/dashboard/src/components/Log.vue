@@ -3,22 +3,23 @@
     <!-- fix for purgeCss -->
     <div class="hidden bg-gray-400 bg-green-400 bg-blue-400 bg-yellow-400">&nbsp;</div>
 
-    <table class="table-auto w-full text-left text-sm">
-      <thead>
-        <tr>
-          <th class="border-b-2 border-black py-2">Event</th>
-          <th class="border-b-2 border-black py-2">Socket</th>
-          <th class="border-b-2 border-black py-2">Document Name</th>
-          <th class="border-b-2 border-black py-2">Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, index) in log"
-          class="hover:bg-yellow-300"
-          :key="index"
+    <div class="flex flex-col text-sm">
+      <div class="flex items-stretch border-b-2 border-black font-bold py-2">
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">Event</div>
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 15rem;">Socket</div>
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 20rem;">Document Name</div>
+        <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">Time</div>
+      </div>
+
+      <RecycleScroller
+        :items="log"
+        :item-size="32"
+        v-slot="{ item }"
+      >
+        <div
+          class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch"
         >
-          <td class="border-t border-black py-3">
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">
             <span
               class="px-2 py-1 rounded text-sm"
               :class="{
@@ -31,13 +32,13 @@
             >
               {{ item.label }}
             </span>
-          </td>
-          <td class="border-t border-black py-3">{{ item.socket }}</td>
-          <td class="border-t border-black py-3">{{ item.details }}</td>
-          <td class="border-t border-black py-3">{{ item.time }}</td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 15rem;">{{ item.socket }}</div>
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 20rem;">{{ item.details }}</div>
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">{{ item.time }}</div>
+        </div>
+      </RecycleScroller>
+    </div>
   </card>
 </template>
 
@@ -46,7 +47,8 @@ import collect from 'collect.js'
 import moment from 'moment'
 import Card from './Card'
 
-const formatTime = timestamp => moment(timestamp).format('HH:mm:ss')
+const formatTime = timestamp => moment(timestamp)
+  .format('HH:mm:ss')
 
 export default {
   components: {
@@ -79,7 +81,6 @@ export default {
         .sortByDesc('timestamp')
         .values()
         .map((item, index) => this.mapper(item, index))
-        .take(100)
         .toArray()
     },
   },
@@ -114,6 +115,7 @@ export default {
 
       return {
         ...data,
+        id: index,
         time: formatTime(item.timestamp),
       }
     },

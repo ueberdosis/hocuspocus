@@ -56,20 +56,20 @@
         </svg>
       </div>
       <div class="flex-initial flex justify-center items-center ml-3">
-        <span class="py-1 px-1 border-2 border-black rounded-md uppercase font-bold text-xs p-0 leading-3 tracking-wider">monitor</span>
+        <span class="py-1 px-1 border-2 border-black rounded-md uppercase font-bold text-xs p-0 leading-none tracking-wider">monitor</span>
       </div>
     </div>
 
-    <div class="flex mt-16 mr-1">
-      <div class="flex-1 mr-2">
+    <div class="flex mt-16 mr-1 flex-col lg:flex-row">
+      <div class="flex-1 mb-2 lg:mr-2">
         <memory :data="memory" />
       </div>
 
-      <div class="flex-1 mx-2">
+      <div class="flex-1 mb-2 lg:mx-2">
         <cpu :data="cpu" />
       </div>
 
-      <div class="flex-1 ml-2">
+      <div class="flex-1 mb-2 lg:ml-2">
         <info :info="info" />
       </div>
     </div>

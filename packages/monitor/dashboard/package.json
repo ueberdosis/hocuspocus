@@ -26,7 +26,8 @@
   "resolutions": {
     "@babel/preset-env": "7.13.8"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@tailwindcss/postcss7-compat": "^2.0.3",
@@ -38,6 +39,7 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "tailwindcss-font-inter": "^2.0.2",
     "vue": "^2.6.12",
-    "vue-plotly": "^1.1.0"
+    "vue-plotly": "^1.1.0",
+    "vue-virtual-scroller": "^1.0.10"
   }
 }
