@@ -5,19 +5,47 @@
 
     <div class="text-sm">
       <div class="flex items-stretch border-b-2 border-black font-bold py-2">
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">Event</div>
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 15rem;">Socket</div>
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 20rem;">Document Name</div>
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">Time</div>
+        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 8rem;">
+          Event: <input
+            type="text"
+            class="flex-auto ml-1"
+            v-model="event"
+            placeholder="Filter"
+          >
+        </div>
+        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 15rem;">
+          Socket: <input
+            type="text"
+            class="flex-auto ml-1"
+            v-model="socket"
+            placeholder="Filter"
+          >
+        </div>
+        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 20rem;">
+          Document Name: <input
+            type="text"
+            class="flex-auto ml-1"
+            v-model="document"
+            placeholder="Filter"
+          >
+        </div>
+        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 6rem;">
+          Time: <input
+            type="text"
+            class="flex-auto ml-1"
+            v-model="time"
+            placeholder="Filter"
+          >
+        </div>
       </div>
 
       <RecycleScroller
-        :items="log"
+        :items="filteredLog"
         :item-size="46"
         v-slot="{ item }"
       >
         <div class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch">
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">
+          <div class="flex-grow flex-shrink-0" style="flex-basis: 8rem;">
             <span
               class="px-2 py-1 rounded text-sm"
               :class="{
@@ -67,7 +95,10 @@ export default {
 
   data() {
     return {
-      toggle: [],
+      socket: '',
+      document: '',
+      time: '',
+      event: '',
     }
   },
 
@@ -79,6 +110,16 @@ export default {
         .sortByDesc('timestamp')
         .values()
         .map((item, index) => this.mapper(item, index))
+        .toArray()
+    },
+    filteredLog() {
+      return collect(this.log)
+        .filter(
+          item => (!this.socket || item.socket.indexOf(this.socket) !== -1)
+            && (!this.document || item.details.indexOf(this.document) !== -1)
+            && (!this.event || item.label.indexOf(this.event) !== -1)
+            && (!this.time || item.time.indexOf(this.time) !== -1),
+        )
         .toArray()
     },
   },
