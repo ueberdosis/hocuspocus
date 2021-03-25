@@ -1,12 +1,12 @@
 {
-  "name": "@hocuspocus/monitor",
+  "name": "@hocuspocus/extension-monitor",
   "description": "hocuspocus monitoring",
   "version": "1.0.0-alpha.36",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
     "tiptap",
-    "redis",
+    "monitor",
     "yjs"
   ],
   "type": "module",

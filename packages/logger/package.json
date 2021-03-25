@@ -1,12 +1,13 @@
 {
-  "name": "@hocuspocus/logger",
+  "name": "@hocuspocus/extension-logger",
   "version": "1.0.0-alpha.12",
   "description": "hocuspocus logging extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
     "tiptap",
-    "redis",
+    "logging",
+    "logger",
     "yjs"
   ],
   "type": "module",

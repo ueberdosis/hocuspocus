@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@hocuspocus/redis",
+  "name": "@hocuspocus/extension-redis",
   "version": "1.0.0-alpha.28",
   "description": "hocuspocus persistence driver for Redis",
   "homepage": "https://hocuspocus.dev",
