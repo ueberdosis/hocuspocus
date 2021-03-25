@@ -2,19 +2,16 @@
 import { expect } from 'chai'
 import fetch from 'node-fetch'
 import { Hocuspocus } from '../packages/server/src'
-
-const defaultPort = parseInt(process.env.DEFAULT_PORT || 1234)
+import { defaultHost, defaultPort } from './utils/utils'
 
 context('listen', () => {
 
-  it('should start an instance', (done) => {
+  it('should start an instance', async () => {
     const Server = new Hocuspocus
-
     Server.configure({ port: defaultPort })
-    Server.listen()
-    Server.destroy()
 
-    done()
+    await Server.listen()
+    await Server.destroy()
   })
 
   it('should fire onListen after starting the server', (done) => {
@@ -22,9 +19,9 @@ context('listen', () => {
 
     Server.configure({
       port: defaultPort,
-      onListen() {
+      async onListen() {
+        await Server.destroy()
         done()
-        Server.destroy()
       }
     })
 
@@ -36,7 +33,7 @@ context('listen', () => {
 
     Server.configure({
       port: defaultPort,
-      onDestroy() {
+      async onDestroy() {
         done()
       }
     })
@@ -45,24 +42,37 @@ context('listen', () => {
     Server.destroy()
   })
 
-  it('should respond with OK', async () => {
+  it('should respond with OK', (done) => {
     const Server = new Hocuspocus
 
     Server.configure({
       port: defaultPort,
-      onListen(data, resolve, reject) {
-
-        fetch(`http://localhost:${defaultPort}`)
-          .then(response => {
-            expect(response.ok).to.equal(true)
-            resolve()
-          })
-          .catch(e => reject(e))
+      async onListen() {
+        const response = await fetch(`http://${defaultHost}:${defaultPort}`)
+        expect(response.ok).to.equal(true)
+        await Server.destroy()
+        done()
       }
     })
 
-    await Server.listen()
-    await Server.destroy()
+    Server.listen()
+  })
+
+  it('should fire onRequest', (done) => {
+    const Server = new Hocuspocus
+
+    Server.configure({
+      port: defaultPort,
+      async onListen() {
+        await fetch(`http://${defaultHost}:${defaultPort}`)
+      },
+      async onRequest() {
+        await Server.destroy()
+        done()
+      }
+    })
+
+    Server.listen()
   })
 
 })

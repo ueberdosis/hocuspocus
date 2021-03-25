@@ -1,47 +1,32 @@
 /* eslint-disable */
 import { expect } from 'chai'
 import { Hocuspocus } from '../packages/server/src'
-import * as Y from 'yjs'
-import pkg from 'y-websocket'
-import { EventEmitter } from 'events'
-import ws from 'ws'
-
-const { WebsocketProvider } = pkg
-
-const defaultPort = parseInt(process.env.DEFAULT_PORT || 1234)
+import { connectToServer, defaultPort } from './utils/utils'
 
 context('connect', () => {
   let Server
 
   beforeEach(() => {
-    Server = new Hocuspocus
+    Server = new Hocuspocus()
+    Server.configuration.port = defaultPort
   })
 
-  afterEach(() => {
-    Server.destroy()
+  afterEach(async () => {
+    await Server.destroy()
   })
 
-  it.skip('should be able to connect to the websocket server', async () => {
+  it('should be able to connect to the websocket server', (done) => {
     Server.configure({
-      port: defaultPort,
-      onListen(data, resolve, reject) {
-        // const doc = new Y.Doc()
-        // const wsProvider = new WebsocketProvider(
-        //   `ws://localhost:${defaultPort}`,
-        //   'test',
-        //   doc,
-        //   { WebSocketPolyfill: ws }
-        //   )
-        //
-        // wsProvider.on('status', event => {
-        //   if(event.status === 'connected') {
-        //     resolve()
-        //   }
-        // })
+      async onListen(data) {
+       const { wsProvider } = connectToServer()
+
+        wsProvider.on('status', async (event) => {
+          if(event.status !== 'connected') return
+          done()
+        })
       }
     })
 
-    await Server.listen()
+    Server.listen()
   })
-
 })

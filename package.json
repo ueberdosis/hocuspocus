@@ -26,7 +26,7 @@
     "release": "yarn lint && yarn build:packages && lerna publish",
     "reset": "yarn clean:packages && rm -rf ./**/.cache && rm -rf ./**/node_modules && rm -rf ./yarn.lock && yarn install",
     "start:docs": "yarn --cwd ./docs start",
-    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/**/*.js' --exit"
+    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli 'tests/*.js' --exit"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -56,6 +56,7 @@
     "minimist": "^1.2.5",
     "mocha": "^8.3.0",
     "node-fetch": "^2.6.1",
+    "node-window-polyfill": "^1.0.2",
     "rollup": "^2.39.0",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
