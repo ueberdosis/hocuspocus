@@ -18,10 +18,10 @@ Now you should be able to install the RocksDB package with:
 
 ```bash
 # with npm
-npm install @hocuspocus/rocksdb
+npm install @hocuspocus/extension-rocksdb
 
 # with Yarn
-yarn add @hocuspocus/rocksdb
+yarn add @hocuspocus/extension-rocksdb
 ```
 
 ## Configuration
@@ -30,7 +30,7 @@ In this example we configured the RocksDB extension to persist data in the `./da
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { RocksDB } from '@hocuspocus/rocksdb'
+import { RocksDB } from '@hocuspocus/extension-rocksdb'
 
 const server = Server.configure({
 

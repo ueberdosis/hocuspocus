@@ -18,10 +18,10 @@ Now you should be able to install the Monitor package with:
 
 ```bash
 # with npm
-npm install @hocuspocus/redis
+npm install @hocuspocus/extension-redis
 
 # with Yarn
-yarn add @hocuspocus/redis
+yarn add @hocuspocus/extension-redis
 ```
 
 ## Configuration
@@ -30,7 +30,7 @@ For a full documentation on all available redis and redis cluster options, check
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { Redis } from '@hocuspocus/redis'
+import { Redis } from '@hocuspocus/extension-redis'
 
 const server = Server.configure({
   extensions: [

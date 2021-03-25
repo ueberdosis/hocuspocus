@@ -14,10 +14,10 @@ Now you should be able to install the Monitor package with:
 
 ```bash
 # with npm
-npm install @hocuspocus/logger
+npm install @hocuspocus/extension-logger
 
 # with Yarn
-yarn add @hocuspocus/logger
+yarn add @hocuspocus/extension-logger
 ```
 
 ## Configuration
@@ -26,7 +26,7 @@ The logger has no configuration options (yet).
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/logger'
+import { Logger } from '@hocuspocus/extension-logger'
 
 const server = Server.configure({
   extensions: [

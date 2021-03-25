@@ -17,10 +17,10 @@ Now you should be able to install the Monitor package with:
 
 ```bash
 # with npm
-npm install @hocuspocus/monitor
+npm install @hocuspocus/extension-monitor
 
 # with Yarn
-yarn add @hocuspocus/monitor
+yarn add @hocuspocus/extension-monitor
 ```
 
 ## Configuration
@@ -29,7 +29,7 @@ All configuration options are optional.
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { Monitor } from '@hocuspocus/monitor'
+import { Monitor } from '@hocuspocus/extension-monitor'
 
 const server = Server.configure({
 
