@@ -10,13 +10,13 @@ Extensions are a quick way to add additional features to hocuspocus. They use th
 
 We already created some very useful extensions you should check out for sure:
 
-**[@hocuspocus/rocksdb](/extensions/rocksdb)**: An easy to use primary storage for hocuspocus.
+**[@hocuspocus/extension-rocksdb](/extensions/rocksdb)**: An easy to use primary storage for hocuspocus.
 
-**[@hocuspocus/monitor](/extensions/monitor)**: A beautiful dashboard to monitor and debug your hocuspocus instance.
+**[@hocuspocus/extension-monitor](/extensions/monitor)**: A beautiful dashboard to monitor and debug your hocuspocus instance.
 
-**[@hocuspocus/redis](/extensions/redis)**: Scale hocuspocus horizontally with redis.
+**[@hocuspocus/extension-redis](/extensions/redis)**: Scale hocuspocus horizontally with redis.
 
-**[@hocuspocus/logger](/extensions/logger)**: Add logging to hocuspocus.
+**[@hocuspocus/extension-logger](/extensions/logger)**: Add logging to hocuspocus.
 
 ## Create your own extension
 
