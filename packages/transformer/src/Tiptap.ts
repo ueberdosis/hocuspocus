@@ -6,7 +6,7 @@ import { Transformer } from './types'
 
 class Tiptap implements Transformer {
 
-  fromYdoc(document: Doc, fieldName: string | Array<string> = []): any {
+  fromYdoc(document: Doc, fieldName?: string | Array<string>): any {
     return ProsemirrorTransformer.fromYdoc(document, fieldName)
   }
 

@@ -5,7 +5,7 @@ import { Transformer } from './types'
 
 class Prosemirror implements Transformer {
 
-  fromYdoc(document: Doc, fieldName: string | Array<string>): any {
+  fromYdoc(document: Doc, fieldName?: string | Array<string>): any {
     const data = {}
 
     // allow a single field name
@@ -14,7 +14,7 @@ class Prosemirror implements Transformer {
     }
 
     // default to all available fields if the given field name is empty
-    if (fieldName.length === 0) {
+    if (fieldName === undefined || fieldName.length === 0) {
       fieldName = Array.from(document.share.keys())
     }
 
