@@ -40,35 +40,29 @@ With the `onChange` hook you can listen to changes of the document and handle th
 In a real-world application you would probably save the current document to a database, send it via webhook to an API
 or something else.
 
-It's highly recommended to debounce extensive operations (like API calls) as this hook can be fired up to multiple times a second:
+It's **highly recommended** to debounce extensive operations (like API calls) as this hook can be fired up to multiple times a second:
 
 ```typescript
-import { writeFile } from 'fs'
-import { Server } from '@hocuspocus/server'
-import { yDocToProsemirrorJSON } from 'y-prosemirror'
 import { debounce } from 'debounce'
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import { writeFile } from 'fs'
 
 let debounced
 
 const hocuspocus = Server.configure({
   async onChange(data) {
     const save = () => {
-      // Get the underlying Y-Doc
-      const ydoc = data.document
-
-      // Convert the y-doc to the format your editor uses, in this
-      // example Prosemirror JSON for the tiptap editor.
-      // The tiptap collaboration extension uses shared types of a single y-doc
-      // to store different fields in the same document. You can target a specific
-      // field by providing a second argument with the name of the field.
-      // The default field in tiptap is simply called "default"
-      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
+      // Convert the y-doc to something you can actually use in your views.
+      // In this example we use the TiptapTransformer to get JSON from the given
+      // ydoc.
+      const prosemirrorJSON = TiptapTransformer.fromYdoc(data.document)
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
       writeFile(
         `/path/to/your/documents/${data.documentName}.json`,
-        prosemirrorDocument
+        prosemirrorJSON
       )
 
       // Maybe you want to store the user who changed the document?
@@ -96,44 +90,42 @@ If you're using the tiptap editor you will need the schema to create a Y-Doc fro
 ```typescript
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
-import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { getSchema } from '@tiptap/core'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
   async onCreateDocument(data) {
-      // The tiptap collaboration extension uses shared types of a single y-doc
-      // to store different fields in the same document.
-      // The default field in tiptap is simply called "default"
-      const fieldName = 'default'
+    // The tiptap collaboration extension uses shared types of a single y-doc
+    // to store different fields in the same document.
+    // The default field in tiptap is simply called "default"
+    const fieldName = 'default'
 
     // Check if the given field already exists in the given y-doc.
-    // Only import a document if it doesn't exist in the primary data storage
-    if (data.document.get(fieldName)._start) {
+    // Important: Only import a document if it doesn't exist in the primary data storage!
+    if (data.document.isEmpty(fieldName)) {
       return
     }
 
     // Get the document from somwhere. In a real world application this would
     // probably be a database query or an API call
-    const prosemirrorDocument = JSON.parse(
+    const prosemirrorJSON = JSON.parse(
       readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
     )
 
-    // When using the tiptap editor we need the schema to create
-    // a prosemirror JSON. You can use the `getSchema` method and
-    // pass it all the tiptap extensions you're using in the frontend
-    const schema = getSchema([ Document, Paragraph, Text ])
-
-    // Convert the prosemirror JSON to a ydoc and simply return it.
-    // You can target a specific field by providing a third argument with the name of the field.
-    return prosemirrorJSONToYDoc(schema, prosemirrorDocument, fieldName)
+    // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
+    // of extensions you use in the frontend to create a valid document
+    return TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], fieldName)
   },
 })
 
 hocuspocus.listen()
 ```
+
+## Importing a document with multiple fields
+
+// TODO
 
 ## Converting a Y-Doc
 
@@ -142,40 +134,36 @@ In the previous example we used the `y-prosemirror` package to transform the Yjs
 hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start.
 
 
-### tiptap / prosemirror
+### tiptap
 
 **Convert a Y-Doc to prosemirror JSON:**
 
 ```typescript
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import { Doc } from 'yjs'
-import { yDocToProsemirrorJSON } from 'y-prosemirror'
 
 const ydoc = new Doc()
-const newProsemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name');
+const prosemirrorJSON = TiptapTransformer.fromYdoc(ydoc, 'field-name')
 ```
 
 **Convert prosemirror JSON to a Y-Doc:**
 
 ```typescript
-import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { getSchema } from '@tiptap/core'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
-const prosemirrorDocument = {
+const prosemirrorJSON = {
   type: 'doc',
   content: [
     // ...
   ],
 }
 
-// We need the schema to create a prosemirror JSON. You can use
-// the `getSchema` method of the tiptap editor and pass it all
-// the tiptap extensions you're using in the frontend
-const schema = getSchema([ Document, Paragraph, Text ])
-
-const newYdoc = prosemirrorJSONToYDoc(schema, newProsemirrorDocument, 'field-name')
+// The TiptapTransformer requires you to pass the list of  extensions you use in
+// the frontend to create a valid document
+const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], 'field-name')
 ```
 
 ### Quill

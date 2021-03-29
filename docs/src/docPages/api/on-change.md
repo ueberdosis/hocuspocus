@@ -33,33 +33,31 @@ Context contains the data provided in former `onConnect` hooks.
 
 ## Example
 
+:::warning Use a primary storage
+The following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
+:::
+
 ```typescript
-import { writeFile } from 'fs'
-import { Server } from '@hocuspocus/server'
-import { yDocToProsemirrorJSON } from 'y-prosemirror'
 import { debounce } from 'debounce'
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import { writeFile } from 'fs'
 
 let debounced
 
 const hocuspocus = Server.configure({
   async onChange(data) {
     const save = () => {
-      // Get the underlying Y-Doc
-      const ydoc = data.document
-
-      // Convert the y-doc to the format your editor uses, in this
-      // example Prosemirror JSON for the tiptap editor.
-      // The tiptap collaboration extension uses shared types of a single y-doc
-      // to store different fields in the same document. You can target a specific
-      // field by providing a second argument with the name of the field.
-      // The default field in tiptap is simply called "default"
-      const prosemirrorDocument = yDocToProsemirrorJSON(ydoc, 'field-name')
+      // Convert the y-doc to something you can actually use in your views.
+      // In this example we use the TiptapTransformer to get JSON from the given
+      // ydoc.
+      const prosemirrorJSON = TiptapTransformer.fromYdoc(data.document)
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
       writeFile(
         `/path/to/your/documents/${data.documentName}.json`,
-        prosemirrorDocument
+        prosemirrorJSON
       )
 
       // Maybe you want to store the user who changed the document?
@@ -77,7 +75,3 @@ const hocuspocus = Server.configure({
 
 hocuspocus.listen()
 ```
-
-:::warning Usa a primary storage
-This example above is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
-:::

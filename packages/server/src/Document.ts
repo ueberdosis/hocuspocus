@@ -39,6 +39,14 @@ class Document extends Doc {
   }
 
   /**
+   * Check if the Document is empty
+   */
+  isEmpty(fieldName: string): boolean {
+    // eslint-disable-next-line no-underscore-dangle
+    return !!this.get(fieldName)._start
+  }
+
+  /**
    * Set a callback that will be triggered when the document is updated
    */
   onUpdate(callback: (document: Document, connection: Connection, update: Uint8Array) => void): Document {
