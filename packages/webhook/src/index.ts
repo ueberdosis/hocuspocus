@@ -91,9 +91,11 @@ export class Webhook implements Extension {
   /**
    * Send a request to the given url containing the given data
    */
-  async sendRequest(url: string, data: string) {
+  async sendRequest(url: string, data: any) {
+    const json = JSON.stringify(data)
+
     axios
-      .post(url, data, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(data) } })
+      .post(url, json, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } })
       .catch(e => console.log(`[${new Date().toISOString()}] Request to ${url} failed:`, e.message))
   }
 
@@ -102,8 +104,11 @@ export class Webhook implements Extension {
    */
   async onChange(data: onChangePayload) {
     const save = () => {
-      const json = JSON.stringify(this.getDataFromYdoc(data.document))
-      this.configuration.urls.forEach(url => this.sendRequest(url, json))
+      this.configuration.urls.forEach(url => this.sendRequest(url, {
+        data: this.getDataFromYdoc(data.document),
+        documentName: data.documentName,
+        context: data.context,
+      }))
     }
 
     if (!this.configuration.debounce) {

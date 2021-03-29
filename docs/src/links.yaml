@@ -47,6 +47,8 @@
       link: /extensions/redis
     - title: Logger
       link: /extensions/logger
+    - title: Webhook
+      link: /extensions/webhook
 
 - title: API
   items:
