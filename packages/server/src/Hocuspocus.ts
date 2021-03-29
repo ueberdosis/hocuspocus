@@ -12,7 +12,7 @@ import packageJson from '../package.json'
 export const defaultConfiguration = {
   port: 80,
   timeout: 30000,
-  throttle: 5,
+  throttle: 15,
   banTime: 5,
 }
 
