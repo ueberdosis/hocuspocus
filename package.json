@@ -21,6 +21,7 @@
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos/client dev\" \"yarn --cwd ./demos/server dev src/express.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/client dev\" \"yarn --cwd ./demos/server dev src/monitor.ts\" \"yarn --cwd ./packages/monitor start\"",
     "demo:minimal": "concurrently --kill-others \"yarn --cwd ./demos/client dev\" \"yarn --cwd ./demos/server dev src/minimal.ts\"",
+    "demo:webhook": "concurrently --kill-others \"yarn --cwd ./demos/client dev\" \"yarn --cwd ./demos/server dev src/webhook.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "release": "yarn lint && yarn build:packages && lerna publish",

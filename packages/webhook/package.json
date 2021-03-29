@@ -1,0 +1,34 @@
+{
+  "name": "@hocuspocus/extension-webhook",
+  "version": "1.0.0-alpha.1",
+  "description": "hocuspocus webhook extension",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "webhook",
+    "api",
+    "rest",
+    "yjs"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-webhook.esm.js",
+  "module": "dist/hocuspocus-webhook.esm.js",
+  "types": "dist/packages/webhook/src/index.d.ts",
+  "exports": {
+    "import": "./dist/hocuspocus-webhook.esm.js",
+    "require": "./dist/hocuspocus-webhook.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.37",
+    "@hocuspocus/transformer": "^1.0.0-alpha.3",
+    "axios": "^0.21.1"
+  },
+  "publishConfig": {
+    "registry": "https://registry.ueber.io"
+  }
+}
