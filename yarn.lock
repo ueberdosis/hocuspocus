@@ -2108,7 +2108,7 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@tiptap/core@^2.0.0-alpha.18", "@tiptap/core@^2.0.0-beta.5":
+"@tiptap/core@^2.0.0-alpha.18", "@tiptap/core@^2.0.0-beta.5", "@tiptap/core@^2.0.0-beta.6":
   version "2.0.0-beta.6"
   resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.6.tgz#44f8e4b42d58b43ae374b503ac7fe6d7d3f7c57b"
   integrity sha512-94OpUaj8W1WTBa7uAoGUBTyJwm+cIVPQPKxx9yMndqqT/ecWhZKWtgYWdsKoN4pkMx+Hed3vaK2DEL6qTrQI8A==
@@ -15258,7 +15258,7 @@ yauzl@^2.4.2:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
 
-yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2:
+yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3:
   version "13.5.3"
   resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.3.tgz#0efc5983ec287d24f4471f8f4184f9df80780835"
   integrity sha512-LlkmCr68LCfkmoic6rBjDaD01vbdMhy07dXYo65sQ0wOYh8eylrU1b0lTo3YT/BmcyH5Jn4KewDxyJMsDwvERw==
