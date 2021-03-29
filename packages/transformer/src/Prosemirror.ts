@@ -3,9 +3,9 @@ import { yDocToProsemirrorJSON, prosemirrorJSONToYDoc } from 'y-prosemirror'
 import { Schema } from 'prosemirror-model'
 import { Transformer } from './types'
 
-export class ProsemirrorTransformer implements Transformer {
+class Prosemirror implements Transformer {
 
-  static fromYdoc(document: Doc, fieldName: string | Array<string>): any {
+  fromYdoc(document: Doc, fieldName: string | Array<string>): any {
     const data = {}
 
     // allow a single field name
@@ -26,7 +26,7 @@ export class ProsemirrorTransformer implements Transformer {
     return data
   }
 
-  static toYdoc(document: any, schema: Schema, fieldName: string | Array<string> = 'prosemirror'): Doc {
+  toYdoc(document: any, schema: Schema, fieldName: string | Array<string> = 'prosemirror'): Doc {
     // allow a single field name
     if (typeof fieldName === 'string') {
       return prosemirrorJSONToYDoc(schema, document, fieldName)
@@ -46,3 +46,5 @@ export class ProsemirrorTransformer implements Transformer {
   }
 
 }
+
+export const ProsemirrorTransformer = new Prosemirror()
