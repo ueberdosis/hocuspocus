@@ -24,15 +24,15 @@ export class Hocuspocus {
   configuration: Configuration = {
     ...defaultConfiguration,
     extensions: [],
-    onChange: () => new Promise(r => r()),
-    onConfigure: () => new Promise(r => r()),
-    onConnect: () => new Promise(r => r()),
-    onCreateDocument: () => new Promise(r => r()),
-    onDestroy: () => new Promise(r => r()),
-    onDisconnect: () => new Promise(r => r()),
-    onListen: () => new Promise(r => r()),
-    onRequest: () => new Promise(r => r()),
-    onUpgrade: () => new Promise(r => r()),
+    onChange: () => new Promise(r => r(null)),
+    onConfigure: () => new Promise(r => r(null)),
+    onConnect: () => new Promise(r => r(null)),
+    onCreateDocument: () => new Promise(r => r(null)),
+    onDestroy: () => new Promise(r => r(null)),
+    onDisconnect: () => new Promise(r => r(null)),
+    onListen: () => new Promise(r => r(null)),
+    onRequest: () => new Promise(r => r(null)),
+    onUpgrade: () => new Promise(r => r(null)),
   }
 
   documents = new Map()

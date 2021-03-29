@@ -22,15 +22,15 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
-  onChange(data: onChangePayload): Promise<void>,
-  onConnect(data: onConnectPayload): Promise<void>,
-  onConfigure(data: onConfigurePayload): Promise<void>,
-  onCreateDocument(data: onCreateDocumentPayload): Promise<void>,
-  onDestroy(data: onDestroyPayload): Promise<void>,
-  onDisconnect(data: onDisconnectPayload): Promise<void>
-  onListen(data: onListenPayload): Promise<void>,
-  onRequest(data: onRequestPayload): Promise<void>,
-  onUpgrade(data: onUpgradePayload): Promise<void>,
+  onChange(data: onChangePayload): Promise<any>,
+  onConnect(data: onConnectPayload): Promise<any>,
+  onConfigure(data: onConfigurePayload): Promise<any>,
+  onCreateDocument(data: onCreateDocumentPayload): Promise<any>,
+  onDestroy(data: onDestroyPayload): Promise<any>,
+  onDisconnect(data: onDisconnectPayload): Promise<any>
+  onListen(data: onListenPayload): Promise<any>,
+  onRequest(data: onRequestPayload): Promise<any>,
+  onUpgrade(data: onUpgradePayload): Promise<any>,
 }
 
 export interface Configuration extends Extension {

@@ -1,9 +1,7 @@
-import { getSchema } from '@tiptap/core'
 import { defaultExtensions } from '@tiptap/starter-kit'
-import { prosemirrorJSONToYDoc } from 'y-prosemirror'
-
 import { Logger } from '../../../packages/logger/src'
 import { RocksDB } from '../../../packages/rocksdb/src'
+import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
 const server = Server.configure({
@@ -16,30 +14,31 @@ const server = Server.configure({
   ],
 
   async onCreateDocument(data: onCreateDocumentPayload) {
-    const fieldName = 'default'
-
     // eslint-disable-next-line no-underscore-dangle
-    if (data.document.get(fieldName)._start) {
+    if (data.document.get('default')._start) {
       return
     }
 
-    const prosemirrorDocument = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'Hello World!',
-            },
-          ],
-        },
-      ],
-    }
+    const ydoc = TiptapTransformer.toYdoc(
+      {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'What is love?',
+              },
+            ],
+          },
+        ],
+      },
+      defaultExtensions(),
+      'default',
+    )
 
-    const schema = getSchema(defaultExtensions())
-    return prosemirrorJSONToYDoc(schema, prosemirrorDocument, fieldName)
+    return ydoc
   },
 })
 
