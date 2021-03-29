@@ -118,35 +118,35 @@ export class Webhook implements Extension {
     this.debounce(data.documentName, save)
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onCreateDocument(data: onCreateDocumentPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConnect(data: onConnectPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDisconnect(data: onDisconnectPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onUpgrade(data: onUpgradePayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onRequest(data: onRequestPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onListen(data: onListenPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDestroy(data: onDestroyPayload) {
   }
 
-  // eslint-disable-next-line no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
   }
 
