@@ -7,11 +7,6 @@ import ws from 'ws'
 const { WebsocketProvider } = pkg
 nodeWindowPolyfill.register(false)
 
-// handle unhandled rejections
-// process.on('unhandledRejection', message => {
-//   throw new Error(message)
-// })
-
 /*
  * Default values
  */

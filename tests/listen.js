@@ -4,6 +4,11 @@ import fetch from 'node-fetch'
 import { Hocuspocus } from '../packages/server/src'
 import { defaultHost, defaultPort } from './utils/utils'
 
+// handle unhandled rejections
+process.on('unhandledRejection', message => {
+  throw new Error(message)
+})
+
 context('listen', () => {
 
   it('should start an instance', async () => {
