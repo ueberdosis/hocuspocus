@@ -20,11 +20,11 @@ context('connect', () => {
 
         // http works…
         fetch(`http://${defaultHost}:${defaultPort}`)
-          .then(result => console.log('fetch', result))
+          .then(() => console.log('# http works!'))
 
         // ws works…
         const ws = new WebSocket(`ws://${defaultHost}:${defaultPort}`)
-        ws.on('open', () => console.log('connected'))
+        ws.on('open', () => console.log('# ws works too!'))
 
         // y u not working? 😡
         const { wsProvider } = connectToServer()
