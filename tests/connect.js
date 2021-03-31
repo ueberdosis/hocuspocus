@@ -1,9 +1,11 @@
 /* eslint-disable */
 import { expect } from 'chai'
 import { Hocuspocus } from '../packages/server/src'
-import { connectToServer, defaultPort, defaultHost } from './utils/utils'
+import { connectToServer, defaultPort, defaultHost, defaultRoomName } from './utils/utils'
 import fetch from 'node-fetch'
 import WebSocket from 'ws'
+import * as Y from 'yjs'
+import ws from 'ws'
 
 // handle unhandled rejections
 process.on('unhandledRejection', message => {
@@ -19,11 +21,11 @@ context('connect', () => {
       async onListen(data) {
 
         // http works…
-        fetch(`http://${defaultHost}:${defaultPort}`)
+        fetch(`http://${defaultHost}:${defaultPort}/${defaultRoomName}`)
           .then(() => console.log('# http works!'))
 
         // ws works…
-        const ws = new WebSocket(`ws://${defaultHost}:${defaultPort}`)
+        const ws = new WebSocket(`ws://${defaultHost}:${defaultPort}/${defaultRoomName}`)
         ws.on('open', () => console.log('# ws works too!'))
 
         // y u not working? 😡
