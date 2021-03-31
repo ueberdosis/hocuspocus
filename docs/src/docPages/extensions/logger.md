@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Hocuspocus doesn't log anything to the console. With this simple extension it will.
+Hocuspocus doesn't log anything to stdout/stderr. Thanks to this simple extension it will.
 
 ## Installation
 

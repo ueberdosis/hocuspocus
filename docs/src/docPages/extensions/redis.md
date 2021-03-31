@@ -4,11 +4,11 @@
 
 ## Introduction
 
-hocuspocus can be scaled indefinitely using the official Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.
-
 :::warning Work in progress
 Currently, the Redis extension only syncs document changes. Awareness states, for example cursors, are not yet supported.
 :::
+
+hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.
 
 ## Installation
 

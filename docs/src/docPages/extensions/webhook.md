@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This extension allows you to send documents via webhook to the API of your choice after they were changed. This is a very simple way to add hocuspocus to your existing application, even if it isn't built on Node.js.
+The webhook extension allows you to send documents via webhook to the API of your choice when they are changed. This is a very simple way to add hocuspocus to your existing application, even if it isn't built with Node.js.
 
 ## Installation
 
@@ -54,9 +54,9 @@ server.listen()
 
 ## Transformation
 
-As you probably already know from [the guide](/guide/documents), the onChange hook gives you access to the Y-Doc which must be serialized into something readable by your application. The webhook extension needs this as well.
+As you probably already know from [the guide](/guide/documents), all hooks gives you access to the Y-Doc which must be serialized into something readable by your application.
 
-Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use the Transformers from the `@hocuspocus/transformer` package, or write your own by simply passing a function that accepts a Y-Doc and returns your representation:
+Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use a Transformer from the `@hocuspocus/transformer` package, or write your own by simply passing a function that accepts a Y-Doc and returns your representation:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
@@ -70,7 +70,7 @@ const server = Server.configure({
       secret: '459824aaffa928e05f5b1caec411ae5f',
 
       transformer: (document: Doc): any => {
-          // convert the given y-doc and return it!
+          // convert the given y-doc to something and return it!
           return {}
       },
     }),
@@ -82,9 +82,11 @@ server.listen()
 
 ## Verify Request Signature
 
-On your application server you should verify the signature coming from the webhook extension to secure the route. (It sends POST requests by the way)
+On your application server you should verify the signature coming from the webhook extension to secure the route.
 
-Here are some examples how your could do that:
+The extension sends POST requests, and the signature is stored in the `X-Hocuspocus-Signature-256` header containing a message authentication code created with sha256.
+
+Here are some examples how you could do that in different languages:
 
 ### PHP
 
