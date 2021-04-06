@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/docs",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "private": true,
   "scripts": {
     "start": "gridsome develop",
