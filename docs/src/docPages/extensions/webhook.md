@@ -10,7 +10,7 @@ The webhook extension allows you to send documents via webhook to the API of you
 
 Configure your `.npmrc` to look for packages with the @hocuspocus prefix in our private registry, [as described here](/installation#2-installation).
 
-Now you should be able to install the Monitor package with:
+Now you should be able to install the Webhook package with:
 
 ```bash
 # with npm
@@ -54,9 +54,9 @@ server.listen()
 
 ## Transformation
 
-As you probably already know from [the guide](/guide/documents), all hooks gives you access to the Y-Doc which must be serialized into something readable by your application.
+As you probably already know from [the guide](/guide/documents) the Y-Doc must be serialized into something readable by your application.
 
-Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use a Transformer from the `@hocuspocus/transformer` package, or write your own by simply passing a function that accepts a Y-Doc and returns your representation:
+Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use a Transformer from the `@hocuspocus/transformer` package, or write your own by simply passing a function that accepts a Y-Doc and returns your representation of it:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
