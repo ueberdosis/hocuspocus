@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
-import { Doc } from 'yjs'
+import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
 import { mutex, createMutex } from 'lib0/mutex.js'
 
 import { AwarenessUpdate } from './types'
@@ -43,7 +43,18 @@ class Document extends Doc {
    */
   isEmpty(fieldName: string): boolean {
     // eslint-disable-next-line no-underscore-dangle
-    return !!this.get(fieldName)._start
+    return !this.get(fieldName)._start
+  }
+
+  /**
+   * Merge the given document(s) into this one
+   */
+  merge(documents: Doc|Array<Doc>): Document {
+    (Array.isArray(documents) ? documents : [documents]).forEach(document => {
+      applyUpdate(this, encodeStateAsUpdate(document))
+    })
+
+    return this
   }
 
   /**

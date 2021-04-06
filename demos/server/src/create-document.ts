@@ -4,6 +4,23 @@ import { RocksDB } from '../../../packages/rocksdb/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
+const generateProsemirrorJson = (text: string) => {
+  return {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text,
+          },
+        ],
+      },
+    ],
+  }
+}
+
 const server = Server.configure({
   port: 1234,
   throttle: false,
@@ -14,31 +31,23 @@ const server = Server.configure({
   ],
 
   async onCreateDocument(data: onCreateDocumentPayload) {
-    // eslint-disable-next-line no-underscore-dangle
-    if (data.document.get('default')._start) {
-      return
+    if (data.document.isEmpty('default')) {
+      const defaultField = TiptapTransformer.toYdoc(
+        generateProsemirrorJson('What is love?'), defaultExtensions(), 'default',
+      )
+
+      data.document.merge(defaultField)
     }
 
-    const ydoc = TiptapTransformer.toYdoc(
-      {
-        type: 'doc',
-        content: [
-          {
-            type: 'paragraph',
-            content: [
-              {
-                type: 'text',
-                text: 'What is love?',
-              },
-            ],
-          },
-        ],
-      },
-      defaultExtensions(),
-      'default',
-    )
+    if (data.document.isEmpty('secondary')) {
+      const secondaryField = TiptapTransformer.toYdoc(
+        generateProsemirrorJson('Baby don\'t hurt me…'), defaultExtensions(), 'secondary',
+      )
 
-    return ydoc
+      data.document.merge(secondaryField)
+    }
+
+    return data.document
   },
 })
 

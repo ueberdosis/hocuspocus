@@ -104,7 +104,7 @@ const hocuspocus = Server.configure({
 
     // Check if the given field already exists in the given y-doc.
     // Important: Only import a document if it doesn't exist in the primary data storage!
-    if (data.document.isEmpty(fieldName)) {
+    if (!data.document.isEmpty(fieldName)) {
       return
     }
 

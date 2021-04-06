@@ -4,6 +4,10 @@
     <div v-if="editor">
       <editor-content :editor="editor" />
     </div>
+
+    <div v-if="editor2">
+      <editor-content :editor="editor2" />
+    </div>
   </div>
 </template>
 
@@ -23,6 +27,7 @@ export default {
     return {
       provider: null,
       editor: null,
+      editor2: null,
       status: 'connecting',
     }
   },
@@ -37,11 +42,24 @@ export default {
 
     window.ydoc = ydoc
 
+    const extensions = defaultExtensions().filter(extension => extension.config.name !== 'history')
+
     this.editor = new Editor({
       extensions: [
-        ...defaultExtensions().filter(extension => extension.config.name !== 'history'),
+        ...extensions,
         Collaboration.configure({
           document: ydoc,
+          field: 'default',
+        }),
+      ],
+    })
+
+    this.editor2 = new Editor({
+      extensions: [
+        ...extensions,
+        Collaboration.configure({
+          document: ydoc,
+          field: 'secondary',
         }),
       ],
     })
@@ -49,6 +67,7 @@ export default {
 
   beforeUnmount() {
     this.editor.destroy()
+    this.editor2.destroy()
     this.provider.destroy()
   },
 }
