@@ -19,7 +19,6 @@ import levelup from 'levelup'
 export interface Configuration {
   options: object | undefined,
   path: string,
-  useLevelDb: boolean | undefined,
 }
 
 export class RocksDB implements Extension {
@@ -27,12 +26,9 @@ export class RocksDB implements Extension {
   configuration: Configuration = {
     options: {},
     path: './database',
-    useLevelDb: false,
   }
 
   provider: LeveldbPersistence
-
-  debounced: any
 
   /**
    * Constructor
@@ -46,35 +42,36 @@ export class RocksDB implements Extension {
     this.provider = new LeveldbPersistence(
       this.configuration.path,
       {
-        level: this.configuration.useLevelDb
-          ? undefined
-          : (location: string, options: any) => levelup(rocksDB(location), options),
+        level: (location: string, options: any) => levelup(rocksDB(location), options),
         levelOptions: this.configuration.options,
       },
     )
-
-    return this
-  }
-
-  async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
-    const storedDocument = await this.provider.getYDoc(data.documentName)
-    const update = encodeStateAsUpdate(data.document)
-
-    await this.store(data.documentName, update)
-
-    applyUpdate(data.document, encodeStateAsUpdate(storedDocument))
-  }
-
-  async onChange(data: onChangePayload): Promise<any> {
-    this.store(data.documentName, data.update)
   }
 
   /**
-   * Store the given update in the database
-   * @private
+   * onCreateDocument hook
    */
-  private store(documentName: string, update: Uint8Array): void {
-    this.provider.storeUpdate(documentName, update)
+  async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
+    const persistedDocument = await this.provider.getYDoc(data.documentName)
+    const newUpdates = encodeStateAsUpdate(data.document)
+
+    applyUpdate(data.document, encodeStateAsUpdate(persistedDocument))
+
+    await this.store(data.documentName, newUpdates)
+  }
+
+  /**
+   * onChange hook
+   */
+  async onChange(data: onChangePayload): Promise<any> {
+    await this.store(data.documentName, data.update)
+  }
+
+  /**
+   * store updates in y-leveldb persistence
+   */
+  async store(documentName: string, update: Uint8Array): Promise<any> {
+    return this.provider.storeUpdate(documentName, update)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
