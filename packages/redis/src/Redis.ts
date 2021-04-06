@@ -39,15 +39,14 @@ export class Redis implements Extension {
   }
 
   /*
-   * onConnect hook
+   * onCreateDocument hook
    */
-  async onConnect(data: onConnectPayload) {
+  async onCreateDocument(data: onCreateDocumentPayload) {
     await this.persistence.bindState(data.documentName, data.document).synced
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
-  async onCreateDocument(data: onCreateDocumentPayload) {
-  }
+  async onConnect(data: onConnectPayload) {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
