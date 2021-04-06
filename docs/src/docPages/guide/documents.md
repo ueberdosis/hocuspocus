@@ -188,7 +188,6 @@ In the previous example we used the TiptapTransformer to transform the Yjs Docum
 
 hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start:
 
-
 ### tiptap
 
 **Convert a Y-Doc to prosemirror JSON:**
@@ -220,6 +219,38 @@ const prosemirrorJSON = {
 // the frontend to create a valid document
 const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], 'field-name')
 ```
+
+### Prosemirror
+
+**Convert a Y-Doc to prosemirror JSON:**
+
+```typescript
+import { ProsemirrorTransformer } from '@hocuspocus/transformer'
+import { Doc } from 'yjs'
+
+const ydoc = new Doc()
+const prosemirrorJSON = ProsemirrorTransformer.fromYdoc(ydoc, 'field-name')
+```
+
+**Convert prosemirror JSON to a Y-Doc:**
+
+```typescript
+import { ProsemirrorTransformer } from '@hocuspocus/transformer'
+import { Schema } from 'prosemirror-model'
+
+const prosemirrorJSON = {
+  type: 'doc',
+  content: [
+    // ...
+  ],
+}
+
+const prosemirrorSchema = new Schema()
+
+// The ProsemirrorTransformer requires you to pass the schema your editor uses
+const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, prosemirrorSchema, 'field-name')
+```
+
 
 ### Quill
 
