@@ -2342,6 +2342,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/encoding-down@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/encoding-down/-/encoding-down-5.0.0.tgz#0b5b90b93ac3aa75148f19508044e7bd36463557"
+  integrity sha512-G0MlS/+/U2RIQLcSEhhAcoMrXw3hXUCFSKbhbeEljoKMra2kq+NPX6tfOveSWQLX2hJXBo+YrvKgAGe+tFL1Aw==
+  dependencies:
+    "@types/abstract-leveldown" "*"
+    "@types/level-codec" "*"
+
 "@types/estree@*":
   version "0.0.47"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.47.tgz#d7a51db20f0650efec24cd04994f523d93172ed4"
@@ -2423,6 +2431,11 @@
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
+
+"@types/level-codec@*":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@types/level-codec/-/level-codec-9.0.0.tgz#9f1dc7f9017b6fba094a450602ec0b91cc384059"
+  integrity sha512-SWYkVJylo1dqblkhrr7UtmsQh4wdZA9bV1y3QJSywMPSqGfW0p1w37N1EayZtKbg1dGReIIQEEOtxk4wZvGrWQ==
 
 "@types/levelup@^4.3.0":
   version "4.3.0"

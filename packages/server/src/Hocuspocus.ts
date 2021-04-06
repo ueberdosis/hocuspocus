@@ -150,7 +150,7 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
     // get the remote ip address
-    const ip = <String> request.headers['x-real-ip']
+    const ip = <String>request.headers['x-real-ip']
       || request.headers['x-forwarded-for']
       || request.socket.remoteAddress || ''
 
@@ -271,13 +271,15 @@ export class Hocuspocus {
         requestParameters: Hocuspocus.getParameters(request),
       }
 
-      this.hooks('onDisconnect', hookPayload).catch(e => {
-        throw e
-      })
-
-      if (document.connectionsCount() <= 0) {
-        this.documents.delete(document.name)
-      }
+      this.hooks('onDisconnect', hookPayload)
+        .catch(e => {
+          throw e
+        })
+        .finally(() => {
+          if (document.connectionsCount() <= 0) {
+            this.documents.delete(document.name)
+          }
+        })
     })
 
     return instance

@@ -15,6 +15,7 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
 import rocksDB from 'rocksdb'
 import levelup from 'levelup'
+import encode from 'encoding-down'
 
 export interface Configuration {
   options: object | undefined,
@@ -42,7 +43,7 @@ export class RocksDB implements Extension {
     this.provider = new LeveldbPersistence(
       this.configuration.path,
       {
-        level: (location: string, options: any) => levelup(rocksDB(location), options),
+        level: (location: string, options: any) => levelup(encode(rocksDB(location), options)),
         levelOptions: this.configuration.options,
       },
     )
@@ -55,16 +56,14 @@ export class RocksDB implements Extension {
     const persistedDocument = await this.provider.getYDoc(data.documentName)
     const newUpdates = encodeStateAsUpdate(data.document)
 
+    await this.store(data.documentName, newUpdates)
     applyUpdate(data.document, encodeStateAsUpdate(persistedDocument))
 
-    await this.store(data.documentName, newUpdates)
-  }
-
-  /**
-   * onChange hook
-   */
-  async onChange(data: onChangePayload): Promise<any> {
-    await this.store(data.documentName, data.update)
+    // use the documents update handler directly instead of using the onChange hook
+    // to skip the first change that's triggered by the applyUpdate above
+    data.document.on('update', (update: Uint8Array) => {
+      this.store(data.documentName, update)
+    })
   }
 
   /**
@@ -72,6 +71,10 @@ export class RocksDB implements Extension {
    */
   async store(documentName: string, update: Uint8Array): Promise<any> {
     return this.provider.storeUpdate(documentName, update)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  async onChange(data: onChangePayload) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
