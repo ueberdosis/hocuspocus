@@ -85,8 +85,6 @@ hocuspocus.listen()
 
 If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system if they are **not present** in your [primary storage](#using-a-primary-storage). For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
-If you're using the tiptap editor you will need the schema to create a Y-Doc from the prosemirror JSON. Fortunately tiptap has you covered with it's `getSchema` function.
-
 ```typescript
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
@@ -125,13 +123,70 @@ hocuspocus.listen()
 
 ## Importing a document with multiple fields
 
-// TODO
+When using multiple fields you can simply merge different documents into the given document:
 
-## Converting a Y-Doc
+```typescript
+import { readFileSync } from 'fs'
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
 
-In the previous example we used the `y-prosemirror` package to transform the Yjs Document (short: Y-Doc) to the format the tiptap editor uses and vice versa.
+const generateSampleProsemirrorJson = (text: string) => {
+  return {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text,
+          },
+        ],
+      },
+    ],
+  }
+}
 
-hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start.
+const hocuspocus = Server.configure({
+  async onCreateDocument(data) {
+
+    // only import things if they are not already set in the primary storage
+    if (data.document.isEmpty('default')) {
+      // Get a Y-Doc for the 'default' field …
+      const defaultField = TiptapTransformer.toYdoc(
+        generateSampleProsemirrorJson('What is love?'),
+        [ Document, Paragraph, Text ],
+        'default'
+      )
+
+      // … and merge it into the given document
+      data.document.merge(defaultField)
+    }
+
+    if (data.document.isEmpty('secondary')) {
+      // Get a Y-Doc for the 'secondary' field …
+      const secondaryField = TiptapTransformer.toYdoc(
+        generateSampleProsemirrorJson('Baby don\'t hurt me…'),
+        [ Document, Paragraph, Text ],
+        'secondary'
+      )
+
+      // … and merge it into the given document
+      data.document.merge(secondaryField)
+    }
+  },
+})
+
+hocuspocus.listen()
+```
+## Transformations
+
+In the previous example we used the TiptapTransformer to transform the Yjs Document (short: Y-Doc) to the format the tiptap editor uses and vice versa.
+
+hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start:
 
 
 ### tiptap
