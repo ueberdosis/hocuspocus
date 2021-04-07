@@ -27,7 +27,10 @@ export interface Configuration {
   debounce: number | false | null,
   debounceMaxWait: number,
   secret: string,
-  transformer: Transformer | ((document: Doc) => any),
+  transformer: Transformer | {
+    toYdoc: (document: any) => Doc,
+    fromYdoc: (document: Doc) => any,
+  },
   url: string,
   events: Array<Events>,
   paths: {
@@ -104,18 +107,6 @@ export class Webhook implements Extension {
   }
 
   /**
-   * Get data from the given y-doc using the configured transformer
-   */
-  getDataFromYdoc(document: Doc) {
-    const transformer = <Transformer> this.configuration.transformer
-    const callableTransformer = <((document: Doc) => any)> this.configuration.transformer
-
-    if (transformer.fromYdoc !== undefined) return transformer.fromYdoc(document)
-
-    return callableTransformer(document)
-  }
-
-  /**
    * Get request url for the given event
    */
   getRequestUrl(event: Events) {
@@ -145,7 +136,7 @@ export class Webhook implements Extension {
 
     const save = () => {
       this.sendRequest(this.getRequestUrl(Events.Change), {
-        data: this.getDataFromYdoc(data.document),
+        data: this.configuration.transformer.fromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
       })
