@@ -34,7 +34,11 @@ export default {
 
   mounted() {
     const ydoc = new Y.Doc()
-    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'tiptap-collaboration-example', ydoc)
+    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'tiptap-collaboration-example', ydoc, {
+      params: {
+        token: '123456',
+      },
+    })
 
     this.provider.on('status', event => {
       this.status = event.status

@@ -121,9 +121,7 @@ export class Webhook implements Extension {
   async sendRequest(url: string, data: any) {
     const json = JSON.stringify(data)
 
-    return axios
-      .post(url, json, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } })
-      .catch(e => console.log(`[${new Date().toISOString()}] Request to ${url} failed:`, e.message))
+    return axios.post(url, json, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } })
   }
 
   /**
@@ -177,8 +175,24 @@ export class Webhook implements Extension {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  /**
+   * onConnect hook
+   */
   async onConnect(data: onConnectPayload) {
+    if (!this.configuration.events.includes(Events.Connect)) {
+      return
+    }
+
+    try {
+      await this.sendRequest(this.getRequestUrl(Events.Connect), {
+        documentName: data.documentName,
+        requestHeaders: data.requestHeaders,
+        requestParameters: Object.fromEntries(data.requestParameters.entries()),
+      })
+    } catch (e) {
+      // eslint-disable-next-line no-throw-literal
+      throw null
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function

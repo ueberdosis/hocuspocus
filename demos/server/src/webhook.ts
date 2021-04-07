@@ -19,7 +19,7 @@ const server = Server.configure({
       secret: '1234',
       url: 'http://localhost:12345',
       events: [
-        Events.Create, Events.Change,
+        Events.Create, Events.Change, Events.Connect,
       ],
     }),
   ],
@@ -51,14 +51,32 @@ const receiver = createServer((request, response) => {
   })
 
   request.on('end', () => {
-    if (verifySignature(data, request.headers['x-hocuspocus-signature-256'] as string)) {
-      // handle data
-      console.log(`[${new Date().toISOString()}] Received "${request.url}":`, JSON.parse(data))
-    } else {
+    if (!verifySignature(data, request.headers['x-hocuspocus-signature-256'] as string)) {
       response.writeHead(403, 'signature not valid')
     }
 
+    data = JSON.parse(data)
+
+    if (request.url === '/change') {
+      // @ts-ignore
+      console.log(`[${new Date().toISOString()}] RECEIVER - document ${data.documentName} was changed: ${JSON.stringify(data.document)}`)
+    }
+
+    if (request.url === '/connect') {
+      // @ts-ignore
+      console.log(`[${new Date().toISOString()}] RECEIVER - user connected to ${data.documentName}: ${JSON.stringify({ requestHeaders: data.requestHeaders, requestParameters: data.requestParameters })}`)
+
+      // @ts-ignore
+      if (data.requestParameters?.token !== '123456') {
+        response.writeHead(403, 'unathorized')
+        return response.end()
+      }
+    }
+
     if (request.url === '/create') {
+      // @ts-ignore
+      console.log(`[${new Date().toISOString()}] RECEIVER - document ${data.documentName} created`)
+
       response.writeHead(200, { 'Content-Type': 'application/json' })
       return response.end(JSON.stringify({
         default:
