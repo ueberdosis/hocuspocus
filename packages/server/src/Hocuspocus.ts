@@ -291,25 +291,18 @@ export class Hocuspocus {
    * Runs the given callback after each hook
    * @private
    */
-  private async hooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
+  private hooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
+    let chain = Promise.resolve()
+
     for (let i = 0; i < extensions.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      await this.hook(name, extensions[i], hookPayload, callback)
+      // @ts-ignore
+      chain = chain.then(() => (extensions[i][name] ? extensions[i][name](hookPayload) : null))
+      if (callback) chain = chain.then((...args: any[]) => callback(...args))
     }
-  }
 
-  /**
-   * Run the given hook on the given extension.
-   * @private
-   */
-  private hook(name: string, extension: Extension, hookPayload: any, callback: Function | null = null): Promise<any> {
-    // @ts-ignore
-    const promise = extension[name] ? extension[name](hookPayload) : new Promise(r => r())
-    if (callback) promise.then((...args: any[]) => callback(...args))
-
-    return promise
+    return chain
   }
 
   /**
