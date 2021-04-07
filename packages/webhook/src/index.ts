@@ -21,7 +21,7 @@ export interface Configuration {
   debounceMaxWait: number,
   secret: string,
   transformer: Transformer | ((document: Doc) => any),
-  urls: Array<string>,
+  url: string,
 }
 
 export class Webhook implements Extension {
@@ -31,7 +31,7 @@ export class Webhook implements Extension {
     debounceMaxWait: 10000,
     secret: '',
     transformer: TiptapTransformer,
-    urls: [],
+    url: '',
   }
 
   debounced: Map<string, { timeout: Timeout, start: number }> = new Map()
@@ -43,6 +43,10 @@ export class Webhook implements Extension {
     this.configuration = {
       ...this.configuration,
       ...configuration,
+    }
+
+    if (!this.configuration.url) {
+      throw new Error('url is required!')
     }
   }
 
@@ -104,11 +108,11 @@ export class Webhook implements Extension {
    */
   async onChange(data: onChangePayload) {
     const save = () => {
-      this.configuration.urls.forEach(url => this.sendRequest(url, {
+      this.sendRequest(this.configuration.url, {
         data: this.getDataFromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
-      }))
+      })
     }
 
     if (!this.configuration.debounce) {
