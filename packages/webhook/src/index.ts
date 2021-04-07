@@ -12,7 +12,7 @@ import {
   onUpgradePayload,
 } from '@hocuspocus/server'
 import { Doc } from 'yjs'
-import { Transformer } from '@hocuspocus/transformer'
+import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
 import axios from 'axios'
 import Timeout = NodeJS.Timeout
 
@@ -30,7 +30,7 @@ export class Webhook implements Extension {
     debounce: 2000,
     debounceMaxWait: 10000,
     secret: '',
-    transformer: document => document.toJSON(),
+    transformer: TiptapTransformer,
     urls: [],
   }
 
