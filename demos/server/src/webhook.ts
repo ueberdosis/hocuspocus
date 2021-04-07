@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { Logger } from '../../../packages/logger/src'
 import { Server } from '../../../packages/server/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
-import { Webhook } from '../../../packages/webhook/src'
+import { Events, Webhook } from '../../../packages/webhook/src'
 
 /*
  * Setup server
@@ -17,7 +17,10 @@ const server = Server.configure({
     new Webhook({
       transformer: TiptapTransformer,
       secret: '1234',
-      urls: ['http://localhost:12345'],
+      url: 'http://localhost:12345',
+      events: [
+        Events.Create, Events.Change,
+      ],
     }),
   ],
 })
@@ -50,9 +53,30 @@ const receiver = createServer((request, response) => {
   request.on('end', () => {
     if (verifySignature(data, request.headers['x-hocuspocus-signature-256'] as string)) {
       // handle data
-      console.log(`[${new Date().toISOString()}] Data received by webhook:`, JSON.parse(data))
+      console.log(`[${new Date().toISOString()}] Received "${request.url}":`, JSON.parse(data))
     } else {
       response.writeHead(403, 'signature not valid')
+    }
+
+    if (request.url === '/create') {
+      response.writeHead(200, { 'Content-Type': 'application/json' })
+      return response.end(JSON.stringify({
+        default:
+          {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'What is love?',
+                  },
+                ],
+              },
+            ],
+          },
+      }))
     }
 
     response.end()

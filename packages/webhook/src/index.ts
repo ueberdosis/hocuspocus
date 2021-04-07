@@ -13,7 +13,7 @@ import {
 } from '@hocuspocus/server'
 import { Doc } from 'yjs'
 import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import Timeout = NodeJS.Timeout
 
 export enum Events {
@@ -121,7 +121,7 @@ export class Webhook implements Extension {
   async sendRequest(url: string, data: any) {
     const json = JSON.stringify(data)
 
-    axios
+    return axios
       .post(url, json, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } })
       .catch(e => console.log(`[${new Date().toISOString()}] Request to ${url} failed:`, e.message))
   }
@@ -149,8 +149,32 @@ export class Webhook implements Extension {
     this.debounce(data.documentName, save)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
+  /**
+   * onCreateDocument hook
+   */
   async onCreateDocument(data: onCreateDocumentPayload) {
+    if (!this.configuration.events.includes(Events.Create)) {
+      return
+    }
+
+    const response = <AxiosResponse> await this.sendRequest(this.getRequestUrl(Events.Create), {
+      documentName: data.documentName,
+    })
+
+    if (response.status !== 200 || !response.data) return
+
+    const document = typeof response.data === 'string'
+      ? JSON.parse(response.data)
+      : response.data
+
+    // eslint-disable-next-line guard-for-in,no-restricted-syntax
+    for (const fieldName in document) {
+      if (data.document.isEmpty(fieldName)) {
+        data.document.merge(
+          this.configuration.transformer.toYdoc(document[fieldName], fieldName),
+        )
+      }
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
