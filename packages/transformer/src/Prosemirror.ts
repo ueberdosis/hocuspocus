@@ -39,7 +39,7 @@ class Prosemirror implements Transformer {
     return data
   }
 
-  toYdoc(document: any, schema?: Schema, fieldName: string | Array<string> = 'prosemirror'): Doc {
+  toYdoc(document: any, fieldName: string | Array<string> = 'prosemirror', schema?: Schema): Doc {
     // allow a single field name
     if (typeof fieldName === 'string') {
       return prosemirrorJSONToYDoc(schema || this.defaultSchema, document, fieldName)

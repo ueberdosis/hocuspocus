@@ -19,11 +19,11 @@ export class Tiptap implements Transformer {
     return ProsemirrorTransformer.fromYdoc(document, fieldName)
   }
 
-  toYdoc(document: any, extensions?: Extensions, fieldName: string | Array<string> = 'default'): Doc {
+  toYdoc(document: any, fieldName: string | Array<string> = 'default', extensions?: Extensions): Doc {
     return ProsemirrorTransformer.toYdoc(
       document,
-      getSchema(extensions || this.defaultExtensions),
       fieldName,
+      getSchema(extensions || this.defaultExtensions),
     )
   }
 
