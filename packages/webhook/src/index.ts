@@ -136,7 +136,7 @@ export class Webhook implements Extension {
 
     const save = () => {
       this.sendRequest(this.getRequestUrl(Events.Change), {
-        data: this.configuration.transformer.fromYdoc(data.document),
+        document: this.configuration.transformer.fromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
       })
