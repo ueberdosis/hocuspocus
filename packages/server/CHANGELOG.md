@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.43](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.42...@hocuspocus/server@1.0.0-alpha.43) (2021-04-07)
+
+
+### Bug Fixes
+
+* fix hook promise chaining ([ee5052d](https://github.com/ueberdosis/hocuspocus/commit/ee5052d236ba0b400880dc7ca1c90cefdd372003))
+
+
+
+
+
 # [1.0.0-alpha.42](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.41...@hocuspocus/server@1.0.0-alpha.42) (2021-04-06)
 
 **Note:** Version bump only for package @hocuspocus/server
