@@ -71,6 +71,19 @@ const receiver = createServer((request, response) => {
         response.writeHead(403, 'unathorized')
         return response.end()
       }
+
+      response.writeHead(200, { 'Content-Type': 'application/json' })
+      return response.end(JSON.stringify({
+        user: {
+          id: 1,
+          name: 'John',
+        },
+      }))
+    }
+
+    if (request.url === '/disconnect') {
+      // @ts-ignore
+      console.log(`[${new Date().toISOString()}] RECEIVER - user ${data.context.user.name} disconnected from ${data.documentName}`)
     }
 
     if (request.url === '/create') {

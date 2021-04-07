@@ -184,19 +184,30 @@ export class Webhook implements Extension {
     }
 
     try {
-      await this.sendRequest(this.getRequestUrl(Events.Connect), {
+      const response = <AxiosResponse> await this.sendRequest(this.getRequestUrl(Events.Connect), {
         documentName: data.documentName,
         requestHeaders: data.requestHeaders,
         requestParameters: Object.fromEntries(data.requestParameters.entries()),
       })
+
+      return typeof response.data === 'string'
+        ? JSON.parse(response.data)
+        : response.data
     } catch (e) {
       // eslint-disable-next-line no-throw-literal
       throw null
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDisconnect(data: onDisconnectPayload) {
+    if (!this.configuration.events.includes(Events.Connect)) {
+      return
+    }
+
+    await this.sendRequest(this.getRequestUrl(Events.Disconnect), {
+      documentName: data.documentName,
+      context: data.context,
+    })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
