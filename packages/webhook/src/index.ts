@@ -16,12 +16,26 @@ import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
 import axios from 'axios'
 import Timeout = NodeJS.Timeout
 
+export enum Events {
+  Change = 'change',
+  Connect = 'connect',
+  Create = 'create',
+  Disconnect = 'disconnect',
+}
+
 export interface Configuration {
   debounce: number | false | null,
   debounceMaxWait: number,
   secret: string,
   transformer: Transformer | ((document: Doc) => any),
   url: string,
+  events: Array<Events>,
+  paths: {
+    change: string,
+    connect: string,
+    create: string,
+    disconnect: string,
+  },
 }
 
 export class Webhook implements Extension {
@@ -32,6 +46,15 @@ export class Webhook implements Extension {
     secret: '',
     transformer: TiptapTransformer,
     url: '',
+    events: [
+      Events.Change,
+    ],
+    paths: {
+      change: 'change',
+      connect: 'connect',
+      create: 'create',
+      disconnect: 'disconnect',
+    },
   }
 
   debounced: Map<string, { timeout: Timeout, start: number }> = new Map()
@@ -93,6 +116,15 @@ export class Webhook implements Extension {
   }
 
   /**
+   * Get request url for the given event
+   */
+  getRequestUrl(event: Events) {
+    return this.configuration.url
+      + (this.configuration.url.substr(-1, 1) !== '/' ? '/' : '')
+      + this.configuration.paths[event]
+  }
+
+  /**
    * Send a request to the given url containing the given data
    */
   async sendRequest(url: string, data: any) {
@@ -107,8 +139,12 @@ export class Webhook implements Extension {
    * onChange hook
    */
   async onChange(data: onChangePayload) {
+    if (!this.configuration.events.includes(Events.Change)) {
+      return
+    }
+
     const save = () => {
-      this.sendRequest(this.configuration.url, {
+      this.sendRequest(this.getRequestUrl(Events.Change), {
         data: this.getDataFromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
