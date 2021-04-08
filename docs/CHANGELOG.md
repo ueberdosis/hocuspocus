@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.1.23...@hocuspocus/docs@0.2.0) (2021-04-08)
+
+
+### Features
+
+* improve wevhook docs ([3f774c4](https://github.com/ueberdosis/hocuspocus/commit/3f774c4aec6edea4428b6d3b12a24902f1abf383))
+
+
+
+
+
 ## [0.1.23](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.1.22...@hocuspocus/docs@0.1.23) (2021-04-07)
 
 **Note:** Version bump only for package @hocuspocus/docs
