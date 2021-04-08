@@ -1,4 +1,6 @@
-import { createServer } from 'http'
+import {
+  createServer, IncomingMessage, ServerResponse, Server as HTTPServer,
+} from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { Logger } from '../../../packages/logger/src'
 import { Server } from '../../../packages/server/src'
@@ -19,7 +21,7 @@ const server = Server.configure({
       secret: '1234',
       url: 'http://localhost:12345',
       events: [
-        Events.Create, Events.Change, Events.Connect,
+        Events.onCreate, Events.onChange, Events.onConnect,
       ],
     }),
   ],
@@ -30,90 +32,104 @@ server.listen()
 /*
  * Setup receiver
  */
-const secret = '1234'
+class WebhookReceiver {
 
-// use this to verify the given payload and signature
-const verifySignature = (body: string, header: string): boolean => {
-  const signature = Buffer.from(header)
+  secret = '1234'
 
-  const hmac = createHmac('sha256', secret)
-  const digest = Buffer.from(`sha256=${hmac.update(body).digest('hex')}`)
+  apiToken = '123456'
 
-  return signature.length !== digest.length || timingSafeEqual(digest, signature)
-}
+  server: HTTPServer
 
-// create a simple http server to act as an webhook receiver
-const receiver = createServer((request, response) => {
-  let data = ''
+  constructor() {
+    this.server = createServer(this.handleRequest.bind(this))
 
-  request.on('data', chunk => {
-    data += chunk
-  })
+    this.server.listen(12345, () => {
+      console.log('[WebhookReceiver] listening on port 12345…')
+    })
+  }
 
-  request.on('end', () => {
-    if (!verifySignature(data, request.headers['x-hocuspocus-signature-256'] as string)) {
-      response.writeHead(403, 'signature not valid')
-    }
+  verifySignature(body: string, header: string): boolean {
+    const signature = Buffer.from(header)
 
-    data = JSON.parse(data)
+    const hmac = createHmac('sha256', this.secret)
+    const digest = Buffer.from(`sha256=${hmac.update(body).digest('hex')}`)
 
-    if (request.url === '/change') {
-      // @ts-ignore
-      console.log(`[${new Date().toISOString()}] RECEIVER - document ${data.documentName} was changed: ${JSON.stringify(data.document)}`)
-    }
+    return signature.length !== digest.length || timingSafeEqual(digest, signature)
+  }
 
-    if (request.url === '/connect') {
-      // @ts-ignore
-      console.log(`[${new Date().toISOString()}] RECEIVER - user connected to ${data.documentName}: ${JSON.stringify({ requestHeaders: data.requestHeaders, requestParameters: data.requestParameters })}`)
+  handleRequest(request: IncomingMessage, response: ServerResponse) {
+    let data = ''
 
-      // @ts-ignore
-      if (data.requestParameters?.token !== '123456') {
-        response.writeHead(403, 'unathorized')
-        return response.end()
+    request.on('data', chunk => {
+      data += chunk
+    })
+
+    request.on('end', () => {
+      if (!this.verifySignature(data, <string> request.headers['x-hocuspocus-signature-256'])) {
+        response.writeHead(403, 'signature not valid')
       }
 
-      response.writeHead(200, { 'Content-Type': 'application/json' })
-      return response.end(JSON.stringify({
-        user: {
-          id: 1,
-          name: 'John',
+      const { event, payload } = <{ event: string, payload: any }> JSON.parse(data)
+
+      try {
+        // @ts-ignore - let me do some magic here please TypeScript
+        this[`on${event[0].toUpperCase()}${event.substr(1)}`](payload, response)
+      } catch (e) {
+        console.log(`[WebhookReceiver] unknown event "${event}"`)
+      }
+    })
+  }
+
+  onConnect(payload: any, response: ServerResponse) {
+    console.log(`[WebhookReceiver] user connected to ${payload.documentName}`)
+
+    // authorize user
+    if (payload.requestParameters?.token !== this.apiToken) {
+      response.writeHead(403, 'unathorized')
+      return response.end()
+    }
+
+    // return context
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify({
+      user: {
+        id: 1,
+        name: 'John',
+      },
+    }))
+  }
+
+  onCreate(payload: any, response: ServerResponse) {
+    console.log(`[WebhookReceiver] document ${payload.documentName} created`)
+
+    // return a document for the "default" field
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify({
+      default:
+        {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'What is love?',
+                },
+              ],
+            },
+          ],
         },
-      }))
-    }
+    }))
+  }
 
-    if (request.url === '/disconnect') {
-      // @ts-ignore
-      console.log(`[${new Date().toISOString()}] RECEIVER - user ${data.context.user.name} disconnected from ${data.documentName}`)
-    }
+  onChange(payload: any, response: ServerResponse) {
+    console.log(`[WebhookReceiver] document ${payload.documentName} was changed: ${JSON.stringify(payload.document)}`)
+  }
 
-    if (request.url === '/create') {
-      // @ts-ignore
-      console.log(`[${new Date().toISOString()}] RECEIVER - document ${data.documentName} created`)
+  onDisconnect(payload: any, response: ServerResponse) {
+    console.log(`[WebhookReceiver] user ${payload.context.user.name} disconnected from ${payload.documentName}`)
+  }
+}
 
-      response.writeHead(200, { 'Content-Type': 'application/json' })
-      return response.end(JSON.stringify({
-        default:
-          {
-            type: 'doc',
-            content: [
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'What is love?',
-                  },
-                ],
-              },
-            ],
-          },
-      }))
-    }
-
-    response.end()
-  })
-})
-
-receiver.listen(12345, () => {
-  console.log(`[${new Date().toISOString()}] Receiver listening on port 12345`)
-})
+const receiver = new WebhookReceiver()

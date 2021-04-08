@@ -17,10 +17,10 @@ import axios, { AxiosResponse } from 'axios'
 import Timeout = NodeJS.Timeout
 
 export enum Events {
-  Change = 'change',
-  Connect = 'connect',
-  Create = 'create',
-  Disconnect = 'disconnect',
+  onChange = 'change',
+  onConnect = 'connect',
+  onCreate = 'create',
+  onDisconnect = 'disconnect',
 }
 
 export interface Configuration {
@@ -33,12 +33,6 @@ export interface Configuration {
   },
   url: string,
   events: Array<Events>,
-  paths: {
-    change: string,
-    connect: string,
-    create: string,
-    disconnect: string,
-  },
 }
 
 export class Webhook implements Extension {
@@ -50,14 +44,8 @@ export class Webhook implements Extension {
     transformer: TiptapTransformer,
     url: '',
     events: [
-      Events.Change,
+      Events.onChange,
     ],
-    paths: {
-      change: 'change',
-      connect: 'connect',
-      create: 'create',
-      disconnect: 'disconnect',
-    },
   }
 
   debounced: Map<string, { timeout: Timeout, start: number }> = new Map()
@@ -107,33 +95,28 @@ export class Webhook implements Extension {
   }
 
   /**
-   * Get request url for the given event
-   */
-  getRequestUrl(event: Events) {
-    return this.configuration.url
-      + (this.configuration.url.substr(-1, 1) !== '/' ? '/' : '')
-      + this.configuration.paths[event]
-  }
-
-  /**
    * Send a request to the given url containing the given data
    */
-  async sendRequest(url: string, data: any) {
-    const json = JSON.stringify(data)
+  async sendRequest(event: Events, payload: any) {
+    const json = JSON.stringify({ event, payload })
 
-    return axios.post(url, json, { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } })
+    return axios.post(
+      this.configuration.url,
+      json,
+      { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } },
+    )
   }
 
   /**
    * onChange hook
    */
   async onChange(data: onChangePayload) {
-    if (!this.configuration.events.includes(Events.Change)) {
+    if (!this.configuration.events.includes(Events.onChange)) {
       return
     }
 
     const save = () => {
-      this.sendRequest(this.getRequestUrl(Events.Change), {
+      this.sendRequest(Events.onChange, {
         document: this.configuration.transformer.fromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
@@ -151,11 +134,11 @@ export class Webhook implements Extension {
    * onCreateDocument hook
    */
   async onCreateDocument(data: onCreateDocumentPayload) {
-    if (!this.configuration.events.includes(Events.Create)) {
+    if (!this.configuration.events.includes(Events.onCreate)) {
       return
     }
 
-    const response = <AxiosResponse> await this.sendRequest(this.getRequestUrl(Events.Create), {
+    const response = <AxiosResponse> await this.sendRequest(Events.onCreate, {
       documentName: data.documentName,
     })
 
@@ -179,12 +162,12 @@ export class Webhook implements Extension {
    * onConnect hook
    */
   async onConnect(data: onConnectPayload) {
-    if (!this.configuration.events.includes(Events.Connect)) {
+    if (!this.configuration.events.includes(Events.onConnect)) {
       return
     }
 
     try {
-      const response = <AxiosResponse> await this.sendRequest(this.getRequestUrl(Events.Connect), {
+      const response = <AxiosResponse> await this.sendRequest(Events.onConnect, {
         documentName: data.documentName,
         requestHeaders: data.requestHeaders,
         requestParameters: Object.fromEntries(data.requestParameters.entries()),
@@ -200,11 +183,11 @@ export class Webhook implements Extension {
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    if (!this.configuration.events.includes(Events.Connect)) {
+    if (!this.configuration.events.includes(Events.onConnect)) {
       return
     }
 
-    await this.sendRequest(this.getRequestUrl(Events.Disconnect), {
+    await this.sendRequest(Events.onDisconnect, {
       documentName: data.documentName,
       context: data.context,
     })
