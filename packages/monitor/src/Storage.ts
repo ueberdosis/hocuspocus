@@ -16,7 +16,7 @@ export class Storage extends EventEmitter {
    * Get all constant values.
    */
   async all(): Promise<any> {
-    const data: Array<{key: String, value: any}> = []
+    const data: Array<{key: string, value: any}> = []
     this.constant.forEach((value, key) => data.push({ key, value }))
     return data
   }

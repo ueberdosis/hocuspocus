@@ -27,7 +27,7 @@ class Connection {
     onClose: (document: Document) => null,
   }
 
-  socketId: String
+  socketId: string
 
   lock: AsyncLock
 
@@ -39,7 +39,7 @@ class Connection {
     request: HTTPIncomingMessage,
     document: Document,
     timeout: number,
-    socketId: String,
+    socketId: string,
     context: any,
   ) {
     this.connection = connection

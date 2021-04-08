@@ -37,9 +37,9 @@ export class Hocuspocus {
 
   documents = new Map()
 
-  connectionsByIp: Map<String, Array<number>> = new Map()
+  connectionsByIp: Map<string, Array<number>> = new Map()
 
-  bannedIps: Map<String, number> = new Map()
+  bannedIps: Map<string, number> = new Map()
 
   httpServer?: HTTPServer
 
@@ -150,12 +150,12 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
 
     // get the remote ip address
-    const ip = <String>request.headers['x-real-ip']
+    const ip = request.headers['x-real-ip']
       || request.headers['x-forwarded-for']
       || request.socket.remoteAddress || ''
 
     // throttle the connection
-    if (this.throttle(ip)) {
+    if (this.throttle(<string> ip)) {
       return incoming.close()
     }
 
@@ -193,7 +193,7 @@ export class Hocuspocus {
    * Handle update of the given document
    * @private
    */
-  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: String): void {
+  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
 
     const hookPayload = {
       clientsCount: document.connectionsCount(),
@@ -256,7 +256,7 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    * @private
    */
-  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: String, context?: any): Connection {
+  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, context?: any): Connection {
 
     const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context)
 
@@ -326,7 +326,7 @@ export class Hocuspocus {
    * Throttle requests
    * @private
    */
-  private throttle(ip: String): Boolean {
+  private throttle(ip: string): Boolean {
     if (!this.configuration.throttle) {
       return false
     }
