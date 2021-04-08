@@ -58,7 +58,7 @@ const hocuspocus = Server.configure({
 
     // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
     // of extensions you use in the frontend to create a valid document
-    return TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], fieldName)
+    return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [ Document, Paragraph, Text ])
   },
 })
 

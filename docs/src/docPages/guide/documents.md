@@ -114,7 +114,7 @@ const hocuspocus = Server.configure({
 
     // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
     // of extensions you use in the frontend to create a valid document
-    return TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], fieldName)
+    return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [ Document, Paragraph, Text ])
   },
 })
 
@@ -158,8 +158,8 @@ const hocuspocus = Server.configure({
       // Get a Y-Doc for the 'default' field …
       const defaultField = TiptapTransformer.toYdoc(
         generateSampleProsemirrorJson('What is love?'),
-        [ Document, Paragraph, Text ],
         'default'
+        [ Document, Paragraph, Text ],
       )
 
       // … and merge it into the given document
@@ -170,8 +170,8 @@ const hocuspocus = Server.configure({
       // Get a Y-Doc for the 'secondary' field …
       const secondaryField = TiptapTransformer.toYdoc(
         generateSampleProsemirrorJson('Baby don\'t hurt me…'),
-        [ Document, Paragraph, Text ],
         'secondary'
+        [ Document, Paragraph, Text ],
       )
 
       // … and merge it into the given document
@@ -217,7 +217,13 @@ const prosemirrorJSON = {
 
 // The TiptapTransformer requires you to pass the list of  extensions you use in
 // the frontend to create a valid document
-const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, [ Document, Paragraph, Text ], 'field-name')
+const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, 'field-name', [ Document, Paragraph, Text ])
+
+// Alternatively you can set the extensions on the Transformer instance directly
+// and reuse them
+const transformer = TiptapTransformer.extensions([ Document, Paragraph, Text ])
+const ydoc2 = transformer.toYdoc(prosemirrorJSON, 'field-name')
+const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
 ```
 
 ### Prosemirror
@@ -248,7 +254,13 @@ const prosemirrorJSON = {
 const prosemirrorSchema = new Schema()
 
 // The ProsemirrorTransformer requires you to pass the schema your editor uses
-const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, prosemirrorSchema, 'field-name')
+const ydoc = ProsemirrorTransformer.toYdoc(prosemirrorJSON, 'field-name', prosemirrorSchema)
+
+// Alternatively you can set the schema on the Transformer instance directly
+// and reuse it
+const transformer = ProsemirrorTransformer.schema(prosemirrorSchema)
+const ydoc2 = transformer.toYdoc(prosemirrorJSON, 'field-name')
+const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
 ```
 
 
