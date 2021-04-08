@@ -83,7 +83,9 @@ export class Hocuspocus {
   async listen(): Promise<void> {
 
     const websocketServer = new WebSocket.Server({ noServer: true })
-    websocketServer.on('connection', this.handleConnection.bind(this))
+    websocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
+      this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
+    })
 
     const server = createServer((request, response) => {
       this.hooks('onRequest', { request, response })
@@ -147,7 +149,7 @@ export class Hocuspocus {
   /**
    * Handle the incoming websocket connection
    */
-  handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
 
     // get the remote ip address
     const ip = request.headers['x-real-ip']
@@ -163,7 +165,7 @@ export class Hocuspocus {
     const socketId = uuid()
 
     const hookPayload = {
-      documentName: Hocuspocus.getDocumentName(request),
+      documentName,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
       socketId,
@@ -171,14 +173,11 @@ export class Hocuspocus {
 
     this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
       // merge context from all hooks
-      context = {
-        ...context,
-        ...contextAdditions,
-      }
+      context = { ...context, ...contextAdditions }
     })
       .then(() => {
         // if no hook interrupts create a document and connection
-        const document = this.createDocument(request, socketId, context)
+        const document = this.createDocument(documentName, request, socketId, context)
         this.createConnection(incoming, request, document, socketId, context)
       })
       .catch(e => {
@@ -216,9 +215,7 @@ export class Hocuspocus {
    * Create a new document by the given request
    * @private
    */
-  private createDocument(request: IncomingMessage, socketId: string, context?: any): Document {
-
-    const documentName = Hocuspocus.getDocumentName(request)
+  private createDocument(documentName: string, request: IncomingMessage, socketId: string, context?: any): Document {
 
     if (this.documents.has(documentName)) {
       return this.documents.get(documentName)

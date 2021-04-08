@@ -56,5 +56,5 @@ import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server
 
-hocuspocus.handleConnection(<Websocket> websocket, <IncomingMessage> request, <any> context)
+hocuspocus.handleConnection(<Websocket> websocket, <IncomingMessage> request, <string> documentName, <any> context)
 ```

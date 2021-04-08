@@ -6,9 +6,9 @@
 
 hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When you don't call `listen()` on hocuspocus, it will not start a WebSocket server itself but rather relies on you calling it's `handleConnection()` method manually.
 
-It requires the WebSocket connection instance as first argument, the HTTP request as second, and the context as used in the `onConnect` hook as third.
+It requires the WebSocket connection instance as first argument, the HTTP request as second and the name of the document as third one.
 
-Note: the `onConnect` hook will not fire because you are handling connections yourself. So you need to put your authorization and authentication code in your own upgrade connection handler.
+Note: You have the choice to either use hocuspocus' `onConnect` hook or put your authorization and authentication code in your own upgrade connection handler and pass the `context` as fourth argument to the `handleConnection()` method.
 
 ## Express
 
@@ -44,7 +44,7 @@ app.ws('/collaboration/:document', (websocket, request) => {
     },
   }
 
-  server.handleConnection(websocket, request, context)
+  server.handleConnection(websocket, request, request.params.document, context)
 })
 
 // Start the server
