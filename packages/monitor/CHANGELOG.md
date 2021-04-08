@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.43](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.42...@hocuspocus/extension-monitor@1.0.0-alpha.43) (2021-04-08)
+
+
+### Bug Fixes
+
+* typescript strings ([0dd5f12](https://github.com/ueberdosis/hocuspocus/commit/0dd5f1292616e426cdb4cc79e83ab8ced0895bfa))
+
+
+
+
+
 # [1.0.0-alpha.42](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.41...@hocuspocus/extension-monitor@1.0.0-alpha.42) (2021-04-07)
 
 **Note:** Version bump only for package @hocuspocus/extension-monitor
