@@ -34,15 +34,14 @@ export interface Extension {
 }
 
 export interface Configuration extends Extension {
-  banTime: number,
   extensions: Array<Extension>,
   port: number | null,
-  throttle: number | null | false,
   timeout: number,
 }
 
 export interface onConnectPayload {
   documentName: string,
+  request: IncomingMessage,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,

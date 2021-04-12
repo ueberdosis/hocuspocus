@@ -4,7 +4,7 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 
-import { Configuration, Extension } from './types'
+import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import packageJson from '../package.json'
@@ -12,8 +12,6 @@ import packageJson from '../package.json'
 export const defaultConfiguration = {
   port: 80,
   timeout: 30000,
-  throttle: 15,
-  banTime: 5,
 }
 
 /**
@@ -36,10 +34,6 @@ export class Hocuspocus {
   }
 
   documents = new Map()
-
-  connectionsByIp: Map<string, Array<number>> = new Map()
-
-  bannedIps: Map<string, number> = new Map()
 
   httpServer?: HTTPServer
 
@@ -151,21 +145,12 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
 
-    // get the remote ip address
-    const ip = request.headers['x-real-ip']
-      || request.headers['x-forwarded-for']
-      || request.socket.remoteAddress || ''
-
-    // throttle the connection
-    if (this.throttle(<string> ip)) {
-      return incoming.close()
-    }
-
     // create a unique identifier for every socket connection
     const socketId = uuid()
 
     const hookPayload = {
       documentName,
+      request,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
       socketId,
@@ -318,41 +303,6 @@ export class Hocuspocus {
    */
   private static getDocumentName(request: IncomingMessage): string {
     return request.url?.slice(1)?.split('?')[0] || ''
-  }
-
-  /**
-   * Throttle requests
-   * @private
-   */
-  private throttle(ip: string): Boolean {
-    if (!this.configuration.throttle) {
-      return false
-    }
-
-    const bannedAt = this.bannedIps.get(ip) || 0
-
-    if (Date.now() < (bannedAt + (this.configuration.banTime * 60 * 1000))) {
-      return true
-    }
-
-    this.bannedIps.delete(ip)
-
-    // add this connection try to the list of previous connections
-    const previousConnections = this.connectionsByIp.get(ip) || []
-    previousConnections.push(Date.now())
-
-    // calculate the previous connections in the last minute
-    const previousConnectionsInTheLastMinute = previousConnections
-      .filter(timestamp => timestamp + (60 * 1000) > Date.now())
-
-    this.connectionsByIp.set(ip, previousConnectionsInTheLastMinute)
-
-    if (previousConnectionsInTheLastMinute.length > this.configuration.throttle) {
-      this.bannedIps.set(ip, Date.now())
-      return true
-    }
-
-    return false
   }
 }
 
