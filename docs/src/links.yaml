@@ -49,6 +49,8 @@
       link: /extensions/logger
     - title: Webhook
       link: /extensions/webhook
+    - title: Throttle
+      link: /extensions/throttle
 
 - title: API
   items:

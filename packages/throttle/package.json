@@ -1,0 +1,30 @@
+{
+  "name": "@hocuspocus/extension-throttle",
+  "version": "1.0.0-alpha.1",
+  "description": "hocuspocus throttle extension",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "tiptap",
+    "throttle",
+    "yjs"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-throttle.esm.js",
+  "module": "dist/hocuspocus-throttle.esm.js",
+  "types": "dist/packages/throttle/src/index.d.ts",
+  "exports": {
+    "import": "./dist/hocuspocus-throttle.esm.js",
+    "require": "./dist/hocuspocus-throttle.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.44"
+  },
+  "publishConfig": {
+    "registry": "https://registry.ueber.io"
+  }
+}

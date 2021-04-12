@@ -27,6 +27,7 @@ Start listening on the configured port.
 ```js
 import { Server } from '@hocuspocus/server'
 
+
 const hocuspocus = Server
 
 hocuspocus.listen()
