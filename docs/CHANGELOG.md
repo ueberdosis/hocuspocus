@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.2.1...@hocuspocus/docs@0.3.0) (2021-04-12)
+
+
+### Features
+
+* add throttle extension ([b65de2a](https://github.com/ueberdosis/hocuspocus/commit/b65de2aa127c79fcad433d5e7353face7ad82d26))
+
+
+
+
+
 ## [0.2.1](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.2.0...@hocuspocus/docs@0.2.1) (2021-04-08)
 
 **Note:** Version bump only for package @hocuspocus/docs
