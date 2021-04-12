@@ -4,8 +4,6 @@ import { Server } from '../../../packages/server/src'
 import { Logger } from '../../../packages/logger/src'
 
 const server = Server.configure({
-  throttle: false,
-
   extensions: [
     new Logger(),
   ],
@@ -19,7 +17,7 @@ app.get('/', (request, response) => {
 
 app.ws('/:document', (websocket, request: any) => {
   const context = { user_id: 1234 }
-  server.handleConnection(websocket, request, context)
+  server.handleConnection(websocket, request, request.params.document, context)
 })
 
 app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234…'))

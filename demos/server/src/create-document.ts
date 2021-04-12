@@ -23,8 +23,6 @@ const generateProsemirrorJson = (text: string) => {
 
 const server = Server.configure({
   port: 1234,
-  throttle: false,
-
   extensions: [
     new Logger(),
     new RocksDB(),
@@ -33,7 +31,7 @@ const server = Server.configure({
   async onCreateDocument(data: onCreateDocumentPayload) {
     if (data.document.isEmpty('default')) {
       const defaultField = TiptapTransformer.toYdoc(
-        generateProsemirrorJson('What is love?'), defaultExtensions(), 'default',
+        generateProsemirrorJson('What is love?'), 'default',
       )
 
       data.document.merge(defaultField)
@@ -41,7 +39,7 @@ const server = Server.configure({
 
     if (data.document.isEmpty('secondary')) {
       const secondaryField = TiptapTransformer.toYdoc(
-        generateProsemirrorJson('Baby don\'t hurt me…'), defaultExtensions(), 'secondary',
+        generateProsemirrorJson('Baby don\'t hurt me…'), 'secondary',
       )
 
       data.document.merge(secondaryField)

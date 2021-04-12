@@ -12,8 +12,6 @@ import { Events, Webhook } from '../../../packages/webhook/src'
  */
 const server = Server.configure({
   port: 1234,
-  throttle: false,
-
   extensions: [
     new Logger(),
     new Webhook({
