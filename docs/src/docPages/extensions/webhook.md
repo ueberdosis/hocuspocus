@@ -61,11 +61,11 @@ server.listen()
 
 ## How it works
 
-The webhook extension listens on up to four configurable events/hooks that will trigger a POST request to the configured url and path.
+The webhook extension listens on up to four configurable events/hooks that will trigger a POST request to the configured url.
 
 ### onConnect
 
-When a new user connects to the server the onConnect webhook will be triggered with the following payload:
+When a new user connects to the server, the onConnect webhook will be triggered with the following payload:
 
 ```json
 {
@@ -172,7 +172,7 @@ When a document is changed the onChange webhook will be triggered with the follo
 }
 ```
 
-Because this happens on every keystroke up to multiple times a second, the webhook is debounced by default You can configure this (or shut it off entirely) with the `debounce` and `debounceMaxWait` configuration options.
+Because this happens on every keystroke up to multiple times a second, the webhook is debounced by default. You can configure this (or shut it off entirely) with the `debounce` and `debounceMaxWait` configuration options.
 
 ### onDisconnect
 
