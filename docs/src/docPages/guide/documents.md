@@ -42,6 +42,8 @@ or something else. If you want to send a webhook to an external API we already h
 
 It's **highly recommended** to debounce extensive operations (like API calls) as this hook can be fired up to multiple times a second:
 
+You need to serialize the Y-Doc that hocuspocus gives you to something you can actually display in your views. Check out the [transformers section](/guide/transformers) of the guide for more information.
+
 ```typescript
 import { debounce } from 'debounce'
 import { Server } from '@hocuspocus/server'
@@ -85,16 +87,19 @@ hocuspocus.listen()
 
 If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook and apply updates directly to the given document. This way you can load your document from a database, an external API or even the file system if they are **not present** in your [primary storage](#using-a-primary-storage). For more information on the hook and it's payload checkout it's [API section](/api/on-create-document).
 
+`onCreateDocument` expects a Y-Doc to be returned. Check out the [transformers section](/guide/transformers) of the guide for more information.
+
 ```typescript
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
+import { Doc } from 'yjs'
 import { TiptapTransformer } from '@hocuspocus/transformer'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
-  async onCreateDocument(data) {
+  async onCreateDocument(data): Doc {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
     // The default field in tiptap is simply called "default"
@@ -181,97 +186,4 @@ const hocuspocus = Server.configure({
 })
 
 hocuspocus.listen()
-```
-## Transformations
-
-In the previous example we used the TiptapTransformer to transform the Yjs Document (short: Y-Doc) to the format the tiptap editor uses and vice versa.
-
-hocuspocus doesn't care how you structure your data, you can use any Yjs Shared Types you want. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below. But if you do, those examples should give you a head start:
-
-### tiptap
-
-**Convert a Y-Doc to prosemirror JSON:**
-
-```typescript
-import { TiptapTransformer } from '@hocuspocus/transformer'
-import { Doc } from 'yjs'
-
-const ydoc = new Doc()
-const prosemirrorJSON = TiptapTransformer.fromYdoc(ydoc, 'field-name')
-```
-
-**Convert prosemirror JSON to a Y-Doc:**
-
-```typescript
-import { TiptapTransformer } from '@hocuspocus/transformer'
-import Document from '@tiptap/extension-document'
-import Paragraph from '@tiptap/extension-paragraph'
-import Text from '@tiptap/extension-text'
-
-const prosemirrorJSON = {
-  type: 'doc',
-  content: [
-    // ...
-  ],
-}
-
-// The TiptapTransformer requires you to pass the list of  extensions you use in
-// the frontend to create a valid document
-const ydoc = TiptapTransformer.toYdoc(prosemirrorJSON, 'field-name', [ Document, Paragraph, Text ])
-
-// Alternatively you can set the extensions on the Transformer instance directly
-// and reuse them
-const transformer = TiptapTransformer.extensions([ Document, Paragraph, Text ])
-const ydoc2 = transformer.toYdoc(prosemirrorJSON, 'field-name')
-const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
-```
-
-### Prosemirror
-
-**Convert a Y-Doc to prosemirror JSON:**
-
-```typescript
-import { ProsemirrorTransformer } from '@hocuspocus/transformer'
-import { Doc } from 'yjs'
-
-const ydoc = new Doc()
-const prosemirrorJSON = ProsemirrorTransformer.fromYdoc(ydoc, 'field-name')
-```
-
-**Convert prosemirror JSON to a Y-Doc:**
-
-```typescript
-import { ProsemirrorTransformer } from '@hocuspocus/transformer'
-import { Schema } from 'prosemirror-model'
-
-const prosemirrorJSON = {
-  type: 'doc',
-  content: [
-    // ...
-  ],
-}
-
-const prosemirrorSchema = new Schema()
-
-// The ProsemirrorTransformer requires you to pass the schema your editor uses
-const ydoc = ProsemirrorTransformer.toYdoc(prosemirrorJSON, 'field-name', prosemirrorSchema)
-
-// Alternatively you can set the schema on the Transformer instance directly
-// and reuse it
-const transformer = ProsemirrorTransformer.schema(prosemirrorSchema)
-const ydoc2 = transformer.toYdoc(prosemirrorJSON, 'field-name')
-const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
-```
-
-
-### Quill
-
-```typescript
-// TODO
-```
-
-### Monaco
-
-```typescript
-// TODO
 ```

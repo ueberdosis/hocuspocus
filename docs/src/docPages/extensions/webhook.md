@@ -193,7 +193,7 @@ When a user disconnects the onDisconnect webhook will be triggered with the foll
 
 ## Transformation
 
-As you probably already know from [the guide](/guide/documents) the Y-Doc must be serialized into something readable by your application and when importing a document it must be converted into a Y-Doc respectively.
+As you probably already know from [the guide](/guide/transformations) the Y-Doc must be serialized into something readable by your application and when importing a document it must be converted into a Y-Doc respectively.
 
 Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use one of the transformers from the `@hocuspocus/transformer` package. Make sure to configure them properly. In this example we used the TiptapTransformer that needs the list of extensions:
 

@@ -20,6 +20,8 @@ We already created some very useful extensions you should check out for sure:
 
 **[@hocuspocus/extension-webhook](/extensions/webhook)**: Send document changes via webhook to your API.
 
+**[@hocuspocus/extension-throttle](/extensions/throttle)**: Throttle connections by ips.
+
 ## Create your own extension
 
 hocuspocus is written in TypeScript. You don't have to use TypeScript to write extensions, but it's highly recommended. We will only cover the TypeScript part in this documentation.

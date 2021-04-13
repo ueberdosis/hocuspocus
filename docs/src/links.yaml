@@ -32,6 +32,8 @@
       link: /guide/authentication-and-authorization
     - title: Working with Documents
       link: /guide/documents
+    - title: Transformations
+      link: /guide/transformations
     - title: Framework integration
       link: /guide/framework-integration
     - title: Extensions
