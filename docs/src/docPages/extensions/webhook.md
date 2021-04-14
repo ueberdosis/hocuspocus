@@ -151,18 +151,21 @@ When a document is changed the onChange webhook will be triggered with the follo
   "payload": {
     "documentName": "example-document",
     "document": {
-      "type": "doc",
-      "content": [
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "What is love?"
-            }
-          ]
-        }
-      ]
+      "another-field-name": {},
+      "field-name": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "What is love?"
+              }
+            ]
+          }
+        ]
+      }
     },
     "context": {
       "user_id": 1,
