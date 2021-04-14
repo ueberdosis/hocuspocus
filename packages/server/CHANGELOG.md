@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.46](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.45...@hocuspocus/server@1.0.0-alpha.46) (2021-04-14)
+
+
+### Features
+
+* add read only mode ([7b59d52](https://github.com/ueberdosis/hocuspocus/commit/7b59d522b966b51347db35ac6a4524211e44ae9c))
+
+
+
+
+
 # [1.0.0-alpha.45](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.44...@hocuspocus/server@1.0.0-alpha.45) (2021-04-12)
 
 **Note:** Version bump only for package @hocuspocus/server

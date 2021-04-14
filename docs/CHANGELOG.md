@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.3.0...@hocuspocus/docs@0.4.0) (2021-04-14)
+
+
+### Features
+
+* add read only mode ([7b59d52](https://github.com/ueberdosis/hocuspocus/commit/7b59d522b966b51347db35ac6a4524211e44ae9c))
+* add transformations page to the guide ([81e0ddf](https://github.com/ueberdosis/hocuspocus/commit/81e0ddfefbfdf2095e477cca8d1eab7eac576c04))
+
+
+
+
+
 # [0.3.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.2.1...@hocuspocus/docs@0.3.0) (2021-04-12)
 
 
