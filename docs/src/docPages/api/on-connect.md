@@ -22,6 +22,9 @@ const data = {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
+  connection: {
+    readOnly: boolean,
+  },
 }
 ```
 
@@ -38,6 +41,12 @@ const server = Server.configure({
     // request parameter
     if (requestParameters.access_token !== 'super-secret-token') {
       throw new Error('Not authorized!')
+    }
+
+    // Example to set a document to read only for the current user
+    // thus changes will not be accepted and synced to other clients
+    if(someCondition === true) {
+        data.connection.readOnly = true
     }
 
     // You can set contextual data to use it in other hooks

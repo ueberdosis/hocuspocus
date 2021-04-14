@@ -45,6 +45,9 @@ export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
+  connection: {
+    readOnly: boolean,
+  },
 }
 
 export interface onCreateDocumentPayload {

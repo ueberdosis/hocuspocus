@@ -147,6 +147,7 @@ export class Hocuspocus {
 
     // create a unique identifier for every socket connection
     const socketId = uuid()
+    const connection = { readOnly: false }
 
     const hookPayload = {
       documentName,
@@ -154,6 +155,7 @@ export class Hocuspocus {
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
       socketId,
+      connection,
     }
 
     this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
@@ -163,7 +165,7 @@ export class Hocuspocus {
       .then(() => {
         // if no hook interrupts create a document and connection
         const document = this.createDocument(documentName, request, socketId, context)
-        this.createConnection(incoming, request, document, socketId, context)
+        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
       })
       .catch(e => {
         // if a hook interrupts, close the websocket connection
@@ -239,9 +241,9 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    * @private
    */
-  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, context?: any): Connection {
+  private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
 
-    const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context)
+    const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
 
     instance.onClose(document => {
       const hookPayload = {

@@ -1,4 +1,3 @@
-import { readSyncMessage } from 'y-protocols/sync'
 import {
   createDecoder,
   Decoder,
@@ -12,6 +11,14 @@ import {
   writeVarUint,
   toUint8Array,
 } from 'lib0/encoding'
+import {
+  messageYjsSyncStep1,
+  messageYjsSyncStep2,
+  messageYjsUpdate,
+  readSyncStep1,
+  readSyncStep2,
+  readUpdate,
+} from 'y-protocols/sync'
 
 import Document from './Document'
 import { MessageTypes } from './types'
@@ -33,7 +40,24 @@ export class IncomingMessage {
 
   readSyncMessageAndApplyItTo(document: Document, connection?: Connection): void {
     writeVarUint(this.encoder, MessageTypes.Sync)
-    readSyncMessage(this.decoder, this.encoder, document, connection)
+
+    const messageType = readVarUint(this.decoder)
+
+    // this is a copy of the original y-protocols/sync/readSyncMessage function
+    // which enables the read only mode
+    switch (messageType) {
+      case messageYjsSyncStep1:
+        readSyncStep1(this.decoder, this.encoder, document)
+        break
+      case messageYjsSyncStep2:
+        if (!connection?.readOnly) readSyncStep2(this.decoder, document, connection)
+        break
+      case messageYjsUpdate:
+        if (!connection?.readOnly) readUpdate(this.decoder, document, connection)
+        break
+      default:
+        throw new Error('Unknown message type')
+    }
   }
 
   readUint8Array(): Uint8Array {

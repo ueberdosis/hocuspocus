@@ -31,6 +31,8 @@ class Connection {
 
   lock: AsyncLock
 
+  readOnly: Boolean
+
   /**
    * Constructor.
    */
@@ -41,6 +43,7 @@ class Connection {
     timeout: number,
     socketId: string,
     context: any,
+    readOnly = false,
   ) {
     this.connection = connection
     this.context = context
@@ -48,6 +51,7 @@ class Connection {
     this.request = request
     this.timeout = timeout
     this.socketId = socketId
+    this.readOnly = readOnly
 
     this.lock = new AsyncLock()
 
