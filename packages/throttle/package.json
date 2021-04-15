@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-throttle",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "hocuspocus throttle extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -22,7 +22,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.46"
+    "@hocuspocus/server": "^1.0.0-alpha.47"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"

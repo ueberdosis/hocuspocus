@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.47](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.46...@hocuspocus/server@1.0.0-alpha.47) (2021-04-15)
+
+
+### Features
+
+* add request headers and parameters to onCreateDocument ([47a8b95](https://github.com/ueberdosis/hocuspocus/commit/47a8b95baf8dd22ebd71c56565420179402cdaa4))
+
+
+
+
+
 # [1.0.0-alpha.46](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.45...@hocuspocus/server@1.0.0-alpha.46) (2021-04-14)
 
 

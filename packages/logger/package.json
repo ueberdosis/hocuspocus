@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-logger",
-  "version": "1.0.0-alpha.21",
+  "version": "1.0.0-alpha.22",
   "description": "hocuspocus logging extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -23,7 +23,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.46"
+    "@hocuspocus/server": "^1.0.0-alpha.47"
   },
   "publishConfig": {
     "registry": "https://registry.ueber.io"

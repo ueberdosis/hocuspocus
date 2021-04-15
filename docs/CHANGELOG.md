@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.4.0...@hocuspocus/docs@0.5.0) (2021-04-15)
+
+
+### Bug Fixes
+
+* webhook docs ([f0faac2](https://github.com/ueberdosis/hocuspocus/commit/f0faac268dedabca8b0afa5b485bb02af8b5f399))
+
+
+### Features
+
+* add request headers and parameters to onCreateDocument ([47a8b95](https://github.com/ueberdosis/hocuspocus/commit/47a8b95baf8dd22ebd71c56565420179402cdaa4))
+
+
+
+
+
 # [0.4.0](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/docs@0.3.0...@hocuspocus/docs@0.4.0) (2021-04-14)
 
 
