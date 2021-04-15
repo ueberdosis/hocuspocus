@@ -235,8 +235,8 @@ const server = Server.configure({
       secret: '459824aaffa928e05f5b1caec411ae5f',
 
       transformer: {
-        toYdoc(document: any): Doc {
-          // convert the given document (from your api) to a ydoc
+        toYdoc(document: any, fieldName: string): Doc {
+          // convert the given document (from your api) to a ydoc using the provided fieldName
           return new Doc()
         },
         fromYdoc(document: Doc): any {
