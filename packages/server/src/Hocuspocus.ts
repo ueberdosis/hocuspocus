@@ -219,6 +219,8 @@ export class Hocuspocus {
       document,
       documentName,
       socketId,
+      requestHeaders: request.headers,
+      requestParameters: Hocuspocus.getParameters(request),
     }
 
     this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {

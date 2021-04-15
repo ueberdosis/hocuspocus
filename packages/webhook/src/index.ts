@@ -120,6 +120,8 @@ export class Webhook implements Extension {
         document: this.configuration.transformer.fromYdoc(data.document),
         documentName: data.documentName,
         context: data.context,
+        requestHeaders: data.requestHeaders,
+        requestParameters: Object.fromEntries(data.requestParameters.entries()),
       })
     }
 
@@ -140,6 +142,8 @@ export class Webhook implements Extension {
 
     const response = <AxiosResponse> await this.sendRequest(Events.onCreate, {
       documentName: data.documentName,
+      requestHeaders: data.requestHeaders,
+      requestParameters: Object.fromEntries(data.requestParameters.entries()),
     })
 
     if (response.status !== 200 || !response.data) return
@@ -189,6 +193,8 @@ export class Webhook implements Extension {
 
     await this.sendRequest(Events.onDisconnect, {
       documentName: data.documentName,
+      requestHeaders: data.requestHeaders,
+      requestParameters: Object.fromEntries(data.requestParameters.entries()),
       context: data.context,
     })
   }

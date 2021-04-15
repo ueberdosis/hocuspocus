@@ -54,6 +54,8 @@ export interface onCreateDocumentPayload {
   context: any,
   document: Document,
   documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
   socketId: string,
 }
 

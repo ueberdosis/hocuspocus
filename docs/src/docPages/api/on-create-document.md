@@ -17,6 +17,8 @@ const data = {
   context: any,
   document: Doc,
   documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
   socketId: string,
 }
 ```
