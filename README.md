@@ -1,4 +1,4 @@
-# hocuspocus
+# hocuspocus (Sponsors preview)
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
 
 hocuspocus is a plug & play collaboration backend. It’s based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
