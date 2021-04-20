@@ -27,8 +27,5 @@
     "@hocuspocus/server": "^1.0.0-alpha.47",
     "@hocuspocus/transformer": "^1.0.0-alpha.5",
     "axios": "^0.21.1"
-  },
-  "publishConfig": {
-    "registry": "https://registry.ueber.io"
   }
 }

@@ -32,8 +32,5 @@
     "rocksdb": "^4.1.0",
     "y-leveldb": "^0.1.0",
     "yjs": "^13.5.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.ueber.io"
   }
 }

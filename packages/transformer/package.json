@@ -26,8 +26,5 @@
     "prosemirror-model": "^1.13.3",
     "y-prosemirror": "^1.0.7",
     "yjs": "^13.5.3"
-  },
-  "publishConfig": {
-    "registry": "https://registry.ueber.io"
   }
 }

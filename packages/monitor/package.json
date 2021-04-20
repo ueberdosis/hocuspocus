@@ -38,8 +38,5 @@
     "public-ip": "^4.0.3",
     "ws": "^7.4.3",
     "yjs": "^13.4.12"
-  },
-  "publishConfig": {
-    "registry": "https://registry.ueber.io"
   }
 }

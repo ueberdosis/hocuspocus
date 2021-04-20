@@ -23,8 +23,5 @@
   ],
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.47"
-  },
-  "publishConfig": {
-    "registry": "https://registry.ueber.io"
   }
 }
