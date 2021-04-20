@@ -7,7 +7,6 @@
   "useWorkspaces": true,
   "command": {
     "publish": {
-      "registry": "https://registry.ueber.io",
       "conventionalCommits": true
     }
   }

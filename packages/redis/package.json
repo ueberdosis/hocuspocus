@@ -25,5 +25,6 @@
     "@hocuspocus/server": "^1.0.0-alpha.49",
     "y-redis": "^1.0.2",
     "yjs": "^13.5.0"
-  }
+  },
+  "gitHead": "27206c8144e49b091cc63798f559444a84d3fd54"
 }

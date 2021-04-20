@@ -24,5 +24,6 @@
   ],
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.49"
-  }
+  },
+  "gitHead": "27206c8144e49b091cc63798f559444a84d3fd54"
 }
