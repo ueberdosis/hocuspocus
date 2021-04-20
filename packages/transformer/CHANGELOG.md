@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.10](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/transformer@1.0.0-alpha.9...@hocuspocus/transformer@1.0.0-alpha.10) (2021-04-20)
+
+**Note:** Version bump only for package @hocuspocus/transformer
+
+
+
+
+
 # [1.0.0-alpha.9](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/transformer@1.0.0-alpha.8...@hocuspocus/transformer@1.0.0-alpha.9) (2021-04-20)
 
 **Note:** Version bump only for package @hocuspocus/transformer
