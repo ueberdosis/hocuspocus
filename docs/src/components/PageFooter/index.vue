@@ -39,7 +39,12 @@
         </h3>
         <ul>
           <li>
-            <g-link to="https://twitter.com/_ueberdosis">
+            <g-link to="https://discord.gg/WtJ49jGshW">
+              Discord
+            </g-link>
+          </li>
+          <li>
+            <g-link to="https://twitter.com/tiptap_editor">
               Twitter
             </g-link>
           </li>

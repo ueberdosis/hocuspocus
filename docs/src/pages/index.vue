@@ -81,25 +81,19 @@
             You can spin up multiple instances of hocuspocus and keep them in sync with Redis. Support for Redis clusters is already baked-in.
           </p>
         </feature-item>
-
-        <feature-item>
-          <h3 class="is-h2">
-            Support from humans
-          </h3>
-          <p>
-            hocuspocus receives regular updates, maintenance and reliable support, directly from the developers.
-          </p>
-        </feature-item>
       </feature-list>
     </app-section>
 
-    <!-- <app-section>
+    <app-section>
       <div class="text">
         <h2 class="is-h1">
           License
         </h2>
+        <p>
+          hocuspocus will be licensed under MIT, so you are free to do whatever you want. If you are using it commercially, <g-link to="https://github.com/sponsors/ueberdosis">become one of our wonderful sponsors</g-link> to fund the maintenance, support and development of tiptap now and in the future.
+        </p>
       </div>
-    </app-section> -->
+    </app-section>
   </Layout>
 </template>
 
@@ -108,7 +102,6 @@ import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
 import NewsletterForm from '@/components/NewsletterForm'
-import Prism from '~/components/Prism'
 
 export default {
   components: {
@@ -116,7 +109,6 @@ export default {
     FeatureList,
     FeatureItem,
     NewsletterForm,
-    Prism,
   },
 
   metaInfo() {
