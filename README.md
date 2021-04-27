@@ -1,29 +1,48 @@
 # hocuspocus (Sponsors preview)
+A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
+
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
+[![Version](https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/server)
+[![Downloads](https://img.shields.io/npm/dm/@hocuspocus/server.svg)](https://npmcharts.com/compare/@hocuspocus/server?minimal=true)
+[![License](https://img.shields.io/npm/l/@hocuspocus/server.svg)](https://www.npmjs.com/package/@hocuspocus/server)
+[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/WtJ49jGshW)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
-hocuspocus is a plug & play collaboration backend. It’s based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
-
-## Installation
-1. Sign up on https://store.ueber.io
-2. Ask Hans or Kris to upgrade your account
-3. Get your personal `.npmrc` file and store it in your project folder
-4. Install the package `$ yarn add @hocuspocus/server`
+## Documentation
+The full documentation is a available on [www.hocuspocus.dev](https://www.hocuspocus.dev/installation).
 
 ## Usage
-The following example is the bare minimum you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or with the WebSocket protocol on ws://127.0.0.1):
+The following example is a example setup you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
 
 ```js
 import { Server } from '@hocuspocus/server'
+import { RocksDB } from '@hocuspocus/extension-rocksdb'
 
-Server.listen()
+const server = Server.configure({
+  port: 80,
+
+  async onConnect() {
+    console.log('🔮')
+  }
+
+  extensions: [
+    new RocksDB({
+      path: './database',
+    }),
+  ],
+})
 ```
 
-## Documentation
-Read more about collaborative editing with tiptap, the configuration of the server and everything you need to know in [the official documentation](https://hocuspocus.dev).
+## Community
+For help, discussion about best practices, or any other conversation:
 
-## Development
-1. Install dependencies with `$ yarn install`
-2. Start the development server `$ yarn start:development`
+[Join the tiptap Discord Server](https://discord.gg/WtJ49jGshW)
 
-## Release
-1. Release a new version: `$ yarn release`
+## Contributing
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## Contributors
+[All contributors](../../contributors).
+
+## License
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
