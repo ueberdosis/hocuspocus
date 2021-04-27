@@ -6,14 +6,24 @@
           The plug & play collaboration backend
         </h1>
         <p class="is-large">
-          Real-time collaboration, offline-first apps and syncing devices isn’t hard anymore. With the conflict-free magic of hocuspocus.
+          Real-time collaboration, offline-first apps and syncing devices as easy as it can get. With the conflict-free magic of hocuspocus.
         </p>
-        <div>
+        <btn-wrapper>
+          <btn
+            type="secondary"
+            icon="github-fill"
+            icon-position="before"
+            to="https://github.com/sponsors/ueberdosis"
+          >
+            Early access on GitHub
+          </btn>
+        </btn-wrapper>
+        <!-- <div>
           <newsletter-form
             id="d6ab5e0a-5c27-47e1-bad1-e8b8fb869925"
             button-label="Request Early Access"
           />
-        </div>
+        </div> -->
       </div>
     </app-section>
 
@@ -101,14 +111,18 @@
 import AppSection from '@/components/AppSection'
 import FeatureList from '@/components/FeatureList'
 import FeatureItem from '@/components/FeatureItem'
-import NewsletterForm from '@/components/NewsletterForm'
+// import NewsletterForm from '@/components/NewsletterForm'
+import Btn from '~/components/Btn'
+import BtnWrapper from '~/components/BtnWrapper'
 
 export default {
   components: {
     AppSection,
     FeatureList,
     FeatureItem,
-    NewsletterForm,
+    // NewsletterForm,
+    Btn,
+    BtnWrapper,
   },
 
   metaInfo() {
