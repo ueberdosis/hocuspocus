@@ -93,36 +93,6 @@
       </feature-list>
     </app-section>
 
-    <app-section>
-      <div class="text">
-        <h2>
-          A tiny preview
-        </h2>
-        <p>
-          Not teased enough? Here is some example code.
-        </p>
-<!-- eslint-disable -->
-<prism language="js" :code="`import { Server } from '@hocuspocus/server'
-import { RocksDB } from '@hocuspocus/rocksdb'
-
-const server = Server.configure({
-  port: 80,
-
-  async onConnect() {
-    console.log('🔮')
-  }
-
-  extensions: [
-    new RocksDB({
-      path: './database',
-    }),
-  ],
-})
-
-server.listen()`" />
-      </div>
-    </app-section>
-
     <!-- <app-section>
       <div class="text">
         <h2 class="is-h1">
