@@ -4,7 +4,7 @@ import { RocksDB } from '../../../packages/rocksdb/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
-const generateProsemirrorJson = (text: string) => {
+const getProseMirrorJSON = (text: string) => {
   return {
     type: 'doc',
     content: [
@@ -31,7 +31,8 @@ const server = Server.configure({
   async onCreateDocument(data: onCreateDocumentPayload) {
     if (data.document.isEmpty('default')) {
       const defaultField = TiptapTransformer.toYdoc(
-        generateProsemirrorJson('What is love?'), 'default',
+        getProseMirrorJSON('What is love?'),
+        'default',
       )
 
       data.document.merge(defaultField)
@@ -39,7 +40,8 @@ const server = Server.configure({
 
     if (data.document.isEmpty('secondary')) {
       const secondaryField = TiptapTransformer.toYdoc(
-        generateProsemirrorJson('Baby don\'t hurt me…'), 'secondary',
+        getProseMirrorJSON('Baby don\'t hurt me…'),
+        'secondary',
       )
 
       data.document.merge(secondaryField)
