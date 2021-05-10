@@ -61,12 +61,6 @@ module.exports = {
         },
       },
     },
-    // {
-    //   use: 'gridsome-plugin-simple-analytics',
-    //   options: {
-    //     domain: 'data.hocuspocus.dev',
-    //   },
-    // },
   ],
   runtimeCompiler: true,
   configureWebpack: {
