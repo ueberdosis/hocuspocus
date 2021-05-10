@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discuss hocuspocus on GitHub
+    url: https://github.com/ueberdosis/hocuspocus/discussions/new
+    about: Help, discussion about best practices, or any other conversation that would benefit from being searchable
+  - name: Join the hocuspocus Discord server
+    url: https://discord.gg/WtJ49jGshW
+    about: Ccasual chit-chat with others using hocuspocus
