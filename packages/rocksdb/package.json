@@ -6,17 +6,16 @@
   "keywords": [
     "hocuspocus",
     "tiptap",
-    "leveldb",
     "rocksdb",
     "yjs"
   ],
   "type": "module",
-  "main": "dist/hocuspocus-leveldb.esm.js",
-  "module": "dist/hocuspocus-leveldb.esm.js",
-  "types": "dist/packages/leveldb/src/index.d.ts",
+  "main": "dist/hocuspocus-rocksdb.esm.js",
+  "module": "dist/hocuspocus-rocksdb.esm.js",
+  "types": "dist/packages/rocksdb/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-leveldb.esm.js",
-    "require": "./dist/hocuspocus-leveldb.js"
+    "import": "./dist/hocuspocus-rocksdb.esm.js",
+    "require": "./dist/hocuspocus-rocksdb.js"
   },
   "files": [
     "src",
