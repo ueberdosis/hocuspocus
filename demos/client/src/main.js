@@ -1,4 +1,9 @@
-import { createApp } from 'vue'
+import Vue from 'vue/dist/vue'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+Vue.component('App', App)
+
+const app = new Vue({
+  el: '#app',
+  template: '<App />',
+})
