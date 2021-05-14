@@ -1,6 +1,6 @@
 # Installation
 
-## 1. Installation the core package
+## 1. Install the core package
 You can install other packages later, let’s start with a basic version for now:
 
 ```bash
@@ -17,7 +17,11 @@ The following example is the bare minimum you need to start a WebSocket server. 
 ```js
 import { Server } from '@hocuspocus/server'
 
-Server.listen()
+const hocuspocus = Server.configure({
+  port: 80,
+})
+
+hocuspocus.listen()
 ```
 
 ## 3. Connect with a frontend
