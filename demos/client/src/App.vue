@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Status: {{ status }}, Synced: {{ synced }}</p>
+    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
     <div v-if="editor">
       <editor-content :editor="editor" />
     </div>
@@ -43,10 +43,6 @@ export default {
 
     this.provider.on('status', event => {
       this.status = event.status
-    })
-
-    this.provider.on('synced', () => {
-      this.synced = true
     })
 
     window.ydoc = ydoc
