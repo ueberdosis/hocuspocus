@@ -227,7 +227,8 @@ export class Hocuspocus {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
       // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-      if (loadedDocument?.constructor.name === 'Doc') {
+      // TODO: Are there cases where this returns 'Doc'?
+      if (loadedDocument?.constructor.name === 'Document') {
         applyUpdate(document, encodeStateAsUpdate(loadedDocument))
       }
     }).catch(e => {
