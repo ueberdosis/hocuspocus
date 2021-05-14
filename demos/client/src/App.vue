@@ -17,6 +17,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
+import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
   components: {
@@ -29,8 +30,8 @@ export default {
       editor: null,
       editor2: null,
       status: 'connecting',
-      synced: false,
       ydoc: null,
+      indexdb: null,
     }
   },
 
@@ -41,6 +42,8 @@ export default {
         token: '123456',
       },
     })
+
+    // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
 
     this.provider.on('status', event => {
       this.status = event.status
