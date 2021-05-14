@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
+    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}, Ydoc: {{ ydoc ? ydoc.toJSON() : null }}</p>
     <div v-if="editor">
       <editor-content :editor="editor" />
     </div>
@@ -30,12 +30,13 @@ export default {
       editor2: null,
       status: 'connecting',
       synced: false,
+      ydoc: null,
     }
   },
 
   mounted() {
-    const ydoc = new Y.Doc()
-    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', ydoc, {
+    this.ydoc = new Y.Doc()
+    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
       params: {
         token: '123456',
       },
@@ -45,7 +46,7 @@ export default {
       this.status = event.status
     })
 
-    window.ydoc = ydoc
+    window.ydoc = this.ydoc
 
     this.editor = new Editor({
       extensions: [
@@ -53,7 +54,7 @@ export default {
           history: false,
         }),
         Collaboration.configure({
-          document: ydoc,
+          document: this.ydoc,
           field: 'default',
         }),
       ],
@@ -65,7 +66,7 @@ export default {
           history: false,
         }),
         Collaboration.configure({
-          document: ydoc,
+          document: this.ydoc,
           field: 'secondary',
         }),
       ],
