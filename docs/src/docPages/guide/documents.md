@@ -37,8 +37,7 @@ These examples are only meant to store the resulting document for the views of y
 to import it if it doesn't exist in your primary storage.
 
 No worries, we have you covered! We built an extension that's meant to be used as primary storage:
-the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate and it
-already ships with the default hocuspocus license.
+the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate.
 
 Make sure to always include this extension in your production setups!
 
