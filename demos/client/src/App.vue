@@ -1,6 +1,12 @@
 <template>
   <div>
     <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}, Ydoc: {{ ydoc ? ydoc.toJSON() : null }}</p>
+    <button @click="provider.connect()">
+      connect
+    </button>
+    <button @click="provider.disconnect()">
+      disconnect
+    </button>
     <div v-if="editor">
       <editor-content :editor="editor" />
     </div>
