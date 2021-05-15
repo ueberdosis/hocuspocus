@@ -39,6 +39,8 @@ export class Hocuspocus {
 
   websocketServer?: WebSocket.Server
 
+  incomingMessageQueue: Iterable<number>[] = []
+
   /**
    * Configure the server
    */
@@ -158,6 +160,10 @@ export class Hocuspocus {
       connection,
     }
 
+    // Queue messages before the connection is established
+    const queueIncomingMessageListener = this.queueIncomingMessage.bind(this)
+    incoming.on('message', queueIncomingMessageListener)
+
     this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
@@ -166,6 +172,13 @@ export class Hocuspocus {
         // if no hook interrupts create a document and connection
         const document = this.createDocument(documentName, request, socketId, context)
         this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+
+        // Remove the queue listener
+        incoming.off('message', queueIncomingMessageListener)
+        // Work through queue messages
+        this.incomingMessageQueue.forEach(input => {
+          incoming.emit('message', input)
+        })
       })
       .catch(e => {
         // if a hook interrupts, close the websocket connection
@@ -173,6 +186,15 @@ export class Hocuspocus {
         if (e) throw e
       })
 
+  }
+
+  /**
+   * Queue incoming WebSocket messages before the onConnect hooks are finished
+   * and the connection is full established
+   * @private
+   */
+  private queueIncomingMessage(input: Iterable<number>): void {
+    this.incomingMessageQueue.push(input)
   }
 
   /**
