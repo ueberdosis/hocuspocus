@@ -1,5 +1,5 @@
-// import { Logger } from '../../../packages/logger/src'
-// import { RocksDB } from '../../../packages/rocksdb/src'
+import { Logger } from '../../../packages/logger/src'
+import { RocksDB } from '../../../packages/rocksdb/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
@@ -23,17 +23,12 @@ const getProseMirrorJSON = (text: string) => {
 const server = Server.configure({
   port: 1234,
   extensions: [
-    // new Logger(),
-    // new RocksDB(),
+    new Logger(),
+    new RocksDB(),
   ],
 
-  // TODO: This breaks everything
-  // If the onConnect hook isn’t resolved fast enough,
-  // * other clients don’t receive the initial document
-  // * the provider never fires the 'synced' event
   async onConnect(data) {
     await new Promise(resolve => setTimeout(() => {
-      console.log('Resolve onConnect hook (after 1337ms)')
       // @ts-ignore
       resolve()
     }, 1337))
