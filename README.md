@@ -38,6 +38,16 @@ For help, discussion about best practices, or any other conversation:
 
 [Join the tiptap Discord Server](https://discord.gg/WtJ49jGshW)
 
+## 💖 Sponsors
+* [überdosis](https://ueberdosis.io/) 🎁
+* [Cargo](https://cargo.site/) 💎
+* [QA Wolf](https://www.qawolf.com/) 💎
+* [Saga](https://saga.so/) 💎
+
+… and hundreds of awesome inviduals.
+
+Using hocuspocus in production? Invest in the future of hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
+
 ## Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
