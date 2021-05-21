@@ -76,18 +76,18 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    # - name: Load cached dependencies
-    #   uses: actions/cache@v2
-    #   id: cache
-    #   with:
-    #     path: |
-    #       **/node_modules
-    #       ~/.cache/ms-playwright
-    #     key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+    - name: Load cached dependencies
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: |
+          **/node_modules
+          ~/.cache/ms-playwright
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
     - name: Install dependencies
       id: install-dependencies
-      # if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install
 
     - uses: microsoft/playwright-github-action@v1
