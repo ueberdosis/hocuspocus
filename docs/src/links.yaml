@@ -7,6 +7,8 @@
     - title: Support
       link: /support
       draft: true
+    - title: Changelog
+      link: /changelog
 
 - title: Examples
   items:
