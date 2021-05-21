@@ -2,6 +2,7 @@
 import {
   createDecoder,
   Decoder,
+  readVarUint,
 } from 'lib0/decoding'
 
 import * as decoding from 'lib0/decoding'
@@ -23,53 +24,64 @@ export class IncomingMessage {
   decoder: Decoder
 
   constructor(input: any) {
-    if (!(input instanceof Uint8Array)) {
-      input = new Uint8Array(input)
-    }
-
+    // if (!(input instanceof Uint8Array)) {
+    //   input = new Uint8Array(input)
+    // }
     this.decoder = createDecoder(input)
     this.encoder = encoding.createEncoder()
   }
 
   public readMessage(provider, emitSynced) {
-    const messageType = decoding.readVarUint(this.decoder)
-    // const messageHandler = messageHandlers[messageType]
-
-    // if (messageHandler) {
-    //   messageHandler(encoder, this.decoder, foo, emitSynced, messageType)
-    // } else {
-    //   console.error('Unable to compute message')
-    // }
     let syncMessageType
 
-    switch (messageType) {
+    switch (this.messageType) {
       case MessageTypes.Sync:
         encoding.writeVarUint(this.encoder, MessageTypes.Sync)
+
         syncMessageType = syncProtocol.readSyncMessage(
           this.decoder,
           this.encoder,
           provider.options.document,
           provider,
         )
-        if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2 && !provider.synced) {
+
+        if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
           provider.synced = true
         }
+
         break
-      case MessageTypes.QueryAwareness:
-        encoding.writeVarUint(this.encoder, MessageTypes.Awareness)
-        encoding.writeVarUint8Array(this.encoder, awarenessProtocol.encodeAwarenessUpdate(provider.options.awareness, Array.from(provider.options.awareness.getStates().keys())))
-        break
+
       case MessageTypes.Awareness:
         awarenessProtocol.applyAwarenessUpdate(provider.options.awareness, decoding.readVarUint8Array(this.decoder), provider)
+
         break
+
       case MessageTypes.Auth:
         authProtocol.readAuthMessage(this.decoder, provider.options.document, permissionDeniedHandler)
+
         break
+
+      case MessageTypes.QueryAwareness:
+        encoding.writeVarUint(this.encoder, MessageTypes.Awareness)
+        encoding.writeVarUint8Array(
+          this.encoder,
+          awarenessProtocol.encodeAwarenessUpdate(
+            provider.options.awareness,
+            Array.from(provider.options.awareness.getStates().keys()),
+          ),
+        )
+
+        break
+
       default:
         throw new Error('Unknown message type')
     }
 
     return this.encoder
+  }
+
+  get messageType(): number {
+    return readVarUint(this.decoder)
   }
 }
 
