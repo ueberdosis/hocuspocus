@@ -88,9 +88,10 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install
 
-    - name: Run your tests
+    - uses: microsoft/playwright-github-action@v1
+
+    - name: Run tests
       id: test
-      uses: microsoft/playwright-github-action@v1
       run: yarn test
 
     - name: Send Slack notifications
