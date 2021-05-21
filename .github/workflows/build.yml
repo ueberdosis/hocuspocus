@@ -34,6 +34,7 @@ jobs:
       with:
         path: |
           **/node_modules
+          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
     - name: Install dependencies
@@ -81,6 +82,7 @@ jobs:
       with:
         path: |
           **/node_modules
+          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
     - name: Install dependencies
