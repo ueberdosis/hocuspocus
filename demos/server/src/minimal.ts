@@ -6,6 +6,15 @@ const server = Server.configure({
   extensions: [
     new Logger(),
   ],
+
+  async onConnect(data) {
+    await new Promise((resolve, reject) => setTimeout(() => {
+      // @ts-ignore
+      reject()
+      // @ts-ignore
+      // resolve()
+    }, 1337))
+  },
 })
 
 server.listen()

@@ -182,7 +182,7 @@ export class Hocuspocus {
       })
       .catch(e => {
         // if a hook interrupts, close the websocket connection
-        incoming.close()
+        incoming.close(4403, 'Forbidden')
         if (e) throw e
       })
 

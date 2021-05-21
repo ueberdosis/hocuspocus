@@ -1,12 +1,14 @@
 <template>
   <div>
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}, Ydoc: {{ ydoc ? ydoc.toJSON() : null }}</p>
+    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
+
     <button @click="provider.connect()">
       connect
     </button>
     <button @click="provider.disconnect()">
       disconnect
     </button>
+
     <div v-if="editor">
       <editor-content :editor="editor" />
     </div>
@@ -22,8 +24,9 @@ import { Editor, EditorContent } from '@tiptap/vue-2'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
-import { IndexeddbPersistence } from 'y-indexeddb'
+// import { WebsocketProvider } from 'y-websocket'
+import { WebsocketProvider } from './WebsocketProvider'
+// import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
   components: {
