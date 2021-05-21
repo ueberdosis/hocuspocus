@@ -1,11 +1,11 @@
 <template>
   <div>
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
+    <p>Status: {{ status }}, Synced: {{ client ? client.synced : null }}</p>
 
-    <button @click="provider.connect()">
+    <button @click="client.connect()">
       connect
     </button>
-    <button @click="provider.disconnect()">
+    <button @click="client.disconnect()">
       disconnect
     </button>
 
@@ -25,7 +25,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { WebsocketProvider } from './WebsocketProvider'
+import { HocuspocusClient } from './HocuspocusClient'
 // import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
@@ -35,7 +35,7 @@ export default {
 
   data() {
     return {
-      provider: null,
+      client: null,
       editor: null,
       editor2: null,
       status: 'connecting',
@@ -46,15 +46,24 @@ export default {
 
   mounted() {
     this.ydoc = new Y.Doc()
-    this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
-      params: {
+    // this.client = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
+    //   params: {
+    //     token: '123456',
+    //   },
+    // })
+
+    this.client = new HocuspocusClient({
+      url: 'ws://127.0.0.1:1234',
+      name: 'hocuspocus-demo',
+      document: this.ydoc,
+      parameters: {
         token: '123456',
       },
     })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
 
-    this.provider.on('status', event => {
+    this.client.on('status', event => {
       this.status = event.status
     })
 
@@ -88,7 +97,7 @@ export default {
   beforeUnmount() {
     this.editor.destroy()
     this.editor2.destroy()
-    this.provider.destroy()
+    this.client.destroy()
   },
 }
 </script>
