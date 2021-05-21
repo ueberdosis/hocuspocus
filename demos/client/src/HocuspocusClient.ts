@@ -73,7 +73,7 @@ export class HocuspocusClient extends Observable {
     forceSyncInterval: false,
     reconnectTimeoutBase: 1200,
     maxReconnectTimeout: 2500,
-    // @todo - this should depend on awareness.outdatedTime
+    // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
   }
 
@@ -178,12 +178,7 @@ export class HocuspocusClient extends Observable {
     })
   }
 
-  /**
-   * Listens to Yjs updates and sends them to remote peers (ws and broadcastchannel)
-   * @param {Uint8Array} update
-   * @param {any} origin
-   */
-  updateHandler(update, origin) {
+  updateHandler(update: Uint8Array, origin: any) {
     if (origin === this) {
       return
     }
@@ -195,11 +190,7 @@ export class HocuspocusClient extends Observable {
     this.broadcastMessage(encoding.toUint8Array(encoder))
   }
 
-  /**
-   * @param {any} changed
-   * @param {any} origin
-   */
-  awarenessUpdateHandler({ added, updated, removed }, origin) {
+  awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
     const changedClients = added.concat(updated).concat(removed)
 
     const encoder = encoding.createEncoder()
@@ -417,31 +408,22 @@ export class HocuspocusClient extends Observable {
     }])
   }
 
-  /**
-   * @param {HocuspocusClient} provider
-   * @param {Uint8Array} buffer
-   * @param {boolean} emitSynced
-   * @return {encoding.Encoder}
-   */
-  readMessage(buffer, emitSynced) {
+  readMessage(buffer: Uint8Array, emitSynced: boolean): encoding.Encoder {
     const decoder = decoding.createDecoder(buffer)
     const encoder = encoding.createEncoder()
     const messageType = decoding.readVarUint(decoder)
     const messageHandler = this.messageHandlers[messageType]
 
-    if (/** @type {any} */ (messageHandler)) {
+    if (messageHandler) {
       messageHandler(encoder, decoder, this, emitSynced, messageType)
     } else {
       console.error('Unable to compute message')
     }
+
     return encoder
   }
 
-  /**
-   * @param {HocuspocusClient} provider
-   * @param {ArrayBuffer} buffer
-   */
-  broadcastMessage(buffer) {
+  broadcastMessage(buffer: ArrayBuffer): void {
     if (this.websocketConnected) {
       /** @type {WebSocket} */ (this.websocket).send(buffer)
     }
