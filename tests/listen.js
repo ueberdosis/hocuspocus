@@ -1,39 +1,45 @@
 import { chromium } from 'playwright'
 import assert from 'assert'
-
-// hocuspocus
 import { Server } from '@hocuspocus/server'
 
+/**
+ * Set up the server
+ */
 const server = Server.configure({
   port: 1234,
 })
 
-server.listen()
+/**
+ * Tests
+ */
+context('listen', () => {
+  let browser
 
-// setup
-let browser
+  before(async () => {
+    browser = await chromium.launch()
 
-before(async () => {
-  browser = await chromium.launch()
-})
+    server.listen()
+  })
 
-after(async () => {
-  await browser.close()
-})
+  after(async () => {
+    await browser.close()
 
-let page
+    server.destroy()
+  })
 
-beforeEach(async () => {
-  page = await browser.newPage()
-})
+  let page
 
-afterEach(async () => {
-  await page.close()
-})
+  beforeEach(async () => {
+    page = await browser.newPage()
+  })
 
-// tests
-it('should respond with OK', async () => {
-  await page.goto('http://localhost:1234/')
+  afterEach(async () => {
+    await page.close()
+  })
 
-  assert.equal(await page.textContent('html'), 'OK')
+  it('should respond with OK', async () => {
+    await page.goto('http://localhost:1234/')
+
+    assert.strictEqual(await page.textContent('html'), 'OK')
+  })
 })

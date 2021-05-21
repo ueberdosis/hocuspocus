@@ -82,6 +82,8 @@ module.exports = {
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-hooks-for-single-case': 'off',
       },
     },
   ],
