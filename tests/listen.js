@@ -1,83 +1,39 @@
-/* eslint-disable */
-import { expect } from 'chai'
-import fetch from 'node-fetch'
-import { Hocuspocus } from '../packages/server/src'
-import { defaultHost, defaultPort } from './utils/utils'
+import { chromium } from 'playwright'
+import assert from 'assert'
 
-// handle unhandled rejections
-process.on('unhandledRejection', message => {
-  throw new Error(message)
+// hocuspocus
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  port: 1234,
 })
 
-context('listen', () => {
+server.listen()
 
-  it('should start an instance', async () => {
-    const Server = new Hocuspocus
-    Server.configure({ port: defaultPort })
+// setup
+let browser
 
-    await Server.listen()
-    await Server.destroy()
-  })
+before(async () => {
+  browser = await chromium.launch()
+})
 
-  it('should fire onListen after starting the server', (done) => {
-    const Server = new Hocuspocus
+after(async () => {
+  await browser.close()
+})
 
-    Server.configure({
-      port: defaultPort,
-      async onListen() {
-        await Server.destroy()
-        done()
-      }
-    })
+let page
 
-    Server.listen()
-  })
+beforeEach(async () => {
+  page = await browser.newPage()
+})
 
-  it('should fire onDestroy after destroying the server', (done) => {
-    const Server = new Hocuspocus
+afterEach(async () => {
+  await page.close()
+})
 
-    Server.configure({
-      port: defaultPort,
-      async onDestroy() {
-        done()
-      }
-    })
+// tests
+it('should respond with OK', async () => {
+  await page.goto('http://localhost:1234/')
 
-    Server.listen()
-    Server.destroy()
-  })
-
-  it('should respond with OK', (done) => {
-    const Server = new Hocuspocus
-
-    Server.configure({
-      port: defaultPort,
-      async onListen() {
-        const response = await fetch(`http://${defaultHost}:${defaultPort}`)
-        expect(response.ok).to.equal(true)
-        await Server.destroy()
-        done()
-      }
-    })
-
-    Server.listen()
-  })
-
-  it('should fire onRequest', (done) => {
-    const Server = new Hocuspocus
-
-    Server.configure({
-      port: defaultPort,
-      async onListen() {
-        await fetch(`http://${defaultHost}:${defaultPort}`)
-      },
-      async onRequest() {
-        await Server.destroy()
-        done()
-      }
-    })
-
-    Server.listen()
-  })
-
+  assert.equal(await page.textContent('html'), 'OK')
 })

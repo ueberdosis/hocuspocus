@@ -57,6 +57,7 @@
     "mocha": "^8.3.0",
     "node-fetch": "^2.6.1",
     "node-window-polyfill": "^1.0.2",
+    "playwright": "^1.11.1",
     "rollup": "^2.39.0",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
