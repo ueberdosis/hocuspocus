@@ -227,7 +227,7 @@ export class WebsocketProvider extends Observable {
     /**
      * @type {boolean}
      */
-    this.synced = false
+    this.isSynced = false
     /**
      * @type {WebSocket?}
      */
@@ -313,12 +313,12 @@ export class WebsocketProvider extends Observable {
    * @type {boolean}
    */
   get synced() {
-    return this.synced
+    return this.isSynced
   }
 
   set synced(state) {
-    if (this.synced !== state) {
-      this.synced = state
+    if (this.isSynced !== state) {
+      this.isSynced = state
       this.emit('synced', [state])
       this.emit('sync', [state])
     }
