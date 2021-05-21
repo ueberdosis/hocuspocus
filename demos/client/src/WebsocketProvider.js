@@ -79,7 +79,7 @@ const readMessage = (provider, buf, emitSynced) => {
  */
 const broadcastMessage = (provider, buf) => {
   if (provider.wsconnected) {
-    /** @type {WebSocket} */ (provider.ws).send(buf)
+    /** @type {WebSocket} */ (provider.connection).send(buf)
   }
   if (provider.bcconnected) {
     provider.mux(() => {
@@ -153,7 +153,7 @@ export class WebsocketProvider extends Observable {
     /**
      * @type {WebSocket?}
      */
-    this.ws = null
+    this.connection = null
     this.wsLastMessageReceived = 0
     /**
      * Whether to connect to other peers or not
@@ -167,12 +167,12 @@ export class WebsocketProvider extends Observable {
     this.resyncInterval = 0
     if (resyncInterval > 0) {
       this.resyncInterval = /** @type {any} */ (setInterval(() => {
-        if (this.ws) {
+        if (this.connection) {
           // resend sync step 1
           const encoder = encoding.createEncoder()
           encoding.writeVarUint(encoder, messageSync)
           syncProtocol.writeSyncStep1(encoder, doc)
-          this.ws.send(encoding.toUint8Array(encoder))
+          this.connection.send(encoding.toUint8Array(encoder))
         }
       }, resyncInterval))
     }
@@ -223,7 +223,7 @@ export class WebsocketProvider extends Observable {
       if (this.wsconnected && messageReconnectTimeout < time.getUnixTime() - this.wsLastMessageReceived) {
         // no message received in a long time - not even your own awareness
         // updates (which are updated every 15 seconds)
-        /** @type {WebSocket} */ (this.ws).close()
+        /** @type {WebSocket} */ (this.connection).close()
       }
     }, messageReconnectTimeout / 10))
     if (connect) {
@@ -286,7 +286,7 @@ export class WebsocketProvider extends Observable {
     })
   }
 
-  disconnectBc() {
+  disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
     const encoder = encoding.createEncoder()
     encoding.writeVarUint(encoder, messageAwareness)
@@ -300,15 +300,18 @@ export class WebsocketProvider extends Observable {
 
   disconnect() {
     this.shouldConnect = false
-    this.disconnectBc()
-    if (this.ws !== null) {
-      this.ws.close()
+    this.disconnectBroadcastChannel()
+
+    if (this.connection === null) {
+      return
     }
+
+    this.connection.close()
   }
 
   connect() {
     this.shouldConnect = true
-    if (!this.wsconnected && this.ws === null) {
+    if (!this.wsconnected && this.connection === null) {
       this.setupWS()
       this.connectBc()
     }
@@ -320,14 +323,14 @@ export class WebsocketProvider extends Observable {
     this.wsLastMessageReceived = time.getUnixTime()
     const encoder = readMessage(this, new Uint8Array(event.data), true)
     if (encoding.length(encoder) > 1) {
-      this.ws.send(encoding.toUint8Array(encoder))
+      this.connection.send(encoding.toUint8Array(encoder))
     }
   }
 
   onClose(event) {
     console.log(event.type, event.code, event.reason, { event })
 
-    this.ws = null
+    this.connection = null
     this.wsconnecting = false
     if (this.wsconnected) {
       this.wsconnected = false
@@ -340,13 +343,12 @@ export class WebsocketProvider extends Observable {
     } else {
       this.wsUnsuccessfulReconnects += 1
     }
-    // Start with no reconnect timeout and increase timeout by
-    // log10(wsUnsuccessfulReconnects).
-    // The idea is to increase reconnect timeout slowly and have no reconnect
-    // timeout at the beginning (log(1) = 0)
 
     // TODO: `wsUnsuccessfulReconnects` is always 0
-    setTimeout(this.setupWS, math.min(math.log10(this.wsUnsuccessfulReconnects + 1) * reconnectTimeoutBase, maxReconnectTimeout), this)
+    setTimeout(
+      this.setupWS,
+      math.min(math.log10(this.wsUnsuccessfulReconnects + 1) * reconnectTimeoutBase, maxReconnectTimeout),
+    )
   }
 
   onOpen(event) {
@@ -360,37 +362,52 @@ export class WebsocketProvider extends Observable {
     this.emit('status', [{
       status: 'connected',
     }])
-    // always send sync step 1 when connected
+
+    this.sendFirstSyncStep()
+    this.broadcastLocalAwarenessState()
+  }
+
+  broadcastLocalAwarenessState() {
+    if (this.awareness.getLocalState() === null) {
+      return false
+    }
+
+    const encoderAwarenessState = encoding.createEncoder()
+    encoding.writeVarUint(encoderAwarenessState, messageAwareness)
+    encoding.writeVarUint8Array(encoderAwarenessState, awarenessProtocol.encodeAwarenessUpdate(this.awareness, [this.doc.clientID]))
+    this.connection.send(encoding.toUint8Array(encoderAwarenessState))
+  }
+
+  sendFirstSyncStep() {
     const encoder = encoding.createEncoder()
     encoding.writeVarUint(encoder, messageSync)
     syncProtocol.writeSyncStep1(encoder, this.doc)
-    this.ws.send(encoding.toUint8Array(encoder))
-    // broadcast local awareness state
-    if (this.awareness.getLocalState() !== null) {
-      const encoderAwarenessState = encoding.createEncoder()
-      encoding.writeVarUint(encoderAwarenessState, messageAwareness)
-      encoding.writeVarUint8Array(encoderAwarenessState, awarenessProtocol.encodeAwarenessUpdate(this.awareness, [this.doc.clientID]))
-      this.ws.send(encoding.toUint8Array(encoderAwarenessState))
-    }
+    this.connection.send(encoding.toUint8Array(encoder))
   }
 
   setupWS() {
-    if (this.shouldConnect && this.ws === null) {
-      const websocket = new this.WS(this.url)
-      websocket.binaryType = 'arraybuffer'
-      this.ws = websocket
-      this.wsconnecting = true
-      this.wsconnected = false
-      this.synced = false
-
-      websocket.onmessage = this.onMessage.bind(this)
-      websocket.onclose = this.onClose.bind(this)
-      websocket.onopen = this.onOpen.bind(this)
-
-      this.emit('status', [{
-        status: 'connecting',
-      }])
+    if (!this.shouldConnect) {
+      return false
     }
+
+    if (this.connection !== null) {
+      return false
+    }
+
+    this.connection = new this.WS(this.url)
+    this.connection.binaryType = 'arraybuffer'
+
+    this.wsconnecting = true
+    this.wsconnected = false
+    this.synced = false
+
+    this.connection.onmessage = this.onMessage.bind(this)
+    this.connection.onclose = this.onClose.bind(this)
+    this.connection.onopen = this.onOpen.bind(this)
+
+    this.emit('status', [{
+      status: 'connecting',
+    }])
   }
 
 }
