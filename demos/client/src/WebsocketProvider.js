@@ -11,6 +11,12 @@ import { Observable } from 'lib0/observable'
 import * as math from 'lib0/math'
 import * as url from 'lib0/url'
 
+/**
+ * @param {WebsocketProvider} provider
+ * @param {string} reason
+ */
+const permissionDeniedHandler = (provider, reason) => console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
+
 const messageSync = 0
 const messageQueryAwareness = 3
 const messageAwareness = 1
@@ -50,12 +56,6 @@ const messageReconnectTimeout = 30000
 
 /**
  * @param {WebsocketProvider} provider
- * @param {string} reason
- */
-const permissionDeniedHandler = (provider, reason) => console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
-
-/**
- * @param {WebsocketProvider} provider
  * @param {Uint8Array} buf
  * @param {boolean} emitSynced
  * @return {encoding.Encoder}
@@ -78,7 +78,7 @@ const readMessage = (provider, buf, emitSynced) => {
  */
 const setupWS = provider => {
   if (provider.shouldConnect && provider.ws === null) {
-    const websocket = new provider._WS(provider.url)
+    const websocket = new provider.WS(provider.url)
     websocket.binaryType = 'arraybuffer'
     provider.ws = websocket
     provider.wsconnecting = true
@@ -108,7 +108,7 @@ const setupWS = provider => {
           status: 'disconnected',
         }])
       } else {
-        provider.wsUnsuccessfulReconnects++
+        provider.wsUnsuccessfulReconnects += 1
       }
       // Start with no reconnect timeout and increase timeout by
       // log10(wsUnsuccessfulReconnects).
@@ -216,7 +216,7 @@ export class WebsocketProvider extends Observable {
     this.url = `${serverUrl}/${roomname}${encodedParams.length === 0 ? '' : `?${encodedParams}`}`
     this.roomname = roomname
     this.doc = doc
-    this._WS = WebSocketPolyfill
+    this.WS = WebSocketPolyfill
     this.awareness = awareness
     this.wsconnected = false
     this.wsconnecting = false
@@ -227,7 +227,7 @@ export class WebsocketProvider extends Observable {
     /**
      * @type {boolean}
      */
-    this._synced = false
+    this.synced = false
     /**
      * @type {WebSocket?}
      */
@@ -242,9 +242,9 @@ export class WebsocketProvider extends Observable {
     /**
      * @type {number}
      */
-    this._resyncInterval = 0
+    this.resyncInterval = 0
     if (resyncInterval > 0) {
-      this._resyncInterval = /** @type {any} */ (setInterval(() => {
+      this.resyncInterval = /** @type {any} */ (setInterval(() => {
         if (this.ws) {
           // resend sync step 1
           const encoder = encoding.createEncoder()
@@ -258,7 +258,7 @@ export class WebsocketProvider extends Observable {
     /**
      * @param {ArrayBuffer} data
      */
-    this._bcSubscriber = data => {
+    this.bcSubscriber = data => {
       this.mux(() => {
         const encoder = readMessage(this, new Uint8Array(data), false)
         if (encoding.length(encoder) > 1) {
@@ -271,7 +271,7 @@ export class WebsocketProvider extends Observable {
      * @param {Uint8Array} update
      * @param {any} origin
      */
-    this._updateHandler = (update, origin) => {
+    this.updateHandler = (update, origin) => {
       if (origin !== this) {
         const encoder = encoding.createEncoder()
         encoding.writeVarUint(encoder, messageSync)
@@ -279,12 +279,12 @@ export class WebsocketProvider extends Observable {
         broadcastMessage(this, encoding.toUint8Array(encoder))
       }
     }
-    this.doc.on('update', this._updateHandler)
+    this.doc.on('update', this.updateHandler)
     /**
      * @param {any} changed
      * @param {any} origin
      */
-    this._awarenessUpdateHandler = ({ added, updated, removed }, origin) => {
+    this.awarenessUpdateHandler = ({ added, updated, removed }, origin) => {
       const changedClients = added.concat(updated).concat(removed)
       const encoder = encoding.createEncoder()
       encoding.writeVarUint(encoder, messageAwareness)
@@ -296,8 +296,8 @@ export class WebsocketProvider extends Observable {
         awarenessProtocol.removeAwarenessStates(this.awareness, [doc.clientID], 'window unload')
       })
     }
-    awareness.on('update', this._awarenessUpdateHandler)
-    this._checkInterval = /** @type {any} */ (setInterval(() => {
+    awareness.on('update', this.awarenessUpdateHandler)
+    this.checkInterval = /** @type {any} */ (setInterval(() => {
       if (this.wsconnected && messageReconnectTimeout < time.getUnixTime() - this.wsLastMessageReceived) {
         // no message received in a long time - not even your own awareness
         // updates (which are updated every 15 seconds)
@@ -313,31 +313,31 @@ export class WebsocketProvider extends Observable {
    * @type {boolean}
    */
   get synced() {
-    return this._synced
+    return this.synced
   }
 
   set synced(state) {
-    if (this._synced !== state) {
-      this._synced = state
+    if (this.synced !== state) {
+      this.synced = state
       this.emit('synced', [state])
       this.emit('sync', [state])
     }
   }
 
   destroy() {
-    if (this._resyncInterval !== 0) {
-      clearInterval(this._resyncInterval)
+    if (this.resyncInterval !== 0) {
+      clearInterval(this.resyncInterval)
     }
-    clearInterval(this._checkInterval)
+    clearInterval(this.checkInterval)
     this.disconnect()
-    this.awareness.off('update', this._awarenessUpdateHandler)
-    this.doc.off('update', this._updateHandler)
+    this.awareness.off('update', this.awarenessUpdateHandler)
+    this.doc.off('update', this.updateHandler)
     super.destroy()
   }
 
   connectBc() {
     if (!this.bcconnected) {
-      bc.subscribe(this.bcChannel, this._bcSubscriber)
+      bc.subscribe(this.bcChannel, this.bcSubscriber)
       this.bcconnected = true
     }
     // send sync step1 to bc
@@ -371,7 +371,7 @@ export class WebsocketProvider extends Observable {
     encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.awareness, [this.doc.clientID], new Map()))
     broadcastMessage(this, encoding.toUint8Array(encoder))
     if (this.bcconnected) {
-      bc.unsubscribe(this.bcChannel, this._bcSubscriber)
+      bc.unsubscribe(this.bcChannel, this.bcSubscriber)
       this.bcconnected = false
     }
   }
