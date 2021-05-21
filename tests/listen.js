@@ -20,14 +20,6 @@ context('listen', () => {
     await page.close()
   })
 
-  it('should respond with OK on the default port', async () => {
-    Server.listen()
-
-    await page.goto('http://localhost:80')
-
-    assert.strictEqual(await page.textContent('html'), 'OK')
-  })
-
   it('should respond with OK on a custom port', async () => {
     Server.configure({ port: 1234 }).listen()
 
