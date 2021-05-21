@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 import assert from 'assert'
-import { Server } from '@hocuspocus/server'
+import { Server } from '../packages/server/src'
 
 /**
  * Set up the server
