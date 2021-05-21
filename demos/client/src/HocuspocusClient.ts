@@ -3,52 +3,15 @@ import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
 import * as encoding from 'lib0/encoding'
-import * as decoding from 'lib0/decoding'
 import * as syncProtocol from 'y-protocols/sync'
-import * as authProtocol from 'y-protocols/auth'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import { Observable } from 'lib0/observable'
 import * as math from 'lib0/math'
 import * as url from 'lib0/url'
 
-/**
- * @param {HocuspocusClient} provider
- * @param {string} reason
- */
-const permissionDeniedHandler = (provider, reason) => console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
-
-const messageSync = 0
-const messageQueryAwareness = 3
-const messageAwareness = 1
-const messageAuth = 2
-
-/**
- *                       encoder,          decoder,          provider,          emitSynced, messageType
- * @type {Array<function(encoding.Encoder, decoding.Decoder, HocuspocusClient, boolean,    number):void>}
- */
-const messageHandlers = []
-
-messageHandlers[messageSync] = (encoder, decoder, provider, emitSynced, messageType) => {
-  encoding.writeVarUint(encoder, messageSync)
-  const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, provider.options.document, provider)
-  if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2 && !provider.synced) {
-    provider.synced = true
-  }
-}
-
-messageHandlers[messageQueryAwareness] = (encoder, decoder, provider, emitSynced, messageType) => {
-  encoding.writeVarUint(encoder, messageAwareness)
-  encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(provider.options.awareness, Array.from(provider.options.awareness.getStates().keys())))
-}
-
-messageHandlers[messageAwareness] = (encoder, decoder, provider, emitSynced, messageType) => {
-  awarenessProtocol.applyAwarenessUpdate(provider.options.awareness, decoding.readVarUint8Array(decoder), provider)
-}
-
-messageHandlers[messageAuth] = (encoder, decoder, provider, emitSynced, messageType) => {
-  authProtocol.readAuthMessage(decoder, provider.options.document, permissionDeniedHandler)
-}
+import { IncomingMessage } from './IncomingMessage'
+import { MessageTypes } from './types'
 
 export interface HocuspocusClientOptions {
   url: string,
@@ -90,8 +53,6 @@ export class HocuspocusClient extends Observable {
   isSynced = false
 
   lastMessageReceived = 0
-
-  messageHandlers = messageHandlers.slice()
 
   mux = mutex.createMutex()
 
@@ -150,7 +111,7 @@ export class HocuspocusClient extends Observable {
 
     // resend sync step 1
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageSync)
+    encoding.writeVarUint(encoder, MessageTypes.Sync)
     syncProtocol.writeSyncStep1(encoder, this.options.document)
     this.websocket.send(encoding.toUint8Array(encoder))
   }
@@ -184,7 +145,7 @@ export class HocuspocusClient extends Observable {
     }
 
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageSync)
+    encoding.writeVarUint(encoder, MessageTypes.Sync)
     syncProtocol.writeUpdate(encoder, update)
 
     this.broadcastMessage(encoding.toUint8Array(encoder))
@@ -194,7 +155,7 @@ export class HocuspocusClient extends Observable {
     const changedClients = added.concat(updated).concat(removed)
 
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageAwareness)
+    encoding.writeVarUint(encoder, MessageTypes.Awareness)
     encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.options.awareness, changedClients))
 
     this.broadcastMessage(encoding.toUint8Array(encoder))
@@ -259,24 +220,24 @@ export class HocuspocusClient extends Observable {
     this.mux(() => {
       // write sync step 1
       const encoderSync = encoding.createEncoder()
-      encoding.writeVarUint(encoderSync, messageSync)
+      encoding.writeVarUint(encoderSync, MessageTypes.Sync)
       syncProtocol.writeSyncStep1(encoderSync, this.options.document)
       bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderSync))
 
       // broadcast local state
       const encoderState = encoding.createEncoder()
-      encoding.writeVarUint(encoderState, messageSync)
+      encoding.writeVarUint(encoderState, MessageTypes.Sync)
       syncProtocol.writeSyncStep2(encoderState, this.options.document)
       bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderState))
 
       // write queryAwareness
       const encoderAwarenessQuery = encoding.createEncoder()
-      encoding.writeVarUint(encoderAwarenessQuery, messageQueryAwareness)
+      encoding.writeVarUint(encoderAwarenessQuery, MessageTypes.QueryAwareness)
       bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderAwarenessQuery))
 
       // broadcast local awareness state
       const encoderAwarenessState = encoding.createEncoder()
-      encoding.writeVarUint(encoderAwarenessState, messageAwareness)
+      encoding.writeVarUint(encoderAwarenessState, MessageTypes.Awareness)
       encoding.writeVarUint8Array(encoderAwarenessState, awarenessProtocol.encodeAwarenessUpdate(this.options.awareness, [this.options.document.clientID]))
       bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderAwarenessState))
     })
@@ -285,7 +246,7 @@ export class HocuspocusClient extends Observable {
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageAwareness)
+    encoding.writeVarUint(encoder, MessageTypes.Awareness)
     encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.options.awareness, [this.options.document.clientID], new Map()))
     this.broadcastMessage(encoding.toUint8Array(encoder))
 
@@ -371,14 +332,14 @@ export class HocuspocusClient extends Observable {
     }
 
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageAwareness)
+    encoding.writeVarUint(encoder, MessageTypes.Awareness)
     encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.options.awareness, [this.options.document.clientID]))
     this.websocket.send(encoding.toUint8Array(encoder))
   }
 
   sendFirstSyncStep() {
     const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, messageSync)
+    encoding.writeVarUint(encoder, MessageTypes.Sync)
     syncProtocol.writeSyncStep1(encoder, this.options.document)
     this.websocket.send(encoding.toUint8Array(encoder))
   }
@@ -408,19 +369,10 @@ export class HocuspocusClient extends Observable {
     }])
   }
 
-  readMessage(buffer: Uint8Array, emitSynced: boolean): encoding.Encoder {
-    const decoder = decoding.createDecoder(buffer)
-    const encoder = encoding.createEncoder()
-    const messageType = decoding.readVarUint(decoder)
-    const messageHandler = this.messageHandlers[messageType]
-
-    if (messageHandler) {
-      messageHandler(encoder, decoder, this, emitSynced, messageType)
-    } else {
-      console.error('Unable to compute message')
-    }
-
-    return encoder
+  readMessage(input: Uint8Array, emitSynced: boolean): encoding.Encoder {
+    const message = new IncomingMessage(input)
+    // message.readSyncMessageAndApplyItTo(this.options.document, this)
+    return message.readMessage(this, emitSynced)
   }
 
   broadcastMessage(buffer: ArrayBuffer): void {
