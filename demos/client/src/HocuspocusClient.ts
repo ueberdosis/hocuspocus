@@ -314,18 +314,20 @@ export class HocuspocusClient extends EventEmitter {
       this.websocketConnectionAttempts += 1
     }
 
-    // TODO: `websocketConnectionAttempts` is always 0
-    const wait = math.min(
-      math.log10(this.websocketConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
-      this.options.maxReconnectTimeout,
-    )
+    if (this.shouldConnect) {
+      const wait = math.min(
+        math.log10(this.websocketConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
+        this.options.maxReconnectTimeout,
+      )
 
-    console.log(`Reconnect in ${wait}ms …`)
+      setTimeout(this.startWebSocketConnection.bind(this), wait)
 
-    setTimeout(this.startWebSocketConnection.bind(this), wait)
+      console.log(`Reconnecting in ${wait}ms …`)
+    }
   }
 
   startWebSocketConnection() {
+    // TODO: Still required?
     if (!this.shouldConnect) {
       return
     }
@@ -377,8 +379,8 @@ export class HocuspocusClient extends EventEmitter {
   }
 
   sendMessage(buffer: ArrayBuffer): void {
-    if (this.websocketConnected) {
-      (this.websocket).send(buffer)
+    if (this.websocket) {
+      this.websocket.send(buffer)
     }
 
     if (this.subscribedToBroadcastChannel) {
