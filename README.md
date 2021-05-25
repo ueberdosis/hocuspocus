@@ -9,7 +9,7 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs),
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
 ## Documentation
-The full documentation is a available on [www.hocuspocus.dev](https://www.hocuspocus.dev/installation).
+The full documentation is a available on [hocuspocus.dev/installation](https://www.hocuspocus.dev/installation).
 
 ## Usage
 The following example is a example setup you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
