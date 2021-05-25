@@ -10,6 +10,7 @@ import { Observable } from 'lib0/observable'
 import * as math from 'lib0/math'
 import * as url from 'lib0/url'
 
+import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
 import { MessageTypes } from './types'
 
@@ -26,7 +27,7 @@ export interface HocuspocusClientOptions {
   messageReconnectTimeout: number,
 }
 
-export class HocuspocusClient extends Observable {
+export class HocuspocusClient extends EventEmitter {
   public options: HocuspocusClientOptions = {
     url: '',
     name: '',
@@ -40,6 +41,9 @@ export class HocuspocusClient extends Observable {
     maxReconnectTimeout: 2500,
     // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
+    onOpen: () => null,
+    onMessage: () => null,
+    onClose: () => null,
   }
 
   websocket: WebSocket = null
@@ -72,6 +76,9 @@ export class HocuspocusClient extends Observable {
     this.shouldConnect = options.connect
 
     this.setOptions(options)
+    this.on('open', this.options.onOpen)
+    this.on('message', this.options.onMessage)
+    this.on('close', this.options.onClose)
 
     if (this.options.forceSyncInterval) {
       this.intervals.forceSync = setInterval(
@@ -198,8 +205,8 @@ export class HocuspocusClient extends Observable {
     }
 
     this.isSynced = state
-    this.emit('synced', [state])
-    this.emit('sync', [state])
+    this.emit('synced', state)
+    this.emit('sync', state)
   }
 
   destroy() {
@@ -281,7 +288,7 @@ export class HocuspocusClient extends Observable {
   }
 
   onMessage(event) {
-    console.log(event.type, { event })
+    this.emit('message', event)
 
     this.lastMessageReceived = time.getUnixTime()
     const encoder = this.readMessage(new Uint8Array(event.data), true)
@@ -291,7 +298,7 @@ export class HocuspocusClient extends Observable {
   }
 
   onClose(event) {
-    console.log(event.type, event.code, event.reason, { event })
+    this.emit('close', event)
 
     this.websocket = null
     this.websocketConnecting = false
@@ -300,9 +307,9 @@ export class HocuspocusClient extends Observable {
       this.synced = false
       // update awareness (all users except local left)
       awarenessProtocol.removeAwarenessStates(this.options.awareness, Array.from(this.options.awareness.getStates().keys()).filter(client => client !== this.options.document.clientID), this)
-      this.emit('status', [{
+      this.emit('status', {
         status: 'disconnected',
-      }])
+      })
     } else {
       this.websocketConnectionAttempts += 1
     }
@@ -315,16 +322,16 @@ export class HocuspocusClient extends Observable {
   }
 
   onOpen(event) {
-    console.log(event.type, { event })
+    this.emit('open', event)
 
     // TODO: That all happens to early, the connection can still get closed at this stage
     this.lastMessageReceived = time.getUnixTime()
     this.websocketConnecting = false
     this.websocketConnected = true
     this.websocketConnectionAttempts = 0
-    this.emit('status', [{
+    this.emit('status', {
       status: 'connected',
-    }])
+    })
 
     this.sendFirstSyncStep()
     this.broadcastLocalAwarenessState()
@@ -368,9 +375,9 @@ export class HocuspocusClient extends Observable {
     this.websocket.onclose = this.onClose.bind(this)
     this.websocket.onopen = this.onOpen.bind(this)
 
-    this.emit('status', [{
+    this.emit('status', {
       status: 'connecting',
-    }])
+    })
   }
 
   readMessage(input: Uint8Array, emitSynced: boolean): encoding.Encoder {

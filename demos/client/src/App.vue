@@ -59,6 +59,15 @@ export default {
       parameters: {
         token: '123456',
       },
+      onOpen: event => {
+        console.log(event.type, { event })
+      },
+      // onMessage: event => {
+      //   console.log(event.type, { event })
+      // },
+      onClose: event => {
+        console.log(event.type, event.code, event.reason, { event })
+      },
     })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
