@@ -14,7 +14,6 @@ import { IncomingMessage } from './IncomingMessage'
 import { MessageTypes } from './types'
 
 export interface HocuspocusClientOptions {
-  url: string,
   name: string,
   document: Y.Doc,
   connect: boolean,
@@ -22,12 +21,15 @@ export interface HocuspocusClientOptions {
   parameters: Object<string, string>,
   WebSocketPolyfill: WebSocket,
   forceSyncInterval: false | number,
+  reconnectTimeoutBase: number,
+  maxReconnectTimeout: number,
+  messageReconnectTimeout: number,
 }
 
 export class HocuspocusClient extends Observable {
   public options: HocuspocusClientOptions = {
-    url: null,
-    name: null,
+    url: '',
+    name: '',
     document: null,
     connect: true,
     awareness: null,
@@ -51,6 +53,8 @@ export class HocuspocusClient extends Observable {
   subscribedToBroadcastChannel = false
 
   isSynced = false
+
+  shouldConnect = true
 
   lastMessageReceived = 0
 
@@ -76,7 +80,7 @@ export class HocuspocusClient extends Observable {
       )
     }
 
-    this.connectionChecker = setInterval(
+    this.intervals.connectionChecker = setInterval(
       this.checkConnection.bind(this),
       this.options.messageReconnectTimeout / 10,
     )
@@ -134,7 +138,7 @@ export class HocuspocusClient extends Observable {
     this.mux(() => {
       const encoder = this.readMessage(new Uint8Array(data), false)
       if (encoding.length(encoder) > 1) {
-        bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoder))
+        bc.publish(this.broadcastChannel, encoding.toUint8Array(encoder))
       }
     })
   }
@@ -202,7 +206,7 @@ export class HocuspocusClient extends Observable {
     if (this.intervals.forceSync) {
       clearInterval(this.intervals.forceSync)
     }
-    clearInterval(this.connectionChecker)
+    clearInterval(this.intervals.connectionChecker)
 
     this.disconnect()
     this.options.awareness.off('update', this.awarenessUpdateHandler)
@@ -212,7 +216,7 @@ export class HocuspocusClient extends Observable {
 
   subscribeToBroadcastChannel() {
     if (!this.subscribedToBroadcastChannel) {
-      bc.subscribe(this.broadcoastChannel, this.broadcastChannelSubscriber.bind(this))
+      bc.subscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
       this.subscribedToBroadcastChannel = true
     }
 
@@ -222,24 +226,24 @@ export class HocuspocusClient extends Observable {
       const encoderSync = encoding.createEncoder()
       encoding.writeVarUint(encoderSync, MessageTypes.Sync)
       syncProtocol.writeSyncStep1(encoderSync, this.options.document)
-      bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderSync))
+      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderSync))
 
       // broadcast local state
       const encoderState = encoding.createEncoder()
       encoding.writeVarUint(encoderState, MessageTypes.Sync)
       syncProtocol.writeSyncStep2(encoderState, this.options.document)
-      bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderState))
+      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderState))
 
       // write queryAwareness
       const encoderAwarenessQuery = encoding.createEncoder()
       encoding.writeVarUint(encoderAwarenessQuery, MessageTypes.QueryAwareness)
-      bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderAwarenessQuery))
+      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderAwarenessQuery))
 
       // broadcast local awareness state
       const encoderAwarenessState = encoding.createEncoder()
       encoding.writeVarUint(encoderAwarenessState, MessageTypes.Awareness)
       encoding.writeVarUint8Array(encoderAwarenessState, awarenessProtocol.encodeAwarenessUpdate(this.options.awareness, [this.options.document.clientID]))
-      bc.publish(this.broadcoastChannel, encoding.toUint8Array(encoderAwarenessState))
+      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderAwarenessState))
     })
   }
 
@@ -251,7 +255,7 @@ export class HocuspocusClient extends Observable {
     this.broadcastMessage(encoding.toUint8Array(encoder))
 
     if (this.subscribedToBroadcastChannel) {
-      bc.unsubscribe(this.broadcoastChannel, this.broadcastChannelSubscriber.bind(this))
+      bc.unsubscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
       this.subscribedToBroadcastChannel = false
     }
   }
@@ -382,7 +386,7 @@ export class HocuspocusClient extends Observable {
 
     if (this.subscribedToBroadcastChannel) {
       this.mux(() => {
-        bc.publish(this.broadcoastChannel, buffer)
+        bc.publish(this.broadcastChannel, buffer)
       })
     }
   }
