@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid'
 import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
+import { Forbidden } from './Exceptions'
 import packageJson from '../package.json'
 
 export const defaultConfiguration = {
@@ -182,7 +183,7 @@ export class Hocuspocus {
       })
       .catch(e => {
         // if a hook interrupts, close the websocket connection
-        incoming.close(4403, 'Forbidden')
+        incoming.close(Forbidden.code, Forbidden.reason)
         if (e) throw e
       })
 

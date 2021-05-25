@@ -21,7 +21,7 @@ export class IncomingMessage {
     return decoding.readVarUint(this.decoder)
   }
 
-  public readMessage(provider: HocuspocusClient, emitSynced: boolean) {
+  public handle(provider: HocuspocusClient, emitSynced: boolean) {
     switch (this.messageType) {
       case MessageTypes.Sync:
         this.handleSyncMessage(provider, emitSynced)
