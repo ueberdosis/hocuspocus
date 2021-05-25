@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid'
 import { Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Forbidden } from './Exceptions'
+import { Forbidden } from './CloseEvents'
 import packageJson from '../package.json'
 
 export const defaultConfiguration = {
