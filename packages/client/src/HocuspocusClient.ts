@@ -26,7 +26,7 @@ export enum WebSocketStatus {
 
 export interface HocuspocusClientOptions {
   name: string,
-  document: Y.Doc,
+  document: any,
   connect: boolean,
   awareness: Awareness,
   parameters: Object<string, string>,
@@ -52,7 +52,7 @@ export class HocuspocusClient extends EventEmitter {
     connect: true,
     awareness: null,
     parameters: {},
-    WebSocketPolyfill: WebSocket,
+    WebSocketPolyfill: typeof WebSocket !== 'undefined' ? WebSocket : null,
     forceSyncInterval: false,
     reconnectTimeoutBase: 1200,
     maxReconnectTimeout: 2500,
@@ -156,7 +156,11 @@ export class HocuspocusClient extends EventEmitter {
   }
 
   registerBeforeUnloadEventListener() {
-    window?.addEventListener('beforeunload', () => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.addEventListener('beforeunload', () => {
       removeAwarenessStates(
         this.options.awareness,
         [this.options.document.clientID],
