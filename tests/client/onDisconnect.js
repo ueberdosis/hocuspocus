@@ -7,7 +7,7 @@ import { HocuspocusClient } from '../../packages/client/src'
 let client
 const ydoc = new Y.Doc()
 
-context('client/onClose', () => {
+context('client/onDisconnect', () => {
   before(() => {
     Server.configure({ port: 4000 }).listen()
   })
@@ -16,7 +16,7 @@ context('client/onClose', () => {
     Server.destroy()
   })
 
-  it('onClose callback is executed', done => {
+  it('onDisconnect callback is executed', done => {
     client = new HocuspocusClient({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
@@ -25,13 +25,14 @@ context('client/onClose', () => {
       onConnect: () => {
         client.disconnect()
       },
-      onClose: () => {
+      onDisconnect: () => {
         done()
+        client.destroy()
       },
     })
   })
 
-  it("on('close') callback is executed", done => {
+  it("on('disconnect') callback is executed", done => {
     client = new HocuspocusClient({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
@@ -42,8 +43,9 @@ context('client/onClose', () => {
     client.on('connect', () => {
       client.disconnect()
     })
-    client.on('close', () => {
+    client.on('disconnect', () => {
       done()
+      client.destroy()
     })
   })
 })

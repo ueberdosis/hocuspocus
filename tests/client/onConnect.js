@@ -7,7 +7,7 @@ import { HocuspocusClient } from '../../packages/client/src'
 let client
 const ydoc = new Y.Doc()
 
-context('onConnect', () => {
+context('client/onConnect', () => {
   before(() => {
     Server.configure({ port: 4000 }).listen()
   })
@@ -26,10 +26,9 @@ context('onConnect', () => {
       name: 'hocuspocus-demo',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-    })
-
-    client.on('connect', () => {
-      done()
+      onConnect: () => {
+        done()
+      },
     })
   })
 
@@ -39,9 +38,10 @@ context('onConnect', () => {
       name: 'hocuspocus-demo',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      onConnect: () => {
-        done()
-      },
+    })
+
+    client.on('connect', () => {
+      done()
     })
   })
 })

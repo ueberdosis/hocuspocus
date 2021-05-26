@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import assert from 'assert'
 import { Server } from '../../packages/server/src'
 
-context('listen', () => {
+context('server/listen', () => {
   let browser
 
   before(async () => {
