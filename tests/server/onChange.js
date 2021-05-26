@@ -7,27 +7,28 @@ import { HocuspocusClient } from '../../packages/client/src'
 let client
 const ydoc = new Y.Doc()
 
-context('server/onCreateDocument', () => {
-  before(() => {
-    Server.configure({
-      port: 4000,
-      async onCreateDocument({ document }) {
-        document.getArray('foo').insert(0, ['bar'])
-
-        return document
-      },
-    }).listen()
-  })
-
-  after(() => {
-    Server.destroy()
-  })
-
+context('server/onChange', () => {
   afterEach(() => {
+    Server.destroy()
     client.destroy()
   })
 
-  it('onCreateDocument callback creates a new document', done => {
+  it('onChange callback receives updates', done => {
+    let triggered = false
+
+    Server.configure({
+      port: 4000,
+      async onChange({ document }) {
+        const value = document.getArray('foo').get(0)
+
+        if (!triggered && value === 'bar') {
+          triggered = true
+          assert.strictEqual(value, 'bar')
+          done()
+        }
+      },
+    }).listen()
+
     client = new HocuspocusClient({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
@@ -36,9 +37,7 @@ context('server/onCreateDocument', () => {
     })
 
     client.on('synced', () => {
-      const value = ydoc.getArray('foo').get(0)
-      assert.strictEqual(value, 'bar')
-      done()
+      ydoc.getArray('foo').insert(0, ['bar'])
     })
   })
 })
