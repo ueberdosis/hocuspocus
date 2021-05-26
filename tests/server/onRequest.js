@@ -4,7 +4,7 @@ import { Hocuspocus } from '../../packages/server/src'
 
 const Server = new Hocuspocus()
 
-context('server/listen', () => {
+context('server/onRequest', () => {
   let browser
 
   before(async () => {
@@ -26,11 +26,18 @@ context('server/listen', () => {
     Server.destroy()
   })
 
-  it('should respond with OK on a custom port', async () => {
-    Server.configure({ port: 4000 }).listen()
-
-    await page.goto('http://localhost:4000')
-
-    assert.strictEqual(await page.textContent('html'), 'OK')
+  it('onRequest callback is executed', done => {
+    Server.configure({
+      port: 4000,
+      async onListen() {
+        await page.goto('http://localhost:4000/foobar')
+      },
+      async onRequest({ request }) {
+        setTimeout(() => {
+          assert.strictEqual(request.url, '/foobar')
+          done()
+        }, 0)
+      },
+    }).listen()
   })
 })

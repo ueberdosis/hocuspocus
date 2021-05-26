@@ -1,4 +1,6 @@
-import { Server } from '../../packages/server/src'
+import { Hocuspocus } from '../../packages/server/src'
+
+const Server = new Hocuspocus()
 
 context('server/onListen', () => {
   afterEach(() => {

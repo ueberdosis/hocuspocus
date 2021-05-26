@@ -8,17 +8,20 @@ let client
 const ydoc = new Y.Doc()
 const Server = new Hocuspocus()
 
-context('server/onDisconnect', () => {
+context('server/onConnect', () => {
   afterEach(() => {
     Server.destroy()
     client.destroy()
   })
 
-  it('onDisconnect callback is executed', done => {
+  it('onConnect callback is executed', done => {
     Server.configure({
       port: 4000,
-      async onDisconnect() {
-        done()
+      async onConnect({ documentName }) {
+        setTimeout(() => {
+          assert.strictEqual(documentName, 'hocuspocus-demo')
+          done()
+        }, 0)
       },
     }).listen()
 
@@ -27,10 +30,6 @@ context('server/onDisconnect', () => {
       name: 'hocuspocus-demo',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-    })
-
-    client.on('connect', () => {
-      client.disconnect()
     })
   })
 })

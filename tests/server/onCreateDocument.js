@@ -1,11 +1,12 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Server } from '../../packages/server/src'
+import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusClient } from '../../packages/client/src'
 
 let client
 const ydoc = new Y.Doc()
+const Server = new Hocuspocus()
 
 context('server/onCreateDocument', () => {
   before(() => {

@@ -393,7 +393,9 @@ export class HocuspocusClient extends EventEmitter {
   }
 
   sendMessage(buffer: ArrayBuffer): void {
-    this.websocket?.send(buffer)
+    if (this.status === WebSocketStatus.Connected) {
+      this.websocket?.send(buffer)
+    }
 
     if (this.subscribedToBroadcastChannel) {
       this.mux(() => {
