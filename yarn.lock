@@ -9617,6 +9617,13 @@ lib0@^0.2.13, lib0@^0.2.31, lib0@^0.2.34, lib0@^0.2.35, lib0@^0.2.38, lib0@^0.2.
   dependencies:
     isomorphic.js "^0.2.4"
 
+lib0@^0.2.42:
+  version "0.2.42"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.42.tgz#6d8bf1fb8205dec37a953c521c5ee403fd8769b0"
+  integrity sha512-8BNM4MiokEKzMvSxTOC3gnCBisJH+jL67CnSnqzHv3jli3pUvGC8wz+0DQ2YvGr4wVQdb2R2uNNPw9LEpVvJ4Q==
+  dependencies:
+    isomorphic.js "^0.2.4"
+
 lines-and-columns@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
@@ -15813,6 +15820,13 @@ y-protocols@^1.0.3:
   dependencies:
     lib0 "^0.2.35"
 
+y-protocols@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.5.tgz#91d574250060b29fcac8f8eb5e276fbad594245e"
+  integrity sha512-Wil92b7cGk712lRHDqS4T90IczF6RkcvCwAD0A2OPg+adKmOe+nOiT/N2hvpQIWS3zfjmtL4CPaH5sIW1Hkm/A==
+  dependencies:
+    lib0 "^0.2.42"
+
 y-redis@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/y-redis/-/y-redis-1.0.2.tgz#d5486a89f0a6ebb359c95f8179b36eb120410981"
@@ -15968,6 +15982,13 @@ yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3:
   integrity sha512-sbE4G+bSP0jw71aJ9Hqi5UxOTy8JGkObIaCSpY6krRoNqssPCWq05rqV9PQcuMqcrHD3twzko92fVaF1S3id/Q==
   dependencies:
     lib0 "^0.2.38"
+
+yjs@^13.5.8:
+  version "13.5.8"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.8.tgz#5bfcb2f8855bf8ee980f246a7fd7b0212559f105"
+  integrity sha512-Szd+FHlcJnx/M56Oyle7Q20hSdoQeZPRXx55Z/JXfcaW2Y8/oQIFL/mnHiWdNo7xrhIIxV01v2jVI3tcYnXHAA==
+  dependencies:
+    lib0 "^0.2.41"
 
 yn@3.1.1:
   version "3.1.1"
