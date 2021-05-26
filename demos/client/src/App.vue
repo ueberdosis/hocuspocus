@@ -59,13 +59,13 @@ export default {
       parameters: {
         token: '123456',
       },
-      onOpen: event => {
+      onConnect: () => {
+        console.log('connected')
+      },
+      onMessage: event => {
         console.log(event.type, { event })
       },
-      // onMessage: event => {
-      //   console.log(event.type, { event })
-      // },
-      onClose: event => {
+      onDisconnect: event => {
         console.log(event.type, event.code, event.reason, { event })
       },
     })

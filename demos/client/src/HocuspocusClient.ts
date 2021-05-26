@@ -39,7 +39,7 @@ export interface HocuspocusClientOptions {
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
   onSynced: () => void,
-  onDisconnect: () => void,
+  onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
   onDestroy: () => void,
 }
@@ -322,7 +322,7 @@ export class HocuspocusClient extends EventEmitter {
 
       this.status = WebSocketStatus.Disconnected
       this.emit('status', { status: 'disconnected' })
-      this.emit('disconnect')
+      this.emit('disconnect', event)
     } else {
       this.failedConnectionAttempts += 1
     }
@@ -341,7 +341,7 @@ export class HocuspocusClient extends EventEmitter {
 
     this.status = WebSocketStatus.Disconnected
     this.emit('status', { status: 'disconnected' })
-    this.emit('disconnect')
+    this.emit('disconnect', event)
   }
 
   startWebSocketConnection() {
