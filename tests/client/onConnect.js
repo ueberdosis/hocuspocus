@@ -43,6 +43,5 @@ context('onConnect', () => {
         done()
       },
     })
-
   })
 })
