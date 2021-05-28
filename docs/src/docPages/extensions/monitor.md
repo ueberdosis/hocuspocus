@@ -11,9 +11,7 @@ The Monitor extension adds a live updating dashboard featuring metrics and logs 
 
 ## Installation
 
-Configure your `.npmrc` to look for packages with the @hocuspocus prefix in our private registry, [as described here](/installation#2-installation).
-
-Now you should be able to install the Monitor package with:
+Install the Monitor package with:
 
 ```bash
 # with npm
