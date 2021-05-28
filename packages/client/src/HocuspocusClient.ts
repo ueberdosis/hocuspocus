@@ -287,7 +287,11 @@ export class HocuspocusClient extends EventEmitter {
       return
     }
 
-    this.websocket.close()
+    try {
+      this.websocket.close()
+    } catch {
+      //
+    }
   }
 
   connect() {
