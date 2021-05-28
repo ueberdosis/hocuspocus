@@ -2,65 +2,59 @@
   items:
     - title: Installation
       link: /installation
-    - title: License
-      link: /license
-    - title: Support
-      link: /support
-      draft: true
+      items:
+        - title: Express
+          link: /installation/express
+        - title: Laravel
+          link: /installation/laravel
+          type: draft
+
     - title: Changelog
       link: /changelog
+    - title: About the project
+      link: /sponsor
+      type: sponsor
+    - title: Contributing
+      link: /contributing
+      type: draft
 
 - title: Examples
   items:
+    - title: Application state
+      link: /examples/application-state
+      type: draft
     - title: tiptap
       link: /examples/tiptap
     - title: Quill
       link: /examples/quill
-      draft: true
     - title: Monaco
       link: /examples/monaco
-      draft: true
     - title: CodeMirror 5
       link: /examples/codemirror
-      draft: true
 
 - title: Guide
   items:
     - title: Configuration
       link: /guide/configuration
-    - title: Introducing hooks
-      link: /guide/hooks
-    - title: Authentication & authorization
+    - title: Authorization
       link: /guide/authentication-and-authorization
     - title: Documents
       link: /guide/documents
-    - title: Transformations
+    - title: Hooks
+      link: /guide/hooks
+    - title: Working with JSON
       link: /guide/transformations
-    - title: Express integration
-      link: /guide/framework-integration
-    - title: Extensions
+    - title: Custom Extensions
       link: /guide/extensions
 
-- title: Extensions
+- title: Server
   items:
-    - title: RocksDB
-      link: /extensions/rocksdb
-    - title: Monitor
-      link: /extensions/monitor
-    - title: Redis
-      link: /extensions/redis
-    - title: Logger
-      link: /extensions/logger
-    - title: Webhook
-      link: /extensions/webhook
-    - title: Throttle
-      link: /extensions/throttle
-
-- title: API
-  items:
+    - title: Settings
+      link: /api/settings
+      type: draft
     - title: Methods
       link: /api/methods
-      draft: true
+      type: draft
     - title: Hooks
       items:
         - title: onConnect
@@ -80,13 +74,34 @@
         - title: onRequest
           link: /api/on-request
         - title: onUpgrade
-      link: /api/on-upgrade
+          link: /api/on-upgrade
+
+    - title: Extensions
+      items:
+        - title: RocksDB
+          link: /api/extensions/rocksdb
+        - title: Monitor
+          link: /api/extensions/monitor
+        - title: Redis
+          link: /api/extensions/redis
+        - title: Logger
+          link: /api/extensions/logger
+        - title: Webhook
+          link: /api/extensions/webhook
+        - title: Throttle
+          link: /api/extensions/throttle
+
+    - title: Client
+      items:
+        - title: Installation
+          link: /client/installation
+          type: draft
 
 # - title: Knowledge
 #   items:
 #     - title: What’s a CRDT?
 #       link: /knowledge/crdt
-#       draft: true
+#       type: draft
 #     - title: How does Y.js work?
 #       link: /knowledge/yjs
-#       draft: true
+#       type: draft
