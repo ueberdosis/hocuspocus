@@ -1,5 +1,5 @@
 # hocuspocus (Sponsors preview)
-A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
+A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
 [![Version](https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/server)
