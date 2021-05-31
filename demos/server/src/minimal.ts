@@ -10,9 +10,9 @@ const server = Server.configure({
   async onConnect(data) {
     await new Promise((resolve, reject) => setTimeout(() => {
       // @ts-ignore
-      reject()
+      // reject()
       // @ts-ignore
-      // resolve()
+      resolve()
     }, 1337))
   },
 })

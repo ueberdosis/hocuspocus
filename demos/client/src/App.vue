@@ -25,7 +25,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusClient } from './HocuspocusClient'
+import { HocuspocusClient } from '../../../packages/client/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
@@ -58,6 +58,15 @@ export default {
       document: this.ydoc,
       parameters: {
         token: '123456',
+      },
+      onConnect: () => {
+        console.log('connected')
+      },
+      onMessage: event => {
+        console.log(event.type, { event })
+      },
+      onDisconnect: event => {
+        console.log(event.type, event.code, event.reason, { event })
       },
     })
 

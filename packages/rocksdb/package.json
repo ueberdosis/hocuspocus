@@ -5,7 +5,6 @@
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
-    "tiptap",
     "rocksdb",
     "yjs"
   ],

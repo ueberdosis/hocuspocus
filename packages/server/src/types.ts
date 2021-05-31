@@ -103,3 +103,8 @@ export interface onConfigurePayload {
   version: string,
   yjsVersion: string,
 }
+
+export interface CloseEvent {
+  code: number,
+  reason: string,
+}

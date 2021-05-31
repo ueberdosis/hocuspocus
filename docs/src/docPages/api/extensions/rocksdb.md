@@ -12,9 +12,7 @@ With this extension, documents and the collaboration history can be easily store
 
 ## Installation
 
-Configure your `.npmrc` to look for packages with the @hocuspocus prefix in our private registry, [as described here](/installation#2-installation).
-
-Now you should be able to install the RocksDB package with:
+Install the RocksDB package with:
 
 ```bash
 # with npm

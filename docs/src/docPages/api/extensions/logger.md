@@ -8,9 +8,7 @@ Hocuspocus doesn't log anything to stdout/stderr. Thanks to this simple extensio
 
 ## Installation
 
-Configure your `.npmrc` to look for packages with the @hocuspocus prefix in our private registry, [as described here](/installation#2-installation).
-
-Now you should be able to install the Monitor package with:
+Install the Logger package with:
 
 ```bash
 # with npm

@@ -8,9 +8,7 @@ The webhook extension allows you to connect hocuspocus to your existing applicat
 
 ## Installation
 
-Configure your `.npmrc` to look for packages with the @hocuspocus prefix in our private registry, [as described here](/installation#2-installation).
-
-Now you should be able to install the Webhook package with:
+Install the Webhook package with:
 
 ```bash
 # with npm
