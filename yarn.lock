@@ -9845,11 +9845,7 @@ lib0@^0.2.13:
   dependencies:
     isomorphic.js "^0.2.4"
 
-<<<<<<< HEAD
 lib0@^0.2.31, lib0@^0.2.34, lib0@^0.2.35, lib0@^0.2.41, lib0@^0.2.42:
-=======
-lib0@^0.2.42:
->>>>>>> feature/client
   version "0.2.42"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.42.tgz#6d8bf1fb8205dec37a953c521c5ee403fd8769b0"
   integrity sha512-8BNM4MiokEKzMvSxTOC3gnCBisJH+jL67CnSnqzHv3jli3pUvGC8wz+0DQ2YvGr4wVQdb2R2uNNPw9LEpVvJ4Q==
@@ -16077,13 +16073,6 @@ y-protocols@^1.0.5:
   dependencies:
     lib0 "^0.2.42"
 
-y-protocols@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.5.tgz#91d574250060b29fcac8f8eb5e276fbad594245e"
-  integrity sha512-Wil92b7cGk712lRHDqS4T90IczF6RkcvCwAD0A2OPg+adKmOe+nOiT/N2hvpQIWS3zfjmtL4CPaH5sIW1Hkm/A==
-  dependencies:
-    lib0 "^0.2.42"
-
 y-redis@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/y-redis/-/y-redis-1.0.2.tgz#d5486a89f0a6ebb359c95f8179b36eb120410981"
@@ -16233,14 +16222,7 @@ yazl@^2.5.1:
   dependencies:
     buffer-crc32 "~0.2.3"
 
-yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3:
-  version "13.5.8"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.8.tgz#5bfcb2f8855bf8ee980f246a7fd7b0212559f105"
-  integrity sha512-Szd+FHlcJnx/M56Oyle7Q20hSdoQeZPRXx55Z/JXfcaW2Y8/oQIFL/mnHiWdNo7xrhIIxV01v2jVI3tcYnXHAA==
-  dependencies:
-    lib0 "^0.2.41"
-
-yjs@^13.5.8:
+yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3, yjs@^13.5.8:
   version "13.5.8"
   resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.8.tgz#5bfcb2f8855bf8ee980f246a7fd7b0212559f105"
   integrity sha512-Szd+FHlcJnx/M56Oyle7Q20hSdoQeZPRXx55Z/JXfcaW2Y8/oQIFL/mnHiWdNo7xrhIIxV01v2jVI3tcYnXHAA==
