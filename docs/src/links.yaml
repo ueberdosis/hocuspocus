@@ -58,6 +58,7 @@
       link: /api/methods
       type: draft
     - title: Hooks
+      link: /api/hooks
       items:
         - title: onConnect
           link: /api/on-connect
