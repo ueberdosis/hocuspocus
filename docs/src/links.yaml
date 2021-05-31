@@ -44,7 +44,9 @@
       link: /guide/hooks
     - title: Working with JSON
       link: /guide/transformations
-    - title: Custom Extensions
+    - title: Subdocuments
+      link: /guide/documents/subdocuments
+    - title: Custom extensions
       link: /guide/extensions
 
 - title: Server
