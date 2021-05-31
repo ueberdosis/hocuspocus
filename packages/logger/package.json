@@ -9,6 +9,7 @@
     "logger",
     "yjs"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-logger.esm.js",
   "module": "dist/hocuspocus-logger.esm.js",

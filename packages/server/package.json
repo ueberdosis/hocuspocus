@@ -9,6 +9,7 @@
     "yjs-websocket",
     "prosemirror"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-server.esm.js",
   "module": "dist/hocuspocus-server.esm.js",

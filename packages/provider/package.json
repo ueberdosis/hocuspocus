@@ -9,6 +9,7 @@
     "provider",
     "yjs"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-provider.esm.js",
   "module": "dist/hocuspocus-provider.esm.js",

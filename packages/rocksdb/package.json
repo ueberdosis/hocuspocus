@@ -8,6 +8,7 @@
     "rocksdb",
     "yjs"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-rocksdb.esm.js",
   "module": "dist/hocuspocus-rocksdb.esm.js",

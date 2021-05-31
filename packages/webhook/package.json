@@ -10,6 +10,7 @@
     "rest",
     "yjs"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-webhook.esm.js",
   "module": "dist/hocuspocus-webhook.esm.js",

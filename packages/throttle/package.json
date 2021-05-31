@@ -8,6 +8,7 @@
     "throttle",
     "yjs"
   ],
+  "license": "MIT",
   "type": "module",
   "main": "dist/hocuspocus-throttle.esm.js",
   "module": "dist/hocuspocus-throttle.esm.js",
