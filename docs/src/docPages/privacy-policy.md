@@ -28,11 +28,5 @@ We use [Algolia DocSearch](https://docsearch.algolia.com/) to offer search funct
 
 If you want to know more about what data they collect and process, [read their privacy policy](https://www.algolia.com/policies/privacy/). -->
 
-### Mailing (Mailcoach)
-For the mailing list we use a self-hosted [Mailcoach](https://mailcoach.app/) instance, which is hosted on of our bare metal servers at [Servivum](https://www.servivum.com/).
-
-### Emails (Mailgun)
-The actual emails we send to mailing list subscribers are sent through [Mailgun](https://www.mailgun.com/) (EU). We’d love to send them through our own infrastructure, but email is pretty hard.
-
 ## Suggesting alternatives
 If you know a good self-hosted version of any of the mentioned services, create an issue on GitHub or send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev).

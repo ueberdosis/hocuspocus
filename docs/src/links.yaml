@@ -45,7 +45,7 @@
     - title: Working with JSON
       link: /guide/transformations
     - title: Subdocuments
-      link: /guide/documents/subdocuments
+      link: /guide/subdocuments
     - title: Custom extensions
       link: /guide/extensions
 
@@ -80,6 +80,7 @@
           link: /api/on-upgrade
 
     - title: Extensions
+      link: /api/extensions
       items:
         - title: RocksDB
           link: /api/extensions/rocksdb
@@ -94,11 +95,11 @@
         - title: Throttle
           link: /api/extensions/throttle
 
-    - title: Client
-      items:
-        - title: Installation
-          link: /client/installation
-          type: draft
+# - title: Client
+#   items:
+#     - title: Installation
+#       link: /client/installation
+#       type: draft
 
 # - title: Knowledge
 #   items:

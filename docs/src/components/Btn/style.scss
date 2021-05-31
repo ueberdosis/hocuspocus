@@ -9,7 +9,6 @@
   text-align: center;
   line-height: 1;
   text-decoration: none;
-
   white-space: nowrap;
 
   &--primary {
@@ -18,7 +17,7 @@
     border: 3px solid $colorBlack;
 
     &:hover {
-      color: $colorWhite;
+      color: $colorYellow;
     }
   }
 
@@ -29,6 +28,7 @@
 
     &:hover {
       color: $colorBlack;
+      background-color: $colorYellow;
     }
   }
 
@@ -46,6 +46,8 @@
   }
 
   &__icon {
+    transition: opacity 0.2s $ease;
+
     &:first-child {
       margin-right: 0.5rem;
     }

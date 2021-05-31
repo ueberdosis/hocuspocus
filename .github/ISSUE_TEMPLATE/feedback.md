@@ -1,7 +1,7 @@
 ---
 name: Feedback on the documentation
 about: Share what we need to explain better
-url: https://github.com/ueberdosis/tiptap/issues/new
+url: https://github.com/ueberdosis/hocuspocus/issues/new
 title: ''
 labels:
   - documentation

@@ -2,51 +2,44 @@
   <div class="app">
     <div class="app__navigation">
       <div class="app__top-bar">
-        <g-link
-          class="app__logo"
-          to="/"
-        >
+        <g-link class="app__logo" to="/">
           <img src="~@/assets/images/logo.svg">
         </g-link>
 
-        <!-- <div class="app__menu">
-          <span class="app__menu-item">
-            Search
+        <div class="app__menu">
+          <!-- <span class="app__menu-item">
+            <icon name="search-line" />
+            <span>Search</span>
+            <span class="app__search-shortcut" />
             <div class="app__search-docsearch" />
-          </span>
+          </span> -->
 
           <portal-target name="desktop-menu" />
-        </div> -->
+        </div>
 
-        <!-- <button
+        <button
           class="app__menu-icon"
           @click="menuIsVisible = true"
           v-if="!menuIsVisible"
         >
-          <icon name="menu" />
+          <icon name="menu-fill" />
         </button>
         <button
           class="app__close-icon"
           @click="menuIsVisible = false"
           v-if="menuIsVisible"
         >
-          <icon name="close" />
-        </button> -->
+          <icon name="close-fill" />
+        </button>
       </div>
-      <div
-        class="app__mobile-menu"
-        v-if="menuIsVisible"
-      >
+      <div class="app__mobile-menu" v-if="menuIsVisible">
         <portal-target name="mobile-menu" />
         <portal-target name="mobile-sidebar" />
       </div>
     </div>
 
     <div class="app__content">
-      <div
-        class="app__sidebar"
-        v-if="showSidebar"
-      >
+      <div class="app__sidebar" v-if="showSidebar">
         <portal-target name="desktop-sidebar" />
       </div>
 
@@ -54,70 +47,70 @@
         <slot />
       </main>
 
-      <portal :to="menuPortal">
-        <g-link
-          class="app__menu-item"
-          to="/installation"
-        >
-          Documentation
+      <portal :to="menuPortal" v-if="!['/', '/impressum', '/privacy-policy'].includes($route.path)">
+        <g-link class="app__menu-item" to="/installation" v-if="$route.name === 'home'">
+          <icon name="book-3-line" />
+          <span>Documentation</span>
+        </g-link>
+        <g-link class="app__menu-item" to="https://github.com/sponsors/ueberdosis">
+          <icon name="heart-line" />
+          <span>Sponsor</span>
+        </g-link>
+        <g-link class="app__menu-item" to="https://github.com/ueberdosis/hocuspocus">
+          <icon name="github-fill" />
+          <span>GitHub</span>
         </g-link>
       </portal>
 
-      <portal
-        :to="sidebarPortal"
-        v-if="showSidebar"
-      >
+      <portal :to="sidebarPortal">
         <nav class="app__sidebar-menu">
-          <div
-            class="app__link-group"
-            v-for="(linkGroup, i) in linkGroups"
-            :key="i"
-          >
-            <div class="app__link-group-title">
-              {{ linkGroup.title }}
-            </div>
-            <ul class="app__link-list">
-              <li
-                v-for="(item, j) in linkGroup.items"
-                :key="j"
+          <div class="app__link-group" v-for="(linkGroup, i) in linkGroups" :key="i">
+            <template v-if="linkGroup.link && !linkGroup.items">
+              <g-link
+                class="app__link-group__link"
+                :to="linkGroup.redirect || linkGroup.link"
               >
-                <g-link
-                  :class="{
-                    'app__link': true,
-                    'app__link--exact': $router.currentRoute.path === item.link,
-                    'app__link--active': $router.currentRoute.path.startsWith(item.link),
-                    [`app__link--${item.type}`]: item.type !== null,
-                    'app__link--with-children': !!item.items
-                  }"
-                  :to="item.redirect || item.link"
-                >
-                  {{ item.title }}
-                </g-link>
-
-                <ul
-                  v-if="item.items"
-                  class="app__link-list"
-                >
-                  <li
-                    v-for="(item, k) in item.items"
-                    :key="k"
+                {{ linkGroup.title }}
+              </g-link>
+            </template>
+            <template v-else>
+              <div class="app__link-group-title">
+                {{ linkGroup.title }}
+              </div>
+              <ul class="app__link-list">
+                <li v-for="(item, j) in linkGroup.items" :key="j">
+                  <g-link
+                    :class="{
+                      'app__link': true,
+                      'app__link--exact': $router.currentRoute.path === item.link,
+                      'app__link--active': $router.currentRoute.path.startsWith(item.link),
+                      [`app__link--${item.type}`]: item.type !== null,
+                      'app__link--with-children': !!item.items
+                    }"
+                    :to="item.redirect || item.link"
                   >
-                    <g-link
-                      :class="{
-                        'app__link': true,
-                        'app__link--exact': $router.currentRoute.path === item.link,
-                        'app__link--active': $router.currentRoute.path.startsWith(item.link),
-                        [`app__link--${item.type}`]: item.type !== null,
-                      }"
-                      :to="item.link"
-                      exact
-                    >
-                      {{ item.title }}
-                    </g-link>
-                  </li>
-                </ul>
-              </li>
-            </ul>
+                    {{ item.title }}
+                  </g-link>
+
+                  <ul v-if="item.items" class="app__link-list">
+                    <li v-for="(item, k) in item.items" :key="k">
+                      <g-link
+                        :class="{
+                          'app__link': true,
+                          'app__link--exact': $router.currentRoute.path === item.link,
+                          'app__link--active': $router.currentRoute.path.startsWith(item.link),
+                          [`app__link--${item.type}`]: item.type !== null,
+                        }"
+                        :to="item.link"
+                        exact
+                      >
+                        {{ item.title }}
+                      </g-link>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </template>
           </div>
         </nav>
       </portal>
@@ -137,7 +130,10 @@ query {
 
 <script>
 import linkGroups from '@/links.yaml'
+import Icon from '@/components/Icon'
 import PageFooter from '@/components/PageFooter'
+// import BannerMessage from '@/components/BannerMessage'
+// import GithubButton from 'vue-github-button'
 
 export default {
   props: {
@@ -148,7 +144,10 @@ export default {
   },
 
   components: {
+    Icon,
     PageFooter,
+    // BannerMessage,
+    // GithubButton,
   },
 
   data() {
@@ -196,15 +195,15 @@ export default {
   },
 
   methods: {
-    initSearch() {
-      // eslint-disable-next-line
-      // docsearch({
-      //   apiKey: '1abe7fb0f0dac150d0e963d2eda930fe',
-      //   indexName: 'ueberdosis_tiptap',
-      //   container: '.app__search-docsearch',
-      //   debug: false,
-      // })
-    },
+    // initSearch() {
+    //   // eslint-disable-next-line
+    //   docsearch({
+    //     apiKey: '1abe7fb0f0dac150d0e963d2eda930fe',
+    //     indexName: 'ueberdosis_tiptap',
+    //     container: '.app__search-docsearch',
+    //     debug: false,
+    //   })
+    // },
 
     handleResize() {
       this.windowWidth = window.innerWidth
@@ -215,7 +214,7 @@ export default {
     // what the hell is wrong with iOS safari
     setTimeout(() => {
       this.handleResize()
-      this.initSearch()
+      // this.initSearch()
     }, 10)
 
     window.addEventListener('resize', this.handleResize)

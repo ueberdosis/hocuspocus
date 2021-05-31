@@ -4,7 +4,7 @@ $menuBreakPoint: 800px;
 
 .app {
   &__navigation {
-    position: fixed;
+    position: sticky;
     display: flex;
     flex-direction: column;
     z-index: 2;
@@ -33,7 +33,7 @@ $menuBreakPoint: 800px;
     align-items: center;
     flex: 0 0 auto;
     height: $navHeight;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
 
     @media (min-width: $mobileBreakPoint) {
       padding: 0 2rem;
@@ -43,21 +43,38 @@ $menuBreakPoint: 800px;
   &__menu {
     display: flex;
     align-items: center;
+
+    > .vue-portal-target {
+      display: flex;
+    }
   }
 
   &__menu-item {
-    display: block;
+    display: flex;
+    align-items: center;
     overflow: hidden;
     position: relative;
     font-weight: 500;
 
     @media (min-width: $menuBreakPoint) {
       display: inline-flex;
-      margin-right: 1.5rem;
+      margin-right: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+
+      &:hover {
+        background: rgba($colorBlack, 0.05);
+      }
 
       &:last-child {
         margin-right: 0;
       }
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      margin: 0 0.25rem;
     }
   }
 
@@ -111,6 +128,26 @@ $menuBreakPoint: 800px;
     position: relative;
   }
 
+  &__search-shortcut {
+    display: inline-flex;
+
+    @media (min-width: $menuBreakPoint) {
+      &::after {
+        content: "⌘K";
+        display: inline-flex;
+        align-items: center;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: $colorGrey;
+        background-color: rgba($colorBlack, 0.05);
+        font-size: 0.75rem;
+        padding: 0 0.4rem;
+        border-radius: 0.4rem;
+        margin-left: 0.4rem;
+      }
+    }
+  }
+
   &__search-docsearch {
     ::v-deep > button {
       position: absolute;
@@ -132,15 +169,14 @@ $menuBreakPoint: 800px;
       width: 20rem;
       flex: 0 0 auto;
       position: sticky;
-      top: 0;
+      top: $navHeight;
       align-self: flex-start;
       padding: 2rem;
-      padding-top: $navHeight + 2rem;
+      padding-top: 2rem;
       height: 100vh;
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
     }
   }
 
@@ -155,7 +191,6 @@ $menuBreakPoint: 800px;
   &__main {
     flex: 1 1 auto;
     min-width: 0;
-    padding-top: $navHeight;
     overflow: hidden;
   }
 
@@ -230,6 +265,7 @@ $menuBreakPoint: 800px;
     font-size: 0.85rem;
     margin-left: -0.5rem;
     white-space: nowrap;
+    position: relative;
 
     &:hover {
       color: $colorBlack;
@@ -298,7 +334,7 @@ $menuBreakPoint: 800px;
       }
     }
 
-    &--with-children::after {
+    &--with-children::before {
       content: '›';
       font-weight: bold;
       color: rgba($colorBlack, 0.2);
@@ -312,7 +348,7 @@ $menuBreakPoint: 800px;
   }
 
   &__mobile-menu {
-    padding: 1rem 0 1rem 1rem;
+    padding: 1rem 0 3rem 1.5rem;
     flex: 1 1 auto;
     overflow-x: hidden;
     overflow-y: auto;
@@ -320,7 +356,7 @@ $menuBreakPoint: 800px;
     overscroll-behavior: contain;
 
     @media (min-width: $mobileBreakPoint) {
-      padding: 1rem 1rem 1rem 2rem;
+      padding: 1rem 1rem 3rem 2rem;
     }
 
     @media (min-width: $menuBreakPoint) {

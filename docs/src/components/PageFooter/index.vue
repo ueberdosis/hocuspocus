@@ -17,6 +17,29 @@
     <div class="page-footer__section">
       <div class="page-footer__column">
         <h3>
+          Community
+        </h3>
+        <ul>
+          <li>
+            <g-link to="https://github.com/ueberdosis/hocuspocus">
+              GitHub
+            </g-link>
+          </li>
+          <li>
+            <g-link to="https://discord.gg/WtJ49jGshW">
+              Discord
+            </g-link>
+          </li>
+          <li>
+            <g-link to="https://twitter.com/tiptap_editor">
+              Twitter
+            </g-link>
+          </li>
+        </ul>
+      </div>
+
+      <div class="page-footer__column">
+        <h3>
           Legal
         </h3>
         <ul>
@@ -35,20 +58,19 @@
 
       <div class="page-footer__column">
         <h3>
-          Community
+          Licence
         </h3>
         <ul>
           <li>
-            <g-link to="https://discord.gg/WtJ49jGshW">
-              Discord
-            </g-link>
-          </li>
-          <li>
-            <g-link to="https://twitter.com/tiptap_editor">
-              Twitter
+            <g-link to="https://github.com/ueberdosis/hocuspocus/blob/main/LICENSE.md">
+              MIT
             </g-link>
           </li>
         </ul>
+      </div>
+
+      <div class="page-footer__column">
+        <a :href="editLink" target="_blank">Edit this page on GitHub</a>
       </div>
     </div>
 
@@ -63,5 +85,33 @@
     </div>
   </footer>
 </template>
+
+<script>
+export default {
+  computed: {
+    currentPath() {
+      return this.$route.matched[0].path
+    },
+
+    editLink() {
+      const { currentPath } = this
+
+      if (process.env.NODE_ENV === 'development') {
+        if (currentPath === '') {
+          return `vscode://file${this.cwd}/src/pages/index.vue`
+        }
+
+        return `vscode://file${this.cwd}/src/docPages${currentPath}.md`
+      }
+
+      if (currentPath === '') {
+        return 'https://github.com/ueberdosis/hocuspocus/blob/main/docs/src/pages/index.vue'
+      }
+
+      return `https://github.com/ueberdosis/hocuspocus/blob/main/docs/src/docPages${currentPath}.md`
+    },
+  },
+}
+</script>
 
 <style lang="scss" src="./style.scss" scoped></style>
