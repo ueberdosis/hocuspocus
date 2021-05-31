@@ -16,6 +16,7 @@
     "start": "yarn --cwd ./docs start",
     "demo:create-document": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/create-document.ts\"",
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/express.ts\"",
+    "demo:koa": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/koa.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/monitor.ts\" \"yarn --cwd ./packages/monitor start\"",
     "demo:minimal": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/minimal.ts\"",
     "demo:webhook": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/server dev src/webhook.ts\"",

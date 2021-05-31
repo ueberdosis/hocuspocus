@@ -21,7 +21,10 @@
 
 <script>
 import { Editor, EditorContent } from '@tiptap/vue-2'
-import StarterKit from '@tiptap/starter-kit'
+// import StarterKit from '@tiptap/starter-kit'
+import { Document } from '@tiptap/extension-document'
+import { Paragraph } from '@tiptap/extension-paragraph'
+import { Text } from '@tiptap/extension-text'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
@@ -65,6 +68,9 @@ export default {
       onMessage: event => {
         console.log(event.type, { event })
       },
+      onClose: event => {
+        console.log(event.type, { event })
+      },
       onDisconnect: event => {
         console.log(event.type, event.code, event.reason, { event })
       },
@@ -80,9 +86,12 @@ export default {
 
     this.editor = new Editor({
       extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
+        Document,
+        Paragraph,
+        Text,
+        // StarterKit.configure({
+        //   history: false,
+        // }),
         Collaboration.configure({
           document: this.ydoc,
           field: 'default',
@@ -92,9 +101,12 @@ export default {
 
     this.editor2 = new Editor({
       extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
+        Document,
+        Paragraph,
+        Text,
+        // StarterKit.configure({
+        //   history: false,
+        // }),
         Collaboration.configure({
           document: this.ydoc,
           field: 'secondary',
