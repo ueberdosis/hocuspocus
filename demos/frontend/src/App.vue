@@ -25,7 +25,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusClient } from '../../../packages/client/src'
+import { HocuspocusProvider } from '../../../packages/provider/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
@@ -52,7 +52,7 @@ export default {
     //   },
     // })
 
-    this.client = new HocuspocusClient({
+    this.client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,

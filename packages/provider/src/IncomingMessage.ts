@@ -4,7 +4,7 @@ import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
 import * as authProtocol from 'y-protocols/auth'
 import { MessageTypes } from './types'
-import { HocuspocusClient } from './HocuspocusClient'
+import { HocuspocusProvider } from './HocuspocusProvider'
 
 export class IncomingMessage {
 
@@ -21,7 +21,7 @@ export class IncomingMessage {
     return decoding.readVarUint(this.decoder)
   }
 
-  public handle(provider: HocuspocusClient, emitSynced: boolean) {
+  public handle(provider: HocuspocusProvider, emitSynced: boolean) {
     switch (this.messageType) {
       case MessageTypes.Sync:
         this.handleSyncMessage(provider, emitSynced)
@@ -46,7 +46,7 @@ export class IncomingMessage {
     return this.encoder
   }
 
-  private handleSyncMessage(provider: HocuspocusClient, emitSynced: boolean) {
+  private handleSyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
     encoding.writeVarUint(this.encoder, MessageTypes.Sync)
 
     const syncMessageType = syncProtocol.readSyncMessage(
@@ -61,7 +61,7 @@ export class IncomingMessage {
     }
   }
 
-  private handleAwarenessMessage(provider: HocuspocusClient) {
+  private handleAwarenessMessage(provider: HocuspocusProvider) {
     awarenessProtocol.applyAwarenessUpdate(
       provider.options.awareness,
       decoding.readVarUint8Array(this.decoder),
@@ -69,7 +69,7 @@ export class IncomingMessage {
     )
   }
 
-  private handleAuthMessage(provider: HocuspocusClient) {
+  private handleAuthMessage(provider: HocuspocusProvider) {
     authProtocol.readAuthMessage(
       this.decoder,
       provider.options.document,
@@ -80,7 +80,7 @@ export class IncomingMessage {
     )
   }
 
-  private handleQueryAwarenessMessage(provider: HocuspocusClient) {
+  private handleQueryAwarenessMessage(provider: HocuspocusProvider) {
     encoding.writeVarUint(this.encoder, MessageTypes.Awareness)
     encoding.writeVarUint8Array(
       this.encoder,

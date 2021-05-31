@@ -24,7 +24,7 @@ export enum WebSocketStatus {
   Disconnected = 'disconnected',
 }
 
-export interface HocuspocusClientOptions {
+export interface HocuspocusProviderOptions {
   name: string,
   document: any,
   connect: boolean,
@@ -44,8 +44,8 @@ export interface HocuspocusClientOptions {
   onDestroy: () => void,
 }
 
-export class HocuspocusClient extends EventEmitter {
-  public options: HocuspocusClientOptions = {
+export class HocuspocusProvider extends EventEmitter {
+  public options: HocuspocusProviderOptions = {
     url: '',
     name: '',
     document: null,
@@ -88,7 +88,7 @@ export class HocuspocusClient extends EventEmitter {
     connectionChecker: null,
   }
 
-  constructor(options: Partial<HocuspocusClientOptions> = {}) {
+  constructor(options: Partial<HocuspocusProviderOptions> = {}) {
     super()
 
     this.options.awareness = new Awareness(options.document)
@@ -124,7 +124,7 @@ export class HocuspocusClient extends EventEmitter {
     }
   }
 
-  public setOptions(options: Partial<HocuspocusClientOptions> = {}): void {
+  public setOptions(options: Partial<HocuspocusProviderOptions> = {}): void {
     this.options = { ...this.options, ...options }
   }
 

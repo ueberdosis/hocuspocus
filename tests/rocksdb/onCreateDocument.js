@@ -3,7 +3,7 @@ import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { RocksDB } from '../../packages/rocksdb/src'
-import { HocuspocusClient } from '../../packages/client/src'
+import { HocuspocusProvider } from '../../packages/provider/src'
 import rmdir from '../utils/rmdir'
 
 let client
@@ -34,7 +34,7 @@ context('rocksdb/onCreateDocument', () => {
   })
 
   it('document are persisted', done => {
-    client = new HocuspocusClient({
+    client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: ydoc,
@@ -55,7 +55,7 @@ context('rocksdb/onCreateDocument', () => {
   })
 
   it('document can be restored', done => {
-    client = new HocuspocusClient({
+    client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: anotherYdoc,

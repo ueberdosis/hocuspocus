@@ -2,7 +2,7 @@ import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusClient } from '../../packages/client/src'
+import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
@@ -18,7 +18,7 @@ context('client/onDisconnect', () => {
   })
 
   it('onDisconnect callback is executed', done => {
-    client = new HocuspocusClient({
+    client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: ydoc,
@@ -34,7 +34,7 @@ context('client/onDisconnect', () => {
   })
 
   it("on('disconnect') callback is executed", done => {
-    client = new HocuspocusClient({
+    client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: ydoc,

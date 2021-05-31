@@ -95,10 +95,10 @@
         - title: Throttle
           link: /api/extensions/throttle
 
-# - title: Client
+# - title: Provider
 #   items:
 #     - title: Installation
-#       link: /client/installation
+#       link: /provider/installation
 #       type: draft
 
 # - title: Knowledge

@@ -1,29 +1,27 @@
 {
-  "name": "@hocuspocus/client",
+  "name": "@hocuspocus/provider",
   "version": "1.0.0-alpha.1",
-  "description": "hocuspocus client",
+  "description": "hocuspocus provider",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
-    "client",
     "websocket",
     "provider",
     "yjs"
   ],
   "type": "module",
-  "main": "dist/hocuspocus-client.esm.js",
-  "module": "dist/hocuspocus-client.esm.js",
+  "main": "dist/hocuspocus-provider.esm.js",
+  "module": "dist/hocuspocus-provider.esm.js",
   "types": "dist/packages/logger/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-client.esm.js",
-    "require": "./dist/hocuspocus-client.js"
+    "import": "./dist/hocuspocus-provider.esm.js",
+    "require": "./dist/hocuspocus-provider.js"
   },
   "files": [
     "src",
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.53",
     "lib0": "^0.2.42",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.8"
