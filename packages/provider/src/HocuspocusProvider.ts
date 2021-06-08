@@ -33,7 +33,7 @@ export interface HocuspocusProviderOptions {
   connect: boolean,
   awareness: Awareness,
   parameters: Object<string, string>,
-  WebSocketPolyfill: WebSocket,
+  WebSocketPolyfill: any,
   forceSyncInterval: false | number,
   reconnectTimeoutBase: number,
   maxReconnectTimeout: number,
@@ -78,7 +78,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   subscribedToBroadcastChannel = false
 
-  websocket: WebSocket = null
+  websocket: any = null
 
   shouldConnect: boolean
 
