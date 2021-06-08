@@ -165,7 +165,7 @@ export class Hocuspocus {
 
     // Queue messages before the connection is established
     const queueIncomingMessageListener = (input: Iterable<number>) => {
-      this.incomingMessageQueue.push(input)
+      incomingMessageQueue.push(input)
     }
 
     incoming.on('message', queueIncomingMessageListener)
