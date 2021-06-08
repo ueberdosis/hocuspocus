@@ -157,9 +157,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.send(
-      new SyncStepOneMessage().get(this.document),
-    )
+    this.send(new SyncStepOneMessage().get(this.document))
   }
 
   registerBeforeUnloadEventListener() {
@@ -187,15 +185,13 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.sendMessage(new UpdateMessage().get(update))
+    this.send(new UpdateMessage().get(update), true)
   }
 
   awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
     const changedClients = added.concat(updated).concat(removed)
 
-    this.sendMessage(
-      new AwarenessMessage().get(this.awareness, changedClients),
-    )
+    this.send(new AwarenessMessage().get(this.awareness, changedClients), true)
   }
 
   get document() {
@@ -253,15 +249,21 @@ export class HocuspocusProvider extends EventEmitter {
     bc.publish(this.broadcastChannel, message)
   }
 
-  send(message: Uint8Array) {
-    this.websocket?.send(message)
+  send(message: Uint8Array, broadcast: false) {
+    if (broadcast && this.subscribedToBroadcastChannel) {
+      this.mux(() => {
+        this.broadcast(message)
+      })
+    }
+
+    if (this.status === WebSocketStatus.Connected) {
+      this.websocket?.send(message)
+    }
   }
 
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
-    this.sendMessage(
-      new AwarenessMessage().get(this.awareness, [this.document.clientID], new Map()),
-    )
+    this.send(new AwarenessMessage().get(this.awareness, [this.document.clientID], new Map()), true)
 
     if (this.subscribedToBroadcastChannel) {
       bc.unsubscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
@@ -392,18 +394,6 @@ export class HocuspocusProvider extends EventEmitter {
 
     if (this.awareness.getLocalState() !== null) {
       this.send(new AwarenessMessage().get(this.awareness, [this.document.clientID]))
-    }
-  }
-
-  sendMessage(buffer: ArrayBuffer): void {
-    if (this.subscribedToBroadcastChannel) {
-      this.mux(() => {
-        this.broadcast(buffer)
-      })
-    }
-
-    if (this.status === WebSocketStatus.Connected) {
-      this.send(buffer)
     }
   }
 
