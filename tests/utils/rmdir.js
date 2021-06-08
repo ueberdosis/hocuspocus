@@ -13,7 +13,7 @@ export default dir => {
         // pass these files
       } else if (stat.isDirectory()) {
         // rmdir recursively
-        rmdir(filename)
+        dir(filename)
       } else {
         // rm fiilename
         fs.unlinkSync(filename)
