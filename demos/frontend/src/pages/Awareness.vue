@@ -13,17 +13,14 @@
       disconnect
     </button>
 
-    <button @click="setAwarenessFields()">
-      setAwarenessFields
-    </button>
-
     <h2>Users</h2>
 
-    <ul v-for="state in states">
-      <li :style="`color: ${state.user.color}`">{{ state.user.name }}</li>
+    <ul>
+      <li v-for="state in states" :key="state.clientId">
+        <span :style="`background-color: ${state.user.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
+        #{{ state.clientId }} {{ state.user.name }} ({{ state.user.x }}, {{ state.user.y }})
+      </li>
     </ul>
-
-    {{ states }}
   </Layout>
 </template>
 
@@ -32,6 +29,15 @@ import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
 
+const awarenessStatesToArray = states => {
+  return Array.from(states.entries()).map(([key, value]) => {
+    return {
+      clientId: key,
+      ...value,
+    }
+  })
+}
+
 export default {
   data() {
     return {
@@ -39,6 +45,12 @@ export default {
       provider: null,
       status: 'connecting',
       states: [],
+      state: {
+        name: 'Emmanuelle Charpentier',
+        color: '#ffb61e',
+        x: 0,
+        y: 0,
+      },
     }
   },
 
@@ -75,19 +87,29 @@ export default {
       this.status = event.status
     })
 
-    this.provider.awareness.on('change', changes => {
-      this.states = Array.from(this.provider.awareness.getStates().values())
+    this.provider.awareness.on('change', () => {
+      this.states = awarenessStatesToArray(this.provider.awareness.getStates())
     })
 
-    this.setAwarenessFields()
+    this.setAwarenessState()
+
+    this.bindEventListeners()
   },
 
   methods: {
-    setAwarenessFields() {
-      this.provider.awareness.setLocalStateField('user', {
-        name: 'Emmanuelle Charpentier',
-        color: '#ffb61e',
+    bindEventListeners() {
+      document.addEventListener('mousemove', e => {
+        this.state.x = e.offsetX
+        this.state.y = e.offsetY
+
+        this.setAwarenessState()
       })
+    },
+    removeEventListeners() {
+      document.removeEventListeners('mousemove')
+    },
+    setAwarenessState() {
+      this.provider.awareness.setLocalStateField('user', this.state)
     },
   },
 
