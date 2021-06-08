@@ -13,13 +13,23 @@
       disconnect
     </button>
 
-    <h2>Users</h2>
+    <h2>
+      Users
+    </h2>
 
     <ul>
       <li v-for="state in states" :key="state.clientId">
         <span :style="`background-color: ${state.user.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
         #{{ state.clientId }} {{ state.user.name }} ({{ state.user.x }}, {{ state.user.y }})
       </li>
+    </ul>
+
+    <h2>
+      Tasks
+    </h2>
+    <ul>
+      <li>Disconnect → Connect → States aren’t synced</li>
+      <li>Integrate well with @hocuspocus/provider</li>
     </ul>
   </Layout>
 </template>
@@ -45,7 +55,7 @@ export default {
       provider: null,
       status: 'connecting',
       states: [],
-      state: {
+      me: {
         name: 'Emmanuelle Charpentier',
         color: '#ffb61e',
         x: 0,
@@ -71,10 +81,12 @@ export default {
       },
       onConnect: () => {
         console.log('connected')
+
+        this.setAwarenessState()
       },
-      onMessage: event => {
-        console.log(event.type, { event })
-      },
+      // onMessage: event => {
+      //   console.log(event.type, { event })
+      // },
       onClose: event => {
         console.log(event.type, { event })
       },
@@ -91,16 +103,14 @@ export default {
       this.states = awarenessStatesToArray(this.provider.awareness.getStates())
     })
 
-    this.setAwarenessState()
-
     this.bindEventListeners()
   },
 
   methods: {
     bindEventListeners() {
       document.addEventListener('mousemove', e => {
-        this.state.x = e.offsetX
-        this.state.y = e.offsetY
+        this.me.x = e.offsetX
+        this.me.y = e.offsetY
 
         this.setAwarenessState()
       })
@@ -109,11 +119,11 @@ export default {
       document.removeEventListeners('mousemove')
     },
     setAwarenessState() {
-      this.provider.awareness.setLocalStateField('user', this.state)
+      this.provider.awareness.setLocalStateField('user', this.me)
     },
   },
 
-  beforeUnmount() {
+  beforeDestroy() {
     this.provider.destroy()
   },
 }

@@ -3,10 +3,8 @@ import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
 import * as encoding from 'lib0/encoding'
-import * as syncProtocol from 'y-protocols/sync'
 import {
   Awareness,
-  encodeAwarenessUpdate,
   removeAwarenessStates,
 } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
@@ -16,8 +14,12 @@ import * as url from 'lib0/url'
 import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
-import { MessageTypes } from './types'
 import { MessageHandler } from './MessageHandler'
+import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
+import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
+import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
+import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
+import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -153,12 +155,9 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    // resend sync step 1
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Sync)
-    syncProtocol.writeSyncStep1(encoder, this.document)
-
-    this.websocket?.send(encoding.toUint8Array(encoder))
+    this.websocket?.send(
+      new SyncStepOneMessage().get(this.document),
+    )
   }
 
   registerBeforeUnloadEventListener() {
@@ -177,7 +176,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
-      const encoder = this.retrieveMessage(new Uint8Array(data), false)
+      const encoder = this.receiveMessage(new Uint8Array(data), false)
+
       if (encoding.length(encoder) > 1) {
         bc.publish(this.broadcastChannel, encoding.toUint8Array(encoder))
       }
@@ -189,21 +189,15 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Sync)
-    syncProtocol.writeUpdate(encoder, update)
-
-    this.sendMessage(encoding.toUint8Array(encoder))
+    this.sendMessage(new UpdateMessage().get(update))
   }
 
   awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
     const changedClients = added.concat(updated).concat(removed)
 
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Awareness)
-    encoding.writeVarUint8Array(encoder, encodeAwarenessUpdate(this.awareness, changedClients))
-
-    this.sendMessage(encoding.toUint8Array(encoder))
+    this.sendMessage(
+      new AwarenessMessage().get(this.awareness, changedClients),
+    )
   }
 
   get document() {
@@ -249,39 +243,23 @@ export class HocuspocusProvider extends EventEmitter {
       this.subscribedToBroadcastChannel = true
     }
 
-    // send sync step1 to bc
     this.mux(() => {
-      // write sync step 1
-      const encoderSync = encoding.createEncoder()
-      encoding.writeVarUint(encoderSync, MessageTypes.Sync)
-      syncProtocol.writeSyncStep1(encoderSync, this.document)
-      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderSync))
-
-      // broadcast local state
-      const encoderState = encoding.createEncoder()
-      encoding.writeVarUint(encoderState, MessageTypes.Sync)
-      syncProtocol.writeSyncStep2(encoderState, this.document)
-      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderState))
-
-      // write queryAwareness
-      const encoderAwarenessQuery = encoding.createEncoder()
-      encoding.writeVarUint(encoderAwarenessQuery, MessageTypes.QueryAwareness)
-      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderAwarenessQuery))
-
-      // broadcast local awareness state
-      const encoderAwarenessState = encoding.createEncoder()
-      encoding.writeVarUint(encoderAwarenessState, MessageTypes.Awareness)
-      encoding.writeVarUint8Array(encoderAwarenessState, encodeAwarenessUpdate(this.awareness, [this.document.clientID]))
-      bc.publish(this.broadcastChannel, encoding.toUint8Array(encoderAwarenessState))
+      this.broadcast(new SyncStepOneMessage().get(this.document))
+      this.broadcast(new SyncStepTwoMessage().get(this.document))
+      this.broadcast(new QueryAwarenessMessage().get())
+      this.broadcast(new AwarenessMessage().get(this.awareness, [this.document.clientID]))
     })
+  }
+
+  broadcast(message) {
+    bc.publish(this.broadcastChannel, message)
   }
 
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Awareness)
-    encoding.writeVarUint8Array(encoder, encodeAwarenessUpdate(this.awareness, [this.document.clientID], new Map()))
-    this.sendMessage(encoding.toUint8Array(encoder))
+    this.sendMessage(
+      new AwarenessMessage().get(this.awareness, [this.document.clientID], new Map()),
+    )
 
     if (this.subscribedToBroadcastChannel) {
       bc.unsubscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
@@ -322,7 +300,7 @@ export class HocuspocusProvider extends EventEmitter {
       this.websocketConnectionEstablished()
     }
 
-    const encoder = this.retrieveMessage(new Uint8Array(event.data), true)
+    const encoder = this.receiveMessage(new Uint8Array(event.data), true)
 
     // TODO: What’s that?
     if (encoding.length(encoder) > 1) {
@@ -353,10 +331,10 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     if (this.shouldConnect) {
-      const wait = math.min(
+      const wait = math.round(math.min(
         math.log10(this.failedConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
         this.options.maxReconnectTimeout,
-      )
+      ))
 
       console.log(`Reconnecting in ${wait}ms …`)
       setTimeout(this.startWebSocketConnection.bind(this), wait)
@@ -393,10 +371,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('open', event)
   }
 
-  // TODO: receive instead of retrieve?
-  retrieveMessage(input: Uint8Array, emitSynced: boolean): encoding.Encoder {
-    this.lastMessageReceived = time.getUnixTime()
-
+  receiveMessage(input: Uint8Array, emitSynced: boolean): encoding.Encoder {
     const message = new IncomingMessage(input)
 
     return new MessageHandler(message).handle(this, emitSynced)
@@ -408,7 +383,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
-    this.sendFirstSyncStep()
+    this.sendSyncStepOne()
     this.sendLocalAwarenessState()
   }
 
@@ -424,12 +399,8 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  sendFirstSyncStep() {
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Sync)
-    syncProtocol.writeSyncStep1(encoder, this.document)
-
-    this.websocket?.send(encoding.toUint8Array(encoder))
+  sendSyncStepOne() {
+    this.websocket?.send(new SyncStepOneMessage().get(this.document))
   }
 
   sendLocalAwarenessState() {
@@ -437,11 +408,9 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    const encoder = encoding.createEncoder()
-    encoding.writeVarUint(encoder, MessageTypes.Awareness)
-    encoding.writeVarUint8Array(encoder, encodeAwarenessUpdate(this.awareness, [this.document.clientID]))
-
-    this.websocket?.send(encoding.toUint8Array(encoder))
+    this.websocket?.send(
+      new AwarenessMessage().get(this.awareness, [this.document.clientID]),
+    )
   }
 
   destroy() {
