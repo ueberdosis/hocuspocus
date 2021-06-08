@@ -37,7 +37,7 @@
     "@babel/preset-env": "^7.12.16",
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^3.18.0",
-    "@lerna/project": "^3.21.0",
+    "@lerna/project": "^4.0.0",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-json": "^4.1.0",
