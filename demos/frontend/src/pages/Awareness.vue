@@ -20,9 +20,26 @@
     <ul>
       <li v-for="state in states" :key="state.clientId">
         <span :style="`background-color: ${state.user.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
-        #{{ state.clientId }} {{ state.user.name }} ({{ state.user.x }}, {{ state.user.y }})
+        #{{ state.clientId }} {{ state.user.name }} ({{ state.user.clientX }}, {{ state.user.clientY }})
       </li>
     </ul>
+
+    <div
+      v-for="state in filteredStates"
+      :key="state.clientId"
+      :style="`
+        position: absolute;
+        background-color: ${state.user.color};
+        top: ${state.user.clientY}px;
+        left: ${state.user.clientX}px;
+        width: 12px;
+        height: 12px;
+        margin-left: -6px;
+        margin-top: -6px;
+        pointer-events: none;
+        border-radius: 50%;
+      `"
+    />
 
     <h2>
       Tasks
@@ -50,10 +67,20 @@ export default {
       me: {
         name: 'Emmanuelle Charpentier',
         color: '#ffb61e',
-        x: 0,
-        y: 0,
+        clientX: 0,
+        clientY: 0,
+        visible: false,
       },
     }
+  },
+
+  computed: {
+    filteredStates() {
+      return this
+        .states
+        .filter(state => state.user.visible)
+        .filter(state => state.clientId !== this.ydoc.clientID)
+    },
   },
 
   mounted() {
@@ -101,15 +128,24 @@ export default {
 
   methods: {
     bindEventListeners() {
-      document.addEventListener('mousemove', e => {
-        this.me.x = e.offsetX
-        this.me.y = e.offsetY
+      document.addEventListener('mousemove', event => {
+        console.log({ event })
+        this.me.clientX = event.clientX
+        this.me.clientY = event.clientY
+        this.me.visible = true
+
+        this.setAwarenessState()
+      })
+
+      document.addEventListener('mouseout', event => {
+        this.me.visible = false
 
         this.setAwarenessState()
       })
     },
     removeEventListeners() {
       document.removeEventListeners('mousemove')
+      document.removeEventListeners('mouseout')
     },
     setAwarenessState() {
       this.provider.awareness.setLocalStateField('user', this.me)
