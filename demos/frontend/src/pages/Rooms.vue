@@ -8,11 +8,11 @@
       <tr :key="room.name" v-for="room in rooms">
         <td>{{ room.name }}</td>
         <td>{{ room.status }}</td>
-        <td>{{ room.countUsers() }}</td>
+        <td>{{ room.numberOfUsers }}</td>
         <td>{{ room.states }}</td>
         <td>
-          <button @click="room.connect()">connect</button>
-          <button @click="room.disconnect()">disconnect</button>
+          <button v-if="room.status !== 'connected'" @click="room.connect()">connect</button>
+          <button v-if="room.status !== 'disconnected'" @click="room.disconnect()">disconnect</button>
         </td>
       </tr>
     </table>
@@ -42,10 +42,12 @@ class Room {
     //   document: this.doc,
     //   name: this.name,
     // })
-    this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })
+
     this.provider.on('status', event => {
       this.status = event.status
     })
+
+    this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })
 
     this.provider.awareness.on('change', () => {
       this.states = awarenessStatesToArray(this.provider.awareness.getStates())
@@ -54,16 +56,8 @@ class Room {
     this.states = awarenessStatesToArray(this.provider.awareness.getStates())
   }
 
-  countUsers() {
-    const states = this.provider.awareness.getStates()
-
-    let count = 0
-
-    states.forEach(state => {
-      if (state.user) count += 1
-    })
-
-    return count
+  get numberOfUsers() {
+    return this.provider.awareness.getStates().size
   }
 
   connect() {

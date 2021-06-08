@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page">
     <nav>
       <ul>
         <li><a href="/">Default</a></li>
@@ -10,3 +10,9 @@
     <slot />
   </div>
 </template>
+
+<style>
+.page {
+  font-family: sans-serif;
+}
+</style>

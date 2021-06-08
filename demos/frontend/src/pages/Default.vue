@@ -12,12 +12,18 @@
       disconnect
     </button>
 
+    <h2>
+      Editor
+    </h2>
     <div v-if="editor">
-      <editor-content :editor="editor" />
+      <editor-content :editor="editor" class="editor" />
     </div>
 
+    <h2>
+      Another editor
+    </h2>
     <div v-if="editor2">
-      <editor-content :editor="editor2" />
+      <editor-content :editor="editor2" class="editor" />
     </div>
   </Layout>
 </template>
@@ -125,3 +131,10 @@ export default {
   },
 }
 </script>
+
+<style>
+.ProseMirror {
+  border: 1px solid grey;
+  padding: 1rem;
+}
+</style>
