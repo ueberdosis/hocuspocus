@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server-demos@0.2.5...@hocuspocus/server-demos@0.2.6) (2021-06-08)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
 ## [0.2.5](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server-demos@0.2.4...@hocuspocus/server-demos@0.2.5) (2021-05-15)
 
 **Note:** Version bump only for package @hocuspocus/server-demos
