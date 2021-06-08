@@ -1,0 +1,105 @@
+<template>
+  <Layout>
+    <h1>
+      Rooms
+    </h1>
+
+    <table border="1" cellpadding="5">
+      <tr :key="room.name" v-for="room in rooms">
+        <td>{{ room.name }}</td>
+        <td>{{ room.status }}</td>
+        <td>{{ room.countUsers() }}</td>
+        <td>{{ room.states }}</td>
+        <td>
+          <button @click="room.connect()">connect</button>
+          <button @click="room.disconnect()">disconnect</button>
+        </td>
+      </tr>
+      </ul>
+    </table>
+  </Layout>
+</template>
+
+<script>
+import * as Y from 'yjs'
+import { WebsocketProvider } from 'y-websocket'
+// import { HocuspocusProvider } from '../../../../packages/provider/src'
+
+class Room {
+  doc = new Y.Doc()
+
+  name = ''
+
+  status = 'disconnected'
+
+  states = []
+
+  constructor(name) {
+    this.name = name
+    this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
+    this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })
+    this.provider.on('status', event => {
+      this.status = event.status
+    })
+
+    this.provider.awareness.on('change', () => {
+      this.states = awarenessStatesToArray(this.provider.awareness.getStates())
+    })
+
+    this.states = awarenessStatesToArray(this.provider.awareness.getStates())
+  }
+
+  countUsers() {
+    const states = this.provider.awareness.getStates()
+
+    let count = 0
+
+    states.forEach(state => {
+      if (state.user) count += 1
+    })
+
+    return count
+  }
+
+  connect() {
+    this.provider.connect()
+  }
+
+  disconnect() {
+    this.provider.disconnect()
+  }
+
+  destroy() {
+    this.provider.destroy()
+  }
+}
+
+const awarenessStatesToArray = states => {
+  return Array.from(states.entries()).map(([key, value]) => {
+    return {
+      clientId: key,
+      ...value,
+    }
+  })
+}
+
+export default {
+  data() {
+    return {
+      rooms: [],
+    }
+  },
+
+  mounted() {
+    for (let i = 1; i < 5; i += 1) {
+      this.rooms.push(new Room(`room-${i}`))
+    }
+  },
+
+  beforeDestroy() {
+    this.rooms.forEach(room => {
+      room.destroy()
+    })
+  },
+}
+</script>
