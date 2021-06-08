@@ -50,7 +50,7 @@ export interface HocuspocusProviderOptions {
 }
 
 export class HocuspocusProvider extends EventEmitter {
-  public options: Partial<HocuspocusProviderOptions> = {
+  public options: HocuspocusProviderOptions = {
     url: '',
     name: '',
     parameters: {},
@@ -99,8 +99,9 @@ export class HocuspocusProvider extends EventEmitter {
     this.setOptions(options)
 
     this.options.document = options.document ? options.document : new Y.Doc()
+    this.options.awareness = options.awareness ? options.awareness : new Awareness(this.document)
+    this.options.WebSocketPolyfill = options.WebSocketPolyfill ? options.WebSocketPolyfill : WebSocket
     this.shouldConnect = options.connect !== undefined ? options.connect : this.shouldConnect
-    this.awareness = options.awareness ? options.awareness : new Awareness(this.document)
 
     this.on('open', this.options.onOpen)
     this.on('connect', this.options.onConnect)
@@ -194,6 +195,10 @@ export class HocuspocusProvider extends EventEmitter {
 
   get document() {
     return this.options.document
+  }
+
+  get awareness() {
+    return this.options.awareness
   }
 
   // ensure that url is always ends with /
