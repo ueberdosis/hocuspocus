@@ -28,11 +28,12 @@ export enum WebSocketStatus {
 }
 
 export interface HocuspocusProviderOptions {
+  url: string,
   name: string,
   document: Y.Doc,
   connect: boolean,
   awareness: Awareness,
-  parameters: Object<string, string>,
+  parameters: { [key: string]: any },
   WebSocketPolyfill: any,
   forceSyncInterval: false | number,
   reconnectTimeoutBase: number,
@@ -49,14 +50,12 @@ export interface HocuspocusProviderOptions {
 }
 
 export class HocuspocusProvider extends EventEmitter {
-  public options: HocuspocusProviderOptions = {
+  public options: Partial<HocuspocusProviderOptions> = {
     url: '',
     name: '',
-    document: null,
-    connect: true,
-    awareness: null,
     parameters: {},
-    WebSocketPolyfill: typeof WebSocket !== 'undefined' ? WebSocket : null,
+    debug: false,
+    connect: true,
     forceSyncInterval: false,
     reconnectTimeoutBase: 1200,
     maxReconnectTimeout: 2500,
@@ -69,18 +68,15 @@ export class HocuspocusProvider extends EventEmitter {
     onDisconnect: () => null,
     onClose: () => null,
     onDestroy: () => null,
-    debug: false,
   }
 
   awareness: Awareness
-
-  document: Y.Doc
 
   subscribedToBroadcastChannel = false
 
   websocket: any = null
 
-  shouldConnect: boolean
+  shouldConnect = true
 
   status: WebSocketStatus = WebSocketStatus.Disconnected
 
@@ -102,7 +98,8 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.setOptions(options)
 
-    this.shouldConnect = options.connect
+    this.options.document = options.document ? options.document : new Y.Doc()
+    this.shouldConnect = options.connect !== undefined ? options.connect : this.shouldConnect
     this.awareness = options.awareness ? options.awareness : new Awareness(this.document)
 
     this.on('open', this.options.onOpen)
@@ -246,11 +243,11 @@ export class HocuspocusProvider extends EventEmitter {
     })
   }
 
-  broadcast(message) {
+  broadcast(message: Uint8Array) {
     bc.publish(this.broadcastChannel, message)
   }
 
-  send(message: Uint8Array, broadcast: false) {
+  send(message: Uint8Array, broadcast = false) {
     if (broadcast && this.subscribedToBroadcastChannel) {
       this.mux(() => {
         this.broadcast(message)

@@ -4,12 +4,15 @@ import { MessageTypes } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
 export class AwarenessMessage extends OutgoingMessage {
-  get(awareness: Awareness, clients: number[], states: Map<number, { [x: string]: any; }> | undefined) {
+  get(
+    awareness: Awareness,
+    clients: number[],
+    states: Map<number, { [x: string]: any; }> | undefined = undefined,
+  ) {
     encoding.writeVarUint(this.encoder, MessageTypes.Awareness)
 
     let awarenessUpdate
-
-    if (typeof states === 'undefined') {
+    if (states === undefined) {
       awarenessUpdate = encodeAwarenessUpdate(awareness, clients)
     } else {
       awarenessUpdate = encodeAwarenessUpdate(awareness, clients, states)
