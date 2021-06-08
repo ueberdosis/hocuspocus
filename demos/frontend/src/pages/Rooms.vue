@@ -15,7 +15,6 @@
           <button @click="room.disconnect()">disconnect</button>
         </td>
       </tr>
-      </ul>
     </table>
   </Layout>
 </template>
