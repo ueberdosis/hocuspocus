@@ -21,8 +21,8 @@
 
 <script>
 import * as Y from 'yjs'
-// import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusProvider } from '../../../../packages/provider/src'
+import { WebsocketProvider } from 'y-websocket'
+// import { HocuspocusProvider } from '../../../../packages/provider/src'
 import { awarenessStatesToArray } from '../utils/awarenessStatesToArray'
 
 class Room {
@@ -36,12 +36,12 @@ class Room {
 
   constructor(name) {
     this.name = name
-    // this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
-    this.provider = new HocuspocusProvider({
-      url: 'ws://localhost:1234',
-      document: this.doc,
-      name: this.name,
-    })
+    this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
+    // this.provider = new HocuspocusProvider({
+    //   url: 'ws://localhost:1234',
+    //   document: this.doc,
+    //   name: this.name,
+    // })
     this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })
     this.provider.on('status', event => {
       this.status = event.status
