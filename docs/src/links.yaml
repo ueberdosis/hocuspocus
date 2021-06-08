@@ -58,10 +58,13 @@
   items:
     - title: Settings
       link: /api/settings
+      type: new
     - title: Methods
       link: /api/methods
+      type: new
     - title: Hooks
       link: /api/hooks
+      type: new
       items:
         - title: onConnect
           link: /api/on-connect
