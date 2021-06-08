@@ -40,8 +40,6 @@ export class Hocuspocus {
 
   websocketServer?: WebSocket.Server
 
-  incomingMessageQueue: Iterable<number>[] = []
-
   /**
    * Configure the server
    */
