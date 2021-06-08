@@ -174,6 +174,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.mux(() => {
       const encoder = this.receiveMessage(new Uint8Array(data), false)
 
+      // TODO: What’s that doing?
       if (encoding.length(encoder) > 1) {
         this.broadcast(encoding.toUint8Array(encoder))
       }
