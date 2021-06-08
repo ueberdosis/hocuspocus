@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <Layout>
+    <h1>
+      Awareness
+    </h1>
     <p>Status: {{ status }}, Synced: {{ client ? client.synced : null }}</p>
 
     <button @click="client.connect()">
@@ -16,7 +19,7 @@
     <div v-if="editor2">
       <editor-content :editor="editor2" />
     </div>
-  </div>
+  </Layout>
 </template>
 
 <script>
@@ -28,7 +31,7 @@ import { Text } from '@tiptap/extension-text'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusProvider } from '../../../packages/provider/src'
+import { HocuspocusProvider } from '../../../../packages/provider/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {

@@ -1,9 +1,24 @@
 import Vue from 'vue/dist/vue'
-import App from './App.vue'
+import Default from './pages/Default.vue'
+import Awareness from './pages/Awareness.vue'
+import Layout from './Layout.vue'
 
-Vue.component('App', App)
+const routes = {
+  '/': Default,
+  '/awareness': Awareness,
+}
+
+Vue.component('Layout', Layout)
 
 const app = new Vue({
   el: '#app',
-  template: '<App />',
+  data: {
+    currentRoute: window.location.pathname,
+  },
+  computed: {
+    ViewComponent() {
+      return routes[this.currentRoute]
+    },
+  },
+  render(h) { return h(this.ViewComponent) },
 })
