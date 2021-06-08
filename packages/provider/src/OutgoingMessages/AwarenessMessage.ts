@@ -1,7 +1,7 @@
 import * as encoding from 'lib0/encoding'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { MessageTypes } from '../types'
-import { OutgoingMessage } from './OutgoingMessage'
+import { OutgoingMessage } from '../OutgoingMessage'
 
 export class AwarenessMessage extends OutgoingMessage {
   get(awareness: Awareness, clients: number[], states: Map<number, { [x: string]: any; }> | undefined) {

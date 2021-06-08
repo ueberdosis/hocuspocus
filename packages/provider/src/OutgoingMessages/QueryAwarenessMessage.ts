@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
 import { MessageTypes } from '../types'
-import { OutgoingMessage } from './OutgoingMessage'
+import { OutgoingMessage } from '../OutgoingMessage'
 
 export class QueryAwarenessMessage extends OutgoingMessage {
   get() {

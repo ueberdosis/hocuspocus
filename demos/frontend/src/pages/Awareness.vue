@@ -79,6 +79,7 @@ export default {
       parameters: {
         token: '123456',
       },
+      debug: true,
       onConnect: () => {
         console.log('connected')
 
