@@ -38,15 +38,7 @@
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
-
-const awarenessStatesToArray = states => {
-  return Array.from(states.entries()).map(([key, value]) => {
-    return {
-      clientId: key,
-      ...value,
-    }
-  })
-}
+import { awarenessStatesToArray } from '../utils/awarenessStatesToArray'
 
 export default {
   data() {
