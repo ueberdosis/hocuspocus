@@ -161,8 +161,13 @@ export class Hocuspocus {
       connection,
     }
 
+    const incomingMessageQueue: Iterable<number>[] = []
+
     // Queue messages before the connection is established
-    const queueIncomingMessageListener = this.queueIncomingMessage.bind(this)
+    const queueIncomingMessageListener = (input: Iterable<number>) => {
+      this.incomingMessageQueue.push(input)
+    }
+
     incoming.on('message', queueIncomingMessageListener)
 
     this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
@@ -177,7 +182,7 @@ export class Hocuspocus {
         // Remove the queue listener
         incoming.off('message', queueIncomingMessageListener)
         // Work through queue messages
-        this.incomingMessageQueue.forEach(input => {
+        incomingMessageQueue.forEach(input => {
           incoming.emit('message', input)
         })
       })
@@ -187,15 +192,6 @@ export class Hocuspocus {
         if (e) throw e
       })
 
-  }
-
-  /**
-   * Queue incoming WebSocket messages before the onConnect hooks are finished
-   * and the connection is full established
-   * @private
-   */
-  private queueIncomingMessage(input: Iterable<number>): void {
-    this.incomingMessageQueue.push(input)
   }
 
   /**
