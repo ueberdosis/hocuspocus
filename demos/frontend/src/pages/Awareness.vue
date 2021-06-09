@@ -39,16 +39,13 @@
     </h2>
     <ul>
       <li>Disconnect → Connect → States aren’t synced</li>
-      <li>Integrate well with @hocuspocus/provider</li>
     </ul>
   </Layout>
 </template>
 
 <script>
 import * as Y from 'yjs'
-// import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
-import { awarenessStatesToArray } from '../utils/awarenessStatesToArray'
 import StatusBar from '../Components/StatusBar.vue'
 
 export default {
@@ -81,65 +78,47 @@ export default {
 
   mounted() {
     this.ydoc = new Y.Doc()
-    // this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
-    //   params: {
-    //     token: '123456',
-    //   },
-    // })
 
     this.provider = new HocuspocusProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
-      parameters: {
-        token: '123456',
-      },
-      debug: true,
-      onConnect: () => {
-        console.log('connected')
-
-        this.setAwarenessState()
-      },
-      // onMessage: ({ event }) => {
-      //   console.log(event.type, { event })
-      // },
-      onClose: ({ event }) => {
-        console.log(event.type, { event })
-      },
-      onDisconnect: ({ event }) => {
-        console.log(event.type, event.code, event.reason, { event })
+      onAwarenessChange: ({ states }) => {
+        this.states = states
       },
     })
 
-    this.provider.awareness.on('change', () => {
-      this.states = awarenessStatesToArray(this.provider.awareness.getStates())
-    })
-
+    this.setAwarenessState()
     this.bindEventListeners()
   },
 
   methods: {
+    setAwarenessState(values = {}) {
+      this.me = {
+        ...this.me,
+        ...values,
+      }
+
+      this.provider.setAwarenessField('user', this.me)
+    },
     bindEventListeners() {
       document.addEventListener('mousemove', event => {
-        this.me.clientX = event.clientX
-        this.me.clientY = event.clientY
-        this.me.visible = true
-
-        this.setAwarenessState()
+        this.setAwarenessState({
+          clientX: event.clientX,
+          clientY: event.clientY,
+          visible: true,
+        })
       })
 
       document.addEventListener('mouseout', event => {
-        this.me.visible = false
-
-        this.setAwarenessState()
+        this.setAwarenessState({
+          visible: false,
+        })
       })
     },
     removeEventListeners() {
       document.removeEventListeners('mousemove')
       document.removeEventListeners('mouseout')
-    },
-    setAwarenessState() {
-      this.provider.awareness.setLocalStateField('user', this.me)
     },
   },
 

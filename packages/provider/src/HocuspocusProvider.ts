@@ -21,6 +21,7 @@ import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
+import { awarenessStatesToArray } from './utils/awarenessStatesToArray'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -48,6 +49,7 @@ export interface HocuspocusProviderOptions {
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
   onDestroy: () => void,
+  onAwarenessChange: (states: any) => void,
   debug: boolean,
 }
 
@@ -71,6 +73,7 @@ export class HocuspocusProvider extends EventEmitter {
     onDisconnect: () => null,
     onClose: () => null,
     onDestroy: () => null,
+    onAwarenessChange: () => null,
   }
 
   awareness: Awareness
@@ -114,6 +117,13 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('disconnect', this.options.onDisconnect)
     this.on('close', this.options.onClose)
     this.on('destroy', this.options.onDestroy)
+    this.on('awarenessChange', this.options.onAwarenessChange)
+
+    this.awareness.on('change', () => {
+      this.emit('awarenessChange', {
+        states: awarenessStatesToArray(this.awareness.getStates()),
+      })
+    })
 
     this.intervals.connectionChecker = setInterval(
       this.checkConnection.bind(this),
@@ -363,10 +373,7 @@ export class HocuspocusProvider extends EventEmitter {
         this.options.maxReconnectTimeout,
       ))
 
-      if (this.options.debug) {
-        console.log(`Reconnecting in ${wait}ms …`)
-      }
-
+      this.log(`[close] Reconnecting in ${wait}ms …`)
       setTimeout(this.createWebSocketConnection.bind(this), wait)
 
       return
@@ -432,5 +439,17 @@ export class HocuspocusProvider extends EventEmitter {
     this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
+  }
+
+  log(message: string): void {
+    if (!this.options.debug) {
+      return
+    }
+
+    console.log(message)
+  }
+
+  setAwarenessField(key: string, value: any) {
+    this.awareness.setLocalStateField(key, value)
   }
 }

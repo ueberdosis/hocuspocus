@@ -10,7 +10,12 @@ const server = Server.configure({
   // async onConnect(data) {
   //   await new Promise((resolve, reject) => setTimeout(() => {
   //     // @ts-ignore
-  //     // reject()
+  //     reject()
+  //   }, 1337))
+  // },
+
+  // async onConnect(data) {
+  //   await new Promise((resolve, reject) => setTimeout(() => {
   //     // @ts-ignore
   //     resolve()
   //   }, 1337))

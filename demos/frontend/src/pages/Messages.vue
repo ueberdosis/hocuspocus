@@ -41,19 +41,19 @@ export default {
         console.log('[open]')
       },
       onConnect: () => {
-        console.log('[connect]')
+        console.log('[connected]')
       },
       onMessage: ({ event, message }) => {
-        console.log('[message] <', message.name, event)
+        console.log(`[message] ◀️ ${message.name}`, event)
       },
       onOutgoingMessage: ({ message }) => {
-        console.log('[message] >', message.name, '-', message.description)
+        console.info(`[message] ▶️ ${message.name} (${message.description})`)
       },
       onClose: ({ event }) => {
-        console.log('[close]', event.type, event.code, event.reason, event)
+        console.log('[close]', event.code, event.reason, event)
       },
       onDisconnect: ({ event }) => {
-        console.log('[disconnect]', event.type, event.code, event.reason, event)
+        console.log('[disconnect]', event.code, event.reason, event)
       },
       onDestroy: () => {
         console.log('[destroy]')
