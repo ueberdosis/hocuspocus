@@ -104,19 +104,19 @@ export default {
 
         this.setAwarenessState()
       },
-      // onMessage: ({event}) => {
+      // onMessage: ({ event }) => {
       //   console.log(event.type, { event })
       // },
-      onClose: event => {
+      onClose: ({ event }) => {
         console.log(event.type, { event })
       },
-      onDisconnect: event => {
+      onDisconnect: ({ event }) => {
         console.log(event.type, event.code, event.reason, { event })
       },
     })
 
-    this.provider.on('status', event => {
-      this.status = event.status
+    this.provider.on('status', ({ status }) => {
+      this.status = status
     })
 
     this.provider.awareness.on('change', () => {
@@ -129,7 +129,6 @@ export default {
   methods: {
     bindEventListeners() {
       document.addEventListener('mousemove', event => {
-        console.log({ event })
         this.me.clientX = event.clientX
         this.me.clientY = event.clientY
         this.me.visible = true

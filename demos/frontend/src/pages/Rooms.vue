@@ -43,8 +43,8 @@ class Room {
     //   name: this.name,
     // })
 
-    this.provider.on('status', event => {
-      this.status = event.status
+    this.provider.on('status', ({ status }) => {
+      this.status = status
     })
 
     this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })

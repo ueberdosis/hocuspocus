@@ -49,10 +49,10 @@ export default {
       onMessage: ({ event, message }) => {
         console.log('[message]', event, message.type)
       },
-      onClose: event => {
+      onClose: ({ event }) => {
         console.log('[close]', event.type, event.code, event.reason, event)
       },
-      onDisconnect: event => {
+      onDisconnect: ({ event }) => {
         console.log('[disconnect]', event.type, event.code, event.reason, event)
       },
       onDestroy: () => {
@@ -60,8 +60,8 @@ export default {
       },
     })
 
-    this.provider.on('status', event => {
-      this.status = event.status
+    this.provider.on('status', ({ status }) => {
+      this.status = status
     })
 
     // this.provider.awareness.on('change', () => {

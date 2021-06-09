@@ -231,8 +231,8 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.isSynced = state
-    this.emit('synced', state)
-    this.emit('sync', state)
+    this.emit('synced', { state })
+    this.emit('sync', { state })
   }
 
   subscribeToBroadcastChannel() {
@@ -319,7 +319,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onClose(event: CloseEvent) {
-    this.emit('close', event)
+    this.emit('close', { event })
 
     this.websocket = null
 
@@ -335,7 +335,7 @@ export class HocuspocusProvider extends EventEmitter {
 
       this.status = WebSocketStatus.Disconnected
       this.emit('status', { status: 'disconnected' })
-      this.emit('disconnect', event)
+      this.emit('disconnect', { event })
     } else {
       this.failedConnectionAttempts += 1
     }
@@ -358,7 +358,7 @@ export class HocuspocusProvider extends EventEmitter {
     if (this.status !== WebSocketStatus.Disconnected) {
       this.status = WebSocketStatus.Disconnected
       this.emit('status', { status: 'disconnected' })
-      this.emit('disconnect', event)
+      this.emit('disconnect', { event })
     }
   }
 
@@ -377,13 +377,11 @@ export class HocuspocusProvider extends EventEmitter {
     this.websocket.onclose = this.onClose.bind(this)
     this.websocket.onopen = this.onOpen.bind(this)
 
-    this.emit('status', {
-      status: 'connecting',
-    })
+    this.emit('status', { status: 'connecting' })
   }
 
   onOpen(event: OpenEvent) {
-    this.emit('open', event)
+    this.emit('open', { event })
   }
 
   websocketConnectionEstablished() {

@@ -77,18 +77,18 @@ export default {
       onMessage: ({ event }) => {
         console.log(event.type, { event })
       },
-      onClose: event => {
+      onClose: ({ event }) => {
         console.log(event.type, { event })
       },
-      onDisconnect: event => {
+      onDisconnect: ({ event }) => {
         console.log(event.type, event.code, event.reason, { event })
       },
     })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
 
-    this.provider.on('status', event => {
-      this.status = event.status
+    this.provider.on('status', ({ status }) => {
+      this.status = status
     })
 
     window.ydoc = this.ydoc
