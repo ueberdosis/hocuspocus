@@ -19,7 +19,6 @@
     <div v-if="editor2">
       <editor-content :editor="editor2" class="editor" />
     </div>
-    </statusbar>
   </Layout>
 </template>
 
