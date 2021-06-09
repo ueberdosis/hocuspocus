@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
 import * as syncProtocol from 'y-protocols/sync'
-import { MessageType } from '../types'
+import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
 export class UpdateMessage extends OutgoingMessage {
@@ -8,10 +8,10 @@ export class UpdateMessage extends OutgoingMessage {
 
   description = 'A document update'
 
-  // update: Uint8Array
-  get({ update }) {
+  get(args: Partial<OutgoingMessageArguments>) {
     encoding.writeVarUint(this.encoder, this.type)
-    syncProtocol.writeUpdate(this.encoder, update)
+    syncProtocol.writeUpdate(this.encoder, args.update)
+
     return this.encoder
   }
 }

@@ -1,7 +1,7 @@
 import * as encoding from 'lib0/encoding'
-import { MessageType } from './types'
+import { MessageType, OutgoingMessageInterface } from './types'
 
-export class OutgoingMessage {
+export class OutgoingMessage implements OutgoingMessageInterface {
   encoder: encoding.Encoder
 
   type?: MessageType

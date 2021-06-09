@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
-import { MessageType } from '../types'
+import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
 export class AwarenessMessage extends OutgoingMessage {
@@ -8,17 +8,22 @@ export class AwarenessMessage extends OutgoingMessage {
 
   description = 'Awareness states update'
 
-  // awareness: Awareness,
-  //   clients: number[],
-  //   states: Map<number, { [x: string]: any; }> | undefined = undefined,
-  get({ awareness, clients, states }) {
+  get(args: Partial<OutgoingMessageArguments>) {
+    if (typeof args.awareness === 'undefined') {
+      throw new Error('The awareness message requires awareness as an argument')
+    }
+
+    if (typeof args.clients === 'undefined') {
+      throw new Error('The awareness message requires clients as an argument')
+    }
+
     encoding.writeVarUint(this.encoder, this.type)
 
     let awarenessUpdate
-    if (states === undefined) {
-      awarenessUpdate = encodeAwarenessUpdate(awareness, clients)
+    if (args.states === undefined) {
+      awarenessUpdate = encodeAwarenessUpdate(args.awareness, args.clients)
     } else {
-      awarenessUpdate = encodeAwarenessUpdate(awareness, clients, states)
+      awarenessUpdate = encodeAwarenessUpdate(args.awareness, args.clients, args.states)
     }
 
     encoding.writeVarUint8Array(this.encoder, awarenessUpdate)

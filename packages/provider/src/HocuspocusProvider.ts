@@ -3,10 +3,7 @@ import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
 import * as encoding from 'lib0/encoding'
-import {
-  Awareness,
-  removeAwarenessStates,
-} from 'y-protocols/awareness'
+import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import * as math from 'lib0/math'
 import * as url from 'lib0/url'

@@ -6,6 +6,7 @@ import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
+import { Constructable } from './types'
 
 export class MessageSender {
 
@@ -14,11 +15,11 @@ export class MessageSender {
   message: any
 
   constructor(Message:
-    AwarenessMessage |
-    QueryAwarenessMessage |
-    SyncStepOneMessage |
-    SyncStepTwoMessage |
-    UpdateMessage,
+    Constructable<AwarenessMessage> |
+    Constructable<QueryAwarenessMessage> |
+    Constructable<SyncStepOneMessage> |
+    Constructable<SyncStepTwoMessage> |
+    Constructable<UpdateMessage>,
   args: any = {}) {
     this.message = new Message()
     this.encoder = this.message.get(args)
