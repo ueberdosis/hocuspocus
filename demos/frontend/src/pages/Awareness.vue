@@ -71,7 +71,7 @@ export default {
     filteredStates() {
       return this
         .states
-        .filter(state => state.user.visible)
+        .filter(state => state.user && state.user.visible)
         .filter(state => state.clientId !== this.ydoc.clientID)
     },
   },

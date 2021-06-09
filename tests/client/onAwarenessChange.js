@@ -7,29 +7,31 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 let client
 const ydoc = new Y.Doc()
 
-context('server/onConnect', () => {
+context('client/onAwarenessChange', () => {
+  afterEach(() => {
+    client.destroy()
+  })
+
   it('onConnect callback is executed', done => {
     const Server = new Hocuspocus()
 
-    Server.configure({
-      port: 4000,
-      async onConnect({ documentName }) {
-        setTimeout(() => {
-          assert.strictEqual(documentName, 'hocuspocus-demo')
-
-          client.destroy()
-          Server.destroy()
-
-          done()
-        }, 0)
-      },
-    }).listen()
+    Server.configure({ port: 4000 }).listen()
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      onConnect: () => {
+        client.setAwarenessField('foo', 'bar')
+      },
+      onAwarenessChange: ({ states }) => {
+        Server.destroy()
+
+        assert.strictEqual(states[0].foo, 'bar')
+
+        done()
+      },
     })
   })
 })

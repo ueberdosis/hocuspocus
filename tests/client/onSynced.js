@@ -6,34 +6,33 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
 
 context('client/onSynced', () => {
-  before(() => {
-    Server.configure({ port: 4000 }).listen()
-  })
-
-  after(() => {
-    Server.destroy()
-  })
-
   afterEach(() => {
     client.destroy()
   })
 
   it('onSynced callback is executed', done => {
+    const Server = new Hocuspocus()
+    Server.configure({ port: 4000 }).listen()
+
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        Server.destroy()
+
         done()
       },
     })
   })
 
   it("on('synced') callback is executed", done => {
+    const Server = new Hocuspocus()
+    Server.configure({ port: 4000 }).listen()
+
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-demo',
@@ -42,7 +41,34 @@ context('client/onSynced', () => {
     })
 
     client.on('synced', () => {
+      Server.destroy()
+
       done()
+    })
+  })
+
+  it('onSynced callback is executed, even when the onConnect takes longer', done => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 4000,
+
+      async onConnect(data) {
+        await new Promise((resolve, reject) => setTimeout(() => {
+          resolve()
+        }, 100))
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-demo',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced: () => {
+        Server.destroy()
+
+        done()
+      },
     })
   })
 })
