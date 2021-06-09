@@ -8,7 +8,7 @@ import {
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 
-import { MessageTypes } from './types'
+import { MessageType } from './types'
 import Document from './Document'
 
 export class OutgoingMessage {
@@ -20,7 +20,7 @@ export class OutgoingMessage {
   }
 
   createSyncMessage(): OutgoingMessage {
-    writeVarUint(this.encoder, MessageTypes.Sync)
+    writeVarUint(this.encoder, MessageType.Sync)
 
     return this
   }
@@ -31,7 +31,7 @@ export class OutgoingMessage {
       changedClients || Array.from(awareness.getStates().keys()),
     )
 
-    writeVarUint(this.encoder, MessageTypes.Awareness)
+    writeVarUint(this.encoder, MessageType.Awareness)
     writeVarUint8Array(this.encoder, message)
 
     return this

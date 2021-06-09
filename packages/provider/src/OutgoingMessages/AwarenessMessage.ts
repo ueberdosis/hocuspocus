@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
-import { MessageTypes } from '../types'
+import { MessageType } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
 export class AwarenessMessage extends OutgoingMessage {
@@ -9,7 +9,7 @@ export class AwarenessMessage extends OutgoingMessage {
     clients: number[],
     states: Map<number, { [x: string]: any; }> | undefined = undefined,
   ) {
-    encoding.writeVarUint(this.encoder, MessageTypes.Awareness)
+    encoding.writeVarUint(this.encoder, MessageType.Awareness)
 
     let awarenessUpdate
     if (states === undefined) {

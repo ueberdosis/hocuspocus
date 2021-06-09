@@ -3,7 +3,7 @@ import * as encoding from 'lib0/encoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
 import * as authProtocol from 'y-protocols/auth'
-import { MessageTypes } from './types'
+import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 
@@ -20,19 +20,19 @@ export class MessageHandler {
 
   public handle(emitSynced: boolean) {
     switch (this.message.type) {
-      case MessageTypes.Sync:
+      case MessageType.Sync:
         this.handleSyncMessage(emitSynced)
         break
 
-      case MessageTypes.Awareness:
+      case MessageType.Awareness:
         this.handleAwarenessMessage()
         break
 
-      case MessageTypes.Auth:
+      case MessageType.Auth:
         this.handleAuthMessage()
         break
 
-      case MessageTypes.QueryAwareness:
+      case MessageType.QueryAwareness:
         this.handleQueryAwarenessMessage()
         break
 
@@ -44,7 +44,7 @@ export class MessageHandler {
   }
 
   private handleSyncMessage(emitSynced: boolean) {
-    encoding.writeVarUint(this.message.encoder, MessageTypes.Sync)
+    encoding.writeVarUint(this.message.encoder, MessageType.Sync)
 
     const syncMessageType = syncProtocol.readSyncMessage(
       this.message.decoder,
@@ -79,7 +79,7 @@ export class MessageHandler {
   }
 
   private handleQueryAwarenessMessage() {
-    encoding.writeVarUint(this.message.encoder, MessageTypes.Awareness)
+    encoding.writeVarUint(this.message.encoder, MessageType.Awareness)
     encoding.writeVarUint8Array(
       this.message.encoder,
       awarenessProtocol.encodeAwarenessUpdate(

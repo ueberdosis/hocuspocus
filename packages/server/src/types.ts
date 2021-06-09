@@ -5,7 +5,7 @@ import { URLSearchParams } from 'url'
 import { Socket } from 'net'
 import Document from './Document'
 
-export enum MessageTypes {
+export enum MessageType {
   Sync = 0,
   Awareness = 1,
 }

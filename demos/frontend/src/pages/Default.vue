@@ -74,7 +74,7 @@ export default {
       onConnect: () => {
         console.log('connected')
       },
-      onMessage: event => {
+      onMessage: ({ event }) => {
         console.log(event.type, { event })
       },
       onClose: event => {

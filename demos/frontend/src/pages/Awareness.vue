@@ -104,7 +104,7 @@ export default {
 
         this.setAwarenessState()
       },
-      // onMessage: event => {
+      // onMessage: ({event}) => {
       //   console.log(event.type, { event })
       // },
       onClose: event => {

@@ -21,7 +21,7 @@ import {
 } from 'y-protocols/sync'
 
 import Document from './Document'
-import { MessageTypes } from './types'
+import { MessageType } from './types'
 import Connection from './Connection'
 
 export class IncomingMessage {
@@ -39,7 +39,7 @@ export class IncomingMessage {
   }
 
   readSyncMessageAndApplyItTo(document: Document, connection?: Connection): void {
-    writeVarUint(this.encoder, MessageTypes.Sync)
+    writeVarUint(this.encoder, MessageType.Sync)
 
     const messageType = readVarUint(this.decoder)
 

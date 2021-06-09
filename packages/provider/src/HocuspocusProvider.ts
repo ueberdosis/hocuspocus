@@ -170,7 +170,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
-      const message = new IncomingMessage(new Uint8Array(data))
+      const message = new IncomingMessage(data)
       const encoder = new MessageHandler(message, this).handle(false)
 
       // TODO: What’s that doing?
@@ -306,9 +306,9 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.lastMessageReceived = time.getUnixTime()
 
-    const message = new IncomingMessage(new Uint8Array(event.data))
+    const message = new IncomingMessage(event.data)
 
-    this.emit('message', event)
+    this.emit('message', { event, message })
 
     const encoder = new MessageHandler(message, this).handle()
 
@@ -355,9 +355,11 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.status = WebSocketStatus.Disconnected
-    this.emit('status', { status: 'disconnected' })
-    this.emit('disconnect', event)
+    if (this.status !== WebSocketStatus.Disconnected) {
+      this.status = WebSocketStatus.Disconnected
+      this.emit('status', { status: 'disconnected' })
+      this.emit('disconnect', event)
+    }
   }
 
   createWebSocketConnection() {

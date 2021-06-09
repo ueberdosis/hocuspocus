@@ -1,18 +1,21 @@
 import * as decoding from 'lib0/decoding'
 import * as encoding from 'lib0/encoding'
+import { MessageType } from './types'
 
 export class IncomingMessage {
+
+  data: any
 
   encoder: encoding.Encoder
 
   decoder: decoding.Decoder
 
-  constructor(input: any) {
-    this.encoder = encoding.createEncoder()
-    this.decoder = decoding.createDecoder(input)
-  }
+  type: MessageType
 
-  get type(): number {
-    return decoding.readVarUint(this.decoder)
+  constructor(data: any) {
+    this.data = data
+    this.encoder = encoding.createEncoder()
+    this.decoder = decoding.createDecoder(new Uint8Array(this.data))
+    this.type = decoding.readVarUint(this.decoder)
   }
 }
