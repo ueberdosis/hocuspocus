@@ -7,6 +7,8 @@ import { OutgoingMessage } from '../OutgoingMessage'
 export class SyncStepTwoMessage extends OutgoingMessage {
   type = MessageType.Sync
 
+  description = 'Second sync step'
+
   // document: Y.Doc
   get({ document }) {
     encoding.writeVarUint(this.encoder, this.type)

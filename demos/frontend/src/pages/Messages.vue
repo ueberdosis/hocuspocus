@@ -44,10 +44,10 @@ export default {
         console.log('[connect]')
       },
       onMessage: ({ event, message }) => {
-        console.log('[message]', event, message.type)
+        console.log('[message] <', message.name, event)
       },
       onOutgoingMessage: ({ message }) => {
-        console.log('[outgoingMessage]', message.type)
+        console.log('[message] >', message.name, '-', message.description)
       },
       onClose: ({ event }) => {
         console.log('[close]', event.type, event.code, event.reason, event)

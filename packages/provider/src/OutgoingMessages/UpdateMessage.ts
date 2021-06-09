@@ -6,6 +6,8 @@ import { OutgoingMessage } from '../OutgoingMessage'
 export class UpdateMessage extends OutgoingMessage {
   type = MessageType.Sync
 
+  description = 'A document update'
+
   // update: Uint8Array
   get({ update }) {
     encoding.writeVarUint(this.encoder, this.type)

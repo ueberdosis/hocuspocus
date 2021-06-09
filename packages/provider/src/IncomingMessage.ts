@@ -18,4 +18,8 @@ export class IncomingMessage {
     this.decoder = decoding.createDecoder(new Uint8Array(this.data))
     this.type = decoding.readVarUint(this.decoder)
   }
+
+  get name() {
+    return MessageType[this.type]
+  }
 }

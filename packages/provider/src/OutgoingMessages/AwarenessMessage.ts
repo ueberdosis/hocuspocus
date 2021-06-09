@@ -6,6 +6,8 @@ import { OutgoingMessage } from '../OutgoingMessage'
 export class AwarenessMessage extends OutgoingMessage {
   type = MessageType.Awareness
 
+  description = 'Awareness states update'
+
   // awareness: Awareness,
   //   clients: number[],
   //   states: Map<number, { [x: string]: any; }> | undefined = undefined,
