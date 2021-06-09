@@ -15,7 +15,7 @@ export class MessageReceiver {
     this.message = message
   }
 
-  public apply(provider: HocuspocusProvider, emitSynced: boolean) {
+  public apply(provider: HocuspocusProvider, emitSynced = true) {
     switch (this.message.type) {
       case MessageType.Sync:
         this.applySyncMessage(provider, emitSynced)

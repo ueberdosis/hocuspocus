@@ -70,8 +70,11 @@ export default {
       onConnect: () => {
         console.log('connected')
       },
-      onMessage: ({ event }) => {
-        console.log(event.type, { event })
+      onMessage: ({ event, message }) => {
+        console.log(`[message] ◀️ ${message.name}`, event)
+      },
+      onOutgoingMessage: ({ message }) => {
+        console.info(`[message] ▶️ ${message.name} (${message.description})`)
       },
       onClose: ({ event }) => {
         console.log(event.type, { event })
