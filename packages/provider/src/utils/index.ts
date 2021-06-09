@@ -1,3 +1,1 @@
-import { awarenessStatesToArray } from './awarenessStatesToArray'
-
-export default { awarenessStatesToArray }
+export { default as awarenessStatesToArray } from './awarenessStatesToArray'

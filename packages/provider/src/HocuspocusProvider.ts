@@ -22,7 +22,7 @@ import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
-import { awarenessStatesToArray } from './utils/awarenessStatesToArray'
+import awarenessStatesToArray from './utils/awarenessStatesToArray'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
