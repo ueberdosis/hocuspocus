@@ -13,6 +13,6 @@ export class SyncStepTwoMessage extends OutgoingMessage {
   get({ document }) {
     encoding.writeVarUint(this.encoder, this.type)
     syncProtocol.writeSyncStep2(this.encoder, document)
-    return encoding.toUint8Array(this.encoder)
+    return this.encoder
   }
 }

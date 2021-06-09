@@ -23,6 +23,6 @@ export class AwarenessMessage extends OutgoingMessage {
 
     encoding.writeVarUint8Array(this.encoder, awarenessUpdate)
 
-    return encoding.toUint8Array(this.encoder)
+    return this.encoder
   }
 }

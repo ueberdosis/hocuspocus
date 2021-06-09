@@ -12,6 +12,6 @@ export class UpdateMessage extends OutgoingMessage {
   get({ update }) {
     encoding.writeVarUint(this.encoder, this.type)
     syncProtocol.writeUpdate(this.encoder, update)
-    return encoding.toUint8Array(this.encoder)
+    return this.encoder
   }
 }

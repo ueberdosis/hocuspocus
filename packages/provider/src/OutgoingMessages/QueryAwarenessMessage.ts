@@ -9,6 +9,6 @@ export class QueryAwarenessMessage extends OutgoingMessage {
 
   get() {
     encoding.writeVarUint(this.encoder, this.type)
-    return encoding.toUint8Array(this.encoder)
+    return this.encoder
   }
 }
