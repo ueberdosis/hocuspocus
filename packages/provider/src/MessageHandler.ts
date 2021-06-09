@@ -13,7 +13,7 @@ export class MessageHandler {
 
   provider: HocuspocusProvider
 
-  constructor(provider: HocuspocusProvider, message: IncomingMessage) {
+  constructor(message: IncomingMessage, provider: HocuspocusProvider) {
     this.provider = provider
     this.message = message
   }

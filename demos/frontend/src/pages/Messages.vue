@@ -46,8 +46,8 @@ export default {
       onConnect: () => {
         console.log('[connect]')
       },
-      onMessage: ({ event, message }) => {
-        console.log('[message]', message.type, event)
+      onMessage: event => {
+        console.log('[message]', event)
       },
       onClose: event => {
         console.log('[close]', event.type, event.code, event.reason, event)

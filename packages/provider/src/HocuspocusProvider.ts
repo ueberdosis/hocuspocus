@@ -170,7 +170,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
-      const encoder = this.receiveMessage(new Uint8Array(data), false)
+      const message = new IncomingMessage(new Uint8Array(data))
+      const encoder = new MessageHandler(message, this).handle(false)
 
       // TODO: What’s that doing?
       if (encoding.length(encoder) > 1) {
@@ -299,15 +300,17 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
-    this.emit('message', event)
-
-    this.lastMessageReceived = time.getUnixTime()
-
     if (this.status !== WebSocketStatus.Connected) {
       this.websocketConnectionEstablished()
     }
 
-    const encoder = this.receiveMessage(new Uint8Array(event.data), true)
+    this.lastMessageReceived = time.getUnixTime()
+
+    const message = new IncomingMessage(new Uint8Array(event.data))
+
+    this.emit('message', event)
+
+    const encoder = new MessageHandler(message, this).handle()
 
     // TODO: What’s that doing?
     if (encoding.length(encoder) > 1) {
@@ -379,12 +382,6 @@ export class HocuspocusProvider extends EventEmitter {
 
   onOpen(event: OpenEvent) {
     this.emit('open', event)
-  }
-
-  receiveMessage(input: Uint8Array, emitSynced: boolean): encoding.Encoder {
-    const message = new IncomingMessage(input)
-
-    return new MessageHandler(this, message).handle(emitSynced)
   }
 
   websocketConnectionEstablished() {
