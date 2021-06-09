@@ -12,7 +12,7 @@ context('client/onAwarenessChange', () => {
     client.destroy()
   })
 
-  it('onConnect callback is executed', done => {
+  it('onAwarenessChange callback is executed', done => {
     const Server = new Hocuspocus()
 
     Server.configure({ port: 4000 }).listen()
