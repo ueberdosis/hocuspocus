@@ -20,6 +20,7 @@ import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
+import { OutgoingMessage } from './OutgoingMessage'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -42,6 +43,7 @@ export interface HocuspocusProviderOptions {
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
+  onOutgoingMessage: (message: OutgoingMessage) => void,
   onSynced: () => void,
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
@@ -106,6 +108,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('open', this.options.onOpen)
     this.on('connect', this.options.onConnect)
     this.on('message', this.options.onMessage)
+    this.on('outgoingMessage', this.options.onOutgoingMessage)
     this.on('synced', this.options.onSynced)
     this.on('disconnect', this.options.onDisconnect)
     this.on('close', this.options.onClose)
@@ -262,6 +265,8 @@ export class HocuspocusProvider extends EventEmitter {
 
     if (this.status === WebSocketStatus.Connected) {
       this.websocket?.send(message)
+
+      this.emit('outgoingMessage', { message })
     }
   }
 

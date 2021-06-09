@@ -49,6 +49,9 @@ export default {
       onMessage: ({ event, message }) => {
         console.log('[message]', event, message.type)
       },
+      onOutgoingMessage: ({ message }) => {
+        console.log('[outgoingMessage]', message.type)
+      },
       onClose: ({ event }) => {
         console.log('[close]', event.type, event.code, event.reason, event)
       },

@@ -3,8 +3,10 @@ import { MessageType } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
 export class QueryAwarenessMessage extends OutgoingMessage {
+  type = MessageType.QueryAwareness
+
   get() {
-    encoding.writeVarUint(this.encoder, MessageType.QueryAwareness)
+    encoding.writeVarUint(this.encoder, this.type)
     return encoding.toUint8Array(this.encoder)
   }
 }
