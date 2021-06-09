@@ -66,6 +66,7 @@ export class HocuspocusProvider extends EventEmitter {
     onOpen: () => null,
     onConnect: () => null,
     onMessage: () => null,
+    onOutgoingMessage: () => null,
     onSynced: () => null,
     onDisconnect: () => null,
     onClose: () => null,
@@ -158,7 +159,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.send(new SyncStepOneMessage().get(this.document))
+    this.send(SyncStepOneMessage, { document: this.document })
   }
 
   registerBeforeUnloadEventListener() {
@@ -177,9 +178,9 @@ export class HocuspocusProvider extends EventEmitter {
       const encoder = new MessageHandler(message, this).handle(false)
 
       // TODO: What’s that doing?
-      if (encoding.length(encoder) > 1) {
-        this.broadcast(encoding.toUint8Array(encoder))
-      }
+      // if (encoding.length(encoder) > 1) {
+      //   this.broadcast(encoding.toUint8Array(encoder))
+      // }
     })
   }
 
@@ -188,13 +189,16 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.send(new UpdateMessage().get(update), true)
+    this.send(UpdateMessage, { update }, true)
   }
 
   awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
     const changedClients = added.concat(updated).concat(removed)
 
-    this.send(new AwarenessMessage().get(this.awareness, changedClients), true)
+    this.send(AwarenessMessage, {
+      awareness: this.awareness,
+      clients: changedClients,
+    }, true)
   }
 
   get document() {
@@ -245,26 +249,30 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.mux(() => {
-      this.broadcast(new SyncStepOneMessage().get(this.document))
-      this.broadcast(new SyncStepTwoMessage().get(this.document))
-      this.broadcast(new QueryAwarenessMessage().get())
-      this.broadcast(new AwarenessMessage().get(this.awareness, [this.document.clientID]))
+      this.broadcast(SyncStepOneMessage, { document: this.document })
+      this.broadcast(SyncStepTwoMessage, { document: this.document })
+      this.broadcast(QueryAwarenessMessage)
+      this.broadcast(AwarenessMessage, { awareness: this.awareness, clients: [this.document.clientID] })
     })
   }
 
-  broadcast(message: Uint8Array) {
-    bc.publish(this.broadcastChannel, message)
+  broadcast(Message: OutgoingMessage, args: any) {
+    const message = new Message()
+
+    bc.publish(this.broadcastChannel, message.get(args))
   }
 
-  send(message: Uint8Array, broadcast = false) {
+  send(Message: OutgoingMessage, args: any, broadcast = false) {
+    const message = new Message()
+
     if (broadcast && this.subscribedToBroadcastChannel) {
       this.mux(() => {
-        this.broadcast(message)
+        this.broadcast(Message, args)
       })
     }
 
     if (this.status === WebSocketStatus.Connected) {
-      this.websocket?.send(message)
+      this.websocket?.send(message.get(args))
 
       this.emit('outgoingMessage', { message })
     }
@@ -272,7 +280,11 @@ export class HocuspocusProvider extends EventEmitter {
 
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
-    this.send(new AwarenessMessage().get(this.awareness, [this.document.clientID], new Map()), true)
+    this.send(AwarenessMessage, {
+      awareness: this.awareness,
+      clients: [this.document.clientID],
+      states: new Map(),
+    }, true)
 
     if (this.subscribedToBroadcastChannel) {
       bc.unsubscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
@@ -318,9 +330,9 @@ export class HocuspocusProvider extends EventEmitter {
     const encoder = new MessageHandler(message, this).handle()
 
     // TODO: What’s that doing?
-    if (encoding.length(encoder) > 1) {
-      this.send(encoding.toUint8Array(encoder))
-    }
+    // if (encoding.length(encoder) > 1) {
+    //   this.send(encoding.toUint8Array(encoder))
+    // }
   }
 
   onClose(event: CloseEvent) {
@@ -395,10 +407,13 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
-    this.send(new SyncStepOneMessage().get(this.document))
+    this.send(SyncStepOneMessage, { document: this.document })
 
     if (this.awareness.getLocalState() !== null) {
-      this.send(new AwarenessMessage().get(this.awareness, [this.document.clientID]))
+      this.send(AwarenessMessage, {
+        awareness: this.awareness,
+        clients: [this.document.clientID],
+      })
     }
   }
 

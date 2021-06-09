@@ -4,14 +4,7 @@
       Awareness
     </h1>
 
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
-
-    <button v-if="status !== 'connected'" @click="provider.connect()">
-      connect
-    </button>
-    <button v-if="status !== 'disconnected'" @click="provider.disconnect()">
-      disconnect
-    </button>
+    <StatusBar v-if="provider" :provider="provider" />
 
     <h2>
       Users
@@ -56,13 +49,16 @@ import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
 import { awarenessStatesToArray } from '../utils/awarenessStatesToArray'
+import StatusBar from '../Components/StatusBar.vue'
 
 export default {
+  components: {
+    StatusBar,
+  },
   data() {
     return {
       ydoc: null,
       provider: null,
-      status: 'connecting',
       states: [],
       me: {
         name: 'Emmanuelle Charpentier',
@@ -113,10 +109,6 @@ export default {
       onDisconnect: ({ event }) => {
         console.log(event.type, event.code, event.reason, { event })
       },
-    })
-
-    this.provider.on('status', ({ status }) => {
-      this.status = status
     })
 
     this.provider.awareness.on('change', () => {

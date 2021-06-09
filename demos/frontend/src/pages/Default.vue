@@ -3,14 +3,8 @@
     <h1>
       Default
     </h1>
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
 
-    <button @click="provider.connect()">
-      connect
-    </button>
-    <button @click="provider.disconnect()">
-      disconnect
-    </button>
+    <StatusBar v-if="provider" :provider="provider" />
 
     <h2>
       Editor
@@ -25,6 +19,7 @@
     <div v-if="editor2">
       <editor-content :editor="editor2" class="editor" />
     </div>
+    </statusbar>
   </Layout>
 </template>
 
@@ -39,10 +34,12 @@ import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
+import StatusBar from '../Components/StatusBar.vue'
 
 export default {
   components: {
     EditorContent,
+    StatusBar,
   },
 
   data() {
@@ -50,7 +47,6 @@ export default {
       provider: null,
       editor: null,
       editor2: null,
-      status: 'connecting',
       ydoc: null,
       indexdb: null,
     }
@@ -86,12 +82,6 @@ export default {
     })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
-
-    this.provider.on('status', ({ status }) => {
-      this.status = status
-    })
-
-    window.ydoc = this.ydoc
 
     this.editor = new Editor({
       extensions: [

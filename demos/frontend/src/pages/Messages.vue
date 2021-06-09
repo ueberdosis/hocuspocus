@@ -4,14 +4,7 @@
       Messages
     </h1>
 
-    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
-
-    <button @click="provider.connect()">
-      connect
-    </button>
-    <button @click="provider.disconnect()">
-      disconnect
-    </button>
+    <StatusBar v-if="provider" :provider="provider" />
 
     <p>
       Open console
@@ -22,13 +15,17 @@
 <script>
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
+import StatusBar from '../Components/StatusBar.vue'
 
 export default {
+  components: {
+    StatusBar,
+  },
+
   data() {
     return {
       ydoc: null,
       provider: null,
-      status: 'connecting',
     }
   },
 
@@ -61,10 +58,6 @@ export default {
       onDestroy: () => {
         console.log('[destroy]')
       },
-    })
-
-    this.provider.on('status', ({ status }) => {
-      this.status = status
     })
 
     // this.provider.awareness.on('change', () => {
