@@ -5,6 +5,7 @@
         <li><a href="/">Default</a></li>
         <li><a href="/awareness">Awareness</a></li>
         <li><a href="/rooms">Rooms</a></li>
+        <li><a href="/messages">Messages</a></li>
       </ul>
     </nav>
     <slot />

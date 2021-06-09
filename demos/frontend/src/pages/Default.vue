@@ -3,12 +3,12 @@
     <h1>
       Default
     </h1>
-    <p>Status: {{ status }}, Synced: {{ client ? client.synced : null }}</p>
+    <p>Status: {{ status }}, Synced: {{ provider ? provider.synced : null }}</p>
 
-    <button @click="client.connect()">
+    <button @click="provider.connect()">
       connect
     </button>
-    <button @click="client.disconnect()">
+    <button @click="provider.disconnect()">
       disconnect
     </button>
 
@@ -47,7 +47,7 @@ export default {
 
   data() {
     return {
-      client: null,
+      provider: null,
       editor: null,
       editor2: null,
       status: 'connecting',
@@ -58,13 +58,13 @@ export default {
 
   mounted() {
     this.ydoc = new Y.Doc()
-    // this.client = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
+    // this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
     //   params: {
     //     token: '123456',
     //   },
     // })
 
-    this.client = new HocuspocusProvider({
+    this.provider = new HocuspocusProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
@@ -87,7 +87,7 @@ export default {
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
 
-    this.client.on('status', event => {
+    this.provider.on('status', event => {
       this.status = event.status
     })
 
@@ -127,7 +127,7 @@ export default {
   beforeUnmount() {
     this.editor.destroy()
     this.editor2.destroy()
-    this.client.destroy()
+    this.provider.destroy()
   },
 }
 </script>
