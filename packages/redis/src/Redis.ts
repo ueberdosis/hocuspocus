@@ -42,6 +42,11 @@ export class Redis implements Extension {
    * onCreateDocument hook
    */
   async onCreateDocument(data: onCreateDocumentPayload) {
+    // If another connection has already loaded this doc, this is a no-op
+    if (this.persistence.docs.has(data.documentName)) {
+      return
+    }
+
     await this.persistence.bindState(data.documentName, data.document).synced
   }
 
