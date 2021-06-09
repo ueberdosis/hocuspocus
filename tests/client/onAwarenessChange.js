@@ -28,6 +28,7 @@ context('client/onAwarenessChange', () => {
       onAwarenessChange: ({ states }) => {
         Server.destroy()
 
+        assert.strictEqual(states.length, 1)
         assert.strictEqual(states[0].foo, 'bar')
 
         done()
