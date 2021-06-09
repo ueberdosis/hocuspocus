@@ -14,7 +14,7 @@ import * as url from 'lib0/url'
 import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
-import { MessageHandler } from './MessageHandler'
+import { MessageReceiver } from './MessageReceiver'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
@@ -185,7 +185,7 @@ export class HocuspocusProvider extends EventEmitter {
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
       const message = new IncomingMessage(data)
-      const encoder = new MessageHandler(message, this).handle(false)
+      const encoder = new MessageReceiver(message, this).apply(this, false)
 
       // TODO: What’s that doing?
       // if (encoding.length(encoder) > 1) {
@@ -337,7 +337,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('message', { event, message })
 
-    const encoder = new MessageHandler(message, this).handle()
+    const encoder = new MessageReceiver(message, this).apply(this)
 
     // TODO: What’s that doing?
     // if (encoding.length(encoder) > 1) {

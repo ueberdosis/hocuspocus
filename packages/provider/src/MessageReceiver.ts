@@ -7,70 +7,67 @@ import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 
-export class MessageHandler {
+export class MessageReceiver {
 
   message: IncomingMessage
 
-  provider: HocuspocusProvider
-
-  constructor(message: IncomingMessage, provider: HocuspocusProvider) {
-    this.provider = provider
+  constructor(message: IncomingMessage) {
     this.message = message
   }
 
-  public handle(emitSynced: boolean) {
+  public apply(provider: HocuspocusProvider, emitSynced: boolean) {
     switch (this.message.type) {
       case MessageType.Sync:
-        this.handleSyncMessage(emitSynced)
+        this.applySyncMessage(provider, emitSynced)
         break
 
       case MessageType.Awareness:
-        this.handleAwarenessMessage()
+        this.applyAwarenessMessage(provider)
         break
 
       case MessageType.Auth:
-        this.handleAuthMessage()
+        this.applyAuthMessage(provider)
         break
 
       case MessageType.QueryAwareness:
-        this.handleQueryAwarenessMessage()
+        this.applyQueryAwarenessMessage(provider)
         break
 
       default:
-        throw new Error(`Can’t handle unknown type of message: ${this.message.type}`)
+        throw new Error(`Can’t apply unknown type of message: ${this.message.type}`)
     }
 
     return this.message.encoder
   }
 
-  private handleSyncMessage(emitSynced: boolean) {
+  private applySyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
     encoding.writeVarUint(this.message.encoder, MessageType.Sync)
 
     const syncMessageType = syncProtocol.readSyncMessage(
       this.message.decoder,
       this.message.encoder,
-      this.provider.document,
-      this.provider,
+      provider.document,
+      provider,
     )
 
     if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
-      this.provider.synced = true
+      provider.synced = true
     }
   }
 
-  private handleAwarenessMessage() {
+  private applyAwarenessMessage(provider: HocuspocusProvider) {
     awarenessProtocol.applyAwarenessUpdate(
-      this.provider.awareness,
+      provider.awareness,
       decoding.readVarUint8Array(this.message.decoder),
-      this.provider,
+      provider,
     )
   }
 
   // TODO: This isn’t really used. Needs to be implemented in the server, or removed here.
-  private handleAuthMessage() {
+  private applyAuthMessage(provider: HocuspocusProvider) {
     authProtocol.readAuthMessage(
       this.message.decoder,
-      this.provider.document,
+      provider.document,
       // TODO: Add a configureable hook
       (provider, reason) => {
         console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
@@ -78,13 +75,13 @@ export class MessageHandler {
     )
   }
 
-  private handleQueryAwarenessMessage() {
+  private applyQueryAwarenessMessage(provider: HocuspocusProvider) {
     encoding.writeVarUint(this.message.encoder, MessageType.Awareness)
     encoding.writeVarUint8Array(
       this.message.encoder,
       awarenessProtocol.encodeAwarenessUpdate(
-        this.provider.awareness,
-        Array.from(this.provider.awareness.getStates().keys()),
+        provider.awareness,
+        Array.from(provider.awareness.getStates().keys()),
       ),
     )
   }
