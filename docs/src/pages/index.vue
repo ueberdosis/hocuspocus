@@ -3,10 +3,10 @@
     <app-section>
       <div class="text">
         <h1 class="is-large">
-          The plug & play collaboration backend
+          The multiplayer mode for your application
         </h1>
         <p class="is-large">
-          Real-time collaboration, offline-first apps and syncing devices as easy as it can get. With the conflict-free magic of hocuspocus.
+          hocuspocus is the open source backend to bring real-time syncing, collaborative text editing and true collaboration to your application today. Get started in minutes, scale to millions.
         </p>
         <btn-wrapper>
           <btn
@@ -31,10 +31,19 @@
       <feature-list>
         <feature-item>
           <h3 class="is-h2">
-            Real-time collaboration
+            Real-time everything
           </h3>
           <p>
-            Share changes, cursor positions, text selections, or even the whole application state with other people in real-time.
+            Add real-time syncing to parts of your app, or to the whole app. Integrates well with every backend that speaks HTTP.
+          </p>
+        </feature-item>
+
+        <feature-item>
+          <h3 class="is-h2">
+            Collaborative text editing
+          </h3>
+          <p>
+            Make everything a Google doc. Works with tiptap, Quill, Slate, ProseMirror, Monaco, CodeMirror and Atlaskit.
           </p>
         </feature-item>
 
@@ -43,7 +52,7 @@
             Everything in sync
           </h3>
           <p>
-            Enable people to edit their data on multiple devices, and keep everything in sync with hocuspocus
+            Enable people to edit their data on multiple devices, and keep everything in sync, in real-time.
           </p>
         </feature-item>
 
@@ -52,7 +61,7 @@
             Offline-first
           </h3>
           <p>
-            Store changes in the browser, and send them later. hocuspocus will merge them, no matter when they are delivered.
+            Work offline and store changes in the browser, send them when you’re back online again.
           </p>
         </feature-item>
 
@@ -61,16 +70,7 @@
             Conflict-free
           </h3>
           <p>
-            hocuspocus is based on the performant and conflict-free Y.js. It’s like a superfast Git, without the merge conflicts.
-          </p>
-        </feature-item>
-
-        <feature-item>
-          <h3 class="is-h2">
-            TypeScript code base
-          </h3>
-          <p>
-            TypeScript ensures code quality and gives a nice autocomplete for the API on top of the extensive human written documentation.
+            Based on the Y.js conflict-free replication data type. It’s like Git, but superfast and without merge conflicts.
           </p>
         </feature-item>
 
@@ -79,16 +79,34 @@
             Well documented
           </h3>
           <p>
-            We write the documentation while we write the code. You’ll find a lot of guides, examples and even background knowledge here.
+            Documentation is a priority, we’ll write it while we code and that shows. Anything missing? We’ll make sure to add it.
           </p>
         </feature-item>
 
         <feature-item>
           <h3 class="is-h2">
-            Scalable with Redis
+            Scales with Redis
           </h3>
           <p>
-            You can spin up multiple instances of hocuspocus and keep them in sync with Redis. Support for Redis clusters is already baked-in.
+            Spin up multiple instances and keep them in sync with Redis, or even Redis clusters.
+          </p>
+        </feature-item>
+
+        <feature-item>
+          <h3 class="is-h2">
+            Open source
+          </h3>
+          <p>
+            Vendor lock-in? Nope, take the code and do whatever you like with it. We’ve worked in open source for years.
+          </p>
+        </feature-item>
+
+        <feature-item>
+          <h3 class="is-h2">
+            Written in TypeScript
+          </h3>
+          <p>
+            TypeScript ensures code quality and find bugs early. But don’t worry, no need to learn it.
           </p>
         </feature-item>
       </feature-list>
@@ -100,7 +118,8 @@
           License
         </h2>
         <p>
-          hocuspocus will be licensed under MIT, so you are free to do whatever you want. If you are using it commercially, <g-link to="https://github.com/sponsors/ueberdosis">become one of our wonderful sponsors</g-link> to fund the maintenance, support and development of tiptap now and in the future.
+          hocuspocus will be licensed under MIT, and you’ll be free to do whatever you want with it.
+          Can’t wait to get access? Become one of our wonderful <g-link to="https://github.com/sponsors/ueberdosis">GitHub sponsors</g-link> and receive an invite immediatly. BTW, we’re officially part of the <g-link to="https://opencollective.com/y-collective">Y-Collective</g-link>, too.
         </p>
       </div>
     </app-section>
