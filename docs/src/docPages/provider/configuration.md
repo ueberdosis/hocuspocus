@@ -30,7 +30,7 @@ There is definitely more to configure. Find the full list of all available setti
 | document                | `''`              | The actual Y.js document.                                            |
 | awareness               | `new Awareness()` | Awareness object, by default attached to the passed Y.js document.   |
 | connect                 | `true`            | Whether to connect to the server after intialization.                |
-| debug                   | `false`           | Verbose output on the console.                                       |
+| ~~debug~~ (wip)         | `false`           | Verbose output on the console.                                       |
 | forceSyncInterval       | `false`           | Ask the server every x ms for updates.                               |
 | maxReconnectTimeout     | `2500`            |                                                                      |
 | messageReconnectTimeout | `30000`           |                                                                      |
