@@ -16,7 +16,7 @@
   "types": "dist/packages/logger/src/index.d.ts",
   "exports": {
     "import": "./dist/hocuspocus-provider.esm.js",
-    "require": "./dist/hocuspocus-provider.js"
+    "require": "./dist/hocuspocus-provider.cjs"
   },
   "files": [
     "src",

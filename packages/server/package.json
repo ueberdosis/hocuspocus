@@ -16,7 +16,7 @@
   "types": "dist/packages/server/src/index.d.ts",
   "exports": {
     "import": "./dist/hocuspocus-server.esm.js",
-    "require": "./dist/hocuspocus-server.js"
+    "require": "./dist/hocuspocus-server.cjs"
   },
   "files": [
     "src",

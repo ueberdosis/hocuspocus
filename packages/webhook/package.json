@@ -17,7 +17,7 @@
   "types": "dist/packages/webhook/src/index.d.ts",
   "exports": {
     "import": "./dist/hocuspocus-webhook.esm.js",
-    "require": "./dist/hocuspocus-webhook.js"
+    "require": "./dist/hocuspocus-webhook.cjs"
   },
   "files": [
     "src",

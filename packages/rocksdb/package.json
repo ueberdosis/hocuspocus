@@ -15,7 +15,7 @@
   "types": "dist/packages/rocksdb/src/index.d.ts",
   "exports": {
     "import": "./dist/hocuspocus-rocksdb.esm.js",
-    "require": "./dist/hocuspocus-rocksdb.js"
+    "require": "./dist/hocuspocus-rocksdb.cjs"
   },
   "files": [
     "src",
