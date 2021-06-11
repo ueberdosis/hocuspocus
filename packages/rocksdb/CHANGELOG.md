@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.59](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-rocksdb@1.0.0-alpha.58...@hocuspocus/extension-rocksdb@1.0.0-alpha.59) (2021-06-11)
+
+**Note:** Version bump only for package @hocuspocus/extension-rocksdb
+
+
+
+
+
 # [1.0.0-alpha.58](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-rocksdb@1.0.0-alpha.57...@hocuspocus/extension-rocksdb@1.0.0-alpha.58) (2021-06-09)
 
 **Note:** Version bump only for package @hocuspocus/extension-rocksdb
