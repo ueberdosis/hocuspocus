@@ -3,6 +3,7 @@ import Default from './pages/Default.vue'
 import Awareness from './pages/Awareness.vue'
 import Rooms from './pages/Rooms.vue'
 import Messages from './pages/Messages.vue'
+import Subdocuments from './pages/Subdocuments.vue'
 import Layout from './Layout.vue'
 
 const routes = {
@@ -10,6 +11,7 @@ const routes = {
   '/awareness': Awareness,
   '/rooms': Rooms,
   '/messages': Messages,
+  '/subdocuments': Subdocuments,
 }
 
 Vue.component('Layout', Layout)
