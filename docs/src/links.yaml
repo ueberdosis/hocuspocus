@@ -21,7 +21,6 @@
       type: sponsor
     - title: Contributing
       link: /contributing
-      type: draft
 
 - title: Examples
   items:
@@ -101,11 +100,23 @@
         - title: Throttle
           link: /api/extensions/throttle
 
-# - title: Provider
-#   items:
-#     - title: Installation
-#       link: /provider/installation
-#       type: draft
+- title: Provider
+  items:
+    - title: Introduction
+      link: /provider/introduction
+      type: new
+    - title: Installation
+      link: /provider/installation
+      type: new
+    - title: Configuration
+      link: /provider/configuration
+      type: new
+    - title: Events
+      link: /provider/events
+      type: new
+    - title: Awareness
+      link: /provider/awareness
+      type: new
 
 # - title: Knowledge
 #   items:
