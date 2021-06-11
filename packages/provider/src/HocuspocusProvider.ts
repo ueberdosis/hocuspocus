@@ -43,6 +43,7 @@ export interface HocuspocusProviderOptions {
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
   onOutgoingMessage: (message: OutgoingMessage) => void,
+  onStatus: (status: any) => void,
   onSynced: () => void,
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
@@ -67,6 +68,7 @@ export class HocuspocusProvider extends EventEmitter {
     onConnect: () => null,
     onMessage: () => null,
     onOutgoingMessage: () => null,
+    onStatus: () => null,
     onSynced: () => null,
     onDisconnect: () => null,
     onClose: () => null,
@@ -112,6 +114,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('message', this.options.onMessage)
     this.on('outgoingMessage', this.options.onOutgoingMessage)
     this.on('synced', this.options.onSynced)
+    this.on('status', this.options.onStatus)
     this.on('disconnect', this.options.onDisconnect)
     this.on('close', this.options.onClose)
     this.on('destroy', this.options.onDestroy)

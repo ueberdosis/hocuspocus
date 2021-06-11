@@ -43,6 +43,9 @@ export default {
       onConnect: () => {
         console.log('[connected]')
       },
+      onStatus: ({ status }) => {
+        console.log('[status]', status)
+      },
       onMessage: ({ event, message }) => {
         console.log(`[message] ◀️ ${message.name}`, event)
       },
