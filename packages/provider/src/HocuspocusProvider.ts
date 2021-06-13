@@ -300,8 +300,6 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   send(Message: OutgoingMessage, args: any, broadcast = false) {
-    const message = new Message()
-
     if (broadcast) {
       this.mux(() => {
         this.broadcast(Message, args)
