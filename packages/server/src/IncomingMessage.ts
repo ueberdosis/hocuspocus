@@ -41,11 +41,9 @@ export class IncomingMessage {
   readSyncMessageAndApplyItTo(document: Document, connection?: Connection): void {
     writeVarUint(this.encoder, MessageType.Sync)
 
-    const messageType = readVarUint(this.decoder)
-
     // this is a copy of the original y-protocols/sync/readSyncMessage function
     // which enables the read only mode
-    switch (messageType) {
+    switch (this.type) {
       case messageYjsSyncStep1:
         readSyncStep1(this.decoder, this.encoder, document)
         break
@@ -56,7 +54,9 @@ export class IncomingMessage {
         if (!connection?.readOnly) readUpdate(this.decoder, document, connection)
         break
       default:
-        throw new Error('Unknown message type')
+      // TODO: Shouldn’t crash the whole server,
+      // remove or catch exceptions in the top level?
+      //   throw new Error('Unknown message type')
     }
   }
 
@@ -72,8 +72,13 @@ export class IncomingMessage {
     return length(this.encoder)
   }
 
-  get messageType(): number {
-    return readVarUint(this.decoder)
+  get type(): number {
+    try {
+      return readVarUint(this.decoder)
+    } catch {
+      // Failed read the message type
+      return -1
+    }
   }
 
   private get encoder() {

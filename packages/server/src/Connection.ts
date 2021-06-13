@@ -169,7 +169,7 @@ class Connection {
   private handleMessage(input: Iterable<number>): void {
     const message = new IncomingMessage(input)
 
-    if (message.messageType === MessageType.Awareness) {
+    if (message.type === MessageType.Awareness) {
       this.document.applyAwarenessUpdate(this, message.readUint8Array())
       return
     }
