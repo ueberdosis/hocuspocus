@@ -35,4 +35,4 @@ There is definitely more to configure. Find the full list of all available setti
 | maxReconnectTimeout     | `2500`            |                                                                      |
 | messageReconnectTimeout | `30000`           |                                                                      |
 | reconnectTimeoutBase    | `1200`            |                                                                      |
-| WebSocketPolyfill       | `WebSocket`       | Running in Node.js: Pass a WebSocket polyfill, for exampl e `ws`.    |
+| WebSocketPolyfill       | `WebSocket`       | Running in Node.js: Pass a WebSocket polyfill, for example `ws`.    |
