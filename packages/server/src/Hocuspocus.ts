@@ -307,9 +307,26 @@ export class Hocuspocus {
     let chain = Promise.resolve()
 
     for (let i = 0; i < extensions.length; i += 1) {
-      // @ts-ignore
-      chain = chain.then(() => (extensions[i][name] ? extensions[i][name](hookPayload) : null))
-      if (callback) chain = chain.then((...args: any[]) => callback(...args))
+      chain = chain
+        // @ts-ignore
+        .then(() => (extensions[i][name] ? extensions[i][name](hookPayload) : null))
+        .catch(error => {
+          // TODO: Move to Logger extension?
+          if (error.message) {
+            console.log(`[${name}]`, error.message)
+          }
+        })
+
+      if (callback) {
+        chain = chain
+          .then((...args: any[]) => callback(...args))
+          .catch(error => {
+            // TODO: Move to Logger extension?
+            if (error.message) {
+              console.log(`[${name}]`, error.message)
+            }
+          })
+      }
     }
 
     return chain
