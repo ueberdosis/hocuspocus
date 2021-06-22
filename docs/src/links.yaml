@@ -2,6 +2,7 @@
   items:
     - title: Introduction
       link: /introduction
+      type: new
     - title: Installation
       link: /installation
       items:

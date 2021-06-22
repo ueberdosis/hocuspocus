@@ -1,4 +1,4 @@
-# hocuspocus (Sponsors preview)
+# hocuspocus (Alpha Preview!)
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
@@ -9,7 +9,10 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
 ## Documentation
-The full documentation is a available on [hocuspocus.dev/installation](https://www.hocuspocus.dev/installation).
+The full documentation is a available on [hocuspocus.dev/introduction](https://www.hocuspocus.dev/introduction).
+
+## Feedback
+Send all your questions, feedback and bug reports to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev) or [create an issue](https://github.com/ueberdosis/hocuspocus/issues/new/choose) here.
 
 ## Usage
 The following example is a example setup you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
