@@ -53,15 +53,20 @@ export class RocksDB implements Extension {
    * onCreateDocument hook
    */
   async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
+    // Get from disk …
     const persistedDocument = await this.provider.getYDoc(data.documentName)
-    const newUpdates = encodeStateAsUpdate(data.document)
-
-    await this.store(data.documentName, newUpdates)
     applyUpdate(data.document, encodeStateAsUpdate(persistedDocument))
 
-    // use the documents update handler directly instead of using the onChange hook
+    // Apply current state
+    const newUpdates = encodeStateAsUpdate(data.document)
+    console.log('[rocksdb]: store document')
+    await this.store(data.documentName, newUpdates)
+
+    // Listen for changes …
+    // Use the documents update handler directly instead of using the onChange hook
     // to skip the first change that's triggered by the applyUpdate above
     data.document.on('update', (update: Uint8Array) => {
+      console.log('[rocksdb]: store update')
       this.store(data.documentName, update)
     })
   }
