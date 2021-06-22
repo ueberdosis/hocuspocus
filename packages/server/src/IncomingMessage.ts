@@ -47,12 +47,19 @@ export class IncomingMessage {
       case messageYjsSyncStep1:
         readSyncStep1(this.decoder, this.encoder, document)
         break
+
       case messageYjsSyncStep2:
-        if (!connection?.readOnly) readSyncStep2(this.decoder, document, connection)
+        if (!connection?.readOnly) {
+          readSyncStep2(this.decoder, document, connection)
+        }
         break
+
       case messageYjsUpdate:
-        if (!connection?.readOnly) readUpdate(this.decoder, document, connection)
+        if (!connection?.readOnly) {
+          readUpdate(this.decoder, document, connection)
+        }
         break
+
       default:
       // TODO: Shouldn’t crash the whole server,
       // remove or catch exceptions in the top level?
