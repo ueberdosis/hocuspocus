@@ -20,14 +20,14 @@ You can use whatever you like to send Y.js changes to other clients, but the mos
 * Merges changes without conflicts
 * Doesn’t care when changes come in
 * Can sync your whole application state
-* Collaborative editing with tiptap, Slate, Quill and many more
+* Collaborative text editing (with Tiptap, Slate, Quill, Monaco or ProseMirror)
 * Integrates into existing applications
-* Redirects changes to Webhooks
+* Sends changes to Webhooks
 * Scales to millions of users with Redis
 * Written in TypeScript
 * Part of the [Y-Collective](https://opencollective.com/y-collective), a fund for the Y.js ecosystem
 
-## Usage
+## Quickstart
 The two code examples below show a working example of the backend *and* frontend to sync an array with multiple users.
 
 ### Backend
@@ -39,7 +39,7 @@ const server = Server.configure({
   port: 1234,
 })
 
-// … run it!
+// … and run it!
 server.listen()
 ```
 
@@ -63,7 +63,7 @@ const tasks = ydoc.getArray('tasks')
 
 // Listen for changes
 tasks.observer(() => {
-  console.log('tasks was modified')
+  console.log('tasks were modified')
 })
 
 // Add a new task

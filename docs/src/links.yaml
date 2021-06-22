@@ -23,8 +23,11 @@
     - title: Contributing
       link: /contributing
 
-- title: Examples
+- title: Use cases
   items:
+    - title: Awareness
+      link: /examples/awareness
+      type: new
     - title: Application state
       link: /examples/application-state
       type: draft
