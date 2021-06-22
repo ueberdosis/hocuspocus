@@ -110,7 +110,7 @@ jobs:
       id: test
       run: yarn test
       env:
-        REDIS_HOST: redis
+        REDIS_HOST: localhost
         REDIS_PORT: 6379
 
     - name: Send Slack notifications
