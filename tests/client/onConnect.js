@@ -24,7 +24,7 @@ context('client/onConnect', () => {
   it('onConnect callback is executed', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
@@ -36,7 +36,7 @@ context('client/onConnect', () => {
   it("on('connect') callback is executed", done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })

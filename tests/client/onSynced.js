@@ -18,7 +18,7 @@ context('client/onSynced', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
@@ -35,7 +35,7 @@ context('client/onSynced', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })
@@ -61,7 +61,7 @@ context('client/onSynced', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {

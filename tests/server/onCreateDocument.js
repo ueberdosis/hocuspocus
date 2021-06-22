@@ -31,7 +31,7 @@ context('server/onCreateDocument', () => {
   it('onCreateDocument callback creates a new document', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })

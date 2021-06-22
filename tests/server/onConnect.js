@@ -15,7 +15,7 @@ context('server/onConnect', () => {
       port: 4000,
       async onConnect({ documentName }) {
         setTimeout(() => {
-          assert.strictEqual(documentName, 'hocuspocus-demo')
+          assert.strictEqual(documentName, 'hocuspocus-test')
 
           client.destroy()
           Server.destroy()
@@ -27,7 +27,7 @@ context('server/onConnect', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-demo',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })
