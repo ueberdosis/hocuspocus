@@ -62,17 +62,10 @@ jobs:
 
     services:
       redis:
-        # Docker Hub image
-        image: redis:6
+        image: redis
         ports:
         - 6379/tcp
-        # Set health checks to wait until redis has started
-        options: >-
-          --entrypoint redis-server
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: --entrypoint redis-server
 
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -111,7 +104,7 @@ jobs:
       run: yarn test
       env:
         REDIS_HOST: localhost
-        REDIS_PORT: 6379
+        REDIS_PORT: ${{ job.services.redis.ports[6379] }}
 
     - name: Send Slack notifications
       uses: act10ns/slack@v1
