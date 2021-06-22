@@ -59,14 +59,14 @@ export class RocksDB implements Extension {
 
     // Apply current state
     const newUpdates = encodeStateAsUpdate(data.document)
-    console.log('[rocksdb]: store document')
+    // console.log('[rocksdb]: store document')
     await this.store(data.documentName, newUpdates)
 
     // Listen for changes …
     // Use the documents update handler directly instead of using the onChange hook
     // to skip the first change that's triggered by the applyUpdate above
     data.document.on('update', (update: Uint8Array) => {
-      console.log('[rocksdb]: store update')
+      // console.log('[rocksdb]: store update')
       this.store(data.documentName, update)
     })
   }
