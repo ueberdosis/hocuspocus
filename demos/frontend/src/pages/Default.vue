@@ -16,8 +16,13 @@
     <h2>
       Another editor
     </h2>
-    <div v-if="editor2">
-      <editor-content :editor="editor2" class="editor" />
+    <div v-if="anotherEditor">
+      <editor-content :editor="anotherEditor" class="editor" />
+    </div>
+
+    <h2>Y.js document</h2>
+    <div v-if="ydoc">
+      {{ ydocJSON }}
     </div>
   </Layout>
 </template>
@@ -45,10 +50,19 @@ export default {
     return {
       provider: null,
       editor: null,
-      editor2: null,
+      anotherEditor: null,
       ydoc: null,
       indexdb: null,
     }
+  },
+
+  computed: {
+    ydocJSON() {
+      return {
+        default: this.ydoc.getXmlFragment('default').toJSON(),
+        secondary: this.ydoc.getXmlFragment('secondary').toJSON(),
+      }
+    },
   },
 
   mounted() {
@@ -63,9 +77,6 @@ export default {
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
-      parameters: {
-        token: '123456',
-      },
       onConnect: () => {
         console.log('connected')
       },
@@ -100,7 +111,7 @@ export default {
       ],
     })
 
-    this.editor2 = new Editor({
+    this.anotherEditor = new Editor({
       extensions: [
         Document,
         Paragraph,
@@ -118,7 +129,7 @@ export default {
 
   beforeUnmount() {
     this.editor.destroy()
-    this.editor2.destroy()
+    this.anotherEditor.destroy()
     this.provider.destroy()
   },
 }

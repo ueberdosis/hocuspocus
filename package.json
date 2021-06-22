@@ -19,6 +19,7 @@
     "demo:koa": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/koa.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/monitor.ts\" \"yarn --cwd ./packages/monitor start\"",
     "demo:minimal": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/minimal.ts\"",
+    "demo:slow": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/slow.ts\"",
     "demo:redis": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/redis.ts\"",
     "demo:webhook": "concurrently --kill-others \"yarn --cwd ./demos/frontend dev\" \"yarn --cwd ./demos/backend dev src/webhook.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",

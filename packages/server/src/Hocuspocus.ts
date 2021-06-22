@@ -179,15 +179,18 @@ export class Hocuspocus {
 
         // Remove the queue listener
         incoming.off('message', queueIncomingMessageListener)
-        // Work through queue messages
+        // Work through queued messages
         incomingMessageQueue.forEach(input => {
           incoming.emit('message', input)
         })
       })
-      .catch(e => {
+      .catch(error => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
-        if (e) throw e
+
+        if (error) {
+          throw error
+        }
       })
 
   }
