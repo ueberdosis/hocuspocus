@@ -42,16 +42,19 @@ export class Redis implements Extension {
    * onCreateDocument hook
    */
   async onCreateDocument(data: onCreateDocumentPayload) {
-    // If another connection has already loaded this doc, this is a no-op
-    if (this.persistence.docs.has(data.documentName)) {
-      return
+    // If another connection has already loaded this doc, return this one instead
+    const binding = this.persistence.docs.get(data.documentName)
+
+    if (binding) {
+      return binding.doc
     }
 
     await this.persistence.bindState(data.documentName, data.document).synced
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
-  async onConnect(data: onConnectPayload) {}
+  async onConnect(data: onConnectPayload) {
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {

@@ -52,13 +52,13 @@ context('redis/onCreateDocument', () => {
 
           setTimeout(() => {
             done()
-          }, 100)
-        }, 100)
+          }, 500)
+        }, 500)
       },
     })
   })
 
-  it.skip('document can be restored', done => {
+  it('document can be restored', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -71,7 +71,7 @@ context('redis/onCreateDocument', () => {
           assert.strictEqual(value, 'bar')
 
           done()
-        }, 100)
+        }, 500)
       },
     })
   })
