@@ -149,25 +149,20 @@ export class Monitor implements Extension {
     await this.storage.add('connectionLog', this.collector.disconnect(data))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onCreateDocument(data: onCreateDocumentPayload) {
     await this.storage.add('documentLog', this.collector.createDocument(data))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
     await this.storage.add('documentLog', this.collector.changeDocument(data))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onListen(data: onListenPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDestroy(data: onDestroyPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
     this.collector.version = data.version
     this.collector.yjsVersion = data.yjsVersion

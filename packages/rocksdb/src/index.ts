@@ -78,35 +78,27 @@ export class RocksDB implements Extension {
     return this.provider.storeUpdate(documentName, update)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onChange(data: onChangePayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConnect(data: onConnectPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDisconnect(data: onDisconnectPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onListen(data: onListenPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDestroy(data: onDestroyPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onRequest(data: onRequestPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onUpgrade(data: onUpgradePayload) {
   }
 }

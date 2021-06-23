@@ -199,23 +199,18 @@ export class Webhook implements Extension {
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onUpgrade(data: onUpgradePayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onRequest(data: onRequestPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onListen(data: onListenPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onDestroy(data: onDestroyPayload) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function,no-empty-function
   async onConfigure(data: onConfigurePayload) {
   }
 
