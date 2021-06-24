@@ -2351,10 +2351,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@tiptap/core@^2.0.0-alpha.18", "@tiptap/core@^2.0.0-beta.5", "@tiptap/core@^2.0.0-beta.6", "@tiptap/core@^2.0.0-beta.84":
-  version "2.0.0-beta.84"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.84.tgz#71d4f6b1d3c9ba44da7a285950b8b56c7fbd6866"
-  integrity sha512-wf3qax8/sstXSBsCxnxNCccuKH2vfzz+sozMjaFDvZDjlvItKeYHZ9jVnK9Cv3zuFfCVajJ9zt4+qdcjXB+q2A==
+"@tiptap/core@^2.0.0-alpha.18", "@tiptap/core@^2.0.0-beta.5", "@tiptap/core@^2.0.0-beta.6", "@tiptap/core@^2.0.0-beta.85":
+  version "2.0.0-beta.85"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.85.tgz#5955aa525bc750824ea8d3359491b36e35432018"
+  integrity sha512-uAEpmUbwHq5NqftVqp0tz4DJwLnHB2h5YG/ATtNjh7Nzxt9VdrbXtyNTj/652jqeds4dTd+ShJOHN9DBnJ9fuw==
   dependencies:
     "@types/prosemirror-commands" "^1.0.4"
     "@types/prosemirror-inputrules" "^1.0.4"
@@ -2371,7 +2371,7 @@
     prosemirror-schema-list "^1.1.4"
     prosemirror-state "^1.3.4"
     prosemirror-transform "^1.3.2"
-    prosemirror-view "^1.18.7"
+    prosemirror-view "^1.18.8"
 
 "@tiptap/core@^2.0.0-beta.73":
   version "2.0.0-beta.81"
@@ -2563,11 +2563,11 @@
     "@tiptap/extension-text" "^2.0.0-beta.12"
 
 "@tiptap/starter-kit@^2.0.0-beta.4":
-  version "2.0.0-beta.80"
-  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.80.tgz#eaa3a683b59c5f8805c82d00af4f4c4eadeadbdb"
-  integrity sha512-ly4LFofIfkmbJh/EemAZM1s5GXBLju7+WER8UiHFAyRJ7ktl0Q/l2lny35JcK5fWHWR8W1mH50HOCgR0GkIrxw==
+  version "2.0.0-beta.81"
+  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.81.tgz#a70ac65277bf45f142e8d18d3dc16d30104cdae9"
+  integrity sha512-9AFZgJUOhJ0q16zW3q/r2w3tLwqlE/HssQUKEoHS1o4KJUTO/9SpqqJspKEddjeKL5TCzKvOdlBdWcXEZM6Pxw==
   dependencies:
-    "@tiptap/core" "^2.0.0-beta.84"
+    "@tiptap/core" "^2.0.0-beta.85"
     "@tiptap/extension-blockquote" "^2.0.0-beta.14"
     "@tiptap/extension-bold" "^2.0.0-beta.14"
     "@tiptap/extension-bullet-list" "^2.0.0-beta.14"
@@ -12000,7 +12000,16 @@ prosemirror-transform@^1.0.0, prosemirror-transform@^1.1.0, prosemirror-transfor
   dependencies:
     prosemirror-model "^1.0.0"
 
-prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.18.2, prosemirror-view@^1.18.7:
+prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.18.7, prosemirror-view@^1.18.8:
+  version "1.18.8"
+  resolved "https://registry.yarnpkg.com/prosemirror-view/-/prosemirror-view-1.18.8.tgz#feca545331e07a1b29ede19a51fe7724dab71ce2"
+  integrity sha512-iLNonsRUM+ByIxJZP+tRuE8jUy56jfgf8oxnc4InWYTYdPibARs4FL6DQ6D56GdPMlXyTjXjSdfDp/x8mwHhtw==
+  dependencies:
+    prosemirror-model "^1.1.0"
+    prosemirror-state "^1.0.0"
+    prosemirror-transform "^1.1.0"
+
+prosemirror-view@^1.18.2:
   version "1.18.7"
   resolved "https://registry.yarnpkg.com/prosemirror-view/-/prosemirror-view-1.18.7.tgz#d9843337a1649f532401589899b724e7e87e83c0"
   integrity sha512-pUCxoyuWnbVfJ/ukhQ+7+bfDMArG3wu6hHnnTFi61C7Teb5OILUhkkhEhF2/RsppBFWrkwsNcf8rQm8SSoSKRg==
@@ -15549,9 +15558,9 @@ yazl@^2.5.1:
     buffer-crc32 "~0.2.3"
 
 yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3, yjs@^13.5.8:
-  version "13.5.10"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.10.tgz#7c7ed618b5429c3cef29ec8a30b810b962cb908f"
-  integrity sha512-RFCYvU/KA2lEOP6dJjmBKpTRLC/McULI26SDfH5b5bPK+jgOjkpWh8oNWNWxnuK7PaCJQPf1l+RosfsRnI1pQA==
+  version "13.5.11"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.11.tgz#8f41a61fd0039a8d720a5b3186b8ad319d88563b"
+  integrity sha512-nJzML0NoSUh+kZLEOssYViPI1ZECv/7rnLk5mhXvhMTnezNAYWAIfNLvo+FHYRhWBojbrutT4d2IAP/IE9Xaog==
   dependencies:
     lib0 "^0.2.41"
 
