@@ -28,8 +28,8 @@
     - title: Awareness
       link: /examples/awareness
       type: new
-    - title: Application state
-      link: /examples/application-state
+    - title: Tasks
+      link: /examples/tasks
       type: draft
     - title: tiptap
       link: /examples/tiptap
@@ -39,6 +39,9 @@
       link: /examples/monaco
     - title: CodeMirror 5
       link: /examples/codemirror
+    - title: Slate
+      link: /examples/slate
+      type: draft
 
 - title: Guide
   items:

@@ -1,3 +1,0 @@
-# Application state
-
-TODO
