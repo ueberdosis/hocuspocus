@@ -91,18 +91,21 @@
     - title: Extensions
       link: /api/extensions
       items:
-        - title: RocksDB
-          link: /api/extensions/rocksdb
-        - title: Monitor
-          link: /api/extensions/monitor
-        - title: Redis
-          link: /api/extensions/redis
         - title: Logger
           link: /api/extensions/logger
-        - title: Webhook
-          link: /api/extensions/webhook
+        - title: Monitor
+          link: /api/extensions/monitor
+        - title: Postgres
+          link: /api/extensions/postgres
+          type: draft
+        - title: Redis
+          link: /api/extensions/redis
+        - title: RocksDB
+          link: /api/extensions/rocksdb
         - title: Throttle
           link: /api/extensions/throttle
+        - title: Webhook
+          link: /api/extensions/webhook
 
 - title: Provider
   items:
