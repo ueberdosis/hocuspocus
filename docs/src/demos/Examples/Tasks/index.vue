@@ -2,12 +2,13 @@
   <div>
     <strong>Work in progress</strong>
     <ul>
-      <li v-for="(task, index) in tasks">
-        #{{ index }} {{ task.completed }}
-        <span @click="editTask(index)">
-          {{ task.text }}
+      <li v-for="task in tasks" :key="task[0]">
+        <input type="checkbox" v-model="task[1].completed">
+        <span @click="editTask(task[0])">
+          {{ task[1].text }}
         </span>
-        <button @click="deleteTask(index)">
+        ({{ task[0] }})
+        <button @click="deleteTask(task[0])">
           delete
         </button>
       </li>
@@ -24,6 +25,7 @@
 <script>
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import { v4 as uuidv4 } from 'uuid'
 
 export default {
   data() {
@@ -36,39 +38,37 @@ export default {
 
   mounted() {
     const ydoc = new Y.Doc()
+
     this.provider = new HocuspocusProvider({
       url: 'wss://websocket.tiptap.dev',
-      name: 'hocuspocus-demo-tasks',
+      name: 'hocuspocus-demo-task-list',
       document: ydoc,
     })
 
-    this.tasks = ydoc.getArray('tasks')
+    this.tasks = ydoc.getMap('tasks')
+
+    this.tasks.observe(() => {
+      console.log('update')
+      // this.tasks = ydoc.getMap('tasks')
+    })
   },
 
   methods: {
     addTask() {
-      this.tasks.push([{
+      this.tasks.set(uuidv4(), {
         text: this.newTask,
         completed: false,
-      }])
+      })
 
       this.newTask = ''
     },
-    editTask(index) {
-      const task = this.tasks.get(index)
-      task.text = window.prompt(task.text)
+    editTask(id) {
+      const task = this.tasks.get(id)
 
-      // console.log(index, {
-      //   ...task,
-      //   text,
-      // })
-      // this.tasks.insert(index, {
-      //   ...task,
-      //   text,
-      // })
+      task.text = window.prompt(task.text)
     },
-    deleteTask(index) {
-      this.tasks.delete(index)
+    deleteTask(id) {
+      this.tasks.delete(id)
     },
   },
 
