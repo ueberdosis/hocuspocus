@@ -46,11 +46,6 @@ export default {
     })
 
     this.tasks = ydoc.getMap('tasks')
-
-    this.tasks.observe(() => {
-      console.log('update')
-      // this.tasks = ydoc.getMap('tasks')
-    })
   },
 
   methods: {
