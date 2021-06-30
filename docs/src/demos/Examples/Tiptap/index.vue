@@ -34,20 +34,14 @@
 </template>
 
 <script>
-import { Editor, EditorContent, defaultExtensions } from '@tiptap/vue-starter-kit'
+import { Editor, EditorContent } from '@tiptap/vue'
 import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
-import Highlight from '@tiptap/extension-highlight'
+import StarterKit from '@tiptap/starter-kit'
 import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import MenuBar from './MenuBar.vue'
-
-const CustomTaskItem = TaskItem.extend({
-  content: 'paragraph',
-})
 
 const getRandomElement = list => {
   return list[Math.floor(Math.random() * list.length)]
@@ -74,19 +68,23 @@ export default {
 
   mounted() {
     const ydoc = new Y.Doc()
-    const provider = new WebsocketProvider('wss://websocket.tiptap.dev', 'hocuspocus-example-tiptap', ydoc)
-    provider.on('status', event => {
-      this.status = event.status
+    const provider = new HocuspocusProvider({
+      url: 'wss://websocket.tiptap.dev',
+      name: 'hocuspocus-example-tiptap',
+      document: ydoc,
+    })
+
+    provider.on('status', ({ status }) => {
+      this.status = status
     })
 
     this.indexdb = new IndexeddbPersistence('hocuspocus-example-tiptap', ydoc)
 
     this.editor = new Editor({
       extensions: [
-        ...defaultExtensions().filter(extension => extension.config.name !== 'history'),
-        Highlight,
-        TaskList,
-        CustomTaskItem,
+        StarterKit.configure({
+          history: false,
+        }),
         CollaborationCursor.configure({
           provider,
           user: this.currentUser,

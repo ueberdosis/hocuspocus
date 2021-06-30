@@ -24,29 +24,38 @@ Add an element to your HTML document where tiptap should be initialized:
 
 Install the required extensions:
 ```bash
-yarn add @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs y-websocket
+yarn add @hocuspocus/provider @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs
 ```
 
 And create your tiptap instance:
 ```js
-import { Editor, defaultExtensions } from '@tiptap/starter-kit'
+import { Editor, StarterKit } from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import CollateborationCursor from '@tiptap/extension-collaboration-cursor'
 import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const ydoc = new Y.Doc()
-const provider = new WebsocketProvider('ws://127.0.0.1', 'example-document', ydoc)
+
+const provider = new HocuspocusProvider({
+  url: 'ws://127.0.0.1',
+  name: 'example-document',
+  document: ydoc,
+})
 
 new Editor({
   element: document.querySelector('.element'),
   extensions: [
-    ...defaultExtensions().filter(extension => extension.config.name !== 'history'),
+    StarterKit.configure({
+      history: false,
+    }),
+    Collaboration.configure({ provider }),
     CollaborationCursor.configure({
       provider,
       user: { name: 'John Doe', '#ffcc00' },
     }),
-    Collaboration.configure({ provider }),
   ],
 })
 ```
+
+Read more: https://www.tiptap.dev/guide/collaborative-editing

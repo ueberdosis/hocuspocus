@@ -12,3 +12,5 @@ title: Collaborative editing with CodeMirror
   height="400"
   frameborder="0"
 ></iframe>
+
+Read more: https://github.com/yjs/y-codemirror
