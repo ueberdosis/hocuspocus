@@ -24,8 +24,8 @@
 
 <script>
 import * as Y from 'yjs'
-import { HocuspocusProvider } from '@hocuspocus/provider'
 import { v4 as uuidv4 } from 'uuid'
+import { WebsocketProvider } from 'y-websocket'
 
 export default {
   data() {
@@ -39,11 +39,11 @@ export default {
   mounted() {
     const ydoc = new Y.Doc()
 
-    this.provider = new HocuspocusProvider({
-      url: 'wss://websocket.tiptap.dev',
-      name: 'hocuspocus-demo-task-list',
-      document: ydoc,
-    })
+    this.provider = new WebsocketProvider(
+      'wss://websocket.tiptap.dev',
+      'hocuspocus-demo-task-list',
+      ydoc,
+    )
 
     this.tasks = ydoc.getMap('tasks')
   },

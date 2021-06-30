@@ -39,8 +39,8 @@ import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
 import StarterKit from '@tiptap/starter-kit'
 import * as Y from 'yjs'
-import { HocuspocusProvider } from '@hocuspocus/provider'
 import { IndexeddbPersistence } from 'y-indexeddb'
+import { WebsocketProvider } from 'y-websocket'
 import MenuBar from './MenuBar.vue'
 
 const getRandomElement = list => {
@@ -68,11 +68,11 @@ export default {
 
   mounted() {
     const ydoc = new Y.Doc()
-    const provider = new HocuspocusProvider({
-      url: 'wss://websocket.tiptap.dev',
-      name: 'hocuspocus-example-tiptap',
-      document: ydoc,
-    })
+    const provider = new WebsocketProvider(
+      'wss://websocket.tiptap.dev',
+      'hocuspocus-example-tiptap',
+      ydoc,
+    )
 
     provider.on('status', ({ status }) => {
       this.status = status
