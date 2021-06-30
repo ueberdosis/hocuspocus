@@ -28,9 +28,9 @@
     - title: Awareness
       link: /examples/awareness
       type: new
-    - title: Tasks
-      link: /examples/tasks
-      type: draft
+    # - title: Tasks
+    #   link: /examples/tasks
+    #   type: draft
     - title: tiptap
       link: /examples/tiptap
     - title: Quill
