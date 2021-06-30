@@ -52,8 +52,8 @@ context('redis/onCreateDocument', () => {
 
           setTimeout(() => {
             done()
-          }, 500)
-        }, 500)
+          }, 100)
+        }, 100)
       },
     })
   })
@@ -71,7 +71,7 @@ context('redis/onCreateDocument', () => {
           assert.strictEqual(value, 'bar')
 
           done()
-        }, 500)
+        }, 100)
       },
     })
   })
