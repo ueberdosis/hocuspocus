@@ -1,7 +1,7 @@
 const globby = require('globby')
-const { createDefaultOpenGraphImage, createSpecificOpenGraphImage } = require('./utilities/opengraph-images')
+// const { createDefaultOpenGraphImage, createSpecificOpenGraphImage } = require('./utilities/opengraph-images')
 
-createDefaultOpenGraphImage('The plug & play collaboration backend.', 'static/images/og-image.png')
+// createDefaultOpenGraphImage('The plug & play collaboration backend.', 'static/images/og-image.png')
 
 module.exports = function (api) {
 
@@ -9,11 +9,11 @@ module.exports = function (api) {
     cwd: process.cwd(),
   })
 
-  api.onCreateNode(options => {
-    if (process.env.NODE_ENV === 'production' && options.internal.typeName === 'DocPage') {
-      createSpecificOpenGraphImage(options.title, options.content, `static/images${options.path}og-image.png`)
-    }
-  })
+  // api.onCreateNode(options => {
+  //   if (process.env.NODE_ENV === 'production' && options.internal.typeName === 'DocPage') {
+  //     createSpecificOpenGraphImage(options.title, options.content, `static/images${options.path}og-image.png`)
+  //   }
+  // })
 
   api.loadSource(() => {
     /**
