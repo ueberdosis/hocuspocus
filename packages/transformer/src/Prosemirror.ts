@@ -40,6 +40,10 @@ class Prosemirror implements Transformer {
   }
 
   toYdoc(document: any, fieldName: string | Array<string> = 'prosemirror', schema?: Schema): Doc {
+    if (!document) {
+      throw new Error(`You’ve passed an empty or invalid document to the Transformer. Make sure to pass ProseMirror-compatible JSON. Actually passed JSON: ${document}`)
+    }
+
     // allow a single field name
     if (typeof fieldName === 'string') {
       return prosemirrorJSONToYDoc(schema || this.defaultSchema, document, fieldName)
