@@ -174,14 +174,15 @@ export class Hocuspocus {
     })
       .then(() => {
         // if no hook interrupts create a document and connection
-        const document = this.createDocument(documentName, request, socketId, context)
-        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+        this.createDocument(documentName, request, socketId, context).then(document => {
+          this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
-        // Remove the queue listener
-        incoming.off('message', queueIncomingMessageListener)
-        // Work through queued messages
-        incomingMessageQueue.forEach(input => {
-          incoming.emit('message', input)
+          // Remove the queue listener
+          incoming.off('message', queueIncomingMessageListener)
+          // Work through queued messages
+          incomingMessageQueue.forEach(input => {
+            incoming.emit('message', input)
+          })
         })
       })
       .catch(error => {
@@ -222,44 +223,46 @@ export class Hocuspocus {
    * Create a new document by the given request
    * @private
    */
-  private createDocument(documentName: string, request: IncomingMessage, socketId: string, context?: any): Document {
+  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, context?: any): Promise<Document> {
+    return new Promise(resolve => {
+      if (this.documents.has(documentName)) {
+        const document = this.documents.get(documentName)
+        return resolve(document)
+      }
 
-    if (this.documents.has(documentName)) {
-      return this.documents.get(documentName)
-    }
+      const document = new Document(documentName)
 
-    const document = new Document(documentName)
+      document.onUpdate((document, connection, update) => {
+        this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+      })
 
-    document.onUpdate((document, connection, update) => {
-      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
-    })
+      const hookPayload = {
+        context,
+        document,
+        documentName,
+        socketId,
+        requestHeaders: request.headers,
+        requestParameters: Hocuspocus.getParameters(request),
+      }
 
-    const hookPayload = {
-      context,
-      document,
-      documentName,
-      socketId,
-      requestHeaders: request.headers,
-      requestParameters: Hocuspocus.getParameters(request),
-    }
-
-    this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
+      this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
       // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-      if (
-        loadedDocument?.constructor.name === 'Document'
+        if (
+          loadedDocument?.constructor.name === 'Document'
         || loadedDocument?.constructor.name === 'Doc'
-      ) {
-        applyUpdate(document, encodeStateAsUpdate(loadedDocument))
-      }
-    }).catch(e => {
-      throw e
+        ) {
+          applyUpdate(document, encodeStateAsUpdate(loadedDocument))
+        }
+      }).then(() => {
+        resolve(document)
+      }).catch(e => {
+        throw e
+      })
+
+      this.documents.set(documentName, document)
     })
-
-    this.documents.set(documentName, document)
-
-    return document
   }
 
   /**
