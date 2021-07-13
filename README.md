@@ -45,7 +45,7 @@ For help, discussion about best practices, or any other conversation:
 * [überdosis](https://ueberdosis.io/) 🎁
 * [Cargo](https://cargo.site/) 💎
 * [Saga](https://saga.so/) 💎
-* [Gamma](https://gamma.app/)
+* [Gamma](https://gamma.app/) 💎
 * [QA Wolf](https://www.qawolf.com/) 💎
 
 … and hundreds of awesome inviduals.
