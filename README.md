@@ -44,8 +44,9 @@ For help, discussion about best practices, or any other conversation:
 ## 💖 Sponsors
 * [überdosis](https://ueberdosis.io/) 🎁
 * [Cargo](https://cargo.site/) 💎
-* [QA Wolf](https://www.qawolf.com/) 💎
 * [Saga](https://saga.so/) 💎
+* [Gamma](https://gamma.app/) 💎
+* [QA Wolf](https://www.qawolf.com/) 💎
 
 … and hundreds of awesome inviduals.
 
