@@ -4,7 +4,9 @@ import { Hocuspocus } from '../../packages/server/src'
 
 const Server = new Hocuspocus()
 
-context('server/listen', () => {
+context('server/listen', function () {
+  this.timeout(10000)
+
   let browser
 
   before(async () => {
