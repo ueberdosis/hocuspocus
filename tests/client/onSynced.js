@@ -71,4 +71,32 @@ context('client/onSynced', () => {
       },
     })
   })
+
+  it('onSynced callback is executed when the document is actually synced', done => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 4000,
+
+      async onCreateDocument({ document }) {
+        document.getArray('foo').insert(0, ['bar'])
+
+        return document
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced: () => {
+        Server.destroy()
+
+        const value = ydoc.getArray('foo').get(0)
+        assert.strictEqual(value, 'bar')
+
+        done()
+      },
+    })
+  })
 })
