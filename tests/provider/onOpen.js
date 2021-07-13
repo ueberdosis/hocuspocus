@@ -1,14 +1,14 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
+import { Hocuspocus } from '@hocuspocus/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
 const Server = new Hocuspocus()
 
-context('client/onDisconnect', () => {
+context('provider/onOpen', () => {
   before(() => {
     Server.configure({ port: 4000 }).listen()
   })
@@ -17,23 +17,23 @@ context('client/onDisconnect', () => {
     Server.destroy()
   })
 
-  it('onDisconnect callback is executed', done => {
+  afterEach(() => {
+    client.destroy()
+  })
+
+  it('onOpen callback is executed', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      onConnect: () => {
-        client.disconnect()
-      },
-      onDisconnect: () => {
+      onOpen: () => {
         done()
-        client.destroy()
       },
     })
   })
 
-  it("on('disconnect') callback is executed", done => {
+  it("on('open') callback is executed", done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -41,12 +41,8 @@ context('client/onDisconnect', () => {
       WebSocketPolyfill: WebSocket,
     })
 
-    client.on('connect', () => {
-      client.disconnect()
-    })
-    client.on('disconnect', () => {
+    client.on('open', () => {
       done()
-      client.destroy()
     })
   })
 })

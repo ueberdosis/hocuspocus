@@ -8,7 +8,7 @@ let client
 const ydoc = new Y.Doc()
 const Server = new Hocuspocus()
 
-context('client/onConnect', () => {
+context('provider/onConnect', () => {
   before(() => {
     Server.configure({ port: 4000 }).listen()
   })

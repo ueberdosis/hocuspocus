@@ -1,13 +1,13 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
+import { Hocuspocus } from '@hocuspocus/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
 
-context('client/onSynced', () => {
+context('provider/onSynced', () => {
   afterEach(() => {
     client.destroy()
   })

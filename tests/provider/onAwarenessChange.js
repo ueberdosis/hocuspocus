@@ -8,7 +8,7 @@ let client
 let anotherClient
 const ydoc = new Y.Doc()
 
-context('client/onAwarenessChange', () => {
+context('provider/onAwarenessChange', () => {
   afterEach(() => {
     client.destroy()
   })
