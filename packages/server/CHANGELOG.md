@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.60](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.59...@hocuspocus/server@1.0.0-alpha.60) (2021-07-13)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
 # [1.0.0-alpha.59](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.58...@hocuspocus/server@1.0.0-alpha.59) (2021-06-22)
 
 **Note:** Version bump only for package @hocuspocus/server
