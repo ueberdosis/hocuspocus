@@ -26,7 +26,7 @@ const server = Server.configure({
 
   async onConnect() {
     console.log('🔮')
-  }
+  },
 
   extensions: [
     new RocksDB({
