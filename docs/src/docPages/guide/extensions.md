@@ -10,17 +10,17 @@ Extensions are a quick way to add additional features to hocuspocus. They use th
 
 We already created some very useful extensions you should check out for sure:
 
-**[@hocuspocus/extension-rocksdb](/extensions/rocksdb)**: An easy to use primary storage for hocuspocus.
+**[@hocuspocus/extension-rocksdb](/api/extensions/rocksdb)**: An easy to use primary storage for hocuspocus.
 
-**[@hocuspocus/extension-monitor](/extensions/monitor)**: A beautiful dashboard to monitor and debug your hocuspocus instance.
+**[@hocuspocus/extension-monitor](/api/extensions/monitor)**: A beautiful dashboard to monitor and debug your hocuspocus instance.
 
-**[@hocuspocus/extension-redis](/extensions/redis)**: Scale hocuspocus horizontally with redis.
+**[@hocuspocus/extension-redis](/api/extensions/redis)**: Scale hocuspocus horizontally with redis.
 
-**[@hocuspocus/extension-logger](/extensions/logger)**: Add logging to hocuspocus.
+**[@hocuspocus/extension-logger](/api/extensions/logger)**: Add logging to hocuspocus.
 
-**[@hocuspocus/extension-webhook](/extensions/webhook)**: Send document changes via webhook to your API.
+**[@hocuspocus/extension-webhook](/api/extensions/webhook)**: Send document changes via webhook to your API.
 
-**[@hocuspocus/extension-throttle](/extensions/throttle)**: Throttle connections by ips.
+**[@hocuspocus/extension-throttle](/api/extensions/throttle)**: Throttle connections by ips.
 
 ## Create your own extension
 
