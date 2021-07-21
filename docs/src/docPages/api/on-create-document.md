@@ -28,7 +28,7 @@ Context contains the data provided in former `onConnect` hooks.
 ## Example
 
 :::warning Use a primary storage
-This following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
+This following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/api/extensions/rocksdb).
 :::
 
 ```typescript

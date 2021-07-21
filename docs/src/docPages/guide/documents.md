@@ -37,7 +37,7 @@ These examples are only meant to store the resulting document for the views of y
 to import it if it doesn't exist in your primary storage.
 
 No worries, we have you covered! We built an extension that's meant to be used as primary storage:
-the [RocksDB extension](/extensions/rocksdb). It's just a couple of lines to integrate.
+the [RocksDB extension](/api/extensions/rocksdb). It's just a couple of lines to integrate.
 
 Make sure to always include this extension in your production setups!
 
@@ -50,7 +50,7 @@ s [API section](/api/on-change).
 
 In a real-world application you would probably save the current document to a database, send it via
 webhook to an API or something else. If you want to send a webhook to an external API we already
-have you covered: [Check out our webhook extension](/extensions/webhook).
+have you covered: [Check out our webhook extension](/api/extensions/webhook).
 
 It's **highly recommended** to debounce extensive operations (like API calls) as this hook can be
 fired up to multiple times a second:

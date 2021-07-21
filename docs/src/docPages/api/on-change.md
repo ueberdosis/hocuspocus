@@ -34,7 +34,7 @@ Context contains the data provided in former `onConnect` hooks.
 ## Example
 
 :::warning Use a primary storage
-The following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/extensions/rocksdb).
+The following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/api/extensions/rocksdb).
 :::
 
 ```typescript
