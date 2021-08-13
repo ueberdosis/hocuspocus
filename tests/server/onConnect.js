@@ -8,7 +8,7 @@ let client
 const ydoc = new Y.Doc()
 
 context('server/onConnect', () => {
-  it('onConnect callback is executed', done => {
+  it('executes the onConnect callback', done => {
     const Server = new Hocuspocus()
 
     Server.configure({
@@ -22,6 +22,34 @@ context('server/onConnect', () => {
 
           done()
         }, 0)
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('stops when the onConnect hook throws an Error', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect() {
+        throw new Error()
+      },
+      async onDisconnect() {
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+      // MUST NOT BE CALLED
+      async onCreateDocument() {
+        console.log('WARNING: When onConnect fails onCreateDocument must not be called.')
       },
     }).listen()
 
