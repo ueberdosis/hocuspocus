@@ -103,6 +103,8 @@ export class Hocuspocus {
         .then(() => {
           // let the default websocket server handle the connection if
           // prior hooks don't interfere
+          // TODO: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
+          // @ts-ignore
           websocketServer.handleUpgrade(request, socket, head, ws => {
             websocketServer.emit('connection', ws, request)
           })
