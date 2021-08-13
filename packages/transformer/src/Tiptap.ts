@@ -1,13 +1,14 @@
 import { Doc } from 'yjs'
 import { Extensions } from '@tiptap/core/dist/packages/core/src/types'
 import { getSchema } from '@tiptap/core'
-import { defaultExtensions } from '@tiptap/starter-kit'
-import { ProsemirrorTransformer } from './Prosemirror'
+import StarterKit from '@tiptap/starter-kit'
 import { Transformer } from './types'
+import { ProsemirrorTransformer } from './Prosemirror'
 
 export class Tiptap implements Transformer {
-
-  defaultExtensions: Extensions = defaultExtensions()
+  defaultExtensions: Extensions = [
+    StarterKit,
+  ]
 
   extensions(extensions: Extensions): Tiptap {
     this.defaultExtensions = extensions
