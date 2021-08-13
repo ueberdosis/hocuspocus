@@ -41,12 +41,6 @@ context('server/onConnect', () => {
       async onConnect() {
         throw new Error()
       },
-      async onDisconnect() {
-        client.destroy()
-        Server.destroy()
-
-        done()
-      },
       // MUST NOT BE CALLED
       async onCreateDocument() {
         console.log('WARNING: When onConnect fails onCreateDocument must not be called.')
@@ -58,6 +52,12 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      onClose: () => {
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
     })
   })
 })
