@@ -3,7 +3,7 @@
 ## toc
 
 ## Introduction
-There’s only two settings to pass for now: A custom port and a connection timout. Most things are controlled through [hooks](/api/hooks).
+There’s only two settings to pass for now: A custom port and a connection timeout. Most things are controlled through [hooks](/api/hooks).
 
 ## Available settings
 | Setting   | Default | Description                                        |
