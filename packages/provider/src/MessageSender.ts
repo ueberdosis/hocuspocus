@@ -14,8 +14,6 @@ export class MessageSender {
 
   message: any
 
-  args: any
-
   constructor(Message:
     Constructable<AuthenticationMessage> |
     Constructable<AwarenessMessage> |
@@ -26,7 +24,6 @@ export class MessageSender {
   args: any = {}) {
     this.message = new Message()
     this.encoder = this.message.get(args)
-    this.args = args
   }
 
   create() {
