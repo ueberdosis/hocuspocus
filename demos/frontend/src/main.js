@@ -3,10 +3,12 @@ import routes from 'virtual:generated-pages'
 import VueRouter from 'vue-router'
 import StatusBar from './components/StatusBar.vue'
 import App from './App.vue'
+import '../index.css'
 
 Vue.component('StatusBar', StatusBar)
 
 const router = new VueRouter({
+  mode: 'history',
   routes,
 })
 

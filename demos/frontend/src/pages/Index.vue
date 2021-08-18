@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h1>
-      Default
+    <h1 class="text-3xl">
+      Text editing
     </h1>
 
     <StatusBar v-if="provider" :provider="provider" />
