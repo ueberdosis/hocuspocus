@@ -226,7 +226,7 @@ const hocuspocus = Server.configure({
     // Example code to check if the current user has write access by a
     // request parameter. In a real world application you would probably
     // get the user by a token from your database
-    if(!usersWithWriteAccess.includes(data.requestParameters.user)) {
+    if(!usersWithWriteAccess.includes(data.requestParameters.get('user'))) {
       // Set the connection to readonly
       data.connection.readOnly = true
     }

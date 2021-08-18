@@ -66,6 +66,8 @@ export class Dashboard {
     })
 
     server.on('upgrade', (request, socket, head) => {
+      // TODO: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
+      // @ts-ignore
       this.handleUpgrade(request, socket, head)
     })
 

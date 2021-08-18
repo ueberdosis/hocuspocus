@@ -49,15 +49,19 @@ export class IncomingMessage {
         break
 
       case messageYjsSyncStep2:
-        if (!connection?.readOnly) {
-          readSyncStep2(this.decoder, document, connection)
+        if (connection?.readOnly) {
+          break
         }
+
+        readSyncStep2(this.decoder, document, connection)
         break
 
       case messageYjsUpdate:
-        if (!connection?.readOnly) {
-          readUpdate(this.decoder, document, connection)
+        if (connection?.readOnly) {
+          break
         }
+
+        readUpdate(this.decoder, document, connection)
         break
 
       default:

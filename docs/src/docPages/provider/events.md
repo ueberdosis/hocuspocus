@@ -66,10 +66,10 @@ const onMessage = () => {
 }
 
 // Bind …
-provider.on('onMessage', onMessage)
+provider.on('onMessage', message)
 
 // … and unbind.
-provider.off('onMessage', onMessage)
+provider.off('onMessage', message)
 ```
 
 ## List of events

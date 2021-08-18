@@ -26,7 +26,7 @@ context('server/onRequest', () => {
     Server.destroy()
   })
 
-  it('onRequest callback is executed', done => {
+  it('executes the onRequest callback', done => {
     Server.configure({
       port: 4000,
       async onListen() {
@@ -40,4 +40,33 @@ context('server/onRequest', () => {
       },
     }).listen()
   })
+
+  it('executes the onRequest callback of a custom extension', done => {
+    class CustomExtension {
+      async onRequest({ response }) {
+        return new Promise((resolve, reject) => {
+
+          response.writeHead(200, { 'Content-Type': 'text/plain' })
+          response.end('I like cats.')
+
+          return reject()
+        })
+      }
+    }
+
+    Server.configure({
+      port: 4000,
+      extensions: [
+        new CustomExtension(),
+      ],
+      async onListen() {
+        await page.goto('http://localhost:4000/')
+
+        assert.strictEqual(await page.textContent('html'), 'I like cats.')
+
+        done()
+      },
+    }).listen()
+  })
+
 })

@@ -32,7 +32,7 @@ const server = Server.configure({
     // Could be an API call, DB query or whatever …
     return axios.get('/user', {
       headers: {
-        Authorization: `Bearer ${requestParameters.token}}`
+        Authorization: `Bearer ${requestParameters.get('token')}}`
       }
     })
 
