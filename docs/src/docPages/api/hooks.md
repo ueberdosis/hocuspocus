@@ -12,7 +12,7 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 | Hook               | Description                               | Link                                 |
 | ------------------ | ----------------------------------------- | ------------------------------------ |
 | `onConnect`        | When a connection is established          | [Read more](/api/on-connect)         |
-| `onAuthenticate`   | When authenntication is passed            | [Read more](/api/on-authenticate)    |
+| `onAuthenticate`   | When authentication is passed             | [Read more](/api/on-authenticate)    |
 | `onCreateDocument` | When a new document is created            | [Read more](/api/on-create-document) |
 | `onChange`         | When a document has changed               | [Read more](/api/on-change)          |
 | `onDisconnect`     | When a connection was closed              | [Read more](/api/on-disconnect)      |
