@@ -1,34 +1,16 @@
 <template>
-  <div class="page">
-    <nav>
+  <div class="flex flex-row">
+    <nav class="w-60 pt-4">
       <ul>
-        <li><router-link to="/">Default</router-link></li>
-        <li><router-link to="/awareness">Awareness</router-link></li>
-        <li><router-link to="/rooms">Rooms</router-link></li>
-        <li><router-link to="/messages">Messages</router-link></li>
-        <li><router-link to="/subdocuments">Subdocuments</router-link></li>
+        <li><router-link class="block px-6 py-3" to="/">Text editing</router-link></li>
+        <li><router-link class="block px-6 py-3" to="/awareness">Awareness</router-link></li>
+        <li><router-link class="block px-6 py-3" to="/rooms">Rooms</router-link></li>
+        <li><router-link class="block px-6 py-3" to="/messages">Messages</router-link></li>
+        <li><router-link class="block px-6 py-3" to="/subdocuments">Subdocuments</router-link></li>
       </ul>
     </nav>
-    <router-view />
+    <main class="flex-grow mt-4 p-4">
+      <router-view />
+    </main>
   </div>
 </template>
-
-<script>
-import routes from 'virtual:generated-pages'
-// import { RouterView } from 'vue-router'
-
-export default {
-  // components: {
-  //   RouterView,
-  // },
-  mounted() {
-    console.log(routes)
-  },
-}
-</script>
-
-<style>
-.page {
-  font-family: sans-serif;
-}
-</style>

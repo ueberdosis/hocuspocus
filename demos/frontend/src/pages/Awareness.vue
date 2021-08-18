@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>
+    <h1 class="text-3xl mb-8">
       Awareness
     </h1>
 
@@ -46,12 +46,8 @@
 <script>
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
-import StatusBar from '../Components/StatusBar.vue'
 
 export default {
-  components: {
-    StatusBar,
-  },
   data() {
     return {
       ydoc: null,

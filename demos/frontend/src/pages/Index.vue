@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-3xl">
+    <h1 class="text-3xl mb-8">
       Text editing
     </h1>
 
@@ -38,12 +38,10 @@ import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
-import StatusBar from '../Components/StatusBar.vue'
 
 export default {
   components: {
     EditorContent,
-    StatusBar,
   },
 
   data() {

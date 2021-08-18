@@ -1,18 +1,18 @@
 <template>
   <div>
-    <h1>
+    <h1 class="text-3xl mb-8">
       Rooms
     </h1>
 
-    <table border="1" cellpadding="5">
+    <table class="border border-gray-300 w-full">
       <tr :key="room.name" v-for="room in rooms">
-        <td>{{ room.name }}</td>
-        <td>{{ room.status }}</td>
-        <td>{{ room.numberOfUsers }}</td>
-        <td>{{ room.states }}</td>
-        <td>
-          <button v-if="room.status !== 'connected'" @click="room.connect()">connect</button>
-          <button v-if="room.status !== 'disconnected'" @click="room.disconnect()">disconnect</button>
+        <td class="p-3 border border-gray-300">{{ room.name }}</td>
+        <td class="p-3 border border-gray-300 text-center">{{ room.status }}</td>
+        <td class="p-3 border border-gray-300 text-center">{{ room.numberOfUsers }}</td>
+        <td class="p-3 border border-gray-300">{{ room.states }}</td>
+        <td class="p-3 border border-gray-300 text-center">
+          <button v-if="room.status !== 'connected'" @click="room.connect()" class="border-2 border-black bg-black text-white px-4 py-2 rounded">connect</button>
+          <button v-if="room.status !== 'disconnected'" @click="room.disconnect()" class="border-2 border-black px-4 py-2 rounded">disconnect</button>
         </td>
       </tr>
     </table>
