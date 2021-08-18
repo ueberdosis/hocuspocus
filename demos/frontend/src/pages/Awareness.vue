@@ -1,6 +1,6 @@
 <template>
-  <Layout>
-    <h1>
+  <div>
+    <h1 class="text-3xl mb-8">
       Awareness
     </h1>
 
@@ -40,18 +40,14 @@
     <ul>
       <li>Disconnect → Connect → States aren’t synced</li>
     </ul>
-  </Layout>
+  </div>
 </template>
 
 <script>
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
-import StatusBar from '../Components/StatusBar.vue'
 
 export default {
-  components: {
-    StatusBar,
-  },
   data() {
     return {
       ydoc: null,

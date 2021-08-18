@@ -1,7 +1,7 @@
 <template>
-  <Layout>
-    <h1>
-      Default
+  <div>
+    <h1 class="text-3xl mb-8">
+      Subdocuments
     </h1>
 
     <StatusBar v-if="provider" :provider="provider" />
@@ -13,7 +13,7 @@
     <div v-if="editor">
       <editor-content :editor="editor" class="editor" />
     </div> -->
-  </Layout>
+  </div>
 </template>
 
 <script>
@@ -24,12 +24,10 @@
 // import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '../../../../packages/provider/src'
-import StatusBar from '../Components/StatusBar.vue'
 
 export default {
   components: {
     // EditorContent,
-    StatusBar,
   },
 
   data() {
