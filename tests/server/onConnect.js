@@ -110,4 +110,34 @@ context('server/onConnect', () => {
       },
     })
   })
+
+  it('has the request parameters', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ requestParameters }) {
+        setTimeout(() => {
+          assert.strictEqual(requestParameters instanceof URLSearchParams, true)
+          assert.strictEqual(requestParameters.has('foo'), true)
+          assert.strictEqual(requestParameters.get('foo'), 'bar')
+
+          client.destroy()
+          Server.destroy()
+
+          done()
+        }, 0)
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      parameters: {
+        foo: 'bar',
+      },
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
 })
