@@ -72,23 +72,23 @@
       link: /api/hooks
       items:
         - title: onConnect
-          link: /api/on-connect
+          link: /api/hooks/on-connect
         - title: onCreateDocument
-          link: /api/on-create-document
+          link: /api/hooks/on-create-document
         - title: onChange
-          link: /api/on-change
+          link: /api/hooks/on-change
         - title: onDisconnect
-          link: /api/on-disconnect
+          link: /api/hooks/on-disconnect
         - title: onListen
-          link: /api/on-listen
+          link: /api/hooks/on-listen
         - title: onDestroy
-          link: /api/on-destroy
+          link: /api/hooks/on-destroy
         - title: onConfigure
-          link: /api/on-configure
+          link: /api/hooks/on-configure
         - title: onRequest
-          link: /api/on-request
+          link: /api/hooks/on-request
         - title: onUpgrade
-          link: /api/on-upgrade
+          link: /api/hooks/on-upgrade
 
     - title: Extensions
       link: /api/extensions
