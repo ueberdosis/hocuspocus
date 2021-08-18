@@ -2,7 +2,7 @@
   "private": true,
   "workspaces": [
     "demos/backend",
-    "demos/client",
+    "demos/frontend",
     "docs",
     "packages/*"
   ],
