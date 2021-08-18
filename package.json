@@ -1,8 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "demos/backend",
-    "demos/frontend",
+    "demos/*",
     "docs",
     "packages/*"
   ],
