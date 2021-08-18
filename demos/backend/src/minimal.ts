@@ -8,7 +8,7 @@ const server = Server.configure({
   ],
 
   async onAuthenticate(data) {
-    if (true || data.authentication !== 'my-access-token') {
+    if (data.authentication !== 'my-access-token') {
       throw new Error('Incorrect access token')
     }
   },

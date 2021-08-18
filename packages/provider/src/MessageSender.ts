@@ -6,7 +6,7 @@ import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
-import { MessageType, Constructable } from './types'
+import { Constructable } from './types'
 
 export class MessageSender {
 
@@ -30,12 +30,6 @@ export class MessageSender {
   }
 
   create() {
-    // authentication message is a special case as it's the only message that is
-    // sent as a string instead of a buffer
-    if (this.message.type === MessageType.Auth) {
-      return this.args.authentication
-    }
-
     return encoding.toUint8Array(this.encoder)
   }
 

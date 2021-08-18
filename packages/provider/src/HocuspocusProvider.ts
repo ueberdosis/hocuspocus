@@ -215,6 +215,17 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
   }
 
+  permissionDeniedHandler(document: Y.Doc, reason: string) {
+    this.log('Permission denied', reason)
+    this.isAuthenticated = false
+    this.shouldConnect = false
+  }
+
+  authenticatedHandler() {
+    this.isAuthenticated = true
+    this.startSync()
+  }
+
   // Ensure that the URL always ends with /
   get serverUrl() {
     while (this.options.url[this.options.url.length - 1] === '/') {
@@ -312,11 +323,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.startSync()
   }
 
-  webSocketConnectionAuthenticated() {
-    this.isAuthenticated = true
-    this.startSync()
-  }
-
   startSync() {
     this.send(SyncStepOneMessage, { document: this.document })
 
@@ -346,16 +352,11 @@ export class HocuspocusProvider extends EventEmitter {
   onMessage(event: MessageEvent) {
     this.lastMessageReceived = time.getUnixTime()
 
-    if (event.data === 'authenticated') {
-      this.webSocketConnectionAuthenticated()
-      return
-    }
-
     const message = new IncomingMessage(event.data)
 
     this.emit('message', { event, message })
 
-    new MessageReceiver(message, this).apply(this)
+    const encoder = new MessageReceiver(message, this).apply(this)
 
     // TODO: What’s that doing?
     // if (encoding.length(encoder) > 1) {

@@ -1,13 +1,15 @@
+import * as decoding from 'lib0/decoding'
 import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 
-import { Configuration } from './types'
+import { MessageType, Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden } from './CloseEvents'
+import { OutgoingMessage } from './OutgoingMessage'
 import packageJson from '../package.json'
 
 export const defaultConfiguration = {
@@ -166,9 +168,9 @@ export class Hocuspocus {
       connection,
     }
 
-    const incomingMessageQueue: (Iterable<number> | string)[] = []
+    const incomingMessageQueue: Uint8Array[] = []
 
-    const handleNewConnection = (listener: (input: Iterable<number> | string) => void) => async () => {
+    const handleNewConnection = (listener: (input: Uint8Array) => void) => async () => {
       if (this.authenticationRequired && !connection.isAuthenticated) {
         return
       }
@@ -186,28 +188,45 @@ export class Hocuspocus {
       })
     }
 
-    // Queue messages before the connection is established
-    const queueIncomingMessageListener = (input: Iterable<number> | string) => {
-      // string is authentication message
-      // TODO: formalize this?
-      if (typeof input === 'string') {
-        this.hooks('onAuthenticate', { authentication: input, ...hookPayload }, (contextAdditions: any) => {
+    // Messages are queued using this handler before the connection is
+    // authenticated and the document is loaded from persistence.
+    const queueIncomingMessageListener = (data: Uint8Array) => {
+      const decoder = decoding.createDecoder(data)
+      const type = decoding.readVarUint(decoder)
+
+      if (type === MessageType.Auth) {
+
+        // second int contains submessage type which will always be authentication
+        // when sent from client -> server
+        decoding.readVarUint(decoder)
+        const authentication = decoding.readVarString(decoder)
+
+        this.hooks('onAuthenticate', { authentication, ...hookPayload }, (contextAdditions: any) => {
           // merge context from hook
           context = { ...context, ...contextAdditions }
         })
           .then(() => {
             connection.isAuthenticated = true
-            incoming.send('authenticated')
+
+            const message = new OutgoingMessage().writeAuthenticated()
+            incoming.send(message.toUint8Array())
           })
           .then(handleNewConnection(queueIncomingMessageListener))
           .catch(error => {
-            incoming.send('permission-denied', () => {
+            // We could pass the Error message through to the client here but it
+            // risks exposing server internals or being a very long stack trace
+            // hardcoded to 'permission-denied' for now
+            const message = new OutgoingMessage().writePermissionDenied('permission-denied')
+
+            // Ensure that the permission denied message is sent before the
+            // connection is closed
+            incoming.send(message.toUint8Array(), () => {
               incoming.close(Forbidden.code, Forbidden.reason)
             })
           })
+      } else {
+        incomingMessageQueue.push(data)
       }
-
-      incomingMessageQueue.push(input)
     }
 
     incoming.on('message', queueIncomingMessageListener)
