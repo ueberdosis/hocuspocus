@@ -33,31 +33,12 @@ const data = {
 ```typescript
 import { Server } from '@hocuspocus/server'
 
-const server = Server.configure({
+const hocuspocus = Server.configure({
   async onConnect(data) {
-    const { requestParameters } = data
-
-    // Example test if a user is authenticated using a
-    // request parameter
-    if (requestParameters.get('access_token') !== 'super-secret-token') {
-      throw new Error('Not authorized!')
-    }
-
-    // Example to set a document to read only for the current user
-    // thus changes will not be accepted and synced to other clients
-    if(someCondition === true) {
-        data.connection.readOnly = true
-    }
-
-    // You can set contextual data to use it in other hooks
-    return {
-      user: {
-        id: 1234,
-        name: 'John',
-      },
-    }
+    // Output some information
+    process.stdout.write(`New websocket connection`)
   },
 })
 
-server.listen()
+hocuspocus.listen()
 ```
