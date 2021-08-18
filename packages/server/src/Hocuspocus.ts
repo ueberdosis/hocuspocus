@@ -344,7 +344,9 @@ export class Hocuspocus {
    * @private
    */
   private static getDocumentName(request: IncomingMessage): string {
-    return request.url?.slice(1)?.split('?')[0] || ''
+    return decodeURI(
+      request.url?.slice(1)?.split('?')[0] || '',
+    )
   }
 }
 
