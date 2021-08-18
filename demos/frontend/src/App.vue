@@ -9,9 +9,23 @@
         <li><a href="/subdocuments">Subdocuments</a></li>
       </ul>
     </nav>
-    <slot />
+    <router-view />
   </div>
 </template>
+
+<script>
+import routes from 'virtual:generated-pages'
+import { RouterView } from 'vue-router'
+
+export default {
+  components: {
+    RouterView,
+  },
+  mounted() {
+    console.log(routes)
+  },
+}
+</script>
 
 <style>
 .page {

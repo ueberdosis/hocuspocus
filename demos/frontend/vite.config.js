@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
-import { createVuePlugin } from 'vite-plugin-vue2'
+import Vue from '@vitejs/plugin-vue'
+import Pages from 'vite-plugin-pages'
 
 // https://vitejs.dev/config/
-// https://github.com/underfin/vite-plugin-vue2
 export default defineConfig({
-  plugins: [createVuePlugin()],
+  plugins: [
+    Vue(),
+    Pages(),
+  ],
 })

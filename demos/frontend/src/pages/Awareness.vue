@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <div>
     <h1>
       Awareness
     </h1>
@@ -40,7 +40,7 @@
     <ul>
       <li>Disconnect → Connect → States aren’t synced</li>
     </ul>
-  </Layout>
+  </div>
 </template>
 
 <script>

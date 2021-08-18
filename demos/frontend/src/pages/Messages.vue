@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <div>
     <h1>
       Messages
     </h1>
@@ -9,7 +9,7 @@
     <p>
       Open console
     </p>
-  </Layout>
+  </div>
 </template>
 
 <script>

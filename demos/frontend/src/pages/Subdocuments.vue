@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <div>
     <h1>
       Default
     </h1>
@@ -13,7 +13,7 @@
     <div v-if="editor">
       <editor-content :editor="editor" class="editor" />
     </div> -->
-  </Layout>
+  </div>
 </template>
 
 <script>

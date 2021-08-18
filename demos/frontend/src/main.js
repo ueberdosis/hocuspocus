@@ -1,30 +1,18 @@
-import Vue from 'vue/dist/vue'
-import Default from './pages/Default.vue'
-import Awareness from './pages/Awareness.vue'
-import Rooms from './pages/Rooms.vue'
-import Messages from './pages/Messages.vue'
-import Subdocuments from './pages/Subdocuments.vue'
-import Layout from './Layout.vue'
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import routes from 'virtual:generated-pages'
+import App from './App.vue'
+import StatusBar from './components/StatusBar.vue'
 
-const routes = {
-  '/': Default,
-  '/awareness': Awareness,
-  '/rooms': Rooms,
-  '/messages': Messages,
-  '/subdocuments': Subdocuments,
-}
-
-Vue.component('Layout', Layout)
-
-const app = new Vue({
-  el: '#app',
-  data: {
-    currentRoute: window.location.pathname,
-  },
-  computed: {
-    ViewComponent() {
-      return routes[this.currentRoute]
-    },
-  },
-  render(h) { return h(this.ViewComponent) },
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
 })
+
+const app = createApp(App)
+
+app.use(router)
+
+app.component('StatusBar', StatusBar)
+
+app.mount('#app')

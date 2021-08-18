@@ -1,8 +1,12 @@
 <template>
-  <Layout>
+  <div>
     <h1>
       Rooms
     </h1>
+
+    <p>
+      TODO: Isn’t reactive anymore with Vue 3.
+    </p>
 
     <table border="1" cellpadding="5">
       <tr :key="room.name" v-for="room in rooms">
@@ -16,14 +20,13 @@
         </td>
       </tr>
     </table>
-  </Layout>
+  </div>
 </template>
 
 <script>
 import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
-// import { HocuspocusProvider } from '../../../../packages/provider/src'
-import { awarenessStatesToArray } from '../../../../packages/provider/src'
+// import { WebsocketProvider } from 'y-websocket'
+import { HocuspocusProvider, awarenessStatesToArray } from '../../../../packages/provider/src'
 
 class Room {
   doc = new Y.Doc()
@@ -36,12 +39,15 @@ class Room {
 
   constructor(name) {
     this.name = name
-    this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
-    // this.provider = new HocuspocusProvider({
-    //   url: 'ws://localhost:1234',
-    //   document: this.doc,
-    //   name: this.name,
-    // })
+    // this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
+    this.provider = new HocuspocusProvider({
+      url: 'ws://localhost:1234',
+      document: this.doc,
+      name: this.name,
+      onConnect: () => {
+        console.log('connected')
+      },
+    })
 
     this.provider.on('status', ({ status }) => {
       this.status = status
