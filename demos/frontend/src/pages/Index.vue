@@ -4,10 +4,6 @@
       Default
     </h1>
 
-    <td>
-      TODO: Doesn’t run with Vue 3, need to check
-    </td>
-
     <StatusBar v-if="provider" :provider="provider" />
 
     <h2>
@@ -32,7 +28,7 @@
 </template>
 
 <script>
-import { Editor, EditorContent } from '@tiptap/vue-3'
+import { Editor, EditorContent } from '@tiptap/vue-2'
 // import StarterKit from '@tiptap/starter-kit'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'

@@ -1,18 +1,21 @@
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import Vue from 'vue/dist/vue'
 import routes from 'virtual:generated-pages'
-import App from './App.vue'
+import VueRouter from 'vue-router'
 import StatusBar from './components/StatusBar.vue'
+import App from './App.vue'
 
-const router = createRouter({
-  history: createWebHistory(),
+Vue.component('StatusBar', StatusBar)
+
+const router = new VueRouter({
   routes,
 })
 
-const app = createApp(App)
+Vue.use(VueRouter)
 
-app.use(router)
-
-app.component('StatusBar', StatusBar)
-
-app.mount('#app')
+const app = new Vue({
+  router,
+  components: {
+    App,
+  },
+  template: '<App />',
+}).$mount('#app')

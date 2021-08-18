@@ -4,10 +4,6 @@
       Rooms
     </h1>
 
-    <p>
-      TODO: Isn’t reactive anymore with Vue 3.
-    </p>
-
     <table border="1" cellpadding="5">
       <tr :key="room.name" v-for="room in rooms">
         <td>{{ room.name }}</td>
