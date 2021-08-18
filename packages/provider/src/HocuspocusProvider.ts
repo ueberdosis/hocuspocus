@@ -40,6 +40,7 @@ export interface HocuspocusProviderOptions {
   reconnectTimeoutBase: number,
   maxReconnectTimeout: number,
   messageReconnectTimeout: number,
+  onAuthenticated: () => void,
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
@@ -243,7 +244,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('sync', { state })
   }
 
-  get authenticationRequired(): boolean {
+  get isAuthenticationRequired(): boolean {
     return !!this.options.authentication && !this.isAuthenticated
   }
 
@@ -303,7 +304,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
-    if (this.authenticationRequired) {
+    if (this.isAuthenticationRequired) {
       this.send(AuthenticationMessage, { authentication: this.options.authentication })
       return
     }
@@ -312,16 +313,11 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   webSocketConnectionAuthenticated() {
-    // TODO: Never called
     this.isAuthenticated = true
     this.startSync()
   }
 
   startSync() {
-    if (this.authenticationRequired) {
-      throw new Error('Attempted to send sync messages before auth completed')
-    }
-
     this.send(SyncStepOneMessage, { document: this.document })
 
     if (this.awareness.getLocalState() !== null) {
@@ -359,7 +355,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('message', { event, message })
 
-    const encoder = new MessageReceiver(message, this).apply(this)
+    new MessageReceiver(message, this).apply(this)
 
     // TODO: What’s that doing?
     // if (encoding.length(encoder) > 1) {

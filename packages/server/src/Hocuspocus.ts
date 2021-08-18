@@ -168,6 +168,24 @@ export class Hocuspocus {
 
     const incomingMessageQueue: (Iterable<number> | string)[] = []
 
+    const handleNewConnection = (listener: (input: Iterable<number> | string) => void) => async () => {
+      if (this.authenticationRequired && !connection.isAuthenticated) {
+        return
+      }
+
+      // if no hook interrupts create a document and connection
+      this.createDocument(documentName, request, socketId, context).then(document => {
+        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+
+        // Remove the queue listener
+        incoming.off('message', listener)
+        // Work through queued messages
+        incomingMessageQueue.forEach(input => {
+          incoming.emit('message', input)
+        })
+      })
+    }
+
     // Queue messages before the connection is established
     const queueIncomingMessageListener = (input: Iterable<number> | string) => {
       // string is authentication message
@@ -176,29 +194,16 @@ export class Hocuspocus {
         this.hooks('onAuthenticate', { authentication: input, ...hookPayload }, (contextAdditions: any) => {
           // merge context from hook
           context = { ...context, ...contextAdditions }
-          connection.isAuthenticated = true
-          incoming.send('authenticated')
         })
-          .then(async () => {
-            // if no hook interrupts create a document and connection
-            this.createDocument(documentName, request, socketId, context).then(document => {
-              this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
-
-              // Remove the queue listener
-              incoming.off('message', queueIncomingMessageListener)
-              // Work through queued messages
-              incomingMessageQueue.forEach(input => {
-                incoming.emit('message', input)
-              })
-            })
+          .then(() => {
+            connection.isAuthenticated = true
+            incoming.send('authenticated')
           })
+          .then(handleNewConnection(queueIncomingMessageListener))
           .catch(error => {
-          // if a hook interrupts, close the websocket connection
-            incoming.close(Forbidden.code, Forbidden.reason)
-
-            if (error) {
-              throw error
-            }
+            incoming.send('permission-denied', () => {
+              incoming.close(Forbidden.code, Forbidden.reason)
+            })
           })
       }
 
@@ -211,31 +216,15 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-    // .then(async () => {
-    //   if (this.authenticationRequired) {
-    //     return
-    //   }
+      .then(handleNewConnection(queueIncomingMessageListener))
+      .catch(error => {
+        // if a hook interrupts, close the websocket connection
+        incoming.close(Forbidden.code, Forbidden.reason)
 
-    //   // if no hook interrupts create a document and connection
-    //   this.createDocument(documentName, request, socketId, context).then(document => {
-    //     this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
-
-    //     // Remove the queue listener
-    //     incoming.off('message', queueIncomingMessageListener)
-    //     // Work through queued messages
-    //     incomingMessageQueue.forEach(input => {
-    //       incoming.emit('message', input)
-    //     })
-    //   })
-    // })
-    // .catch(error => {
-    //   // if a hook interrupts, close the websocket connection
-    //   incoming.close(Forbidden.code, Forbidden.reason)
-
-    //   if (error) {
-    //     throw error
-    //   }
-    // })
+        if (error) {
+          throw error
+        }
+      })
 
   }
 
