@@ -21,7 +21,7 @@ const server = Server.configure({
 
     // Example test if a user is authenticated using a
     // request parameter
-    if (requestParameters.access_token !== 'super-secret-token') {
+    if (requestParameters.get('access_token') !== 'super-secret-token') {
       throw new Error('Not authorized!')
     }
 

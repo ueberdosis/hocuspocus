@@ -84,7 +84,7 @@ You can use this to authorize your users. By responding with a 403 status code t
 
 ```typescript
 // authorize the user by the request parameters or headers
-if (payload.requestParameters?.token !== "secret-api-token") {
+if (payload.requestParameters?.get('token') !== "secret-api-token") {
   response.writeHead(403, 'unathorized')
   return response.end()
 }
