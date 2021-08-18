@@ -51,6 +51,7 @@ export class Hocuspocus {
     }
 
     this.configuration.extensions.push({
+      onAuthenticate: this.configuration.onAuthenticate,
       onChange: this.configuration.onChange,
       onConfigure: this.configuration.onConfigure,
       onConnect: this.configuration.onConnect,
@@ -70,6 +71,10 @@ export class Hocuspocus {
 
     return this
 
+  }
+
+  get authenticationRequired(): boolean {
+    return this.configuration.onAuthenticate !== undefined
   }
 
   /**
@@ -148,7 +153,7 @@ export class Hocuspocus {
 
     // create a unique identifier for every socket connection
     const socketId = uuid()
-    const connection = { readOnly: false }
+    const connection = { readOnly: false, isAuthenticated: false }
 
     const hookPayload = {
       documentName,
@@ -159,10 +164,42 @@ export class Hocuspocus {
       connection,
     }
 
-    const incomingMessageQueue: Iterable<number>[] = []
+    const incomingMessageQueue: (Iterable<number> | string)[] = []
 
     // Queue messages before the connection is established
-    const queueIncomingMessageListener = (input: Iterable<number>) => {
+    const queueIncomingMessageListener = (input: Iterable<number> | string) => {
+      // string is authentication message
+      // TODO: formalize this?
+      if (typeof input === 'string') {
+        this.hooks('onAuthenticate', { authentication: input, ...hookPayload }, (contextAdditions: any) => {
+          // merge context from hook
+          context = { ...context, ...contextAdditions }
+          connection.isAuthenticated = true
+          incoming.send('authenticated')
+        })
+          .then(async () => {
+            // if no hook interrupts create a document and connection
+            this.createDocument(documentName, request, socketId, context).then(document => {
+              this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+
+              // Remove the queue listener
+              incoming.off('message', queueIncomingMessageListener)
+              // Work through queued messages
+              incomingMessageQueue.forEach(input => {
+                incoming.emit('message', input)
+              })
+            })
+          })
+          .catch(error => {
+          // if a hook interrupts, close the websocket connection
+            incoming.close(Forbidden.code, Forbidden.reason)
+
+            if (error) {
+              throw error
+            }
+          })
+      }
+
       incomingMessageQueue.push(input)
     }
 
@@ -172,27 +209,31 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-      .then(() => {
-        // if no hook interrupts create a document and connection
-        this.createDocument(documentName, request, socketId, context).then(document => {
-          this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+    // .then(async () => {
+    //   if (this.authenticationRequired) {
+    //     return
+    //   }
 
-          // Remove the queue listener
-          incoming.off('message', queueIncomingMessageListener)
-          // Work through queued messages
-          incomingMessageQueue.forEach(input => {
-            incoming.emit('message', input)
-          })
-        })
-      })
-      .catch(error => {
-        // if a hook interrupts, close the websocket connection
-        incoming.close(Forbidden.code, Forbidden.reason)
+    //   // if no hook interrupts create a document and connection
+    //   this.createDocument(documentName, request, socketId, context).then(document => {
+    //     this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
-        if (error) {
-          throw error
-        }
-      })
+    //     // Remove the queue listener
+    //     incoming.off('message', queueIncomingMessageListener)
+    //     // Work through queued messages
+    //     incomingMessageQueue.forEach(input => {
+    //       incoming.emit('message', input)
+    //     })
+    //   })
+    // })
+    // .catch(error => {
+    //   // if a hook interrupts, close the websocket connection
+    //   incoming.close(Forbidden.code, Forbidden.reason)
+
+    //   if (error) {
+    //     throw error
+    //   }
+    // })
 
   }
 

@@ -7,6 +7,12 @@ const server = Server.configure({
     new Logger(),
   ],
 
+  async onAuthenticate(data) {
+    if (data.authentication !== 'my-access-token') {
+      throw new Error('Incorrect access token')
+    }
+  },
+
   // Test error handling
   // async onConnect(data) {
   //   throw new Error('CRASH')

@@ -1,12 +1,12 @@
 import * as encoding from 'lib0/encoding'
 import * as bc from 'lib0/broadcastchannel'
-import { OutgoingMessage } from './OutgoingMessage'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
-import { Constructable } from './types'
+import { MessageType, Constructable } from './types'
 
 export class MessageSender {
 
@@ -14,7 +14,10 @@ export class MessageSender {
 
   message: any
 
+  args: any
+
   constructor(Message:
+    Constructable<AuthenticationMessage> |
     Constructable<AwarenessMessage> |
     Constructable<QueryAwarenessMessage> |
     Constructable<SyncStepOneMessage> |
@@ -23,9 +26,16 @@ export class MessageSender {
   args: any = {}) {
     this.message = new Message()
     this.encoder = this.message.get(args)
+    this.args = args
   }
 
   create() {
+    // authentication message is a special case as it's the only message that is
+    // sent as a string instead of a buffer
+    if (this.message.type === MessageType.Auth) {
+      return this.args.authentication
+    }
+
     return encoding.toUint8Array(this.encoder)
   }
 

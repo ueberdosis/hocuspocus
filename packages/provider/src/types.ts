@@ -11,11 +11,11 @@ export enum MessageType {
 
 export interface OutgoingMessageInterface {
   encoder: encoding.Encoder
-
   type?: MessageType
 }
 
 export interface OutgoingMessageArguments {
+  authentication: string,
   document: Y.Doc,
   awareness: Awareness,
   clients: number[],

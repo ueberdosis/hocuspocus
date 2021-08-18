@@ -8,6 +8,7 @@ import Document from './Document'
 export enum MessageType {
   Sync = 0,
   Awareness = 1,
+  Auth = 2,
 }
 
 export enum WsReadyStates {
@@ -22,6 +23,7 @@ export interface AwarenessUpdate {
 }
 
 export interface Extension {
+  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   onChange(data: onChangePayload): Promise<any>,
   onConnect(data: onConnectPayload): Promise<any>,
   onConfigure(data: onConfigurePayload): Promise<any>,
@@ -37,6 +39,14 @@ export interface Configuration extends Extension {
   extensions: Array<Extension>,
   port: number | null,
   timeout: number,
+}
+
+export interface onAuthenticatePayload {
+  documentName: string,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  authentication: string,
 }
 
 export interface onConnectPayload {
