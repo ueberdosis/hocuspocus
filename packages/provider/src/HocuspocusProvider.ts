@@ -32,6 +32,7 @@ export interface HocuspocusProviderOptions {
   name: string,
   document: Y.Doc,
   connect: boolean,
+  broadcast: boolean,
   awareness: Awareness,
   token: string,
   parameters: { [key: string]: any },
@@ -63,6 +64,7 @@ export class HocuspocusProvider extends EventEmitter {
     parameters: {},
     debug: false,
     connect: true,
+    broadcast: true,
     forceSyncInterval: false,
     reconnectTimeoutBase: 1200,
     maxReconnectTimeout: 2500,
@@ -475,9 +477,15 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   broadcast(Message: OutgoingMessage, args: any) {
-    if (this.subscribedToBroadcastChannel) {
-      new MessageSender(Message, args).broadcast(this.broadcastChannel)
+    if (!this.options.broadcast) {
+      return
     }
+
+    if (!this.subscribedToBroadcastChannel) {
+      return
+    }
+
+    new MessageSender(Message, args).broadcast(this.broadcastChannel)
   }
 
   log(message: string): void {

@@ -370,7 +370,7 @@ export class Hocuspocus {
     }
 
     chain.catch(error => {
-      if (error.message) {
+      if (error?.message) {
         // TODO: Move to Logger extension?
         console.log(`[${name}]`, error.message)
       }

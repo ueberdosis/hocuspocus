@@ -34,7 +34,7 @@ const provider = new HocuspocusProvider({
   onOutgoingMessage: ({ message }) => {
    // …
   },
-  onSynced: ({ status }) => {
+  onSynced: ({ state }) => {
     // …
   },
   onClose: ({ event }) => {
@@ -72,10 +72,10 @@ const onMessage = () => {
 }
 
 // Bind …
-provider.on('onMessage', message)
+provider.on('onMessage', onMessage)
 
 // … and unbind.
-provider.off('onMessage', message)
+provider.off('onMessage', onMessage)
 ```
 
 ## List of events
