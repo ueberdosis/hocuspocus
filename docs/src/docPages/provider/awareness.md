@@ -42,7 +42,7 @@ provider = new HocuspocusProvider({
   // Listen for changes …
   onAwarenessChange: ({ states }) => {
     console.log(states)
-  }),
+  },
 })
 
 // Actually set the awareness field for the current user

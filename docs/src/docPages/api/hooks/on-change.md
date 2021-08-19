@@ -68,7 +68,7 @@ const hocuspocus = Server.configure({
     }
 
     debounced?.clear()
-    debounced = debounce(() => save, 4000)
+    debounced = debounce(save, 4000)
     debounced()
   },
 })
