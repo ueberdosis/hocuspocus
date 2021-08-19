@@ -41,6 +41,7 @@ export interface HocuspocusProviderOptions {
   maxReconnectTimeout: number,
   messageReconnectTimeout: number,
   onAuthenticated: () => void,
+  onAuthenticationFailed: ({ reason: string }) => void,
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
@@ -68,6 +69,7 @@ export class HocuspocusProvider extends EventEmitter {
     // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
     onAuthenticated: () => null,
+    onAuthenticationFailed: () => null,
     onOpen: () => null,
     onConnect: () => null,
     onMessage: () => null,
@@ -117,6 +119,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.on('open', this.options.onOpen)
     this.on('authenticated', this.options.onAuthenticated)
+    this.on('authenticationFailed', this.options.onAuthenticationFailed)
     this.on('connect', this.options.onConnect)
     this.on('message', this.options.onMessage)
     this.on('outgoingMessage', this.options.onOutgoingMessage)
@@ -215,14 +218,18 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
   }
 
-  permissionDeniedHandler(document: Y.Doc, reason: string) {
+  permissionDeniedHandler(reason: string) {
+    this.emit('authenticationFailed', { reason })
     this.log('Permission denied', reason)
+
     this.isAuthenticated = false
     this.shouldConnect = false
   }
 
   authenticatedHandler() {
     this.isAuthenticated = true
+
+    this.emit('authenticated')
     this.startSync()
   }
 

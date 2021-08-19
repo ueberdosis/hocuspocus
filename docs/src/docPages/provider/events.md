@@ -19,7 +19,10 @@ const provider = new HocuspocusProvider({
   onConnect: () => {
     // …
   },
-  onAuthenticate: () => {
+  onAuthenticated: () => {
+    // …
+  },
+  onAuthenticationFailed: ({ reason }) => {
     // …
   },
   onStatus: ({ status }) => {
@@ -77,15 +80,17 @@ provider.off('onMessage', message)
 
 ## List of events
 
-| Name            | Description                                                |
-| --------------- | ---------------------------------------------------------- |
-| open            | When the WebSocket connection is created.                  |
-| connect         | When the provider has succesfully connected to the server. |
-| authenticate    | When the client sends authentication to the server.        |
-| status          | When the connections status changes.                       |
-| message         | When a message is incoming.                                |
-| outgoingMessage | When a message will be sent.                               |
-| synced          | When the Y.js document is successfully synced.             |
-| close           | When the WebSocket connection is closed.                   |
-| disconnect      | When the provider disconnects.                             |
-| destroy         | When the provider will be destroyed.                       |
+| Name                 | Description                                                |
+|----------------------|------------------------------------------------------------|
+| open                 | When the WebSocket connection is created.                  |
+| connect              | When the provider has succesfully connected to the server. |
+| authenticated        | When the client has successfully authenticated.            |
+| authenticationFailed | When the client authentication was not successful.         |
+| status               | When the connections status changes.                       |
+| message              | When a message is incoming.                                |
+| outgoingMessage      | When a message will be sent.                               |
+| synced               | When the Y.js document is successfully synced.             |
+| close                | When the WebSocket connection is closed.                   |
+| disconnect           | When the provider disconnects.                             |
+| destroy              | When the provider will be destroyed.                       |
+

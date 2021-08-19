@@ -66,7 +66,6 @@ export class MessageReceiver {
   private applyAuthMessage(provider: HocuspocusProvider) {
     authProtocol.readAuthMessage(
       this.message.decoder,
-      provider.document,
       provider.permissionDeniedHandler.bind(provider),
       provider.authenticatedHandler.bind(provider),
     )

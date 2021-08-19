@@ -82,6 +82,9 @@ export default {
       onAuthenticated: () => {
         console.log('authenticated')
       },
+      onAuthenticationFailed: () => {
+        console.log('authentication failed')
+      },
       onMessage: ({ event, message }) => {
         console.log(`[message] ◀️ ${message.name}`, event)
       },

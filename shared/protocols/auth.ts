@@ -22,14 +22,18 @@ export const writeAuthenticated = (encoder: encoding.Encoder) => {
   encoding.writeVarUint(encoder, messageAuthenticated)
 }
 
-export const readAuthMessage = (decoder: decoding.Decoder, document: Y.Doc, permissionDeniedHandler: any, authenticatedHandler: any) => {
+export const readAuthMessage = (
+  decoder: decoding.Decoder,
+  permissionDeniedHandler: (reason: string) => void,
+  authenticatedHandler: () => void,
+) => {
   switch (decoding.readVarUint(decoder)) {
     case messagePermissionDenied: {
-      permissionDeniedHandler(document, decoding.readVarString(decoder))
+      permissionDeniedHandler(decoding.readVarString(decoder))
       break
     }
     case messageAuthenticated: {
-      authenticatedHandler(document)
+      authenticatedHandler()
       break
     }
     default:
