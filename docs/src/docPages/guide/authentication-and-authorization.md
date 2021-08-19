@@ -8,7 +8,7 @@ With the `onAuthenticate` hook you can check if a client is authenticated and au
 
 ## Example
 
-When throwing an error (or rejecting the returned Promise), the connection to the client will be terminated. If the client is authorized and authenticated you can also return contextual data which will be accessible in other hooks. But you don't need to.
+When throwing an error (or rejecting the returned Promise), the connection to the client will be terminated. If the client is authorized and authenticated you can also return contextual data such as a user id which will be accessible in other hooks. But you don’t need to.
 
 For more information on the hook and it's payload checkout it's [API section](/api/on-authenticate).
 
@@ -37,7 +37,7 @@ const server = Server.configure({
 server.listen()
 ```
 
-On the client you would pass the authentication parameter as one of the Hocuspocus options, like so:
+On the client you would pass the "token" parameter as one of the Hocuspocus options, like so:
 
 ```typescript
 new HocuspocusProvider({
