@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="min-h-screen flex flex-col">
     <header class="border-b px-8 py-6 font-bold">
       Playground
     </header>
-    <div class="flex flex-row">
+    <div class="flex flex-grow">
       <nav class="w-60 pt-4 border-r">
         <ul>
           <li><router-link class="block px-8 py-3" to="/">Text editing</router-link></li>
