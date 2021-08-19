@@ -28,12 +28,12 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
-  async onAuthenticate({ documentName, authentication }) {
+  async onAuthenticate({ documentName, token }) {
 
     // Could be an API call, DB query or whatever …
     return axios.get('/user', {
       headers: {
-        Authorization: `Bearer ${authentication}`
+        Authorization: `Bearer ${token}`
       }
     })
   },

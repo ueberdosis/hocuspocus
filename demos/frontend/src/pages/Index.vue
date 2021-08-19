@@ -75,7 +75,7 @@ export default {
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
-      authentication: 'my-access-token',
+      token: 'my-access-token',
       onConnect: () => {
         console.log('connected')
       },

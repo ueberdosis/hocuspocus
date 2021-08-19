@@ -12,7 +12,7 @@ context('provider/onAuthenticationFailed', () => {
 
     Server.configure({
       port: 4000,
-      async onAuthenticate({ authentication }) {
+      async onAuthenticate({ token }) {
         throw new Error()
       },
     }).listen()
@@ -22,7 +22,7 @@ context('provider/onAuthenticationFailed', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
       onAuthenticationFailed: () => {
         client.destroy()
         Server.destroy()

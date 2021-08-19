@@ -12,8 +12,8 @@ context('provider/onAuthenticated', () => {
 
     Server.configure({
       port: 4000,
-      async onAuthenticate({ authentication }) {
-        if (authentication !== 'SUPER-SECRET-TOKEN') {
+      async onAuthenticate({ token }) {
+        if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
         }
       },
@@ -24,7 +24,7 @@ context('provider/onAuthenticated', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
       onAuthenticated: () => {
         client.destroy()
         Server.destroy()

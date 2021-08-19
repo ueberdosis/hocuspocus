@@ -17,10 +17,10 @@ import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
   async onAuthenticate(data) {
-    const { authentication } = data
+    const { token } = data
 
     // Example test if a user is authenticated with a token passed from the client
-    if (authentication !== 'super-secret-token') {
+    if (token !== 'super-secret-token') {
       throw new Error('Not authorized!')
     }
 
@@ -44,6 +44,6 @@ new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'example-document',
   document: ydoc,
-  authentication: 'super-secret-token',
+  token: 'super-secret-token',
 })
 ```

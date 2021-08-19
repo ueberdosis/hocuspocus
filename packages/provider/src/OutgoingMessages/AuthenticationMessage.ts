@@ -9,12 +9,12 @@ export class AuthenticationMessage extends OutgoingMessage {
   description = 'Authentication'
 
   get(args: Partial<OutgoingMessageArguments>) {
-    if (typeof args.authentication === 'undefined') {
-      throw new Error('The authentication message requires authentication as an argument')
+    if (typeof args.token === 'undefined') {
+      throw new Error('The authentication message requires token as an argument')
     }
 
     encoding.writeVarUint(this.encoder, this.type)
-    writeAuthentication(this.encoder, args.authentication)
+    writeAuthentication(this.encoder, args.token)
 
     return this.encoder
   }

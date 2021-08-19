@@ -33,7 +33,7 @@ export interface HocuspocusProviderOptions {
   document: Y.Doc,
   connect: boolean,
   awareness: Awareness,
-  authentication: string,
+  token: string,
   parameters: { [key: string]: any },
   WebSocketPolyfill: any,
   forceSyncInterval: false | number,
@@ -59,7 +59,7 @@ export class HocuspocusProvider extends EventEmitter {
   public options: HocuspocusProviderOptions = {
     url: '',
     name: '',
-    authentication: null,
+    token: null,
     parameters: {},
     debug: false,
     connect: true,
@@ -263,7 +263,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   get isAuthenticationRequired(): boolean {
-    return !!this.options.authentication && !this.isAuthenticated
+    return !!this.options.token && !this.isAuthenticated
   }
 
   connect() {
@@ -323,7 +323,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('connect')
 
     if (this.isAuthenticationRequired) {
-      this.send(AuthenticationMessage, { authentication: this.options.authentication })
+      this.send(AuthenticationMessage, { token: this.options.token })
       return
     }
 

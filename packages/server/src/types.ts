@@ -46,7 +46,7 @@ export interface onAuthenticatePayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  authentication: string,
+  token: string,
 }
 
 export interface onConnectPayload {

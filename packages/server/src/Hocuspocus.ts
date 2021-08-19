@@ -199,9 +199,9 @@ export class Hocuspocus {
         // second int contains submessage type which will always be authentication
         // when sent from client -> server
         decoding.readVarUint(decoder)
-        const authentication = decoding.readVarString(decoder)
+        const token = decoding.readVarString(decoder)
 
-        this.hooks('onAuthenticate', { authentication, ...hookPayload }, (contextAdditions: any) => {
+        this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
           // merge context from hook
           context = { ...context, ...contextAdditions }
         })

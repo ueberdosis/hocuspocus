@@ -26,7 +26,7 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
     })
   })
 
@@ -35,9 +35,9 @@ context('server/onAuthenticate', () => {
 
     Server.configure({
       port: 4000,
-      async onAuthenticate({ authentication }) {
+      async onAuthenticate({ token }) {
         setTimeout(() => {
-          assert.strictEqual(authentication, 'SUPER-SECRET-TOKEN')
+          assert.strictEqual(token, 'SUPER-SECRET-TOKEN')
 
           client.destroy()
           Server.destroy()
@@ -52,7 +52,7 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
     })
   })
 
@@ -81,7 +81,7 @@ context('server/onAuthenticate', () => {
 
         done()
       },
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
     })
   })
 
@@ -90,8 +90,8 @@ context('server/onAuthenticate', () => {
 
     Server.configure({
       port: 4000,
-      async onAuthenticate({ authentication }) {
-        if (authentication !== 'SUPER-SECRET-TOKEN') {
+      async onAuthenticate({ token }) {
+        if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
         }
       },
@@ -108,7 +108,7 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      authentication: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
     })
   })
 })

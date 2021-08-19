@@ -15,7 +15,7 @@ export interface OutgoingMessageInterface {
 }
 
 export interface OutgoingMessageArguments {
-  authentication: string,
+  token: string,
   document: Y.Doc,
   awareness: Awareness,
   clients: number[],

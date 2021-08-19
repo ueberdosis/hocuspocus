@@ -22,7 +22,7 @@ const data = {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  authentication: string,
+  token: string,
   connection: {
     readOnly: boolean,
   },
@@ -36,11 +36,11 @@ import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
   async onAuthenticate(data) {
-    const { authentication } = data
+    const { token } = data
 
     // Example test if a user is authenticated using a
     // request parameter
-    if (authentication !== 'super-secret-token') {
+    if (token !== 'super-secret-token') {
       throw new Error('Not authorized!')
     }
 
