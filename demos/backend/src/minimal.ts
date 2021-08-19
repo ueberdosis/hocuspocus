@@ -25,6 +25,20 @@ const server = Server.configure({
   //     resolve()
   //   }, 1337))
   // },
+
+  // Intercept HTTP requests
+  // onRequest(data) {
+  //   return new Promise((resolve, reject) => {
+  //     const { response } = data
+  //     // Respond with your custum content
+  //     response.writeHead(200, { 'Content-Type': 'text/plain' })
+  //     response.end('This is my custom response, yay!')
+
+  //     // Rejecting the promise will stop the chain and no further
+  //     // onRequest hooks are run
+  //     return reject()
+  //   })
+  // },
 })
 
 server.listen()
