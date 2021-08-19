@@ -1,13 +1,15 @@
+import * as decoding from 'lib0/decoding'
 import WebSocket from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 
-import { Configuration } from './types'
+import { MessageType, Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden } from './CloseEvents'
+import { OutgoingMessage } from './OutgoingMessage'
 import packageJson from '../package.json'
 
 export const defaultConfiguration = {
@@ -51,6 +53,7 @@ export class Hocuspocus {
     }
 
     this.configuration.extensions.push({
+      onAuthenticate: this.configuration.onAuthenticate,
       onChange: this.configuration.onChange,
       onConfigure: this.configuration.onConfigure,
       onConnect: this.configuration.onConnect,
@@ -70,6 +73,10 @@ export class Hocuspocus {
 
     return this
 
+  }
+
+  get authenticationRequired(): boolean {
+    return this.configuration.onAuthenticate !== undefined
   }
 
   /**
@@ -150,7 +157,7 @@ export class Hocuspocus {
 
     // create a unique identifier for every socket connection
     const socketId = uuid()
-    const connection = { readOnly: false }
+    const connection = { readOnly: false, isAuthenticated: false }
 
     const hookPayload = {
       documentName,
@@ -161,11 +168,65 @@ export class Hocuspocus {
       connection,
     }
 
-    const incomingMessageQueue: Iterable<number>[] = []
+    const incomingMessageQueue: Uint8Array[] = []
 
-    // Queue messages before the connection is established
-    const queueIncomingMessageListener = (input: Iterable<number>) => {
-      incomingMessageQueue.push(input)
+    const handleNewConnection = (listener: (input: Uint8Array) => void) => async () => {
+      if (this.authenticationRequired && !connection.isAuthenticated) {
+        return
+      }
+
+      // if no hook interrupts create a document and connection
+      this.createDocument(documentName, request, socketId, context).then(document => {
+        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+
+        // Remove the queue listener
+        incoming.off('message', listener)
+        // Work through queued messages
+        incomingMessageQueue.forEach(input => {
+          incoming.emit('message', input)
+        })
+      })
+    }
+
+    // Messages are queued using this handler before the connection is
+    // authenticated and the document is loaded from persistence.
+    const queueIncomingMessageListener = (data: Uint8Array) => {
+      const decoder = decoding.createDecoder(data)
+      const type = decoding.readVarUint(decoder)
+
+      if (type === MessageType.Auth) {
+
+        // second int contains submessage type which will always be authentication
+        // when sent from client -> server
+        decoding.readVarUint(decoder)
+        const token = decoding.readVarString(decoder)
+
+        this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
+          // merge context from hook
+          context = { ...context, ...contextAdditions }
+        })
+          .then(() => {
+            connection.isAuthenticated = true
+
+            const message = new OutgoingMessage().writeAuthenticated()
+            incoming.send(message.toUint8Array())
+          })
+          .then(handleNewConnection(queueIncomingMessageListener))
+          .catch(error => {
+            // We could pass the Error message through to the client here but it
+            // risks exposing server internals or being a very long stack trace
+            // hardcoded to 'permission-denied' for now
+            const message = new OutgoingMessage().writePermissionDenied('permission-denied')
+
+            // Ensure that the permission denied message is sent before the
+            // connection is closed
+            incoming.send(message.toUint8Array(), () => {
+              incoming.close(Forbidden.code, Forbidden.reason)
+            })
+          })
+      } else {
+        incomingMessageQueue.push(data)
+      }
     }
 
     incoming.on('message', queueIncomingMessageListener)
@@ -174,19 +235,7 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-      .then(() => {
-        // if no hook interrupts create a document and connection
-        this.createDocument(documentName, request, socketId, context).then(document => {
-          this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
-
-          // Remove the queue listener
-          incoming.off('message', queueIncomingMessageListener)
-          // Work through queued messages
-          incomingMessageQueue.forEach(input => {
-            incoming.emit('message', input)
-          })
-        })
-      })
+      .then(handleNewConnection(queueIncomingMessageListener))
       .catch(error => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)

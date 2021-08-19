@@ -2,10 +2,10 @@ import * as decoding from 'lib0/decoding'
 import * as encoding from 'lib0/encoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
-import * as authProtocol from 'y-protocols/auth'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
+import { readAuthMessage } from '../../../shared/protocols/auth'
 
 export class MessageReceiver {
 
@@ -63,15 +63,11 @@ export class MessageReceiver {
     )
   }
 
-  // TODO: This isn’t really used. Needs to be implemented in the server, or removed here.
   private applyAuthMessage(provider: HocuspocusProvider) {
-    authProtocol.readAuthMessage(
+    readAuthMessage(
       this.message.decoder,
-      provider.document,
-      // TODO: Add a configureable hook
-      (provider, reason) => {
-        console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
-      },
+      provider.permissionDeniedHandler.bind(provider),
+      provider.authenticatedHandler.bind(provider),
     )
   }
 

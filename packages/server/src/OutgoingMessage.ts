@@ -8,6 +8,7 @@ import {
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 
+import { writeAuthenticated, writePermissionDenied } from '../../../shared/protocols/auth'
 import { MessageType } from './types'
 import Document from './Document'
 
@@ -33,6 +34,20 @@ export class OutgoingMessage {
 
     writeVarUint(this.encoder, MessageType.Awareness)
     writeVarUint8Array(this.encoder, message)
+
+    return this
+  }
+
+  writeAuthenticated(): OutgoingMessage {
+    writeVarUint(this.encoder, MessageType.Auth)
+    writeAuthenticated(this.encoder)
+
+    return this
+  }
+
+  writePermissionDenied(reason: string): OutgoingMessage {
+    writeVarUint(this.encoder, MessageType.Auth)
+    writePermissionDenied(this.encoder, reason)
 
     return this
   }

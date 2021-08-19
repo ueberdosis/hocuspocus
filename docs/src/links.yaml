@@ -73,6 +73,8 @@
       items:
         - title: onConnect
           link: /api/hooks/on-connect
+        - title: onAuthenticate
+          link: /api/hooks/on-authenticate
         - title: onCreateDocument
           link: /api/hooks/on-create-document
         - title: onChange

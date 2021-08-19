@@ -1,5 +1,5 @@
 import * as encoding from 'lib0/encoding'
-import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 

@@ -12,6 +12,7 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 | Hook               | Description                               | Link                                 |
 | ------------------ | ----------------------------------------- | ------------------------------------ |
 | `onConnect`        | When a connection is established          | [Read more](/api/on-connect)         |
+| `onAuthenticate`   | When authentication is passed             | [Read more](/api/on-authenticate)    |
 | `onCreateDocument` | When a new document is created            | [Read more](/api/on-create-document) |
 | `onChange`         | When a document has changed               | [Read more](/api/on-change)          |
 | `onDisconnect`     | When a connection was closed              | [Read more](/api/on-disconnect)      |
@@ -27,15 +28,14 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
-  async onConnect({ documentName, requestParameters }) {
+  async onAuthenticate({ documentName, token }) {
 
     // Could be an API call, DB query or whatever …
     return axios.get('/user', {
       headers: {
-        Authorization: `Bearer ${requestParameters.get('token')}}`
+        Authorization: `Bearer ${token}`
       }
     })
-
   },
 })
 

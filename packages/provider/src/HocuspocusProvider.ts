@@ -2,7 +2,6 @@
 import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
-import * as encoding from 'lib0/encoding'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import * as math from 'lib0/math'
@@ -16,6 +15,7 @@ import { MessageSender } from './MessageSender'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
@@ -34,12 +34,15 @@ export interface HocuspocusProviderOptions {
   connect: boolean,
   broadcast: boolean,
   awareness: Awareness,
+  token: string,
   parameters: { [key: string]: any },
   WebSocketPolyfill: any,
   forceSyncInterval: false | number,
   reconnectTimeoutBase: number,
   maxReconnectTimeout: number,
   messageReconnectTimeout: number,
+  onAuthenticated: () => void,
+  onAuthenticationFailed: ({ reason: string }) => void,
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
@@ -57,6 +60,7 @@ export class HocuspocusProvider extends EventEmitter {
   public options: HocuspocusProviderOptions = {
     url: '',
     name: '',
+    token: null,
     parameters: {},
     debug: false,
     connect: true,
@@ -66,6 +70,8 @@ export class HocuspocusProvider extends EventEmitter {
     maxReconnectTimeout: 2500,
     // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
+    onAuthenticated: () => null,
+    onAuthenticationFailed: () => null,
     onOpen: () => null,
     onConnect: () => null,
     onMessage: () => null,
@@ -92,6 +98,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   isSynced = false
 
+  isAuthenticated = false
+
   lastMessageReceived = 0
 
   mux = mutex.createMutex()
@@ -112,6 +120,8 @@ export class HocuspocusProvider extends EventEmitter {
     this.shouldConnect = options.connect !== undefined ? options.connect : this.shouldConnect
 
     this.on('open', this.options.onOpen)
+    this.on('authenticated', this.options.onAuthenticated)
+    this.on('authenticationFailed', this.options.onAuthenticationFailed)
     this.on('connect', this.options.onConnect)
     this.on('message', this.options.onMessage)
     this.on('outgoingMessage', this.options.onOutgoingMessage)
@@ -210,6 +220,21 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
   }
 
+  permissionDeniedHandler(reason: string) {
+    this.emit('authenticationFailed', { reason })
+    this.log('Permission denied', reason)
+
+    this.isAuthenticated = false
+    this.shouldConnect = false
+  }
+
+  authenticatedHandler() {
+    this.isAuthenticated = true
+
+    this.emit('authenticated')
+    this.startSync()
+  }
+
   // Ensure that the URL always ends with /
   get serverUrl() {
     while (this.options.url[this.options.url.length - 1] === '/') {
@@ -237,6 +262,10 @@ export class HocuspocusProvider extends EventEmitter {
     this.isSynced = state
     this.emit('synced', { state })
     this.emit('sync', { state })
+  }
+
+  get isAuthenticationRequired(): boolean {
+    return !!this.options.token && !this.isAuthenticated
   }
 
   connect() {
@@ -283,6 +312,10 @@ export class HocuspocusProvider extends EventEmitter {
 
   onOpen(event: OpenEvent) {
     this.emit('open', { event })
+
+    if (this.status !== WebSocketStatus.Connected) {
+      this.webSocketConnectionEstablished()
+    }
   }
 
   webSocketConnectionEstablished() {
@@ -291,6 +324,15 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
+    if (this.isAuthenticationRequired) {
+      this.send(AuthenticationMessage, { token: this.options.token })
+      return
+    }
+
+    this.startSync()
+  }
+
+  startSync() {
     this.send(SyncStepOneMessage, { document: this.document })
 
     if (this.awareness.getLocalState() !== null) {
@@ -317,10 +359,6 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
-    if (this.status !== WebSocketStatus.Connected) {
-      this.webSocketConnectionEstablished()
-    }
-
     this.lastMessageReceived = time.getUnixTime()
 
     const message = new IncomingMessage(event.data)
@@ -338,6 +376,7 @@ export class HocuspocusProvider extends EventEmitter {
   onClose(event: CloseEvent) {
     this.emit('close', { event })
 
+    this.isAuthenticated = false
     this.webSocket = null
 
     if (this.status === WebSocketStatus.Connected) {

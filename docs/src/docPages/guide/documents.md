@@ -84,7 +84,7 @@ const hocuspocus = Server.configure({
 
       // Maybe you want to store the user who changed the document?
       // Guess what, you have access to your custom context from the
-      // onConnect hook here. See authorization & authentication for more
+      // onAuthenticate hook here. See authorization & authentication for more
       // details
       console.log(`Document ${data.documentName} changed by ${data.context.user.name}`)
     }
@@ -211,7 +211,7 @@ hocuspocus.listen()
 ## Read only mode
 
 If you want to restrict the current user only to read the document and it's updates but not apply
-updates him- or herself, you can use the `connection` property in the `onConnect` hooks payload:
+updates him- or herself, you can use the `connection` property in the `onAuthenticate` hooks payload:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
@@ -221,7 +221,7 @@ const usersWithWriteAccess = [
 ]
 
 const hocuspocus = Server.configure({
-  async onConnect(data): Doc {
+  async onAuthenticate(data): Doc {
 
     // Example code to check if the current user has write access by a
     // request parameter. In a real world application you would probably

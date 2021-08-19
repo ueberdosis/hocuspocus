@@ -28,6 +28,7 @@ There is definitely more to configure. Find the full list of all available setti
 | parameters              | `{}`              | Parameters will be added to the server URL and passed to the server.     |
 | name                    | `''`              | The name of the document.                                                |
 | document                | `''`              | The actual Y.js document.                                                |
+| token                   | `''`              | An authentication token that will be passed to the server.               |
 | awareness               | `new Awareness()` | Awareness object, by default attached to the passed Y.js document.       |
 | connect                 | `true`            | Whether to connect to the server after intialization.                    |
 | broadcast               | `true`            | By default changes are synced between browser tabs through broadcasting. |

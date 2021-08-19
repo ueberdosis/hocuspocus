@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
 import * as bc from 'lib0/broadcastchannel'
-import { OutgoingMessage } from './OutgoingMessage'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
@@ -15,6 +15,7 @@ export class MessageSender {
   message: any
 
   constructor(Message:
+    Constructable<AuthenticationMessage> |
     Constructable<AwarenessMessage> |
     Constructable<QueryAwarenessMessage> |
     Constructable<SyncStepOneMessage> |
