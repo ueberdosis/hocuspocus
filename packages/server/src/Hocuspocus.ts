@@ -262,9 +262,9 @@ export class Hocuspocus {
       ) {
         applyUpdate(document, encodeStateAsUpdate(loadedDocument))
       }
-
-      document.onUpdate(handleDocumentUpdate)
     })
+
+    document.onUpdate(handleDocumentUpdate)
 
     return document
   }
