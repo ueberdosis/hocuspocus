@@ -5,7 +5,7 @@ import * as syncProtocol from 'y-protocols/sync'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
-import * as authProtocol from '../../../shared/protocols/auth'
+import { readAuthMessage } from '../../../shared/protocols/auth'
 
 export class MessageReceiver {
 
@@ -64,7 +64,7 @@ export class MessageReceiver {
   }
 
   private applyAuthMessage(provider: HocuspocusProvider) {
-    authProtocol.readAuthMessage(
+    readAuthMessage(
       this.message.decoder,
       provider.permissionDeniedHandler.bind(provider),
       provider.authenticatedHandler.bind(provider),

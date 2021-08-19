@@ -2,24 +2,24 @@ import * as Y from 'yjs'
 import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
 
-export const messageAuthentication = 7
-
-export const messagePermissionDenied = 8
-
-export const messageAuthenticated = 9
+enum AuthMessageType {
+  Token = 0,
+  PermissionDenied = 1,
+  Authenticated = 2,
+}
 
 export const writeAuthentication = (encoder: encoding.Encoder, auth: string) => {
-  encoding.writeVarUint(encoder, messageAuthentication)
+  encoding.writeVarUint(encoder, AuthMessageType.Token)
   encoding.writeVarString(encoder, auth)
 }
 
 export const writePermissionDenied = (encoder: encoding.Encoder, reason: string) => {
-  encoding.writeVarUint(encoder, messagePermissionDenied)
+  encoding.writeVarUint(encoder, AuthMessageType.PermissionDenied)
   encoding.writeVarString(encoder, reason)
 }
 
 export const writeAuthenticated = (encoder: encoding.Encoder) => {
-  encoding.writeVarUint(encoder, messageAuthenticated)
+  encoding.writeVarUint(encoder, AuthMessageType.Authenticated)
 }
 
 export const readAuthMessage = (
@@ -28,11 +28,11 @@ export const readAuthMessage = (
   authenticatedHandler: () => void,
 ) => {
   switch (decoding.readVarUint(decoder)) {
-    case messagePermissionDenied: {
+    case AuthMessageType.PermissionDenied: {
       permissionDeniedHandler(decoding.readVarString(decoder))
       break
     }
-    case messageAuthenticated: {
+    case AuthMessageType.Authenticated: {
       authenticatedHandler()
       break
     }
