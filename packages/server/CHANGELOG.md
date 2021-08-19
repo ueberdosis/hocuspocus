@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.63](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.62...@hocuspocus/server@1.0.0-alpha.63) (2021-08-19)
+
+
+### Features
+
+* Message Authentication ([#163](https://github.com/ueberdosis/hocuspocus/issues/163)) ([a1e68d5](https://github.com/ueberdosis/hocuspocus/commit/a1e68d5a272742bd17dd92522dfc908277343849))
+
+
+
+
+
 # [1.0.0-alpha.62](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.61...@hocuspocus/server@1.0.0-alpha.62) (2021-08-19)
 
 **Note:** Version bump only for package @hocuspocus/server
