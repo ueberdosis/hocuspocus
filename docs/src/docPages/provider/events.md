@@ -19,6 +19,9 @@ const provider = new HocuspocusProvider({
   onConnect: () => {
     // …
   },
+  onAuthenticate: () => {
+    // …
+  },
   onStatus: ({ status }) => {
     // …
   },
@@ -78,6 +81,7 @@ provider.off('onMessage', message)
 | --------------- | ---------------------------------------------------------- |
 | open            | When the WebSocket connection is created.                  |
 | connect         | When the provider has succesfully connected to the server. |
+| authenticate    | When the client sends authentication to the server.        |
 | status          | When the connections status changes.                       |
 | message         | When a message is incoming.                                |
 | outgoingMessage | When a message will be sent.                               |

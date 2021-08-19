@@ -35,6 +35,7 @@ import {
   Extension,
   onChangePayload,
   onConnectPayload,
+  onAuthenticatePayload,
   onCreateDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
@@ -46,6 +47,8 @@ export class MyHocuspocusExtension implements Extension {
   async onChange(data: onChangePayload): Promise<void> {}
 
   async onConnect(data: onConnectPayload): Promise<void> {}
+
+  async onAuthenticate(data: onAuthenticatePayload): Promise<void> {}
 
   async onDisconnect(data: onDisconnectPayload): Promise<void> {}
 
@@ -73,6 +76,7 @@ import {
   Extension,
   onChangePayload,
   onConnectPayload,
+  onAuthenticatePayload,
   onCreateDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
@@ -101,6 +105,9 @@ export class MyHocuspocusExtension implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async onConnect(data: onConnectPayload): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onAuthenticate(data: onAuthenticatePayload): Promise<void> {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async onDisconnect(data: onDisconnectPayload): Promise<void> {}

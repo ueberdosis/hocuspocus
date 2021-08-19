@@ -1,4 +1,4 @@
-# onConnect
+# onAuthenticate
 
 ## toc
 

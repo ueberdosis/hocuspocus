@@ -80,7 +80,7 @@ When a new user connects to the server, the onConnect webhook will be triggered 
 }
 ```
 
-You can use this to authorize your users. By responding with a 403 status code the user is not authorized and the connection wil be terminated. You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
+You can use this to authorize your users. By responding with a 403 status code the user is not authorized and the connection will be terminated. You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
 
 ```typescript
 // authorize the user by the request parameters or headers
