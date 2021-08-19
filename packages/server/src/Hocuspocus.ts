@@ -234,15 +234,6 @@ export class Hocuspocus {
     const document = new Document(documentName)
     this.documents.set(documentName, document)
 
-    const handleDocumentUpdate = (document: Document, connection: Connection, update: Uint8Array) => {
-      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
-    }
-
-    if (!this.hasHook('onCreateDocument')) {
-      document.onUpdate(handleDocumentUpdate)
-      return document
-    }
-
     const hookPayload = {
       context,
       document,
@@ -264,7 +255,9 @@ export class Hocuspocus {
       }
     })
 
-    document.onUpdate(handleDocumentUpdate)
+    document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
+      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+    })
 
     return document
   }
@@ -301,17 +294,6 @@ export class Hocuspocus {
 
     return instance
 
-  }
-
-  /**
-   * Find if any extension has defined the given hook
-   * @private
-   */
-  private hasHook(hookName: string): boolean {
-    const { extensions } = this.configuration
-
-    // @ts-ignore
-    return extensions.some(extension => extension[hookName] !== undefined)
   }
 
   /**
