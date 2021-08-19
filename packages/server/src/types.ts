@@ -47,6 +47,9 @@ export interface onAuthenticatePayload {
   requestParameters: URLSearchParams,
   socketId: string,
   token: string,
+  connection: {
+    readOnly: boolean,
+  },
 }
 
 export interface onConnectPayload {
