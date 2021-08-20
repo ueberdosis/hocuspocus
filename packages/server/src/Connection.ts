@@ -168,17 +168,9 @@ class Connection {
    * @private
    */
   private handleMessage(data: Iterable<number>): void {
-    const message = new IncomingMessage(data)
-
-    const encoder = new MessageReceiver(message).apply(this)
-
-    if (message.length <= 1) {
-      return
-    }
-
-    return this.send(
-      message.toUint8Array(),
-    )
+    new MessageReceiver(
+      new IncomingMessage(data),
+    ).apply(this)
   }
 
   /**

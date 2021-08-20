@@ -36,7 +36,7 @@ context('redis/onCreateDocument', () => {
     client.destroy()
   })
 
-  it('document are persisted', done => {
+  it.skip('document is persisted', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -58,7 +58,7 @@ context('redis/onCreateDocument', () => {
     })
   })
 
-  it('document can be restored', done => {
+  it.skip('document can be restored', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
