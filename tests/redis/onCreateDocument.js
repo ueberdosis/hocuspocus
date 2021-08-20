@@ -36,29 +36,28 @@ context('redis/onCreateDocument', () => {
     client.destroy()
   })
 
-  it.skip('document is persisted', done => {
+  it('document is persisted', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      broadcast: false,
       // foo.0 = 'bar'
       onSynced: () => {
+        const valueBefore = ydoc.getArray('foo').get(0)
+        assert.strictEqual(valueBefore, undefined)
+
+        ydoc.getArray('foo').insert(0, ['bar'])
+
         setTimeout(() => {
-          const valueBefore = ydoc.getArray('foo').get(0)
-          assert.strictEqual(valueBefore, undefined)
-
-          ydoc.getArray('foo').insert(0, ['bar'])
-
-          setTimeout(() => {
-            done()
-          }, 100)
+          done()
         }, 100)
       },
     })
   })
 
-  it.skip('document can be restored', done => {
+  it('document can be restored', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
