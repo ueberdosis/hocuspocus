@@ -30,7 +30,7 @@ context('server/onAuthenticate', () => {
     })
   })
 
-  it('executes the onAuthenticate callback from an extension', done => {
+  it('executes the onAuthenticate callback from a custom extension', done => {
     const Server = new Hocuspocus()
 
     class CustomExtension {
