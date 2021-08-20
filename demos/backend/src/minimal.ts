@@ -7,11 +7,11 @@ const server = Server.configure({
     new Logger(),
   ],
 
-  async onAuthenticate(data) {
-    if (data.token !== 'my-access-token') {
-      throw new Error('Incorrect access token')
-    }
-  },
+  // async onAuthenticate(data) {
+  //   if (data.token !== 'my-access-token') {
+  //     throw new Error('Incorrect access token')
+  //   }
+  // },
 
   // Test error handling
   // async onConnect(data) {
