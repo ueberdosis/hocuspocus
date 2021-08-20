@@ -365,7 +365,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('message', { event, message })
 
-    const encoder = new MessageReceiver(message, this).apply(this)
+    const encoder = new MessageReceiver(message).apply(this)
 
     // TODO: What’s that doing?
     // if (encoding.length(encoder) > 1) {
