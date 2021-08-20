@@ -9,18 +9,18 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 
 ## Available hooks
 
-| Hook               | Description                               | Link                                 |
-| ------------------ | ----------------------------------------- | ------------------------------------ |
-| `onConnect`        | When a connection is established          | [Read more](/api/on-connect)         |
-| `onAuthenticate`   | When authentication is passed             | [Read more](/api/on-authenticate)    |
-| `onCreateDocument` | When a new document is created            | [Read more](/api/on-create-document) |
-| `onChange`         | When a document has changed               | [Read more](/api/on-change)          |
-| `onDisconnect`     | When a connection was closed              | [Read more](/api/on-disconnect)      |
-| `onListen`         | When the serer is intialized              | [Read more](/api/on-listen)          |
-| `onDestroy`        | When the server will be destroyed         | [Read more](/api/on-destroy)         |
-| `onConfigure`      | When the server has been configured       | [Read more](/api/on-configure)       |
-| `onRequest`        | When a HTTP request comes in              | [Read more](/api/on-request)         |
-| `onUpgrade`        | When the WebSocket connection is upgraded | [Read more](/api/on-upgrade)         |
+| Hook               | Description                               | Link                                       |
+| ------------------ | ----------------------------------------- | ------------------------------------------ |
+| `onConnect`        | When a connection is established          | [Read more](/api/hooks/on-connect)         |
+| `onAuthenticate`   | When authentication is passed             | [Read more](/api/hooks/on-authenticate)    |
+| `onCreateDocument` | When a new document is created            | [Read more](/api/hooks/on-create-document) |
+| `onChange`         | When a document has changed               | [Read more](/api/hooks/on-change)          |
+| `onDisconnect`     | When a connection was closed              | [Read more](/api/hooks/on-disconnect)      |
+| `onListen`         | When the serer is intialized              | [Read more](/api/hooks/on-listen)          |
+| `onDestroy`        | When the server will be destroyed         | [Read more](/api/hooks/on-destroy)         |
+| `onConfigure`      | When the server has been configured       | [Read more](/api/hooks/on-configure)       |
+| `onRequest`        | When a HTTP request comes in              | [Read more](/api/hooks/on-request)         |
+| `onUpgrade`        | When the WebSocket connection is upgraded | [Read more](/api/hooks/on-upgrade)         |
 
 ## Usage
 
