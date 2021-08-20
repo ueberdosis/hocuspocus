@@ -7,19 +7,21 @@ import {
 import {
   createEncoder,
   Encoder,
-  length,
   toUint8Array,
   writeVarUint,
 } from 'lib0/encoding'
 import { MessageType } from './types'
 
 export class IncomingMessage {
-
+  /**
+   * Access to the received message.
+   */
   decoder: Decoder
 
+  /**
+   * Access to the reply.
+   */
   encoder: Encoder
-
-  syncMessageEncoder?: Encoder
 
   constructor(input: any) {
     if (!(input instanceof Uint8Array)) {
@@ -44,9 +46,5 @@ export class IncomingMessage {
 
   writeVarUint(type: MessageType) {
     writeVarUint(this.encoder, type)
-  }
-
-  get length(): number {
-    return length(this.encoder)
   }
 }
