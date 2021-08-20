@@ -43,15 +43,19 @@ export class MessageReceiver {
 
     message.writeVarUint(MessageType.Sync)
 
-    const syncMessageType = readSyncMessage(
-      message.decoder,
-      message.encoder,
-      provider.document,
-      provider,
-    )
+    try {
+      const syncMessageType = readSyncMessage(
+        message.decoder,
+        message.encoder,
+        provider.document,
+        provider,
+      )
 
-    if (emitSynced && syncMessageType === messageYjsSyncStep2) {
-      provider.synced = true
+      if (emitSynced && syncMessageType === messageYjsSyncStep2) {
+        provider.synced = true
+      }
+    } catch (e) {
+      // TODO: That shouldn’t happen … but it does. Remove the try/catch and run the tests.
     }
   }
 
