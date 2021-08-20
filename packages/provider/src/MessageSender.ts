@@ -1,4 +1,4 @@
-import * as encoding from 'lib0/encoding'
+import { Encoder, toUint8Array } from 'lib0/encoding'
 import * as bc from 'lib0/broadcastchannel'
 import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
@@ -10,7 +10,7 @@ import { Constructable } from './types'
 
 export class MessageSender {
 
-  encoder: encoding.Encoder
+  encoder: Encoder
 
   message: any
 
@@ -27,7 +27,7 @@ export class MessageSender {
   }
 
   create() {
-    return encoding.toUint8Array(this.encoder)
+    return toUint8Array(this.encoder)
   }
 
   send(webSocket: any) {
