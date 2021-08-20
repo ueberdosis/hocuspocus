@@ -4,8 +4,9 @@ import { IncomingMessage as HTTPIncomingMessage } from 'http'
 
 import Document from './Document'
 import { IncomingMessage } from './IncomingMessage'
-import { MessageType, WsReadyStates } from './types'
+import { WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
+import { MessageReceiver } from './MessageReceiver'
 
 class Connection {
 
@@ -166,22 +167,10 @@ class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(input: Iterable<number>): void {
-    const message = new IncomingMessage(input)
+  private handleMessage(data: Iterable<number>): void {
+    const message = new IncomingMessage(data)
 
-    if (message.is(MessageType.Awareness)) {
-      this.document.applyAwarenessUpdate(this, message.readUint8Array())
-      return
-    }
-
-    try {
-      message.applyTo({
-        connection: this,
-        document: this.document,
-      })
-    } catch {
-      // Ignore invalid messages
-    }
+    const encoder = new MessageReceiver(message).apply(this)
 
     if (message.length <= 1) {
       return

@@ -38,40 +38,6 @@ export class IncomingMessage {
     this.decoder = createDecoder(input)
   }
 
-  applyTo(
-    { document, connection }:
-    { document: Document, connection: Connection },
-  ): void {
-    writeVarUint(this.encoder, MessageType.Sync)
-
-    // this is a copy of the original y-protocols/sync/readSyncMessage function
-    // which enables the read only mode
-    switch (this.type) {
-      case messageYjsSyncStep1:
-        readSyncStep1(this.decoder, this.encoder, document)
-        break
-
-      case messageYjsSyncStep2:
-        if (connection?.readOnly) {
-          break
-        }
-
-        readSyncStep2(this.decoder, document, connection)
-        break
-
-      case messageYjsUpdate:
-        if (connection?.readOnly) {
-          break
-        }
-
-        readUpdate(this.decoder, document, connection)
-        break
-
-      default:
-        // Do nothing
-    }
-  }
-
   readUint8Array(): Uint8Array {
     return readVarUint8Array(this.decoder)
   }
@@ -96,7 +62,7 @@ export class IncomingMessage {
     return this.type === messageType
   }
 
-  private get encoder() {
+  get encoder() {
     if (!this.syncMessageEncoder) {
       this.syncMessageEncoder = createEncoder()
     }
