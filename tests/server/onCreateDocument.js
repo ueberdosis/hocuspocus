@@ -12,10 +12,14 @@ context('server/onCreateDocument', () => {
   before(() => {
     Server.configure({
       port: 4000,
-      async onCreateDocument({ document }) {
-        document.getArray('foo').insert(0, ['bar'])
-
-        return document
+      onCreateDocument({ document }) {
+        // delay more accurately simulate a database fetch
+        return new Promise(resolve => {
+          setTimeout(() => {
+            document.getArray('foo').insert(0, ['bar'])
+            resolve(document)
+          }, 250)
+        })
       },
     }).listen()
   })
@@ -39,6 +43,29 @@ context('server/onCreateDocument', () => {
     client.on('synced', () => {
       const value = ydoc.getArray('foo').get(0)
       assert.strictEqual(value, 'bar')
+      done()
+    })
+  })
+
+  it('multiple simultanous connections do not create multiple documents', done => {
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    const client2 = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: new Y.Doc(),
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      assert.strictEqual(Server.documents.size, 1)
+
+      client2.destroy()
       done()
     })
   })

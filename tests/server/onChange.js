@@ -41,4 +41,34 @@ context('server/onChange', () => {
       ydoc.getArray('foo').insert(0, ['bar'])
     })
   })
+
+  it('onChange callback is not called after onCreateDocument', done => {
+    let triggered = false
+
+    Server.configure({
+      port: 4000,
+      async onChange(data) {
+        triggered = true
+      },
+      async onCreateDocument({ document }) {
+        document.getArray('foo').insert(0, ['bar'])
+        return document
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      if (triggered) {
+        throw new Error('onChange should not be called unless client updates')
+      }
+
+      done()
+    })
+  })
 })

@@ -275,45 +275,40 @@ export class Hocuspocus {
    * @private
    */
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, context?: any): Promise<Document> {
-    return new Promise(resolve => {
-      if (this.documents.has(documentName)) {
-        const document = this.documents.get(documentName)
-        return resolve(document)
-      }
+    if (this.documents.has(documentName)) {
+      const document = this.documents.get(documentName)
+      return document
+    }
 
-      const document = new Document(documentName)
+    const document = new Document(documentName)
+    this.documents.set(documentName, document)
 
-      document.onUpdate((document, connection, update) => {
-        this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
-      })
+    const hookPayload = {
+      context,
+      document,
+      documentName,
+      socketId,
+      requestHeaders: request.headers,
+      requestParameters: Hocuspocus.getParameters(request),
+    }
 
-      const hookPayload = {
-        context,
-        document,
-        documentName,
-        socketId,
-        requestHeaders: request.headers,
-        requestParameters: Hocuspocus.getParameters(request),
-      }
-
-      this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
+    await this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
       // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-        if (
-          loadedDocument?.constructor.name === 'Document'
+      if (
+        loadedDocument?.constructor.name === 'Document'
         || loadedDocument?.constructor.name === 'Doc'
-        ) {
-          applyUpdate(document, encodeStateAsUpdate(loadedDocument))
-        }
-      }).then(() => {
-        resolve(document)
-      }).catch(e => {
-        throw e
-      })
-
-      this.documents.set(documentName, document)
+      ) {
+        applyUpdate(document, encodeStateAsUpdate(loadedDocument))
+      }
     })
+
+    document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
+      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+    })
+
+    return document
   }
 
   /**
