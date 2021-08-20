@@ -1,5 +1,5 @@
-import * as encoding from 'lib0/encoding'
-import * as syncProtocol from 'y-protocols/sync'
+import { writeVarUint } from 'lib0/encoding'
+import { writeUpdate } from 'y-protocols/sync'
 import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
@@ -9,8 +9,8 @@ export class UpdateMessage extends OutgoingMessage {
   description = 'A document update'
 
   get(args: Partial<OutgoingMessageArguments>) {
-    encoding.writeVarUint(this.encoder, this.type)
-    syncProtocol.writeUpdate(this.encoder, args.update)
+    writeVarUint(this.encoder, this.type)
+    writeUpdate(this.encoder, args.update)
 
     return this.encoder
   }
