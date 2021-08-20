@@ -169,12 +169,15 @@ class Connection {
   private handleMessage(input: Iterable<number>): void {
     const message = new IncomingMessage(input)
 
-    if (message.type === MessageType.Awareness) {
+    if (message.is(MessageType.Awareness)) {
       this.document.applyAwarenessUpdate(this, message.readUint8Array())
       return
     }
 
-    message.readSyncMessageAndApplyItTo(this.document, this)
+    message.applyTo({
+      connection: this,
+      document: this.document,
+    })
 
     if (message.length <= 1) {
       return
@@ -183,7 +186,6 @@ class Connection {
     return this.send(
       message.toUint8Array(),
     )
-
   }
 
   /**
