@@ -28,7 +28,10 @@ export class MessageReceiver {
       case MessageType.Sync:
         message.writeVarUint(MessageType.Sync)
         this.readSyncMessage(message, connection)
-        connection.send(message.toUint8Array())
+
+        if (message.length > 1) {
+          connection.send(message.toUint8Array())
+        }
 
         break
       case MessageType.Awareness:
