@@ -40,16 +40,12 @@ context('rocksdb/onCreateDocument', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
-        setTimeout(() => {
-          const valueBefore = ydoc.getArray('foo').get(0)
-          assert.strictEqual(valueBefore, undefined)
+        const valueBefore = ydoc.getArray('foo').get(0)
+        assert.strictEqual(valueBefore, undefined)
 
-          ydoc.getArray('foo').insert(0, ['bar'])
+        ydoc.getArray('foo').insert(0, ['bar'])
 
-          setTimeout(() => {
-            done()
-          }, 100)
-        }, 100)
+        done()
       },
     })
   })
@@ -61,12 +57,10 @@ context('rocksdb/onCreateDocument', () => {
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
-        setTimeout(() => {
-          const value = anotherYdoc.getArray('foo').get(0)
-          assert.strictEqual(value, 'bar')
+        const value = anotherYdoc.getArray('foo').get(0)
+        assert.strictEqual(value, 'bar')
 
-          done()
-        }, 100)
+        done()
       },
     })
   })
