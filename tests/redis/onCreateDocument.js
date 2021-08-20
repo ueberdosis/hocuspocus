@@ -36,24 +36,21 @@ context('redis/onCreateDocument', () => {
     client.destroy()
   })
 
-  it('document are persisted', done => {
+  it('document is persisted', done => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      broadcast: false,
       // foo.0 = 'bar'
       onSynced: () => {
-        setTimeout(() => {
-          const valueBefore = ydoc.getArray('foo').get(0)
-          assert.strictEqual(valueBefore, undefined)
+        const valueBefore = ydoc.getArray('foo').get(0)
+        assert.strictEqual(valueBefore, undefined)
 
-          ydoc.getArray('foo').insert(0, ['bar'])
+        ydoc.getArray('foo').insert(0, ['bar'])
 
-          setTimeout(() => {
-            done()
-          }, 100)
-        }, 100)
+        done()
       },
     })
   })
@@ -66,12 +63,10 @@ context('redis/onCreateDocument', () => {
       WebSocketPolyfill: WebSocket,
       // foo.0 === 'bar'
       onSynced: () => {
-        setTimeout(() => {
-          const value = anotherYdoc.getArray('foo').get(0)
-          assert.strictEqual(value, 'bar')
+        const value = anotherYdoc.getArray('foo').get(0)
+        assert.strictEqual(value, 'bar')
 
-          done()
-        }, 100)
+        done()
       },
     })
   })

@@ -30,7 +30,7 @@ context('server/onAuthenticate', () => {
     })
   })
 
-  it('executes the onAuthenticate callback from an extension', done => {
+  it('executes the onAuthenticate callback from a custom extension', done => {
     const Server = new Hocuspocus()
 
     class CustomExtension {
@@ -55,6 +55,28 @@ context('server/onAuthenticate', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       token: 'SUPER-SECRET-TOKEN',
+    })
+  })
+
+  it('ignores the authentication token when having no onAuthenticate hook', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      token: 'SUPER-SECRET-TOKEN',
+      onConnect: () => {
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
     })
   })
 
