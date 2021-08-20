@@ -174,10 +174,14 @@ class Connection {
       return
     }
 
-    message.applyTo({
-      connection: this,
-      document: this.document,
-    })
+    try {
+      message.applyTo({
+        connection: this,
+        document: this.document,
+      })
+    } catch {
+      // Ignore invalid messages
+    }
 
     if (message.length <= 1) {
       return
