@@ -1,25 +1,44 @@
-import * as decoding from 'lib0/decoding'
-import * as encoding from 'lib0/encoding'
+import {
+  createDecoder,
+  readVarUint,
+  readVarUint8Array,
+  Decoder,
+} from 'lib0/decoding'
+import {
+  Encoder,
+  createEncoder,
+  writeVarUint,
+  writeVarUint8Array,
+} from 'lib0/encoding'
 import { MessageType } from './types'
 
 export class IncomingMessage {
 
   data: any
 
-  encoder: encoding.Encoder
+  encoder: Encoder
 
-  decoder: decoding.Decoder
-
-  type: MessageType
+  decoder: Decoder
 
   constructor(data: any) {
     this.data = data
-    this.encoder = encoding.createEncoder()
-    this.decoder = decoding.createDecoder(new Uint8Array(this.data))
-    this.type = decoding.readVarUint(this.decoder)
+    this.encoder = createEncoder()
+    this.decoder = createDecoder(new Uint8Array(this.data))
   }
 
-  get name() {
-    return MessageType[this.type]
+  readVarUint(): MessageType {
+    return readVarUint(this.decoder)
+  }
+
+  readVarUint8Array() {
+    return readVarUint8Array(this.decoder)
+  }
+
+  writeVarUint(type: MessageType) {
+    return writeVarUint(this.encoder, type)
+  }
+
+  writeVarUint8Array(data: Uint8Array) {
+    return writeVarUint8Array(this.encoder, data)
   }
 }
