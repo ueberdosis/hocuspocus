@@ -52,6 +52,7 @@ export interface HocuspocusProviderOptions {
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
   onDestroy: () => void,
+  onAwarenessUpdate: (states: any) => void,
   onAwarenessChange: (states: any) => void,
   debug: boolean,
 }
@@ -81,6 +82,7 @@ export class HocuspocusProvider extends EventEmitter {
     onDisconnect: () => null,
     onClose: () => null,
     onDestroy: () => null,
+    onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
   }
 
@@ -130,7 +132,14 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('disconnect', this.options.onDisconnect)
     this.on('close', this.options.onClose)
     this.on('destroy', this.options.onDestroy)
+    this.on('awarenessUpdate', this.options.onAwarenessUpdate)
     this.on('awarenessChange', this.options.onAwarenessChange)
+
+    this.awareness.on('update', () => {
+      this.emit('awarenessUpdate', {
+        states: awarenessStatesToArray(this.awareness.getStates()),
+      })
+    })
 
     this.awareness.on('change', () => {
       this.emit('awarenessChange', {

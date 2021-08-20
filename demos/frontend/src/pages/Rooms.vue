@@ -40,22 +40,15 @@ class Room {
       url: 'ws://localhost:1234',
       document: this.doc,
       name: this.name,
-      onConnect: () => {
-        console.log('connected')
+      onStatus: ({ status }) => {
+        this.status = status
+      },
+      onAwarenessUpdate: ({ states }) => {
+        this.states = states
       },
     })
 
-    this.provider.on('status', ({ status }) => {
-      this.status = status
-    })
-
-    this.provider.awareness.setLocalStateField('user', { name: `Jon @ ${this.name}` })
-
-    this.provider.awareness.on('change', () => {
-      this.states = awarenessStatesToArray(this.provider.awareness.getStates())
-    })
-
-    this.states = awarenessStatesToArray(this.provider.awareness.getStates())
+    this.provider.setAwarenessField('user', { name: `Jon @ ${this.name}` })
   }
 
   get numberOfUsers() {

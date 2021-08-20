@@ -20,8 +20,8 @@ provider.setAwarenessField('user', {
 Register an event listener to receive and react to any changes, not only for your, but for all awareness states of all connected users:
 
 ```js
-// Listen for changes to the states of all users
-provider.on('awarenessChange', ({ states }) => {
+// Listen for updates to the states of all users
+provider.on('awarenessUpdate', ({ states }) => {
   console.log(states)
 })
 ```
@@ -39,8 +39,8 @@ provider = new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'awareness-example',
   document: new Y.Doc(),
-  // Listen for changes …
-  onAwarenessChange: ({ states }) => {
+  // Listen for updates …
+  onAwarenessUpdate: ({ states }) => {
     console.log(states)
   },
 })
