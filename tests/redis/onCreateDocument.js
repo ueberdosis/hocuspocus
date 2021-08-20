@@ -50,9 +50,7 @@ context('redis/onCreateDocument', () => {
 
         ydoc.getArray('foo').insert(0, ['bar'])
 
-        setTimeout(() => {
-          done()
-        }, 100)
+        done()
       },
     })
   })
@@ -65,12 +63,10 @@ context('redis/onCreateDocument', () => {
       WebSocketPolyfill: WebSocket,
       // foo.0 === 'bar'
       onSynced: () => {
-        setTimeout(() => {
-          const value = anotherYdoc.getArray('foo').get(0)
-          assert.strictEqual(value, 'bar')
+        const value = anotherYdoc.getArray('foo').get(0)
+        assert.strictEqual(value, 'bar')
 
-          done()
-        }, 100)
+        done()
       },
     })
   })
