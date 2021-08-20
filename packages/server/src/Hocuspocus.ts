@@ -76,10 +76,9 @@ export class Hocuspocus {
   }
 
   get authenticationRequired(): boolean {
-    return this.configuration.onAuthenticate !== undefined
-      || !!this.configuration.extensions.find(extension => {
-        return extension.onAuthenticate !== undefined
-      })
+    return !!this.configuration.extensions.find(extension => {
+      return extension.onAuthenticate !== undefined
+    })
   }
 
   /**
