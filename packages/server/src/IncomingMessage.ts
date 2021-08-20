@@ -38,7 +38,10 @@ export class IncomingMessage {
     this.decoder = createDecoder(input)
   }
 
-  readSyncMessageAndApplyItTo(document: Document, connection?: Connection): void {
+  applyTo(
+    { document, connection }:
+    { document: Document, connection: Connection },
+  ): void {
     writeVarUint(this.encoder, MessageType.Sync)
 
     // this is a copy of the original y-protocols/sync/readSyncMessage function
@@ -65,9 +68,7 @@ export class IncomingMessage {
         break
 
       default:
-      // TODO: Shouldn’t crash the whole server,
-      // remove or catch exceptions in the top level?
-      //   throw new Error('Unknown message type')
+        // Do nothing
     }
   }
 
@@ -90,6 +91,10 @@ export class IncomingMessage {
       // Failed read the message type
       return -1
     }
+  }
+
+  is(messageType: MessageType) {
+    return this.type === messageType
   }
 
   private get encoder() {
