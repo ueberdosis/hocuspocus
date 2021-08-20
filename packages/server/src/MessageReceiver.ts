@@ -1,4 +1,3 @@
-import { Encoder, writeVarUint } from 'lib0/encoding'
 import {
   messageYjsSyncStep1,
   messageYjsSyncStep2,
@@ -7,7 +6,6 @@ import {
   readSyncStep2,
   readUpdate,
 } from 'y-protocols/sync'
-import * as Y from 'yjs'
 import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import { MessageType } from './types'
 import Connection from './Connection'
@@ -29,7 +27,7 @@ export class MessageReceiver {
     switch (type) {
       case MessageType.Sync:
         message.writeVarUint(MessageType.Sync)
-        this.readSyncMessage(message, document)
+        this.readSyncMessage(message, connection)
         connection.send(message.toUint8Array())
 
         break
@@ -42,7 +40,8 @@ export class MessageReceiver {
     }
   }
 
-  readSyncMessage(message: IncomingMessage, document: Y.Doc) {
+  readSyncMessage(message: IncomingMessage, connection: Connection) {
+    const { document } = connection
     const type = message.readVarUint()
 
     switch (type) {
@@ -50,21 +49,21 @@ export class MessageReceiver {
         readSyncStep1(message.decoder, message.encoder, document)
         break
       case messageYjsSyncStep2:
-        // if (connection?.readOnly) {
-        //   break
-        // }
+        if (connection?.readOnly) {
+          break
+        }
 
         readSyncStep2(message.decoder, document, null)
         break
       case messageYjsUpdate:
-        // if (connection?.readOnly) {
-        //   break
-        // }
+        if (connection?.readOnly) {
+          break
+        }
 
         readUpdate(message.decoder, document, null)
         break
       default:
-        throw new Error('Unknown message type')
+        throw new Error(`Received a message with an unknown type: ${type}`)
     }
 
     return type
