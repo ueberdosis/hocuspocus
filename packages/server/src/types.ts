@@ -6,6 +6,7 @@ import { Socket } from 'net'
 import Document from './Document'
 
 export enum MessageType {
+  Unknown = -1,
   Sync = 0,
   Awareness = 1,
   Auth = 2,

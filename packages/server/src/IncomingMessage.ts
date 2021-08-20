@@ -88,8 +88,7 @@ export class IncomingMessage {
     try {
       return readVarUint(this.decoder)
     } catch {
-      // Failed read the message type
-      return -1
+      return MessageType.Unknown
     }
   }
 

@@ -58,6 +58,28 @@ context('server/onAuthenticate', () => {
     })
   })
 
+  it('ignores the authentication token when having no onAuthenticate hook', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      token: 'SUPER-SECRET-TOKEN',
+      onConnect: () => {
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    })
+  })
+
   it('has the authentication token', done => {
     const Server = new Hocuspocus()
 
