@@ -97,15 +97,11 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install
 
-    - name: Try to build the packages
-      id: build-packages
-      run: yarn build:packages
-
     - uses: microsoft/playwright-github-action@v1
 
-    - name: Run tests
+    - name: Build packages and run tests
       id: test
-      run: yarn test
+      run: yarn build:packages && yarn test
       env:
         REDIS_HOST: localhost
         REDIS_PORT: ${{ job.services.redis.ports[6379] }}
