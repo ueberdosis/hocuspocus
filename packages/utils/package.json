@@ -1,0 +1,23 @@
+{
+  "name": "@hocuspocus/utils",
+  "version": "1.0.0-alpha.0",
+  "description": "hocuspocus utilities",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-utils.esm.js",
+  "module": "dist/hocuspocus-utils.esm.js",
+  "types": "dist/packages/utils/src/index.d.ts",
+  "exports": {
+    "import": "./dist/hocuspocus-utils.esm.js",
+    "require": "./dist/hocuspocus-utils.cjs"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
+}
