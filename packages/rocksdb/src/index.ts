@@ -1,7 +1,4 @@
-import {
-  Extension,
-  onCreateDocumentPayload,
-} from '@hocuspocus/server'
+import { Extension, onCreateDocumentPayload } from '@hocuspocus/server'
 
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
