@@ -6,20 +6,44 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
 
 context('server/onUpgrade', () => {
-  afterEach(() => {
-    Server.destroy()
-    client.destroy()
-  })
+  it('executes the onUpgrade callback', done => {
+    const Server = new Hocuspocus()
 
-  it('onUpgrade callback is executed', done => {
     Server.configure({
       port: 4000,
-      async onUpgrade({ documentName }) {
-        setTimeout(done, 0)
+      async onUpgrade() {
+        client.destroy()
+        Server.destroy()
+        done()
       },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('executes the onUpgrade callback from an extension', done => {
+    const Server = new Hocuspocus()
+
+    class CustomExtension {
+      async onUpgrade() {
+        client.destroy()
+        Server.destroy()
+        done()
+      }
+    }
+
+    Server.configure({
+      port: 4000,
+      extensions: [
+        new CustomExtension(),
+      ],
     }).listen()
 
     client = new HocuspocusProvider({

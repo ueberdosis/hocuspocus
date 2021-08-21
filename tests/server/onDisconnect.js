@@ -6,18 +6,16 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
 
 context('server/onDisconnect', () => {
-  afterEach(() => {
-    Server.destroy()
-    client.destroy()
-  })
+  it('executes the onDisconnect callback', done => {
+    const Server = new Hocuspocus()
 
-  it('onDisconnect callback is executed', done => {
     Server.configure({
       port: 4000,
       async onDisconnect() {
+        client.destroy()
+        Server.destroy()
         done()
       },
     }).listen()
@@ -27,10 +25,38 @@ context('server/onDisconnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      onConnect: () => {
+        client.disconnect()
+      },
     })
+  })
 
-    client.on('connect', () => {
-      client.disconnect()
+  it('executes the onDisconnect callback from an extension', done => {
+    const Server = new Hocuspocus()
+
+    class CustomExtension {
+      async onDisconnect() {
+        client.destroy()
+        Server.destroy()
+        done()
+      }
+    }
+
+    Server.configure({
+      port: 4000,
+      extensions: [
+        new CustomExtension(),
+      ],
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onConnect: () => {
+        client.disconnect()
+      },
     })
   })
 })

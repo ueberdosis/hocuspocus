@@ -5,16 +5,12 @@ import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
-const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
 
 context('server/onChange', () => {
-  afterEach(() => {
-    Server.destroy()
-    client.destroy()
-  })
-
   it('onChange callback receives updates', done => {
+    const ydoc = new Y.Doc()
+    const Server = new Hocuspocus()
+
     let triggered = false
 
     Server.configure({
@@ -25,6 +21,9 @@ context('server/onChange', () => {
         if (!triggered && value === 'bar') {
           triggered = true
           assert.strictEqual(value, 'bar')
+
+          Server.destroy()
+          client.destroy()
           done()
         }
       },
@@ -42,7 +41,48 @@ context('server/onChange', () => {
     })
   })
 
+  it('executes onChange callback from an extension', done => {
+    const ydoc = new Y.Doc()
+    const Server = new Hocuspocus()
+    let triggered = false
+
+    class CustomExtension {
+      async onChange({ document }) {
+        const value = document.getArray('foo').get(0)
+
+        if (!triggered && value === 'bar') {
+          triggered = true
+          assert.strictEqual(value, 'bar')
+
+          Server.destroy()
+          client.destroy()
+          done()
+        }
+      }
+    }
+
+    Server.configure({
+      port: 4000,
+      extensions: [
+        new CustomExtension(),
+      ],
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      ydoc.getArray('foo').insert(0, ['bar'])
+    })
+  })
+
   it('onChange callback is not called after onCreateDocument', done => {
+    const ydoc = new Y.Doc()
+    const Server = new Hocuspocus()
     let triggered = false
 
     Server.configure({
@@ -68,6 +108,8 @@ context('server/onChange', () => {
         throw new Error('onChange should not be called unless client updates')
       }
 
+      Server.destroy()
+      client.destroy()
       done()
     })
   })

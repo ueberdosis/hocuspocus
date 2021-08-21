@@ -92,11 +92,9 @@ context('provider/onAwarenessUpdate', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
-        setTimeout(() => {
-          Server.destroy()
-          anotherClient.destroy()
-          done()
-        }, 100)
+        Server.destroy()
+        anotherClient.destroy()
+        done()
       },
       onAwarenessUpdate: ({ states }) => {
         const player2 = !!states.filter(state => state.name === 'player2').length

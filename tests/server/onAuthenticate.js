@@ -86,14 +86,12 @@ context('server/onAuthenticate', () => {
     Server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
-        setTimeout(() => {
-          assert.strictEqual(token, 'SUPER-SECRET-TOKEN')
+        assert.strictEqual(token, 'SUPER-SECRET-TOKEN')
 
-          client.destroy()
-          Server.destroy()
+        client.destroy()
+        Server.destroy()
 
-          done()
-        }, 0)
+        done()
       },
     }).listen()
 

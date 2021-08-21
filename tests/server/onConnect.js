@@ -14,13 +14,38 @@ context('server/onConnect', () => {
     Server.configure({
       port: 4000,
       async onConnect() {
-        setTimeout(() => {
-          client.destroy()
-          Server.destroy()
+        client.destroy()
+        Server.destroy()
 
-          done()
-        }, 0)
+        done()
       },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('executes the onConnect callback from an extension', done => {
+    const Server = new Hocuspocus()
+
+    class CustomExtension {
+      async onConnect() {
+        client.destroy()
+        Server.destroy()
+
+        done()
+      }
+    }
+
+    Server.configure({
+      port: 4000,
+      extensions: [
+        new CustomExtension(),
+      ],
     }).listen()
 
     client = new HocuspocusProvider({
@@ -37,14 +62,12 @@ context('server/onConnect', () => {
     Server.configure({
       port: 4000,
       async onConnect({ documentName }) {
-        setTimeout(() => {
-          assert.strictEqual(documentName, 'hocuspocus-test')
+        assert.strictEqual(documentName, 'hocuspocus-test')
 
-          client.destroy()
-          Server.destroy()
+        client.destroy()
+        Server.destroy()
 
-          done()
-        }, 0)
+        done()
       },
     }).listen()
 
@@ -64,14 +87,12 @@ context('server/onConnect', () => {
     Server.configure({
       port: 4000,
       async onConnect({ documentName }) {
-        setTimeout(() => {
-          assert.strictEqual(documentName, weirdDocumentName)
+        assert.strictEqual(documentName, weirdDocumentName)
 
-          client.destroy()
-          Server.destroy()
+        client.destroy()
+        Server.destroy()
 
-          done()
-        }, 0)
+        done()
       },
     }).listen()
 
@@ -117,16 +138,14 @@ context('server/onConnect', () => {
     Server.configure({
       port: 4000,
       async onConnect({ requestParameters }) {
-        setTimeout(() => {
-          assert.strictEqual(requestParameters instanceof URLSearchParams, true)
-          assert.strictEqual(requestParameters.has('foo'), true)
-          assert.strictEqual(requestParameters.get('foo'), 'bar')
+        assert.strictEqual(requestParameters instanceof URLSearchParams, true)
+        assert.strictEqual(requestParameters.has('foo'), true)
+        assert.strictEqual(requestParameters.get('foo'), 'bar')
 
-          client.destroy()
-          Server.destroy()
+        client.destroy()
+        Server.destroy()
 
-          done()
-        }, 0)
+        done()
       },
     }).listen()
 
