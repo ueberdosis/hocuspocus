@@ -3,7 +3,8 @@
   "workspaces": [
     "demos/*",
     "docs",
-    "packages/*"
+    "packages/*",
+    "packages/monitor/dashboard"
   ],
   "browserslist": [
     "defaults",
