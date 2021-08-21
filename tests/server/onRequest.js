@@ -29,14 +29,12 @@ context('server/onRequest', () => {
   it('executes the onRequest callback', done => {
     Server.configure({
       port: 4000,
-      async onListen() {
-        await page.goto('http://localhost:4000/foobar')
+      onListen() {
+        page.goto('http://localhost:4000/foobar')
       },
       async onRequest({ request }) {
-        setTimeout(() => {
-          assert.strictEqual(request.url, '/foobar')
-          done()
-        }, 0)
+        assert.strictEqual(request.url, '/foobar')
+        done()
       },
     }).listen()
   })
