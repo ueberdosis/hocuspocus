@@ -1,14 +1,6 @@
 import {
   Extension,
-  onChangePayload,
-  onConfigurePayload,
-  onConnectPayload,
   onCreateDocumentPayload,
-  onDestroyPayload,
-  onDisconnectPayload,
-  onListenPayload,
-  onRequestPayload,
-  onUpgradePayload,
 } from '@hocuspocus/server'
 
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
@@ -78,27 +70,4 @@ export class RocksDB implements Extension {
     return this.provider.storeUpdate(documentName, update)
   }
 
-  async onChange(data: onChangePayload) {
-  }
-
-  async onConnect(data: onConnectPayload) {
-  }
-
-  async onDisconnect(data: onDisconnectPayload) {
-  }
-
-  async onListen(data: onListenPayload) {
-  }
-
-  async onDestroy(data: onDestroyPayload) {
-  }
-
-  async onConfigure(data: onConfigurePayload) {
-  }
-
-  async onRequest(data: onRequestPayload) {
-  }
-
-  async onUpgrade(data: onUpgradePayload) {
-  }
 }

@@ -2,14 +2,9 @@ import { createHmac } from 'crypto'
 import {
   Extension,
   onChangePayload,
-  onConfigurePayload,
   onConnectPayload,
   onCreateDocumentPayload,
-  onDestroyPayload,
   onDisconnectPayload,
-  onListenPayload,
-  onRequestPayload,
-  onUpgradePayload,
 } from '@hocuspocus/server'
 import { Doc } from 'yjs'
 import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
@@ -197,21 +192,6 @@ export class Webhook implements Extension {
       requestParameters: Object.fromEntries(data.requestParameters.entries()),
       context: data.context,
     })
-  }
-
-  async onUpgrade(data: onUpgradePayload) {
-  }
-
-  async onRequest(data: onRequestPayload) {
-  }
-
-  async onListen(data: onListenPayload) {
-  }
-
-  async onDestroy(data: onDestroyPayload) {
-  }
-
-  async onConfigure(data: onConfigurePayload) {
   }
 
 }

@@ -1,14 +1,6 @@
 import {
   Extension,
-  onChangePayload,
-  onConfigurePayload,
   onConnectPayload,
-  onCreateDocumentPayload,
-  onDestroyPayload,
-  onDisconnectPayload,
-  onListenPayload,
-  onRequestPayload,
-  onUpgradePayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -79,27 +71,4 @@ export class Throttle implements Extension {
     return this.throttle(<string> ip) ? Promise.reject() : Promise.resolve()
   }
 
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onCreateDocument(data: onCreateDocumentPayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onChange(data: onChangePayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onDisconnect(data: onDisconnectPayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onUpgrade(data: onUpgradePayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onRequest(data: onRequestPayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onListen(data: onListenPayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onDestroy(data: onDestroyPayload) {}
-
-  // eslint-disable-next-line no-empty-function,@typescript-eslint/no-empty-function
-  async onConfigure(data: onConfigurePayload) {}
 }

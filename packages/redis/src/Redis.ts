@@ -1,11 +1,9 @@
 import { RedisPersistence } from 'y-redis'
 import {
   Extension,
-  onChangePayload, onConfigurePayload,
-  onConnectPayload, onCreateDocumentPayload,
-  onDestroyPayload,
+  onConnectPayload,
+  onCreateDocumentPayload,
   onDisconnectPayload,
-  onListenPayload, onRequestPayload, onUpgradePayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -62,9 +60,6 @@ export class Redis implements Extension {
 
   }
 
-  async onChange(data: onChangePayload) {
-  }
-
   async onDisconnect(data: onDisconnectPayload) {
     // Not binded to Redis? Never mind!
     if (!this.persistence) {
@@ -80,21 +75,6 @@ export class Redis implements Extension {
     this.persistence.destroy()
     this.persistence = undefined
 
-  }
-
-  async onListen(data: onListenPayload) {
-  }
-
-  async onDestroy(data: onDestroyPayload) {
-  }
-
-  async onConfigure(data: onConfigurePayload) {
-  }
-
-  async onRequest(data: onRequestPayload) {
-  }
-
-  async onUpgrade(data: onUpgradePayload) {
   }
 
 }

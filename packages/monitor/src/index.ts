@@ -157,12 +157,6 @@ export class Monitor implements Extension {
     await this.storage.add('documentLog', this.collector.changeDocument(data))
   }
 
-  async onListen(data: onListenPayload) {
-  }
-
-  async onDestroy(data: onDestroyPayload) {
-  }
-
   async onConfigure(data: onConfigurePayload) {
     this.collector.version = data.version
     this.collector.yjsVersion = data.yjsVersion

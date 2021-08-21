@@ -25,15 +25,15 @@ export interface AwarenessUpdate {
 
 export interface Extension {
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
-  onChange(data: onChangePayload): Promise<any>,
-  onConnect(data: onConnectPayload): Promise<any>,
-  onConfigure(data: onConfigurePayload): Promise<any>,
-  onCreateDocument(data: onCreateDocumentPayload): Promise<any>,
-  onDestroy(data: onDestroyPayload): Promise<any>,
-  onDisconnect(data: onDisconnectPayload): Promise<any>
-  onListen(data: onListenPayload): Promise<any>,
-  onRequest(data: onRequestPayload): Promise<any>,
-  onUpgrade(data: onUpgradePayload): Promise<any>,
+  onChange?(data: onChangePayload): Promise<any>,
+  onConnect?(data: onConnectPayload): Promise<any>,
+  onConfigure?(data: onConfigurePayload): Promise<any>,
+  onCreateDocument?(data: onCreateDocumentPayload): Promise<any>,
+  onDestroy?(data: onDestroyPayload): Promise<any>,
+  onDisconnect?(data: onDisconnectPayload): Promise<any>
+  onListen?(data: onListenPayload): Promise<any>,
+  onRequest?(data: onRequestPayload): Promise<any>,
+  onUpgrade?(data: onUpgradePayload): Promise<any>,
 }
 
 export interface Configuration extends Extension {
