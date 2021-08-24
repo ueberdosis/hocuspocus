@@ -43,12 +43,41 @@ For help, discussion about best practices, or any other conversation:
 
 [Join the tiptap Discord Server](https://discord.gg/WtJ49jGshW)
 
-## 💖 Sponsors
-* [überdosis](https://ueberdosis.io/) 🎁
-* [Cargo](https://cargo.site/) 💎
-* [Saga](https://saga.so/) 💎
-* [Gamma](https://gamma.app/) 💎
-* [QA Wolf](https://www.qawolf.com/) 💎
+## Sponsors 💖
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://ueberdosis.io/">
+        <img src="https://unavatar.io/ueberdosis.io" width="100"><br>
+        <strong>überdosis</strong>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://cargo.site/">
+        <img src="https://unavatar.io/github/cargo" width="100"><br>
+        <strong>Cargo</strong>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://saga.so/">
+        <img src="https://unavatar.io/saga.so" width="100"><br>
+        <strong>Saga</strong>
+      </a>
+    </td>    
+    <td align="center">
+      <a href="https://www.gamma.app/">
+        <img src="https://unavatar.io/gamma.app" width="100"><br>
+        <strong>Gamma</strong>
+      </a>
+    </td>    
+    <td align="center">
+      <a href="https://www.cosmicmind.com/">
+        <img src="https://unavatar.io/github/cosmicmind" width="100"><br>
+        <strong>CosmicMind</strong>
+      </a>
+    </td>
+  </tr>
+</table>
 
 … and hundreds of awesome inviduals.
 
