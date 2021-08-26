@@ -76,6 +76,12 @@ For help, discussion about best practices, or any other conversation:
         <strong>CosmicMind</strong>
       </a>
     </td>
+    <td align="center">
+      <a href="https://www.getoutline.com/">
+        <img src="https://unavatar.io/github/outline" width="100"><br>
+        <strong>Outline</strong>
+      </a>
+    </td>    
   </tr>
 </table>
 
