@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.64](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.63...@hocuspocus/server@1.0.0-alpha.64) (2021-08-27)
+
+
+### Bug Fixes
+
+* Empty sync message causes error in client MessageReceiver ([#174](https://github.com/ueberdosis/hocuspocus/issues/174)) ([f9dca69](https://github.com/ueberdosis/hocuspocus/commit/f9dca69eb96d1ede37a0709bd3b7735bf1ff57ba))
+* Potential onCreateDocument race condition ([#167](https://github.com/ueberdosis/hocuspocus/issues/167)) ([b3e3e4d](https://github.com/ueberdosis/hocuspocus/commit/b3e3e4dea74f9b833ccb0c6a6521f55c001411c1))
+
+
+
+
+
 # [1.0.0-alpha.63](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.62...@hocuspocus/server@1.0.0-alpha.63) (2021-08-19)
 
 
