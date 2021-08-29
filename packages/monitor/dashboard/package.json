@@ -26,11 +26,10 @@
   "resolutions": {
     "@babel/preset-env": "7.13.8"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
-    "@tailwindcss/postcss7-compat": "^2.0.3",
+    "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^9.7.3",
     "collect.js": "^4.28.6",
     "moment": "^2.29.1",
