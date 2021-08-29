@@ -32,7 +32,8 @@ context('server/onRequest', () => {
       onListen() {
         page.goto('http://localhost:4000/foobar')
       },
-      async onRequest({ request }) {
+      async onRequest({ request, instance }) {
+        assert.strictEqual(instance, Server)
         assert.strictEqual(request.url, '/foobar')
         done()
       },

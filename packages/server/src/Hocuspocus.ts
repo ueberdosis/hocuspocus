@@ -69,6 +69,7 @@ export class Hocuspocus {
       configuration: this.configuration,
       version: packageJson.version,
       yjsVersion: null,
+      instance: this,
     })
 
     return this
@@ -92,7 +93,7 @@ export class Hocuspocus {
     })
 
     const server = createServer((request, response) => {
-      this.hooks('onRequest', { request, response })
+      this.hooks('onRequest', { request, response, instance: this })
         .then(() => {
           // default response if all prior hooks don't interfere
           response.writeHead(200, { 'Content-Type': 'text/plain' })
@@ -179,6 +180,7 @@ export class Hocuspocus {
 
     const hookPayload = {
       documentName,
+      instance: this,
       request,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),
