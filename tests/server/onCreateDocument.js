@@ -54,7 +54,7 @@ context('server/onCreateDocument', () => {
     })
   })
 
-  it('passes the context to the onCreateDocument callback', done => {
+  it('passes the context and connection to the onCreateDocument callback', done => {
     const Server = new Hocuspocus()
 
     const mockContext = {
@@ -63,11 +63,16 @@ context('server/onCreateDocument', () => {
 
     Server.configure({
       port: 4000,
-      onConnect() {
+      onConnect({ connection }) {
+        connection.readOnly = true
         return mockContext
       },
-      onCreateDocument({ context }) {
+      onCreateDocument({ context, connection }) {
         assert.deepStrictEqual(context, mockContext)
+        assert.deepStrictEqual(connection, {
+          isAuthenticated: false,
+          readOnly: true,
+        })
 
         client.destroy()
         Server.destroy()
@@ -80,6 +85,30 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('sets the client to readOnly', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onCreateDocument({ connection }) {
+        connection.readOnly = true
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced() {
+        Server.documents.get('hocuspocus-test').connections.forEach(conn => {
+          assert.strictEqual(conn.connection.readOnly, true)
+        })
+        done()
+      },
     })
   })
 

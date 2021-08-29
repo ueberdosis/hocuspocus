@@ -23,6 +23,11 @@ export interface AwarenessUpdate {
   removed: Array<any>,
 }
 
+export interface ConnectionConfig {
+  readOnly: boolean
+  isAuthenticated: boolean
+}
+
 export interface Extension {
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   onChange?(data: onChangePayload): Promise<any>,
@@ -48,9 +53,7 @@ export interface onAuthenticatePayload {
   requestParameters: URLSearchParams,
   socketId: string,
   token: string,
-  connection: {
-    readOnly: boolean,
-  },
+  connection: ConnectionConfig
 }
 
 export interface onConnectPayload {
@@ -59,9 +62,7 @@ export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: {
-    readOnly: boolean,
-  },
+  connection: ConnectionConfig
 }
 
 export interface onCreateDocumentPayload {
@@ -71,6 +72,7 @@ export interface onCreateDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
+  connection: ConnectionConfig
 }
 
 export interface onChangePayload {
