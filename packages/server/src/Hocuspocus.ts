@@ -141,6 +141,22 @@ export class Hocuspocus {
   }
 
   /**
+   * Force closes one or more connections
+   */
+  closeConnections(docName?: string) {
+    // Iterate through all connections for all documents
+    // and invoke their close method, which is a graceful
+    // disconnect wrapper around the underlying websocket.close
+    this.documents.forEach((document: Document) => {
+      // If a docName was specified, bail if it doesnt match
+      if (docName && document.name !== docName) return
+      document.connections.forEach((conn: Connection) => {
+        conn.connection.close()
+      })
+    })
+  }
+
+  /**
    * Destroy the server
    */
   async destroy(): Promise<any> {
