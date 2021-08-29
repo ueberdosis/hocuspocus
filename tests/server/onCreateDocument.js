@@ -107,6 +107,8 @@ context('server/onCreateDocument', () => {
         Server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
         })
+        client.destroy()
+        Server.destroy()
         done()
       },
     })
