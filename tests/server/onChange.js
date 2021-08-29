@@ -11,12 +11,19 @@ context('server/onChange', () => {
     const ydoc = new Y.Doc()
     const Server = new Hocuspocus()
 
+    const mockContext = {
+      userId: '12345',
+    }
     let triggered = false
 
     Server.configure({
       port: 4000,
-      async onChange({ document }) {
+      async onConnect() {
+        return mockContext
+      },
+      async onChange({ document, context }) {
         const value = document.getArray('foo').get(0)
+        assert.deepStrictEqual(context, mockContext)
 
         if (!triggered && value === 'bar') {
           triggered = true

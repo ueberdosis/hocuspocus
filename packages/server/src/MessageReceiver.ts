@@ -56,14 +56,14 @@ export class MessageReceiver {
           break
         }
 
-        readSyncStep2(message.decoder, document, null)
+        readSyncStep2(message.decoder, document, connection)
         break
       case messageYjsUpdate:
         if (connection?.readOnly) {
           break
         }
 
-        readUpdate(message.decoder, document, null)
+        readUpdate(message.decoder, document, connection)
         break
       default:
         throw new Error(`Received a message with an unknown type: ${type}`)
