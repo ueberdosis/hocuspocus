@@ -109,12 +109,12 @@ context('server/onConnect', () => {
 
     Server.configure({
       port: 4000,
-      async onConnect() {
+      onConnect() {
         throw new Error()
       },
       // MUST NOT BE CALLED
-      async onCreateDocument() {
-        console.log('WARNING: When onConnect fails onCreateDocument must not be called.')
+      onCreateDocument() {
+        assert.fail('WARNING: When onConnect fails onCreateDocument must not be called.')
       },
     }).listen()
 
@@ -155,6 +155,98 @@ context('server/onConnect', () => {
       parameters: {
         foo: 'bar',
       },
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('has the request headers', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ requestHeaders }) {
+        assert.strictEqual(requestHeaders.connection !== undefined, true)
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('has the whole request', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ request }) {
+        assert.strictEqual(request.url, '/hocuspocus-test')
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('has the socketId', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ socketId }) {
+        assert.strictEqual(socketId !== undefined, true)
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('defaults to readOnly = false', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ connection }) {
+        assert.strictEqual(connection.readOnly, false)
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })
