@@ -54,6 +54,35 @@ context('server/onCreateDocument', () => {
     })
   })
 
+  it('passes the context to the onCreateDocument callback', done => {
+    const Server = new Hocuspocus()
+
+    const mockContext = {
+      user: 123,
+    }
+
+    Server.configure({
+      port: 4000,
+      onConnect() {
+        return mockContext
+      },
+      onCreateDocument({ context }) {
+        assert.deepStrictEqual(context, mockContext)
+
+        client.destroy()
+        Server.destroy()
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
   it('creates a new document in the onCreateDocument callback', done => {
     const Server = new Hocuspocus()
 

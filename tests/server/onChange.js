@@ -12,7 +12,7 @@ context('server/onChange', () => {
     const Server = new Hocuspocus()
 
     const mockContext = {
-      userId: '12345',
+      user: 123,
     }
     let triggered = false
 

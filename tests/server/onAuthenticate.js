@@ -58,6 +58,36 @@ context('server/onAuthenticate', () => {
     })
   })
 
+  it('passes context from onAuthenticate to onCreateDocument', done => {
+    const Server = new Hocuspocus()
+
+    const mockContext = {
+      user: 123,
+    }
+
+    Server.configure({
+      port: 4000,
+      onAuthenticate() {
+        return mockContext
+      },
+      onCreateDocument({ context }) {
+        assert.deepStrictEqual(context, mockContext)
+
+        client.destroy()
+        Server.destroy()
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      token: 'SUPER-SECRET-TOKEN',
+    })
+  })
+
   it('ignores the authentication token when having no onAuthenticate hook', done => {
     const Server = new Hocuspocus()
 
