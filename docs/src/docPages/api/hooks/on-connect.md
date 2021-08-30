@@ -16,9 +16,9 @@ import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
 
 const data = {
-  clientsCount: number,
-  document: Doc,
   documentName: string,
+  instance: Hocuspocus,
+  request: IncomingMessage,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,

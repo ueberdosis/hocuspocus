@@ -18,6 +18,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 const data = {
   request: IncomingMessage,
   response: ServerResponse,
+  instance: Hocuspocus,
 }
 ```
 
