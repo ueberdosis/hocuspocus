@@ -181,10 +181,17 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   checkConnection() {
+    // Don’t close the connection when it’s not established anyway
     if (this.status !== WebSocketStatus.Connected) {
       return
     }
 
+    // Don’t just close then connection while waiting for the first message
+    if (!this.lastMessageReceived) {
+      return
+    }
+
+    // Don’t close the connection when a message was received recently
     if (this.options.messageReconnectTimeout >= time.getUnixTime() - this.lastMessageReceived) {
       return
     }
