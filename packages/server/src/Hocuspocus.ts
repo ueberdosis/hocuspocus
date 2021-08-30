@@ -39,7 +39,7 @@ export class Hocuspocus {
 
   httpServer?: HTTPServer
 
-  websocketServer?: WebSocket.Server
+  webSocketServer?: WebSocket.Server
 
   /**
    * Configure the server
@@ -83,8 +83,8 @@ export class Hocuspocus {
    * Start the server
    */
   async listen(): Promise<void> {
-    const websocketServer = new WebSocket.Server({ noServer: true })
-    websocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
+    const webSocketServer = new WebSocket.Server({ noServer: true })
+    webSocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
       this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
     })
 
@@ -111,8 +111,8 @@ export class Hocuspocus {
           // prior hooks don't interfere
           // TODO: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
           // @ts-ignore
-          websocketServer.handleUpgrade(request, socket, head, ws => {
-            websocketServer.emit('connection', ws, request)
+          webSocketServer.handleUpgrade(request, socket, head, ws => {
+            webSocketServer.emit('connection', ws, request)
           })
         })
         .catch(e => {
@@ -125,7 +125,7 @@ export class Hocuspocus {
     })
 
     this.httpServer = server
-    this.websocketServer = websocketServer
+    this.webSocketServer = webSocketServer
 
     await new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
@@ -160,7 +160,7 @@ export class Hocuspocus {
    */
   async destroy(): Promise<any> {
     this.httpServer?.close()
-    this.websocketServer?.close()
+    this.webSocketServer?.close()
 
     await this.hooks('onDestroy', {})
   }
