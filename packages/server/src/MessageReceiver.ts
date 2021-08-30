@@ -10,10 +10,13 @@ import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
+import { Debugger, MessageLogger } from './Debugger'
 
 export class MessageReceiver {
 
   message: IncomingMessage
+
+  debugger: MessageLogger = Debugger
 
   constructor(message: IncomingMessage) {
     this.message = message
@@ -35,6 +38,12 @@ export class MessageReceiver {
 
         break
       case MessageType.Awareness:
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'Update',
+        })
+
         applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection)
 
         break
@@ -49,9 +58,21 @@ export class MessageReceiver {
 
     switch (type) {
       case messageYjsSyncStep1:
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'SyncStep1',
+        })
+
         readSyncStep1(message.decoder, message.encoder, document)
         break
       case messageYjsSyncStep2:
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'SyncStep2',
+        })
+
         if (connection?.readOnly) {
           break
         }
@@ -59,6 +80,12 @@ export class MessageReceiver {
         readSyncStep2(message.decoder, document, connection)
         break
       case messageYjsUpdate:
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'Update',
+        })
+
         if (connection?.readOnly) {
           break
         }
