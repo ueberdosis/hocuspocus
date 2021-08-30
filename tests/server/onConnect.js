@@ -79,6 +79,32 @@ context('server/onConnect', () => {
     })
   })
 
+  it('sets the client to readOnly', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onConnect({ connection }) {
+        connection.readOnly = true
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced() {
+        Server.documents.get('hocuspocus-test').connections.forEach(conn => {
+          assert.strictEqual(conn.connection.readOnly, true)
+        })
+        client.destroy()
+        Server.destroy()
+        done()
+      },
+    })
+  })
+
   it('encodes weird document names', done => {
     const weirdDocumentName = '<>{}|^äöüß'
 
