@@ -10,14 +10,14 @@ const ydoc = new Y.Doc()
 const ydoc2 = new Y.Doc()
 
 context('server/closeConnections', () => {
-  it('should only close a specific connection when a docName is passed', done => {
+  it('closes a specific connection when a documentName is passed', done => {
     const Server = new Hocuspocus()
 
     Server.configure({
       port: 4000,
     }).listen()
 
-    const clientDonePromise = new Promise(res => {
+    const clientDonePromise = new Promise(resolve => {
       client = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test',
@@ -27,21 +27,21 @@ context('server/closeConnections', () => {
           Server.closeConnections('hocuspocus-test')
         },
         onClose() {
-          // Dont reconnect after we force close
+          // Make the sure client doesn’t reconnect
           client.disconnect()
-          res()
+          resolve()
         },
       })
     })
 
-    const client2DonePromise = new Promise(res => {
+    const client2DonePromise = new Promise(resolve => {
       client2 = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test-2',
         document: ydoc2,
         WebSocketPolyfill: WebSocket,
         onSynced() {
-          res()
+          resolve()
         },
       })
     })
@@ -59,28 +59,28 @@ context('server/closeConnections', () => {
     })
   })
 
-  it('should closes all connections when no argument is passed', done => {
+  it('closes all connections when no documentName is passed', done => {
     const Server = new Hocuspocus()
 
     Server.configure({
       port: 4000,
     }).listen()
 
-    const clientDonePromise = new Promise(res => {
+    const clientDonePromise = new Promise(resolve => {
       client = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test',
         document: ydoc,
         WebSocketPolyfill: WebSocket,
         onClose() {
-          // Dont reconnect after we force close
+          // Make the sure client doesn’t reconnect
           client.disconnect()
-          res()
+          resolve()
         },
       })
     })
 
-    const client2DonePromise = new Promise(res => {
+    const client2DonePromise = new Promise(resolve => {
       client2 = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test-2',
@@ -90,9 +90,9 @@ context('server/closeConnections', () => {
           Server.closeConnections()
         },
         onClose() {
-          // Dont reconnect after we force close
+          // Make the sure client doesn’t reconnect
           client2.disconnect()
-          res()
+          resolve()
         },
       })
     })
