@@ -5,7 +5,7 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 
-import { MessageType, Configuration } from './types'
+import { MessageType, Configuration, ConnectionConfig } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden, ResetConnection } from './CloseEvents'
@@ -171,7 +171,7 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
     // create a unique identifier for every socket connection
     const socketId = uuid()
-    const connection = { readOnly: false, isAuthenticated: false }
+    const connection: ConnectionConfig = { readOnly: false, isAuthenticated: false }
 
     const hookPayload = {
       documentName,
@@ -191,7 +191,7 @@ export class Hocuspocus {
       }
 
       // if no hook interrupts create a document and connection
-      this.createDocument(documentName, request, socketId, context).then(document => {
+      this.createDocument(documentName, request, socketId, connection, context).then(document => {
         this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
         // Remove the queue listener
@@ -286,7 +286,7 @@ export class Hocuspocus {
    * Create a new document by the given request
    * @private
    */
-  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, context?: any): Promise<Document> {
+  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfig, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
       const document = this.documents.get(documentName)
       return document
@@ -297,6 +297,7 @@ export class Hocuspocus {
 
     const hookPayload = {
       context,
+      connection,
       document,
       documentName,
       socketId,
