@@ -58,7 +58,7 @@
     "eslint-plugin-vue": "^7.6.0",
     "lerna": "^3.22.1",
     "minimist": "^1.2.5",
-    "mocha": "^8.3.0",
+    "mocha": "^9.1.1",
     "node-fetch": "^2.6.1",
     "node-window-polyfill": "^1.0.2",
     "nodemon": "^2.0.7",
@@ -67,7 +67,7 @@
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript2": "^0.29.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.2.1",
     "typescript": "^4.1.5"
   },
   "dependencies": {
