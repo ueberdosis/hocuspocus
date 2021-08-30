@@ -21,7 +21,6 @@ export const defaultConfiguration = {
  * Hocuspocus yjs websocket server
  */
 export class Hocuspocus {
-
   configuration: Configuration = {
     ...defaultConfiguration,
     extensions: [],
@@ -46,7 +45,6 @@ export class Hocuspocus {
    * Configure the server
    */
   configure(configuration: Partial<Configuration>): Hocuspocus {
-
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -73,7 +71,6 @@ export class Hocuspocus {
     })
 
     return this
-
   }
 
   get authenticationRequired(): boolean {
@@ -86,7 +83,6 @@ export class Hocuspocus {
    * Start the server
    */
   async listen(): Promise<void> {
-
     const websocketServer = new WebSocket.Server({ noServer: true })
     websocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
       this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
@@ -138,7 +134,6 @@ export class Hocuspocus {
           .catch(e => reject(e))
       })
     })
-
   }
 
   /**
@@ -164,19 +159,16 @@ export class Hocuspocus {
    * Destroy the server
    */
   async destroy(): Promise<any> {
-
     this.httpServer?.close()
     this.websocketServer?.close()
 
     await this.hooks('onDestroy', {})
-
   }
 
   /**
    * Handle the incoming websocket connection
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
-
     // create a unique identifier for every socket connection
     const socketId = uuid()
     const connection = { readOnly: false, isAuthenticated: false }
@@ -267,7 +259,6 @@ export class Hocuspocus {
           throw error
         }
       })
-
   }
 
   /**
@@ -275,7 +266,6 @@ export class Hocuspocus {
    * @private
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
-
     const hookPayload = {
       clientsCount: document.connectionsCount(),
       context: connection?.context || {},
@@ -290,7 +280,6 @@ export class Hocuspocus {
     this.hooks('onChange', hookPayload).catch(e => {
       throw e
     })
-
   }
 
   /**
@@ -339,7 +328,6 @@ export class Hocuspocus {
    * @private
    */
   private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
-
     const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
 
     instance.onClose(document => {
@@ -365,7 +353,6 @@ export class Hocuspocus {
     })
 
     return instance
-
   }
 
   /**
