@@ -72,7 +72,7 @@ export default {
     // })
   },
 
-  beforeUnmount() {
+  beforeDestroy() {
     this.editor.destroy()
     this.provider.destroy()
   },
