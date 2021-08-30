@@ -154,8 +154,8 @@ export class Hocuspocus {
         return
       }
 
-      document.connections.forEach((connection: Connection) => {
-        connection.connection.close(ResetConnection.code, ResetConnection.reason)
+      document.connections.forEach(({ connection } = { connection: Connection }) => {
+        connection.close(ResetConnection)
       })
     })
   }

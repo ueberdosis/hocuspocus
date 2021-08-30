@@ -4,13 +4,13 @@ import { IncomingMessage as HTTPIncomingMessage } from 'http'
 
 import Document from './Document'
 import { IncomingMessage } from './IncomingMessage'
-import { WsReadyStates } from './types'
+import { CloseEvent, WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 
 class Connection {
 
-  connection: WebSocket
+  webSocket: WebSocket
 
   context: any
 
@@ -46,7 +46,7 @@ class Connection {
     context: any,
     readOnly = false,
   ) {
-    this.connection = connection
+    this.webSocket = connection
     this.context = context
     this.document = document
     this.request = request
@@ -56,14 +56,14 @@ class Connection {
 
     this.lock = new AsyncLock()
 
-    this.connection.binaryType = 'arraybuffer'
+    this.webSocket.binaryType = 'arraybuffer'
     this.document.addConnection(this)
 
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
-    this.connection.on('close', this.close.bind(this))
-    this.connection.on('message', this.handleMessage.bind(this))
-    this.connection.on('pong', () => { this.pongReceived = true })
+    this.webSocket.on('close', this.close.bind(this))
+    this.webSocket.on('message', this.handleMessage.bind(this))
+    this.webSocket.on('pong', () => { this.pongReceived = true })
 
     this.sendFirstSyncStep()
   }
@@ -82,14 +82,14 @@ class Connection {
    */
   send(message: any): void {
     if (
-      this.connection.readyState === WsReadyStates.Closing
-      || this.connection.readyState === WsReadyStates.Closed
+      this.webSocket.readyState === WsReadyStates.Closing
+      || this.webSocket.readyState === WsReadyStates.Closed
     ) {
       this.close()
     }
 
     try {
-      this.connection.send(message, (error: any) => {
+      this.webSocket.send(message, (error: any) => {
         if (error != null) this.close()
       })
     } catch (exception) {
@@ -100,7 +100,7 @@ class Connection {
   /**
    * Graceful wrapper around the WebSocket close method.
    */
-  close(code?: number | undefined, data?: string | undefined): void {
+  close(event?: CloseEvent): void {
     this.lock.acquire('close', (done: Function) => {
 
       if (this.pingInterval) {
@@ -113,7 +113,7 @@ class Connection {
 
       this.document.removeConnection(this)
       this.callbacks.onClose(this.document)
-      this.connection.close(code, data)
+      this.webSocket.close(event?.code, event?.reason)
 
       done()
 
@@ -133,7 +133,7 @@ class Connection {
       this.pongReceived = false
 
       try {
-        this.connection.ping()
+        this.webSocket.ping()
       } catch (exception) {
         this.close()
       }
@@ -175,9 +175,22 @@ class Connection {
 
   /**
    * Get the underlying connection instance
+   * @deprecated
    */
   get instance(): WebSocket {
-    return this.connection
+    console.warn('connection.instance is deprecated, use `connection.webSocket` instead.')
+
+    return this.webSocket
+  }
+
+  /**
+   * Get the underlying connection instance
+   * @deprecated
+   */
+  public get connection(): WebSocket {
+    console.warn('connection.connection is deprecated, use `connection.webSocket` instead.')
+
+    return this.webSocket
   }
 }
 
