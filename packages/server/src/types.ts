@@ -4,6 +4,7 @@ import {
 import { URLSearchParams } from 'url'
 import { Socket } from 'net'
 import Document from './Document'
+import { Hocuspocus } from './Hocuspocus'
 
 export enum MessageType {
   Unknown = -1,
@@ -44,6 +45,7 @@ export interface Configuration extends Extension {
 
 export interface onAuthenticatePayload {
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
@@ -55,6 +57,7 @@ export interface onAuthenticatePayload {
 
 export interface onConnectPayload {
   documentName: string,
+  instance: Hocuspocus,
   request: IncomingMessage,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
@@ -97,12 +100,14 @@ export interface onDisconnectPayload {
 export interface onRequestPayload {
   request: IncomingMessage,
   response: ServerResponse,
+  instance: Hocuspocus,
 }
 
 export interface onUpgradePayload {
   head: any,
   request: IncomingMessage,
   socket: Socket,
+  instance: Hocuspocus,
 }
 
 export interface onListenPayload {
@@ -116,6 +121,7 @@ export interface onConfigurePayload {
   configuration: Configuration,
   version: string,
   yjsVersion: string,
+  instance: Hocuspocus,
 }
 
 export interface CloseEvent {

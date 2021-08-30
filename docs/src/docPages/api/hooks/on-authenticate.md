@@ -3,11 +3,9 @@
 ## toc
 
 ## Introduction
-
 The `onAuthenticate` hook will be called when the server receives an authentication request from the client provider. It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.
 
 ## Hook payload
-
 The `data` passed to the `onAuthenticate` hook has the following attributes:
 
 ```typescript
@@ -16,9 +14,8 @@ import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
 
 const data = {
-  clientsCount: number,
-  document: Doc,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
@@ -30,7 +27,6 @@ const data = {
 ```
 
 ## Example
-
 ```typescript
 import { Server } from '@hocuspocus/server'
 

@@ -3,19 +3,18 @@
 ## toc
 
 ## Introduction
-Our goal: Let’s keep it simple. The server has four methods in total. That’s enough to pass a custom configuration, start the server, stop the server or bind it to an existing WebSocket server.
+Our goal: Let’s keep it simple. The server has a few methods only.
 
 ## Available methods
-
-| Method                                                       | Description                                     |
-| ------------------------------------------------------------ | ----------------------------------------------- |
-| `configure(configuration)`                                   | Pass custom settings.                           |
-| `listen()`                                                   | Start the server.                               |
-| `destroy()`                                                  | Stop the server.                                |
-| `handleConnection(incoming, request, documentName, context)` | Bind the server to an existing server instance. |
+| Method                                                       | Description                                       |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| `listen()`                                                   | Start the server.                                 |
+| `configure(configuration)`                                   | Pass custom settings.                             |
+| `handleConnection(incoming, request, documentName, context)` | Bind the server to an existing server instance.   |
+| `closeConnections(documentName?)`                            | Close all connections, or to a specific document. |
+| `destroy()`                                                  | Stop the server.                                  |
 
 ## Usage
-
 ```js
 import { Server } from '@hocuspocus/server'
 

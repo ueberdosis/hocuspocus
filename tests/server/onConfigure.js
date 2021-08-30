@@ -13,7 +13,9 @@ context('server/onConfigure', () => {
 
     Server.configure({
       port: 4000,
-      async onConfigure() {
+      async onConfigure({ instance }) {
+        assert.strictEqual(instance, Server)
+
         client.destroy()
         Server.destroy()
         done()
