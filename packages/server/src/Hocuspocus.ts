@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 import { MessageType, Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Forbidden } from './CloseEvents'
+import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
 import packageJson from '../package.json'
 
@@ -69,6 +69,7 @@ export class Hocuspocus {
       configuration: this.configuration,
       version: packageJson.version,
       yjsVersion: null,
+      instance: this,
     })
 
     return this
@@ -92,7 +93,7 @@ export class Hocuspocus {
     })
 
     const server = createServer((request, response) => {
-      this.hooks('onRequest', { request, response })
+      this.hooks('onRequest', { request, response, instance: this })
         .then(() => {
           // default response if all prior hooks don't interfere
           response.writeHead(200, { 'Content-Type': 'text/plain' })
@@ -141,6 +142,25 @@ export class Hocuspocus {
   }
 
   /**
+   * Force closes one or more connections
+   */
+  closeConnections(documentName?: string) {
+    // Iterate through all connections for all documents
+    // and invoke their close method, which is a graceful
+    // disconnect wrapper around the underlying websocket.close
+    this.documents.forEach((document: Document) => {
+      // If a documentName was specified, bail if it doesnt match
+      if (documentName && document.name !== documentName) {
+        return
+      }
+
+      document.connections.forEach(({ connection } = { connection: Connection }) => {
+        connection.close(ResetConnection)
+      })
+    })
+  }
+
+  /**
    * Destroy the server
    */
   async destroy(): Promise<any> {
@@ -163,6 +183,7 @@ export class Hocuspocus {
 
     const hookPayload = {
       documentName,
+      instance: this,
       request,
       requestHeaders: request.headers,
       requestParameters: Hocuspocus.getParameters(request),

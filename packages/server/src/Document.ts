@@ -71,7 +71,7 @@ class Document extends Doc {
    * underlying websocket connection
    */
   addConnection(connection: Connection): Document {
-    this.connections.set(connection.instance, {
+    this.connections.set(connection.webSocket, {
       clients: new Set(),
       connection,
     })
@@ -83,7 +83,7 @@ class Document extends Doc {
    * Is the given connection registered on this document
    */
   hasConnection(connection: Connection): boolean {
-    return this.connections.has(connection.instance)
+    return this.connections.has(connection.webSocket)
   }
 
   /**
@@ -92,11 +92,11 @@ class Document extends Doc {
   removeConnection(connection: Connection): Document {
     removeAwarenessStates(
       this.awareness,
-      Array.from(this.getClients(connection.instance)),
+      Array.from(this.getClients(connection.webSocket)),
       null,
     )
 
-    this.connections.delete(connection.instance)
+    this.connections.delete(connection.webSocket)
 
     return this
   }
@@ -138,7 +138,7 @@ class Document extends Doc {
     applyAwarenessUpdate(
       this.awareness,
       update,
-      connection.instance,
+      connection.webSocket,
     )
 
     return this

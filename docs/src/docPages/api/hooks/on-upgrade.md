@@ -20,6 +20,7 @@ const data = {
   head: any,
   request: IncomingMessage,
   socket: Socket,
+  instance: Hocuspocus,
 }
 ```
 
