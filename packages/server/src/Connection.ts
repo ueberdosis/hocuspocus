@@ -98,9 +98,9 @@ class Connection {
   }
 
   /**
-   * Close the connection
+   * Graceful wrapper around the WebSocket close method.
    */
-  close(): void {
+  close(code?: number | undefined, data?: string | undefined): void {
     this.lock.acquire('close', (done: Function) => {
 
       if (this.pingInterval) {
@@ -113,7 +113,7 @@ class Connection {
 
       this.document.removeConnection(this)
       this.callbacks.onClose(this.document)
-      this.connection.close()
+      this.connection.close(code, data)
 
       done()
 

@@ -108,4 +108,30 @@ context('server/closeConnections', () => {
       done()
     })
   })
+
+  it('uses a proper close event', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+    }).listen()
+
+    const client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced() {
+        Server.closeConnections()
+      },
+      onClose({ event }) {
+        assert.strictEqual(event.code, 4205)
+        assert.strictEqual(event.reason, 'Reset Connection')
+
+        client.destroy()
+        Server.destroy()
+        done()
+      },
+    })
+  })
 })

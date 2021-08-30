@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 import { MessageType, Configuration } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Forbidden } from './CloseEvents'
+import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
 import packageJson from '../package.json'
 
@@ -144,15 +144,18 @@ export class Hocuspocus {
   /**
    * Force closes one or more connections
    */
-  closeConnections(docName?: string) {
+  closeConnections(documentName?: string) {
     // Iterate through all connections for all documents
     // and invoke their close method, which is a graceful
     // disconnect wrapper around the underlying websocket.close
     this.documents.forEach((document: Document) => {
-      // If a docName was specified, bail if it doesnt match
-      if (docName && document.name !== docName) return
-      document.connections.forEach((conn: Connection) => {
-        conn.connection.close()
+      // If a documentName was specified, bail if it doesnt match
+      if (documentName && document.name !== documentName) {
+        return
+      }
+
+      document.connections.forEach((connection: Connection) => {
+        connection.connection.close(ResetConnection.code, ResetConnection.reason)
       })
     })
   }
