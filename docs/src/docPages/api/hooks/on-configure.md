@@ -22,6 +22,7 @@ const data = {
   configuration: Configuration,
   version: string,
   yjsVersion: string,
+  instance: Hocuspocus,
 }
 ```
 

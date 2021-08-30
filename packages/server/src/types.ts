@@ -121,6 +121,7 @@ export interface onConfigurePayload {
   configuration: Configuration,
   version: string,
   yjsVersion: string,
+  instance: Hocuspocus,
 }
 
 export interface CloseEvent {
