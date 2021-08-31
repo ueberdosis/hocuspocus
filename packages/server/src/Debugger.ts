@@ -38,7 +38,7 @@ export class MessageLogger {
     this.logs.push(item)
 
     if (this.output) {
-      console.log('[DEBUGGER]', item.direction === 'in' ? '–>' : '<–', `${item.type}/${item.category}`)
+      console.log('[DEBUGGER]', item.direction === 'in' ? 'IN –>' : 'OUT <–', `${item.type}/${item.category}`)
     }
 
     return this
