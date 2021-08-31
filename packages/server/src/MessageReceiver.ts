@@ -65,6 +65,9 @@ export class MessageReceiver {
         })
 
         readSyncStep1(message.decoder, message.encoder, document)
+
+        // TODO: When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
+
         break
       case messageYjsSyncStep2:
         this.debugger.log({

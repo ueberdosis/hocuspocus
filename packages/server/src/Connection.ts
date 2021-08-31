@@ -68,7 +68,8 @@ class Connection {
     this.webSocket.on('message', this.handleMessage.bind(this))
     this.webSocket.on('pong', () => { this.pongReceived = true })
 
-    this.sendFirstSyncStep()
+    // TODO: The sync should be initiated by the client
+    // this.sendFirstSyncStep()
   }
 
   /**
@@ -147,34 +148,35 @@ class Connection {
    * Send first sync step
    * @private
    */
-  private sendFirstSyncStep(): void {
-    const syncMessage = new OutgoingMessage()
-      .createSyncMessage()
-      .writeFirstSyncStepFor(this.document)
+  // TODO: The sync should be initiated by the client
+  // private sendFirstSyncStep(): void {
+  //   const syncMessage = new OutgoingMessage()
+  //     .createSyncMessage()
+  //     .writeFirstSyncStepFor(this.document)
 
-    this.debugger.log({
-      direction: 'out',
-      type: syncMessage.type,
-      category: syncMessage.category,
-    })
+  //   this.debugger.log({
+  //     direction: 'out',
+  //     type: syncMessage.type,
+  //     category: syncMessage.category,
+  //   })
 
-    this.send(syncMessage.toUint8Array())
+  //   this.send(syncMessage.toUint8Array())
 
-    if (!this.document.hasAwarenessStates()) {
-      return
-    }
+  //   if (!this.document.hasAwarenessStates()) {
+  //     return
+  //   }
 
-    const awarenessMessage = new OutgoingMessage()
-      .createAwarenessUpdateMessage(this.document.awareness)
+  //   const awarenessMessage = new OutgoingMessage()
+  //     .createAwarenessUpdateMessage(this.document.awareness)
 
-    this.debugger.log({
-      direction: 'out',
-      type: awarenessMessage.type,
-      category: awarenessMessage.category,
-    })
+  //   this.debugger.log({
+  //     direction: 'out',
+  //     type: awarenessMessage.type,
+  //     category: awarenessMessage.category,
+  //   })
 
-    this.send(awarenessMessage.toUint8Array())
-  }
+  //   this.send(awarenessMessage.toUint8Array())
+  // }
 
   /**
    * Handle an incoming message
