@@ -1,16 +1,26 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { readSyncMessage, messageYjsSyncStep2 } from 'y-protocols/sync'
+import { toUint8Array } from 'lib0/encoding'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 import { readAuthMessage } from '../../../shared/protocols/auth'
+import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 
 export class MessageReceiver {
 
   message: IncomingMessage
 
+  broadcasted = false
+
   constructor(message: IncomingMessage) {
     this.message = message
+  }
+
+  public setBroadcasted(value: boolean) {
+    this.broadcasted = value
+
+    return this
   }
 
   public apply(provider: HocuspocusProvider, emitSynced = true) {
@@ -43,6 +53,7 @@ export class MessageReceiver {
 
     message.writeVarUint(MessageType.Sync)
 
+    // Apply update
     const syncMessageType = readSyncMessage(
       message.decoder,
       message.encoder,
@@ -50,8 +61,24 @@ export class MessageReceiver {
       provider,
     )
 
+    // Synced
     if (emitSynced && syncMessageType === messageYjsSyncStep2) {
       provider.synced = true
+    }
+
+    // Reply
+    if (this.message.length() > 1) {
+      const update = toUint8Array(this.message.encoder)
+
+      if (this.broadcasted) {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.broadcast(UpdateMessage, { update })
+      } else {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.send(UpdateMessage, { update })
+      }
     }
   }
 

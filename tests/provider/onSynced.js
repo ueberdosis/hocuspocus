@@ -107,6 +107,43 @@ context('provider/onSynced', () => {
     })
   })
 
+  it('send all messages according to the protocol', done => {
+    const ydoc = new Y.Doc()
+
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 4000,
+
+      async onCreateDocument({ document }) {
+        document.getArray('foo').insert(0, ['bar'])
+
+        return document
+      },
+    })
+    Server.enableDebugging()
+    Server.listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced: () => {
+        assert.deepStrictEqual(Server.getMessageLogs(), [
+          { direction: 'out', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'in', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'in', type: 'Awareness', category: 'Update' },
+          // TODO: That should output `type: 'Sync'`, right?
+          { direction: 'in', type: 'Auth', category: 'Update' },
+        ])
+
+        Server.destroy()
+
+        done()
+      },
+    })
+  })
+
   it('onSynced callback is executed when the document is actually synced, even if it takes longer', done => {
     const ydoc = new Y.Doc()
 
