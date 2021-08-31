@@ -16,17 +16,26 @@ export class OutgoingMessage {
 
   encoder: Encoder
 
+  type?: number
+
+  category?: string
+
   constructor() {
     this.encoder = createEncoder()
   }
 
   createSyncMessage(): OutgoingMessage {
+    this.type = MessageType.Sync
+
     writeVarUint(this.encoder, MessageType.Sync)
 
     return this
   }
 
   createAwarenessUpdateMessage(awareness: Awareness, changedClients?: Array<any>): OutgoingMessage {
+    this.type = MessageType.Awareness
+    this.category = 'Update'
+
     const message = encodeAwarenessUpdate(
       awareness,
       changedClients || Array.from(awareness.getStates().keys()),
@@ -39,6 +48,9 @@ export class OutgoingMessage {
   }
 
   writeAuthenticated(): OutgoingMessage {
+    this.type = MessageType.Auth
+    this.category = 'Authenticated'
+
     writeVarUint(this.encoder, MessageType.Auth)
     writeAuthenticated(this.encoder)
 
@@ -46,6 +58,9 @@ export class OutgoingMessage {
   }
 
   writePermissionDenied(reason: string): OutgoingMessage {
+    this.type = MessageType.Auth
+    this.category = 'PermissionDenied'
+
     writeVarUint(this.encoder, MessageType.Auth)
     writePermissionDenied(this.encoder, reason)
 
@@ -53,12 +68,16 @@ export class OutgoingMessage {
   }
 
   writeFirstSyncStepFor(document: Document): OutgoingMessage {
+    this.category = 'SyncStep1'
+
     writeSyncStep1(this.encoder, document)
 
     return this
   }
 
   writeUpdate(update: Uint8Array): OutgoingMessage {
+    this.category = 'Update'
+
     writeUpdate(this.encoder, update)
 
     return this

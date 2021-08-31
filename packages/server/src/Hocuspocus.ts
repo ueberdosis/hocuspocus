@@ -4,13 +4,13 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
-
 import { MessageType, Configuration, ConnectionConfig } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
 import packageJson from '../package.json'
+import { Debugger, MessageLogger } from './Debugger'
 
 export const defaultConfiguration = {
   port: 80,
@@ -40,6 +40,8 @@ export class Hocuspocus {
   httpServer?: HTTPServer
 
   webSocketServer?: WebSocket.Server
+
+  debugger: MessageLogger = Debugger
 
   /**
    * Configure the server
@@ -216,6 +218,12 @@ export class Hocuspocus {
         decoding.readVarUint(decoder)
         const token = decoding.readVarString(decoder)
 
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'Token',
+        })
+
         this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
           // merge context from hook
           context = { ...context, ...contextAdditions }
@@ -224,6 +232,13 @@ export class Hocuspocus {
             connection.isAuthenticated = true
 
             const message = new OutgoingMessage().writeAuthenticated()
+
+            this.debugger.log({
+              direction: 'out',
+              type: message.type,
+              category: message.category,
+            })
+
             incoming.send(message.toUint8Array())
           })
           .then(handleNewConnection(queueIncomingMessageListener))
@@ -232,6 +247,12 @@ export class Hocuspocus {
             // risks exposing server internals or being a very long stack trace
             // hardcoded to 'permission-denied' for now
             const message = new OutgoingMessage().writePermissionDenied('permission-denied')
+
+            this.debugger.log({
+              direction: 'out',
+              type: message.type,
+              category: message.category,
+            })
 
             // Ensure that the permission denied message is sent before the
             // connection is closed
@@ -402,6 +423,32 @@ export class Hocuspocus {
     return decodeURI(
       request.url?.slice(1)?.split('?')[0] || '',
     )
+  }
+
+  enableDebugging() {
+    this.debugger.enable()
+  }
+
+  enableLogging() {
+    this.debugger.verbose()
+  }
+
+  disableLogging() {
+    this.debugger.quiet()
+  }
+
+  disableDebugging() {
+    this.debugger.disable()
+  }
+
+  flushMessageLogs() {
+    this.debugger.flush()
+
+    return this
+  }
+
+  getMessageLogs() {
+    return this.debugger.get()?.logs
   }
 }
 

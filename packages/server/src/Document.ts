@@ -2,10 +2,10 @@ import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
 import { mutex, createMutex } from 'lib0/mutex.js'
-
 import { AwarenessUpdate } from './types'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
+import { Debugger, MessageLogger } from './Debugger'
 
 class Document extends Doc {
 
@@ -21,6 +21,8 @@ class Document extends Doc {
   name: string
 
   mux: mutex
+
+  debugger: MessageLogger = Debugger
 
   /**
    * Constructor.
@@ -163,11 +165,20 @@ class Document extends Doc {
       }
     }
 
-    this.getConnections().forEach(connection => connection.send(
-      new OutgoingMessage()
+    this.getConnections().forEach(connection => {
+      const awarenessMessage = new OutgoingMessage()
         .createAwarenessUpdateMessage(this.awareness, changedClients)
-        .toUint8Array(),
-    ))
+
+      this.debugger.log({
+        direction: 'out',
+        type: awarenessMessage.type,
+        category: awarenessMessage.category,
+      })
+
+      connection.send(
+        awarenessMessage.toUint8Array(),
+      )
+    })
 
     return this
   }
@@ -182,9 +193,17 @@ class Document extends Doc {
       .createSyncMessage()
       .writeUpdate(update)
 
-    this.getConnections().forEach(connection => connection.send(
-      message.toUint8Array(),
-    ))
+    this.getConnections().forEach(connection => {
+      this.debugger.log({
+        direction: 'out',
+        type: message.type,
+        category: message.category,
+      })
+
+      connection.send(
+        message.toUint8Array(),
+      )
+    })
 
     return this
   }

@@ -7,6 +7,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { CloseEvent, WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
+import { Debugger, MessageLogger } from './Debugger'
 
 class Connection {
 
@@ -33,6 +34,8 @@ class Connection {
   lock: AsyncLock
 
   readOnly: Boolean
+
+  debugger: MessageLogger = Debugger
 
   /**
    * Constructor.
@@ -145,22 +148,32 @@ class Connection {
    * @private
    */
   private sendFirstSyncStep(): void {
-    this.send(
-      new OutgoingMessage()
-        .createSyncMessage()
-        .writeFirstSyncStepFor(this.document)
-        .toUint8Array(),
-    )
+    const syncMessage = new OutgoingMessage()
+      .createSyncMessage()
+      .writeFirstSyncStepFor(this.document)
+
+    this.debugger.log({
+      direction: 'out',
+      type: syncMessage.type,
+      category: syncMessage.category,
+    })
+
+    this.send(syncMessage.toUint8Array())
 
     if (!this.document.hasAwarenessStates()) {
       return
     }
 
-    this.send(
-      new OutgoingMessage()
-        .createAwarenessUpdateMessage(this.document.awareness)
-        .toUint8Array(),
-    )
+    const awarenessMessage = new OutgoingMessage()
+      .createAwarenessUpdateMessage(this.document.awareness)
+
+    this.debugger.log({
+      direction: 'out',
+      type: awarenessMessage.type,
+      category: awarenessMessage.category,
+    })
+
+    this.send(awarenessMessage.toUint8Array())
   }
 
   /**
