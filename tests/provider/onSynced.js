@@ -129,6 +129,24 @@ context('provider/onSynced', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        // In a client-server model, you want to handle this differently: The client should initiate the connection with SyncStep1.
+        // When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1. The client replies
+        // with SyncStep2 when it receives SyncStep1. Optionally the server may send a SyncDone after it received SyncStep2, so the
+        // client knows that the sync is finished.  There are two reasons for this more elaborated sync model: 1. This protocol can
+        // easily be implemented on top of http and websockets. 2. The server shoul only reply to requests, and not initiate them.
+        // Therefore it is necesarry that the client initiates the sync.
+
+        // Source: https://github.com/yjs/y-protocols/blob/master/sync.js#L23-L28
+
+        // Expected (according to the protocol)
+        // [
+        //   { direction: 'in', type: 'Sync', category: 'SyncStep1' },
+        //   { direction: 'out', type: 'Sync', category: 'SyncStep2' },
+        //   { direction: 'out', type: 'Sync', category: 'SyncStep1' },
+        //   { direction: 'in', type: 'Sync', category: 'SyncStep2' },
+        //   { direction: 'in', type: 'Awareness', category: 'Update' },
+        // ]
+
         assert.deepStrictEqual(Server.getMessageLogs(), [
           { direction: 'out', type: 'Sync', category: 'SyncStep1' },
           { direction: 'in', type: 'Sync', category: 'SyncStep1' },
