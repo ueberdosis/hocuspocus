@@ -107,7 +107,7 @@ context('provider/onSynced', () => {
     })
   })
 
-  it('send all messages according to the protocol', done => {
+  it.only('send all messages according to the protocol', done => {
     const ydoc = new Y.Doc()
 
     const Server = new Hocuspocus()
@@ -121,6 +121,7 @@ context('provider/onSynced', () => {
       },
     })
     Server.enableDebugging()
+    Server.enableLogging()
     Server.listen()
 
     client = new HocuspocusProvider({
