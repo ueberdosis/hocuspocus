@@ -429,7 +429,8 @@ export class Hocuspocus {
     this.debugger.enable()
   }
 
-  enableLogging() {
+  enableMessageLogging() {
+    this.debugger.enable()
     this.debugger.verbose()
   }
 
