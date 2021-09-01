@@ -1,5 +1,5 @@
 import { Encoder, createEncoder, toUint8Array } from 'lib0/encoding'
-import { MessageType, OutgoingMessageInterface } from './types'
+import { MessageType, OutgoingMessageArguments, OutgoingMessageInterface } from './types'
 
 export class OutgoingMessage implements OutgoingMessageInterface {
   encoder: Encoder
@@ -8,6 +8,10 @@ export class OutgoingMessage implements OutgoingMessageInterface {
 
   constructor() {
     this.encoder = createEncoder()
+  }
+
+  get(args: Partial<OutgoingMessageArguments>) {
+    return args.encoder
   }
 
   toUint8Array() {

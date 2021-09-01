@@ -4,13 +4,22 @@ import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 import { readAuthMessage } from '../../../shared/protocols/auth'
+import { OutgoingMessage } from './OutgoingMessage'
 
 export class MessageReceiver {
 
   message: IncomingMessage
 
+  broadcasted = false
+
   constructor(message: IncomingMessage) {
     this.message = message
+  }
+
+  public setBroadcasted(value: boolean) {
+    this.broadcasted = value
+
+    return this
   }
 
   public apply(provider: HocuspocusProvider, emitSynced = true) {
@@ -43,6 +52,7 @@ export class MessageReceiver {
 
     message.writeVarUint(MessageType.Sync)
 
+    // Apply update
     const syncMessageType = readSyncMessage(
       message.decoder,
       message.encoder,
@@ -50,8 +60,22 @@ export class MessageReceiver {
       provider,
     )
 
+    // Synced
     if (emitSynced && syncMessageType === messageYjsSyncStep2) {
       provider.synced = true
+    }
+
+    // Reply
+    if (message.length() > 1) {
+      if (this.broadcasted) {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
+      } else {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.send(OutgoingMessage, { encoder: message.encoder })
+      }
     }
   }
 

@@ -382,12 +382,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('message', { event, message })
 
     new MessageReceiver(message).apply(this)
-
-    // TODO: What’s that doing?
-    // Move to the MessageReceiver
-    // if (encoding.length(encoder) > 1) {
-    //   this.send(encoding.toUint8Array(encoder))
-    // }
   }
 
   onClose(event: CloseEvent) {
@@ -456,12 +450,9 @@ export class HocuspocusProvider extends EventEmitter {
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
       const message = new IncomingMessage(data)
-      const encoder = new MessageReceiver(message, this).apply(this, false)
-
-      // TODO: What’s that doing?
-      // if (encoding.length(encoder) > 1) {
-      //   this.broadcast(encoding.toUint8Array(encoder))
-      // }
+      new MessageReceiver(message, this)
+        .setBroadcasted(true)
+        .apply(this, false)
     })
   }
 

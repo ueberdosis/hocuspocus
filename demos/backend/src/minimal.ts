@@ -47,4 +47,6 @@ const server = Server.configure({
   // },
 })
 
+server.enableMessageLogging()
+
 server.listen()

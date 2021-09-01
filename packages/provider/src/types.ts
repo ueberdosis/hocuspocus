@@ -1,6 +1,6 @@
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
-import * as encoding from 'lib0/encoding'
+import { Encoder } from 'lib0/encoding'
 
 export enum MessageType {
   Sync = 0,
@@ -10,7 +10,7 @@ export enum MessageType {
 }
 
 export interface OutgoingMessageInterface {
-  encoder: encoding.Encoder
+  encoder: Encoder
   type?: MessageType
 }
 
@@ -21,6 +21,7 @@ export interface OutgoingMessageArguments {
   clients: number[],
   states: Map<number, { [key: string]: any; }>,
   update: any,
+  encoder: Encoder,
 }
 
 export interface Constructable<T> {

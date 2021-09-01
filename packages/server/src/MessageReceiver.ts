@@ -10,6 +10,7 @@ import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
+import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger, MessageLogger } from './Debugger'
 
 export class MessageReceiver {
@@ -40,7 +41,7 @@ export class MessageReceiver {
       case MessageType.Awareness:
         this.debugger.log({
           direction: 'in',
-          type,
+          type: MessageType.Awareness,
           category: 'Update',
         })
 
@@ -57,19 +58,40 @@ export class MessageReceiver {
     const type = message.readVarUint()
 
     switch (type) {
-      case messageYjsSyncStep1:
+      case messageYjsSyncStep1: {
         this.debugger.log({
           direction: 'in',
-          type,
+          type: MessageType.Sync,
           category: 'SyncStep1',
         })
 
         readSyncStep1(message.decoder, message.encoder, document)
+
+        // When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
+        this.debugger.log({
+          direction: 'out',
+          type: MessageType.Sync,
+          category: 'SyncStep2',
+        })
+
+        const syncMessage = (new OutgoingMessage()
+          .createSyncMessage()
+          .writeFirstSyncStepFor(document))
+
+        this.debugger.log({
+          direction: 'out',
+          type: MessageType.Sync,
+          category: 'SyncStep1',
+        })
+
+        connection.send(syncMessage.toUint8Array())
+
         break
+      }
       case messageYjsSyncStep2:
         this.debugger.log({
           direction: 'in',
-          type,
+          type: MessageType.Sync,
           category: 'SyncStep2',
         })
 
@@ -82,7 +104,7 @@ export class MessageReceiver {
       case messageYjsUpdate:
         this.debugger.log({
           direction: 'in',
-          type,
+          type: MessageType.Sync,
           category: 'Update',
         })
 
