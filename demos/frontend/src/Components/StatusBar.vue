@@ -15,7 +15,7 @@
       <button v-if="status === 'disconnected'" @click="provider.connect()" class="ml-3 border-2 border-black bg-black text-white px-4 py-2 rounded">
         connect
       </button>
-      <button v-if="status !== 'disconnected'" @click="provider.disconnect()" class="ml-3 border-2 border-black bg-white px-4 py-2 rounded">
+      <button v-else @click="provider.disconnect()" class="ml-3 border-2 border-black bg-white px-4 py-2 rounded">
         disconnect
       </button>
     </div>

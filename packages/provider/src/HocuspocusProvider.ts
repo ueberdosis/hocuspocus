@@ -6,8 +6,8 @@ import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import * as math from 'lib0/math'
 import * as url from 'lib0/url'
-
 import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
+import { retry } from '@lifeomic/attempt'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
 import { MessageReceiver } from './MessageReceiver'
@@ -285,12 +285,23 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   connect() {
-    this.shouldConnect = true
-
-    if (this.status !== WebSocketStatus.Connected) {
-      this.createWebSocketConnection()
-      this.subscribeToBroadcastChannel()
+    if (this.status === WebSocketStatus.Connected) {
+      console.log('this.status === WebSocketStatus.Connected')
+      return
     }
+
+    this.shouldConnect = true
+    this.subscribeToBroadcastChannel()
+
+    // TODO: Make all the settings configurable
+    retry(this.createWebSocketConnection.bind(this), {
+      delay: 1000, // 1 second
+      factor: 2,
+      maxAttempts: 0, // unlimited
+      minDelay: 1000, // 1 second
+      maxDelay: 30000, // 30 seconds
+      jitter: true, // randomize
+    })
   }
 
   disconnect() {
@@ -308,30 +319,42 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
+  resolveConnectionAttempt: (value: unknown) => void = null
+
+  rejectConnectionAttempt: (reason?: any) => void = null
+
   createWebSocketConnection() {
+    console.log('createWebSocketConnection')
     if (this.webSocket !== null) {
+      console.log('webSocket !== null')
       return
     }
 
-    this.webSocket = new this.options.WebSocketPolyfill(this.url)
-    this.webSocket.binaryType = 'arraybuffer'
+    if (this.resolveConnectionAttempt || this.rejectConnectionAttempt) {
+      console.log('this.resolveConnectionAttempt || this.rejectConnectionAttempt')
+      return
+    }
 
-    this.status = WebSocketStatus.Connecting
-    this.synced = false
+    return new Promise((resolve, reject) => {
+      this.webSocket = new this.options.WebSocketPolyfill(this.url)
+      this.webSocket.binaryType = 'arraybuffer'
 
-    this.webSocket.onmessage = this.onMessage.bind(this)
-    this.webSocket.onclose = this.onClose.bind(this)
-    this.webSocket.onopen = this.onOpen.bind(this)
+      this.status = WebSocketStatus.Connecting
+      this.synced = false
 
-    this.emit('status', { status: 'connecting' })
+      this.webSocket.onmessage = this.onMessage.bind(this)
+      this.webSocket.onclose = this.onClose.bind(this)
+      this.webSocket.onopen = this.onOpen.bind(this)
+
+      this.emit('status', { status: 'connecting' })
+
+      this.resolveConnectionAttempt = resolve
+      this.rejectConnectionAttempt = reject
+    })
   }
 
   onOpen(event: OpenEvent) {
     this.emit('open', { event })
-
-    if (this.status !== WebSocketStatus.Connected) {
-      this.webSocketConnectionEstablished()
-    }
   }
 
   webSocketConnectionEstablished() {
@@ -346,6 +369,11 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.startSync()
+
+    // TODO: Can we clean this up?
+    this.resolveConnectionAttempt()
+    this.rejectConnectionAttempt = null
+    this.resolveConnectionAttempt = null
   }
 
   startSync() {
@@ -375,6 +403,10 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
+    if (this.status !== WebSocketStatus.Connected) {
+      this.webSocketConnectionEstablished()
+    }
+
     this.lastMessageReceived = time.getUnixTime()
 
     const message = new IncomingMessage(event.data)
@@ -407,17 +439,30 @@ export class HocuspocusProvider extends EventEmitter {
       this.failedConnectionAttempts += 1
     }
 
-    if (this.shouldConnect) {
-      const wait = math.round(math.min(
-        math.log10(this.failedConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
-        this.options.maxReconnectTimeout,
-      ))
-
-      this.log(`[close] Reconnecting in ${wait}ms …`)
-      setTimeout(this.createWebSocketConnection.bind(this), wait)
-
+    if (this.rejectConnectionAttempt) {
+      console.log('ATTEMPT FAILED')
+      // TODO: Can we clean this up?
+      this.rejectConnectionAttempt()
+      this.rejectConnectionAttempt = null
+      this.resolveConnectionAttempt = null
+    } else if (this.shouldConnect) {
+      console.log('START A NEW CONNECT ATTEMPT connect()')
+      this.connect()
       return
     }
+
+    // TODO: When the connection is closed, we should try to reconnect from here
+    // if (this.shouldConnect) {
+    //   const wait = math.round(math.min(
+    //     math.log10(this.failedConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
+    //     this.options.maxReconnectTimeout,
+    //   ))
+
+    //   this.log(`[close] Reconnecting in ${wait}ms …`)
+    //   setTimeout(this.createWebSocketConnection.bind(this), wait)
+
+    //   return
+    // }
 
     if (this.status !== WebSocketStatus.Disconnected) {
       this.status = WebSocketStatus.Disconnected
