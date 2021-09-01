@@ -1,6 +1,5 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { readSyncMessage, messageYjsSyncStep2 } from 'y-protocols/sync'
-import { toUint8Array } from 'lib0/encoding'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'

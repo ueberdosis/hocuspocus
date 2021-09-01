@@ -107,7 +107,7 @@ context('provider/onSynced', () => {
     })
   })
 
-  it.only('send all messages according to the protocol', done => {
+  it('send all messages according to the protocol', done => {
     const ydoc = new Y.Doc()
 
     const Server = new Hocuspocus()
@@ -121,7 +121,6 @@ context('provider/onSynced', () => {
       },
     })
     Server.enableDebugging()
-    Server.enableLogging()
     Server.listen()
 
     client = new HocuspocusProvider({
@@ -138,7 +137,6 @@ context('provider/onSynced', () => {
           // client knows that the sync is finished.  There are two reasons for this more elaborated sync model: 1. This protocol can
           // easily be implemented on top of http and websockets. 2. The server should only reply to requests, and not initiate them.
           // Therefore it is necessary that the client initiates the sync.
-
           // Source: https://github.com/yjs/y-protocols/blob/master/sync.js#L23-L28
 
           // Expected (according to the protocol)
