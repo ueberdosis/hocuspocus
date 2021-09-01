@@ -14,9 +14,9 @@ const server = Server.configure({
   // },
 
   // Test error handling
-  // async onConnect(data) {
-  //   throw new Error('CRASH')
-  // },
+  async onConnect(data) {
+    throw new Error('CRASH')
+  },
 
   // async onConnect(data) {
   //   await new Promise((resolve, reject) => setTimeout(() => {
