@@ -18,7 +18,7 @@ export const defaultConfiguration = {
 }
 
 /**
- * Hocuspocus yjs websocket server
+ * Hocuspocus server
  */
 export class Hocuspocus {
   configuration: Configuration = {
@@ -139,7 +139,7 @@ export class Hocuspocus {
   }
 
   /**
-   * Force closes one or more connections
+   * Force close one or more connections
    */
   closeConnections(documentName?: string) {
     // Iterate through all connections for all documents
@@ -168,7 +168,7 @@ export class Hocuspocus {
   }
 
   /**
-   * Handle the incoming websocket connection
+   * Handle the incoming WebSocket connection
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
     // create a unique identifier for every socket connection
@@ -192,7 +192,7 @@ export class Hocuspocus {
         return
       }
 
-      // if no hook interrupts create a document and connection
+      // If no hook interrupts, create a document and connection
       this.createDocument(documentName, request, socketId, connection, context).then(document => {
         this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
@@ -212,9 +212,8 @@ export class Hocuspocus {
       const type = decoding.readVarUint(decoder)
 
       if (type === MessageType.Auth) {
-
-        // second int contains submessage type which will always be authentication
-        // when sent from client -> server
+        // The 2nd integer contains the submessage type
+        // which will always be authentication when sent from client -> server
         decoding.readVarUint(decoder)
         const token = decoding.readVarString(decoder)
 
@@ -225,7 +224,7 @@ export class Hocuspocus {
         })
 
         this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
-          // merge context from hook
+          // Merge the context from the hook
           context = { ...context, ...contextAdditions }
         })
           .then(() => {
