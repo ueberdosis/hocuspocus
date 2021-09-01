@@ -21,6 +21,7 @@ export interface OutgoingMessageArguments {
   clients: number[],
   states: Map<number, { [key: string]: any; }>,
   update: any,
+  encoder: encoding.Encoder,
 }
 
 export interface Constructable<T> {

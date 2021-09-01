@@ -5,7 +5,7 @@ import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 import { readAuthMessage } from '../../../shared/protocols/auth'
-import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
+import { OutgoingMessage } from './OutgoingMessage'
 
 export class MessageReceiver {
 
@@ -67,17 +67,15 @@ export class MessageReceiver {
     }
 
     // Reply
-    if (this.message.length() > 1) {
-      const update = toUint8Array(this.message.encoder)
-
+    if (message.length() > 1) {
       if (this.broadcasted) {
         // TODO: Some weird TypeScript error
         // @ts-ignore
-        provider.broadcast(UpdateMessage, { update })
+        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
       } else {
         // TODO: Some weird TypeScript error
         // @ts-ignore
-        provider.send(UpdateMessage, { update })
+        provider.send(OutgoingMessage, { encoder: message.encoder })
       }
     }
   }
