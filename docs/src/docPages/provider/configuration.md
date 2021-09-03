@@ -22,19 +22,19 @@ const provider = new HocuspocusProvider({
 ## List of settings
 There is definitely more to configure. Find the full list of all available settings below.
 
-| Name                    | Default           | Description                                                              |
-| ----------------------- | ----------------- | ------------------------------------------------------------------------ |
-| url                     | `''`              | The URL of the hocuspocus/WebSocket server.                              |
-| parameters              | `{}`              | Parameters will be added to the server URL and passed to the server.     |
-| name                    | `''`              | The name of the document.                                                |
-| document                | `''`              | The actual Y.js document.                                                |
-| token                   | `''`              | An authentication token that will be passed to the server.               |
-| awareness               | `new Awareness()` | Awareness object, by default attached to the passed Y.js document.       |
-| connect                 | `true`            | Whether to connect to the server after intialization.                    |
-| broadcast               | `true`            | By default changes are synced between browser tabs through broadcasting. |
-| ~~debug~~ (wip)         | `false`           | Verbose output on the console.                                           |
-| forceSyncInterval       | `false`           | Ask the server every x ms for updates.                                   |
-| maxReconnectTimeout     | `2500`            |                                                                          |
-| messageReconnectTimeout | `30000`           |                                                                          |
-| reconnectTimeoutBase    | `1200`            |                                                                          |
-| WebSocketPolyfill       | `WebSocket`       | Running in Node.js: Pass a WebSocket polyfill, for example `ws`.         |
+| Name                    | Default           | Description                                                                                             |
+| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| url                     | `''`              | The URL of the hocuspocus/WebSocket server.                                                             |
+| parameters              | `{}`              | Parameters will be added to the server URL and passed to the server.                                    |
+| name                    | `''`              | The name of the document.                                                                               |
+| document                | `''`              | The actual Y.js document.                                                                               |
+| token                   | `''`              | An authentication token that will be passed to the server (works with strings, functions and Promises). |
+| awareness               | `new Awareness()` | Awareness object, by default attached to the passed Y.js document.                                      |
+| connect                 | `true`            | Whether to connect to the server after intialization.                                                   |
+| broadcast               | `true`            | By default changes are synced between browser tabs through broadcasting.                                |
+| ~~debug~~ (wip)         | `false`           | Verbose output on the console.                                                                          |
+| forceSyncInterval       | `false`           | Ask the server every x ms for updates.                                                                  |
+| maxReconnectTimeout     | `2500`            |                                                                                                         |
+| messageReconnectTimeout | `30000`           |                                                                                                         |
+| reconnectTimeoutBase    | `1200`            |                                                                                                         |
+| WebSocketPolyfill       | `WebSocket`       | Running in Node.js: Pass a WebSocket polyfill, for example `ws`.                                        |

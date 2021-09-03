@@ -97,7 +97,7 @@
             Open source
           </h3>
           <p>
-            Vendor lock-in? Nope, take the code and do whatever you like with it. We’ve worked in open source for years.
+            Vendor lock-in? Nope, take the code and do whatever you want. We’ve worked in open source for years.
           </p>
         </feature-item>
 
@@ -118,7 +118,7 @@
           License
         </h2>
         <p>
-          hocuspocus will be licensed under MIT, and you’ll be free to do whatever you want with it.
+          hocuspocus will be licensed under MIT, and you’ll be free to do whatever you want.
           Can’t wait to get access? Become one of our wonderful <g-link to="https://github.com/sponsors/ueberdosis">GitHub sponsors</g-link> and receive an invite immediatly. BTW, we’re officially part of the <g-link to="https://opencollective.com/y-collective">Y-Collective</g-link>, too.
         </p>
       </div>
