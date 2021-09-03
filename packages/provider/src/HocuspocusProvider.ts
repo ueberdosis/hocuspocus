@@ -121,8 +121,10 @@ export interface HocuspocusProviderOptions {
 
 export class HocuspocusProvider extends EventEmitter {
   public options: HocuspocusProviderOptions = {
-    document: new Y.Doc(),
-    awareness: new Awareness(new Y.Doc()),
+    // @ts-ignore
+    document: undefined,
+    // @ts-ignore
+    awareness: undefined,
     WebSocketPolyfill: undefined,
     url: '',
     name: '',
