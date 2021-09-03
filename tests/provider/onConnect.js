@@ -18,8 +18,8 @@ context('provider/onConnect', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
-        Server.destroy()
         client.destroy()
+        Server.destroy()
         done()
       },
     })
@@ -61,8 +61,8 @@ context('provider/onConnect', () => {
         assert.fail('onConnect must not be executed')
       },
       onClose: () => {
-        Server.destroy()
         client.destroy()
+        Server.destroy()
         done()
       },
     })
