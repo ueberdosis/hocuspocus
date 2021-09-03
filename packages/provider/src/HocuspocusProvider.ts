@@ -27,16 +27,49 @@ export enum WebSocketStatus {
 }
 
 export interface HocuspocusProviderOptions {
+  /**
+   * URL of your @hocuspocus/server instance
+   */
   url: string,
+  /**
+   * The identifier/name of your document
+   */
   name: string,
+  /**
+   * The actual Y.js document
+   */
   document: Y.Doc,
+  /**
+   * Pass `false` to start the connection manually.
+   */
   connect: boolean,
+  /**
+   * Pass false to disable broadcasting between browser tabs.
+   */
   broadcast: boolean,
+  /**
+   * An Awareness instance to keep the presence state of all clients.
+   */
   awareness: Awareness,
+  /**
+   * A token that’s sent to the backend for authentication purposes.
+   */
   token: string | (() => string) | (() => Promise<string>) | null,
+  /**
+   * URL parameters that should be added.
+   */
   parameters: { [key: string]: any },
+  /**
+   * An optional WebSocket polyfill, for example for Node.js
+   */
   WebSocketPolyfill: any,
+  /**
+   * Force syncing the document in the defined interval.
+   */
   forceSyncInterval: false | number,
+  /**
+   * Disconnect when no message is received for the defined amount of milliseconds.
+   */
   messageReconnectTimeout: number,
   /**
    * The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.
@@ -104,7 +137,7 @@ export class HocuspocusProvider extends EventEmitter {
     delay: 1000, // 1 second
     initialDelay: 0, // instant
     factor: 2, // double the delay each time
-    maxAttempts: 0, // unlimited
+    maxAttempts: 1, // unlimited
     minDelay: 1000, // 1 second
     maxDelay: 30000, // 30 seconds
     jitter: true, // randomize
@@ -130,7 +163,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   shouldConnect = true
 
-  status: WebSocketStatus = WebSocketStatus.Disconnected
+  status = WebSocketStatus.Disconnected
 
   isSynced = false
 
@@ -172,15 +205,11 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('awarenessChange', this.options.onAwarenessChange)
 
     this.awareness.on('update', () => {
-      this.emit('awarenessUpdate', {
-        states: awarenessStatesToArray(this.awareness.getStates()),
-      })
+      this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
     })
 
     this.awareness.on('change', () => {
-      this.emit('awarenessChange', {
-        states: awarenessStatesToArray(this.awareness.getStates()),
-      })
+      this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) })
     })
 
     this.document.on('update', this.documentUpdateHandler.bind(this))
@@ -414,8 +443,9 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('connect')
 
     if (this.isAuthenticationRequired) {
-      const token = await this.getToken()
-      this.send(AuthenticationMessage, { token })
+      this.send(AuthenticationMessage, {
+        token: await this.getToken(),
+      })
       return
     }
 
@@ -437,9 +467,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   send(Message: ConstructableOutgoingMessage, args: any, broadcast = false) {
     if (broadcast) {
-      this.mux(() => {
-        this.broadcast(Message, args)
-      })
+      this.mux(() => { this.broadcast(Message, args) })
     }
 
     if (this.status === WebSocketStatus.Connected) {
