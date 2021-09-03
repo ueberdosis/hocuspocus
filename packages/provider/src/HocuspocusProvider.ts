@@ -34,7 +34,7 @@ export interface HocuspocusProviderOptions {
   connect: boolean,
   broadcast: boolean,
   awareness: Awareness,
-  token: string,
+  token: string | (() => string) | (() => Promise<string>),
   parameters: { [key: string]: any },
   WebSocketPolyfill: any,
   forceSyncInterval: false | number,
@@ -334,14 +334,24 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  webSocketConnectionEstablished() {
+  async getToken() {
+    if (typeof this.options.token === 'function') {
+      const token = await this.options.token()
+      return token
+    }
+
+    return this.options.token
+  }
+
+  async webSocketConnectionEstablished() {
     this.failedConnectionAttempts = 0
     this.status = WebSocketStatus.Connected
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
     if (this.isAuthenticationRequired) {
-      this.send(AuthenticationMessage, { token: this.options.token })
+      const token = await this.getToken()
+      this.send(AuthenticationMessage, { token })
       return
     }
 
