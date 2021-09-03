@@ -18,7 +18,7 @@ import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import awarenessStatesToArray from './utils/awarenessStatesToArray'
-import { Constructable, ConstructableOutgoingMessage } from './types'
+import { ConstructableOutgoingMessage } from './types'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
