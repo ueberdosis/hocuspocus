@@ -273,6 +273,9 @@ export class HocuspocusProvider extends EventEmitter {
       this.webSocket.onmessage = this.onMessage.bind(this)
       this.webSocket.onclose = this.onClose.bind(this)
       this.webSocket.onopen = this.onOpen.bind(this)
+      this.webSocket.onerror = () => {
+        reject()
+      }
 
       // Reset the status
       this.synced = false
