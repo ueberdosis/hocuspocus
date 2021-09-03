@@ -137,7 +137,7 @@ export class HocuspocusProvider extends EventEmitter {
     delay: 1000, // 1 second
     initialDelay: 0, // instant
     factor: 2, // double the delay each time
-    maxAttempts: 1, // unlimited
+    maxAttempts: 0, // unlimited
     minDelay: 1000, // 1 second
     maxDelay: 30000, // 30 seconds
     jitter: true, // randomize
