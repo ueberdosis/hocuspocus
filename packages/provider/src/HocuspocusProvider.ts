@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
@@ -19,6 +18,7 @@ import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import awarenessStatesToArray from './utils/awarenessStatesToArray'
+import { Constructable, ConstructableOutgoingMessage } from './types'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -33,7 +33,7 @@ export interface HocuspocusProviderOptions {
   connect: boolean,
   broadcast: boolean,
   awareness: Awareness,
-  token: string | (() => string) | (() => Promise<string>),
+  token: string | (() => string) | (() => Promise<string>) | null,
   parameters: { [key: string]: any },
   WebSocketPolyfill: any,
   forceSyncInterval: false | number,
@@ -65,13 +65,13 @@ export interface HocuspocusProviderOptions {
   /**
    * If jitter is true then the calculated delay will be a random integer value between minDelay and the calculated delay for the current iteration.
    */
-  jitter: number,
+  jitter: boolean,
   /**
    * A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.
    */
   timeout: number,
   onAuthenticated: () => void,
-  onAuthenticationFailed: ({ reason: string }) => void,
+  onAuthenticationFailed: ({ reason }: { reason: string }) => void,
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
@@ -88,6 +88,9 @@ export interface HocuspocusProviderOptions {
 
 export class HocuspocusProvider extends EventEmitter {
   public options: HocuspocusProviderOptions = {
+    document: new Y.Doc(),
+    awareness: new Awareness(new Y.Doc()),
+    WebSocketPolyfill: undefined,
     url: '',
     name: '',
     token: null,
@@ -121,8 +124,6 @@ export class HocuspocusProvider extends EventEmitter {
     onAwarenessChange: () => null,
   }
 
-  awareness: Awareness
-
   subscribedToBroadcastChannel = false
 
   webSocket: any = null
@@ -130,8 +131,6 @@ export class HocuspocusProvider extends EventEmitter {
   shouldConnect = true
 
   status: WebSocketStatus = WebSocketStatus.Disconnected
-
-  // failedConnectionAttempts = 0
 
   isSynced = false
 
@@ -147,19 +146,16 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   connectionAttempt: {
-    resolve?: (value: unknown) => void
-    reject?: (reason?: any) => void
-  } = null
+    resolve: (value?: any) => void
+    reject: (reason?: any) => void
+  } | null = null
 
   constructor(options: Partial<HocuspocusProviderOptions> = {}) {
     super()
-
     this.setOptions(options)
 
-    this.options.document = options.document ? options.document : new Y.Doc()
     this.options.awareness = options.awareness ? options.awareness : new Awareness(this.document)
     this.options.WebSocketPolyfill = options.WebSocketPolyfill ? options.WebSocketPolyfill : WebSocket
-    this.shouldConnect = options.connect !== undefined ? options.connect : this.shouldConnect
 
     this.on('open', this.options.onOpen)
     this.on('authenticated', this.options.onAuthenticated)
@@ -187,14 +183,14 @@ export class HocuspocusProvider extends EventEmitter {
       })
     })
 
+    this.document.on('update', this.documentUpdateHandler.bind(this))
+    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
+    this.registerBeforeUnloadEventListener()
+
     this.intervals.connectionChecker = setInterval(
       this.checkConnection.bind(this),
       this.options.messageReconnectTimeout / 10,
     )
-
-    this.document.on('update', this.documentUpdateHandler.bind(this))
-    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
-    this.registerBeforeUnloadEventListener()
 
     if (this.options.forceSyncInterval) {
       this.intervals.forceSync = setInterval(
@@ -203,9 +199,19 @@ export class HocuspocusProvider extends EventEmitter {
       )
     }
 
-    if (this.options.connect) {
-      this.connect()
+    if (typeof options.connect !== 'undefined') {
+      this.shouldConnect = options.connect
     }
+
+    if (!this.shouldConnect) {
+      return
+    }
+
+    this.connect()
+  }
+
+  public setOptions(options: Partial<HocuspocusProviderOptions> = {}): void {
+    this.options = { ...this.options, ...options }
   }
 
   connect() {
@@ -251,17 +257,13 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   resolveConnectionAttempt() {
-    this.connectionAttempt.resolve()
+    this.connectionAttempt?.resolve()
     this.connectionAttempt = null
   }
 
   rejectConnectionAttempt() {
-    this.connectionAttempt.reject()
+    this.connectionAttempt?.reject()
     this.connectionAttempt = null
-  }
-
-  public setOptions(options: Partial<HocuspocusProviderOptions> = {}): void {
-    this.options = { ...this.options, ...options }
   }
 
   get document() {
@@ -330,8 +332,6 @@ export class HocuspocusProvider extends EventEmitter {
 
   permissionDeniedHandler(reason: string) {
     this.emit('authenticationFailed', { reason })
-    this.log('Permission denied', reason)
-
     this.isAuthenticated = false
     this.shouldConnect = false
   }
@@ -435,7 +435,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  send(Message: OutgoingMessage, args: any, broadcast = false) {
+  send(Message: ConstructableOutgoingMessage, args: any, broadcast = false) {
     if (broadcast) {
       this.mux(() => {
         this.broadcast(Message, args)
@@ -485,7 +485,7 @@ export class HocuspocusProvider extends EventEmitter {
       this.rejectConnectionAttempt()
     } else if (this.shouldConnect) {
       // The connection was closed by the server, so let’s just try again.
-      // this.connect()
+      this.connect()
     }
 
     // If we’ll reconnect anyway, we’re done for now.
@@ -528,7 +528,7 @@ export class HocuspocusProvider extends EventEmitter {
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
       const message = new IncomingMessage(data)
-      new MessageReceiver(message, this)
+      new MessageReceiver(message)
         .setBroadcasted(true)
         .apply(this, false)
     })
@@ -562,7 +562,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  broadcast(Message: OutgoingMessage, args: any) {
+  broadcast(Message: ConstructableOutgoingMessage, args?: any) {
     if (!this.options.broadcast) {
       return
     }
@@ -572,14 +572,6 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     new MessageSender(Message, args).broadcast(this.broadcastChannel)
-  }
-
-  log(message: string): void {
-    if (!this.options.debug) {
-      return
-    }
-
-    console.log(message)
   }
 
   setAwarenessField(key: string, value: any) {

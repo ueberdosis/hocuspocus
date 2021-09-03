@@ -1,6 +1,12 @@
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 import { Encoder } from 'lib0/encoding'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
+import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
+import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
+import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
+import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
+import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 
 export enum MessageType {
   Sync = 0,
@@ -27,3 +33,11 @@ export interface OutgoingMessageArguments {
 export interface Constructable<T> {
   new(...args: any) : T
 }
+
+export type ConstructableOutgoingMessage =
+  Constructable<AuthenticationMessage> |
+  Constructable<AwarenessMessage> |
+  Constructable<QueryAwarenessMessage> |
+  Constructable<SyncStepOneMessage> |
+  Constructable<SyncStepTwoMessage> |
+  Constructable<UpdateMessage>
