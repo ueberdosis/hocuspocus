@@ -81,7 +81,13 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/github/outline" width="100"><br>
         <strong>Outline</strong>
       </a>
-    </td>    
+    </td> 
+    <td align="center">
+      <a href="https://ahrefs.com/">
+        <img src="https://unavatar.io/ahrefs.com" width="100"><br>
+        <strong>Ahrefs</strong>
+      </a>
+    </td>     
   </tr>
 </table>
 
