@@ -13,9 +13,9 @@ It's highly recommended to debounce extensive operations as this hook can be fir
 The `data` passed to the `onChange` hook has the following attributes:
 
 ```typescript
-import { IncomingHttpHeaders } from "http";
-import { URLSearchParams } from "url";
-import { Doc } from "yjs";
+import { IncomingHttpHeaders } from 'http'
+import { URLSearchParams } from 'url'
+import { Doc } from 'yjs'
 
 const data = {
   clientsCount: number,
@@ -26,8 +26,8 @@ const data = {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,
-  socketId: string
-};
+  socketId: string,
+}
 ```
 
 Context contains the data provided in former `onConnect` hooks.
@@ -39,12 +39,12 @@ The following example is not intended to be your primary storage as serializing 
 :::
 
 ```typescript
-import { debounce } from "debounce";
-import { Server } from "@hocuspocus/server";
-import { TiptapTransformer } from "@hocuspocus/transformer";
-import { writeFile } from "fs";
+import { debounce } from 'debounce'
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import { writeFile } from 'fs'
 
-let debounced;
+let debounced
 
 const hocuspocus = Server.configure({
   async onChange(data) {
@@ -52,24 +52,27 @@ const hocuspocus = Server.configure({
       // Convert the y-doc to something you can actually use in your views.
       // In this example we use the TiptapTransformer to get JSON from the given
       // ydoc.
-      const prosemirrorJSON = TiptapTransformer.fromYdoc(data.document);
+      const prosemirrorJSON = TiptapTransformer.fromYdoc(data.document)
 
       // Save your document. In a real-world app this could be a database query
       // a webhook or something else
-      writeFile(`/path/to/your/documents/${data.documentName}.json`, prosemirrorJSON);
+      writeFile(
+        `/path/to/your/documents/${data.documentName}.json`,
+        prosemirrorJSON
+      )
 
       // Maybe you want to store the user who changed the document?
       // Guess what, you have access to your custom context from the
       // onConnect hook here. See authorization & authentication for more
       // details
-      console.log(`Document ${data.documentName} changed by ${data.context.user.name}`);
-    };
+      console.log(`Document ${data.documentName} changed by ${data.context.user.name}`)
+    }
 
-    debounced?.clear();
-    debounced = debounce(save, 4000);
-    debounced();
-  }
-});
+    debounced?.clear()
+    debounced = debounce(save, 4000)
+    debounced()
+  },
+})
 
-hocuspocus.listen();
+hocuspocus.listen()
 ```
