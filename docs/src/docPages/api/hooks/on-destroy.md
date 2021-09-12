@@ -19,7 +19,7 @@ const data = {
 ## Example
 
 ```typescript
-import { Server } from "@hocuspocus/server'
+import { Server } from '@hocuspocus/server'
 
 const hocuspocus = Server.configure({
   async onDestroy(data) {
