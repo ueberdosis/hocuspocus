@@ -11,6 +11,8 @@ Our goal: Let’s keep it simple. The server has a few methods only.
 | `listen()`                                                   | Start the server.                                 |
 | `configure(configuration)`                                   | Pass custom settings.                             |
 | `handleConnection(incoming, request, documentName, context)` | Bind the server to an existing server instance.   |
+| `documentsCount()`                                           | Get the total number of active documents          |
+| `connectionsCount()`                                         | Get the total number of active connections        |
 | `closeConnections(documentName?)`                            | Close all connections, or to a specific document. |
 | `destroy()`                                                  | Stop the server.                                  |
 

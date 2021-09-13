@@ -139,6 +139,23 @@ export class Hocuspocus {
   }
 
   /**
+   * Get the total number of active documents
+   */
+  documentsCount(): number {
+    return this.documents.size
+  }
+
+  /**
+   * Get the total number of active connections
+   */
+  connectionsCount(): number {
+    return Array.from(this.documents.values()).reduce((acc, document) => {
+      acc += document.connectionsCount()
+      return acc
+    }, 0)
+  }
+
+  /**
    * Force close one or more connections
    */
   closeConnections(documentName?: string) {
