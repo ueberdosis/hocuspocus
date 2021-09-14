@@ -26,6 +26,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -53,6 +54,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -76,6 +78,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -94,6 +97,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onSynced() {
         Server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
@@ -127,6 +131,7 @@ context('server/onConnect', () => {
       name: weirdDocumentName,
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -149,6 +154,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onClose: () => {
         client.destroy()
         Server.destroy()
@@ -183,6 +189,7 @@ context('server/onConnect', () => {
       },
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -206,6 +213,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -229,6 +237,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -252,6 +261,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -275,6 +285,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -298,6 +309,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 })

@@ -25,6 +25,7 @@ context('server/onDisconnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         client.disconnect()
       },
@@ -54,6 +55,7 @@ context('server/onDisconnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         client.disconnect()
       },
@@ -86,6 +88,7 @@ context('server/onDisconnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         client.disconnect()
       },

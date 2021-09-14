@@ -23,6 +23,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test',
         document: ydoc,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           Server.closeConnections('hocuspocus-test')
         },
@@ -40,6 +41,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test-2',
         document: ydoc2,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           resolve()
         },
@@ -72,6 +74,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test',
         document: ydoc,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onClose() {
           // Make the sure client doesn’t reconnect
           client.disconnect()
@@ -86,6 +89,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test-2',
         document: ydoc2,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           Server.closeConnections()
         },
@@ -121,6 +125,7 @@ context('server/closeConnections', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onSynced() {
         Server.closeConnections()
       },

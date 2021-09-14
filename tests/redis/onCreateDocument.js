@@ -37,6 +37,7 @@ context('redis/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       broadcast: false,
       // foo.0 = 'bar'
       onSynced: () => {
@@ -57,6 +58,7 @@ context('redis/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       // foo.0 === 'bar'
       onSynced: () => {
         const value = anotherYdoc.getArray('foo').get(0)

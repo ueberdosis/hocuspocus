@@ -16,6 +16,7 @@ context('provider/onMessage', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onMessage: () => {
         client.destroy()
         Server.destroy()
@@ -33,6 +34,7 @@ context('provider/onMessage', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
 
     client.on('message', () => {

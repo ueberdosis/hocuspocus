@@ -25,6 +25,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -51,6 +52,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -85,6 +87,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -103,6 +106,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onSynced() {
         Server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
@@ -135,6 +139,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
 
     client.on('synced', () => {
@@ -168,6 +173,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
 
     const anotherClient = new HocuspocusProvider({
@@ -175,6 +181,7 @@ context('server/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: new Y.Doc(),
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
 
     client.on('synced', () => {
