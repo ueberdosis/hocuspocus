@@ -4,21 +4,16 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
-let client
 let anotherClient
 const ydoc = new Y.Doc()
 
 context('provider/onAwarenessChange', () => {
-  afterEach(() => {
-    client.destroy()
-  })
-
   it('onAwarenessChange callback is executed', done => {
     const Server = new Hocuspocus()
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -28,6 +23,7 @@ context('provider/onAwarenessChange', () => {
       },
       onAwarenessChange: ({ states }) => {
         Server.destroy()
+        client.destroy()
 
         assert.strictEqual(states.length, 1)
         assert.strictEqual(states[0].foo, 'bar')
@@ -42,7 +38,7 @@ context('provider/onAwarenessChange', () => {
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -57,6 +53,7 @@ context('provider/onAwarenessChange', () => {
           assert.strictEqual(player2, true)
 
           Server.destroy()
+          client.destroy()
           anotherClient.destroy()
           done()
         }
@@ -86,13 +83,14 @@ context('provider/onAwarenessChange', () => {
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
         Server.destroy()
+        client.destroy()
         anotherClient.destroy()
         done()
       },

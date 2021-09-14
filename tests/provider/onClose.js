@@ -4,7 +4,6 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
-let client
 const ydoc = new Y.Doc()
 const Server = new Hocuspocus()
 
@@ -18,7 +17,7 @@ context('provider/onClose', () => {
   })
 
   it('onClose callback is executed', done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -27,13 +26,14 @@ context('provider/onClose', () => {
         client.disconnect()
       },
       onClose: () => {
+        client.destroy()
         done()
       },
     })
   })
 
   it("on('close') callback is executed", done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -44,6 +44,7 @@ context('provider/onClose', () => {
       client.disconnect()
     })
     client.on('close', () => {
+      client.destroy()
       done()
     })
   })
