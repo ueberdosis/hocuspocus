@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.69](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.68...@hocuspocus/server@1.0.0-alpha.69) (2021-09-14)
+
+
+### Features
+
+* Add connectionsCount and documentsCount methods to server ([8bdbcd8](https://github.com/ueberdosis/hocuspocus/commit/8bdbcd86b1f18462f6636b75a4cbd97ebefdb227))
+
+
+
+
+
 # [1.0.0-alpha.68](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.67...@hocuspocus/server@1.0.0-alpha.68) (2021-09-01)
 
 **Note:** Version bump only for package @hocuspocus/server
