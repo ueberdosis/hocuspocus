@@ -23,7 +23,7 @@ context('server/documentsCount', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced() {
-        assert.strictEqual(Server.documentsCount(), 1)
+        assert.strictEqual(Server.getDocumentsCount(), 1)
 
         client.destroy()
         Server.destroy()

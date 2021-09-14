@@ -7,7 +7,7 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 const ydoc = new Y.Doc()
 
-context('server/connectionsCount', () => {
+context('server/getConnectionsCount', () => {
   it('outputs the total connections', done => {
     const Server = new Hocuspocus()
 
@@ -23,7 +23,7 @@ context('server/connectionsCount', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced() {
-        assert.strictEqual(Server.connectionsCount(), 1)
+        assert.strictEqual(Server.getConnectionsCount(), 1)
 
         const client2 = new HocuspocusProvider({
           url: 'ws://127.0.0.1:4000',
@@ -31,7 +31,7 @@ context('server/connectionsCount', () => {
           document: ydoc,
           WebSocketPolyfill: WebSocket,
           onSynced() {
-            assert.strictEqual(Server.connectionsCount(), 2)
+            assert.strictEqual(Server.getConnectionsCount(), 2)
 
             client2.destroy()
             client.destroy()

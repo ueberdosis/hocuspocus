@@ -143,16 +143,16 @@ export class Hocuspocus {
   /**
    * Get the total number of active documents
    */
-  documentsCount(): number {
+  getDocumentsCount(): number {
     return this.documents.size
   }
 
   /**
    * Get the total number of active connections
    */
-  connectionsCount(): number {
+  getConnectionsCount(): number {
     return Array.from(this.documents.values()).reduce((acc, document) => {
-      acc += document.connectionsCount()
+      acc += document.getConnectionsCount()
       return acc
     }, 0)
   }
@@ -307,7 +307,7 @@ export class Hocuspocus {
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
     const hookPayload = {
       instance: this,
-      clientsCount: document.connectionsCount(),
+      clientsCount: document.getConnectionsCount(),
       context: connection?.context || {},
       document,
       documentName: document.name,
@@ -375,7 +375,7 @@ export class Hocuspocus {
     instance.onClose(document => {
       const hookPayload = {
         instance: this,
-        clientsCount: document.connectionsCount(),
+        clientsCount: document.getConnectionsCount(),
         context,
         document,
         socketId,
@@ -389,7 +389,7 @@ export class Hocuspocus {
           throw e
         })
         .finally(() => {
-          if (document.connectionsCount() <= 0) {
+          if (document.getConnectionsCount() <= 0) {
             this.documents.delete(document.name)
           }
         })
