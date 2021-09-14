@@ -25,4 +25,4 @@ context('server/listen', () => {
 
     Server.destroy()
   })
-}).timeout(15000)
+})
