@@ -6,7 +6,6 @@ import { RocksDB } from '../../packages/rocksdb/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 import removeDirectory from '../utils/removeDirectory'
 
-let client
 const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
 const Server = new Hocuspocus()
@@ -29,12 +28,8 @@ context('rocksdb/onCreateDocument', () => {
     removeDirectory('./database')
   })
 
-  afterEach(() => {
-    client.destroy()
-  })
-
   it('document is persisted', done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -45,13 +40,14 @@ context('rocksdb/onCreateDocument', () => {
 
         ydoc.getArray('foo').insert(0, ['bar'])
 
+        client.destroy()
         done()
       },
     })
   })
 
   it('document can be restored', done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: anotherYdoc,
@@ -60,6 +56,7 @@ context('rocksdb/onCreateDocument', () => {
         const value = anotherYdoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')
 
+        client.destroy()
         done()
       },
     })

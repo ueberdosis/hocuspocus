@@ -170,7 +170,7 @@ context('server/onCreateDocument', () => {
       WebSocketPolyfill: WebSocket,
     })
 
-    const client2 = new HocuspocusProvider({
+    const anotherClient = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: new Y.Doc(),
@@ -181,7 +181,7 @@ context('server/onCreateDocument', () => {
       assert.strictEqual(Server.documents.size, 1)
 
       client.destroy()
-      client2.destroy()
+      anotherClient.destroy()
       Server.destroy()
       done()
     })

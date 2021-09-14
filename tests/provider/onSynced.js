@@ -4,25 +4,20 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
-let client
-
 context('provider/onSynced', () => {
-  afterEach(() => {
-    client.destroy()
-  })
-
   it('onSynced callback is executed', done => {
     const ydoc = new Y.Doc()
 
     const Server = new Hocuspocus()
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        client.destroy()
         Server.destroy()
 
         done()
@@ -36,7 +31,7 @@ context('provider/onSynced', () => {
     const Server = new Hocuspocus()
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -44,6 +39,7 @@ context('provider/onSynced', () => {
     })
 
     client.on('synced', () => {
+      client.destroy()
       Server.destroy()
 
       done()
@@ -64,12 +60,13 @@ context('provider/onSynced', () => {
       },
     }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        client.destroy()
         Server.destroy()
 
         done()
@@ -91,12 +88,13 @@ context('provider/onSynced', () => {
       },
     }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        client.destroy()
         Server.destroy()
 
         const value = ydoc.getArray('foo').get(0)
@@ -123,7 +121,7 @@ context('provider/onSynced', () => {
     Server.enableDebugging()
     Server.listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -148,6 +146,7 @@ context('provider/onSynced', () => {
             { direction: 'in', type: 'Sync', category: 'SyncStep2' },
           ])
 
+          client.destroy()
           Server.destroy()
 
           done()
@@ -173,12 +172,13 @@ context('provider/onSynced', () => {
       },
     }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced: () => {
+        client.destroy()
         Server.destroy()
 
         const value = ydoc.getArray('foo').get(0)
