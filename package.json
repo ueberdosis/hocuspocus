@@ -29,7 +29,7 @@
     "build:docs": "yarn --cwd ./docs build",
     "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/monitor build",
     "clean:packages": "rm -Rf ./packages/*/dist",
-    "release": "yarn lint && yarn test && yarn build:packages && lerna publish --no-private",
+    "release": "yarn lint && yarn test && yarn build:packages && lerna publish from-package --no-private",
     "reset": "yarn clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && yarn install"
   },
   "devDependencies": {
