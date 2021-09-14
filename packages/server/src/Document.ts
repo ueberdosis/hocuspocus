@@ -104,7 +104,7 @@ class Document extends Doc {
   }
 
   /**
-   * Get the number of active connections
+   * Get the number of active connections for this document
    */
   connectionsCount(): number {
     return this.connections.size
