@@ -4,30 +4,27 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
-let client
 let anotherClient
 const ydoc = new Y.Doc()
 
 context('provider/onAwarenessUpdate', () => {
-  afterEach(() => {
-    client.destroy()
-  })
-
   it('onAwarenessUpdate callback is executed', done => {
     const Server = new Hocuspocus()
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessUpdate: ({ states }) => {
         Server.destroy()
+        client.destroy()
 
         assert.strictEqual(states.length, 1)
         assert.strictEqual(states[0].foo, 'bar')
@@ -42,11 +39,12 @@ context('provider/onAwarenessUpdate', () => {
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         client.setAwarenessField('name', 'player1')
       },
@@ -57,6 +55,7 @@ context('provider/onAwarenessUpdate', () => {
           assert.strictEqual(player2, true)
 
           Server.destroy()
+          client.destroy()
           anotherClient.destroy()
           done()
         }
@@ -68,6 +67,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
@@ -86,13 +86,15 @@ context('provider/onAwarenessUpdate', () => {
 
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         Server.destroy()
+        client.destroy()
         anotherClient.destroy()
         done()
       },
@@ -110,6 +112,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-completly-different-and-unrelated-document',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },

@@ -6,7 +6,6 @@ import { Redis } from '../../packages/redis/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 import flushRedis from '../utils/flushRedis'
 
-let client
 const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
 const Server = new Hocuspocus()
@@ -32,16 +31,13 @@ context('redis/onCreateDocument', () => {
     flushRedis()
   })
 
-  afterEach(() => {
-    client.destroy()
-  })
-
   it('document is persisted', done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       broadcast: false,
       // foo.0 = 'bar'
       onSynced: () => {
@@ -50,22 +46,25 @@ context('redis/onCreateDocument', () => {
 
         ydoc.getArray('foo').insert(0, ['bar'])
 
+        client.destroy()
         done()
       },
     })
   })
 
   it('document can be restored', done => {
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       // foo.0 === 'bar'
       onSynced: () => {
         const value = anotherYdoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')
 
+        client.destroy()
         done()
       },
     })

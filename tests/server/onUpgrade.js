@@ -25,6 +25,7 @@ context('server/onUpgrade', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -51,6 +52,7 @@ context('server/onUpgrade', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 

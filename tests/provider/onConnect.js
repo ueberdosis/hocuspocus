@@ -4,7 +4,6 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
-let client
 const ydoc = new Y.Doc()
 
 context('provider/onConnect', () => {
@@ -12,14 +11,15 @@ context('provider/onConnect', () => {
     const Server = new Hocuspocus()
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
-        Server.destroy()
         client.destroy()
+        Server.destroy()
         done()
       },
     })
@@ -29,11 +29,12 @@ context('provider/onConnect', () => {
     const Server = new Hocuspocus()
     Server.configure({ port: 4000 }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
 
     client.on('connect', () => {
@@ -52,17 +53,18 @@ context('provider/onConnect', () => {
       },
     }).listen()
 
-    client = new HocuspocusProvider({
+    const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onConnect: () => {
         assert.fail('onConnect must not be executed')
       },
       onClose: () => {
-        Server.destroy()
         client.destroy()
+        Server.destroy()
         done()
       },
     })

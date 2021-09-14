@@ -24,6 +24,7 @@ context('provider/onAuthenticated', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated: () => {
         client.destroy()
@@ -51,6 +52,7 @@ context('provider/onAuthenticated', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       token: () => Promise.resolve('SUPER-SECRET-TOKEN'),
       onAuthenticated: () => {
         client.destroy()
@@ -78,6 +80,7 @@ context('provider/onAuthenticated', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       token: () => 'SUPER-SECRET-TOKEN',
       onAuthenticated: () => {
         client.destroy()

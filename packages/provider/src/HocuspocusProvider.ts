@@ -1,13 +1,11 @@
-// @ts-nocheck
 import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
 import * as time from 'lib0/time'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
-import * as math from 'lib0/math'
 import * as url from 'lib0/url'
-
 import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
+import { retry } from '@lifeomic/attempt'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
 import { MessageReceiver } from './MessageReceiver'
@@ -20,6 +18,7 @@ import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import awarenessStatesToArray from './utils/awarenessStatesToArray'
+import { ConstructableOutgoingMessage } from './types'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -28,21 +27,84 @@ export enum WebSocketStatus {
 }
 
 export interface HocuspocusProviderOptions {
+  /**
+   * URL of your @hocuspocus/server instance
+   */
   url: string,
+  /**
+   * The identifier/name of your document
+   */
   name: string,
+  /**
+   * The actual Y.js document
+   */
   document: Y.Doc,
+  /**
+   * Pass `false` to start the connection manually.
+   */
   connect: boolean,
+  /**
+   * Pass false to disable broadcasting between browser tabs.
+   */
   broadcast: boolean,
+  /**
+   * An Awareness instance to keep the presence state of all clients.
+   */
   awareness: Awareness,
-  token: string | (() => string) | (() => Promise<string>),
+  /**
+   * A token that’s sent to the backend for authentication purposes.
+   */
+  token: string | (() => string) | (() => Promise<string>) | null,
+  /**
+   * URL parameters that should be added.
+   */
   parameters: { [key: string]: any },
+  /**
+   * An optional WebSocket polyfill, for example for Node.js
+   */
   WebSocketPolyfill: any,
+  /**
+   * Force syncing the document in the defined interval.
+   */
   forceSyncInterval: false | number,
-  reconnectTimeoutBase: number,
-  maxReconnectTimeout: number,
+  /**
+   * Disconnect when no message is received for the defined amount of milliseconds.
+   */
   messageReconnectTimeout: number,
+  /**
+   * The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.
+   */
+  delay: number,
+  /**
+   * The intialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately.
+   */
+  initialDelay: number,
+  /**
+   * The factor option is used to grow the delay exponentially.
+   */
+  factor: number,
+  /**
+   * The maximum number of attempts or 0 if there is no limit on number of attempts.
+   */
+  maxAttempts: number,
+  /**
+   * minDelay is used to set a lower bound of delay when jitter is enabled. This property has no effect if jitter is disabled.
+   */
+  minDelay: number,
+  /**
+   * The maxDelay option is used to set an upper bound for the delay when factor is enabled. A value of 0 can be provided if there should be no upper bound when calculating delay.
+   */
+  maxDelay: number,
+  /**
+   * If jitter is true then the calculated delay will be a random integer value between minDelay and the calculated delay for the current iteration.
+   */
+  jitter: boolean,
+  /**
+   * A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.
+   */
+  timeout: number,
   onAuthenticated: () => void,
-  onAuthenticationFailed: ({ reason: string }) => void,
+  onAuthenticationFailed: ({ reason }: { reason: string }) => void,
   onOpen: (event: OpenEvent) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
@@ -54,23 +116,40 @@ export interface HocuspocusProviderOptions {
   onDestroy: () => void,
   onAwarenessUpdate: (states: any) => void,
   onAwarenessChange: (states: any) => void,
-  debug: boolean,
 }
 
 export class HocuspocusProvider extends EventEmitter {
   public options: HocuspocusProviderOptions = {
+    // @ts-ignore
+    document: undefined,
+    // @ts-ignore
+    awareness: undefined,
+    WebSocketPolyfill: undefined,
     url: '',
     name: '',
     token: null,
     parameters: {},
-    debug: false,
     connect: true,
     broadcast: true,
     forceSyncInterval: false,
-    reconnectTimeoutBase: 1200,
-    maxReconnectTimeout: 2500,
     // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
+    // 1 second
+    delay: 1000,
+    // instant
+    initialDelay: 0,
+    // double the delay each time
+    factor: 2,
+    // unlimited retries
+    maxAttempts: 0,
+    // wait at least 1 second
+    minDelay: 1000,
+    // at least every 30 seconds
+    maxDelay: 30000,
+    // randomize
+    jitter: true,
+    // retry forever
+    timeout: 0,
     onAuthenticated: () => null,
     onAuthenticationFailed: () => null,
     onOpen: () => null,
@@ -86,17 +165,13 @@ export class HocuspocusProvider extends EventEmitter {
     onAwarenessChange: () => null,
   }
 
-  awareness: Awareness
-
   subscribedToBroadcastChannel = false
 
   webSocket: any = null
 
   shouldConnect = true
 
-  status: WebSocketStatus = WebSocketStatus.Disconnected
-
-  failedConnectionAttempts = 0
+  status = WebSocketStatus.Disconnected
 
   isSynced = false
 
@@ -111,15 +186,17 @@ export class HocuspocusProvider extends EventEmitter {
     connectionChecker: null,
   }
 
+  connectionAttempt: {
+    resolve: (value?: any) => void
+    reject: (reason?: any) => void
+  } | null = null
+
   constructor(options: Partial<HocuspocusProviderOptions> = {}) {
     super()
-
     this.setOptions(options)
 
-    this.options.document = options.document ? options.document : new Y.Doc()
     this.options.awareness = options.awareness ? options.awareness : new Awareness(this.document)
     this.options.WebSocketPolyfill = options.WebSocketPolyfill ? options.WebSocketPolyfill : WebSocket
-    this.shouldConnect = options.connect !== undefined ? options.connect : this.shouldConnect
 
     this.on('open', this.options.onOpen)
     this.on('authenticated', this.options.onAuthenticated)
@@ -136,25 +213,21 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('awarenessChange', this.options.onAwarenessChange)
 
     this.awareness.on('update', () => {
-      this.emit('awarenessUpdate', {
-        states: awarenessStatesToArray(this.awareness.getStates()),
-      })
+      this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
     })
 
     this.awareness.on('change', () => {
-      this.emit('awarenessChange', {
-        states: awarenessStatesToArray(this.awareness.getStates()),
-      })
+      this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) })
     })
+
+    this.document.on('update', this.documentUpdateHandler.bind(this))
+    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
+    this.registerBeforeUnloadEventListener()
 
     this.intervals.connectionChecker = setInterval(
       this.checkConnection.bind(this),
       this.options.messageReconnectTimeout / 10,
     )
-
-    this.document.on('update', this.documentUpdateHandler.bind(this))
-    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
-    this.registerBeforeUnloadEventListener()
 
     if (this.options.forceSyncInterval) {
       this.intervals.forceSync = setInterval(
@@ -163,13 +236,74 @@ export class HocuspocusProvider extends EventEmitter {
       )
     }
 
-    if (this.options.connect) {
-      this.connect()
+    if (typeof options.connect !== 'undefined') {
+      this.shouldConnect = options.connect
     }
+
+    if (!this.shouldConnect) {
+      return
+    }
+
+    this.connect()
   }
 
   public setOptions(options: Partial<HocuspocusProviderOptions> = {}): void {
     this.options = { ...this.options, ...options }
+  }
+
+  connect() {
+    if (this.status === WebSocketStatus.Connected) {
+      return
+    }
+
+    this.shouldConnect = true
+    this.subscribeToBroadcastChannel()
+
+    retry(this.createWebSocketConnection.bind(this), {
+      delay: this.options.delay,
+      initialDelay: this.options.initialDelay,
+      factor: this.options.factor,
+      maxAttempts: this.options.maxAttempts,
+      minDelay: this.options.minDelay,
+      maxDelay: this.options.maxDelay,
+      jitter: this.options.jitter,
+      timeout: this.options.timeout,
+    })
+  }
+
+  createWebSocketConnection() {
+    return new Promise((resolve, reject) => {
+      // Init the WebSocket connection
+      this.webSocket = new this.options.WebSocketPolyfill(this.url)
+      this.webSocket.binaryType = 'arraybuffer'
+      this.webSocket.onmessage = this.onMessage.bind(this)
+      this.webSocket.onclose = this.onClose.bind(this)
+      this.webSocket.onopen = this.onOpen.bind(this)
+      this.webSocket.onerror = () => {
+        reject()
+      }
+
+      // Reset the status
+      this.synced = false
+      this.status = WebSocketStatus.Connecting
+      this.emit('status', { status: 'connecting' })
+
+      // Store resolve/reject for later use
+      this.connectionAttempt = {
+        resolve,
+        reject,
+      }
+    })
+  }
+
+  resolveConnectionAttempt() {
+    this.connectionAttempt?.resolve()
+    this.connectionAttempt = null
+  }
+
+  rejectConnectionAttempt() {
+    this.connectionAttempt?.reject()
+    this.connectionAttempt = null
   }
 
   get document() {
@@ -181,12 +315,12 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   checkConnection() {
-    // Don’t close the connection when it’s not established anyway
+    // Don’t check the connection when it’s not even established
     if (this.status !== WebSocketStatus.Connected) {
       return
     }
 
-    // Don’t just close then connection while waiting for the first message
+    // Don’t close then connection while waiting for the first message
     if (!this.lastMessageReceived) {
       return
     }
@@ -238,8 +372,6 @@ export class HocuspocusProvider extends EventEmitter {
 
   permissionDeniedHandler(reason: string) {
     this.emit('authenticationFailed', { reason })
-    this.log('Permission denied', reason)
-
     this.isAuthenticated = false
     this.shouldConnect = false
   }
@@ -284,15 +416,6 @@ export class HocuspocusProvider extends EventEmitter {
     return !!this.options.token && !this.isAuthenticated
   }
 
-  connect() {
-    this.shouldConnect = true
-
-    if (this.status !== WebSocketStatus.Connected) {
-      this.createWebSocketConnection()
-      this.subscribeToBroadcastChannel()
-    }
-  }
-
   disconnect() {
     this.shouldConnect = false
     this.disconnectBroadcastChannel()
@@ -306,24 +429,6 @@ export class HocuspocusProvider extends EventEmitter {
     } catch {
       //
     }
-  }
-
-  createWebSocketConnection() {
-    if (this.webSocket !== null) {
-      return
-    }
-
-    this.webSocket = new this.options.WebSocketPolyfill(this.url)
-    this.webSocket.binaryType = 'arraybuffer'
-
-    this.status = WebSocketStatus.Connecting
-    this.synced = false
-
-    this.webSocket.onmessage = this.onMessage.bind(this)
-    this.webSocket.onclose = this.onClose.bind(this)
-    this.webSocket.onopen = this.onOpen.bind(this)
-
-    this.emit('status', { status: 'connecting' })
   }
 
   onOpen(event: OpenEvent) {
@@ -344,18 +449,20 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   async webSocketConnectionEstablished() {
-    this.failedConnectionAttempts = 0
     this.status = WebSocketStatus.Connected
     this.emit('status', { status: 'connected' })
     this.emit('connect')
 
     if (this.isAuthenticationRequired) {
-      const token = await this.getToken()
-      this.send(AuthenticationMessage, { token })
+      this.send(AuthenticationMessage, {
+        token: await this.getToken(),
+      })
       return
     }
 
     this.startSync()
+
+    this.resolveConnectionAttempt()
   }
 
   startSync() {
@@ -369,11 +476,9 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  send(Message: OutgoingMessage, args: any, broadcast = false) {
+  send(Message: ConstructableOutgoingMessage, args: any, broadcast = false) {
     if (broadcast) {
-      this.mux(() => {
-        this.broadcast(Message, args)
-      })
+      this.mux(() => { this.broadcast(Message, args) })
     }
 
     if (this.status === WebSocketStatus.Connected) {
@@ -397,12 +502,11 @@ export class HocuspocusProvider extends EventEmitter {
   onClose(event: CloseEvent) {
     this.emit('close', { event })
 
-    this.isAuthenticated = false
     this.webSocket = null
+    this.isAuthenticated = false
+    this.synced = false
 
     if (this.status === WebSocketStatus.Connected) {
-      this.synced = false
-
       // update awareness (all users except local left)
       removeAwarenessStates(
         this.awareness,
@@ -413,27 +517,30 @@ export class HocuspocusProvider extends EventEmitter {
       this.status = WebSocketStatus.Disconnected
       this.emit('status', { status: 'disconnected' })
       this.emit('disconnect', { event })
-    } else {
-      this.failedConnectionAttempts += 1
     }
 
+    if (this.connectionAttempt) {
+      // Okay, that connection attempt failed …
+      this.rejectConnectionAttempt()
+    } else if (this.shouldConnect) {
+      // The connection was closed by the server, so let’s just try again.
+      this.connect()
+    }
+
+    // If we’ll reconnect anyway, we’re done for now.
     if (this.shouldConnect) {
-      const wait = math.round(math.min(
-        math.log10(this.failedConnectionAttempts + 1) * this.options.reconnectTimeoutBase,
-        this.options.maxReconnectTimeout,
-      ))
-
-      this.log(`[close] Reconnecting in ${wait}ms …`)
-      setTimeout(this.createWebSocketConnection.bind(this), wait)
-
       return
     }
 
-    if (this.status !== WebSocketStatus.Disconnected) {
-      this.status = WebSocketStatus.Disconnected
-      this.emit('status', { status: 'disconnected' })
-      this.emit('disconnect', { event })
+    // The status is set correctly already.
+    if (this.status === WebSocketStatus.Disconnected) {
+      return
     }
+
+    // Let’s update the connection status.
+    this.status = WebSocketStatus.Disconnected
+    this.emit('status', { status: 'disconnected' })
+    this.emit('disconnect', { event })
   }
 
   destroy() {
@@ -460,7 +567,7 @@ export class HocuspocusProvider extends EventEmitter {
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
       const message = new IncomingMessage(data)
-      new MessageReceiver(message, this)
+      new MessageReceiver(message)
         .setBroadcasted(true)
         .apply(this, false)
     })
@@ -494,7 +601,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  broadcast(Message: OutgoingMessage, args: any) {
+  broadcast(Message: ConstructableOutgoingMessage, args?: any) {
     if (!this.options.broadcast) {
       return
     }
@@ -504,14 +611,6 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     new MessageSender(Message, args).broadcast(this.broadcastChannel)
-  }
-
-  log(message: string): void {
-    if (!this.options.debug) {
-      return
-    }
-
-    console.log(message)
   }
 
   setAwarenessField(key: string, value: any) {

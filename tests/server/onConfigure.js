@@ -27,6 +27,7 @@ context('server/onConfigure', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
   })
 
@@ -53,6 +54,20 @@ context('server/onConfigure', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
+    })
+  })
+
+  it('has the configuration', done => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 1337,
+      async onConfigure({ configuration }) {
+        assert.strictEqual(configuration.port, 1337)
+
+        Server.destroy()
+        done()
+      },
     })
   })
 })

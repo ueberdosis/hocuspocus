@@ -5,7 +5,7 @@ import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
-let client2
+let anotherClient
 const ydoc = new Y.Doc()
 const ydoc2 = new Y.Doc()
 
@@ -23,6 +23,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test',
         document: ydoc,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           Server.closeConnections('hocuspocus-test')
         },
@@ -34,12 +35,13 @@ context('server/closeConnections', () => {
       })
     })
 
-    const client2DonePromise = new Promise(resolve => {
-      client2 = new HocuspocusProvider({
+    const anotherClientDonePromise = new Promise(resolve => {
+      anotherClient = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test-2',
         document: ydoc2,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           resolve()
         },
@@ -48,12 +50,12 @@ context('server/closeConnections', () => {
 
     // Wait for the disconnected client to close and the second
     // connection to sync before proceeding to assert
-    Promise.all([clientDonePromise, client2DonePromise]).then(() => {
+    Promise.all([clientDonePromise, anotherClientDonePromise]).then(() => {
       assert.strictEqual(client.status, 'disconnected')
-      assert.strictEqual(client2.status, 'connected')
+      assert.strictEqual(anotherClient.status, 'connected')
 
       client.destroy()
-      client2.destroy()
+      anotherClient.destroy()
       Server.destroy()
       done()
     })
@@ -72,6 +74,7 @@ context('server/closeConnections', () => {
         name: 'hocuspocus-test',
         document: ydoc,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onClose() {
           // Make the sure client doesn’t reconnect
           client.disconnect()
@@ -80,30 +83,31 @@ context('server/closeConnections', () => {
       })
     })
 
-    const client2DonePromise = new Promise(resolve => {
-      client2 = new HocuspocusProvider({
+    const anotherClientDonePromise = new Promise(resolve => {
+      anotherClient = new HocuspocusProvider({
         url: 'ws://127.0.0.1:4000',
         name: 'hocuspocus-test-2',
         document: ydoc2,
         WebSocketPolyfill: WebSocket,
+        maxAttempts: 1,
         onSynced() {
           Server.closeConnections()
         },
         onClose() {
           // Make the sure client doesn’t reconnect
-          client2.disconnect()
+          anotherClient.disconnect()
           resolve()
         },
       })
     })
 
     // Wait for both clients to disconnect before asserting
-    Promise.all([clientDonePromise, client2DonePromise]).then(() => {
+    Promise.all([clientDonePromise, anotherClientDonePromise]).then(() => {
       assert.strictEqual(client.status, 'disconnected')
-      assert.strictEqual(client2.status, 'disconnected')
+      assert.strictEqual(anotherClient.status, 'disconnected')
 
       client.destroy()
-      client2.destroy()
+      anotherClient.destroy()
       Server.destroy()
       done()
     })
@@ -121,6 +125,7 @@ context('server/closeConnections', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       onSynced() {
         Server.closeConnections()
       },

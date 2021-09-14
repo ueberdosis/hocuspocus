@@ -27,6 +27,7 @@ context('server/getMessageLogs', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
       token: 'secret',
       onSynced() {
         assert.isTrue(Server.getMessageLogs().length > 0)

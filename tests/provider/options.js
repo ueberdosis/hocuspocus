@@ -4,34 +4,13 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
+let client
 const ydoc = new Y.Doc()
 const Server = new Hocuspocus()
 
-context('provider/onOpen', () => {
-  before(() => {
-    Server.configure({ port: 4000 }).listen()
-  })
-
-  after(() => {
-    Server.destroy()
-  })
-
-  it('onOpen callback is executed', done => {
-    const client = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-test',
-      document: ydoc,
-      WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onOpen: () => {
-        client.destroy()
-        done()
-      },
-    })
-  })
-
-  it("on('open') callback is executed", done => {
-    const client = new HocuspocusProvider({
+context('provider/options', () => {
+  it('has default options (maxDelay = 30000)', () => {
+    client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
@@ -39,9 +18,19 @@ context('provider/onOpen', () => {
       maxAttempts: 1,
     })
 
-    client.on('open', () => {
-      client.destroy()
-      done()
+    assert.strictEqual(client.options.maxDelay, 30000)
+  })
+
+  it('overwrites the default options', () => {
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      maxDelay: 10000,
+      WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
     })
+
+    assert.strictEqual(client.options.maxDelay, 10000)
   })
 })
