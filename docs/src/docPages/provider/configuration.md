@@ -32,24 +32,14 @@ There is definitely more to configure. Find the full list of all available setti
 | awareness               | `new Awareness()` | Awareness object, by default attached to the passed Y.js document.                                                                                                                 |
 | connect                 | `true`            | Whether to connect to the server after intialization.                                                                                                                              |
 | broadcast               | `true`            | By default changes are synced between browser tabs through broadcasting.                                                                                                           |
-| ~~debug~~ (wip)         | `false`           | Verbose output on the console.                                                                                                                                                     |
 | forceSyncInterval       | `false`           | Ask the server every x ms for updates.                                                                                                                                             |
-| delay                   | `number`          | The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.                                                                     |
-| initialDelay            | `number`          | The intialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately. |
-| factor                  | `number`          | The factor option is used to grow the delay exponentially.                                                                                                                         |
-| maxAttempts             | `number`          | The maximum number of attempts or 0 if there is no limit on number of attempts.                                                                                                    |
-| minDelay                | `number`          | minDelay is used to set a lower bound of delay when jitter is enabled. This property has no effect if jitter is disabled.                                                          |
-| maxDelay                | `number`          | The maxDelay option is used to set an upper bound for the delay when factor is enabled. A value of 0 can be provided if there should be no upper bound when calculating delay.     |
-| jitter                  | `number`          | If jitter is true then the calculated delay will be a random integer value between minDelay and the calculated delay for the current iteration.                                    |
-| timeout                 | `number`          | A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.                          |
+| delay                   | `1000`            | The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.                                                                     |
+| initialDelay            | `0`               | The intialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately. |
+| factor                  | `2`               | The factor option is used to grow the delay exponentially.                                                                                                                         |
+| maxAttempts             | `0`               | The maximum number of attempts or 0 if there is no limit on number of attempts.                                                                                                    |
+| minDelay                | `1000`            | minDelay is used to set a lower bound of delay when jitter is enabled. This property has no effect if jitter is disabled.                                                          |
+| maxDelay                | `30000`           | The maxDelay option is used to set an upper bound for the delay when factor is enabled. A value of 0 can be provided if there should be no upper bound when calculating delay.     |
+| jitter                  | `true`            | If jitter is true then the calculated delay will be a random integer value between minDelay and the calculated delay for the current iteration.                                    |
+| timeout                 | `0`               | A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.                          |
 | messageReconnectTimeout | `30000`           | Closes the connection when after the configured messageReconnectTimeout no message was received.                                                                                   |
 | WebSocketPolyfill       | `WebSocket`       | Running in Node.js: Pass a WebSocket polyfill, for example `ws`.                                                                                                                   |
-
-
-
-
-
-
-
-
-

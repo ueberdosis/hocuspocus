@@ -116,7 +116,6 @@ export interface HocuspocusProviderOptions {
   onDestroy: () => void,
   onAwarenessUpdate: (states: any) => void,
   onAwarenessChange: (states: any) => void,
-  debug: boolean,
 }
 
 export class HocuspocusProvider extends EventEmitter {
@@ -130,20 +129,27 @@ export class HocuspocusProvider extends EventEmitter {
     name: '',
     token: null,
     parameters: {},
-    debug: false,
     connect: true,
     broadcast: true,
     forceSyncInterval: false,
     // TODO: this should depend on awareness.outdatedTime
     messageReconnectTimeout: 30000,
-    delay: 1000, // 1 second
-    initialDelay: 0, // instant
-    factor: 2, // double the delay each time
-    maxAttempts: 0, // unlimited
-    minDelay: 1000, // 1 second
-    maxDelay: 30000, // 30 seconds
-    jitter: true, // randomize
-    timeout: 0, // retry forever
+    // 1 second
+    delay: 1000,
+    // instant
+    initialDelay: 0,
+    // double the delay each time
+    factor: 2,
+    // unlimited retries
+    maxAttempts: 0,
+    // wait at least 1 second
+    minDelay: 1000,
+    // at least every 30 seconds
+    maxDelay: 30000,
+    // randomize
+    jitter: true,
+    // retry forever
+    timeout: 0,
     onAuthenticated: () => null,
     onAuthenticationFailed: () => null,
     onOpen: () => null,

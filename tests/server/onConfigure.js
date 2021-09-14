@@ -55,4 +55,17 @@ context('server/onConfigure', () => {
       WebSocketPolyfill: WebSocket,
     })
   })
+
+  it('has the configuration', done => {
+    const Server = new Hocuspocus()
+    Server.configure({
+      port: 1337,
+      async onConfigure({ configuration }) {
+        assert.strictEqual(configuration.port, 1337)
+
+        Server.destroy()
+        done()
+      },
+    })
+  })
 })
