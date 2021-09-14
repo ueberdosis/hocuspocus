@@ -17,9 +17,10 @@ const data = {
   context: any,
   document: Doc,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
-  socketId: string,
+  socketId: string
 }
 ```
 
@@ -43,7 +44,7 @@ const hocuspocus = Server.configure({
   async onCreateDocument(data) {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
-    // The default field in tiptap is simply called "default"
+    // The default field in tiptap is simply called 'default'
     const fieldName = 'default'
 
     // Check if the given field already exists in the given y-doc.
@@ -60,8 +61,8 @@ const hocuspocus = Server.configure({
 
     // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
     // of extensions you use in the frontend to create a valid document
-    return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [ Document, Paragraph, Text ])
-  },
+    return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [Document, Paragraph, Text])
+  }
 })
 
 hocuspocus.listen()

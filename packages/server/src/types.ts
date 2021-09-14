@@ -87,6 +87,7 @@ export interface onCreateDocumentPayload {
   context: any,
   document: Document,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
@@ -98,6 +99,7 @@ export interface onChangePayload {
   context: any,
   document: Document,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,
@@ -109,6 +111,7 @@ export interface onDisconnectPayload {
   context: any,
   document: Document,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
@@ -132,6 +135,7 @@ export interface onListenPayload {
 }
 
 export interface onDestroyPayload {
+  instance: Hocuspocus,
 }
 
 export interface onConfigurePayload {

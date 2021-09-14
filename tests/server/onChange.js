@@ -120,4 +120,32 @@ context('server/onChange', () => {
       done()
     })
   })
+
+  it('has the server instance', done => {
+    const ydoc = new Y.Doc()
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onChange({ instance }) {
+        assert.strictEqual(instance, Server)
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      ydoc.getArray('foo').insert(0, ['bar'])
+    })
+  })
 })

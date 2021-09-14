@@ -107,7 +107,9 @@ export class Hocuspocus {
     })
 
     server.on('upgrade', (request, socket, head) => {
-      this.hooks('onUpgrade', { request, socket, head })
+      this.hooks('onUpgrade', {
+        request, socket, head, instance: this,
+      })
         .then(() => {
           // let the default websocket server handle the connection if
           // prior hooks don't interfere
@@ -164,7 +166,7 @@ export class Hocuspocus {
     this.httpServer?.close()
     this.webSocketServer?.close()
 
-    await this.hooks('onDestroy', {})
+    await this.hooks('onDestroy', { instance: this })
   }
 
   /**
@@ -287,6 +289,7 @@ export class Hocuspocus {
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
     const hookPayload = {
+      instance: this,
       clientsCount: document.connectionsCount(),
       context: connection?.context || {},
       document,
@@ -316,6 +319,7 @@ export class Hocuspocus {
     this.documents.set(documentName, document)
 
     const hookPayload = {
+      instance: this,
       context,
       connection,
       document,
@@ -353,6 +357,7 @@ export class Hocuspocus {
 
     instance.onClose(document => {
       const hookPayload = {
+        instance: this,
         clientsCount: document.connectionsCount(),
         context,
         document,

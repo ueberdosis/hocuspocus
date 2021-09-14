@@ -22,6 +22,7 @@ const data = {
   context: any,
   document: Doc,
   documentName: string,
+  instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,

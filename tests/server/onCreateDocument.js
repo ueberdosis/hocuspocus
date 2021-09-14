@@ -186,4 +186,27 @@ context('server/onCreateDocument', () => {
       done()
     })
   })
+
+  it('has the server instance', done => {
+    const Server = new Hocuspocus()
+
+    Server.configure({
+      port: 4000,
+      async onCreateDocument({ instance }) {
+        assert.strictEqual(instance, Server)
+
+        client.destroy()
+        Server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
 })
