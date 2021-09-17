@@ -23,7 +23,8 @@ export class MessageReceiver {
   }
 
   public apply(provider: HocuspocusProvider, emitSynced = true) {
-    const type = this.message.readVarUint()
+    const { message } = this
+    const type = message.readVarUint()
 
     switch (type) {
       case MessageType.Sync:
@@ -45,6 +46,19 @@ export class MessageReceiver {
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }
+
+    // Reply
+    if (message.length() > 1) {
+      if (this.broadcasted) {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
+      } else {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.send(OutgoingMessage, { encoder: message.encoder })
+      }
+    }
   }
 
   private applySyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
@@ -60,22 +74,9 @@ export class MessageReceiver {
       provider,
     )
 
-    // Synced
+    // Synced once we receive Step2
     if (emitSynced && syncMessageType === messageYjsSyncStep2) {
       provider.synced = true
-    }
-
-    // Reply
-    if (message.length() > 1) {
-      if (this.broadcasted) {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
-      } else {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.send(OutgoingMessage, { encoder: message.encoder })
-      }
     }
   }
 
