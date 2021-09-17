@@ -9,9 +9,9 @@ const ydoc = new Y.Doc()
 
 context('provider/onAwarenessUpdate', () => {
   it('onAwarenessUpdate callback is executed', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({ port: 4000 }).listen()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -23,7 +23,7 @@ context('provider/onAwarenessUpdate', () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessUpdate: ({ states }) => {
-        Server.destroy()
+        server.destroy()
         client.destroy()
 
         assert.strictEqual(states.length, 1)
@@ -35,9 +35,9 @@ context('provider/onAwarenessUpdate', () => {
   })
 
   it('shares awareness state with other users', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({ port: 4000 }).listen()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -54,7 +54,7 @@ context('provider/onAwarenessUpdate', () => {
         if (player2) {
           assert.strictEqual(player2, true)
 
-          Server.destroy()
+          server.destroy()
           client.destroy()
           anotherClient.destroy()
           done()
@@ -82,9 +82,9 @@ context('provider/onAwarenessUpdate', () => {
   })
 
   it('does not share awareness state with users in other documents', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({ port: 4000 }).listen()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -93,7 +93,7 @@ context('provider/onAwarenessUpdate', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       onConnect: () => {
-        Server.destroy()
+        server.destroy()
         client.destroy()
         anotherClient.destroy()
         done()

@@ -8,8 +8,8 @@ context('provider/onSynced', () => {
   it('onSynced callback is executed', done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -19,7 +19,7 @@ context('provider/onSynced', () => {
       maxAttempts: 1,
       onSynced: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -29,8 +29,8 @@ context('provider/onSynced', () => {
   it("on('synced') callback is executed", done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -42,7 +42,7 @@ context('provider/onSynced', () => {
 
     client.on('synced', () => {
       client.destroy()
-      Server.destroy()
+      server.destroy()
 
       done()
     })
@@ -51,8 +51,8 @@ context('provider/onSynced', () => {
   it('onSynced callback is executed, even when the onConnect takes longer', done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 4000,
 
       async onConnect(data) {
@@ -70,7 +70,7 @@ context('provider/onSynced', () => {
       maxAttempts: 1,
       onSynced: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -80,8 +80,8 @@ context('provider/onSynced', () => {
   it('onSynced callback is executed when the document is actually synced', done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 4000,
 
       async onCreateDocument({ document }) {
@@ -99,7 +99,7 @@ context('provider/onSynced', () => {
       maxAttempts: 1,
       onSynced: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         const value = ydoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')
@@ -112,8 +112,8 @@ context('provider/onSynced', () => {
   it('send all messages according to the protocol', done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 4000,
 
       async onCreateDocument({ document }) {
@@ -122,8 +122,8 @@ context('provider/onSynced', () => {
         return document
       },
     })
-    Server.enableDebugging()
-    Server.listen()
+    server.enableDebugging()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -143,7 +143,7 @@ context('provider/onSynced', () => {
           // Source: https://github.com/yjs/y-protocols/blob/master/sync.js#L23-L28
 
           // Expected (according to the protocol)
-          assert.deepStrictEqual(Server.getMessageLogs(), [
+          assert.deepStrictEqual(server.getMessageLogs(), [
             { direction: 'in', type: 'Sync', category: 'SyncStep1' },
             { direction: 'out', type: 'Sync', category: 'SyncStep2' },
             { direction: 'out', type: 'Sync', category: 'SyncStep1' },
@@ -152,7 +152,7 @@ context('provider/onSynced', () => {
           ])
 
           client.destroy()
-          Server.destroy()
+          server.destroy()
 
           done()
         }, 200)
@@ -163,8 +163,8 @@ context('provider/onSynced', () => {
   it('onSynced callback is executed when the document is actually synced, even if it takes longer', done => {
     const ydoc = new Y.Doc()
 
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 4000,
 
       async onCreateDocument({ document }) {
@@ -185,7 +185,7 @@ context('provider/onSynced', () => {
       maxAttempts: 1,
       onSynced: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         const value = ydoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')

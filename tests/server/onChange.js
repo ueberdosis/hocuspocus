@@ -9,14 +9,14 @@ let client
 context('server/onChange', () => {
   it('onChange callback receives updates', done => {
     const ydoc = new Y.Doc()
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     const mockContext = {
       user: 123,
     }
     let triggered = false
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect() {
         return mockContext
@@ -29,7 +29,7 @@ context('server/onChange', () => {
           triggered = true
           assert.strictEqual(value, 'bar')
 
-          Server.destroy()
+          server.destroy()
           client.destroy()
           done()
         }
@@ -51,7 +51,7 @@ context('server/onChange', () => {
 
   it('executes onChange callback from an extension', done => {
     const ydoc = new Y.Doc()
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
     let triggered = false
 
     class CustomExtension {
@@ -62,14 +62,14 @@ context('server/onChange', () => {
           triggered = true
           assert.strictEqual(value, 'bar')
 
-          Server.destroy()
+          server.destroy()
           client.destroy()
           done()
         }
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -91,10 +91,10 @@ context('server/onChange', () => {
 
   it('onChange callback is not called after onCreateDocument', done => {
     const ydoc = new Y.Doc()
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
     let triggered = false
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onChange(data) {
         triggered = true
@@ -118,7 +118,7 @@ context('server/onChange', () => {
         throw new Error('onChange should not be called unless client updates')
       }
 
-      Server.destroy()
+      server.destroy()
       client.destroy()
       done()
     })
@@ -126,15 +126,15 @@ context('server/onChange', () => {
 
   it('has the server instance', done => {
     const ydoc = new Y.Doc()
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onChange({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/onDisconnect', () => {
   it('executes the onDisconnect callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onDisconnect() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -33,17 +33,17 @@ context('server/onDisconnect', () => {
   })
 
   it('executes the onDisconnect callback from an extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onDisconnect() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -63,13 +63,13 @@ context('server/onDisconnect', () => {
   })
 
   it('passes the context to the onCreateDocument callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     const mockContext = {
       user: 123,
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onConnect() {
         return mockContext
@@ -78,7 +78,7 @@ context('server/onDisconnect', () => {
         assert.deepStrictEqual(context, mockContext)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -96,15 +96,15 @@ context('server/onDisconnect', () => {
   })
 
   it('has the server instance', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onDisconnect({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

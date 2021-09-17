@@ -11,9 +11,9 @@ const ydoc2 = new Y.Doc()
 
 context('server/closeConnections', () => {
   it('closes a specific connection when a documentName is passed', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     }).listen()
 
@@ -25,7 +25,7 @@ context('server/closeConnections', () => {
         WebSocketPolyfill: WebSocket,
         maxAttempts: 1,
         onSynced() {
-          Server.closeConnections('hocuspocus-test')
+          server.closeConnections('hocuspocus-test')
         },
         onClose() {
           // Make the sure client doesn’t reconnect
@@ -56,15 +56,15 @@ context('server/closeConnections', () => {
 
       client.destroy()
       anotherClient.destroy()
-      Server.destroy()
+      server.destroy()
       done()
     })
   })
 
   it('closes all connections when no documentName is passed', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     }).listen()
 
@@ -91,7 +91,7 @@ context('server/closeConnections', () => {
         WebSocketPolyfill: WebSocket,
         maxAttempts: 1,
         onSynced() {
-          Server.closeConnections()
+          server.closeConnections()
         },
         onClose() {
           // Make the sure client doesn’t reconnect
@@ -108,15 +108,15 @@ context('server/closeConnections', () => {
 
       client.destroy()
       anotherClient.destroy()
-      Server.destroy()
+      server.destroy()
       done()
     })
   })
 
   it('uses a proper close event', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     }).listen()
 
@@ -127,14 +127,14 @@ context('server/closeConnections', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       onSynced() {
-        Server.closeConnections()
+        server.closeConnections()
       },
       onClose({ event }) {
         assert.strictEqual(event.code, 4205)
         assert.strictEqual(event.reason, 'Reset Connection')
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })

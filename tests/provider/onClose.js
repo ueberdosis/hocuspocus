@@ -5,15 +5,15 @@ import { Hocuspocus } from '../../packages/server/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 
 const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
+const server = new Hocuspocus()
 
 context('provider/onClose', () => {
   before(() => {
-    Server.configure({ port: 4000 }).listen()
+    server.configure({ port: 4000 }).listen()
   })
 
   after(() => {
-    Server.destroy()
+    server.destroy()
   })
 
   it('onClose callback is executed', done => {

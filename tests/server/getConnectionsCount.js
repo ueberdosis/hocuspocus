@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/getConnectionsCount', () => {
   it('outputs the total connections', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     })
 
-    Server.listen()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -23,7 +23,7 @@ context('server/getConnectionsCount', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced() {
-        assert.strictEqual(Server.getConnectionsCount(), 1)
+        assert.strictEqual(server.getConnectionsCount(), 1)
 
         const client2 = new HocuspocusProvider({
           url: 'ws://127.0.0.1:4000',
@@ -31,11 +31,11 @@ context('server/getConnectionsCount', () => {
           document: ydoc,
           WebSocketPolyfill: WebSocket,
           onSynced() {
-            assert.strictEqual(Server.getConnectionsCount(), 2)
+            assert.strictEqual(server.getConnectionsCount(), 2)
 
             client2.destroy()
             client.destroy()
-            Server.destroy()
+            server.destroy()
             done()
           },
         })

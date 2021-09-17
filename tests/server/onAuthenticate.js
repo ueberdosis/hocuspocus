@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/onAuthenticate', () => {
   it('executes the onAuthenticate callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -32,18 +32,18 @@ context('server/onAuthenticate', () => {
   })
 
   it('executes the onAuthenticate callback from a custom extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onAuthenticate() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -61,9 +61,9 @@ context('server/onAuthenticate', () => {
   })
 
   it('doesn’t execute the onAuthenticate callback when no token is passed to the provider', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         assert.fail()
@@ -80,7 +80,7 @@ context('server/onAuthenticate', () => {
       onOpen: () => {
         setTimeout(() => {
           client.destroy()
-          Server.destroy()
+          server.destroy()
           done()
         }, 100)
       },
@@ -88,16 +88,16 @@ context('server/onAuthenticate', () => {
   })
 
   it('doesn’t send any message when no token is provided, but the onAuthenticate hook is configured', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         assert.fail()
       },
     })
-    Server.enableDebugging()
-    Server.listen()
+    server.enableDebugging()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -107,10 +107,10 @@ context('server/onAuthenticate', () => {
       maxAttempts: 1,
       onOpen: () => {
         setTimeout(() => {
-          assert.deepStrictEqual(Server.getMessageLogs(), [])
+          assert.deepStrictEqual(server.getMessageLogs(), [])
 
           client.destroy()
-          Server.destroy()
+          server.destroy()
 
           done()
         }, 100)
@@ -119,17 +119,17 @@ context('server/onAuthenticate', () => {
   })
 
   it('confirms the `Token` message with an `Authenticated` message', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         // success
         return true
       },
     })
-    Server.enableDebugging()
-    Server.listen()
+    server.enableDebugging()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -139,13 +139,13 @@ context('server/onAuthenticate', () => {
       token: 'SUPER-SECRET-TOKEN',
       maxAttempts: 1,
       onAuthenticated: () => {
-        assert.deepStrictEqual(Server.getMessageLogs(), [
+        assert.deepStrictEqual(server.getMessageLogs(), [
           { category: 'Token', direction: 'in', type: 'Auth' },
           { category: 'Authenticated', direction: 'out', type: 'Auth' },
         ])
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -153,17 +153,17 @@ context('server/onAuthenticate', () => {
   })
 
   it('replies with a `PermissionDenied` message when authentication fails', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         // fail
         throw Error()
       },
     })
-    Server.enableDebugging()
-    Server.listen()
+    server.enableDebugging()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -173,13 +173,13 @@ context('server/onAuthenticate', () => {
       token: 'SUPER-SECRET-TOKEN',
       maxAttempts: 1,
       onAuthenticationFailed: () => {
-        assert.deepStrictEqual(Server.getMessageLogs(), [
+        assert.deepStrictEqual(server.getMessageLogs(), [
           { category: 'Token', direction: 'in', type: 'Auth' },
           { category: 'PermissionDenied', direction: 'out', type: 'Auth' },
         ])
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -187,13 +187,13 @@ context('server/onAuthenticate', () => {
   })
 
   it('passes context from onAuthenticate to onCreateDocument', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     const mockContext = {
       user: 123,
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onAuthenticate() {
         return mockContext
@@ -202,7 +202,7 @@ context('server/onAuthenticate', () => {
         assert.deepStrictEqual(context, mockContext)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -218,9 +218,9 @@ context('server/onAuthenticate', () => {
   })
 
   it('ignores the authentication token when having no onAuthenticate hook', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     }).listen()
 
@@ -233,7 +233,7 @@ context('server/onAuthenticate', () => {
       token: 'SUPER-SECRET-TOKEN',
       onConnect: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -241,15 +241,15 @@ context('server/onAuthenticate', () => {
   })
 
   it('has the authentication token', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         assert.strictEqual(token, 'SUPER-SECRET-TOKEN')
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -266,9 +266,9 @@ context('server/onAuthenticate', () => {
   })
 
   it('stops when the onAuthenticate hook throws an Error', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
         throw new Error()
@@ -287,7 +287,7 @@ context('server/onAuthenticate', () => {
       maxAttempts: 1,
       onClose: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -296,9 +296,9 @@ context('server/onAuthenticate', () => {
   })
 
   it('connects with the correct token', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
@@ -307,7 +307,7 @@ context('server/onAuthenticate', () => {
       },
       async onCreateDocument() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

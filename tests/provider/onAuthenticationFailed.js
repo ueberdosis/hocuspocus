@@ -8,9 +8,9 @@ const ydoc = new Y.Doc()
 
 context('provider/onAuthenticationFailed', () => {
   it('executes the onAuthenticationFailed callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         throw new Error()
@@ -26,7 +26,7 @@ context('provider/onAuthenticationFailed', () => {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticationFailed: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

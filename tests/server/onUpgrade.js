@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/onUpgrade', () => {
   it('executes the onUpgrade callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onUpgrade() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -30,17 +30,17 @@ context('server/onUpgrade', () => {
   })
 
   it('executes the onUpgrade callback from an extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onUpgrade() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -57,15 +57,15 @@ context('server/onUpgrade', () => {
   })
 
   it('has the server instance', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onUpgrade({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import assert from 'assert'
 import { Hocuspocus } from '../../packages/server/src'
 
-const Server = new Hocuspocus()
+const server = new Hocuspocus()
 
 context('server/onRequest', () => {
   let browser
@@ -23,17 +23,17 @@ context('server/onRequest', () => {
 
   afterEach(async () => {
     await page.close()
-    Server.destroy()
+    server.destroy()
   })
 
   it('executes the onRequest callback', done => {
-    Server.configure({
+    server.configure({
       port: 4000,
       onListen() {
         page.goto('http://localhost:4000/foobar')
       },
       async onRequest({ request, instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
         assert.strictEqual(request.url, '/foobar')
         done()
       },
@@ -53,7 +53,7 @@ context('server/onRequest', () => {
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),

@@ -8,8 +8,8 @@ const ydoc = new Y.Doc()
 
 context('provider/onConnect', () => {
   it('executes the onConnect callback', done => {
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -19,15 +19,15 @@ context('provider/onConnect', () => {
       maxAttempts: 1,
       onConnect: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })
   })
 
   it("executes the on('connect') callback", done => {
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -38,15 +38,15 @@ context('provider/onConnect', () => {
     })
 
     client.on('connect', () => {
-      Server.destroy()
+      server.destroy()
       client.destroy()
       done()
     })
   })
 
   it.skip('doesn’t execute the onConnect callback when the server throws an error', done => {
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 4000,
       async onConnect() {
         throw new Error()
@@ -64,7 +64,7 @@ context('provider/onConnect', () => {
       },
       onClose: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })

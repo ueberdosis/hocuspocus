@@ -8,9 +8,9 @@ const ydoc = new Y.Doc()
 
 context('provider/onAuthenticated', () => {
   it('executes the onAuthenticated callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
@@ -28,7 +28,7 @@ context('provider/onAuthenticated', () => {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -36,9 +36,9 @@ context('provider/onAuthenticated', () => {
   })
 
   it('executes the onAuthenticated callback when token is provided as a function that returns a promise', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
@@ -56,7 +56,7 @@ context('provider/onAuthenticated', () => {
       token: () => Promise.resolve('SUPER-SECRET-TOKEN'),
       onAuthenticated: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -64,9 +64,9 @@ context('provider/onAuthenticated', () => {
   })
 
   it('executes the onAuthenticated callback when token is provided as a function that returns a string', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
@@ -84,7 +84,7 @@ context('provider/onAuthenticated', () => {
       token: () => 'SUPER-SECRET-TOKEN',
       onAuthenticated: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

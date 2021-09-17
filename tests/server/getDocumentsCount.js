@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/documentsCount', () => {
   it('outputs the total active documents', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     })
 
-    Server.listen()
+    server.listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -23,10 +23,10 @@ context('server/documentsCount', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onSynced() {
-        assert.strictEqual(Server.getDocumentsCount(), 1)
+        assert.strictEqual(server.getDocumentsCount(), 1)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })

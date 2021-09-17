@@ -3,34 +3,34 @@ import { Hocuspocus } from '../../packages/server/src'
 
 context('server/authenticationRequired', () => {
   it('requires a token when the onAuthenticate hook is present', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onAuthenticate() {
       //
       },
     }).listen()
 
-    assert.strictEqual(Server.authenticationRequired, true)
-    Server.destroy()
+    assert.strictEqual(server.authenticationRequired, true)
+    server.destroy()
     done()
   })
 
   it('doesn’t require a token when the onAuthenticate hook isn’t present', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
     }).listen()
 
-    assert.strictEqual(Server.authenticationRequired, false)
-    Server.destroy()
+    assert.strictEqual(server.authenticationRequired, false)
+    server.destroy()
     done()
   })
 
   it('requires a token when the onAuthenticate hook is present in a extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onAuthenticate() {
@@ -38,7 +38,7 @@ context('server/authenticationRequired', () => {
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
       // @ts-ignore
@@ -46,8 +46,8 @@ context('server/authenticationRequired', () => {
       ],
     }).listen()
 
-    assert.strictEqual(Server.authenticationRequired, true)
-    Server.destroy()
+    assert.strictEqual(server.authenticationRequired, true)
+    server.destroy()
     done()
   })
 })

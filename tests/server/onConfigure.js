@@ -9,15 +9,15 @@ const ydoc = new Y.Doc()
 
 context('server/onConfigure', () => {
   it('onConfigure callback is executed', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConfigure({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -32,17 +32,17 @@ context('server/onConfigure', () => {
   })
 
   it('executes onConfigure callback from an extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onConfigure() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -59,13 +59,13 @@ context('server/onConfigure', () => {
   })
 
   it('has the configuration', done => {
-    const Server = new Hocuspocus()
-    Server.configure({
+    const server = new Hocuspocus()
+    server.configure({
       port: 1337,
       async onConfigure({ configuration }) {
         assert.strictEqual(configuration.port, 1337)
 
-        Server.destroy()
+        server.destroy()
         done()
       },
     })

@@ -9,12 +9,12 @@ const ydoc = new Y.Doc()
 
 context('server/onDestroy', () => {
   it('has the server instance', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onDestroy({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
         client.destroy()
         done()
       },
@@ -26,7 +26,7 @@ context('server/onDestroy', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
-        Server.destroy()
+        server.destroy()
       },
     })
   })

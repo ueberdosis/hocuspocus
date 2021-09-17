@@ -6,7 +6,7 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 let client
 const ydoc = new Y.Doc()
-const Server = new Hocuspocus()
+const server = new Hocuspocus()
 
 context('provider/options', () => {
   it('has default options (maxDelay = 30000)', () => {

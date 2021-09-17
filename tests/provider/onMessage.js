@@ -8,8 +8,8 @@ const ydoc = new Y.Doc()
 
 context('provider/onMessage', () => {
   it('executes the onMessage callback', done => {
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -19,15 +19,15 @@ context('provider/onMessage', () => {
       maxAttempts: 1,
       onMessage: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })
   })
 
   it("executes the on('message') callback", done => {
-    const Server = new Hocuspocus()
-    Server.configure({ port: 4000 }).listen()
+    const server = new Hocuspocus()
+    server.configure({ port: 4000 }).listen()
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -39,7 +39,7 @@ context('provider/onMessage', () => {
 
     client.on('message', () => {
       client.destroy()
-      Server.destroy()
+      server.destroy()
       done()
     })
   })

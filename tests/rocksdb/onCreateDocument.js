@@ -8,13 +8,13 @@ import removeDirectory from '../utils/removeDirectory'
 
 const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
-const Server = new Hocuspocus()
+const server = new Hocuspocus()
 
 context('rocksdb/onCreateDocument', () => {
   before(() => {
     removeDirectory('./database')
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new RocksDB(),
@@ -23,7 +23,7 @@ context('rocksdb/onCreateDocument', () => {
   })
 
   after(() => {
-    Server.destroy()
+    server.destroy()
 
     removeDirectory('./database')
   })

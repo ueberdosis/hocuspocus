@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/onConnect', () => {
   it('executes the onConnect callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -31,18 +31,18 @@ context('server/onConnect', () => {
   })
 
   it('executes the onConnect callback from an extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       async onConnect() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -59,15 +59,15 @@ context('server/onConnect', () => {
   })
 
   it('has the document name', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ documentName }) {
         assert.strictEqual(documentName, 'hocuspocus-test')
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -83,9 +83,9 @@ context('server/onConnect', () => {
   })
 
   it('sets the client to readOnly', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ connection }) {
         connection.readOnly = true
@@ -99,11 +99,11 @@ context('server/onConnect', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       onSynced() {
-        Server.documents.get('hocuspocus-test').connections.forEach(conn => {
+        server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
         })
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })
@@ -112,15 +112,15 @@ context('server/onConnect', () => {
   it('encodes weird document names', done => {
     const weirdDocumentName = '<>{}|^äöüß'
 
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ documentName }) {
         assert.strictEqual(documentName, weirdDocumentName)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -136,9 +136,9 @@ context('server/onConnect', () => {
   })
 
   it('stops when the onConnect hook throws an Error', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onConnect() {
         throw new Error()
@@ -157,7 +157,7 @@ context('server/onConnect', () => {
       maxAttempts: 1,
       onClose: () => {
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -165,9 +165,9 @@ context('server/onConnect', () => {
   })
 
   it('has the request parameters', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ requestParameters }) {
         assert.strictEqual(requestParameters instanceof URLSearchParams, true)
@@ -175,7 +175,7 @@ context('server/onConnect', () => {
         assert.strictEqual(requestParameters.get('foo'), 'bar')
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -194,15 +194,15 @@ context('server/onConnect', () => {
   })
 
   it('has the request headers', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ requestHeaders }) {
         assert.strictEqual(requestHeaders.connection !== undefined, true)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -218,15 +218,15 @@ context('server/onConnect', () => {
   })
 
   it('has the whole request', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ request }) {
         assert.strictEqual(request.url, '/hocuspocus-test')
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -242,15 +242,15 @@ context('server/onConnect', () => {
   })
 
   it('has the socketId', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ socketId }) {
         assert.strictEqual(socketId !== undefined, true)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -266,15 +266,15 @@ context('server/onConnect', () => {
   })
 
   it('has the server instance', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
@@ -290,15 +290,15 @@ context('server/onConnect', () => {
   })
 
   it('defaults to readOnly = false', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onConnect({ connection }) {
         assert.strictEqual(connection.readOnly, false)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },

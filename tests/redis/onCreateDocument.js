@@ -8,13 +8,13 @@ import flushRedis from '../utils/flushRedis'
 
 const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
-const Server = new Hocuspocus()
+const server = new Hocuspocus()
 
 context('redis/onCreateDocument', () => {
   before(() => {
     flushRedis()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new Redis({
@@ -26,7 +26,7 @@ context('redis/onCreateDocument', () => {
   })
 
   after(() => {
-    Server.destroy()
+    server.destroy()
 
     flushRedis()
   })

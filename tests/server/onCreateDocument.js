@@ -9,13 +9,13 @@ const ydoc = new Y.Doc()
 
 context('server/onCreateDocument', () => {
   it('executes the onCreateDocument callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onCreateDocument() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -30,17 +30,17 @@ context('server/onCreateDocument', () => {
   })
 
   it('executes the onCreateDocument callback from an extension', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     class CustomExtension {
       onCreateDocument() {
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       }
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       extensions: [
         new CustomExtension(),
@@ -57,13 +57,13 @@ context('server/onCreateDocument', () => {
   })
 
   it('passes the context and connection to the onCreateDocument callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
     const mockContext = {
       user: 123,
     }
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onConnect({ connection }) {
         connection.readOnly = true
@@ -77,7 +77,7 @@ context('server/onCreateDocument', () => {
         })
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     }).listen()
@@ -92,9 +92,9 @@ context('server/onCreateDocument', () => {
   })
 
   it('sets the client to readOnly', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onCreateDocument({ connection }) {
         connection.readOnly = true
@@ -108,20 +108,20 @@ context('server/onCreateDocument', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       onSynced() {
-        Server.documents.get('hocuspocus-test').connections.forEach(conn => {
+        server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
         })
         client.destroy()
-        Server.destroy()
+        server.destroy()
         done()
       },
     })
   })
 
   it('creates a new document in the onCreateDocument callback', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onCreateDocument({ document }) {
         // delay more accurately simulates a database fetch
@@ -147,15 +147,15 @@ context('server/onCreateDocument', () => {
       assert.strictEqual(value, 'bar')
 
       client.destroy()
-      Server.destroy()
+      server.destroy()
       done()
     })
   })
 
   it('multiple simultanous connections do not create multiple documents', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       onCreateDocument({ document }) {
         // delay more accurately simulates a database fetch
@@ -185,25 +185,25 @@ context('server/onCreateDocument', () => {
     })
 
     client.on('synced', () => {
-      assert.strictEqual(Server.documents.size, 1)
+      assert.strictEqual(server.documents.size, 1)
 
       client.destroy()
       anotherClient.destroy()
-      Server.destroy()
+      server.destroy()
       done()
     })
   })
 
   it('has the server instance', done => {
-    const Server = new Hocuspocus()
+    const server = new Hocuspocus()
 
-    Server.configure({
+    server.configure({
       port: 4000,
       async onCreateDocument({ instance }) {
-        assert.strictEqual(instance, Server)
+        assert.strictEqual(instance, server)
 
         client.destroy()
-        Server.destroy()
+        server.destroy()
 
         done()
       },
