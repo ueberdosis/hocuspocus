@@ -182,6 +182,7 @@ export class Hocuspocus {
   async destroy(): Promise<any> {
     this.httpServer?.close()
     this.webSocketServer?.close()
+    this.debugger.flush()
 
     await this.hooks('onDestroy', { instance: this })
   }
