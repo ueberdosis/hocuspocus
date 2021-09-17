@@ -68,8 +68,7 @@ class Connection {
     this.webSocket.on('message', this.handleMessage.bind(this))
     this.webSocket.on('pong', () => { this.pongReceived = true })
 
-    // TODO: The sync should be initiated by the client
-    // this.sendFirstSyncStep()
+    this.sendCurrentAwareness()
   }
 
   /**
@@ -145,38 +144,25 @@ class Connection {
   }
 
   /**
-   * Send first sync step
+   * Send the current document awareness to the client, if any
    * @private
    */
-  // TODO: The sync should be initiated by the client
-  // private sendFirstSyncStep(): void {
-  //   const syncMessage = new OutgoingMessage()
-  //     .createSyncMessage()
-  //     .writeFirstSyncStepFor(this.document)
+  private sendCurrentAwareness(): void {
+    if (!this.document.hasAwarenessStates()) {
+      return
+    }
 
-  //   this.debugger.log({
-  //     direction: 'out',
-  //     type: syncMessage.type,
-  //     category: syncMessage.category,
-  //   })
+    const awarenessMessage = new OutgoingMessage()
+      .createAwarenessUpdateMessage(this.document.awareness)
 
-  //   this.send(syncMessage.toUint8Array())
+    this.debugger.log({
+      direction: 'out',
+      type: awarenessMessage.type,
+      category: awarenessMessage.category,
+    })
 
-  //   if (!this.document.hasAwarenessStates()) {
-  //     return
-  //   }
-
-  //   const awarenessMessage = new OutgoingMessage()
-  //     .createAwarenessUpdateMessage(this.document.awareness)
-
-  //   this.debugger.log({
-  //     direction: 'out',
-  //     type: awarenessMessage.type,
-  //     category: awarenessMessage.category,
-  //   })
-
-  //   this.send(awarenessMessage.toUint8Array())
-  // }
+    this.send(awarenessMessage.toUint8Array())
+  }
 
   /**
    * Handle an incoming message
