@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.16](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.15...@hocuspocus/provider@1.0.0-alpha.16) (2021-09-17)
+
+
+### Bug Fixes
+
+* Remote client awareness not immediately available ([37703f6](https://github.com/ueberdosis/hocuspocus/commit/37703f695f6bf3b0508c287294c5d26d2e888c37))
+
+
+
+
+
 # [1.0.0-alpha.15](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.14...@hocuspocus/provider@1.0.0-alpha.15) (2021-09-14)
 
 **Note:** Version bump only for package @hocuspocus/provider
