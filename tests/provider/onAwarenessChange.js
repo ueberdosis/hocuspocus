@@ -34,6 +34,61 @@ context('provider/onAwarenessChange', () => {
     })
   })
 
+  it('gets the current awareness states from the server', done => {
+    const ydoc = new Y.Doc()
+
+    const server = new Hocuspocus()
+    server.configure({
+      port: 4000,
+    })
+    server.enableDebugging()
+    server.listen()
+
+    const client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
+      onSynced: () => {
+        assert.deepStrictEqual(server.getMessageLogs(), [
+          {
+            category: 'SyncStep1',
+            direction: 'in',
+            type: 'Sync',
+          },
+          {
+            category: 'SyncStep2',
+            direction: 'out',
+            type: 'Sync',
+          },
+          {
+            category: 'SyncStep1',
+            direction: 'out',
+            type: 'Sync',
+          },
+          {
+            category: 'Update',
+            direction: 'in',
+            type: 'Awareness',
+          },
+          {
+            category: 'Update',
+            direction: 'out',
+            type: 'Awareness',
+          },
+        ])
+
+        client.destroy()
+        server.destroy()
+
+        done()
+      },
+    })
+
+    client.setAwarenessField('foo', 'bar')
+  })
+
   it('shares awareness state with other users', done => {
     const server = new Hocuspocus()
 
