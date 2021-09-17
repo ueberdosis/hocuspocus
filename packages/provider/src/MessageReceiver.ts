@@ -47,6 +47,18 @@ export class MessageReceiver {
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }
 
+    // Reply
+    if (message.length() > 1) {
+      if (this.broadcasted) {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
+      } else {
+        // TODO: Some weird TypeScript error
+        // @ts-ignore
+        provider.send(OutgoingMessage, { encoder: message.encoder })
+      }
+    }
   }
 
   private applySyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
@@ -65,19 +77,6 @@ export class MessageReceiver {
     // Synced once we receive Step2
     if (emitSynced && syncMessageType === messageYjsSyncStep2) {
       provider.synced = true
-    }
-
-    // Reply
-    if (message.length() > 1) {
-      if (this.broadcasted) {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
-      } else {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.send(OutgoingMessage, { encoder: message.encoder })
-      }
     }
   }
 
