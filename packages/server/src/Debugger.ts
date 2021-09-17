@@ -9,6 +9,8 @@ export class MessageLogger {
   output = false
 
   enable() {
+    this.flush()
+
     this.listen = true
   }
 
