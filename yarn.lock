@@ -2877,6 +2877,11 @@
   resolved "https://registry.yarnpkg.com/@types/async-lock/-/async-lock-1.1.3.tgz#0d86017cf87abbcb941c55360e533d37a3f23b3d"
   integrity sha512-UpeDcjGKsYEQMeqEbfESm8OWJI305I7b9KE4ji3aBjoKWyN5CTdn8izcA1FM1DVDne30R5fNEnIy89vZw5LXJQ==
 
+"@types/bluebird@*":
+  version "3.5.36"
+  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.36.tgz#00d9301d4dc35c2f6465a8aec634bb533674c652"
+  integrity sha512-HBNx4lhkxN7bx6P0++W8E289foSu8kO8GCk2unhuVggO+cE7rh9DhZUyPhUxNRG9m+5B5BTKxZQ5ZP92x/mx9Q==
+
 "@types/body-parser@*":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.1.tgz#0c0174c42a7d017b818303d4b5d969cb0b75929c"
@@ -2958,6 +2963,13 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/ioredis@^4.27.4":
+  version "4.27.4"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.27.4.tgz#2caf9d0222640c9d7ce278fca2f9892c1323f9c8"
+  integrity sha512-uTAA/woL//GxXQI1e9FuUoDZCpP8yn5LXQdea1IEFyLtb8GP2w3HfOE+SqglF6QSAp/3cZLWzrMhHqWSYI3bfg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.3.tgz#4ba8ddb720221f432e443bd5f9117fd22cfd4762"
@@ -3005,6 +3017,18 @@
     "@types/abstract-leveldown" "*"
     "@types/level-errors" "*"
     "@types/node" "*"
+
+"@types/lodash.debounce@^4.0.6":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.debounce/-/lodash.debounce-4.0.6.tgz#c5a2326cd3efc46566c47e4c0aa248dc0ee57d60"
+  integrity sha512-4WTmnnhCfDvvuLMaF3KV4Qfki93KebocUF45msxhYyjMttZDQYzHkO639ohhk8+oco2cluAFL3t5+Jn4mleylQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.173"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.173.tgz#9d3b674c67a26cf673756f6aca7b429f237f91ed"
+  integrity sha512-vv0CAYoaEjCw/mLy96GBTnRoZrSxkGE0BKzKimdR8P3OzrNYNvBgtW7p055A+E8C31vXNUhWKoFCbhq7gbyhFg==
 
 "@types/mdast@^3.0.3":
   version "3.0.9"
@@ -3195,6 +3219,13 @@
     "@types/prop-types" "*"
     "@types/scheduler" "*"
     csstype "^3.0.2"
+
+"@types/redlock@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@types/redlock/-/redlock-4.0.2.tgz#3ae94bc236d4cff12815b62b9b9e51a8e7f9f25f"
+  integrity sha512-3MMTCWOXrfQFU8dLAbQWDOsftnFagQxmUkfR5KK/DB/zKPUh0ZzPFkNV84nfw1yMFYLfd4MgITGT+XolYd8d1w==
+  dependencies:
+    "@types/bluebird" "*"
 
 "@types/resolve@1.17.1":
   version "1.17.1"
@@ -10983,6 +11014,23 @@ invert-permutation@^1.0.0:
   resolved "https://registry.yarnpkg.com/invert-permutation/-/invert-permutation-1.0.0.tgz#a0a78042eadb36bc17551e787efd1439add54933"
   integrity sha1-oKeAQurbNrwXVR54fv0UOa3VSTM=
 
+ioredis@^4.0.0:
+  version "4.27.9"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.27.9.tgz#c27bbade9724f0b8f84c279fb1d567be785ba33d"
+  integrity sha512-hAwrx9F+OQ0uIvaJefuS3UTqW+ByOLyLIV+j0EH8ClNVxvFyH9Vmb08hCL4yje6mDYT5zMquShhypkd50RRzkg==
+  dependencies:
+    cluster-key-slot "^1.1.0"
+    debug "^4.3.1"
+    denque "^1.1.0"
+    lodash.defaults "^4.2.0"
+    lodash.flatten "^4.4.0"
+    lodash.isarguments "^3.1.0"
+    p-map "^2.1.0"
+    redis-commands "1.7.0"
+    redis-errors "^1.2.0"
+    redis-parser "^3.0.0"
+    standard-as-callback "^2.1.0"
+
 ioredis@^4.14.1:
   version "4.27.8"
   resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.27.8.tgz#822c2d1ac44067a8f7b92fb673070fc9d661c56e"
@@ -16207,6 +16255,13 @@ redis@^3.1.2:
     redis-commands "^1.7.0"
     redis-errors "^1.2.0"
     redis-parser "^3.0.0"
+
+redlock@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/redlock/-/redlock-4.2.0.tgz#c26590768559afd5fff76aa1133c94b411ff4f5f"
+  integrity sha512-j+oQlG+dOwcetUt2WJWttu4CZVeRzUrcVcISFmEmfyuwCVSJ93rDT7YSgg7H7rnxwoRyk/jU46kycVka5tW7jA==
+  dependencies:
+    bluebird "^3.7.2"
 
 reduce-css-calc@^2.1.8:
   version "2.1.8"

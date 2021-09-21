@@ -1,2 +1,6 @@
 export * from './Hocuspocus'
+export * from './Connection'
+export * from './Document'
+export * from './IncomingMessage'
+export * from './OutgoingMessage'
 export * from './types'
