@@ -14,15 +14,15 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 const ydoc = new Y.Doc()
 
 // Init an empty Array where all states are stored then
-const states = []
+const currentStates = []
 
 // Connect it to the backend
 const provider = new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'example-document',
   document: ydoc,
-  onAwarenessUpdate: ({ newStates }) => {
-    states = newStates
+  onAwarenessUpdate: ({ states }) => {
+    currentStates = states
   },
 })
 
