@@ -1,30 +1,43 @@
 // @flow
 import Redis from 'ioredis'
+import Redlock from 'redlock'
 import debounce from 'lodash.debounce'
 import * as Y from 'yjs'
 import {
-  OutgoingMessage, Document, AwarenessUpdate, Connection, Extension, onChangePayload, onCreateDocumentPayload, onDisconnectPayload,
+  IncomingMessage,
+  OutgoingMessage,
+  Document,
+  Extension,
+  onCreateDocumentPayload,
+  onDisconnectPayload,
+  MessageType,
 } from '@hocuspocus/server'
 import { applyAwarenessUpdate } from 'y-protocols/awareness'
 
 export interface Configuration {
   port: number,
   host: string,
-  redisOpts: Redis.RedisOptions,
+  redisOpts?: Redis.RedisOptions,
   namespace: string,
   persistWait: number,
-  maxWait: number,
-  onPersist: (ydoc: Y.Doc) => Promise<void> | void,
+  onPersist?: (ydoc: Y.Doc) => Promise<void> | void,
+  log: (...args: any[]) => void,
 }
 
-export default class PubSub implements Extension {
-  configuration: Partial<Configuration> = {
+export class PubSub implements Extension {
+  configuration: Configuration = {
+    port: 6379,
+    host: 'localhost',
     namespace: 'hocuspocus',
+    persistWait: 3000,
+    log: console.log, // eslint-disable-line
   }
 
-  pub: Redis.Redis | Redis.Cluster;
+  redis: Redis.Redis | Redis.Cluster;
 
   sub: Redis.Redis;
+
+  redlock: Redlock;
 
   documents = new Map()
 
@@ -35,8 +48,9 @@ export default class PubSub implements Extension {
       ...configuration,
     }
 
-    this.pub = new Redis(port, host, redisOpts)
+    this.redis = new Redis(port, host, redisOpts)
     this.sub = new Redis(port, host, redisOpts)
+    this.redlock = new Redlock([this.redis])
     this.sub.on('messageBuffer', this.handleMessage)
   }
 
@@ -46,91 +60,136 @@ export default class PubSub implements Extension {
   }: onCreateDocumentPayload) {
     this.documents.set(documentName, document)
 
-    // On document creation the node will connect to pub and sub channels
-    this.sub.psubscribe(`${this.getKey(documentName)}*`, err => {
-      if (err) {
-        throw err
-      }
-      // this.configuration.log?.info(`Subscribed to ${documentName}`)
-    })
+    return new Promise((resolve, reject) => {
+      // On document creation the node will connect to redis and sub channels
+      this.sub.subscribe(this.getKey(documentName), async err => {
+        if (err) {
+          reject(err)
+          return
+        }
 
-    document.awareness.on('update', this.handleAwarenessUpdate(document))
-    document.on('update', this.handleUpdate(document))
+        this.configuration.log('subscribed', documentName)
 
-    // broadcast sync step 1
-    const syncMessage = (new OutgoingMessage()
-      .createSyncMessage()
-      .writeFirstSyncStepFor(document))
+        document.awareness.on('update', this.handleAwarenessUpdate(document))
+        document.on('update', this.handleUpdate(document))
 
-    const update = syncMessage.toUint8Array()
-    await this.pub.publishBuffer(this.getKey(documentName), Buffer.from(update))
-  }
+        // broadcast sync step 1
+        const syncMessage = (new OutgoingMessage()
+          .createSyncMessage()
+          .writeFirstSyncStepFor(document))
 
-  async onDisconnect({ documentName, clientsCount }: onDisconnectPayload) {
-    // Still clients connected?
-    if (clientsCount > 0) {
-      return
-    }
+        const update = syncMessage.toUint8Array()
 
-    this.documents.delete(documentName)
-
-    // on final connection close sub channel
-    this.sub.unsubscribe(this.getKey(documentName), err => {
-      if (err) {
-        // this.configuration.log?.error(err)
-
-      }
-      // this.configuration.log?.info(`Unsubscribed from ${documentName}`)
+        this.configuration.log('publish sync step 1')
+        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(update))
+        resolve(document)
+      })
     })
   }
 
-  private handleAwarenessUpdate(document: Document) {
-    return async () => {
-      const awarenessMessage = new OutgoingMessage()
-        .createAwarenessUpdateMessage(document.awareness)
+   onDisconnect= async ({ documentName, clientsCount }: onDisconnectPayload) => {
+     // Still clients connected?
+     if (clientsCount > 0) {
+       return
+     }
 
-      const update = awarenessMessage.toUint8Array()
-      await this.pub.publishBuffer(`${this.getKey(document.name)}:awareness`, Buffer.from(update))
-    }
-  }
+     this.configuration.log('last disconnect', documentName)
 
-  private handleUpdate(document: Document) {
-    return async (update: Uint8Array) => {
+     this.documents.delete(documentName)
 
-      // forward all update messages received to pub channel
-      await this.pub.publishBuffer(this.getKey(document.name), Buffer.from(update))
+     // on final connection close sub channel
+     this.sub.unsubscribe(this.getKey(documentName), err => {
+       if (err) {
+         console.error(err)
+         return
+       }
+       this.configuration.log(`Unsubscribed from ${documentName}`)
+     })
+   }
 
-      // update the lastReceivedTimestamp in a Redis key for documentName if source is this server.
-      // await this.pub.set(`${this.getKey(document.name)}:updated`, new Date().toISOString())
+   private handleAwarenessUpdate(document: Document) {
+     return async () => {
+       const message = new OutgoingMessage()
+         .createAwarenessUpdateMessage(document.awareness)
 
-      // When a node receives an update event from the client or another server it sets an in memory debounce (eg 3 seconds)
-      this.debouncedUpdate(document, update)
-    }
-  }
+       await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(message.toUint8Array()))
+     }
+   }
+
+   private handleUpdate(document: Document) {
+     return async (update: Uint8Array) => {
+       this.configuration.log('publishing local update')
+
+       const message = new OutgoingMessage()
+         .createSyncMessage()
+         .writeUpdate(update)
+
+       // forward all update messages received to redis channel
+       await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(message.toUint8Array()))
+
+       // update the lastReceivedTimestamp in a Redis key for documentName if source is this server.
+       await this.redis.set(`${this.getKey(document.name)}:updated`, new Date().toISOString())
+
+       // When a node receives an update event from the client or another server it sets an in memory debounce (eg 3 seconds)
+       this.debouncedUpdate(document)
+     }
+   }
 
   debouncedUpdate = debounce(
-    (document, update) => {
+    document => {
+      const ttl = 1000
+
       // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
       // if the value < debounce start then it can call the onPersist callback
       // for the host application to write to disk
+      this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (err, lock) => {
+        if (err || !lock) {
+          // could not acquire lock, expected behavior.
+          return
+        }
+
+        const result = await this.redis.get(`${this.getKey(document.name)}:updated`)
+        const updatedTime = result ? Date.parse(result) : undefined
+
+        if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
+          if (this.configuration.onPersist) {
+            this.configuration.onPersist(document)
+          }
+        }
+
+        lock.unlock(err => {
+          // we weren't able to reach redis; the lock will expire after ttl
+          console.error(err)
+        })
+      })
     },
-    3000,
+    this.configuration.persistWait,
   );
 
-  async handleMessage(channel: Buffer, update: Buffer) {
+  handleMessage = async (channel: Buffer, update: Buffer) => {
     const channelName = channel.toString()
-    const [_, documentName, type] = channelName.split(':')
+    this.configuration.log('received remote message', channelName)
+    const [_, documentName] = channelName.split(':')
     const document = this.documents.get(documentName)
+
     if (!document) {
-      console.log(`No document in memory for ${channel}`)
+      this.configuration.log(`No document in memory for ${channel}`)
       return
     }
 
-    // TODO: Remove assumption
-    if (type === 'awareness') {
-      applyAwarenessUpdate(document.awareness, update, undefined)
-    } else {
-      document.emit('update', update)
+    const message = new IncomingMessage(update)
+    const type = message.readVarUint()
+
+    switch (type) {
+      case MessageType.Awareness:
+        this.configuration.log('applying remote awareness')
+        applyAwarenessUpdate(document.awareness, update, 'remote')
+        break
+      case MessageType.Sync:
+        this.configuration.log('apply remote update')
+        document.emit('update', update)
+        break
+      default:
     }
   }
 
