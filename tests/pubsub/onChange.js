@@ -13,7 +13,7 @@ const opts = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onCreateDocument', () => {
+context('pubsub/onChange', () => {
   before(() => {
     server.configure({
       port: 4000,
@@ -73,13 +73,12 @@ context('pubsub/onCreateDocument', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       broadcast: false,
-    })
-
-    // once we're setup make an edit on client1, to get to client it will need
-    // to pass through the pubsub extension:
-    // client1 -> server1 -> pubsub -> server -> client
-    client1.on('synced', () => {
-      ydoc1.getArray('foo').insert(0, ['bar'])
+      onSynced: () => {
+        // once we're setup make an edit on client1, to get to client it will need
+        // to pass through the pubsub extension:
+        // client1 -> server1 -> pubsub -> server -> client
+        ydoc1.getArray('foo').insert(0, ['bar'])
+      },
     })
   })
 })
