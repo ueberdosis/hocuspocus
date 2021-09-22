@@ -59,7 +59,10 @@ context('pubsub/onCreateDocument', () => {
       console.log('client synced')
 
       client.on('message', () => {
-        console.log('client message received')
+        setTimeout(() => {
+          assert.strictEqual(ydoc.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
+          done()
+        }, 0)
       })
     })
 

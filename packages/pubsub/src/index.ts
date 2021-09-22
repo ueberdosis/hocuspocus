@@ -12,6 +12,10 @@ import {
   onDisconnectPayload,
   MessageType,
 } from '@hocuspocus/server'
+import {
+  readUpdate,
+  messageYjsUpdate,
+} from 'y-protocols/sync'
 import { applyAwarenessUpdate } from 'y-protocols/awareness'
 
 export interface Configuration {
@@ -82,12 +86,12 @@ export class PubSub implements Extension {
 
         this.configuration.log('publish sync step 1')
         await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(update))
-        resolve(document)
+        resolve(undefined)
       })
     })
   }
 
-   onDisconnect= async ({ documentName, clientsCount }: onDisconnectPayload) => {
+   onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
      // Still clients connected?
      if (clientsCount > 0) {
        return
@@ -185,10 +189,20 @@ export class PubSub implements Extension {
         this.configuration.log('applying remote awareness')
         applyAwarenessUpdate(document.awareness, update, 'remote')
         break
-      case MessageType.Sync:
-        this.configuration.log('apply remote update')
-        document.emit('update', update)
+      case MessageType.Sync: {
+        const syncType = message.readVarUint()
+
+        switch (syncType) {
+          case messageYjsUpdate:
+            this.configuration.log('apply remote update', document.getArray('foo').get(0))
+            readUpdate(message.decoder, document, 'remote')
+            break
+          default:
+        }
+
         break
+      }
+
       default:
     }
   }
