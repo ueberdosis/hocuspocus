@@ -20282,7 +20282,7 @@ y-prosemirror@^1.0.7, y-prosemirror@^1.0.9:
   dependencies:
     lib0 "^0.2.34"
 
-y-protocols@^1.0.5:
+y-protocols@^1.0.0, y-protocols@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.5.tgz#91d574250060b29fcac8f8eb5e276fbad594245e"
   integrity sha512-Wil92b7cGk712lRHDqS4T90IczF6RkcvCwAD0A2OPg+adKmOe+nOiT/N2hvpQIWS3zfjmtL4CPaH5sIW1Hkm/A==
