@@ -1,4 +1,5 @@
 // @flow
+import os from 'os'
 import Redis from 'ioredis'
 import Redlock from 'redlock'
 import debounce from 'lodash.debounce'
@@ -16,10 +17,17 @@ import { MessageReceiver } from './MessageReceiver'
 export interface Configuration {
   port: number,
   host: string,
+  /** Options passed directly to Redis constructor */
   redisOpts?: Redis.RedisOptions,
+  /** Used to track the source of messages. If none is provided the os hostname is used */
+  instanceName: string,
+  /** Namespace for redis keys, if none is provided 'hocuspocus' is used */
   namespace: string,
+  /** The period of time to wait between calling onPersist, you should choose a balance between reliability and load */
   persistWait: number,
+  /** onPersist callback will be called debounced persistWait seconds after the last document update */
   onPersist?: (ydoc: Y.Doc) => Promise<void> | void,
+  /** A log function, if none is provided output will go to console */
   log: (...args: any[]) => void,
 }
 
@@ -28,6 +36,7 @@ export class PubSub implements Extension {
     port: 6379,
     host: 'localhost',
     namespace: 'hocuspocus',
+    instanceName: os.hostname(),
     persistWait: 3000,
     log: console.log, // eslint-disable-line
   }
@@ -42,7 +51,7 @@ export class PubSub implements Extension {
 
   debouncedUpdate: (document: Document) => void
 
-  constructor(configuration: Partial<Configuration>) {
+  public constructor(configuration: Partial<Configuration>) {
     const { port, host, redisOpts } = configuration
     this.configuration = {
       ...this.configuration,
@@ -52,7 +61,7 @@ export class PubSub implements Extension {
     this.redis = new Redis(port, host, redisOpts)
     this.sub = new Redis(port, host, redisOpts)
     this.redlock = new Redlock([this.redis])
-    this.sub.on('messageBuffer', this.handleMessage)
+    this.sub.on('messageBuffer', this.handleIncomingMessage)
 
     // debounced handler should be setup here in the constructor so that the
     // wait time can be configurable
@@ -88,7 +97,7 @@ export class PubSub implements Extension {
     )
   }
 
-  async onCreateDocument({
+  public async onCreateDocument({
     documentName,
     document,
   }: onCreateDocumentPayload) {
@@ -121,7 +130,7 @@ export class PubSub implements Extension {
     })
   }
 
-   onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
+   public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
      // Still clients connected?
      if (clientsCount > 0) {
        return
@@ -129,6 +138,7 @@ export class PubSub implements Extension {
 
      this.configuration.log('last disconnect', documentName)
 
+     // TODO: persist first?
      this.documents.delete(documentName)
 
      // on final connection close sub channel
@@ -141,6 +151,9 @@ export class PubSub implements Extension {
      })
    }
 
+   /**
+   * Handle awareness update messages received directly by this hocuspocus instance.
+  */
    private handleAwarenessUpdate(document: Document) {
      return async () => {
        const message = new OutgoingMessage()
@@ -150,6 +163,9 @@ export class PubSub implements Extension {
      }
    }
 
+   /**
+   * Handle document update messages received directly by this hocuspocus instance.
+  */
    private handleUpdate(document: Document) {
      return async (update: Uint8Array) => {
        this.configuration.log('publishing local update')
@@ -169,9 +185,13 @@ export class PubSub implements Extension {
      }
    }
 
-  handleMessage = async (channel: Buffer, data: Buffer) => {
+  /**
+   * Handle incoming messages published on all subscribed document channels.
+   * Note that this will also include messages from ourselves as it is not possible
+   * in redis to filter these.
+  */
+  private handleIncomingMessage = async (channel: Buffer, data: Buffer) => {
     const channelName = channel.toString()
-    this.configuration.log('received remote message', channelName)
     const [_, documentName] = channelName.split(':')
     const document = this.documents.get(documentName)
 
@@ -188,7 +208,7 @@ export class PubSub implements Extension {
     })
   }
 
-  getKey(documentName: string) {
+  private getKey(documentName: string) {
     return `${this.configuration.namespace}:${documentName}`
   }
 }
