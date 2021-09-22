@@ -56,8 +56,8 @@ context('pubsub/onCreateDocument', () => {
     })
 
     client.on('synced', () => {
-      console.log('client synced')
-
+      // wait for an update after we've synced and then check the doc content
+      // matches the doc from the other client
       client.on('message', () => {
         setTimeout(() => {
           assert.strictEqual(ydoc.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
@@ -75,8 +75,10 @@ context('pubsub/onCreateDocument', () => {
       broadcast: false,
     })
 
+    // once we're setup make an edit on client1, to get to client it will need
+    // to pass through the pubsub extension:
+    // client1 -> server1 -> pubsub -> server -> client
     client1.on('synced', () => {
-      console.log('client1 synced')
       ydoc1.getArray('foo').insert(0, ['bar'])
     })
   })
