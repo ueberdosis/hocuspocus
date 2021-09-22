@@ -40,6 +40,8 @@ export class PubSub implements Extension {
 
   documents = new Map()
 
+  debouncedUpdate: (document: Document) => void
+
   constructor(configuration: Partial<Configuration>) {
     const { port, host, redisOpts } = configuration
     this.configuration = {
@@ -51,6 +53,39 @@ export class PubSub implements Extension {
     this.sub = new Redis(port, host, redisOpts)
     this.redlock = new Redlock([this.redis])
     this.sub.on('messageBuffer', this.handleMessage)
+
+    // debounced handler should be setup here in the constructor so that the
+    // wait time can be configurable
+    this.debouncedUpdate = debounce(
+      document => {
+        const ttl = 1000
+
+        // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
+        // if the value < debounce start then it can call the onPersist callback
+        // for the host application to write to disk
+        this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (err, lock) => {
+          if (err || !lock) {
+            // could not acquire lock, expected behavior.
+            return
+          }
+
+          const result = await this.redis.get(`${this.getKey(document.name)}:updated`)
+          const updatedTime = result ? Date.parse(result) : undefined
+
+          if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
+            if (this.configuration.onPersist) {
+              this.configuration.onPersist(document)
+            }
+          }
+
+          lock.unlock(err => {
+            // we weren't able to reach redis; the lock will expire after ttl
+            console.error(err)
+          })
+        })
+      },
+      this.configuration.persistWait,
+    )
   }
 
   async onCreateDocument({
@@ -133,37 +168,6 @@ export class PubSub implements Extension {
        this.debouncedUpdate(document)
      }
    }
-
-  debouncedUpdate = debounce(
-    document => {
-      const ttl = 1000
-
-      // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-      // if the value < debounce start then it can call the onPersist callback
-      // for the host application to write to disk
-      this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (err, lock) => {
-        if (err || !lock) {
-          // could not acquire lock, expected behavior.
-          return
-        }
-
-        const result = await this.redis.get(`${this.getKey(document.name)}:updated`)
-        const updatedTime = result ? Date.parse(result) : undefined
-
-        if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
-          if (this.configuration.onPersist) {
-            this.configuration.onPersist(document)
-          }
-        }
-
-        lock.unlock(err => {
-          // we weren't able to reach redis; the lock will expire after ttl
-          console.error(err)
-        })
-      })
-    },
-    this.configuration.persistWait,
-  );
 
   handleMessage = async (channel: Buffer, data: Buffer) => {
     const channelName = channel.toString()

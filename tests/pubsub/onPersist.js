@@ -7,20 +7,36 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 
 const server = new Hocuspocus()
 const server1 = new Hocuspocus()
+const persistWait = 1000
 
 const opts = {
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onChange', () => {
-  before(() => {
+context('pubsub/onPersist', () => {
+  after(() => {
+    server.destroy()
+    server1.destroy()
+  })
+
+  it('syncs updates between servers and clients', done => {
+    const ydoc = new Y.Doc()
+    const ydoc1 = new Y.Doc()
+
+    const onPersist = document => {
+      assert.strictEqual(document.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
+      assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
+      done()
+    }
     server.configure({
       port: 4000,
       extensions: [
         new PubSub({
           ...opts,
           log: (...args) => console.log('server:', ...args),
+          persistWait,
+          onPersist,
         }),
       ],
     }).listen()
@@ -31,21 +47,11 @@ context('pubsub/onChange', () => {
         new PubSub({
           ...opts,
           log: (...args) => console.log('server1:', ...args),
-
+          persistWait,
+          onPersist,
         }),
       ],
     }).listen()
-  })
-
-  after(() => {
-    server.destroy()
-    server1.destroy()
-  })
-
-  it('syncs updates between servers and clients', done => {
-    const ydoc = new Y.Doc()
-    const ydoc1 = new Y.Doc()
-    let client1
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -56,21 +62,7 @@ context('pubsub/onChange', () => {
       broadcast: false,
     })
 
-    client.on('synced', () => {
-      // wait for an update after we've synced and then check the doc content
-      // matches the doc from the other client
-      client.on('message', () => {
-        setTimeout(() => {
-          assert.strictEqual(ydoc.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
-
-          client.destroy()
-          client1.destroy()
-          done()
-        }, 0)
-      })
-    })
-
-    client1 = new HocuspocusProvider({
+    const client1 = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4001',
       name: 'hocuspocus-test',
       document: ydoc1,
@@ -78,11 +70,11 @@ context('pubsub/onChange', () => {
       maxAttempts: 1,
       broadcast: false,
       onSynced: () => {
-        // once we're setup make an edit on client1, to get to client it will need
-        // to pass through the pubsub extension:
-        // client1 -> server1 -> pubsub -> server -> client
+        // once we're setup make an edit on client1, if all succeeds the onPersist
+        // callback will be called after the debounce period and all docs will
+        // be identical
         ydoc1.getArray('foo').insert(0, ['bar'])
       },
     })
   })
-})
+}).timeout(persistWait * 2)
