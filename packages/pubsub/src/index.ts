@@ -10,13 +10,8 @@ import {
   Extension,
   onCreateDocumentPayload,
   onDisconnectPayload,
-  MessageType,
 } from '@hocuspocus/server'
-import {
-  readUpdate,
-  messageYjsUpdate,
-} from 'y-protocols/sync'
-import { applyAwarenessUpdate } from 'y-protocols/awareness'
+import { MessageReceiver } from './MessageReceiver'
 
 export interface Configuration {
   port: number,
@@ -170,7 +165,7 @@ export class PubSub implements Extension {
     this.configuration.persistWait,
   );
 
-  handleMessage = async (channel: Buffer, update: Buffer) => {
+  handleMessage = async (channel: Buffer, data: Buffer) => {
     const channelName = channel.toString()
     this.configuration.log('received remote message', channelName)
     const [_, documentName] = channelName.split(':')
@@ -181,30 +176,12 @@ export class PubSub implements Extension {
       return
     }
 
-    const message = new IncomingMessage(update)
-    const type = message.readVarUint()
-
-    switch (type) {
-      case MessageType.Awareness:
-        this.configuration.log('applying remote awareness')
-        applyAwarenessUpdate(document.awareness, update, 'remote')
-        break
-      case MessageType.Sync: {
-        const syncType = message.readVarUint()
-
-        switch (syncType) {
-          case messageYjsUpdate:
-            this.configuration.log('apply remote update', document.getArray('foo').get(0))
-            readUpdate(message.decoder, document, 'remote')
-            break
-          default:
-        }
-
-        break
-      }
-
-      default:
-    }
+    new MessageReceiver(
+      new IncomingMessage(data),
+    ).apply(document, async reply => {
+      // TODO: Need to filter messages from this server
+      // await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(reply))
+    })
   }
 
   getKey(documentName: string) {
