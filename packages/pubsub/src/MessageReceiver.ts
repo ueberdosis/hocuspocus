@@ -32,7 +32,7 @@ export class MessageReceiver {
         this.readSyncMessage(message, document, reply)
 
         if (message.length > 1) {
-          // reply(message.toUint8Array())
+          reply(message.toUint8Array())
         }
 
         break
@@ -59,7 +59,7 @@ export class MessageReceiver {
           .createSyncMessage()
           .writeFirstSyncStepFor(document))
 
-        // reply(syncMessage.toUint8Array())
+        reply(syncMessage.toUint8Array())
 
         break
       }

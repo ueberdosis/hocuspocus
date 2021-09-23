@@ -20,6 +20,7 @@ context('pubsub/onAwarenessChange', () => {
       extensions: [
         new PubSub({
           ...opts,
+          instanceName: 'server',
           log: (...args) => console.log('server:', ...args),
         }),
       ],
@@ -30,6 +31,7 @@ context('pubsub/onAwarenessChange', () => {
       extensions: [
         new PubSub({
           ...opts,
+          instanceName: 'server1',
           log: (...args) => console.log('server1:', ...args),
 
         }),

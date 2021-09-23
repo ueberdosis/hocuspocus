@@ -1,4 +1,3 @@
-// @flow
 import os from 'os'
 import Redis from 'ioredis'
 import Redlock from 'redlock'
@@ -19,7 +18,7 @@ export interface Configuration {
   host: string,
   /** Options passed directly to Redis constructor */
   redisOpts?: Redis.RedisOptions,
-  /** Used to track the source of messages. If none is provided the os hostname is used */
+  /** Unique instance name. If none is provided the os hostname is used */
   instanceName: string,
   /** Namespace for redis keys, if none is provided 'hocuspocus' is used */
   namespace: string,
@@ -61,7 +60,7 @@ export class PubSub implements Extension {
     this.redis = new Redis(port, host, redisOpts)
     this.sub = new Redis(port, host, redisOpts)
     this.redlock = new Redlock([this.redis])
-    this.sub.on('messageBuffer', this.handleIncomingMessage)
+    this.sub.on('pmessageBuffer', this.handleIncomingMessage)
 
     // debounced handler should be setup here in the constructor so that the
     // wait time can be configurable
@@ -78,14 +77,15 @@ export class PubSub implements Extension {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
-      // On document creation the node will connect to redis and sub channels
-      this.sub.subscribe(this.getKey(documentName), async err => {
+      // On document creation the node will connect to pub and sub channels
+      // for the document.
+      this.sub.psubscribe(this.subKey(documentName), async err => {
         if (err) {
           reject(err)
           return
         }
 
-        this.configuration.log('subscribed', documentName)
+        this.configuration.log('subscribed', this.subKey(documentName))
 
         document.awareness.on('update', this.handleAwarenessUpdate(document))
         document.on('update', this.handleUpdate(document))
@@ -95,12 +95,12 @@ export class PubSub implements Extension {
           .createSyncMessage()
           .writeFirstSyncStepFor(document)
 
-        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(syncMessage.toUint8Array()))
+        await this.redis.publishBuffer(this.pubKey(documentName), Buffer.from(syncMessage.toUint8Array()))
 
         // request awareness from other instances
         const awarenessMessage = new OutgoingMessage()
           .writeQueryAwareness()
-        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(awarenessMessage.toUint8Array()))
+        await this.redis.publishBuffer(this.pubKey(documentName), Buffer.from(awarenessMessage.toUint8Array()))
 
         resolve(undefined)
       })
@@ -119,12 +119,12 @@ export class PubSub implements Extension {
     this.documents.delete(documentName)
 
     // on final connection close sub channel
-    this.sub.unsubscribe(this.getKey(documentName), err => {
+    this.sub.punsubscribe(this.subKey(documentName), err => {
       if (err) {
         console.error(err)
         return
       }
-      this.configuration.log(`Unsubscribed from ${documentName}`)
+      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
     })
   }
 
@@ -140,7 +140,7 @@ export class PubSub implements Extension {
         return
       }
 
-      const result = await this.redis.get(`${this.getKey(document.name)}:updated`)
+      const result = await this.redis.get(this.updatedKey(document.name))
       const updatedTime = result ? Date.parse(result) : undefined
 
       if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
@@ -164,7 +164,7 @@ export class PubSub implements Extension {
       const message = new OutgoingMessage()
         .createAwarenessUpdateMessage(document.awareness)
 
-      await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(message.toUint8Array()))
+      await this.redis.publishBuffer(this.pubKey(document.name), Buffer.from(message.toUint8Array()))
     }
   }
 
@@ -180,10 +180,10 @@ export class PubSub implements Extension {
         .writeUpdate(update)
 
       // forward all update messages received to redis channel
-      await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(message.toUint8Array()))
+      await this.redis.publishBuffer(this.pubKey(document.name), Buffer.from(message.toUint8Array()))
 
       // update the lastReceivedTimestamp in a Redis key for documentName if source is this server.
-      await this.redis.set(`${this.getKey(document.name)}:updated`, new Date().toISOString())
+      await this.redis.set(this.updatedKey(document.name), new Date().toISOString())
 
       // When a node receives an update event from the client or another server it sets an in memory debounce (eg 3 seconds)
       this.debouncedUpdate(document)
@@ -195,25 +195,39 @@ export class PubSub implements Extension {
    * Note that this will also include messages from ourselves as it is not possible
    * in redis to filter these.
   */
-  private handleIncomingMessage = async (channel: Buffer, data: Buffer) => {
-    const channelName = channel.toString()
-    const [_, documentName] = channelName.split(':')
+  private handleIncomingMessage = async (channel: Buffer, pattern: Buffer, data: Buffer) => {
+    const channelName = pattern.toString()
+    const [_, documentName, instanceName] = channelName.split(':')
     const document = this.documents.get(documentName)
 
+    if (instanceName === this.configuration.instanceName) {
+      return
+    }
+
     if (!document) {
-      this.configuration.log(`No document in memory for ${channel}`)
       return
     }
 
     new MessageReceiver(
       new IncomingMessage(data),
-    ).apply(document, async reply => {
-      // TODO: Need to filter messages from this server for sync to work
-      await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(reply))
+    ).apply(document, reply => {
+      return this.redis.publishBuffer(this.pubKey(document.name), Buffer.from(reply))
     })
   }
 
   private getKey(documentName: string) {
     return `${this.configuration.namespace}:${documentName}`
+  }
+
+  private pubKey(documentName: string) {
+    return `${this.getKey(documentName)}:${this.configuration.instanceName.replace(/:/g, '')}`
+  }
+
+  private subKey(documentName: string) {
+    return `${this.getKey(documentName)}:*`
+  }
+
+  private updatedKey(documentName: string) {
+    return `${this.getKey(documentName)}:updated`
   }
 }
