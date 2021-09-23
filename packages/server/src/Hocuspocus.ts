@@ -4,7 +4,9 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
-import { MessageType, Configuration, ConnectionConfig } from './types'
+import {
+  MessageType, Configuration, ConnectionConfig, WsReadyStates,
+} from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden, ResetConnection } from './CloseEvents'
@@ -213,15 +215,15 @@ export class Hocuspocus {
       }
 
       // If no hook interrupts, create a document and connection
-      this.createDocument(documentName, request, socketId, connection, context).then(document => {
-        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+      const document = await this.createDocument(documentName, request, socketId, connection, context)
+      this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
-        // Remove the queue listener
-        incoming.off('message', listener)
-        // Work through queued messages
-        incomingMessageQueue.forEach(input => {
-          incoming.emit('message', input)
-        })
+      // Remove the queue listener
+      incoming.off('message', listener)
+
+      // Work through queued messages
+      incomingMessageQueue.forEach(input => {
+        incoming.emit('message', input)
       })
     }
 
@@ -395,6 +397,15 @@ export class Hocuspocus {
           }
         })
     })
+
+    // If the websocket has already disconnected (wow, that was fast) – then
+    // immediately call close to cleanup the connection and doc in memory.
+    if (
+      connection.readyState === WsReadyStates.Closing
+      || connection.readyState === WsReadyStates.Closed
+    ) {
+      instance.close()
+    }
 
     return instance
   }

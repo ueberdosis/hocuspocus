@@ -322,9 +322,8 @@ context('server/onConnect', () => {
       onCreateDocument: async () => {
         client.disconnect()
 
-        // pretent we loaded from async data source
+        // pretent we loaded data from async source
         await new Promise(resolve => setTimeout(resolve, 100))
-        return new Y.Doc()
       },
     }).listen()
 
@@ -344,7 +343,7 @@ context('server/onConnect', () => {
         client.destroy()
         server.destroy()
         done()
-      }, 0)
+      }, 200)
     })
   })
 })
