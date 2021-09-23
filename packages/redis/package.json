@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-redis",
-  "version": "1.0.0-alpha.34",
+  "version": "1.0.0-alpha.35",
   "description": "hocuspocus persistence driver for Redis",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
