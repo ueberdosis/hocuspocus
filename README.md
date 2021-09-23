@@ -63,13 +63,13 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/saga.so" width="100"><br>
         <strong>Saga</strong>
       </a>
-    </td>    
+    </td>
     <td align="center">
       <a href="https://www.gamma.app/">
         <img src="https://unavatar.io/gamma.app" width="100"><br>
         <strong>Gamma</strong>
       </a>
-    </td>    
+    </td>
     <td align="center">
       <a href="https://www.cosmicmind.com/">
         <img src="https://unavatar.io/github/cosmicmind" width="100"><br>
@@ -81,13 +81,13 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/github/outline" width="100"><br>
         <strong>Outline</strong>
       </a>
-    </td> 
+    </td>
     <td align="center">
       <a href="https://ahrefs.com/">
         <img src="https://unavatar.io/ahrefs.com" width="100"><br>
         <strong>Ahrefs</strong>
       </a>
-    </td>     
+    </td>
   </tr>
 </table>
 
@@ -99,7 +99,7 @@ Using hocuspocus in production? Invest in the future of hocuspocus and [become a
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Contributors
-[All contributors](../../contributors).
+[Tom Moor](https://github.com/tommoor), [kris](https://github.com/kriskbx) and [many more](../../contributors).
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
