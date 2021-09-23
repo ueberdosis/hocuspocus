@@ -119,7 +119,6 @@ class Connection {
       this.webSocket.close(event?.code, event?.reason)
 
       done()
-
     })
   }
 
