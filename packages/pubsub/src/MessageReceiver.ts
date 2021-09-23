@@ -6,7 +6,7 @@ import {
   readSyncStep2,
   readUpdate,
 } from 'y-protocols/sync'
-import { applyAwarenessUpdate } from 'y-protocols/awareness'
+import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness'
 import {
   Document,
   IncomingMessage,
@@ -32,13 +32,15 @@ export class MessageReceiver {
         this.readSyncMessage(message, document, reply)
 
         if (message.length > 1) {
-          reply(message.toUint8Array())
+          // reply(message.toUint8Array())
         }
 
         break
       case MessageType.Awareness:
         applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), undefined)
-
+        break
+      case MessageType.QueryAwareness:
+        this.applyQueryAwarenessMessage(document.awareness, reply)
         break
       default:
         // Do nothing
@@ -57,7 +59,7 @@ export class MessageReceiver {
           .createSyncMessage()
           .writeFirstSyncStepFor(document))
 
-        reply(syncMessage.toUint8Array())
+        // reply(syncMessage.toUint8Array())
 
         break
       }
@@ -72,5 +74,12 @@ export class MessageReceiver {
     }
 
     return type
+  }
+
+  applyQueryAwarenessMessage(awareness: Awareness, reply: (message: Uint8Array) => void) {
+    const message = new OutgoingMessage()
+      .createAwarenessUpdateMessage(awareness)
+
+    reply(message.toUint8Array())
   }
 }

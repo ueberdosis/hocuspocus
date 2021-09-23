@@ -117,14 +117,17 @@ export class PubSub implements Extension {
         document.on('update', this.handleUpdate(document))
 
         // broadcast sync step 1
-        const syncMessage = (new OutgoingMessage()
+        const syncMessage = new OutgoingMessage()
           .createSyncMessage()
-          .writeFirstSyncStepFor(document))
+          .writeFirstSyncStepFor(document)
 
-        const update = syncMessage.toUint8Array()
+        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(syncMessage.toUint8Array()))
 
-        this.configuration.log('publish sync step 1')
-        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(update))
+        // request awareness from other instances
+        const awarenessMessage = new OutgoingMessage()
+          .writeQueryAwareness()
+        await this.redis.publishBuffer(this.getKey(documentName), Buffer.from(awarenessMessage.toUint8Array()))
+
         resolve(undefined)
       })
     })
@@ -203,8 +206,8 @@ export class PubSub implements Extension {
     new MessageReceiver(
       new IncomingMessage(data),
     ).apply(document, async reply => {
-      // TODO: Need to filter messages from this server
-      // await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(reply))
+      // TODO: Need to filter messages from this server for sync to work
+      await this.redis.publishBuffer(this.getKey(document.name), Buffer.from(reply))
     })
   }
 

@@ -47,6 +47,15 @@ export class OutgoingMessage {
     return this
   }
 
+  writeQueryAwareness(): OutgoingMessage {
+    this.type = MessageType.QueryAwareness
+    this.category = 'Update'
+
+    writeVarUint(this.encoder, MessageType.QueryAwareness)
+
+    return this
+  }
+
   writeAuthenticated(): OutgoingMessage {
     this.type = MessageType.Auth
     this.category = 'Authenticated'
