@@ -12,7 +12,7 @@ import {
   IncomingMessage,
   OutgoingMessage,
   MessageType,
-} from '@hocuspocus/server'
+} from '../../server/src'
 
 export class MessageReceiver {
 

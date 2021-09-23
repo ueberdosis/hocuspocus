@@ -11,7 +11,7 @@ import {
   Extension,
   onCreateDocumentPayload,
   onDisconnectPayload,
-} from '@hocuspocus/server'
+} from '../../server/src'
 import { MessageReceiver } from './MessageReceiver'
 
 export interface Configuration {
