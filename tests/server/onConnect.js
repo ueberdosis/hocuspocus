@@ -312,4 +312,39 @@ context('server/onConnect', () => {
       maxAttempts: 1,
     })
   })
+
+  it('cleans up correctly when client disconnects during onCreateDocument', done => {
+    const server = new Hocuspocus()
+    let client
+
+    server.configure({
+      port: 4000,
+      onCreateDocument: async () => {
+        client.disconnect()
+
+        // pretent we loaded from async data source
+        await new Promise(resolve => setTimeout(resolve, 100))
+        return new Y.Doc()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      maxAttempts: 1,
+    })
+
+    client.on('disconnect', () => {
+      setTimeout(() => {
+        assert.strictEqual(server.getDocumentsCount(), 0)
+        assert.strictEqual(server.getConnectionsCount(), 0)
+
+        client.destroy()
+        server.destroy()
+        done()
+      }, 0)
+    })
+  })
 })
