@@ -7,8 +7,6 @@
 This extension allows horizontal scaling of Hocuspocus instances, allowing any
 client to connect to any instance and share document state between them.
 
-Make sure to register it **after** any other extensions!
-
 ## Installation
 
 Install the Throttle package with:

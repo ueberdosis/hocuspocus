@@ -8,7 +8,7 @@ import {
   OutgoingMessage,
   Document,
   Extension,
-  onCreateDocumentPayload,
+  onCreatedDocumentPayload,
   onDisconnectPayload,
 } from '../../server/src'
 import { MessageReceiver } from './MessageReceiver'
@@ -70,10 +70,10 @@ export class PubSub implements Extension {
     )
   }
 
-  public async onCreateDocument({
+  public async onCreatedDocument({
     documentName,
     document,
-  }: onCreateDocumentPayload) {
+  }: onCreatedDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
@@ -115,7 +115,6 @@ export class PubSub implements Extension {
 
     this.configuration.log('last disconnect', documentName)
 
-    // TODO: persist first?
     this.documents.delete(documentName)
 
     // on final connection close sub channel

@@ -359,6 +359,8 @@ export class Hocuspocus {
       }
     })
 
+    await this.hooks('onCreatedDocument', hookPayload)
+
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
     })

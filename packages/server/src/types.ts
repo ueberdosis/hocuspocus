@@ -95,6 +95,17 @@ export interface onCreateDocumentPayload {
   connection: ConnectionConfig
 }
 
+export interface onCreatedDocumentPayload {
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  connection: ConnectionConfig
+}
+
 export interface onChangePayload {
   clientsCount: number,
   context: any,
