@@ -101,6 +101,8 @@
           link: /api/extensions/monitor
         - title: Postgres
           link: /api/extensions/postgres
+        - title: PubSub
+          link: /api/extensions/pubsub
           type: draft
         - title: Redis
           link: /api/extensions/redis

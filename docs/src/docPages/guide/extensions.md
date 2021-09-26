@@ -18,6 +18,8 @@ We already created some very useful extensions you should check out for sure:
 
 **[@hocuspocus/extension-logger](/api/extensions/logger)**: Add logging to hocuspocus.
 
+**[@hocuspocus/extension-pubsub](/api/extensions/pubsub)**: Horizontally scale using Redis.
+
 **[@hocuspocus/extension-webhook](/api/extensions/webhook)**: Send document changes via webhook to your API.
 
 **[@hocuspocus/extension-throttle](/api/extensions/throttle)**: Throttle connections by ips.
