@@ -16,7 +16,10 @@
     "allowJs": false,
     "checkJs": false,
     "paths": {
-      "@hocuspocus/*": ["packages/*/dist", "packages/*/src"]
+      "@hocuspocus/*": [
+        "packages/*/src",
+        "packages/*/dist"
+      ]
     },
     "lib": [
       "esnext",
