@@ -41,7 +41,6 @@ context('server/onChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
 
     client.on('synced', () => {
@@ -81,7 +80,6 @@ context('server/onChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
 
     client.on('synced', () => {
@@ -110,7 +108,6 @@ context('server/onChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
 
     client.on('synced', () => {
