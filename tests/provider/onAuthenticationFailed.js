@@ -22,7 +22,7 @@ context('provider/onAuthenticationFailed', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            token: 'SUPER-SECRET-TOKEN',
+      token: 'SUPER-SECRET-TOKEN',
       onAuthenticationFailed: () => {
         client.destroy()
         server.destroy()

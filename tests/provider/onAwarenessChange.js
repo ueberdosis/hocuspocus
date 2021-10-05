@@ -18,7 +18,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onConnect: () => {
+      onConnect: () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessChange: ({ states }) => {
@@ -48,7 +48,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onSynced: () => {
+      onSynced: () => {
         assert.deepStrictEqual(server.getMessageLogs(), [
           {
             category: 'SyncStep1',
@@ -97,7 +97,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onConnect: () => {
+      onConnect: () => {
         client.setAwarenessField('name', 'player1')
       },
       onAwarenessChange: ({ states }) => {
@@ -119,7 +119,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onConnect: () => {
+      onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
       onAwarenessChange: ({ states }) => {
@@ -142,7 +142,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onConnect: () => {
+      onConnect: () => {
         server.destroy()
         client.destroy()
         anotherClient.destroy()
@@ -162,7 +162,7 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-completly-different-and-unrelated-document',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onConnect: () => {
+      onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
     })

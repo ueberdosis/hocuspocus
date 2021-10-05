@@ -22,7 +22,7 @@ context('provider/onOpen', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-            onOpen: () => {
+      onOpen: () => {
         client.destroy()
         done()
       },
@@ -35,7 +35,7 @@ context('provider/onOpen', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-          })
+    })
 
     client.on('open', () => {
       client.destroy()

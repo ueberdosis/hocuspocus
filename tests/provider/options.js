@@ -15,7 +15,7 @@ context('provider/options', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-          })
+    })
 
     assert.strictEqual(client.options.maxDelay, 30000)
   })
@@ -27,7 +27,7 @@ context('provider/options', () => {
       document: ydoc,
       maxDelay: 10000,
       WebSocketPolyfill: WebSocket,
-          })
+    })
 
     assert.strictEqual(client.options.maxDelay, 10000)
   })
