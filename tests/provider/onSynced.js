@@ -16,8 +16,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         client.destroy()
         server.destroy()
 
@@ -37,8 +36,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
 
     client.on('synced', () => {
       client.destroy()
@@ -67,8 +65,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         client.destroy()
         server.destroy()
 
@@ -96,8 +93,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         client.destroy()
         server.destroy()
 
@@ -130,8 +126,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         // timeout is required as "synced" is triggered before last SyncStep2 is sent to server
         setTimeout(() => {
           // In a client-server model, you want to handle this differently: The client should initiate the connection with SyncStep1.
@@ -182,8 +177,7 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         client.destroy()
         server.destroy()
 

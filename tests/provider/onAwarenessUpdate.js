@@ -18,8 +18,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onConnect: () => {
+            onConnect: () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessUpdate: ({ states }) => {
@@ -44,8 +43,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onConnect: () => {
+            onConnect: () => {
         client.setAwarenessField('name', 'player1')
       },
       onAwarenessUpdate: ({ states }) => {
@@ -67,8 +65,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onConnect: () => {
+            onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
       onAwarenessUpdate: ({ states }) => {
@@ -91,8 +88,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onConnect: () => {
+            onConnect: () => {
         server.destroy()
         client.destroy()
         anotherClient.destroy()
@@ -112,8 +108,7 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-completly-different-and-unrelated-document',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onConnect: () => {
+            onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
     })

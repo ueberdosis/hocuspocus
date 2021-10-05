@@ -26,8 +26,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('executes the onConnect callback from an extension', done => {
@@ -54,8 +53,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('has the document name', done => {
@@ -78,8 +76,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('sets the client to readOnly', done => {
@@ -97,8 +94,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced() {
+            onSynced() {
         server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
         })
@@ -131,8 +127,7 @@ context('server/onConnect', () => {
       name: weirdDocumentName,
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('stops when the onConnect hook throws an Error', done => {
@@ -154,8 +149,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onClose: () => {
+            onClose: () => {
         client.destroy()
         server.destroy()
 
@@ -189,8 +183,7 @@ context('server/onConnect', () => {
       },
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('has the request headers', done => {
@@ -213,8 +206,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('has the whole request', done => {
@@ -237,8 +229,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('has the socketId', done => {
@@ -261,8 +252,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('has the server instance', done => {
@@ -285,8 +275,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('defaults to readOnly = false', done => {
@@ -309,8 +298,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
   })
 
   it('cleans up correctly when client disconnects during onCreateDocument', done => {
@@ -332,8 +320,7 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
 
     client.on('disconnect', () => {
       setTimeout(() => {

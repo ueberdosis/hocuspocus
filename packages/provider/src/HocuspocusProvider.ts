@@ -268,6 +268,11 @@ export class HocuspocusProvider extends EventEmitter {
       maxDelay: this.options.maxDelay,
       jitter: this.options.jitter,
       timeout: this.options.timeout,
+      beforeAttempt: context => {
+        if (!this.shouldConnect) {
+          context.abort()
+        }
+      },
     })
   }
 

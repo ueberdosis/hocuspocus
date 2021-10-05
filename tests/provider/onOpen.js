@@ -22,8 +22,7 @@ context('provider/onOpen', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onOpen: () => {
+            onOpen: () => {
         client.destroy()
         done()
       },
@@ -36,8 +35,7 @@ context('provider/onOpen', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-    })
+          })
 
     client.on('open', () => {
       client.destroy()

@@ -34,8 +34,7 @@ context('rocksdb/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         const valueBefore = ydoc.getArray('foo').get(0)
         assert.strictEqual(valueBefore, undefined)
 
@@ -53,8 +52,7 @@ context('rocksdb/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
-      onSynced: () => {
+            onSynced: () => {
         const value = anotherYdoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')
 
