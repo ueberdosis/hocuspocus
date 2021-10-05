@@ -13,6 +13,7 @@ context('provider/onAwarenessUpdate', () => {
 
     server.configure({ port: 4000 }).listen()
 
+    let called = false
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -22,6 +23,9 @@ context('provider/onAwarenessUpdate', () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessUpdate: ({ states }) => {
+        if (called) return
+        called = true
+
         server.destroy()
         client.destroy()
 

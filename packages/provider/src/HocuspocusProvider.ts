@@ -559,6 +559,8 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.disconnect()
 
+    removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+
     this.awareness.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
 
