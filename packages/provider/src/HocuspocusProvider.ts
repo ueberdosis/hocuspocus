@@ -567,6 +567,11 @@ export class HocuspocusProvider extends EventEmitter {
 
     removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
 
+    // If there is still a connection attempt outstanding then we should resolve
+    // it before calling disconnect, otherwise it will be rejected in the onClose
+    // handler and trigger a retry
+    this.resolveConnectionAttempt()
+
     this.disconnect()
 
     this.awareness.off('update', this.awarenessUpdateHandler)
