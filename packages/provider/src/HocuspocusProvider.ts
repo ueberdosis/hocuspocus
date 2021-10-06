@@ -251,7 +251,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.options = { ...this.options, ...options }
   }
 
-  connect() {
+  async connect() {
     if (this.status === WebSocketStatus.Connected) {
       return
     }
@@ -259,21 +259,29 @@ export class HocuspocusProvider extends EventEmitter {
     this.shouldConnect = true
     this.subscribeToBroadcastChannel()
 
-    retry(this.createWebSocketConnection.bind(this), {
-      delay: this.options.delay,
-      initialDelay: this.options.initialDelay,
-      factor: this.options.factor,
-      maxAttempts: this.options.maxAttempts,
-      minDelay: this.options.minDelay,
-      maxDelay: this.options.maxDelay,
-      jitter: this.options.jitter,
-      timeout: this.options.timeout,
-      beforeAttempt: context => {
-        if (!this.shouldConnect) {
-          context.abort()
-        }
-      },
-    })
+    try {
+      await retry(this.createWebSocketConnection.bind(this), {
+        delay: this.options.delay,
+        initialDelay: this.options.initialDelay,
+        factor: this.options.factor,
+        maxAttempts: this.options.maxAttempts,
+        minDelay: this.options.minDelay,
+        maxDelay: this.options.maxDelay,
+        jitter: this.options.jitter,
+        timeout: this.options.timeout,
+        beforeAttempt: context => {
+          if (!this.shouldConnect) {
+            context.abort()
+          }
+        },
+      })
+    } catch (err: any) {
+      // If we aborted the connection attempt then don't throw an error
+      // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
+      if (err.code !== 'ATTEMPT_ABORTED') {
+        throw err
+      }
+    }
   }
 
   createWebSocketConnection() {
@@ -557,9 +565,14 @@ export class HocuspocusProvider extends EventEmitter {
 
     clearInterval(this.intervals.connectionChecker)
 
-    this.disconnect()
-
     removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+
+    // If there is still a connection attempt outstanding then we should resolve
+    // it before calling disconnect, otherwise it will be rejected in the onClose
+    // handler and trigger a retry
+    this.resolveConnectionAttempt()
+
+    this.disconnect()
 
     this.awareness.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
