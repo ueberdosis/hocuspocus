@@ -279,6 +279,7 @@ export class Hocuspocus {
             // connection is closed
             incoming.send(message.toUint8Array(), () => {
               incoming.close(Forbidden.code, Forbidden.reason)
+              incoming.off('message', queueIncomingMessageListener)
             })
           })
       } else {
@@ -296,6 +297,7 @@ export class Hocuspocus {
       .catch(error => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
+        incoming.off('message', queueIncomingMessageListener)
 
         if (error) {
           throw error
