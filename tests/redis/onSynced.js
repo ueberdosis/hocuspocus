@@ -6,9 +6,6 @@ import { Redis } from '../../packages/redis/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 import flushRedis from '../utils/flushRedis'
 
-const ydoc = new Y.Doc()
-const anotherYdoc = new Y.Doc()
-const theLastYdoc = new Y.Doc()
 const server = new Hocuspocus()
 
 context.only('redis/onSynced', () => {
@@ -35,6 +32,7 @@ context.only('redis/onSynced', () => {
   })
 
   it('document is persisted', done => {
+    const ydoc = new Y.Doc()
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -57,6 +55,7 @@ context.only('redis/onSynced', () => {
   })
 
   it('document can be modified', done => {
+    const anotherYdoc = new Y.Doc()
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -64,7 +63,7 @@ context.only('redis/onSynced', () => {
       WebSocketPolyfill: WebSocket,
       // modify '#1#2'
       onSynced: () => {
-        const fragment = ydoc.getXmlFragment('XMLFragment')
+        const fragment = anotherYdoc.getXmlFragment('XMLFragment')
         fragment.insert(fragment.length, [
           new Y.XmlText('#2'),
         ])
@@ -78,6 +77,7 @@ context.only('redis/onSynced', () => {
   })
 
   it('document can be restored', done => {
+    const theLastYdoc = new Y.Doc()
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -85,7 +85,7 @@ context.only('redis/onSynced', () => {
       WebSocketPolyfill: WebSocket,
       // restore '#1#2'
       onSynced: () => {
-        console.log(server.getMessageLogs())
+        // console.log(server.getMessageLogs())
         // assert.deepStrictEqual(server.getMessageLogs(), [])
 
         const fragment = theLastYdoc.getXmlFragment('XMLFragment')
