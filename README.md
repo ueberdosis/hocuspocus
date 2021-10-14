@@ -71,12 +71,6 @@ For help, discussion about best practices, or any other conversation:
       </a>
     </td>
     <td align="center">
-      <a href="https://www.cosmicmind.com/">
-        <img src="https://unavatar.io/github/cosmicmind" width="100"><br>
-        <strong>CosmicMind</strong>
-      </a>
-    </td>
-    <td align="center">
       <a href="https://www.getoutline.com/">
         <img src="https://unavatar.io/github/outline" width="100"><br>
         <strong>Outline</strong>
