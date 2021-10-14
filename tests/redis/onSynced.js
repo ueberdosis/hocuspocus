@@ -79,11 +79,11 @@ context.only('redis/onSynced', () => {
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
-      document: anotherYdoc,
+      document: theLastYdoc,
       WebSocketPolyfill: WebSocket,
       // restore '#1#2'
       onSynced: () => {
-        const fragment = anotherYdoc.getXmlFragment('XMLFragment')
+        const fragment = theLastYdoc.getXmlFragment('XMLFragment')
         assert.strictEqual(fragment.toString(), '#1#2')
 
         client.destroy()
