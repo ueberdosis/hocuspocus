@@ -23,7 +23,9 @@ context.only('redis/onSynced', () => {
           port: process.env.REDIS_PORT || 6379,
         }),
       ],
-    }).listen()
+    })
+    server.enableDebugging()
+    server.listen()
   })
 
   after(() => {
@@ -83,6 +85,9 @@ context.only('redis/onSynced', () => {
       WebSocketPolyfill: WebSocket,
       // restore '#1#2'
       onSynced: () => {
+        console.log(server.getMessageLogs())
+        // assert.deepStrictEqual(server.getMessageLogs(), [])
+
         const fragment = theLastYdoc.getXmlFragment('XMLFragment')
         assert.strictEqual(fragment.toString(), '#1#2')
 
