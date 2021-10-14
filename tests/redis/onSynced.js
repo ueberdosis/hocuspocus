@@ -39,15 +39,14 @@ context.only('redis/onSynced', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       broadcast: false,
+      // create '#1'
       onSynced: () => {
         const fragment = ydoc.getXmlFragment('XMLFragment')
+        fragment.insert(fragment.length, [
+          new Y.XmlText('#1'),
+        ])
 
-        for (let count = 1; count <= 3; count += 1) {
-          const text = new Y.XmlText(`#${count}`)
-          fragment.insert(fragment.length, [text])
-        }
-
-        assert.strictEqual(fragment.toString(), '#1#2#3')
+        assert.strictEqual(fragment.toString(), '#1')
 
         client.destroy()
         done()
@@ -61,15 +60,14 @@ context.only('redis/onSynced', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
+      // modify '#1#2'
       onSynced: () => {
         const fragment = ydoc.getXmlFragment('XMLFragment')
+        fragment.insert(fragment.length, [
+          new Y.XmlText('#2'),
+        ])
 
-        for (let count = 1; count <= 3; count += 1) {
-          const text = new Y.XmlText(`#${count}`)
-          fragment.insert(fragment.length, [text])
-        }
-
-        assert.strictEqual(fragment.toString(), '#1#2#3#1#2#3')
+        assert.strictEqual(fragment.toString(), '#1#2')
 
         client.destroy()
         done()
@@ -83,9 +81,10 @@ context.only('redis/onSynced', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
+      // restore '#1#2'
       onSynced: () => {
         const fragment = anotherYdoc.getXmlFragment('XMLFragment')
-        assert.strictEqual(fragment.toString(), '#1#2#3#1#2#3')
+        assert.strictEqual(fragment.toString(), '#1#2')
 
         client.destroy()
         done()
