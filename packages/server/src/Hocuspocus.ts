@@ -1,5 +1,5 @@
 import * as decoding from 'lib0/decoding'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
@@ -41,7 +41,7 @@ export class Hocuspocus {
 
   httpServer?: HTTPServer
 
-  webSocketServer?: WebSocket.Server
+  webSocketServer?: WebSocketServer
 
   debugger: MessageLogger = Debugger
 
@@ -87,7 +87,7 @@ export class Hocuspocus {
    * Start the server
    */
   async listen(): Promise<void> {
-    const webSocketServer = new WebSocket.Server({ noServer: true })
+    const webSocketServer = new WebSocketServer({ noServer: true })
     webSocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
       this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
     })
@@ -183,7 +183,16 @@ export class Hocuspocus {
    */
   async destroy(): Promise<any> {
     this.httpServer?.close()
-    this.webSocketServer?.close()
+
+    try {
+      this.webSocketServer?.close()
+      this.webSocketServer?.clients.forEach(client => {
+        client.terminate()
+      })
+    } catch (e) {
+      //
+    }
+
     this.debugger.flush()
 
     await this.hooks('onDestroy', { instance: this })

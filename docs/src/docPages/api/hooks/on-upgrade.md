@@ -28,7 +28,7 @@ const data = {
 
 ```typescript
 import { Server } from '@hocuspocus/server'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 
 const hocuspocus = Server.configure({
   onUpgrade(data) {
@@ -41,7 +41,7 @@ const hocuspocus = Server.configure({
         // Create your own websocket server to upgrade the request, make
         // sure noServer is set to true, because we're handling the upgrade
         // ourselves
-        const websocketServer = new WebSocket.Server({ noServer: true })
+        const websocketServer = new WebSocketServer({ noServer: true })
         websocketServer.on('connection', (connection: WebSocket, request: IncomingMessage) => {
           // Put your application logic here to respond to new connections
           // and subscribe to incoming messages
