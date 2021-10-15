@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.19](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.18...@hocuspocus/provider@1.0.0-alpha.19) (2021-10-15)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
 # [1.0.0-alpha.18](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.17...@hocuspocus/provider@1.0.0-alpha.18) (2021-10-06)
 
 **Note:** Version bump only for package @hocuspocus/provider
