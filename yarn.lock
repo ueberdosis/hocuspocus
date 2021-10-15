@@ -20932,11 +20932,11 @@ yazl@^2.5.1:
     buffer-crc32 "~0.2.3"
 
 yjs@^13.4.12, yjs@^13.5.0, yjs@^13.5.2, yjs@^13.5.3, yjs@^13.5.8:
-  version "13.5.13"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.13.tgz#0bf4d415938fd57212805ba942a5d18ec77fb537"
-  integrity sha512-5vDcT2ZY8USY6jfwGU1xWcyLz4UwOZH9ue5Ri/G9qv3u4rD7bhKeZhtQM+92/7ft6T2fnZf6roVhDvCx7ixf7g==
+  version "13.5.14"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.14.tgz#6ceb85ca3af6135cdf0f0c0c4ef6c0018cfdd29c"
+  integrity sha512-yQHtn7UQJTOTA20EiLQNGB6AYrk1RjrBdN+TzoIB7sWhJrXofDaF8Q4rQufmpJTu0W4tSq30iLSnjp478VAY3Q==
   dependencies:
-    lib0 "^0.2.41"
+    lib0 "^0.2.42"
 
 ylru@^1.2.0:
   version "1.2.1"
