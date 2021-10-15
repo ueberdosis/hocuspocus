@@ -4,7 +4,7 @@ import * as time from 'lib0/time'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import * as url from 'lib0/url'
-import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
+import { Event, CloseEvent, MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
@@ -105,7 +105,7 @@ export interface HocuspocusProviderOptions {
   timeout: number,
   onAuthenticated: () => void,
   onAuthenticationFailed: ({ reason }: { reason: string }) => void,
-  onOpen: (event: OpenEvent) => void,
+  onOpen: (event: Event) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
   onOutgoingMessage: (message: OutgoingMessage) => void,
@@ -444,7 +444,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  onOpen(event: OpenEvent) {
+  onOpen(event: Event) {
     this.emit('open', { event })
 
     if (this.status !== WebSocketStatus.Connected) {
