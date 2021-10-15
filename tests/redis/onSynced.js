@@ -8,7 +8,9 @@ import flushRedis from '../utils/flushRedis'
 
 const server = new Hocuspocus()
 
-context.only('redis/onSynced', () => {
+// Checks that data isn’t corrupted when restored from Redis
+// https://github.com/ueberdosis/hocuspocus/issues/224#issuecomment-944550576
+context('redis/onSynced', () => {
   before(() => {
     flushRedis()
 
@@ -31,6 +33,7 @@ context.only('redis/onSynced', () => {
     flushRedis()
   })
 
+  // create '#1'
   it('document is persisted', done => {
     const ydoc = new Y.Doc()
     const client = new HocuspocusProvider({
@@ -39,7 +42,6 @@ context.only('redis/onSynced', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       broadcast: false,
-      // create '#1'
       onSynced: () => {
         const fragment = ydoc.getXmlFragment('XMLFragment')
         fragment.insert(fragment.length, [
@@ -54,6 +56,7 @@ context.only('redis/onSynced', () => {
     })
   })
 
+  // modify '#1#2'
   it('document can be modified', done => {
     const anotherYdoc = new Y.Doc()
     const client = new HocuspocusProvider({
@@ -61,7 +64,6 @@ context.only('redis/onSynced', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
-      // modify '#1#2'
       onSynced: () => {
         const fragment = anotherYdoc.getXmlFragment('XMLFragment')
         fragment.insert(fragment.length, [
@@ -76,6 +78,7 @@ context.only('redis/onSynced', () => {
     })
   })
 
+  // restore '#1#2'
   it('document can be restored', done => {
     const theLastYdoc = new Y.Doc()
     const client = new HocuspocusProvider({
@@ -83,11 +86,7 @@ context.only('redis/onSynced', () => {
       name: 'hocuspocus-test',
       document: theLastYdoc,
       WebSocketPolyfill: WebSocket,
-      // restore '#1#2'
       onSynced: () => {
-        // console.log(server.getMessageLogs())
-        // assert.deepStrictEqual(server.getMessageLogs(), [])
-
         const fragment = theLastYdoc.getXmlFragment('XMLFragment')
         assert.strictEqual(fragment.toString(), '#1#2')
 
