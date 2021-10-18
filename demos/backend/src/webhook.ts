@@ -2,10 +2,10 @@ import {
   createServer, IncomingMessage, ServerResponse, Server as HTTPServer,
 } from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { Logger } from '../../../packages/logger/src'
-import { Server } from '../../../packages/server/src'
-import { TiptapTransformer } from '../../../packages/transformer/src'
-import { Events, Webhook } from '../../../packages/webhook/src'
+import { Logger } from '@hocuspocus/extension-logger'
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import { Events, Webhook } from '@hocuspocus/extension-webhook'
 
 /*
  * Setup server

@@ -2,8 +2,8 @@
 import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { assert } from 'chai'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const ydoc = new Y.Doc()
 
