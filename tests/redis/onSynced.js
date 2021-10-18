@@ -1,9 +1,9 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { Redis } from '../../packages/redis/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { Redis } from '@hocuspocus/extension-redis'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 import flushRedis from '../utils/flushRedis'
 
 const server = new Hocuspocus()

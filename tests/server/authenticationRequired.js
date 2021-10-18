@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { Hocuspocus } from '../../packages/server/src'
+import { Hocuspocus } from '@hocuspocus/server'
 
 context('server/authenticationRequired', () => {
   it('requires a token when the onAuthenticate hook is present', done => {

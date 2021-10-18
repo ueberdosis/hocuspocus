@@ -1,6 +1,6 @@
-import { Logger } from '../../../packages/logger/src'
-import { RocksDB } from '../../../packages/rocksdb/src'
-import { Server } from '../../../packages/server/src'
+import { Logger } from '@hocuspocus/extension-logger'
+import { RocksDB } from '@hocuspocus/extension-rocksdb'
+import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
   port: 1234,
