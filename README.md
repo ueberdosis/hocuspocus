@@ -82,6 +82,12 @@ For help, discussion about best practices, or any other conversation:
         <strong>Ahrefs</strong>
       </a>
     </td>
+    <td align="center">
+      <a href="https://github.com/brickdoc">
+        <img src="https://unavatar.io/github/brickdoc" width="100"><br>
+        <strong>Brickdoc</strong>
+      </a>
+    </td>    
   </tr>
 </table>
 
