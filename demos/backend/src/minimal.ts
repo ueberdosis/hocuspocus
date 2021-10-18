@@ -1,5 +1,5 @@
-import { Logger } from '@hocuspocus/extension-logger'
-import { Server } from '@hocuspocus/server'
+import { Logger } from '../../../packages/logger/src'
+import { Server } from '../../../packages/server/src'
 
 const server = Server.configure({
   port: 1234,

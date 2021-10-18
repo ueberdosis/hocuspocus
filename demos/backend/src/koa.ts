@@ -1,8 +1,8 @@
 // @ts-nocheck
 import Koa from 'koa'
 import websocket from 'koa-easy-ws'
-import { Server } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/extension-logger'
+import { Server } from '../../../packages/server/src'
+import { Logger } from '../../../packages/logger/src'
 
 const server = Server.configure({
   extensions: [

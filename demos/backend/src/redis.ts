@@ -1,6 +1,6 @@
-import { Server } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/extension-logger'
-import { Redis } from '@hocuspocus/extension-redis'
+import { Server } from '../../../packages/server/src'
+import { Logger } from '../../../packages/logger/src'
+import { Redis } from '../../../packages/redis/src'
 
 const server = Server.configure({
   port: 1234,

@@ -1,7 +1,7 @@
-import { Logger } from '@hocuspocus/extension-logger'
-import { RocksDB } from '@hocuspocus/extension-rocksdb'
-import { TiptapTransformer } from '@hocuspocus/transformer'
-import { Server, onCreateDocumentPayload } from '@hocuspocus/server'
+import { Logger } from '../../../packages/logger/src'
+import { RocksDB } from '../../../packages/rocksdb/src'
+import { TiptapTransformer } from '../../../packages/transformer/src'
+import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 
 const getProseMirrorJSON = (text: string) => {
   return {

@@ -1,9 +1,9 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '@hocuspocus/server'
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import { Hocuspocus } from '../../packages/server/src'
 import { RocksDB } from '../../packages/rocksdb/src'
+import { HocuspocusProvider } from '../../packages/provider/src'
 import removeDirectory from '../utils/removeDirectory'
 
 const ydoc = new Y.Doc()
