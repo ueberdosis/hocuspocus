@@ -7,9 +7,9 @@
 A Node.js collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 ## What is Y.js?
-Y.js merges changes from users without conflicts and in real-time. Compared to other implementations, it is super performant and “kicks the pants off” (Joseph Gentle, Ex-Google Wave Engineer, [source](https://josephg.com/blog/crdts-are-the-future/).
+Y.js merges changes from users without conflicts and in real-time. Compared to other implementations, it is super performant and “kicks the pants off” (Joseph Gentle, Ex-Google Wave Engineer, [source](https://josephg.com/blog/crdts-are-the-future/)).
 
-For such a *Conflict-free Replication Data Type* (CRDT), it doesn’t matter in which order changes are applied. It’s a little bit like Git, where it doesn’t matter when changes are committed.
+For such a Conflict-free Replication Data Type (CRDT), it doesn’t matter in which order changes are applied. It’s a little bit like Git, where it doesn’t matter when changes are committed.
 
 That enables you to build performant real-time applications, add collaboration to your existing app, sync presence states and think offline-first.
 
