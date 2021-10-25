@@ -13,8 +13,8 @@ For such a Conflict-free Replication Data Type (CRDT), it doesn’t matter in wh
 
 That enables you to build performant real-time applications, add collaboration to your existing app, sync presence states and think offline-first.
 
-## So, what’s hocuspocus then?
-You can use whatever you like to send Y.js changes to other clients, but the most popular way is to use a WebSocket. With hocuspocus you’ve got such a WebSocket backend, that has everything to get started quickly, integrate Y.js in your existing infrastructure and scale to a million users.
+## So, what’s Hocuspocus then?
+You can use whatever you like to send Y.js changes to other clients, but the most popular way is to use a WebSocket. With Hocuspocus you’ve got such a WebSocket backend, that has everything to get started quickly, integrate Y.js in your existing infrastructure and scale to a million users.
 
 ## Features
 * Merges changes without conflicts

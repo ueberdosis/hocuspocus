@@ -1,4 +1,4 @@
-# hocuspocus (Alpha Preview!)
+# Hocuspocus (Alpha Preview!)
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
@@ -87,13 +87,13 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/github/brickdoc" width="100"><br>
         <strong>Brickdoc</strong>
       </a>
-    </td>    
+    </td>
   </tr>
 </table>
 
 … and hundreds of awesome inviduals.
 
-Using hocuspocus in production? Invest in the future of hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
+Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
 
 ## Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.

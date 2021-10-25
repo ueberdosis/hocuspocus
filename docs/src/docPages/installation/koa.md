@@ -48,4 +48,4 @@ app.listen(1234)
 ```
 
 ## Extensions
-Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario. Please read the docs of each extension on how to use them when integrating hocuspocus in your framework of choice.
+Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario. Please read the docs of each extension on how to use them when integrating Hocuspocus in your framework of choice.

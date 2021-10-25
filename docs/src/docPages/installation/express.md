@@ -4,7 +4,7 @@
 
 ## Introduction
 
-hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When you don't call `listen()` on hocuspocus, it will not start a WebSocket server itself but rather relies on you calling it's `handleConnection()` method manually.
+hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When you don't call `listen()` on Hocuspocus, it will not start a WebSocket server itself but rather relies on you calling it's `handleConnection()` method manually.
 
 It requires the WebSocket connection instance as first argument, the HTTP request as second and the name of the document as third one.
 
@@ -12,7 +12,7 @@ Note: You have the choice to either use hocuspocus' `onConnect` hook or put your
 
 ## Express
 
-To use hocuspocus with [Express](https://expressjs.com), you need to use the `express-ws` package that adds WebSocket endpoints to Express applications. Then add a new WebSocket route and use hocuspocus' `handleConnection()` method to do the rest.
+To use Hocuspocus with [Express](https://expressjs.com), you need to use the `express-ws` package that adds WebSocket endpoints to Express applications. Then add a new WebSocket route and use hocuspocus' `handleConnection()` method to do the rest.
 
 ```typescript
 import express from 'express'
@@ -53,4 +53,4 @@ app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234'))
 
 ## Extensions
 
-Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario. Please read the docs of each extension on how to use them when integrating hocuspocus in your framework of choice.
+Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario. Please read the docs of each extension on how to use them when integrating Hocuspocus in your framework of choice.

@@ -7,7 +7,7 @@
 
 <g-image src="@/assets/images/monitor-preview.png" width="700"></g-image>
 
-The Monitor extension adds a live updating dashboard featuring metrics and logs to debug and monitor your hocuspocus instance.
+The Monitor extension adds a live updating dashboard featuring metrics and logs to debug and monitor your Hocuspocus instance.
 
 ## Installation
 
@@ -50,7 +50,7 @@ const server = Server.configure({
       osMetricsInterval: 10000,
 
       // [optional] you can launch the dashboard on a different port. if set to null,
-      // the dashboard will run on the same port hocuspocus it self is running.
+      // the dashboard will run on the same port Hocuspocus it self is running.
       // defaults to "null"
       port: null,
 

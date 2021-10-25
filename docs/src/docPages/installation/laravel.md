@@ -2,4 +2,4 @@
 
 TODO
 
-We’re working on a package to integrate hocuspocus with Laravel. 👀
+We’re working on a package to integrate Hocuspocus with Laravel. 👀

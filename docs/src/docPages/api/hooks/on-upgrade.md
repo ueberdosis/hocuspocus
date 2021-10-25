@@ -4,9 +4,9 @@
 
 ## Introduction
 
-The `onUpgrade` hook is called when the HTTP server inside hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
+The `onUpgrade` hook is called when the HTTP server inside Hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
 
-This is useful if you want to create custom websocket routes on the same port hocuspocus runs on.
+This is useful if you want to create custom websocket routes on the same port Hocuspocus runs on.
 
 ## Hook payload
 

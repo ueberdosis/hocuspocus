@@ -3,7 +3,7 @@
 ## toc
 
 ## Introduction
-To deliver a top-notch developer experience and user experience, we put hundreds of hours of unpaid work into hocuspocus. Your funding helps us to make this work more and more financially sustainable. This enables us to provide helpful support, maintain all our packages, keep everything up to date, and develop new features and extensions for hocuspocus.
+To deliver a top-notch developer experience and user experience, we put hundreds of hours of unpaid work into Hocuspocus. Your funding helps us to make this work more and more financially sustainable. This enables us to provide helpful support, maintain all our packages, keep everything up to date, and develop new features and extensions for Hocuspocus.
 
 Give back to the open source community and [sponsor us on GitHub](https://github.com/sponsors/ueberdosis)! ♥
 
@@ -18,16 +18,16 @@ Give back to the open source community and [sponsor us on GitHub](https://github
 Sounds good? [Sponsor us on GitHub!](https://github.com/sponsors/ueberdosis)
 
 ## The maintainers of hocuspocus
-If you are thankful for hocuspocus, you should say thank you to the lovely people of [überdosis](https://ueberdosis.io). The amazing company we are all building together and the amazing company that funded the initial development costs of tiptap.
+If you are thankful for Hocuspocus, you should say thank you to the lovely people of [überdosis](https://ueberdosis.io). The amazing company we are all building together and the amazing company that funded the initial development costs of tiptap.
 
 AND you should definitely hire us if you want us to design und build an amazing digital product for you. Bonus points if it’s somehow text editing related.
 
-But here are the friendly faces of the two maintainers of hocuspocus, Hans Pagel (right) and Philipp Kühn (left). You’ve probably read our names in the thousands of commits, pull requests or Tweets already.
+But here are the friendly faces of the two maintainers of Hocuspocus, Hans Pagel (right) and Philipp Kühn (left). You’ve probably read our names in the thousands of commits, pull requests or Tweets already.
 
-![Philipp and Hans, the maintainers of hocuspocus, looking happy](/philipp-and-hans.jpg)
+![Philipp and Hans, the maintainers of Hocuspocus, looking happy](/philipp-and-hans.jpg)
 
 ## More peace of mind
-Companies betting on hocuspocus probably want some peace of mind and ensure that we keep maintaining hocuspocus, but don’t forget that our work is based on the work of other lovely people that you should definitely sponsor too:
+Companies betting on Hocuspocus probably want some peace of mind and ensure that we keep maintaining Hocuspocus, but don’t forget that our work is based on the work of other lovely people that you should definitely sponsor too:
 
 * [Sponsor Kevin Jahns](https://github.com/sponsors/dmonad) (Y.js)
 * [Sponsor Y-Collective](https://opencollective.com/y-collective) (Y.js + hocuspocus)
@@ -40,7 +40,7 @@ If you’re a company, don’t want to use GitHub, don’t have a credit card or
 We are part of the [Y-Collective](https://opencollective.com/y-collective), a fund for projects related to Y.js (the technology we’re using for all the collaborative editing magic). That’s an OpenCollective, which allows you to send money through transfer, PayPal or credit card. Donations are tax deductible for US companies.
 
 ### I want consulting. What’s your rate?
-We don’t do any calls, consulting or personal support for hocuspocus. If you have an issue, a question, want to talk something through or anything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus/issues) to keep everything accessible for the whole community.
+We don’t do any calls, consulting or personal support for Hocuspocus. If you have an issue, a question, want to talk something through or anything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus/issues) to keep everything accessible for the whole community.
 
 ### Can we have a call?
 Nope, we are big fans of asynchronous communication. If you really need to reach out in private, send us an email to [humans@tiptap.dev](mailto:humans@tiptap.dev), but don’t expect technical email support.

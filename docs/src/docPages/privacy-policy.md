@@ -10,10 +10,10 @@ Keep your personal data for you, we don’t want it. Missing the cookie banner? 
 * No information is shared with advertising companies
 * No information is mined and harvested for personal and behavioral trends
 
-We don’t provide email support for hocuspocus, but if you have some legal issues, privacy or security concerns, send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus-issues/issues). We’ll make sure to get back to you quickly.
+We don’t provide email support for Hocuspocus, but if you have some legal issues, privacy or security concerns, send us an email to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev). For everything else, [please use GitHub issues](https://github.com/ueberdosis/hocuspocus-issues/issues). We’ll make sure to get back to you quickly.
 
 ## List of external services
-With that in mind, we still need a few external services to publish hocuspocus. Let’s go through them one by one.
+With that in mind, we still need a few external services to publish Hocuspocus. Let’s go through them one by one.
 
 ### Hosting (Netlify)
 We use Netlify to host the documentation. It features continuous deployment from Git across a global application delivery network and full integration with Let’s Encrypt. If you want to know more, [read Netlify’s privacy policy](https://www.netlify.com/privacy/).

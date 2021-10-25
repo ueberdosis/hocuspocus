@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The webhook extension allows you to connect hocuspocus to your existing application by triggering webhooks on certain events.
+The webhook extension allows you to connect Hocuspocus to your existing application by triggering webhooks on certain events.
 
 ## Installation
 
@@ -112,7 +112,7 @@ When a new document is created the onCreate webhook will be triggered with the f
 }
 ```
 
-You can use this to import a document into hocuspocus. The webhook extension will first load the document from the [primary storage](/guide/documents#using-a-primary-storage) and only import it if it doesn't already exist in there.
+You can use this to import a document into Hocuspocus. The webhook extension will first load the document from the [primary storage](/guide/documents#using-a-primary-storage) and only import it if it doesn't already exist in there.
 
 Just respond with all the single documents keyed by their field name. For example:
 
@@ -196,7 +196,7 @@ When a user disconnects the onDisconnect webhook will be triggered with the foll
 
 As you probably already know from [the guide](/guide/transformations) the Y-Doc must be serialized into something readable by your application and when importing a document it must be converted into a Y-Doc respectively.
 
-Because hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use one of the transformers from the `@hocuspocus/transformer` package. Make sure to configure them properly. In this example we used the TiptapTransformer that needs the list of extensions:
+Because Hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use one of the transformers from the `@hocuspocus/transformer` package. Make sure to configure them properly. In this example we used the TiptapTransformer that needs the list of extensions:
 
 ```typescript
 import { Server } from '@hocuspocus/server'
