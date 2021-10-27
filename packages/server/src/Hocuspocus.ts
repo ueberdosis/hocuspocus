@@ -218,7 +218,7 @@ export class Hocuspocus {
 
     const incomingMessageQueue: Uint8Array[] = []
 
-    const handleNewConnection = (listener: (input: Uint8Array) => void) => async () => {
+    const handleNewConnection = async () => {
       if (this.authenticationRequired && !connection.isAuthenticated) {
         return
       }
@@ -226,9 +226,6 @@ export class Hocuspocus {
       // If no hook interrupts, create a document and connection
       const document = await this.createDocument(documentName, request, socketId, connection, context)
       this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
-
-      // Remove the queue listener
-      incoming.off('message', listener)
 
       // Work through queued messages
       incomingMessageQueue.forEach(input => {
@@ -271,7 +268,7 @@ export class Hocuspocus {
 
             incoming.send(message.toUint8Array())
           })
-          .then(handleNewConnection(queueIncomingMessageListener))
+          .then(handleNewConnection)
           .catch(error => {
             // We could pass the Error message through to the client here but it
             // risks exposing server internals or being a very long stack trace
@@ -288,8 +285,10 @@ export class Hocuspocus {
             // connection is closed
             incoming.send(message.toUint8Array(), () => {
               incoming.close(Forbidden.code, Forbidden.reason)
-              incoming.off('message', queueIncomingMessageListener)
             })
+          })
+          .finally(() => {
+            incoming.off('message', queueIncomingMessageListener)
           })
       } else {
         incomingMessageQueue.push(data)
@@ -302,15 +301,21 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-      .then(handleNewConnection(queueIncomingMessageListener))
+      .then(handleNewConnection)
       .catch(error => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
-        incoming.off('message', queueIncomingMessageListener)
 
         if (error) {
           throw error
         }
+      })
+      .finally(() => {
+        if (this.authenticationRequired && !connection.isAuthenticated) {
+          return
+        }
+
+        incoming.off('message', queueIncomingMessageListener)
       })
   }
 
