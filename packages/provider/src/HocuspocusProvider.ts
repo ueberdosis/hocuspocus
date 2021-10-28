@@ -167,7 +167,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   subscribedToBroadcastChannel = false
 
-  webSocket: any = null
+  webSocket: WebSocket | null = null
 
   shouldConnect = true
 
@@ -287,14 +287,15 @@ export class HocuspocusProvider extends EventEmitter {
   createWebSocketConnection() {
     return new Promise((resolve, reject) => {
       // Init the WebSocket connection
-      this.webSocket = new this.options.WebSocketPolyfill(this.url)
-      this.webSocket.binaryType = 'arraybuffer'
-      this.webSocket.onmessage = this.onMessage.bind(this)
-      this.webSocket.onclose = this.onClose.bind(this)
-      this.webSocket.onopen = this.onOpen.bind(this)
-      this.webSocket.onerror = () => {
+      const ws = new this.options.WebSocketPolyfill(this.url)
+      ws.binaryType = 'arraybuffer'
+      ws.onmessage = this.onMessage.bind(this)
+      ws.onclose = this.onClose.bind(this)
+      ws.onopen = this.onOpen.bind(this)
+      ws.onerror = () => {
         reject()
       }
+      this.webSocket = ws
 
       // Reset the status
       this.synced = false
@@ -345,7 +346,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     // No message received in a long time, not even your own
     // Awareness updates, which are updated every 15 seconds.
-    this.webSocket.close()
+    this.webSocket?.close()
   }
 
   forceSync() {
