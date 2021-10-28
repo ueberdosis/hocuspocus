@@ -4,13 +4,32 @@ title: Collaborative editing with Quill
 
 # Quill
 
-<iframe
-  v-resize
-  src="https://hocuspocus-demos.netlify.app/quill/"
-  style="background-color: white; border-radius: 8px;"
-  width="100%"
-  height="400"
-  frameborder="0"
-></iframe>
+```js
+import Quill from 'quill'
+import QuillCursors from 'quill-cursors'
 
-Read more: https://github.com/yjs/y-quill
+import * as Y from 'yjs'
+import { QuillBinding } from 'y-quill'
+import { WebsocketProvider } from 'y-websocket'
+
+Quill.register('modules/cursors', QuillCursors)
+
+var ydoc = new Y.Doc()
+var type = ydoc.getText('quill')
+var provider = new WebsocketProvider('wss://websocket.tiptap.dev', 'hocuspocus-demos-quill', ydoc)
+
+var quill = new Quill('.editor', {
+  theme: 'snow',
+  modules: {
+    cursors: true,
+      history: {
+        userOnly: true
+      },
+    },
+  }
+)
+
+new QuillBinding(type, quill, provider.awareness)
+```
+
+Learn more: https://github.com/yjs/y-quill

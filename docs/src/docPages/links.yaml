@@ -10,9 +10,9 @@
         - title: Koa
           link: /installation/koa
           type: draft
-        - title: Laravel
-          link: /installation/laravel
-          type: draft
+        # - title: Laravel
+        #   link: /installation/laravel
+        #   type: draft
 
     - title: Changelog
       link: /changelog
@@ -30,7 +30,7 @@
     # - title: Tasks
     #   link: /examples/tasks
     #   type: draft
-    - title: tiptap
+    - title: Tiptap
       link: /examples/tiptap
     - title: Quill
       link: /examples/quill

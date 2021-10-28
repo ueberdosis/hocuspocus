@@ -3,7 +3,7 @@
 ## toc
 
 ## Introduction
-You can sync information about all present users through the Awareness API. You’re completely free to share whatever you like, for example a name, a color, the cursor position, or even a position a 3D system – do it!
+You can sync information about all present users through the [Awareness API](/provider/awareness). You are completely free to share whatever you like, for example a name, a color, the cursor position, or even a position a 3D system – do it!
 
 ## Example
 ```js
@@ -40,4 +40,3 @@ document.addEventListener('mousemove', event => {
 })
 ```
 
-→ [Read more about Awareness](/provider/awareness)
