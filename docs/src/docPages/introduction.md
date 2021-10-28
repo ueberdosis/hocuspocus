@@ -1,10 +1,10 @@
-# Hocuspocus
+# Introduction
 [![Version](https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/server.svg)](https://npmcharts.com/compare/@hocuspocus/server?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/server.svg)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/WtJ49jGshW)
 
-A Node.js collaboration backend based on [Y.js](https://github.com/yjs/yjs).
+Hocuspocus is a Node.js collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 ## What is Y.js?
 Y.js merges changes from users without conflicts and in real-time. Compared to other implementations, it is super performant and “kicks the pants off” (Joseph Gentle, Ex-Google Wave Engineer, [source](https://josephg.com/blog/crdts-are-the-future/)).
