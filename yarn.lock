@@ -11415,7 +11415,7 @@ invert-permutation@^1.0.0:
   resolved "https://registry.yarnpkg.com/invert-permutation/-/invert-permutation-1.0.0.tgz#a0a78042eadb36bc17551e787efd1439add54933"
   integrity sha1-oKeAQurbNrwXVR54fv0UOa3VSTM=
 
-ioredis@^4.27.6:
+ioredis@^4.0.0, ioredis@^4.27.6:
   version "4.28.0"
   resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.28.0.tgz#5a2be3f37ff2075e2332f280eaeb02ab4d9ff0d3"
   integrity sha512-I+zkeeWp3XFgPT2CtJKxvaF5FjGBGt4yGYljRjQecdQKteThuAsKqffeF1lgHVlYnuNeozRbPOCDNZ7tDWPeig==

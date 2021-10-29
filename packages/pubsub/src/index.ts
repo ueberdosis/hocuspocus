@@ -40,11 +40,11 @@ export class PubSub implements Extension {
     log: console.log, // eslint-disable-line
   }
 
-  redis: Redis.Redis | Redis.Cluster;
+  redis: Redis.Redis | Redis.Cluster
 
-  sub: Redis.Redis;
+  sub: Redis.Redis
 
-  redlock: Redlock;
+  redlock: Redlock
 
   documents = new Map()
 
