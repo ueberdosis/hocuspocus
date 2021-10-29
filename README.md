@@ -1,4 +1,4 @@
-# hocuspocus (Alpha Preview!)
+# Hocuspocus (Alpha Preview!)
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
@@ -63,17 +63,11 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/saga.so" width="100"><br>
         <strong>Saga</strong>
       </a>
-    </td>    
+    </td>
     <td align="center">
       <a href="https://www.gamma.app/">
         <img src="https://unavatar.io/gamma.app" width="100"><br>
         <strong>Gamma</strong>
-      </a>
-    </td>    
-    <td align="center">
-      <a href="https://www.cosmicmind.com/">
-        <img src="https://unavatar.io/github/cosmicmind" width="100"><br>
-        <strong>CosmicMind</strong>
       </a>
     </td>
     <td align="center">
@@ -81,25 +75,31 @@ For help, discussion about best practices, or any other conversation:
         <img src="https://unavatar.io/github/outline" width="100"><br>
         <strong>Outline</strong>
       </a>
-    </td> 
+    </td>
     <td align="center">
       <a href="https://ahrefs.com/">
         <img src="https://unavatar.io/ahrefs.com" width="100"><br>
         <strong>Ahrefs</strong>
       </a>
-    </td>     
+    </td>
+    <td align="center">
+      <a href="https://github.com/brickdoc">
+        <img src="https://unavatar.io/github/brickdoc" width="100"><br>
+        <strong>Brickdoc</strong>
+      </a>
+    </td>
   </tr>
 </table>
 
 … and hundreds of awesome inviduals.
 
-Using hocuspocus in production? Invest in the future of hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
+Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
 
 ## Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Contributors
-[All contributors](../../contributors).
+[Tom Moor](https://github.com/tommoor), [kris](https://github.com/kriskbx) and [many more](../../contributors).
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

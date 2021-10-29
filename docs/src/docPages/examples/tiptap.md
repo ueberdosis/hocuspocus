@@ -1,21 +1,16 @@
 ---
-title: Collaborative editing with tiptap
+title: Collaborative editing with Tiptap
 ---
 
-# tiptap
+# Tiptap
 
 ## toc
 
 ## Introduction
-[tiptap](https://tiptap.dev) is a headless text editor, that’s fully customizable and has a first-class collaborative editing integration that’s compatible with hocuspocus.
-
-## Example
-The following example shows a full-blown version, with a whole bunch of different features, connected to a hocuspocus instance that syncs changes between clients. Open multiple browser windows and try it out!
-
-<demo name="Examples/Tiptap" />
+[Tiptap](https://tiptap.dev) is a headless text editor, that’s fully customizable and has a first-class collaborative editing integration that’s compatible with Hocuspocus.
 
 ## Getting started
-The above examples has a lot of bells and whistles. Let’s focus on the collaborative editing part. The below example code shows everything you need to create an instance of tiptap, with all default extension, start your collaboration backend with hocuspocus and connect everything.
+The above examples has a lot of bells and whistles. Let’s focus on the collaborative editing part. The below example code shows everything you need to create an instance of tiptap, with all default extension, start your collaboration backend with Hocuspocus and connect everything.
 
 Add an element to your HTML document where tiptap should be initialized:
 ```html
@@ -58,4 +53,3 @@ new Editor({
 })
 ```
 
-Read more: https://www.tiptap.dev/guide/collaborative-editing

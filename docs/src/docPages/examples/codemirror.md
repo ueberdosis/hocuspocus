@@ -4,13 +4,24 @@ title: Collaborative editing with CodeMirror
 
 # CodeMirror
 
-<iframe
-  v-resize
-  src="https://hocuspocus-demos.netlify.app/codemirror/"
-  style="background-color: white; border-radius: 8px;"
-  width="100%"
-  height="400"
-  frameborder="0"
-></iframe>
+```js
+import * as Y from 'yjs'
+import { CodemirrorBinding } from 'y-codemirror'
+import { WebsocketProvider } from 'y-websocket'
 
-Read more: https://github.com/yjs/y-codemirror
+import CodeMirror from 'codemirror'
+
+const ydoc = new Y.Doc()
+var provider = new WebsocketProvider('wss://websocket.tiptap.dev', 'hocuspocus-demos-codemirror', ydoc)
+const yText = ydoc.getText('codemirror')
+const yUndoManager = new Y.UndoManager(yText)
+
+const editor = CodeMirror(document.querySelector('.editor'), {
+  mode: 'javascript',
+  lineNumbers: true
+})
+
+const binding = new CodemirrorBinding(yText, editor, provider.awareness, { yUndoManager })
+```
+
+Learn more: https://github.com/yjs/y-codemirror

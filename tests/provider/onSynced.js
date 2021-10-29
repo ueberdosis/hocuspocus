@@ -16,7 +16,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         client.destroy()
         server.destroy()
@@ -37,7 +36,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
 
     client.on('synced', () => {
@@ -67,7 +65,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         client.destroy()
         server.destroy()
@@ -96,7 +93,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         client.destroy()
         server.destroy()
@@ -130,7 +126,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         // timeout is required as "synced" is triggered before last SyncStep2 is sent to server
         setTimeout(() => {
@@ -182,7 +177,6 @@ context('provider/onSynced', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         client.destroy()
         server.destroy()

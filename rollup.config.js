@@ -1,7 +1,7 @@
 import path from 'path'
 import minimist from 'minimist'
 import { getPackages } from '@lerna/project'
-import filterPackages from '@lerna/filter-packages'
+import { filterPackages } from '@lerna/filter-packages'
 import batchPackages from '@lerna/batch-packages'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import typescript from 'rollup-plugin-typescript2'
@@ -72,7 +72,6 @@ async function build(commandLineArgs) {
         },
       ],
       plugins: [
-
         autoExternal({
           packagePath: path.join(basePath, 'package.json'),
         }),
@@ -85,7 +84,7 @@ async function build(commandLineArgs) {
                 '@hocuspocus/*': ['packages/*/src'],
               },
             },
-            include: null,
+            include: [],
           },
         }),
       ],

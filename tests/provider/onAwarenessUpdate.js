@@ -13,16 +13,19 @@ context('provider/onAwarenessUpdate', () => {
 
     server.configure({ port: 4000 }).listen()
 
+    let called = false
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         client.setAwarenessField('foo', 'bar')
       },
       onAwarenessUpdate: ({ states }) => {
+        if (called) return
+        called = true
+
         server.destroy()
         client.destroy()
 
@@ -44,7 +47,6 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         client.setAwarenessField('name', 'player1')
       },
@@ -67,7 +69,6 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
@@ -91,7 +92,6 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         server.destroy()
         client.destroy()
@@ -112,7 +112,6 @@ context('provider/onAwarenessUpdate', () => {
       name: 'hocuspocus-completly-different-and-unrelated-document',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },

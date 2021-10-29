@@ -3,7 +3,7 @@
 ## toc
 
 ## Introduction
-You can sync information about all present users through the Awareness API. You’re completely free to share whatever you like, for example a name, a color, the cursor position, or even a position a 3D system – do it!
+You can sync information about all present users through the [Awareness API](/provider/awareness). You are completely free to share whatever you like, for example a name, a color, the cursor position, or even a position a 3D system – do it!
 
 ## Example
 ```js
@@ -14,15 +14,15 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 const ydoc = new Y.Doc()
 
 // Init an empty Array where all states are stored then
-const states = []
+const currentStates = []
 
 // Connect it to the backend
 const provider = new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'example-document',
   document: ydoc,
-  onAwarenessUpdate: ({ newStates }) => {
-    states = newStates
+  onAwarenessUpdate: ({ states }) => {
+    currentStates = states
   },
 })
 
@@ -40,4 +40,3 @@ document.addEventListener('mousemove', event => {
 })
 ```
 
-→ [Read more about Awareness](/provider/awareness)

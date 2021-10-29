@@ -1,10 +1,12 @@
 import * as decoding from 'lib0/decoding'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
-import { MessageType, Configuration, ConnectionConfig } from './types'
+import {
+  MessageType, Configuration, ConnectionConfig, WsReadyStates,
+} from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { Forbidden, ResetConnection } from './CloseEvents'
@@ -39,7 +41,7 @@ export class Hocuspocus {
 
   httpServer?: HTTPServer
 
-  webSocketServer?: WebSocket.Server
+  webSocketServer?: WebSocketServer
 
   debugger: MessageLogger = Debugger
 
@@ -85,7 +87,7 @@ export class Hocuspocus {
    * Start the server
    */
   async listen(): Promise<void> {
-    const webSocketServer = new WebSocket.Server({ noServer: true })
+    const webSocketServer = new WebSocketServer({ noServer: true })
     webSocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
       this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
     })
@@ -181,7 +183,16 @@ export class Hocuspocus {
    */
   async destroy(): Promise<any> {
     this.httpServer?.close()
-    this.webSocketServer?.close()
+
+    try {
+      this.webSocketServer?.close()
+      this.webSocketServer?.clients.forEach(client => {
+        client.terminate()
+      })
+    } catch (e) {
+      //
+    }
+
     this.debugger.flush()
 
     await this.hooks('onDestroy', { instance: this })
@@ -213,15 +224,15 @@ export class Hocuspocus {
       }
 
       // If no hook interrupts, create a document and connection
-      this.createDocument(documentName, request, socketId, connection, context).then(document => {
-        this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+      const document = await this.createDocument(documentName, request, socketId, connection, context)
+      this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
-        // Remove the queue listener
-        incoming.off('message', listener)
-        // Work through queued messages
-        incomingMessageQueue.forEach(input => {
-          incoming.emit('message', input)
-        })
+      // Remove the queue listener
+      incoming.off('message', listener)
+
+      // Work through queued messages
+      incomingMessageQueue.forEach(input => {
+        incoming.emit('message', input)
       })
     }
 
@@ -277,6 +288,7 @@ export class Hocuspocus {
             // connection is closed
             incoming.send(message.toUint8Array(), () => {
               incoming.close(Forbidden.code, Forbidden.reason)
+              incoming.off('message', queueIncomingMessageListener)
             })
           })
       } else {
@@ -294,6 +306,7 @@ export class Hocuspocus {
       .catch(error => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
+        incoming.off('message', queueIncomingMessageListener)
 
         if (error) {
           throw error
@@ -397,6 +410,15 @@ export class Hocuspocus {
           }
         })
     })
+
+    // If the websocket has already disconnected (wow, that was fast) – then
+    // immediately call close to cleanup the connection and doc in memory.
+    if (
+      connection.readyState === WsReadyStates.Closing
+      || connection.readyState === WsReadyStates.Closed
+    ) {
+      instance.close()
+    }
 
     return instance
   }

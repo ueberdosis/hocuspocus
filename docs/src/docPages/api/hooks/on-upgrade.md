@@ -4,9 +4,9 @@
 
 ## Introduction
 
-The `onUpgrade` hook is called when the HTTP server inside hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
+The `onUpgrade` hook is called when the HTTP server inside Hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
 
-This is useful if you want to create custom websocket routes on the same port hocuspocus runs on.
+This is useful if you want to create custom websocket routes on the same port Hocuspocus runs on.
 
 ## Hook payload
 
@@ -28,7 +28,7 @@ const data = {
 
 ```typescript
 import { Server } from '@hocuspocus/server'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 
 const hocuspocus = Server.configure({
   onUpgrade(data) {
@@ -41,7 +41,7 @@ const hocuspocus = Server.configure({
         // Create your own websocket server to upgrade the request, make
         // sure noServer is set to true, because we're handling the upgrade
         // ourselves
-        const websocketServer = new WebSocket.Server({ noServer: true })
+        const websocketServer = new WebSocketServer({ noServer: true })
         websocketServer.on('connection', (connection: WebSocket, request: IncomingMessage) => {
           // Put your application logic here to respond to new connections
           // and subscribe to incoming messages

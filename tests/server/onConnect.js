@@ -26,7 +26,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -54,7 +53,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -78,7 +76,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -97,7 +94,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced() {
         server.documents.get('hocuspocus-test').connections.forEach(conn => {
           assert.strictEqual(conn.connection.readOnly, true)
@@ -131,7 +127,6 @@ context('server/onConnect', () => {
       name: weirdDocumentName,
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -154,7 +149,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onClose: () => {
         client.destroy()
         server.destroy()
@@ -189,7 +183,6 @@ context('server/onConnect', () => {
       },
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -213,7 +206,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -237,7 +229,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -261,7 +252,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -285,7 +275,6 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
   })
 
@@ -309,7 +298,39 @@ context('server/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
+    })
+  })
+
+  it('cleans up correctly when client disconnects during onCreateDocument', done => {
+    const server = new Hocuspocus()
+    let client
+
+    server.configure({
+      port: 4000,
+      onCreateDocument: async () => {
+        client.disconnect()
+
+        // pretent we loaded data from async source
+        await new Promise(resolve => setTimeout(resolve, 100))
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('disconnect', () => {
+      setTimeout(() => {
+        assert.strictEqual(server.getDocumentsCount(), 0)
+        assert.strictEqual(server.getConnectionsCount(), 0)
+
+        client.destroy()
+        server.destroy()
+        done()
+      }, 200)
     })
   })
 })

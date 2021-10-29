@@ -13,6 +13,35 @@ context('provider/onAwarenessChange', () => {
 
     server.configure({ port: 4000 }).listen()
 
+    let called = false
+    const client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onConnect: () => {
+        client.setAwarenessField('foo', 'bar')
+      },
+      onAwarenessChange: ({ states }) => {
+        if (called) return
+        called = true
+
+        server.destroy()
+        client.destroy()
+
+        assert.strictEqual(states.length, 1)
+        assert.strictEqual(states[0].foo, 'bar')
+
+        done()
+      },
+    })
+  })
+
+  it('onAwarenessChange callback is executed on provider destroy', done => {
+    const server = new Hocuspocus()
+
+    server.configure({ port: 4000 }).listen()
+
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -20,15 +49,12 @@ context('provider/onAwarenessChange', () => {
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       onConnect: () => {
-        client.setAwarenessField('foo', 'bar')
+        client.destroy()
       },
       onAwarenessChange: ({ states }) => {
         server.destroy()
-        client.destroy()
 
-        assert.strictEqual(states.length, 1)
-        assert.strictEqual(states[0].foo, 'bar')
-
+        assert.strictEqual(states.length, 0)
         done()
       },
     })
@@ -49,7 +75,6 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onSynced: () => {
         assert.deepStrictEqual(server.getMessageLogs(), [
           {
@@ -79,8 +104,8 @@ context('provider/onAwarenessChange', () => {
           },
         ])
 
-        client.destroy()
         server.destroy()
+        client.destroy()
 
         done()
       },
@@ -99,7 +124,6 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         client.setAwarenessField('name', 'player1')
       },
@@ -110,8 +134,9 @@ context('provider/onAwarenessChange', () => {
           assert.strictEqual(player2, true)
 
           server.destroy()
-          client.destroy()
           anotherClient.destroy()
+          client.destroy()
+
           done()
         }
       },
@@ -122,7 +147,6 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },
@@ -146,7 +170,6 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         server.destroy()
         client.destroy()
@@ -167,7 +190,6 @@ context('provider/onAwarenessChange', () => {
       name: 'hocuspocus-completly-different-and-unrelated-document',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         anotherClient.setAwarenessField('name', 'player2')
       },

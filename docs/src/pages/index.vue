@@ -6,7 +6,7 @@
           The multiplayer mode for your application
         </h1>
         <p class="is-large">
-          hocuspocus is the open source backend to bring real-time syncing, collaborative text editing and true collaboration to your application today. Get started in minutes, scale to millions.
+          Hocuspocus is the open source backend to bring real-time syncing, collaborative text editing and true collaboration to your application today. Get started in minutes, scale to millions.
         </p>
         <btn-wrapper>
           <btn
@@ -118,7 +118,7 @@
           License
         </h2>
         <p>
-          hocuspocus will be licensed under MIT, and you’ll be free to do whatever you want.
+          Hocuspocus will be licensed under MIT, and you’ll be free to do whatever you want.
           Can’t wait to get access? Become one of our wonderful <g-link to="https://github.com/sponsors/ueberdosis">GitHub sponsors</g-link> and receive an invite immediatly. BTW, we’re officially part of the <g-link to="https://opencollective.com/y-collective">Y-Collective</g-link>, too.
         </p>
       </div>

@@ -35,7 +35,7 @@ hocuspocus.listen()
 {
   "name": "hocuspocus-example-setup",
   "version": "1.0.0",
-  "description": "an example setup to run hocuspocus on render",
+  "description": "an example setup to run Hocuspocus on render",
   "main": "index.js",
   "private": true,
   "type": "module",

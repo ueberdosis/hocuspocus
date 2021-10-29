@@ -4,9 +4,9 @@
 
 ## Introduction
 
-The `onRequest` hook is called when the HTTP server inside hocuspocus receives a new request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond to the request yourself. It's similar to the concept of request middlewares.
+The `onRequest` hook is called when the HTTP server inside Hocuspocus receives a new request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond to the request yourself. It's similar to the concept of request middlewares.
 
-This is useful if you want to create custom routes on the same port hocuspocus runs on.
+This is useful if you want to create custom routes on the same port Hocuspocus runs on.
 
 ## Hook payload
 

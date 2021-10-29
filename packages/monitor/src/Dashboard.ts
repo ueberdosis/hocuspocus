@@ -1,5 +1,5 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import nodeStatic from 'node-static'
@@ -25,7 +25,7 @@ export class Dashboard {
     user: undefined,
   }
 
-  websocketServer: WebSocket.Server
+  websocketServer: WebSocketServer
 
   connections: Map<WebSocket, any> = new Map()
 
@@ -47,7 +47,7 @@ export class Dashboard {
       this.send(JSON.stringify({ event: 'set', data }))
     })
 
-    this.websocketServer = new WebSocket.Server({ noServer: true })
+    this.websocketServer = new WebSocketServer({ noServer: true })
     this.websocketServer.on('connection', this.handleConnection.bind(this))
 
     if (this.configuration.port) {

@@ -4,4 +4,4 @@ title: Collaborative editing with Slate
 
 # Slate
 
-Read more: https://github.com/BitPhinix/slate-yjs
+Learn more: https://github.com/BitPhinix/slate-yjs

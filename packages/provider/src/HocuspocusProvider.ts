@@ -4,7 +4,7 @@ import * as time from 'lib0/time'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import * as url from 'lib0/url'
-import { CloseEvent, MessageEvent, OpenEvent } from 'ws'
+import { Event, CloseEvent, MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
@@ -105,7 +105,7 @@ export interface HocuspocusProviderOptions {
   timeout: number,
   onAuthenticated: () => void,
   onAuthenticationFailed: ({ reason }: { reason: string }) => void,
-  onOpen: (event: OpenEvent) => void,
+  onOpen: (event: Event) => void,
   onConnect: () => void,
   onMessage: (event: MessageEvent) => void,
   onOutgoingMessage: (message: OutgoingMessage) => void,
@@ -167,7 +167,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   subscribedToBroadcastChannel = false
 
-  webSocket: any = null
+  webSocket: WebSocket | null = null
 
   shouldConnect = true
 
@@ -251,7 +251,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.options = { ...this.options, ...options }
   }
 
-  connect() {
+  async connect() {
     if (this.status === WebSocketStatus.Connected) {
       return
     }
@@ -259,29 +259,43 @@ export class HocuspocusProvider extends EventEmitter {
     this.shouldConnect = true
     this.subscribeToBroadcastChannel()
 
-    retry(this.createWebSocketConnection.bind(this), {
-      delay: this.options.delay,
-      initialDelay: this.options.initialDelay,
-      factor: this.options.factor,
-      maxAttempts: this.options.maxAttempts,
-      minDelay: this.options.minDelay,
-      maxDelay: this.options.maxDelay,
-      jitter: this.options.jitter,
-      timeout: this.options.timeout,
-    })
+    try {
+      await retry(this.createWebSocketConnection.bind(this), {
+        delay: this.options.delay,
+        initialDelay: this.options.initialDelay,
+        factor: this.options.factor,
+        maxAttempts: this.options.maxAttempts,
+        minDelay: this.options.minDelay,
+        maxDelay: this.options.maxDelay,
+        jitter: this.options.jitter,
+        timeout: this.options.timeout,
+        beforeAttempt: context => {
+          if (!this.shouldConnect) {
+            context.abort()
+          }
+        },
+      })
+    } catch (err: any) {
+      // If we aborted the connection attempt then don't throw an error
+      // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
+      if (err.code !== 'ATTEMPT_ABORTED') {
+        throw err
+      }
+    }
   }
 
   createWebSocketConnection() {
     return new Promise((resolve, reject) => {
       // Init the WebSocket connection
-      this.webSocket = new this.options.WebSocketPolyfill(this.url)
-      this.webSocket.binaryType = 'arraybuffer'
-      this.webSocket.onmessage = this.onMessage.bind(this)
-      this.webSocket.onclose = this.onClose.bind(this)
-      this.webSocket.onopen = this.onOpen.bind(this)
-      this.webSocket.onerror = () => {
+      const ws = new this.options.WebSocketPolyfill(this.url)
+      ws.binaryType = 'arraybuffer'
+      ws.onmessage = this.onMessage.bind(this)
+      ws.onclose = this.onClose.bind(this)
+      ws.onopen = this.onOpen.bind(this)
+      ws.onerror = () => {
         reject()
       }
+      this.webSocket = ws
 
       // Reset the status
       this.synced = false
@@ -332,7 +346,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     // No message received in a long time, not even your own
     // Awareness updates, which are updated every 15 seconds.
-    this.webSocket.close()
+    this.webSocket?.close()
   }
 
   forceSync() {
@@ -431,7 +445,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  onOpen(event: OpenEvent) {
+  onOpen(event: Event) {
     this.emit('open', { event })
 
     if (this.status !== WebSocketStatus.Connected) {
@@ -551,6 +565,13 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     clearInterval(this.intervals.connectionChecker)
+
+    removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+
+    // If there is still a connection attempt outstanding then we should resolve
+    // it before calling disconnect, otherwise it will be rejected in the onClose
+    // handler and trigger a retry
+    this.resolveConnectionAttempt()
 
     this.disconnect()
 

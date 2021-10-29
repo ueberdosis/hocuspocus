@@ -26,7 +26,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
     })
   })
@@ -55,7 +54,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
     })
   })
@@ -75,7 +73,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       // token: 'SUPER-SECRET-TOKEN',
       onOpen: () => {
         setTimeout(() => {
@@ -104,7 +101,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onOpen: () => {
         setTimeout(() => {
           assert.deepStrictEqual(server.getMessageLogs(), [])
@@ -137,7 +133,6 @@ context('server/onAuthenticate', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       token: 'SUPER-SECRET-TOKEN',
-      maxAttempts: 1,
       onAuthenticated: () => {
         assert.deepStrictEqual(server.getMessageLogs(), [
           { category: 'Token', direction: 'in', type: 'Auth' },
@@ -171,7 +166,6 @@ context('server/onAuthenticate', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       token: 'SUPER-SECRET-TOKEN',
-      maxAttempts: 1,
       onAuthenticationFailed: () => {
         assert.deepStrictEqual(server.getMessageLogs(), [
           { category: 'Token', direction: 'in', type: 'Auth' },
@@ -212,7 +206,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
     })
   })
@@ -229,7 +222,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
       onConnect: () => {
         client.destroy()
@@ -260,7 +252,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
     })
   })
@@ -284,7 +275,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onClose: () => {
         client.destroy()
         server.destroy()
@@ -318,7 +308,6 @@ context('server/onAuthenticate', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       token: 'SUPER-SECRET-TOKEN',
     })
   })

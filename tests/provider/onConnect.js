@@ -16,7 +16,6 @@ context('provider/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         client.destroy()
         server.destroy()
@@ -34,7 +33,6 @@ context('provider/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
     })
 
     client.on('connect', () => {
@@ -58,7 +56,6 @@ context('provider/onConnect', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      maxAttempts: 1,
       onConnect: () => {
         assert.fail('onConnect must not be executed')
       },

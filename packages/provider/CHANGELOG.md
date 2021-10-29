@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.20](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.19...@hocuspocus/provider@1.0.0-alpha.20) (2021-10-28)
+
+
+### Bug Fixes
+
+* Account for this.webSocket being null ([#235](https://github.com/ueberdosis/hocuspocus/issues/235)) ([b1476b6](https://github.com/ueberdosis/hocuspocus/commit/b1476b60f0eceb83d70c1ded2b3139e4f865a869))
+
+
+
+
+
+# [1.0.0-alpha.19](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.18...@hocuspocus/provider@1.0.0-alpha.19) (2021-10-15)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.18](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.17...@hocuspocus/provider@1.0.0-alpha.18) (2021-10-06)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.17](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.16...@hocuspocus/provider@1.0.0-alpha.17) (2021-10-05)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.15...@hocuspocus/provider@1.0.0-alpha.16) (2021-09-17)
 
 

@@ -4,7 +4,7 @@
 
 ## Introduction
 
-By default, hocuspocus stores documents and the collaboration history in memory only, so everything will be deleted when the server is stopped. It’s probably sufficient for your first experiments, but it’s unlikely that you want this behavior in a production environment.
+By default, Hocuspocus stores documents and the collaboration history in memory only, so everything will be deleted when the server is stopped. It’s probably sufficient for your first experiments, but it’s unlikely that you want this behavior in a production environment.
 
 RocksDB is an incredibly fast key-value storage - a fork of Google's LevelDB - maintained at Facebook which allows multi-threading and backups while the server is running.
 

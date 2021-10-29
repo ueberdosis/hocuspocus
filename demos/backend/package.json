@@ -14,7 +14,7 @@
     "@types/express-ws": "^3.0.0",
     "@types/node": "^16.7.6",
     "express": "^4.17.1",
-    "express-ws": "^4.0.0",
+    "express-ws": "^5.0.2",
     "koa": "^2.13.1",
     "koa-easy-ws": "^1.3.0",
     "yjs": "^13.5.2"

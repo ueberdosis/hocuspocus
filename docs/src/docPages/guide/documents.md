@@ -5,7 +5,7 @@
 ## Documents & room-names
 
 Most Yjs connection providers (including the `y-websocket` provider) use a concept called
-room-names. The client will pass a room-name parameter to hocuspocus which will then be used to
+room-names. The client will pass a room-name parameter to Hocuspocus which will then be used to
 identify the document which is currently being edited. We will call room-name throughout this
 documentation document name.
 
@@ -55,7 +55,7 @@ have you covered: [Check out our webhook extension](/api/extensions/webhook).
 It's **highly recommended** to debounce extensive operations (like API calls) as this hook can be
 fired up to multiple times a second:
 
-You need to serialize the Y-Doc that hocuspocus gives you to something you can actually display in
+You need to serialize the Y-Doc that Hocuspocus gives you to something you can actually display in
 your views. Check out the [transformers section](/guide/transformers) of the guide for more
 information.
 
@@ -67,7 +67,7 @@ import {writeFile} from 'fs'
 
 let debounced
 
-const hocuspocus = Server.configure({
+const Hocuspocus = Server.configure({
   async onChange(data) {
     const save = () => {
       // Convert the y-doc to something you can actually use in your views.
@@ -100,7 +100,7 @@ hocuspocus.listen()
 
 ## Importing documents
 
-If you want to alter the Y-Doc when hocuspocus creates it, you can use the `onCreateDocument` hook
+If you want to alter the Y-Doc when Hocuspocus creates it, you can use the `onCreateDocument` hook
 and apply updates directly to the given document. This way you can load your document from a
 database, an external API or even the file system if they are **not present** in
 your [primary storage](#using-a-primary-storage). For more information on the hook and it's payload
@@ -118,7 +118,7 @@ import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
-const hocuspocus = Server.configure({
+const Hocuspocus = Server.configure({
   async onCreateDocument(data): Doc {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
@@ -175,7 +175,7 @@ const generateSampleProsemirrorJson = (text: string) => {
   }
 }
 
-const hocuspocus = Server.configure({
+const Hocuspocus = Server.configure({
   async onCreateDocument(data) {
 
     // only import things if they are not already set in the primary storage
@@ -220,7 +220,7 @@ const usersWithWriteAccess = [
   'jane', 'john', 'christina',
 ]
 
-const hocuspocus = Server.configure({
+const Hocuspocus = Server.configure({
   async onAuthenticate(data): Doc {
 
     // Example code to check if the current user has write access by a
