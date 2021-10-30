@@ -62,7 +62,7 @@ const provider = new HocuspocusProvider({
 const tasks = ydoc.getArray('tasks')
 
 // Listen for changes
-tasks.observer(() => {
+tasks.observe(() => {
   console.log('tasks were modified')
 })
 
