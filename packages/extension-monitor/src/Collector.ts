@@ -7,7 +7,7 @@ import {
   Configuration,
   onConnectPayload,
   onDisconnectPayload,
-  onCreateDocumentPayload,
+  onLoadDocumentPayload,
   onChangePayload,
 } from '@hocuspocus/server'
 import collect from 'collect.js'
@@ -82,7 +82,7 @@ export class Collector {
     }
   }
 
-  createDocument(data: onCreateDocumentPayload) {
+  createDocument(data: onLoadDocumentPayload) {
     const { documentName, document, socketId } = data
 
     return {

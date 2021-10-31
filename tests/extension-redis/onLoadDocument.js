@@ -10,7 +10,7 @@ const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
 const server = new Hocuspocus()
 
-context('extension-redis/onCreateDocument', () => {
+context('extension-redis/onLoadDocument', () => {
   before(() => {
     flushRedis()
 

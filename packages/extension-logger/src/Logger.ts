@@ -3,7 +3,7 @@ import {
   onChangePayload,
   onConfigurePayload,
   onConnectPayload,
-  onCreateDocumentPayload,
+  onLoadDocumentPayload,
   onDestroyPayload,
   onDisconnectPayload,
   onListenPayload,
@@ -33,8 +33,8 @@ export class Logger implements Extension {
     }
   }
 
-  async onCreateDocument(data: onCreateDocumentPayload) {
-    this.log(`Created document "${data.documentName}"`)
+  async onLoadDocument(data: onLoadDocumentPayload) {
+    this.log(`Loaded document "${data.documentName}"`)
   }
 
   async onChange(data: onChangePayload) {

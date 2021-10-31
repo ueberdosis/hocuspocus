@@ -19,6 +19,8 @@ export const defaultConfiguration = {
   timeout: 30000,
 }
 
+const defaultOnCreateDocument = () => new Promise(r => r(null))
+
 /**
  * Hocuspocus server
  */
@@ -29,7 +31,8 @@ export class Hocuspocus {
     onChange: () => new Promise(r => r(null)),
     onConfigure: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
-    onCreateDocument: () => new Promise(r => r(null)),
+    onCreateDocument: defaultOnCreateDocument,
+    onLoadDocument: () => new Promise(r => r(null)),
     onDestroy: () => new Promise(r => r(null)),
     onDisconnect: () => new Promise(r => r(null)),
     onListen: () => new Promise(r => r(null)),
@@ -54,12 +57,24 @@ export class Hocuspocus {
       ...configuration,
     }
 
+    /**
+     * The `onCreateDocument` hook has been renamed to `onLoadDocument`.
+     * We’ll keep this workaround to support the deprecated hook for a while, but output a warning.
+     */
+    let onLoadDocument
+    if (this.configuration.onCreateDocument !== defaultOnCreateDocument) {
+      console.warn('[hocuspocus warn]: The onCreateDocument hook has been renamed. Use the onLoadDocument hook instead.')
+      onLoadDocument = this.configuration.onCreateDocument
+    } else {
+      onLoadDocument = this.configuration.onLoadDocument
+    }
+
     this.configuration.extensions.push({
       onAuthenticate: this.configuration.onAuthenticate,
       onChange: this.configuration.onChange,
       onConfigure: this.configuration.onConfigure,
       onConnect: this.configuration.onConnect,
-      onCreateDocument: this.configuration.onCreateDocument,
+      onLoadDocument,
       onDestroy: this.configuration.onDestroy,
       onDisconnect: this.configuration.onDisconnect,
       onListen: this.configuration.onListen,
@@ -360,7 +375,7 @@ export class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    await this.hooks('onCreateDocument', hookPayload, (loadedDocument: Doc | undefined) => {
+    await this.hooks('onLoadDocument', hookPayload, (loadedDocument: Doc | undefined) => {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
       // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand

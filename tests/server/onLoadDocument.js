@@ -7,8 +7,8 @@ import { HocuspocusProvider } from '../../packages/provider/src'
 let client
 const ydoc = new Y.Doc()
 
-context('server/onCreateDocument', () => {
-  it('executes the onCreateDocument callback', done => {
+context('server/onLoadDocument', () => {
+  it('still executes the deprecated onCreateDocument callback', done => {
     const server = new Hocuspocus()
 
     server.configure({
@@ -28,11 +28,31 @@ context('server/onCreateDocument', () => {
     })
   })
 
-  it('executes the onCreateDocument callback from an extension', done => {
+  it('executes the onLoadDocument callback', done => {
+    const server = new Hocuspocus()
+
+    server.configure({
+      port: 4000,
+      onLoadDocument() {
+        client.destroy()
+        server.destroy()
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('executes the onLoadDocument callback from an extension', done => {
     const server = new Hocuspocus()
 
     class CustomExtension {
-      onCreateDocument() {
+      onLoadDocument() {
         client.destroy()
         server.destroy()
         done()
@@ -54,7 +74,7 @@ context('server/onCreateDocument', () => {
     })
   })
 
-  it('passes the context and connection to the onCreateDocument callback', done => {
+  it('passes the context and connection to the onLoadDocument callback', done => {
     const server = new Hocuspocus()
 
     const mockContext = {
@@ -67,7 +87,7 @@ context('server/onCreateDocument', () => {
         connection.readOnly = true
         return mockContext
       },
-      onCreateDocument({ context, connection }) {
+      onLoadDocument({ context, connection }) {
         assert.deepStrictEqual(context, mockContext)
         assert.deepStrictEqual(connection, {
           isAuthenticated: false,
@@ -93,7 +113,7 @@ context('server/onCreateDocument', () => {
 
     server.configure({
       port: 4000,
-      async onCreateDocument({ connection }) {
+      async onLoadDocument({ connection }) {
         connection.readOnly = true
       },
     }).listen()
@@ -114,12 +134,12 @@ context('server/onCreateDocument', () => {
     })
   })
 
-  it('creates a new document in the onCreateDocument callback', done => {
+  it('creates a new document in the onLoadDocument callback', done => {
     const server = new Hocuspocus()
 
     server.configure({
       port: 4000,
-      onCreateDocument({ document }) {
+      onLoadDocument({ document }) {
         // delay more accurately simulates a database fetch
         return new Promise(resolve => {
           setTimeout(() => {
@@ -152,7 +172,7 @@ context('server/onCreateDocument', () => {
 
     server.configure({
       port: 4000,
-      onCreateDocument({ document }) {
+      onLoadDocument({ document }) {
         // delay more accurately simulates a database fetch
         return new Promise(resolve => {
           setTimeout(() => {
@@ -192,7 +212,7 @@ context('server/onCreateDocument', () => {
 
     server.configure({
       port: 4000,
-      async onCreateDocument({ instance }) {
+      async onLoadDocument({ instance }) {
         assert.strictEqual(instance, server)
 
         client.destroy()

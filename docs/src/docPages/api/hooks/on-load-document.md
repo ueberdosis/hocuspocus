@@ -1,14 +1,14 @@
-# onCreateDocument
+# onLoadDocument
 
 ## toc
 
 ## Introduction
 
-The `onCreateDocument` hook will be called when a new document is created. A new document will be created if it's not in memory, so it may exist in your application but was not edited since the server started. It should return a Promise. Returning a Y-Doc loads the given document.
+The `onLoadDocument` hook will be called when a new document is created. A new document will be created if it's not in memory, so it may exist in your application but was not edited since the server started. It should return a Promise. Returning a Y-Doc loads the given document.
 
 ## Hook payload
 
-The `data` passed to the `onCreateDocument` hook has the following attributes:
+The `data` passed to the `onLoadDocument` hook has the following attributes:
 
 ```typescript
 import { Doc } from 'yjs'
@@ -41,7 +41,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
 const hocuspocus = Server.configure({
-  async onCreateDocument(data) {
+  async onLoadDocument(data) {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
     // The default field in tiptap is simply called 'default'

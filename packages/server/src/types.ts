@@ -40,7 +40,11 @@ export interface Extension {
   onChange?(data: onChangePayload): Promise<any>,
   onConnect?(data: onConnectPayload): Promise<any>,
   onConfigure?(data: onConfigurePayload): Promise<any>,
-  onCreateDocument?(data: onCreateDocumentPayload): Promise<any>,
+  /**
+   * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
+   */
+  onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
+  onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   onDestroy?(data: onDestroyPayload): Promise<any>,
   onDisconnect?(data: onDisconnectPayload): Promise<any>
   onListen?(data: onListenPayload): Promise<any>,
@@ -83,7 +87,7 @@ export interface onConnectPayload {
   connection: ConnectionConfig
 }
 
-export interface onCreateDocumentPayload {
+export interface onLoadDocumentPayload {
   context: any,
   document: Document,
   documentName: string,

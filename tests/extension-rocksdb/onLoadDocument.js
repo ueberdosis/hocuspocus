@@ -10,7 +10,7 @@ const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
 const server = new Hocuspocus()
 
-context('extension-rocksdb/onCreateDocument', () => {
+context('extension-rocksdb/onLoadDocument', () => {
   before(() => {
     removeDirectory('./database')
 

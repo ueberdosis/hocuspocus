@@ -75,8 +75,8 @@
           link: /api/hooks/on-connect
         - title: onAuthenticate
           link: /api/hooks/on-authenticate
-        - title: onCreateDocument
-          link: /api/hooks/on-create-document
+        - title: onLoadDocument
+          link: /api/hooks/on-load-document
         - title: onChange
           link: /api/hooks/on-change
         - title: onDisconnect
