@@ -302,7 +302,7 @@ context('server/onConnect', () => {
   })
 
   // Fails in CI
-  it.skip('cleans up correctly when client disconnects during onLoadDocument', done => {
+  it('cleans up correctly when client disconnects during onLoadDocument', done => {
     const server = new Hocuspocus()
     let client
 
@@ -331,7 +331,7 @@ context('server/onConnect', () => {
         client.destroy()
         server.destroy()
         done()
-      }, 200)
+      }, 300)
     })
   })
 })
