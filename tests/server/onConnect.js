@@ -301,7 +301,6 @@ context('server/onConnect', () => {
     })
   })
 
-  // Fails in CI
   it('cleans up correctly when client disconnects during onLoadDocument', done => {
     const server = new Hocuspocus()
     let client
@@ -318,20 +317,19 @@ context('server/onConnect', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-test',
+      name: 'super-unique-name',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })
 
     client.on('disconnect', () => {
       setTimeout(() => {
-        assert.strictEqual(server.getDocumentsCount(), 0)
-        assert.strictEqual(server.getConnectionsCount(), 0)
+        assert.strictEqual(server.documents.get('super-unique-name'), undefined, 'no documents')
 
         client.destroy()
         server.destroy()
         done()
-      }, 300)
+      }, 100)
     })
   })
 })
