@@ -37,7 +37,7 @@
     "node-static": "^0.7.11",
     "public-ip": "^4.0.3",
     "ws": "^8.2.3",
-    "yjs": "^13.4.12"
+    "yjs": "^13.5.0"
   },
   "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
 }

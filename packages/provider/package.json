@@ -26,7 +26,7 @@
     "@lifeomic/attempt": "^3.0.0",
     "lib0": "^0.2.42",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.8"
+    "yjs": "^13.5.0"
   },
   "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6",
   "publishConfig": {
