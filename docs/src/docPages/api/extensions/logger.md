@@ -20,7 +20,8 @@ yarn add @hocuspocus/extension-logger
 
 ## Configuration
 
-The logger has no configuration options (yet).
+### Prefix
+You can prepend all logging messages with a configured string.
 
 ```js
 import { Server } from '@hocuspocus/server'
@@ -28,7 +29,9 @@ import { Logger } from '@hocuspocus/extension-logger'
 
 const server = Server.configure({
   extensions: [
-    new Logger(),
+    new Logger({
+      prefix: 'hocuspocus-fra1-01',
+    }),
   ],
 })
 
