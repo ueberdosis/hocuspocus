@@ -60,7 +60,7 @@ context('server/onDisconnect', () => {
     })
   })
 
-  it('passes the context to the onCreateDocument callback', done => {
+  it('passes the context to the onLoadDocument callback', done => {
     const server = new Hocuspocus()
 
     const mockContext = {

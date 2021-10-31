@@ -3,7 +3,7 @@ import {
   Extension,
   onChangePayload,
   onConnectPayload,
-  onCreateDocumentPayload,
+  onLoadDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
 import { Doc } from 'yjs'
@@ -128,9 +128,9 @@ export class Webhook implements Extension {
   }
 
   /**
-   * onCreateDocument hook
+   * onLoadDocument hook
    */
-  async onCreateDocument(data: onCreateDocumentPayload) {
+  async onLoadDocument(data: onLoadDocumentPayload) {
     if (!this.configuration.events.includes(Events.onCreate)) {
       return
     }

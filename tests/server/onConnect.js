@@ -139,8 +139,8 @@ context('server/onConnect', () => {
         throw new Error()
       },
       // MUST NOT BE CALLED
-      onCreateDocument() {
-        assert.fail('WARNING: When onConnect fails onCreateDocument must not be called.')
+      onLoadDocument() {
+        assert.fail('WARNING: When onConnect fails onLoadDocument must not be called.')
       },
     }).listen()
 
@@ -302,13 +302,13 @@ context('server/onConnect', () => {
   })
 
   // Fails in CI
-  it.skip('cleans up correctly when client disconnects during onCreateDocument', done => {
+  it.skip('cleans up correctly when client disconnects during onLoadDocument', done => {
     const server = new Hocuspocus()
     let client
 
     server.configure({
       port: 4000,
-      onCreateDocument: async () => {
+      onLoadDocument: async () => {
         client.disconnect()
 
         // pretent we loaded data from async source

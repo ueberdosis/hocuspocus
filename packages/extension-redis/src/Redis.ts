@@ -2,7 +2,7 @@ import { RedisPersistence } from 'y-redis'
 import {
   Extension,
   onConnectPayload,
-  onCreateDocumentPayload,
+  onLoadDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
 
@@ -28,9 +28,9 @@ export class Redis implements Extension {
   }
 
   /*
-   * onCreateDocument hook
+   * onLoadDocument hook
    */
-  async onCreateDocument(data: onCreateDocumentPayload) {
+  async onLoadDocument(data: onLoadDocumentPayload) {
     if (!this.persistence) {
       return
     }

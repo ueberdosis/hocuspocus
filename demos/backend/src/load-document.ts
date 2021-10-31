@@ -1,7 +1,7 @@
 import { Logger } from '../../../packages/extension-logger/src'
 import { RocksDB } from '../../../packages/extension-rocksdb/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
-import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
+import { Server, onLoadDocumentPayload } from '../../../packages/server/src'
 
 const getProseMirrorJSON = (text: string) => {
   return {
@@ -34,7 +34,7 @@ const server = Server.configure({
     }, 1337))
   },
 
-  async onCreateDocument(data: onCreateDocumentPayload) {
+  async onLoadDocument(data: onLoadDocumentPayload) {
     if (data.document.isEmpty('default')) {
       const defaultField = TiptapTransformer.toYdoc(
         getProseMirrorJSON('What is love?'),

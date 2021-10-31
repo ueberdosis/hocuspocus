@@ -1,4 +1,4 @@
-import { Extension, onCreateDocumentPayload } from '@hocuspocus/server'
+import { Extension, onLoadDocumentPayload } from '@hocuspocus/server'
 
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import { LeveldbPersistence } from 'y-leveldb'
@@ -39,9 +39,9 @@ export class RocksDB implements Extension {
   }
 
   /**
-   * onCreateDocument hook
+   * onLoadDocument hook
    */
-  async onCreateDocument(data: onCreateDocumentPayload): Promise<any> {
+  async onLoadDocument(data: onLoadDocumentPayload): Promise<any> {
     // Get from disk …
     const persistedDocument = await this.provider.getYDoc(data.documentName)
     applyUpdate(data.document, encodeStateAsUpdate(persistedDocument))

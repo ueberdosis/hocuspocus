@@ -100,13 +100,13 @@ hocuspocus.listen()
 
 ## Importing documents
 
-If you want to alter the Y-Doc when Hocuspocus creates it, you can use the `onCreateDocument` hook
+If you want to alter the Y-Doc when Hocuspocus creates it, you can use the `onLoadDocument` hook
 and apply updates directly to the given document. This way you can load your document from a
 database, an external API or even the file system if they are **not present** in
 your [primary storage](#using-a-primary-storage). For more information on the hook and it's payload
 checkout it's [API section](/api/on-create-document).
 
-`onCreateDocument` expects a Y-Doc to be returned. Check out
+`onLoadDocument` expects a Y-Doc to be returned. Check out
 the [transformers section](/guide/transformers) of the guide for more information.
 
 ```typescript
@@ -119,7 +119,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
 const Hocuspocus = Server.configure({
-  async onCreateDocument(data): Doc {
+  async onLoadDocument(data): Doc {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
     // The default field in tiptap is simply called "default"
@@ -176,7 +176,7 @@ const generateSampleProsemirrorJson = (text: string) => {
 }
 
 const Hocuspocus = Server.configure({
-  async onCreateDocument(data) {
+  async onLoadDocument(data) {
 
     // only import things if they are not already set in the primary storage
     if (data.document.isEmpty('default')) {

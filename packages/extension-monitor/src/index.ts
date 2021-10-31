@@ -4,7 +4,7 @@ import {
   onChangePayload,
   onConfigurePayload,
   onConnectPayload,
-  onCreateDocumentPayload,
+  onLoadDocumentPayload,
   onDestroyPayload,
   onDisconnectPayload,
   onListenPayload,
@@ -149,7 +149,7 @@ export class Monitor implements Extension {
     await this.storage.add('connectionLog', this.collector.disconnect(data))
   }
 
-  async onCreateDocument(data: onCreateDocumentPayload) {
+  async onLoadDocument(data: onLoadDocumentPayload) {
     await this.storage.add('documentLog', this.collector.createDocument(data))
   }
 

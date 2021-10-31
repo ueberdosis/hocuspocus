@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "start": "yarn --cwd ./docs start",
-    "demo:create-document": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/create-document.ts\"",
+    "demo:load-document": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/load-document.ts\"",
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/express.ts\"",
     "demo:koa": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/koa.ts\"",
     "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/monitor.ts\" \"yarn --cwd ./packages/extension-monitor start\"",
