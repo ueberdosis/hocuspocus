@@ -2,25 +2,22 @@ import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
-import { Redis } from '../../packages/extension-redis/src'
+import { RocksDB } from '../../packages/extension-rocksdb/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
-import flushRedis from '../utils/flushRedis'
+import removeDirectory from '../utils/removeDirectory'
 
 const ydoc = new Y.Doc()
 const anotherYdoc = new Y.Doc()
 const server = new Hocuspocus()
 
-context('redis/onCreateDocument', () => {
+context('extension-rocksdb/onCreateDocument', () => {
   before(() => {
-    flushRedis()
+    removeDirectory('./database')
 
     server.configure({
       port: 4000,
       extensions: [
-        new Redis({
-          host: process.env.REDIS_HOST || '127.0.0.1',
-          port: process.env.REDIS_PORT || 6379,
-        }),
+        new RocksDB(),
       ],
     }).listen()
   })
@@ -28,7 +25,7 @@ context('redis/onCreateDocument', () => {
   after(() => {
     server.destroy()
 
-    flushRedis()
+    removeDirectory('./database')
   })
 
   it('document is persisted', done => {
@@ -37,8 +34,6 @@ context('redis/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
-      broadcast: false,
-      // foo.0 = 'bar'
       onSynced: () => {
         const valueBefore = ydoc.getArray('foo').get(0)
         assert.strictEqual(valueBefore, undefined)
@@ -57,7 +52,6 @@ context('redis/onCreateDocument', () => {
       name: 'hocuspocus-test',
       document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
-      // foo.0 === 'bar'
       onSynced: () => {
         const value = anotherYdoc.getArray('foo').get(0)
         assert.strictEqual(value, 'bar')

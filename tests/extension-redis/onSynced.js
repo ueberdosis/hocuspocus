@@ -10,7 +10,7 @@ const server = new Hocuspocus()
 
 // Checks that data isn’t corrupted when restored from Redis
 // https://github.com/ueberdosis/hocuspocus/issues/224#issuecomment-944550576
-context('redis/onSynced', () => {
+context('extension-redis/onSynced', () => {
   before(() => {
     flushRedis()
 
