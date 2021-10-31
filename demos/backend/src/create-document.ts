@@ -1,5 +1,5 @@
-import { Logger } from '../../../packages/logger/src'
-import { RocksDB } from '../../../packages/rocksdb/src'
+import { Logger } from '../../../packages/extension-logger/src'
+import { RocksDB } from '../../../packages/extension-rocksdb/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Server, onCreateDocumentPayload } from '../../../packages/server/src'
 

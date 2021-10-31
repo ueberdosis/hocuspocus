@@ -12,7 +12,7 @@ TODO
 import Koa from 'koa'
 import websocket from 'koa-easy-ws'
 import { Server } from '../../../packages/server/src'
-import { Logger } from '../../../packages/logger/src'
+import { Logger } from '../../../packages/extension-logger/src'
 
 // Configure hocuspocus
 const server = Server.configure({

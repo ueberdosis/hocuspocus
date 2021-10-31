@@ -12,7 +12,7 @@
   "type": "module",
   "main": "dist/hocuspocus-monitor.esm.js",
   "module": "dist/hocuspocus-monitor.esm.js",
-  "types": "dist/packages/monitor/src/index.d.ts",
+  "types": "dist/packages/extension-monitor/src/index.d.ts",
   "exports": {
     "import": "./dist/hocuspocus-monitor.esm.js",
     "require": "./dist/hocuspocus-monitor.cjs"

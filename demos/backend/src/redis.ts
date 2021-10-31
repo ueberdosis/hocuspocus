@@ -1,6 +1,6 @@
 import { Server } from '../../../packages/server/src'
-import { Logger } from '../../../packages/logger/src'
-import { Redis } from '../../../packages/redis/src'
+import { Logger } from '../../../packages/extension-logger/src'
+import { Redis } from '../../../packages/extension-redis/src'
 
 const server = Server.configure({
   port: 1234,

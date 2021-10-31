@@ -1,4 +1,4 @@
-import { Logger } from '../../../packages/logger/src'
+import { Logger } from '../../../packages/extension-logger/src'
 import { Server } from '../../../packages/server/src'
 
 const server = Server.configure({

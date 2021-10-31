@@ -2,7 +2,7 @@ import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { Hocuspocus } from '../../packages/server/src'
-import { Redis } from '../../packages/redis/src'
+import { Redis } from '../../packages/extension-redis/src'
 import { HocuspocusProvider } from '../../packages/provider/src'
 import flushRedis from '../utils/flushRedis'
 

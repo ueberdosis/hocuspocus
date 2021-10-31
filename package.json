@@ -4,7 +4,7 @@
     "demos/*",
     "docs",
     "packages/*",
-    "packages/monitor/dashboard"
+    "packages/extension-monitor/dashboard"
   ],
   "browserslist": [
     "defaults",
@@ -17,7 +17,7 @@
     "demo:create-document": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/create-document.ts\"",
     "demo:express": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/express.ts\"",
     "demo:koa": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/koa.ts\"",
-    "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/monitor.ts\" \"yarn --cwd ./packages/monitor start\"",
+    "demo:monitor": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/monitor.ts\" \"yarn --cwd ./packages/extension-monitor start\"",
     "demo:minimal": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/minimal.ts\"",
     "demo:slow": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/slow.ts\"",
     "demo:redis": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/redis.ts\"",
@@ -27,7 +27,7 @@
     "test": "node --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
     "test:watch": "nodemon --quiet --watch . --exec 'yarn test || true' --ext 'ts,js'",
     "build:docs": "yarn --cwd ./docs build",
-    "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/monitor build",
+    "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/extension-monitor build",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release": "yarn lint && yarn test && yarn build:packages && lerna publish --no-private",
     "reset": "yarn clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && yarn install"

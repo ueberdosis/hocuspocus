@@ -2,7 +2,7 @@ import {
   createServer, IncomingMessage, ServerResponse, Server as HTTPServer,
 } from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { Logger } from '../../../packages/logger/src'
+import { Logger } from '../../../packages/extension-logger/src'
 import { Server } from '../../../packages/server/src'
 import { TiptapTransformer } from '../../../packages/transformer/src'
 import { Events, Webhook } from '../../../packages/webhook/src'
