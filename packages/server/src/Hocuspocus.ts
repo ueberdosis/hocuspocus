@@ -419,6 +419,7 @@ export class Hocuspocus {
         })
         .finally(() => {
           if (document.getConnectionsCount() <= 0) {
+            document.destroy()
             this.documents.delete(document.name)
           }
         })
