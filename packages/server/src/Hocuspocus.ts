@@ -413,15 +413,20 @@ export class Hocuspocus {
         requestParameters: Hocuspocus.getParameters(request),
       }
 
+      // Remove the document from the map immediately before the hooks are called
+      // as these may take some time to resolve (eg persist to database). If a
+      // new connection were to come in during that time it would rely on the
+      // document in the map that we later remove.
+      if (document.getConnectionsCount() <= 0) {
+        this.documents.delete(document.name)
+      }
+
       this.hooks('onDisconnect', hookPayload)
         .catch(e => {
           throw e
         })
         .finally(() => {
-          if (document.getConnectionsCount() <= 0) {
-            document.destroy()
-            this.documents.delete(document.name)
-          }
+          document.destroy()
         })
     })
 
