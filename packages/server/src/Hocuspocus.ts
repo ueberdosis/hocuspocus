@@ -426,7 +426,9 @@ export class Hocuspocus {
           throw e
         })
         .finally(() => {
-          document.destroy()
+          if (document.getConnectionsCount() <= 0) {
+            document.destroy()
+          }
         })
     })
 
