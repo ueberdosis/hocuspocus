@@ -13,11 +13,7 @@ hocuspocus doesn't care how you structure your data, so you need to transform yo
 We already built a few easy to use transformers for you. Add the `@hocupocus/transformer` package:
 
 ```bash
-# with npm
 npm install @hocuspocus/transformer
-
-# with Yarn
-yarn add @hocuspocus/transformer
 ```
 
 … and import them:

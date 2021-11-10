@@ -15,11 +15,7 @@ With this extension, documents and the collaboration history can be easily store
 Install the RocksDB package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-rocksdb
-
-# with Yarn
-yarn add @hocuspocus/extension-rocksdb
 ```
 
 ## Configuration

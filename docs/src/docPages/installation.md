@@ -4,11 +4,7 @@
 You can install other packages later, let’s start with a basic version for now:
 
 ```bash
-# with npm
 npm install @hocuspocus/server
-
-# with Yarn
-yarn add @hocuspocus/server
 ```
 
 ## 2. Start your server

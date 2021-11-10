@@ -11,11 +11,7 @@ The webhook extension allows you to connect Hocuspocus to your existing applicat
 Install the Webhook package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-webhook
-
-# with Yarn
-yarn add @hocuspocus/extension-webhook
 ```
 
 ## Configuration

@@ -9,11 +9,7 @@ You’ve got your Hocuspocus server running? Time to take the Hocuspocus provide
 Let’s install Y.js and the Hocuspocus provider first:
 
 ```bash
-# with npm
 npm install yjs @hocuspocus/provider
-
-# with Yarn
-yarn add yjs @hocuspocus/provider
 ```
 
 ## Usage

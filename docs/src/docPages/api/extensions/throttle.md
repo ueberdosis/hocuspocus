@@ -13,11 +13,7 @@ Make sure to register it **before** any other extensions!
 Install the Throttle package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-throttle
-
-# with Yarn
-yarn add @hocuspocus/extension-throttle
 ```
 
 ## Configuration

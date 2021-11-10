@@ -11,11 +11,7 @@ Hocuspocus doesn't log anything to stdout/stderr. Thanks to this simple extensio
 Install the Logger package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-logger
-
-# with Yarn
-yarn add @hocuspocus/extension-logger
 ```
 
 ## Configuration

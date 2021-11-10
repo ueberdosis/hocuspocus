@@ -14,11 +14,7 @@ The Monitor extension adds a live updating dashboard featuring metrics and logs 
 Install the Monitor package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-monitor
-
-# with Yarn
-yarn add @hocuspocus/extension-monitor
 ```
 
 ## Configuration

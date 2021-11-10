@@ -15,11 +15,7 @@ hocuspocus can be scaled horizontally using the Redis extension. You can spawn m
 Install the Redis package with:
 
 ```bash
-# with npm
 npm install @hocuspocus/extension-redis
-
-# with Yarn
-yarn add @hocuspocus/extension-redis
 ```
 
 ## Configuration
