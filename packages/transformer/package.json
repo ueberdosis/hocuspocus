@@ -14,8 +14,13 @@
   "module": "dist/hocuspocus-transformer.esm.js",
   "types": "dist/packages/transformer/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-transformer.esm.js",
-    "require": "./dist/hocuspocus-transformer.cjs"
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-transformer.esm.js",
+      "require": "./dist/hocuspocus-transformer.cjs"
+    }
   },
   "files": [
     "src",

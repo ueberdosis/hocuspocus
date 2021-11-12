@@ -14,8 +14,13 @@
   "module": "dist/hocuspocus-monitor.esm.js",
   "types": "dist/packages/extension-monitor/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-monitor.esm.js",
-    "require": "./dist/hocuspocus-monitor.cjs"
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-monitor.esm.js",
+      "require": "./dist/hocuspocus-monitor.cjs"
+    }
   },
   "files": [
     "dashboard",

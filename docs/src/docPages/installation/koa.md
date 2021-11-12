@@ -11,8 +11,8 @@ TODO
 ```js
 import Koa from 'koa'
 import websocket from 'koa-easy-ws'
-import { Server } from '../../../packages/server/src'
-import { Logger } from '../../../packages/extension-logger/src'
+import { Server } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
 
 // Configure hocuspocus
 const server = Server.configure({
