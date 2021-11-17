@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 import assert from 'assert'
-import { Hocuspocus } from '../../packages/server/src'
+import { Hocuspocus } from '@hocuspocus/server'
 
 const server = new Hocuspocus()
 

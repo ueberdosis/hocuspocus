@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 context('provider/onSynced', () => {
   it('onSynced callback is executed', done => {

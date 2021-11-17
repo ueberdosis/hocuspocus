@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { TiptapTransformer } from '../../packages/transformer/src'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 
 context('transformer/TiptapTransformer', () => {
   it('transforms JSON to Y.Doc', () => {

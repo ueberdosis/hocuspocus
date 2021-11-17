@@ -24,7 +24,7 @@
     "demo:webhook": "concurrently --kill-others \"yarn --cwd ./demos/frontend start\" \"yarn --cwd ./demos/backend dev src/webhook.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
-    "test": "node --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
+    "test": "node --conditions=development --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
     "test:watch": "nodemon --quiet --watch . --exec 'yarn test || true' --ext 'ts,js'",
     "build:docs": "yarn --cwd ./docs build",
     "build:packages": "yarn clean:packages && rollup -c && yarn --cwd ./packages/extension-monitor build",
