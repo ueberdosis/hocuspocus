@@ -50,11 +50,11 @@
     "chai": "^4.3.0",
     "concurrently": "^6.1.0",
     "eslint": "^8.0.1",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-html": "^6.1.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-mocha": "^9.0.0",
-    "eslint-plugin-vue": "^7.6.0",
+    "eslint-plugin-vue": "^8.0.3",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",
     "mocha": "^9.1.1",
@@ -64,9 +64,9 @@
     "rollup": "^2.39.0",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
-    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup-plugin-typescript2": "^0.31.0",
     "ts-node": "^10.2.1",
-    "typescript": "^4.1.5"
+    "typescript": "^4.5.2"
   },
   "dependencies": {
     "redis": "^3.1.2"
