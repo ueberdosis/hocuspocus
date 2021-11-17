@@ -13,9 +13,8 @@
         # - title: Laravel
         #   link: /installation/laravel
         #   type: draft
-
-    - title: Changelog
-      link: /changelog
+    # - title: Changelog
+    #   link: /changelog
     - title: About the project
       link: /sponsor
       type: sponsor
