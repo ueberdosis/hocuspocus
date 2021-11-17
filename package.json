@@ -2,7 +2,6 @@
   "private": true,
   "workspaces": [
     "demos/*",
-    "docs",
     "packages/*",
     "packages/extension-monitor/dashboard"
   ],

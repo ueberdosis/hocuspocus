@@ -1,5 +1,0 @@
-dist/
-.temp/
-.cache/
-static/images/*
-!static/images/.gitkeep
