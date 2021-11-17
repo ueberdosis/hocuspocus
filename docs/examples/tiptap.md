@@ -44,10 +44,12 @@ new Editor({
     StarterKit.configure({
       history: false,
     }),
-    Collaboration.configure({ provider }),
+    Collaboration.configure({
+      document: ydoc,
+    }),
     CollaborationCursor.configure({
       provider,
-      user: { name: 'John Doe', '#ffcc00' },
+      user: { name: 'John Doe', color: '#ffcc00' },
     }),
   ],
 })
