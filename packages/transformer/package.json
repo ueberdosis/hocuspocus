@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/transformer",
-  "version": "1.0.0-alpha.14",
+  "version": "1.0.0-alpha.15",
   "description": "hocuspocus transformation utilities",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -14,8 +14,13 @@
   "module": "dist/hocuspocus-transformer.esm.js",
   "types": "dist/packages/transformer/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-transformer.esm.js",
-    "require": "./dist/hocuspocus-transformer.cjs"
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-transformer.esm.js",
+      "require": "./dist/hocuspocus-transformer.cjs"
+    }
   },
   "files": [
     "src",
@@ -25,7 +30,7 @@
     "@tiptap/core": "^2.0.0-beta.6",
     "prosemirror-model": "^1.13.3",
     "y-prosemirror": "^1.0.7",
-    "yjs": "^13.5.3"
+    "yjs": "^13.5.0"
   },
   "gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
 }

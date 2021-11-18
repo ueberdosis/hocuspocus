@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/provider",
-  "version": "1.0.0-alpha.20",
+  "version": "1.0.0-alpha.21",
   "description": "hocuspocus provider",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -15,8 +15,13 @@
   "module": "dist/hocuspocus-provider.esm.js",
   "types": "dist/packages/provider/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-provider.esm.js",
-    "require": "./dist/hocuspocus-provider.cjs"
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-provider.esm.js",
+      "require": "./dist/hocuspocus-provider.cjs"
+    }
   },
   "files": [
     "src",
@@ -26,7 +31,7 @@
     "@lifeomic/attempt": "^3.0.0",
     "lib0": "^0.2.42",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.8"
+    "yjs": "^13.5.0"
   },
   "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6",
   "publishConfig": {

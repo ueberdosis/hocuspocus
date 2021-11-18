@@ -1,4 +1,4 @@
-import { Hocuspocus } from '../../packages/server/src'
+import { Hocuspocus } from '@hocuspocus/server'
 
 context('server/onListen', () => {
   it('executes the onListen callback', done => {

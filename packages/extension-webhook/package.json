@@ -1,0 +1,37 @@
+{
+  "name": "@hocuspocus/extension-webhook",
+  "version": "1.0.0-alpha.42",
+  "description": "hocuspocus webhook extension",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "webhook",
+    "api",
+    "rest",
+    "yjs"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-webhook.esm.js",
+  "module": "dist/hocuspocus-webhook.esm.js",
+  "types": "dist/packages/webhook/src/index.d.ts",
+  "exports": {
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-webhook.esm.js",
+      "require": "./dist/hocuspocus-webhook.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.78",
+    "@hocuspocus/transformer": "^1.0.0-alpha.15",
+    "axios": "^0.23.0"
+  },
+  "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
+}

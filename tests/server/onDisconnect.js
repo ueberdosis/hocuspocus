@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 let client
 const ydoc = new Y.Doc()
@@ -60,7 +60,7 @@ context('server/onDisconnect', () => {
     })
   })
 
-  it('passes the context to the onCreateDocument callback', done => {
+  it('passes the context to the onLoadDocument callback', done => {
     const server = new Hocuspocus()
 
     const mockContext = {

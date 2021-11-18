@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 let client
 
@@ -87,7 +87,7 @@ context('server/onChange', () => {
     })
   })
 
-  it('onChange callback is not called after onCreateDocument', done => {
+  it('onChange callback is not called after onLoadDocument', done => {
     const ydoc = new Y.Doc()
     const server = new Hocuspocus()
     let triggered = false
@@ -97,7 +97,7 @@ context('server/onChange', () => {
       async onChange(data) {
         triggered = true
       },
-      async onCreateDocument({ document }) {
+      async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
         return document
       },

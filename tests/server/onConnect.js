@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 let client
 const ydoc = new Y.Doc()
@@ -139,8 +139,8 @@ context('server/onConnect', () => {
         throw new Error()
       },
       // MUST NOT BE CALLED
-      onCreateDocument() {
-        assert.fail('WARNING: When onConnect fails onCreateDocument must not be called.')
+      onLoadDocument() {
+        assert.fail('WARNING: When onConnect fails onLoadDocument must not be called.')
       },
     }).listen()
 
@@ -301,13 +301,13 @@ context('server/onConnect', () => {
     })
   })
 
-  it('cleans up correctly when client disconnects during onCreateDocument', done => {
+  it('cleans up correctly when client disconnects during onLoadDocument', done => {
     const server = new Hocuspocus()
     let client
 
     server.configure({
       port: 4000,
-      onCreateDocument: async () => {
+      onLoadDocument: async () => {
         client.disconnect()
 
         // pretent we loaded data from async source
@@ -317,20 +317,19 @@ context('server/onConnect', () => {
 
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
-      name: 'hocuspocus-test',
+      name: 'super-unique-name',
       document: ydoc,
       WebSocketPolyfill: WebSocket,
     })
 
     client.on('disconnect', () => {
       setTimeout(() => {
-        assert.strictEqual(server.getDocumentsCount(), 0)
-        assert.strictEqual(server.getConnectionsCount(), 0)
+        assert.strictEqual(server.documents.get('super-unique-name'), undefined, 'no documents')
 
         client.destroy()
         server.destroy()
         done()
-      }, 200)
+      }, 100)
     })
   })
 })

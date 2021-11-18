@@ -1,0 +1,33 @@
+{
+  "name": "@hocuspocus/extension-throttle",
+  "version": "1.0.0-alpha.34",
+  "description": "hocuspocus throttle extension",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "throttle",
+    "yjs"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-throttle.esm.js",
+  "module": "dist/hocuspocus-throttle.esm.js",
+  "types": "dist/packages/extension-throttle/src/index.d.ts",
+  "exports": {
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-throttle.esm.js",
+      "require": "./dist/hocuspocus-throttle.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.78"
+  },
+  "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
+}

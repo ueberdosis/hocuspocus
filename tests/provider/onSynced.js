@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 context('provider/onSynced', () => {
   it('onSynced callback is executed', done => {
@@ -81,7 +81,7 @@ context('provider/onSynced', () => {
     server.configure({
       port: 4000,
 
-      async onCreateDocument({ document }) {
+      async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
         return document
@@ -112,7 +112,7 @@ context('provider/onSynced', () => {
     server.configure({
       port: 4000,
 
-      async onCreateDocument({ document }) {
+      async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
         return document
@@ -162,7 +162,7 @@ context('provider/onSynced', () => {
     server.configure({
       port: 4000,
 
-      async onCreateDocument({ document }) {
+      async onLoadDocument({ document }) {
         // sleep for 100ms
         await new Promise(resolve => setTimeout(resolve, 100))
 

@@ -1,8 +1,8 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 let client
 const ydoc = new Y.Doc()
@@ -180,7 +180,7 @@ context('server/onAuthenticate', () => {
     })
   })
 
-  it('passes context from onAuthenticate to onCreateDocument', done => {
+  it('passes context from onAuthenticate to onLoadDocument', done => {
     const server = new Hocuspocus()
 
     const mockContext = {
@@ -192,7 +192,7 @@ context('server/onAuthenticate', () => {
       onAuthenticate() {
         return mockContext
       },
-      onCreateDocument({ context }) {
+      onLoadDocument({ context }) {
         assert.deepStrictEqual(context, mockContext)
 
         client.destroy()
@@ -265,8 +265,8 @@ context('server/onAuthenticate', () => {
         throw new Error()
       },
       // MUST NOT BE CALLED
-      async onCreateDocument() {
-        console.log('WARNING: When onAuthenticate fails onCreateDocument must not be called.')
+      async onLoadDocument() {
+        console.log('WARNING: When onAuthenticate fails onLoadDocument must not be called.')
       },
     }).listen()
 
@@ -295,7 +295,7 @@ context('server/onAuthenticate', () => {
           throw new Error()
         }
       },
-      async onCreateDocument() {
+      async onLoadDocument() {
         client.destroy()
         server.destroy()
 

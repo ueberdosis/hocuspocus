@@ -59,14 +59,14 @@ async function build(commandLineArgs) {
       output: [
         {
           name,
-          file: path.join(basePath, exports.require),
+          file: path.join(basePath, exports.default.require),
           format: 'cjs',
           sourcemap: true,
           exports: 'auto',
         },
         {
           name,
-          file: path.join(basePath, exports.import),
+          file: path.join(basePath, exports.default.import),
           format: 'es',
           sourcemap: true,
         },
