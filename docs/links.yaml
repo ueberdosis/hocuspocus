@@ -101,6 +101,9 @@
         - title: Postgres
           link: /api/extensions/postgres
           type: draft
+        - title: PubSub
+          link: /api/extensions/pubsub
+          type: draft
         - title: Redis
           link: /api/extensions/redis
         - title: RocksDB
