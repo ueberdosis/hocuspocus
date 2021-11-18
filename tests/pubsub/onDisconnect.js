@@ -24,7 +24,8 @@ context('pubsub/onDisconnect', () => {
         new PubSub({
           ...opts,
           instanceName: 'server',
-          log: (...args) => console.log('server:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('server:', ...args),
           onPersist: doc => {
             assert.strictEqual(ydoc.getArray('foo').get(0), doc.getArray('foo').get(0))
 

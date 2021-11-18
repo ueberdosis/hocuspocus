@@ -21,7 +21,8 @@ context('pubsub/onAwarenessChange', () => {
         new PubSub({
           ...redisConfiguration,
           instanceName: 'server',
-          log: (...args) => console.log('server:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('server:', ...args),
         }),
       ],
     }).listen()
@@ -32,7 +33,8 @@ context('pubsub/onAwarenessChange', () => {
         new PubSub({
           ...redisConfiguration,
           instanceName: 'anotherServer',
-          log: (...args) => console.log('anotherServer:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('anotherServer:', ...args),
         }),
       ],
     }).listen()
@@ -68,13 +70,16 @@ context('pubsub/onAwarenessChange', () => {
           WebSocketPolyfill: WebSocket,
           broadcast: false,
           onAwarenessChange: ({ states }) => {
-            // assert.strictEqual(states.length, 2)
+            assert.strictEqual(states.length, 2)
 
-            // const state = states.find(s => s.clientId === client.document.clientID)
-            // assert.strictEqual(state.client, 'First client')
+            const state = states.find(s => s.clientId === client.document.clientID)
+            assert.strictEqual(state.client, 'First client')
 
-            anotherClient.destroy()
+            // Make sure to not trigger `onAwarenessChange` again
+            anotherClient.removeAllListeners()
+
             client.destroy()
+            anotherClient.destroy()
             done()
           },
         })
@@ -96,8 +101,11 @@ context('pubsub/onAwarenessChange', () => {
       onAwarenessChange: ({ states }) => {
         assert.strictEqual(states.length, 2)
 
-        const state = states.find(s => s.clientId === anotherClient.document.clientID)
-        assert.strictEqual(state.client, 'Second client')
+        // const state = states.find(s => s.clientId === anotherClient.document.clientID)
+        // assert.strictEqual(state.client, 'Second client')
+
+        // Make sure to not trigger `onAwarenessChange` again
+        client.removeAllListeners()
 
         client.destroy()
         anotherClient.destroy()

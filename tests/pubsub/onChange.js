@@ -21,7 +21,8 @@ context('pubsub/onChange', () => {
         new PubSub({
           ...opts,
           instanceName: 'server',
-          log: (...args) => console.log('server:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('server:', ...args),
         }),
       ],
     }).listen()
@@ -32,8 +33,8 @@ context('pubsub/onChange', () => {
         new PubSub({
           ...opts,
           instanceName: 'server1',
-          log: (...args) => console.log('server1:', ...args),
-
+          log: () => {},
+          // log: (...args) => console.log('server1:', ...args),
         }),
       ],
     }).listen()

@@ -34,7 +34,8 @@ context('pubsub/onPersist', () => {
       extensions: [
         new PubSub({
           ...opts,
-          log: (...args) => console.log('server:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('server:', ...args),
           instanceName: 'server',
           persistWait,
           onPersist,
@@ -47,7 +48,8 @@ context('pubsub/onPersist', () => {
       extensions: [
         new PubSub({
           ...opts,
-          log: (...args) => console.log('server1:', ...args),
+          log: () => {},
+          // log: (...args) => console.log('server1:', ...args),
           instanceName: 'server1',
           persistWait,
           onPersist,
