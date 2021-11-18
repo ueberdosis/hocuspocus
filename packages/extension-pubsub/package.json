@@ -15,8 +15,13 @@
   "module": "dist/hocuspocus-pubsub.esm.js",
   "types": "dist/packages/pubsub/src/index.d.ts",
   "exports": {
-    "import": "./dist/hocuspocus-pubsub.esm.js",
-    "require": "./dist/hocuspocus-pubsub.cjs"
+    "development": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-pubsub.esm.js",
+      "require": "./dist/hocuspocus-pubsub.cjs"
+    }
   },
   "files": [
     "src",
