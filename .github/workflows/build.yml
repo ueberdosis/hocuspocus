@@ -35,16 +35,16 @@ jobs:
         path: |
           **/node_modules
           ~/.cache/ms-playwright
-        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: yarn install
+      run: npm install
 
     - name: Fix code style linting errors
       id: lint-fix
-      run: yarn lint:fix
+      run: npm run lint:fix
       continue-on-error: true
 
     - name: Commit fixed linting errors
@@ -55,7 +55,7 @@ jobs:
 
     - name: Lint code
       id: lint
-      run: yarn lint
+      run: npm run lint
 
   test:
     runs-on: ubuntu-latest
@@ -90,18 +90,18 @@ jobs:
         path: |
           **/node_modules
           ~/.cache/ms-playwright
-        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: yarn install
+      run: npm install
 
     - uses: microsoft/playwright-github-action@v1
 
     - name: Run tests
       id: test
-      run: yarn test
+      run: npm run test
       env:
         REDIS_HOST: localhost
         REDIS_PORT: ${{ job.services.redis.ports[6379] }}
@@ -139,13 +139,13 @@ jobs:
         path: |
           **/node_modules
           ~/.cache/ms-playwright
-        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: yarn install
+      run: npm install
 
     - name: Try to build the packages
       id: build-packages
-      run: yarn build:packages
+      run: npm run build:packages
