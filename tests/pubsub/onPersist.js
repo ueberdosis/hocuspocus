@@ -1,9 +1,9 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '../../packages/server/src'
-import { PubSub } from '../../packages/pubsub/src'
-import { HocuspocusProvider } from '../../packages/provider/src'
+import { Hocuspocus } from '@hocuspocus/server'
+import { PubSub } from '@hocuspocus/extension-pubsub'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const server = new Hocuspocus()
 const server1 = new Hocuspocus()
