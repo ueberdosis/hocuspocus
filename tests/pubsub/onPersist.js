@@ -9,12 +9,12 @@ const server = new Hocuspocus()
 const server1 = new Hocuspocus()
 const persistWait = 1000
 
-const opts = {
+const redisConfiguration = {
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onPersist', () => {
+context.only('pubsub/onPersist', () => {
   after(() => {
     server.destroy()
     server1.destroy()
@@ -25,6 +25,7 @@ context('pubsub/onPersist', () => {
     const ydoc1 = new Y.Doc()
 
     const onPersist = document => {
+      console.log('ON PERSIST')
       assert.strictEqual(document.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
@@ -33,7 +34,7 @@ context('pubsub/onPersist', () => {
       port: 4000,
       extensions: [
         new PubSub({
-          ...opts,
+          ...redisConfiguration,
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
           instanceName: 'server',
@@ -47,7 +48,7 @@ context('pubsub/onPersist', () => {
       port: 4001,
       extensions: [
         new PubSub({
-          ...opts,
+          ...redisConfiguration,
           log: () => {},
           // log: (...args) => console.log('server1:', ...args),
           instanceName: 'server1',

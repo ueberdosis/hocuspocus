@@ -14,19 +14,37 @@ import {
 import { MessageReceiver } from './MessageReceiver'
 
 export interface Configuration {
+  /**
+   * Redis port
+   */
   port: number,
+  /**
+   * Redis host
+   */
   host: string,
-  /** Options passed directly to Redis constructor */
+  /**
+   * Options passed directly to Redis constructor
+   */
   redisOpts?: Redis.RedisOptions,
-  /** Unique instance name. If none is provided the os hostname is used */
+  /**
+   * Unique instance name. If none is provided the os hostname is used
+   */
   instanceName: string,
-  /** Namespace for redis keys, if none is provided 'hocuspocus' is used */
+  /**
+   * Namespace for redis keys, if none is provided 'hocuspocus' is used
+   */
   namespace: string,
-  /** The period of time to wait between calling onPersist, you should choose a balance between reliability and load */
+  /**
+   * The period of time to wait between calling onPersist, you should choose a balance between reliability and load
+   */
   persistWait: number,
-  /** onPersist callback will be called debounced persistWait seconds after the last document update */
+  /**
+   * onPersist callback will be called debounced persistWait seconds after the last document update
+   */
   onPersist?: (ydoc: Y.Doc) => Promise<void> | void,
-  /** A log function, if none is provided output will go to console */
+  /**
+   * A log function, if none is provided output will go to console
+   */
   log: (...args: any[]) => void,
 }
 
@@ -133,9 +151,11 @@ export class PubSub implements Extension {
     // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (err, lock) => {
-      if (err || !lock) {
+    console.log('try to aquire lock')
+    this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (error, lock) => {
+      if (error || !lock) {
         // could not acquire lock, expected behavior.
+        console.info('could not acquire lock, expected behavior.')
         return
       }
 
@@ -148,9 +168,9 @@ export class PubSub implements Extension {
         }
       }
 
-      lock.unlock(err => {
+      lock.unlock(error => {
         // we weren't able to reach redis; the lock will expire after ttl
-        console.error(err)
+        console.error("we weren't able to reach redis; the lock will expire after ttl:", error)
       })
     })
   }
