@@ -14,7 +14,7 @@ const redisConfiguration = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context.only('pubsub/onPersist', () => {
+context('pubsub/onPersist', () => {
   after(() => {
     server.destroy()
     server1.destroy()
@@ -25,7 +25,6 @@ context.only('pubsub/onPersist', () => {
     const ydoc1 = new Y.Doc()
 
     const onPersist = document => {
-      console.log('ON PERSIST')
       assert.strictEqual(document.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()

@@ -136,11 +136,12 @@ export class PubSub implements Extension {
     this.documents.delete(documentName)
 
     // on final connection close sub channel
-    this.sub.punsubscribe(this.subKey(documentName), err => {
-      if (err) {
-        console.error(err)
+    this.sub.punsubscribe(this.subKey(documentName), error => {
+      if (error) {
+        console.error(error)
         return
       }
+
       this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
     })
   }
@@ -151,11 +152,10 @@ export class PubSub implements Extension {
     // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    console.log('try to aquire lock')
+    console.log('Trying to aquire lock …')
     this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (error, lock) => {
       if (error || !lock) {
         // could not acquire lock, expected behavior.
-        console.info('could not acquire lock, expected behavior.')
         return
       }
 
@@ -163,15 +163,19 @@ export class PubSub implements Extension {
       const updatedTime = result ? Date.parse(result) : undefined
 
       if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
-        console.log('Let’s persist! updatedTime:', updatedTime, 'updatedTime < Date.now():', updatedTime < Date.now(), 'this.configuration.persistWait:', this.configuration.persistWait)
+        console.log('Let’s persist …')
+        console.log('updatedTime:', updatedTime, 'this.configuration.persistWait:', this.configuration.persistWait, 'updatedTime < Date.now() - this.configuration.persistWait:', updatedTime < Date.now() - this.configuration.persistWait)
         if (this.configuration.onPersist) {
           this.configuration.onPersist(document)
         }
       }
 
       lock.unlock(error => {
-        // we weren't able to reach redis; the lock will expire after ttl
-        console.error("we weren't able to reach redis; the lock will expire after ttl:", error)
+        console.error(`I’m not able to reach Redis. The lock will expire after ${ttl}ms.`)
+
+        if (error) {
+          console.error(` - Error: ${error}`)
+        }
       })
     })
   }
