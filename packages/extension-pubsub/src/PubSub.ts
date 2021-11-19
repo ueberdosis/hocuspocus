@@ -163,6 +163,7 @@ export class PubSub implements Extension {
       const updatedTime = result ? Date.parse(result) : undefined
 
       if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
+        console.log('Let’s persist! updatedTime:', updatedTime, 'updatedTime < Date.now():', updatedTime < Date.now(), 'this.configuration.persistWait:', this.configuration.persistWait)
         if (this.configuration.onPersist) {
           this.configuration.onPersist(document)
         }
