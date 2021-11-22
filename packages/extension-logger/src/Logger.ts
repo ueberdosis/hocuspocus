@@ -125,7 +125,7 @@ export class Logger implements Extension {
 
   async onListen(data: onListenPayload) {
     if (this.configuration.onListen) {
-      this.logRawText(`Ready.`)
+      this.logRawText('Ready.')
       this.logRawText()
     }
   }
@@ -142,7 +142,7 @@ export class Logger implements Extension {
     }
 
     if (this.configuration.prefix) {
-      console.warn(`[hocuspocus warn] The Logger 'prefix' is deprecated. Pass a 'name' to the Hocuspocus configuration instead.`)
+      console.warn('[hocuspocus warn] The Logger \'prefix\' is deprecated. Pass a \'name\' to the Hocuspocus configuration instead.')
     }
 
     this.name = data.instance.configuration.name
@@ -158,8 +158,8 @@ export class Logger implements Extension {
     const extensions = instance.configuration?.extensions.map(extension => {
       return extension.constructor?.name
     })
-    .filter(name => name)
-    .filter(name => name !== 'Object')
+      .filter(name => name)
+      .filter(name => name !== 'Object')
 
     if (!extensions.length) {
       return
@@ -176,7 +176,7 @@ export class Logger implements Extension {
     this.logRawText()
   }
 
-  private logRawText(message: string = '') {+
+  private logRawText(message = '') {
     this.configuration.log(message)
   }
 

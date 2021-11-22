@@ -34,6 +34,11 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
+        'no-unreachable-loop': 'off',
+        'no-promise-executor-return': 'off',
+        'default-param-last': 'off',
+        'vue/multi-word-component-names': 'off',
+
         'no-alert': 'off',
         'no-shadow': 'off',
         'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -51,13 +56,13 @@ module.exports = {
         'max-len': 'off',
         'vue/one-component-per-file': 'off',
         'vue/this-in-template': ['error', 'never'],
-        'vue/max-attributes-per-line': ['error', {
-          singleline: 3,
-          multiline: {
-            max: 1,
-            allowFirstLine: false,
-          },
-        }],
+        // 'vue/max-attributes-per-line': ['error', {
+        //   singleline: 3,
+        //   multiline: {
+        //     max: 1,
+        //     allowFirstLine: false,
+        //   },
+        // }],
         'vue/singleline-html-element-content-newline': 'off',
         'no-param-reassign': 'off',
         'import/prefer-default-export': 'off',

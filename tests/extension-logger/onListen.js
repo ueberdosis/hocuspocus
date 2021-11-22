@@ -3,7 +3,7 @@ import { Logger } from '@hocuspocus/extension-logger'
 import sinon from 'sinon'
 import assert from 'assert'
 
-const fakeLogger = (message) => {
+const fakeLogger = message => {
 }
 
 context('extension-logger/onListen', () => {
@@ -17,7 +17,7 @@ context('extension-logger/onListen', () => {
       async onListen() {
         server.destroy()
 
-        assert(spy.callCount > 1, `Expected the Logger to log something, but didn’t receive anything.`)
+        assert(spy.callCount > 1, 'Expected the Logger to log something, but didn’t receive anything.')
         assert(spy.callCount === 11, `Expected it to log 11 times, but actually logged ${spy.callCount} times`)
 
         done()
@@ -87,5 +87,3 @@ context('extension-logger/onListen', () => {
     }).listen()
   })
 })
-
-
