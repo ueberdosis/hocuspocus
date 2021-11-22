@@ -15,6 +15,7 @@ import packageJson from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
 
 export const defaultConfiguration = {
+  name: null,
   port: 80,
   timeout: 30000,
 }

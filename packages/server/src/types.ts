@@ -54,6 +54,10 @@ export interface Extension {
 
 export interface Configuration extends Extension {
   /**
+   * A name for the instance, used for logging.
+   */
+  name: string | null,
+  /**
    * A list of hocuspocus extenions.
    */
   extensions: Array<Extension>,

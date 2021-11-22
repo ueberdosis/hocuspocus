@@ -3,11 +3,9 @@
 ## toc
 
 ## Introduction
-
-Hocuspocus doesn't log anything to stdout/stderr. Thanks to this simple extension it will.
+Hocuspocus doesn’t log anything. Thanks to this simple extension it will.
 
 ## Installation
-
 Install the Logger package with:
 
 ```bash
@@ -15,9 +13,25 @@ npm install @hocuspocus/extension-logger
 ```
 
 ## Configuration
-
-### Prefix
+### Instance name
 You can prepend all logging messages with a configured string.
+
+```js
+import { Server } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
+
+const server = Server.configure({
+  name: 'hocuspocus-fra1-01',
+  extensions: [
+    new Logger(),
+  ],
+})
+
+server.listen()
+```
+
+### Disable messages
+You can disable logging for specific messages.
 
 ```js
 import { Server } from '@hocuspocus/server'
@@ -26,7 +40,36 @@ import { Logger } from '@hocuspocus/extension-logger'
 const server = Server.configure({
   extensions: [
     new Logger({
-      prefix: 'hocuspocus-fra1-01',
+      onLoadDocument: false,
+      onChange: false,
+      onConnect: false,
+      onDisconnect: false,
+      onUpgrade: false,
+      onRequest: false,
+      onListen: false,
+      onDestroy: false,
+      onConfigure: false,
+    }),
+  ],
+})
+
+server.listen()
+```
+
+### Custom logger
+You can even pass a custom function to log messages.
+
+```js
+import { Server } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
+
+const server = Server.configure({
+  extensions: [
+    new Logger({
+      log: (message) => {
+        // do something custom here
+        console.log(message)
+      }
     }),
   ],
 })
