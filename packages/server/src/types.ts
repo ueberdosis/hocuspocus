@@ -52,6 +52,22 @@ export interface Extension {
   onUpgrade?(data: onUpgradePayload): Promise<any>,
 }
 
+export type Hook =
+  'onAuthenticate' |
+  'onChange' |
+  'onConnect' |
+  'onConfigure' |
+  /**
+   * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
+   */
+  'onCreateDocument' |
+  'onLoadDocument' |
+  'onDestroy' |
+  'onDisconnect' |
+  'onListen' |
+  'onRequest' |
+  'onUpgrade'
+
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.

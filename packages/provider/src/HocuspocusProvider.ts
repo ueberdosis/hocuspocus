@@ -275,11 +275,11 @@ export class HocuspocusProvider extends EventEmitter {
           }
         },
       })
-    } catch (err: any) {
-      // If we aborted the connection attempt then don't throw an error
+    } catch (error: any) {
+      // If we aborted the connection attempt then don’t throw an error
       // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
-      if (err.code !== 'ATTEMPT_ABORTED') {
-        throw err
+      if (error && error.code !== 'ATTEMPT_ABORTED') {
+        throw error
       }
     }
   }
@@ -475,8 +475,6 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.startSync()
-
-    this.resolveConnectionAttempt()
   }
 
   startSync() {
@@ -504,6 +502,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
+    this.resolveConnectionAttempt()
+
     this.lastMessageReceived = time.getUnixTime()
 
     const message = new IncomingMessage(event.data)
