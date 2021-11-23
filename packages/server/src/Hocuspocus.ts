@@ -459,8 +459,7 @@ export class Hocuspocus {
       // run through all the configured hooks
       .forEach(extension => {
         chain = chain
-          // @ts-ignore
-          .then(() => extension[name](payload))
+          .then(() => extension[name]?.(payload))
           .catch(error => {
             // make sure to log error messages
             if (error.message) {
