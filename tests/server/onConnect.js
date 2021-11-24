@@ -29,6 +29,30 @@ context('server/onConnect', () => {
     })
   })
 
+  it('refuses connection when an error is thrown', done => {
+    const server = new Hocuspocus()
+
+    server.configure({
+      port: 4000,
+      async onConnect() {
+        throw new Error()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onDisconnect() {
+        client.destroy()
+        server.destroy()
+
+        done()
+      },
+    })
+  })
+
   it('executes the onConnect callback from an extension', done => {
     const server = new Hocuspocus()
 
