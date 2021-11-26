@@ -16,7 +16,7 @@
   "module": "dist/hocuspocus-webhook.esm.js",
   "types": "dist/packages/webhook/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {

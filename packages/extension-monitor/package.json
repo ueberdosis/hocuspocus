@@ -14,7 +14,7 @@
   "module": "dist/hocuspocus-monitor.esm.js",
   "types": "dist/packages/extension-monitor/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {

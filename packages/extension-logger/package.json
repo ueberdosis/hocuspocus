@@ -15,7 +15,7 @@
   "module": "dist/hocuspocus-logger.esm.js",
   "types": "dist/packages/extension-logger/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {

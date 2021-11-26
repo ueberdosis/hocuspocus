@@ -14,7 +14,7 @@
   "module": "dist/hocuspocus-throttle.esm.js",
   "types": "dist/packages/extension-throttle/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {
