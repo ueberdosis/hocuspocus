@@ -1,9 +1,9 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { readSyncMessage, messageYjsSyncStep2 } from 'y-protocols/sync'
+import { readAuthMessage } from '@hocuspocus/common'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
-import { readAuthMessage } from '@hocuspocus/common'
 import { OutgoingMessage } from './OutgoingMessage'
 
 export class MessageReceiver {
