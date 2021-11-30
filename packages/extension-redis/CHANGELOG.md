@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.46](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.45...@hocuspocus/extension-redis@1.0.0-alpha.46) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
 # [1.0.0-alpha.45](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.44...@hocuspocus/extension-redis@1.0.0-alpha.45) (2021-11-30)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.82](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.81...@hocuspocus/extension-monitor@1.0.0-alpha.82) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
 # [1.0.0-alpha.81](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.80...@hocuspocus/extension-monitor@1.0.0-alpha.81) (2021-11-30)
 
 **Note:** Version bump only for package @hocuspocus/extension-monitor
