@@ -28,7 +28,7 @@
     "build:docs": "npm --prefix ./docs run build",
     "build:packages": "npm run clean:packages && rollup -c && npm --prefix ./packages/extension-monitor run build",
     "clean:packages": "rm -Rf ./packages/*/dist",
-    "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private --access public",
+    "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private",
     "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && npm run install"
   },
   "devDependencies": {
