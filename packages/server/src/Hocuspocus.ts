@@ -444,9 +444,8 @@ export class Hocuspocus {
   /**
    * Run the given hook on all configured extensions
    * Runs the given callback after each hook
-   * @private
    */
-  private hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
+  hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
     // create a new `thenable` chain
