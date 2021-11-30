@@ -463,7 +463,7 @@ export class Hocuspocus {
           .then(() => extension[name]?.(payload))
           .catch(error => {
             // make sure to log error messages
-            if (error.message) {
+            if (error && error.message) {
               console.error(`[${name}]`, error.message)
             }
 

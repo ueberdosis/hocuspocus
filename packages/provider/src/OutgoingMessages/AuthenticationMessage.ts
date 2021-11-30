@@ -1,5 +1,5 @@
 import { writeVarUint } from 'lib0/encoding'
-import { writeAuthentication } from '../../../../shared/protocols/auth'
+import { writeAuthentication } from '@hocuspocus/common'
 import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
