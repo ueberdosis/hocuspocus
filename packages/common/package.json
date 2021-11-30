@@ -1,0 +1,27 @@
+{
+  "name": "@hocuspocus/common",
+  "description": "shared code for multiple Hocuspocus packages",
+  "version": "1.0.0-alpha.0",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-common.esm.js",
+  "module": "dist/hocuspocus-common.esm.js",
+  "types": "dist/packages/common/src/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-common.esm.js",
+      "require": "./dist/hocuspocus-common.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ]
+}

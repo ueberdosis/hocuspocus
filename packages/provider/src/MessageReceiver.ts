@@ -3,7 +3,7 @@ import { readSyncMessage, messageYjsSyncStep2 } from 'y-protocols/sync'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
-import { readAuthMessage } from '../../../shared/protocols/auth'
+import { readAuthMessage } from '@hocuspocus/common'
 import { OutgoingMessage } from './OutgoingMessage'
 
 export class MessageReceiver {
