@@ -46,6 +46,7 @@ export interface Extension {
    */
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
+  onLoadedDocument?(data: onLoadDocumentPayload): Promise<any>,
   onDestroy?(data: onDestroyPayload): Promise<any>,
   onDisconnect?(data: onDisconnectPayload): Promise<any>
   onListen?(data: onListenPayload): Promise<any>,
@@ -62,6 +63,7 @@ export type Hook =
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   'onCreateDocument' |
+  'onLoadedDocument' |
   'onLoadDocument' |
   'onDestroy' |
   'onDisconnect' |
@@ -119,7 +121,7 @@ export interface onLoadDocumentPayload {
   connection: ConnectionConfig
 }
 
-export interface onCreatedDocumentPayload {
+export interface onLoadedDocumentPayload {
   context: any,
   document: Document,
   documentName: string,

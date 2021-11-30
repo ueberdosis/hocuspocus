@@ -8,7 +8,7 @@ import {
   OutgoingMessage,
   Document,
   Extension,
-  onCreatedDocumentPayload,
+  onLoadedDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
 import { MessageReceiver } from './MessageReceiver'
@@ -88,10 +88,10 @@ export class PubSub implements Extension {
     )
   }
 
-  public async onCreatedDocument({
+  public async onLoadedDocument({
     documentName,
     document,
-  }: onCreatedDocumentPayload) {
+  }: onLoadedDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
