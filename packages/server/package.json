@@ -35,7 +35,8 @@
     "lib0": "^0.2.41",
     "uuid": "^8.3.2",
     "ws": "^8.2.3",
-    "yjs": "^13.5.0"
+    "yjs": "^13.5.0",
+    "@hocuspocus/common": "^1.0.0-alpha.0"
   },
   "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
 }
