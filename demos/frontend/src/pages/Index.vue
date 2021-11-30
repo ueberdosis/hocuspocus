@@ -4,20 +4,29 @@
       Text editing
     </h1>
 
-    <StatusBar v-if="provider" :provider="provider" />
+    <StatusBar
+      v-if="provider"
+      :provider="provider"
+    />
 
     <h2>
       Editor
     </h2>
     <div v-if="editor">
-      <editor-content :editor="editor" class="editor" />
+      <editor-content
+        :editor="editor"
+        class="editor"
+      />
     </div>
 
     <h2>
       Another editor
     </h2>
     <div v-if="anotherEditor">
-      <editor-content :editor="anotherEditor" class="editor" />
+      <editor-content
+        :editor="anotherEditor"
+        class="editor"
+      />
     </div>
 
     <h2>Y.js document</h2>
@@ -75,28 +84,29 @@ export default {
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
+      // maxAttempts: 1,
       // token: 'my-access-token',
-      onConnect: () => {
-        console.log('connected')
-      },
-      onAuthenticated: () => {
-        console.log('authenticated')
-      },
-      onAuthenticationFailed: () => {
-        console.log('authentication failed')
-      },
-      onMessage: ({ event, message }) => {
-        console.log(`[message] ◀️ ${message.name}`, event)
-      },
-      onOutgoingMessage: ({ message }) => {
-        console.info(`[message] ▶️ ${message.name} (${message.description})`)
-      },
-      onClose: ({ event }) => {
-        console.log(event.type, { event })
-      },
-      onDisconnect: ({ event }) => {
-        console.log(event.type, event.code, event.reason, { event })
-      },
+      // onConnect: () => {
+      //   console.log('connected')
+      // },
+      // onAuthenticated: () => {
+      //   console.log('authenticated')
+      // },
+      // onAuthenticationFailed: () => {
+      //   console.log('authentication failed')
+      // },
+      // onMessage: ({ event, message }) => {
+      //   console.log(`[message] ◀️ ${message.name}`, event)
+      // },
+      // onOutgoingMessage: ({ message }) => {
+      //   console.info(`[message] ▶️ ${message.name} (${message.description})`)
+      // },
+      // onClose: ({ event }) => {
+      //   console.log(event.type, { event })
+      // },
+      // onDisconnect: ({ event }) => {
+      //   console.log(event.type, event.code, event.reason, { event })
+      // },
     })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)

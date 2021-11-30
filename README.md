@@ -48,7 +48,7 @@ For help, discussion about best practices, or any other conversation:
   <tr>
     <td align="center">
       <a href="https://ueberdosis.io/">
-        <img src="https://unavatar.io/ueberdosis.io" width="100"><br>
+        <img src="https://unavatar.io/github/ueberdosis" width="100"><br>
         <strong>überdosis</strong>
       </a>
     </td>
@@ -86,6 +86,12 @@ For help, discussion about best practices, or any other conversation:
       <a href="https://github.com/brickdoc">
         <img src="https://unavatar.io/github/brickdoc" width="100"><br>
         <strong>Brickdoc</strong>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://www.sanalabs.com/">
+        <img src="https://unavatar.io/github/sanalabs" width="100"><br>
+        <strong>Sana</strong>
       </a>
     </td>
   </tr>

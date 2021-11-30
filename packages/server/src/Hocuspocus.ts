@@ -5,7 +5,7 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import {
-  MessageType, Configuration, ConnectionConfig, WsReadyStates,
+  MessageType, Configuration, ConnectionConfig, WsReadyStates, Hook,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -15,6 +15,7 @@ import packageJson from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
 
 export const defaultConfiguration = {
+  name: null,
   port: 80,
   timeout: 30000,
 }
@@ -318,14 +319,10 @@ export class Hocuspocus {
       context = { ...context, ...contextAdditions }
     })
       .then(handleNewConnection(queueIncomingMessageListener))
-      .catch(error => {
+      .catch(() => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
         incoming.off('message', queueIncomingMessageListener)
-
-        if (error) {
-          throw error
-        }
       })
   }
 
@@ -449,28 +446,34 @@ export class Hocuspocus {
   /**
    * Run the given hook on all configured extensions
    * Runs the given callback after each hook
-   * @private
    */
-  private hooks(name: string, hookPayload: any, callback: Function | null = null): Promise<any> {
+  hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
+    // create a new `thenable` chain
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve
     let chain = Promise.resolve()
 
-    for (let i = 0; i < extensions.length; i += 1) {
-      // @ts-ignore
-      chain = chain.then(() => (extensions[i][name] ? extensions[i][name](hookPayload) : null))
+    extensions
+      // get me all extensions which have the given hook
+      .filter(extension => typeof extension[name] === 'function')
+      // run through all the configured hooks
+      .forEach(extension => {
+        chain = chain
+          .then(() => extension[name]?.(payload))
+          .catch(error => {
+            // make sure to log error messages
+            if (error.message) {
+              console.error(`[${name}]`, error.message)
+            }
 
-      if (callback) {
-        chain = chain.then((...args: any[]) => callback(...args))
-      }
-    }
+            throw error
+          })
 
-    chain.catch(error => {
-      if (error?.message) {
-        // TODO: Move to Logger extension?
-        console.log(`[${name}]`, error.message)
-      }
-    })
+        if (callback) {
+          chain = chain.then((...args: any[]) => callback(...args))
+        }
+      })
 
     return chain
   }

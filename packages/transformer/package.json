@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/transformer",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.17",
   "description": "hocuspocus transformation utilities",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -14,7 +14,7 @@
   "module": "dist/hocuspocus-transformer.esm.js",
   "types": "dist/packages/transformer/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {

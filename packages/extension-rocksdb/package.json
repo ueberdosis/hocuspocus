@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-rocksdb",
   "description": "hocuspocus persistence driver for RocksDB",
-  "version": "1.0.0-alpha.79",
+  "version": "1.0.0-alpha.82",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -14,7 +14,7 @@
   "module": "dist/hocuspocus-rocksdb.esm.js",
   "types": "dist/packages/extension-rocksdb/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {
@@ -27,7 +27,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.78",
+    "@hocuspocus/server": "^1.0.0-alpha.81",
     "@types/encoding-down": "^5.0.0",
     "@types/levelup": "^4.3.0",
     "@types/rocksdb": "^3.0.0",

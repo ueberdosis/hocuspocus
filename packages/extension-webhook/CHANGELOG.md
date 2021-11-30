@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.45](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-webhook@1.0.0-alpha.44...@hocuspocus/extension-webhook@1.0.0-alpha.45) (2021-11-26)
+
+**Note:** Version bump only for package @hocuspocus/extension-webhook
+
+
+
+
+
+# [1.0.0-alpha.44](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-webhook@1.0.0-alpha.43...@hocuspocus/extension-webhook@1.0.0-alpha.44) (2021-11-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-webhook
+
+
+
+
+
+# [1.0.0-alpha.43](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-webhook@1.0.0-alpha.42...@hocuspocus/extension-webhook@1.0.0-alpha.43) (2021-11-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-webhook
+
+
+
+
+
 # [1.0.0-alpha.42](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-webhook@1.0.0-alpha.41...@hocuspocus/extension-webhook@1.0.0-alpha.42) (2021-11-10)
 
 **Note:** Version bump only for package @hocuspocus/extension-webhook

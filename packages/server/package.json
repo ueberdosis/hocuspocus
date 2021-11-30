@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/server",
   "description": "plug & play collaboration backend",
-  "version": "1.0.0-alpha.78",
+  "version": "1.0.0-alpha.81",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -15,7 +15,7 @@
   "module": "dist/hocuspocus-server.esm.js",
   "types": "dist/packages/server/src/index.d.ts",
   "exports": {
-    "development": {
+    "source": {
       "import": "./src"
     },
     "default": {
