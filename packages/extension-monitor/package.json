@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-monitor",
   "description": "hocuspocus monitoring",
-  "version": "1.0.0-alpha.83",
+  "version": "1.0.0-alpha.84",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -32,7 +32,7 @@
     "build": "yarn --cwd dashboard build"
   },
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.84",
+    "@hocuspocus/server": "^1.0.0-alpha.85",
     "@types/node-os-utils": "^1.2.0",
     "@types/node-static": "^0.7.6",
     "bufferutil": "^4.0.3",
