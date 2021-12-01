@@ -7,7 +7,7 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 let client
 const ydoc = new Y.Doc()
 
-context.only('server/getDocumentName', () => {
+context('server/getDocumentName', () => {
   it('prefixes the document name', done => {
     const server = new Hocuspocus()
 
@@ -49,6 +49,43 @@ context.only('server/getDocumentName', () => {
         )
 
         return `${requestParameters.get('prefix')}-${documentNameFromRequest}`
+      },
+      async onConnect({ documentName }) {
+        assert.strictEqual(documentName, 'prefix-hocuspocus-test')
+
+        client.destroy()
+        server.destroy()
+
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      parameters: {
+        prefix: 'prefix',
+      },
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+  })
+
+  it('prefixes the document name with an async function', done => {
+    const server = new Hocuspocus()
+
+    server.configure({
+      port: 4000,
+      async getDocumentName({ request, requestParameters }) {
+        const prefix = await new Promise(resolve => setTimeout(() => {
+          return resolve('prefix')
+        }, 50))
+
+        const documentNameFromRequest = decodeURI(
+          request.url?.slice(1)?.split('?')[0] || '',
+        )
+
+        return `${prefix}-${documentNameFromRequest}`
       },
       async onConnect({ documentName }) {
         assert.strictEqual(documentName, 'prefix-hocuspocus-test')
