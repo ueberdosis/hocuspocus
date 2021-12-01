@@ -88,7 +88,11 @@ export interface Configuration extends Extension {
   /**
    * Function which returns the (customized) document name based on the request
    */
-  getDocumentName?(data: { documentName: string, request: IncomingMessage, requestParameters: URLSearchParams }): string,
+  getDocumentName?(data: {
+    documentName: string,
+    request: IncomingMessage,
+    requestParameters: URLSearchParams,
+  }): string | Promise<string>,
 }
 
 export interface onAuthenticatePayload {

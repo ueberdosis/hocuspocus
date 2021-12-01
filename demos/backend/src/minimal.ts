@@ -6,6 +6,9 @@ const server = Server.configure({
   extensions: [
     new Logger(),
   ],
+  // async getDocumentName({ documentName, requestParameters }) {
+  //   return `${documentName}-${requestParameters.get('prefix')}`
+  // },
 
   // async onAuthenticate(data) {
   //   if (data.token !== 'my-access-token') {
