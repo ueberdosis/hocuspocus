@@ -85,6 +85,10 @@ export interface Configuration extends Extension {
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
   timeout: number,
+  /**
+   * Function which returns the (customized) document name based on the request
+   */
+  getDocumentName?(data: { documentName: string, request: IncomingMessage, requestParameters: URLSearchParams }): string,
 }
 
 export interface onAuthenticatePayload {
