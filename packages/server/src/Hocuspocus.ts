@@ -104,8 +104,9 @@ export class Hocuspocus {
    */
   async listen(): Promise<void> {
     const webSocketServer = new WebSocketServer({ noServer: true })
-    webSocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
-      this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
+
+    webSocketServer.on('connection', async (incoming: WebSocket, request: IncomingMessage) => {
+      this.handleConnection(incoming, request, await this.getDocumentNameFromRequest(request))
     })
 
     const server = createServer((request, response) => {
@@ -489,10 +490,18 @@ export class Hocuspocus {
    * Get document name by the given request
    * @private
    */
-  private static getDocumentName(request: IncomingMessage): string {
-    return decodeURI(
+  private async getDocumentNameFromRequest(request: IncomingMessage): Promise<string> {
+    const documentName = decodeURI(
       request.url?.slice(1)?.split('?')[0] || '',
     )
+
+    if (!this.configuration.getDocumentName) {
+      return documentName
+    }
+
+    const requestParameters = Hocuspocus.getParameters(request)
+
+    return this.configuration.getDocumentName({ documentName, request, requestParameters })
   }
 
   enableDebugging() {
