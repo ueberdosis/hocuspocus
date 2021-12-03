@@ -84,7 +84,7 @@ export default {
     //   name: 'hocuspocus-demo',
     // })
 
-    this.provider = new HocuspocusCloudProvider({
+    this.provider = new HocuspocusProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       // maxAttempts: 1,
