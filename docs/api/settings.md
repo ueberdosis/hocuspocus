@@ -1,6 +1,8 @@
-# Settings
+---
+tableOfContents: true
+---
 
-## toc
+# Settings
 
 ## Introduction
 There’s only two settings to pass for now: A custom port and a connection timeout. Most things are controlled through [hooks](/api/hooks).

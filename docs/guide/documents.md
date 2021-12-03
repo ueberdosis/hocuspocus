@@ -1,6 +1,8 @@
-# Working with Documents
+---
+tableOfContents: true
+---
 
-## toc
+# Working with Documents
 
 ## Documents & room-names
 

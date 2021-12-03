@@ -1,6 +1,8 @@
-# Configuration
+---
+tableOfContents: true
+---
 
-## toc
+# Configuration
 
 ## Introduction
 Pass a single object with all your custom settings to the provider and you’re good to go.

@@ -1,6 +1,8 @@
-# onChange
+---
+tableOfContents: true
+---
 
-## toc
+# onChange
 
 ## Introduction
 

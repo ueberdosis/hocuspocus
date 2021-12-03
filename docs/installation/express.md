@@ -1,6 +1,8 @@
-# Framework integration
+---
+tableOfContents: true
+---
 
-## toc
+# Framework integration
 
 ## Introduction
 

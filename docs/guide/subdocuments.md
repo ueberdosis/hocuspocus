@@ -1,6 +1,8 @@
-# Nested documents
+---
+tableOfContents: true
+---
 
-## toc
+# Nested documents
 
 ## Introduction
 

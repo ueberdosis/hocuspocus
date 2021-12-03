@@ -1,6 +1,8 @@
-# onLoadDocument
+---
+tableOfContents: true
+---
 
-## toc
+# onLoadDocument
 
 ## Introduction
 

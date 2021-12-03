@@ -1,6 +1,8 @@
-# Awareness
+---
+tableOfContents: true
+---
 
-## toc
+# Awareness
 
 ## Introduction
 You can sync information about all present users through the [Awareness API](/provider/awareness). You are completely free to share whatever you like, for example a name, a color, the cursor position, or even a position a 3D system – do it!

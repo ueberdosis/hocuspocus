@@ -1,6 +1,8 @@
-# Logger
+---
+tableOfContents: true
+---
 
-## toc
+# Logger
 
 ## Introduction
 Hocuspocus doesn’t log anything. Thanks to this simple extension it will.

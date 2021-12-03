@@ -1,6 +1,8 @@
-# onDestroy
+---
+tableOfContents: true
+---
 
-## toc
+# onDestroy
 
 ## Introduction
 

@@ -1,6 +1,8 @@
-# Redis
+---
+tableOfContents: true
+---
 
-## toc
+# Redis
 
 ## Introduction
 

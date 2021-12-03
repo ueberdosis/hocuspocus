@@ -1,6 +1,8 @@
-# onAuthenticate
+---
+tableOfContents: true
+---
 
-## toc
+# onAuthenticate
 
 ## Introduction
 The `onAuthenticate` hook will be called when the server receives an authentication request from the client provider. It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.

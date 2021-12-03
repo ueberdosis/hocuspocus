@@ -1,6 +1,8 @@
-# Configuration
+---
+tableOfContents: true
+---
 
-## toc
+# Configuration
 
 ## Introduction
 

@@ -1,6 +1,8 @@
-# onDisconnect
+---
+tableOfContents: true
+---
 
-## toc
+# onDisconnect
 
 ## Introduction
 

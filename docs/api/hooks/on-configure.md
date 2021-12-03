@@ -1,6 +1,8 @@
-# onConfigure
+---
+tableOfContents: true
+---
 
-## toc
+# onConfigure
 
 ## Introduction
 The `onConfigure` hook is called after the server was configured using the [configure](/api/methods) method. It should return a Promise.

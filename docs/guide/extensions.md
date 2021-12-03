@@ -1,6 +1,8 @@
-# Extensions
+---
+tableOfContents: true
+---
 
-## toc
+# Extensions
 
 ## Introduction
 

@@ -1,6 +1,8 @@
-# Transformations
+---
+tableOfContents: true
+---
 
-## toc
+# Transformations
 
 ## What is a Y-Doc?
 

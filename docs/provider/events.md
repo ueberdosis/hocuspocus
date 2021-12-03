@@ -1,6 +1,8 @@
-# Events
+---
+tableOfContents: true
+---
 
-## toc
+# Events
 
 ## Introduction
 Events are a great way to react to different states, for example when the provider has successfully connected. You can choose to bind event listeners on initialization or later, that’s up to you.

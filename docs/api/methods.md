@@ -1,6 +1,8 @@
-# Methods
+---
+tableOfContents: true
+---
 
-## toc
+# Methods
 
 ## Introduction
 Our goal: Let’s keep it simple. The server has a few methods only.

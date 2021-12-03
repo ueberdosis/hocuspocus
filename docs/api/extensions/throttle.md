@@ -1,6 +1,8 @@
-# Throttle
+---
+tableOfContents: true
+---
 
-## toc
+# Throttle
 
 ## Introduction
 

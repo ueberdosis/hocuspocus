@@ -1,11 +1,10 @@
+---
+tableOfContents: true
+---
 
 # Monitor
 
-## toc
-
 ## Introduction
-
-<g-image src="@/assets/images/monitor-preview.png" width="700"></g-image>
 
 The Monitor extension adds a live updating dashboard featuring metrics and logs to debug and monitor your Hocuspocus instance.
 

@@ -1,6 +1,8 @@
-# Scalability
+---
+tableOfContents: true
+---
 
-## toc
+# Scalability
 
 ## Introduction
 

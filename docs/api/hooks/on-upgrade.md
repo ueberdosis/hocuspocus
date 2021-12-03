@@ -1,6 +1,8 @@
-# onUpgrade
+---
+tableOfContents: true
+---
 
-## toc
+# onUpgrade
 
 ## Introduction
 

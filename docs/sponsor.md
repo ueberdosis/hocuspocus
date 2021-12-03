@@ -1,6 +1,8 @@
-# About the project
+---
+tableOfContents: true
+---
 
-## toc
+# About the project
 
 ## Introduction
 To deliver a top-notch developer experience and user experience, we put hundreds of hours of unpaid work into Hocuspocus. Your funding helps us to make this work more and more financially sustainable. This enables us to provide helpful support, maintain all our packages, keep everything up to date, and develop new features and extensions for Hocuspocus.

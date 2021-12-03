@@ -1,6 +1,8 @@
-# onConnect
+---
+tableOfContents: true
+---
 
-## toc
+# onConnect
 
 ## Introduction
 

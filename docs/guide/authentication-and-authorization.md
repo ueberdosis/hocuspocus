@@ -1,6 +1,8 @@
-# Authentication & Authorization
+---
+tableOfContents: true
+---
 
-## toc
+# Authentication & Authorization
 
 ## Introduction
 
