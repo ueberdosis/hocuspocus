@@ -12,7 +12,7 @@
   ],
   "type": "module",
   "scripts": {
-    "start": "npm --prefix ./docs run start",
+    "start": "npm run playground",
     "playground": "npm run playground:default",
     "playground:load-document": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/load-document.ts\"",
     "playground:express": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/express.ts\"",
