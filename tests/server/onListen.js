@@ -1,6 +1,6 @@
 import { Hocuspocus } from '@hocuspocus/server'
 
-context.only('server/onListen', () => {
+context('server/onListen', () => {
   it('executes the onListen callback', done => {
     const server = new Hocuspocus()
 

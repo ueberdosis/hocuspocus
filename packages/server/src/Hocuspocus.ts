@@ -170,7 +170,7 @@ export class Hocuspocus {
 
     await new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
-        if (!this.configuration.quiet) {
+        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }
 

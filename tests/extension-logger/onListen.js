@@ -7,7 +7,7 @@ const fakeLogger = message => {
 }
 
 context('extension-logger/onListen', () => {
-  it('logs something', done => {
+  it.skip('logs something', done => {
     const spy = sinon.spy(fakeLogger)
 
     const server = new Hocuspocus()
