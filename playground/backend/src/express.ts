@@ -1,7 +1,7 @@
 import express from 'express'
 import expressWebsockets from 'express-ws'
-import { Server } from '../../../packages/server/src'
-import { Logger } from '../../../packages/extension-logger/src'
+import { Server } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
 
 const server = Server.configure({
   extensions: [

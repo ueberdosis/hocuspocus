@@ -79,38 +79,38 @@ export default {
     //   },
     // })
 
-    // this.provider = new HocuspocusCloudProvider({
-    //   key: '',
-    //   name: 'hocuspocus-demo',
-    // })
-
-    this.provider = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:1234',
+    this.provider = new HocuspocusCloudProvider({
+      key: 'write_4NHq197BKSGWsOEySmdl',
       name: 'hocuspocus-demo',
-      // maxAttempts: 1,
-      // token: 'my-access-token',
-      // onConnect: () => {
-      //   console.log('connected')
-      // },
-      // onAuthenticated: () => {
-      //   console.log('authenticated')
-      // },
-      // onAuthenticationFailed: () => {
-      //   console.log('authentication failed')
-      // },
-      // onMessage: ({ event, message }) => {
-      //   console.log(`[message] ◀️ ${message.name}`, event)
-      // },
-      // onOutgoingMessage: ({ message }) => {
-      //   console.info(`[message] ▶️ ${message.name} (${message.description})`)
-      // },
-      // onClose: ({ event }) => {
-      //   console.log(event.type, { event })
-      // },
-      // onDisconnect: ({ event }) => {
-      //   console.log(event.type, event.code, event.reason, { event })
-      // },
     })
+
+    // this.provider = new HocuspocusProvider({
+    //   url: 'ws://127.0.0.1:1234',
+    //   name: 'hocuspocus-demo',
+    // maxAttempts: 1,
+    // token: 'my-access-token',
+    // onConnect: () => {
+    //   console.log('connected')
+    // },
+    // onAuthenticated: () => {
+    //   console.log('authenticated')
+    // },
+    // onAuthenticationFailed: () => {
+    //   console.log('authentication failed')
+    // },
+    // onMessage: ({ event, message }) => {
+    //   console.log(`[message] ◀️ ${message.name}`, event)
+    // },
+    // onOutgoingMessage: ({ message }) => {
+    //   console.info(`[message] ▶️ ${message.name} (${message.description})`)
+    // },
+    // onClose: ({ event }) => {
+    //   console.log(event.type, { event })
+    // },
+    // onDisconnect: ({ event }) => {
+    //   console.log(event.type, event.code, event.reason, { event })
+    // },
+    // })
 
     // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.provider.document)
 
