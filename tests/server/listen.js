@@ -28,7 +28,7 @@ context('server/listen', () => {
 
   it('should respond with OK on a custom port passed to listen()', async () => {
     const server = new Hocuspocus()
-    server.configure().listen(4000)
+    server.listen(4000)
     await page.goto('http://localhost:4000')
 
     assert.strictEqual(await page.textContent('html'), 'OK')

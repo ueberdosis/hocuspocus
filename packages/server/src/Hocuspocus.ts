@@ -13,6 +13,7 @@ import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
 import meta from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
+import { onListenPayload } from '.'
 
 const defaultOnCreateDocument = () => new Promise(r => r(null))
 
@@ -98,9 +99,24 @@ export class Hocuspocus {
   /**
    * Start the server
    */
-  async listen(port: number | null = null): Promise<void> {
-    if (port) {
-      this.configuration.port = port
+  async listen(
+    portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
+    callback: any = null,
+  ): Promise<void> {
+    if (typeof portOrCallback === 'number') {
+      this.configuration.port = portOrCallback
+    }
+
+    if (typeof portOrCallback === 'function') {
+      this.configuration.extensions.push({
+        onListen: portOrCallback,
+      })
+    }
+
+    if (typeof callback === 'function') {
+      this.configuration.extensions.push({
+        onListen: callback,
+      })
     }
 
     const webSocketServer = new WebSocketServer({ noServer: true })
