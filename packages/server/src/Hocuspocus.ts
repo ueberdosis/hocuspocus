@@ -4,6 +4,7 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
+import chalk from 'chalk'
 import {
   MessageType, Configuration, ConnectionConfig, WsReadyStates, Hook,
 } from './types'
@@ -25,6 +26,7 @@ export class Hocuspocus {
     name: null,
     port: 80,
     timeout: 30000,
+    quiet: false,
     extensions: [],
     onChange: () => new Promise(r => r(null)),
     onConfigure: () => new Promise(r => r(null)),
@@ -168,11 +170,47 @@ export class Hocuspocus {
 
     await new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
+        if (!this.configuration.quiet) {
+          this.showStartScreen()
+        }
+
         this.hooks('onListen', { port: this.configuration.port })
           .then(() => resolve())
           .catch(e => reject(e))
       })
     })
+  }
+
+  private showStartScreen() {
+    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
+
+    console.log()
+    console.log(`  ${chalk.cyan(`Hocuspocus v${meta.version}${name}`)}${chalk.green(' running at:')}`)
+    console.log()
+    console.log(`  > HTTP: ${chalk.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
+    console.log(`  > WebSocket: ws://127.0.0.1:${this.configuration.port}`)
+
+    const extensions = this.configuration?.extensions.map(extension => {
+      return extension.constructor?.name
+    })
+      .filter(name => name)
+      .filter(name => name !== 'Object')
+
+    if (!extensions.length) {
+      return
+    }
+
+    console.log()
+    console.log('  Extensions:')
+
+    extensions
+      .forEach(name => {
+        console.log(`  - ${name}`)
+      })
+
+    console.log()
+    console.log(`  ${chalk.green('Ready.')}`)
+    console.log()
   }
 
   /**

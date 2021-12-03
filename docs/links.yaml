@@ -64,8 +64,8 @@
 
 - title: Server
   items:
-    - title: Settings
-      link: /api/settings
+    - title: Configuration
+      link: /api/configuration
     - title: Methods
       link: /api/methods
     - title: Hooks

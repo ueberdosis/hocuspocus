@@ -86,6 +86,10 @@ export interface Configuration extends Extension {
    */
   timeout: number,
   /**
+   * By default, the servers show a start screen. If passed false, the server will start quietly.
+   */
+  quiet: boolean,
+  /**
    * Function which returns the (customized) document name based on the request
    */
   getDocumentName?(data: {
