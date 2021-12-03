@@ -98,7 +98,11 @@ export class Hocuspocus {
   /**
    * Start the server
    */
-  async listen(): Promise<void> {
+  async listen(port: number | null = null): Promise<void> {
+    if (port) {
+      this.configuration.port = port
+    }
+
     const webSocketServer = new WebSocketServer({ noServer: true })
 
     webSocketServer.on('connection', async (incoming: WebSocket, request: IncomingMessage) => {
