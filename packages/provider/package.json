@@ -28,10 +28,10 @@
     "dist"
   ],
   "dependencies": {
-    "@lifeomic/attempt": "^3.0.0",
-    "lib0": "^0.2.42",
+    "@lifeomic/attempt": "^3.0.1",
+    "lib0": "^0.2.43",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.0"
+    "yjs": "^13.5.22"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }

@@ -22,7 +22,7 @@
 <script>
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusProvider, awarenessStatesToArray } from '../../../../packages/provider/src'
+import { HocuspocusProvider, awarenessStatesToArray } from '@hocuspocus/provider'
 
 class Room {
   doc = new Y.Doc()

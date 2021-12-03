@@ -4,14 +4,20 @@
       Awareness
     </h1>
 
-    <StatusBar v-if="provider" :provider="provider" />
+    <StatusBar
+      v-if="provider"
+      :provider="provider"
+    />
 
     <h2>
       Users
     </h2>
 
     <ul>
-      <li v-for="state in states" :key="state.clientId">
+      <li
+        v-for="state in states"
+        :key="state.clientId"
+      >
         <span :style="`background-color: ${state.user.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
         #{{ state.clientId }} {{ state.user.name }} ({{ state.user.clientX }}, {{ state.user.clientY }})
       </li>
@@ -45,7 +51,7 @@
 
 <script>
 import * as Y from 'yjs'
-import { HocuspocusProvider } from '../../../../packages/provider/src'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 export default {
   data() {

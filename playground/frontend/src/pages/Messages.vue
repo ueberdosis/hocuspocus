@@ -4,7 +4,10 @@
       Messages
     </h1>
 
-    <StatusBar v-if="provider" :provider="provider" />
+    <StatusBar
+      v-if="provider"
+      :provider="provider"
+    />
 
     <p>
       Open console
@@ -14,7 +17,7 @@
 
 <script>
 import * as Y from 'yjs'
-import { HocuspocusProvider } from '../../../../packages/provider/src'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 export default {
   data() {

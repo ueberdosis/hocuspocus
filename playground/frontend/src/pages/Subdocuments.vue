@@ -4,7 +4,10 @@
       Subdocuments
     </h1>
 
-    <StatusBar v-if="provider" :provider="provider" />
+    <StatusBar
+      v-if="provider"
+      :provider="provider"
+    />
 
     {{ notes }}
     <!-- <h2>
@@ -23,7 +26,7 @@
 // import { Text } from '@tiptap/extension-text'
 // import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
-import { HocuspocusProvider } from '../../../../packages/provider/src'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 export default {
   components: {
