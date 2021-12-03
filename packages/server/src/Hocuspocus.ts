@@ -16,6 +16,13 @@ import meta from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
 import { onListenPayload } from '.'
 
+export const defaultConfiguration = {
+  name: null,
+  port: 80,
+  timeout: 30000,
+  quiet: false,
+}
+
 const defaultOnCreateDocument = () => new Promise(r => r(null))
 
 /**
@@ -23,10 +30,7 @@ const defaultOnCreateDocument = () => new Promise(r => r(null))
  */
 export class Hocuspocus {
   configuration: Configuration = {
-    name: null,
-    port: 80,
-    timeout: 30000,
-    quiet: false,
+    ...defaultConfiguration,
     extensions: [],
     onChange: () => new Promise(r => r(null)),
     onConfigure: () => new Promise(r => r(null)),
