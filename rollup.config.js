@@ -41,6 +41,10 @@ async function build(commandLineArgs) {
       exports,
     } = pkg.toJSON()
 
+    if (!exports) {
+      return
+    }
+
     const basePlugins = [
       sourcemaps(),
       resolve(),
