@@ -5,14 +5,16 @@
     - title: Installation
       link: /installation
       items:
+        - title: CLI
+          link: /installation/cli
         - title: Express
           link: /installation/express
         - title: Koa
           link: /installation/koa
           type: draft
-        # - title: Laravel
-        #   link: /installation/laravel
-        #   type: draft
+        - title: Laravel
+          link: /installation/laravel
+          type: draft
     # - title: Changelog
     #   link: /changelog
     - title: About the project
@@ -25,7 +27,6 @@
   items:
     - title: Awareness
       link: /examples/awareness
-      type: new
     # - title: Tasks
     #   link: /examples/tasks
     #   type: draft

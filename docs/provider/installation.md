@@ -1,6 +1,8 @@
-# Installation
+---
+tableOfContents: true
+---
 
-## toc
+# Installation
 
 ## Introduction
 You’ve got your Hocuspocus server running? Time to take the Hocuspocus provider for a test drive! Install it from npm, and start using it with a few lines of code.

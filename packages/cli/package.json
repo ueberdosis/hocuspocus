@@ -11,7 +11,8 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "hocuspocus": "./src/index.js"
+    "hocuspocus": "./src/index.js",
+    "@hocuspocus/cli": "./src/index.js"
   },
   "files": [
     "src"
