@@ -11,33 +11,31 @@ import Document from './Document'
 import Connection from './Connection'
 import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
-import packageJson from '../package.json'
+import meta from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
 
 const defaultOnCreateDocument = () => new Promise(r => r(null))
-
-export const defaultConfiguration = {
-  name: null,
-  port: 80,
-  timeout: 30000,
-  extensions: [],
-  onChange: () => new Promise(r => r(null)),
-  onConfigure: () => new Promise(r => r(null)),
-  onConnect: () => new Promise(r => r(null)),
-  onCreateDocument: defaultOnCreateDocument,
-  onLoadDocument: () => new Promise(r => r(null)),
-  onDestroy: () => new Promise(r => r(null)),
-  onDisconnect: () => new Promise(r => r(null)),
-  onListen: () => new Promise(r => r(null)),
-  onRequest: () => new Promise(r => r(null)),
-  onUpgrade: () => new Promise(r => r(null)),
-}
 
 /**
  * Hocuspocus Server
  */
 export class Hocuspocus {
-  configuration: Configuration = defaultConfiguration
+  configuration: Configuration = {
+    name: null,
+    port: 80,
+    timeout: 30000,
+    extensions: [],
+    onChange: () => new Promise(r => r(null)),
+    onConfigure: () => new Promise(r => r(null)),
+    onConnect: () => new Promise(r => r(null)),
+    onCreateDocument: defaultOnCreateDocument,
+    onLoadDocument: () => new Promise(r => r(null)),
+    onDestroy: () => new Promise(r => r(null)),
+    onDisconnect: () => new Promise(r => r(null)),
+    onListen: () => new Promise(r => r(null)),
+    onRequest: () => new Promise(r => r(null)),
+    onUpgrade: () => new Promise(r => r(null)),
+  }
 
   documents = new Map()
 
@@ -83,7 +81,7 @@ export class Hocuspocus {
 
     this.hooks('onConfigure', {
       configuration: this.configuration,
-      version: packageJson.version,
+      version: meta.version,
       yjsVersion: null,
       instance: this,
     })
