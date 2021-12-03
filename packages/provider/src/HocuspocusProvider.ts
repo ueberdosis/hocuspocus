@@ -195,6 +195,7 @@ export class HocuspocusProvider extends EventEmitter {
     super()
     this.setOptions(options)
 
+    this.options.document = options.document ? options.document : new Y.Doc()
     this.options.awareness = options.awareness ? options.awareness : new Awareness(this.document)
     this.options.WebSocketPolyfill = options.WebSocketPolyfill ? options.WebSocketPolyfill : WebSocket
 

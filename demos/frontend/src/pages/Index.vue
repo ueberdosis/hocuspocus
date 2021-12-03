@@ -45,7 +45,7 @@ import { Text } from '@tiptap/extension-text'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 // import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusProvider } from '../../../../packages/provider/src'
+import { HocuspocusProvider, HocuspocusCloudProvider } from '../../../../packages/provider/src'
 // import { IndexeddbPersistence } from 'y-indexeddb'
 
 export default {
@@ -66,24 +66,27 @@ export default {
   computed: {
     ydocJSON() {
       return {
-        default: this.ydoc.getXmlFragment('default').toJSON(),
-        secondary: this.ydoc.getXmlFragment('secondary').toJSON(),
+        default: this.provider.document.getXmlFragment('default').toJSON(),
+        secondary: this.provider.document.getXmlFragment('secondary').toJSON(),
       }
     },
   },
 
   mounted() {
-    this.ydoc = new Y.Doc()
-    // this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.ydoc, {
+    // this.provider = new WebsocketProvider('ws://127.0.0.1:1234', 'hocuspocus-demo', this.provider.document, {
     //   params: {
     //     token: '123456',
     //   },
     // })
 
-    this.provider = new HocuspocusProvider({
+    // this.provider = new HocuspocusCloudProvider({
+    //   key: '',
+    //   name: 'hocuspocus-demo',
+    // })
+
+    this.provider = new HocuspocusCloudProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
-      document: this.ydoc,
       // maxAttempts: 1,
       // token: 'my-access-token',
       // onConnect: () => {
@@ -109,7 +112,7 @@ export default {
       // },
     })
 
-    // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.ydoc)
+    // this.indexdb = new IndexeddbPersistence('hocuspocus-demo', this.provider.document)
 
     this.editor = new Editor({
       extensions: [
@@ -120,7 +123,7 @@ export default {
         //   history: false,
         // }),
         Collaboration.configure({
-          document: this.ydoc,
+          document: this.provider.document,
           field: 'default',
         }),
       ],
@@ -135,7 +138,7 @@ export default {
         //   history: false,
         // }),
         Collaboration.configure({
-          document: this.ydoc,
+          document: this.provider.document,
           field: 'secondary',
         }),
       ],
