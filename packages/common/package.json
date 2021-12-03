@@ -24,8 +24,5 @@
     "src",
     "dist"
   ],
-  "gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
-  "publishConfig": {
-    "access": "public"
-  }
+  "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }
