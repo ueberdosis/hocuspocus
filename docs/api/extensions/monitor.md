@@ -65,7 +65,7 @@ server.listen()
 
 The easiest way to get the monitor to work within a framework, is to simply run it on another port:
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 import { Monitor } from '@hocuspocus/extension-monitor'
 
@@ -81,7 +81,7 @@ const server = Server.configure({
 
 Alternatively you can call the monitors `handleConnection` and `handleRequest` methods yourself. Please note: even when calling `handleRequest` manually you need to configure the monitors path correctly:
 
-```typescript
+```js
 import express from 'express'
 import expressWebsockets from 'express-ws'
 import { Server } from '@hocuspocus/server'

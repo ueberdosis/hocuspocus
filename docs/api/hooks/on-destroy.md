@@ -12,7 +12,7 @@ The `onDestroy` hook is called after the server was shut down using the [destroy
 
 The `data` passed to the `onDestroy` hook has the following attributes:
 
-```typescript
+```js
 const data = {
   instance: Hocuspocus
 }
@@ -20,15 +20,15 @@ const data = {
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onDestroy(data) {
     // Output some information
-    process.stdout.write(`Server was shut down!`)
+    console.log(`Server was shut down!`)
   }
 })
 
-hocuspocus.listen()
+server.listen()
 ```

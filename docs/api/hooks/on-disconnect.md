@@ -12,7 +12,7 @@ The `onDisconnect` hook is called when a connection is terminated. It should ret
 
 The `data` passed to the `onDisconnect` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
@@ -33,15 +33,15 @@ Context contains the data provided in former `onConnect` hooks.
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onDisconnect(data) {
     // Output some information
-    process.stdout.write(`"${data.context.user.name}" has disconnected.`)
-  }
+    console.log(`"${data.context.user.name}" has disconnected.`)
+  },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

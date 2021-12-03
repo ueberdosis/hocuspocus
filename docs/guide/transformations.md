@@ -20,7 +20,7 @@ npm install @hocuspocus/transformer
 
 … and import them:
 
-```typescript
+```js
 import { TiptapTransformer, ProsemirrorTransformer } from '@hocuspocus/transformer'
 ```
 
@@ -30,7 +30,7 @@ import { TiptapTransformer, ProsemirrorTransformer } from '@hocuspocus/transform
 
 **Convert a Y-Doc to prosemirror JSON:**
 
-```typescript
+```js
 import { TiptapTransformer } from '@hocuspocus/transformer'
 import { Doc } from 'yjs'
 
@@ -40,7 +40,7 @@ const prosemirrorJSON = TiptapTransformer.fromYdoc(ydoc, 'field-name')
 
 **Convert prosemirror JSON to a Y-Doc:**
 
-```typescript
+```js
 import { TiptapTransformer } from '@hocuspocus/transformer'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -68,7 +68,7 @@ const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
 
 **Convert a Y-Doc to prosemirror JSON:**
 
-```typescript
+```js
 import { ProsemirrorTransformer } from '@hocuspocus/transformer'
 import { Doc } from 'yjs'
 
@@ -78,7 +78,7 @@ const prosemirrorJSON = ProsemirrorTransformer.fromYdoc(ydoc, 'field-name')
 
 **Convert prosemirror JSON to a Y-Doc:**
 
-```typescript
+```js
 import { ProsemirrorTransformer } from '@hocuspocus/transformer'
 import { Schema } from 'prosemirror-model'
 
@@ -104,12 +104,12 @@ const ydoc3 = transformer.toYdoc(prosemirrorJSON, 'field-name')
 
 ### Quill
 
-```typescript
+```js
 // TODO
 ```
 
 ### Monaco
 
-```typescript
+```js
 // TODO
 ```

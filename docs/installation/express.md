@@ -14,7 +14,7 @@ Note: You have the choice to either use Hocuspocus' `onConnect` hook or put your
 ## Express
 To use Hocuspocus with [Express](https://expressjs.com), you need to use the `express-ws` package that adds WebSocket endpoints to Express applications. Then add a new WebSocket route and use Hocuspocus' `handleConnection()` method to do the rest.
 
-```typescript
+```js
 import express from 'express'
 import expressWebsockets from 'express-ws'
 import { Server } from '@hocuspocus/server'

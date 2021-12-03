@@ -10,14 +10,14 @@ The `onConfigure` hook is called after the server was configured using the [conf
 ## Default configuration
 If `configure()` is never called, you can get the default configuration by importing it:
 
-```typescript
+```js
 import { defaultConfiguration } from '@hocuspocus/server'
 ```
 
 ## Hook payload
 The `data` passed to the `onConfigure` hook has the following attributes:
 
-```typescript
+```js
 import { Configuration } from '@hocuspocus/server'
 
 const data = {
@@ -29,15 +29,15 @@ const data = {
 ```
 
 ## Example
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onConfigure(data) {
     // Output some information
-    process.stdout.write(`Server was configured!`)
+    console.log(`Server was configured!`)
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

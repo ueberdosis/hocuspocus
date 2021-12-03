@@ -14,7 +14,7 @@ It's highly recommended to debounce extensive operations as this hook can be fir
 
 The `data` passed to the `onChange` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
@@ -40,7 +40,7 @@ Context contains the data provided in former `onConnect` hooks.
 The following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [RocksDB extension](/api/extensions/rocksdb).
 :::
 
-```typescript
+```js
 import { debounce } from 'debounce'
 import { Server } from '@hocuspocus/server'
 import { TiptapTransformer } from '@hocuspocus/transformer'
@@ -48,7 +48,7 @@ import { writeFile } from 'fs'
 
 let debounced
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onChange(data) {
     const save = () => {
       // Convert the y-doc to something you can actually use in your views.
@@ -76,5 +76,5 @@ const hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

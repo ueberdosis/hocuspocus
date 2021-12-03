@@ -12,7 +12,7 @@ The `onConnect` hook will be called when a new connection is established. It sho
 
 The `data` passed to the `onConnect` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
@@ -32,15 +32,15 @@ const data = {
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onConnect(data) {
     // Output some information
-    process.stdout.write(`New websocket connection`)
+    console.log(`New websocket connection`)
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

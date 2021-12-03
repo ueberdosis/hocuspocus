@@ -10,7 +10,7 @@ The `onAuthenticate` hook will be called when the server receives an authenticat
 ## Hook payload
 The `data` passed to the `onAuthenticate` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
@@ -29,10 +29,10 @@ const data = {
 ```
 
 ## Example
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onAuthenticate(data) {
     const { token } = data
 
@@ -58,5 +58,5 @@ const hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

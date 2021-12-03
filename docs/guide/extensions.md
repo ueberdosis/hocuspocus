@@ -32,7 +32,7 @@ First step: Create a new class that implements the `Extension` interface and add
 
 As every hook needs to return a Promise, the easiest way is to mark them as `async`.
 
-```typescript
+```js
 import {
   Extension,
   onChangePayload,
@@ -73,7 +73,7 @@ Now you can add a constructor that accepts your extension's configuration and me
 
 You need to keep all those methods, even if you don't use them. If you want to get rid of those annoying TypeScript warnings about empty functions, you can add the `@typescript-eslint/no-empty-function` annotation.
 
-```typescript
+```js
 import {
   Extension,
   onChangePayload,
