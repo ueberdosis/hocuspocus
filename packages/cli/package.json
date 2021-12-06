@@ -22,8 +22,5 @@
     "@hocuspocus/extension-webhook": "^1.0.0-alpha.50",
     "@hocuspocus/server": "^1.0.0-alpha.86",
     "meow": "^10.1.2"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
