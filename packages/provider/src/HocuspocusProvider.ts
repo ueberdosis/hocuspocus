@@ -223,7 +223,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.document.on('update', this.documentUpdateHandler.bind(this))
     this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
-    this.registerBeforeUnloadEventListener()
+    this.registerEventListeners()
 
     this.intervals.connectionChecker = setInterval(
       this.checkConnection.bind(this),
@@ -358,11 +358,12 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(SyncStepOneMessage, { document: this.document })
   }
 
-  registerBeforeUnloadEventListener() {
+  registerEventListeners() {
     if (typeof window === 'undefined') {
       return
     }
 
+    window.addEventListener('online', this.connect)
     window.addEventListener('beforeunload', () => {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
     })
@@ -580,6 +581,12 @@ export class HocuspocusProvider extends EventEmitter {
     this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.removeEventListener('online', this.connect)
   }
 
   get broadcastChannel() {
