@@ -28,8 +28,8 @@
   ],
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.86",
-    "y-redis": "^1.0.2",
-    "yjs": "^13.5.0"
+    "y-redis": "^1.0.3",
+    "yjs": "^13.5.22"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }
