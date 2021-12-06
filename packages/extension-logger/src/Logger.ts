@@ -137,11 +137,13 @@ export class Logger implements Extension {
 
   private log(message: string) {
     const date = (new Date()).toISOString()
-    message = `${date} ${message}`
+    let meta = `${date}`
 
     if (this.name) {
-      message = `[${this.name}] ${message}`
+      meta = `${this.name} ${meta}`
     }
+
+    message = `[${meta}] ${message}`
 
     this.configuration.log(message)
   }
