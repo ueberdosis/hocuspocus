@@ -363,7 +363,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.addEventListener('online', this.connect)
+    window.addEventListener('online', this.connect.bind(this))
     window.addEventListener('beforeunload', () => {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
     })
@@ -586,7 +586,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.removeEventListener('online', this.connect)
+    window.removeEventListener('online', this.connect.bind(this))
   }
 
   get broadcastChannel() {
