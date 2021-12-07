@@ -1,0 +1,35 @@
+{
+  "name": "@hocuspocus/extension-database",
+  "description": "a generic Hocuspocus persistence driver for the database",
+  "version": "1.0.0-alpha.0",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "yjs"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-database.esm.js",
+  "module": "dist/hocuspocus-database.esm.js",
+  "types": "dist/packages/extension-database/src/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-database.esm.js",
+      "require": "./dist/hocuspocus-database.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@hocuspocus/server": "^1.0.0-alpha.86",
+    "yjs": "^13.5.22"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
