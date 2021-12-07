@@ -42,7 +42,7 @@ context('extension-logger/onListen', () => {
         server.destroy()
       },
       async onDestroy() {
-        assert.equal(spy.args[spy.args.length - 1][0].includes('[FOOBAR123]'), true, 'Expected the Logger to use the configured instance name.')
+        assert.equal(spy.args[spy.args.length - 1][0].includes('FOOBAR123'), true, 'Expected the Logger to use the configured instance name.')
 
         done()
       },
