@@ -11,6 +11,10 @@ export interface SQLiteConfiguration extends DatabaseConfiguration {
    * https://github.com/mapbox/node-sqlite3/wiki/API#new-sqlite3databasefilename-mode-callback
    */
   database: string,
+  /**
+   * The database schema to create.
+   */
+  schema: string,
 }
 
 export class SQLite extends Database {
@@ -18,9 +22,13 @@ export class SQLite extends Database {
 
   configuration: SQLiteConfiguration = {
     database: ':memory:',
+    schema: `CREATE TABLE IF NOT EXISTS "documents" (
+        "name" varchar(255) NOT NULL,
+        "data" blob NOT NULL
+    );`,
     fetchUpdates: async ({ documentName }) => {
       return new Promise((resolve, reject) => {
-        this.db?.all('SELECT data FROM documents WHERE name = $name ORDER BY rowid', {
+        this.db?.all('SELECT data FROM "documents" WHERE name = $name ORDER BY rowid', {
           $name: documentName,
         }, (error, rows) => {
           if (error) {
@@ -32,7 +40,7 @@ export class SQLite extends Database {
       })
     },
     storeUpdate: async ({ documentName, update }) => {
-      this.db?.run('INSERT INTO documents ("name", "data") VALUES ($name, $data)', {
+      this.db?.run('INSERT INTO "documents" ("name", "data") VALUES ($name, $data)', {
         $name: documentName,
         $data: update,
       })
@@ -59,9 +67,6 @@ export class SQLite extends Database {
   async onConfigure() {
     this.db = new sqlite3.Database(this.configuration.database)
 
-    this.db.run(`CREATE TABLE "documents" (
-        "name" varchar(255) NOT NULL,
-        "data" blob NOT NULL
-    );`)
+    this.db.run(this.configuration.schema)
   }
 }
