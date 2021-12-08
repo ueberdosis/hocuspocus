@@ -96,7 +96,7 @@ export class Hocuspocus {
     return this
   }
 
-  get authenticationRequired(): boolean {
+  get requiresAuthentication(): boolean {
     return !!this.configuration.extensions.find(extension => {
       return extension.onAuthenticate !== undefined
     })
@@ -279,7 +279,11 @@ export class Hocuspocus {
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
     // create a unique identifier for every socket connection
     const socketId = uuid()
-    const connection: ConnectionConfig = { readOnly: false, isAuthenticated: false }
+    const connection: ConnectionConfig = {
+      readOnly: false,
+      requiresAuthentication: this.requiresAuthentication,
+      isAuthenticated: false,
+    }
 
     const hookPayload = {
       documentName,
@@ -294,7 +298,7 @@ export class Hocuspocus {
     const incomingMessageQueue: Uint8Array[] = []
 
     const handleNewConnection = (listener: (input: Uint8Array) => void) => async () => {
-      if (this.authenticationRequired && !connection.isAuthenticated) {
+      if (connection.requiresAuthentication && !connection.isAuthenticated) {
         return
       }
 

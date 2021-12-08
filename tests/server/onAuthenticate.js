@@ -232,6 +232,33 @@ context('server/onAuthenticate', () => {
     })
   })
 
+  it('ignores the onAuthenticate hook when `authenticationRequired` is set to false', done => {
+    const server = new Hocuspocus()
+
+    server.configure({
+      port: 4000,
+      async onConnect({ connection }) {
+        connection.requiresAuthentication = false
+      },
+      async onAuthenticate() {
+        assert.fail('NOPE')
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      onSynced: () => {
+        client.destroy()
+        server.destroy()
+
+        done()
+      },
+    })
+  })
+
   it('has the authentication token', done => {
     const server = new Hocuspocus()
 
@@ -266,7 +293,7 @@ context('server/onAuthenticate', () => {
       },
       // MUST NOT BE CALLED
       async onLoadDocument() {
-        console.log('WARNING: When onAuthenticate fails onLoadDocument must not be called.')
+        assert.fail('WARNING: When onAuthenticate fails onLoadDocument must not be called.')
       },
     }).listen()
 

@@ -90,8 +90,9 @@ context('server/onLoadDocument', () => {
       onLoadDocument({ context, connection }) {
         assert.deepStrictEqual(context, mockContext)
         assert.deepStrictEqual(connection, {
-          isAuthenticated: false,
           readOnly: true,
+          requiresAuthentication: false,
+          isAuthenticated: false,
         })
 
         client.destroy()

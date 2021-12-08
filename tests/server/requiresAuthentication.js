@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { Hocuspocus } from '@hocuspocus/server'
 
-context('server/authenticationRequired', () => {
+context('server/requiresAuthentication', () => {
   it('requires a token when the onAuthenticate hook is present', done => {
     const server = new Hocuspocus()
 
@@ -12,7 +12,7 @@ context('server/authenticationRequired', () => {
       },
     }).listen()
 
-    assert.strictEqual(server.authenticationRequired, true)
+    assert.strictEqual(server.requiresAuthentication, true)
     server.destroy()
     done()
   })
@@ -24,7 +24,7 @@ context('server/authenticationRequired', () => {
       port: 4000,
     }).listen()
 
-    assert.strictEqual(server.authenticationRequired, false)
+    assert.strictEqual(server.requiresAuthentication, false)
     server.destroy()
     done()
   })
@@ -46,7 +46,7 @@ context('server/authenticationRequired', () => {
       ],
     }).listen()
 
-    assert.strictEqual(server.authenticationRequired, true)
+    assert.strictEqual(server.requiresAuthentication, true)
     server.destroy()
     done()
   })
