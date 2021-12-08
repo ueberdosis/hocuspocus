@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.62](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.61...@hocuspocus/extension-logger@1.0.0-alpha.62) (2021-12-08)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
 # [1.0.0-alpha.61](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.60...@hocuspocus/extension-logger@1.0.0-alpha.61) (2021-12-07)
 
 **Note:** Version bump only for package @hocuspocus/extension-logger
