@@ -6,6 +6,7 @@ import * as mutex from 'lib0/mutex'
 import * as url from 'lib0/url'
 import { Event, CloseEvent, MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
+import { Forbidden, Unauthorized } from '@hocuspocus/common'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
 import { MessageReceiver } from './MessageReceiver'
@@ -116,6 +117,10 @@ export interface HocuspocusProviderOptions {
   onDestroy: () => void,
   onAwarenessUpdate: (states: any) => void,
   onAwarenessChange: (states: any) => void,
+  /**
+   * Don’t output any warnings.
+   */
+  quiet: boolean,
 }
 
 export class HocuspocusProvider extends EventEmitter {
@@ -163,6 +168,7 @@ export class HocuspocusProvider extends EventEmitter {
     onDestroy: () => null,
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
+    quiet: false,
   }
 
   subscribedToBroadcastChannel = false
@@ -535,15 +541,29 @@ export class HocuspocusProvider extends EventEmitter {
       this.emit('disconnect', { event })
     }
 
+    if (event.code === Unauthorized.code) {
+      if (!this.options.quiet) {
+        console.warn('[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.')
+      }
+
+      this.shouldConnect = false
+    }
+
+    if (event.code === Forbidden.code) {
+      if (!this.options.quiet) {
+        console.warn('[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.')
+      }
+    }
+
     if (this.connectionAttempt) {
-      // Okay, that connection attempt failed …
+      // That connection attempt failed.
       this.rejectConnectionAttempt()
     } else if (this.shouldConnect) {
-      // The connection was closed by the server, so let’s just try again.
+      // The connection was closed by the server. Let’s just try again.
       this.connect()
     }
 
-    // If we’ll reconnect anyway, we’re done for now.
+    // If we’ll reconnect, we’re done for now.
     if (this.shouldConnect) {
       return
     }

@@ -181,8 +181,3 @@ export interface onConfigurePayload {
   yjsVersion: string,
   instance: Hocuspocus,
 }
-
-export interface CloseEvent {
-  code: number,
-  reason: string,
-}

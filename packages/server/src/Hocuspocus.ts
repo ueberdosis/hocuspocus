@@ -5,6 +5,7 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import chalk from 'chalk'
+import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
 import {
   MessageType,
   Configuration,
@@ -14,7 +15,6 @@ import {
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
 import meta from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
@@ -288,6 +288,11 @@ export class Hocuspocus {
    * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
+    // Make sure to close an idle connection after a while.
+    const closeIdleConnection = setTimeout(() => {
+      incoming.close(Unauthorized.code, Unauthorized.reason)
+    }, this.configuration.timeout)
+
     // Every new connection gets an unique identifier.
     const socketId = uuid()
 
@@ -317,6 +322,9 @@ export class Hocuspocus {
 
     // Once all hooks are run, we’ll fully establish the connection:
     const setUpNewConnection = async (listener: (input: Uint8Array) => void) => {
+      // Not an idle connection anymore, no need to close it then.
+      clearTimeout(closeIdleConnection)
+
       // If no hook interrupts, create a document and connection
       const document = await this.createDocument(documentName, request, socketId, connection, context)
       this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
