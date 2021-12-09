@@ -1,12 +1,10 @@
 import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
-import { Hocuspocus } from '@hocuspocus/server'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 let client
 const ydoc = new Y.Doc()
-const server = new Hocuspocus()
 
 context('provider/options', () => {
   it('has default options (maxDelay = 30000)', () => {
