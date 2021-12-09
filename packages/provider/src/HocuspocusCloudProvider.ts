@@ -1,6 +1,14 @@
-import { HocuspocusProvider, HocuspocusProviderOptions } from './HocuspocusProvider'
+import {
+  HocuspocusProvider,
+  HocuspocusProviderConfiguration,
+} from './HocuspocusProvider'
 
-export interface HocuspocusCloudProviderOptions extends HocuspocusProviderOptions {
+export type HocuspocusCloudProviderConfiguration =
+  Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
+  Partial<HocuspocusProviderConfiguration> &
+  AdditionalHocuspocusCloudProviderConfiguration
+
+export interface AdditionalHocuspocusCloudProviderConfiguration {
   /**
    * A Hocuspocus Cloud key, get one here: https://hocuspocus.cloud/
    */
@@ -8,19 +16,19 @@ export interface HocuspocusCloudProviderOptions extends HocuspocusProviderOption
 }
 
 export class HocuspocusCloudProvider extends HocuspocusProvider {
-  constructor(options: HocuspocusCloudProviderOptions) {
-    if (!options.url) {
-      options.url = 'wss://connect.hocuspocus.cloud'
+  constructor(configuration: HocuspocusCloudProviderConfiguration) {
+    if (!configuration.url) {
+      configuration.url = 'wss://connect.hocuspocus.cloud'
     }
 
-    if (options.key) {
-      if (!options.parameters) {
-        options.parameters = {}
+    if (configuration.key) {
+      if (!configuration.parameters) {
+        configuration.parameters = {}
       }
 
-      options.parameters.key = options.key
+      configuration.parameters.key = configuration.key
     }
 
-    super(options as HocuspocusProviderOptions)
+    super(configuration as HocuspocusProviderConfiguration)
   }
 }

@@ -6,8 +6,8 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 let client
 const ydoc = new Y.Doc()
 
-context('provider/options', () => {
-  it('has default options (maxDelay = 30000)', () => {
+context('provider/configuration', () => {
+  it('has default configuration (maxDelay = 30000)', () => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -15,10 +15,10 @@ context('provider/options', () => {
       WebSocketPolyfill: WebSocket,
     })
 
-    assert.strictEqual(client.options.maxDelay, 30000)
+    assert.strictEqual(client.configuration.maxDelay, 30000)
   })
 
-  it('overwrites the default options', () => {
+  it('overwrites the default configuration', () => {
     client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
       name: 'hocuspocus-test',
@@ -27,6 +27,6 @@ context('provider/options', () => {
       WebSocketPolyfill: WebSocket,
     })
 
-    assert.strictEqual(client.options.maxDelay, 10000)
+    assert.strictEqual(client.configuration.maxDelay, 10000)
   })
 })
