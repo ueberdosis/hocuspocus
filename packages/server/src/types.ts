@@ -30,7 +30,7 @@ export interface AwarenessUpdate {
   removed: Array<any>,
 }
 
-export interface ConnectionConfig {
+export interface ConnectionConfiguration {
   readOnly: boolean
   requiresAuthentication: boolean
   isAuthenticated: boolean
@@ -107,7 +107,7 @@ export interface onAuthenticatePayload {
   requestParameters: URLSearchParams,
   socketId: string,
   token: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onConnectPayload {
@@ -117,7 +117,7 @@ export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onLoadDocumentPayload {
@@ -128,7 +128,7 @@ export interface onLoadDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onChangePayload {
@@ -180,9 +180,4 @@ export interface onConfigurePayload {
   version: string,
   yjsVersion: string,
   instance: Hocuspocus,
-}
-
-export interface CloseEvent {
-  code: number,
-  reason: string,
 }

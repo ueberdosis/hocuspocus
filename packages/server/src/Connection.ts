@@ -1,10 +1,10 @@
 import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
 import { IncomingMessage as HTTPIncomingMessage } from 'http'
-
+import { CloseEvent, ConnectionTimeout } from '@hocuspocus/common'
 import Document from './Document'
 import { IncomingMessage } from './IncomingMessage'
-import { CloseEvent, WsReadyStates } from './types'
+import { WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger, MessageLogger } from './Debugger'
@@ -128,7 +128,7 @@ class Connection {
    */
   private check(): void {
     if (!this.pongReceived) {
-      return this.close()
+      return this.close(ConnectionTimeout)
     }
 
     if (this.document.hasConnection(this)) {
@@ -136,8 +136,8 @@ class Connection {
 
       try {
         this.webSocket.ping()
-      } catch (exception) {
-        this.close()
+      } catch (error) {
+        this.close(ConnectionTimeout)
       }
     }
   }
