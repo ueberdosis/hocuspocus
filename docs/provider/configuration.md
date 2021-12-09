@@ -119,3 +119,7 @@ Running in Node.js: Pass a WebSocket polyfill, for example `ws`.
 
 Default: `WebSocket`
 
+### quiet
+The provider will output a few warnings to help you. In case you want to disable those, just set `quiet` to `true`.
+
+Default: `false`
