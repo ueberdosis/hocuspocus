@@ -1,6 +1,6 @@
 import { Database, DatabaseConfiguration } from '@hocuspocus/extension-database'
 import sqlite3 from 'sqlite3'
-import chalk from 'chalk'
+import kleur from 'kleur'
 
 export interface SQLiteConfiguration extends DatabaseConfiguration {
   /**
@@ -60,7 +60,7 @@ export class SQLite extends Database {
   }
 
   async onListen() {
-    console.warn(`  ${chalk.yellow('The SQLite extension is intended to be used in a local development environment, not in a production environment.')}`)
+    console.warn(`  ${kleur.yellow('The SQLite extension is intended to be used in a local development environment, not in a production environment.')}`)
     console.log()
   }
 

@@ -4,7 +4,7 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
-import chalk from 'chalk'
+import kleur from 'kleur'
 import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
 import {
   MessageType,
@@ -193,9 +193,9 @@ export class Hocuspocus {
     const name = this.configuration.name ? ` (${this.configuration.name})` : ''
 
     console.log()
-    console.log(`  ${chalk.cyan(`Hocuspocus v${meta.version}${name}`)}${chalk.green(' running at:')}`)
+    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
     console.log()
-    console.log(`  > HTTP: ${chalk.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
+    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
     console.log(`  > WebSocket: ws://127.0.0.1:${this.configuration.port}`)
 
     const extensions = this.configuration?.extensions.map(extension => {
@@ -217,7 +217,7 @@ export class Hocuspocus {
       })
 
     console.log()
-    console.log(`  ${chalk.green('Ready.')}`)
+    console.log(`  ${kleur.green('Ready.')}`)
     console.log()
   }
 
