@@ -1,4 +1,4 @@
-# Hocuspocus (Alpha Preview!)
+# Hocuspocus (Alpha)
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
