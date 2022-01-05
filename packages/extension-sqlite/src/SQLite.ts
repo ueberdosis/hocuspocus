@@ -24,32 +24,35 @@ export class SQLite extends Database {
     database: ':memory:',
     schema: `CREATE TABLE IF NOT EXISTS "documents" (
         "name" varchar(255) NOT NULL,
-        "data" blob NOT NULL
+        "data" blob NOT NULL,
+        UNIQUE(name)
     );`,
-    fetchUpdates: async ({ documentName }) => {
+    fetch: async ({ documentName }) => {
       return new Promise((resolve, reject) => {
-        this.db?.all('SELECT data FROM "documents" WHERE name = $name ORDER BY rowid', {
+        this.db?.get(`
+          SELECT data FROM "documents" WHERE name = $name ORDER BY rowid DESC
+        `, {
           $name: documentName,
-        }, (error, rows) => {
+        }, (error, row) => {
           if (error) {
             reject(error)
           }
 
-          resolve(rows.map(row => row.data))
+          resolve(row?.data)
         })
       })
     },
-    storeUpdate: async ({ documentName, update }) => {
-      this.db?.run('INSERT INTO "documents" ("name", "data") VALUES ($name, $data)', {
+    store: async ({ documentName, update }) => {
+      this.db?.run(`
+        INSERT INTO "documents" ("name", "data") VALUES ($name, $data)
+          ON CONFLICT(name) DO UPDATE SET data = $data
+      `, {
         $name: documentName,
         $data: update,
       })
     },
   }
 
-  /**
-   * Constructor
-   */
   constructor(configuration?: Partial<SQLiteConfiguration>) {
     super({})
 
@@ -59,14 +62,13 @@ export class SQLite extends Database {
     }
   }
 
+  async onConfigure() {
+    this.db = new sqlite3.Database(this.configuration.database)
+    this.db.run(this.configuration.schema)
+  }
+
   async onListen() {
     console.warn(`  ${kleur.yellow('The SQLite extension is intended to be used in a local development environment, not in a production environment.')}`)
     console.log()
-  }
-
-  async onConfigure() {
-    this.db = new sqlite3.Database(this.configuration.database)
-
-    this.db.run(this.configuration.schema)
   }
 }

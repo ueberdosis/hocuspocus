@@ -143,6 +143,10 @@ export interface onChangePayload {
   socketId: string,
 }
 
+export interface storePayload extends onChangePayload {
+  update: Buffer,
+}
+
 export interface onDisconnectPayload {
   clientsCount: number,
   context: any,

@@ -64,7 +64,7 @@ export class RocksDB implements Extension {
    * store updates in y-leveldb persistence
    */
   async store(documentName: string, update: Uint8Array): Promise<any> {
-    return this.provider.storeUpdate(documentName, update)
+    return this.provider.store(documentName, update)
   }
 
 }
