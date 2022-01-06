@@ -22,8 +22,8 @@ context('pubsub/onDisconnect', () => {
       extensions: [
         new PubSub({
           ...opts,
-          instanceName: 'server',
-          namespace: 'pubsub/onDisconnect',
+          identifier: 'server',
+          prefix: 'pubsub/onDisconnect',
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
           onPersist: ({ document }) => {

@@ -20,7 +20,7 @@ context('pubsub/onAwarenessChange', () => {
       extensions: [
         new PubSub({
           ...redisConfiguration,
-          instanceName: 'server',
+          identifier: 'server',
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
         }),
@@ -32,7 +32,7 @@ context('pubsub/onAwarenessChange', () => {
       extensions: [
         new PubSub({
           ...redisConfiguration,
-          instanceName: 'anotherServer',
+          identifier: 'anotherServer',
           log: () => {},
           // log: (...args) => console.log('anotherServer:', ...args),
         }),
