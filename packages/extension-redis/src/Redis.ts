@@ -1,8 +1,6 @@
 import RedisClient from 'ioredis'
 import Redlock from 'redlock'
-import debounce from 'lodash.debounce'
 import { v4 as uuid } from 'uuid'
-import * as Y from 'yjs'
 import {
   IncomingMessage,
   OutgoingMessage,
@@ -161,26 +159,22 @@ export class Redis implements Extension {
     })
   }
 
-  // TODO: If locks are released to quickly, all instances store documents.
-  // The TTL of 1000ms blocks all other instances from storing the document.
-  // This … feels wrong, but it works. Should we keep it like that?
+  async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
+    const key = `${this.getKey(documentName)}:lock`
+    // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
 
-  // async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
-  //   const key = `${this.getKey(documentName)}:lock`
-  //   // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
+    this.locks.get(key)?.unlock()
+      .catch(error => {
+        console.error(`I’m not able to unlock Redis. The lock will expire after ${this.configuration.ttl}ms.`)
 
-  //   this.locks.get(key)?.unlock()
-  //     .catch(error => {
-  //       console.error(`I’m not able to unlock Redis. The lock will expire after ${this.configuration.ttl}ms.`)
-
-  //       if (error) {
-  //         console.error(` - Error: ${error}`)
-  //       }
-  //     })
-  //     .finally(() => {
-  //       this.locks.delete(key)
-  //     })
-  // }
+        if (error) {
+          console.error(` - Error: ${error}`)
+        }
+      })
+      .finally(() => {
+        this.locks.delete(key)
+      })
+  }
 
   /**
    * Handle awareness update messages received directly by this Hocuspocus instance.
