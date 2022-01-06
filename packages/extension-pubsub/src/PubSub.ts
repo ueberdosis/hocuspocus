@@ -61,7 +61,7 @@ export class PubSub implements Extension {
     log: console.log, // eslint-disable-line
   }
 
-  publisher: Redis.Redis | Redis.Cluster
+  publisher: Redis.Redis
 
   subscriber: Redis.Redis
 
