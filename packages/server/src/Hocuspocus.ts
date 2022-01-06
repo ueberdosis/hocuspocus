@@ -451,9 +451,7 @@ export class Hocuspocus {
       throw e
     })
 
-    console.log('DEBOUNCE')
     this.debounce(`onStoreDocument-${document.name}`, () => {
-      console.log('RUN')
       this.hooks('onStoreDocument', hookPayload)
     })
   }
