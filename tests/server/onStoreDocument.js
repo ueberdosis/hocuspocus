@@ -296,6 +296,61 @@ context('server/onStoreDocument', () => {
     })
   })
 
+  it('stops when one of the onStoreDocument hooks rejects a promise', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+    let triggered = false
+
+    class BreakingTheChain {
+      async onStoreDocument() {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (triggered) {
+              return
+            }
+
+            triggered = true
+
+            server.destroy()
+            client.destroy()
+            done()
+
+            // Stop it!
+            reject()
+          }, 100)
+        })
+      }
+    }
+
+    class NotExecuted {
+      async onStoreDocument() {
+        // This MUST NOT be executed.
+        server.destroy()
+        client.destroy()
+        done()
+      }
+    }
+
+    server.configure({
+      port: 4000,
+      extensions: [
+        new BreakingTheChain(),
+        new NotExecuted(),
+      ],
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      ydoc.getArray('foo').insert(0, ['bar'])
+    })
+  })
+
   it('has the server instance', done => {
     const ydoc = new Y.Doc()
     const server = new Hocuspocus()
