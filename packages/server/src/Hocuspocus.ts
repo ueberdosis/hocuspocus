@@ -48,6 +48,7 @@ export class Hocuspocus {
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
+    afterStoreDocument: () => new Promise(r => r(null)),
     onAwarenessUpdate: () => new Promise(r => r(null)),
     onRequest: () => new Promise(r => r(null)),
     onDisconnect: () => new Promise(r => r(null)),
@@ -92,6 +93,7 @@ export class Hocuspocus {
       onLoadDocument,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
+      afterStoreDocument: this.configuration.afterStoreDocument,
       onAwarenessUpdate: this.configuration.onAwarenessUpdate,
       onRequest: this.configuration.onRequest,
       onDisconnect: this.configuration.onDisconnect,
@@ -456,7 +458,9 @@ export class Hocuspocus {
     })
 
     this.debounce(`onStoreDocument-${document.name}`, () => {
-      this.hooks('onStoreDocument', hookPayload)
+      this.hooks('onStoreDocument', hookPayload).then(() => {
+        this.hooks('afterStoreDocument', hookPayload)
+      })
     })
   }
 
@@ -531,7 +535,7 @@ export class Hocuspocus {
       }
     })
 
-    await this.hooks('onLoadedDocument', hookPayload)
+    await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
@@ -577,6 +581,8 @@ export class Hocuspocus {
         // but make it run immediately
         this.debounce(`onStoreDocument-${document.name}`, () => {
           this.hooks('onStoreDocument', hookPayload).then(() => {
+            this.hooks('afterStoreDocument', hookPayload)
+
             // Check if there are still no connections to the document, as these hooks
             // may take some time to resolve (e.g. database queries). If a
             // new connection were to come in during that time it would rely on the

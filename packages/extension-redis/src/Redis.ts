@@ -8,7 +8,7 @@ import {
   OutgoingMessage,
   Document,
   Extension,
-  onLoadedDocumentPayload,
+  afterLoadDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
 import { MessageReceiver } from './MessageReceiver'
@@ -92,10 +92,10 @@ export class Redis implements Extension {
     )
   }
 
-  public async onLoadedDocument({
+  public async afterLoadDocument({
     documentName,
     document,
-  }: onLoadedDocumentPayload) {
+  }: afterLoadDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {

@@ -49,9 +49,10 @@ export interface Extension {
    */
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
-  onLoadedDocument?(data: onLoadDocumentPayload): Promise<any>,
+  afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
+  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
   onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>,
   onRequest?(data: onRequestPayload): Promise<any>,
   onDisconnect?(data: onDisconnectPayload): Promise<any>
@@ -69,9 +70,10 @@ export type Hook =
    */
   'onCreateDocument' |
   'onLoadDocument' |
-  'onLoadedDocument' |
+  'afterLoadDocument' |
   'onChange' |
   'onStoreDocument' |
+  'afterStoreDocument' |
   'onAwarenessUpdate' |
   'onRequest' |
   'onDisconnect' |
@@ -148,7 +150,7 @@ export interface onLoadDocumentPayload {
   connection: ConnectionConfiguration
 }
 
-export interface onLoadedDocumentPayload {
+export interface afterLoadDocumentPayload {
   context: any,
   document: Document,
   documentName: string,
@@ -181,6 +183,8 @@ export interface onStoreDocumentPayload {
   requestParameters: URLSearchParams,
   socketId: string,
 }
+
+export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
 
 export interface onAwarenessUpdatePayload {
   clientsCount: number,
