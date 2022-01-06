@@ -24,7 +24,7 @@ context('pubsub/onPersist', () => {
     const ydoc = new Y.Doc()
     const anotherYdoc = new Y.Doc()
 
-    const onPersist = document => {
+    const onPersist = ({ document, instanceName }) => {
       assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
@@ -37,6 +37,7 @@ context('pubsub/onPersist', () => {
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
           instanceName: 'server',
+          namespace: 'pubsub/onPersist',
           persistWait,
           onPersist,
         }),
@@ -51,6 +52,7 @@ context('pubsub/onPersist', () => {
           log: () => {},
           // log: (...args) => console.log('anotherServer:', ...args),
           instanceName: 'anotherServer',
+          namespace: 'pubsub/onPersist',
           persistWait,
           onPersist,
         }),

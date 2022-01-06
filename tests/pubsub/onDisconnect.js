@@ -23,10 +23,11 @@ context('pubsub/onDisconnect', () => {
         new PubSub({
           ...opts,
           instanceName: 'server',
+          namespace: 'pubsub/onDisconnect',
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
-          onPersist: doc => {
-            assert.strictEqual(ydoc.getArray('foo').get(0), doc.getArray('foo').get(0))
+          onPersist: ({ document }) => {
+            assert.strictEqual(ydoc.getArray('foo').get(0), document.getArray('foo').get(0))
 
             client.destroy()
             server.destroy()
@@ -49,5 +50,5 @@ context('pubsub/onDisconnect', () => {
       ydoc.getArray('foo').insert(0, ['bar'])
       client.disconnect()
     })
-  }).timeout(5000)
+  }).timeout(10000)
 })

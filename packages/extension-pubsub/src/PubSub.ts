@@ -41,7 +41,7 @@ export interface Configuration {
   /**
    * onPersist callback will be called debounced persistWait seconds after the last document update
    */
-  onPersist?: (ydoc: Y.Doc) => Promise<void> | void,
+  onPersist?: ({ document, instanceName }: { document: Y.Doc, instanceName: string }) => Promise<void> | void,
   /**
    * A log function, if none is provided output will go to console
    */
@@ -152,7 +152,6 @@ export class PubSub implements Extension {
     // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    console.log('Trying to aquire lock …')
     this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (error, lock) => {
       if (error || !lock) {
         // could not acquire lock, expected behavior.
@@ -163,10 +162,11 @@ export class PubSub implements Extension {
       const updatedTime = result ? Date.parse(result) : undefined
 
       if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
-        console.log('Let’s persist …')
-        console.log('updatedTime:', updatedTime, 'this.configuration.persistWait:', this.configuration.persistWait, 'updatedTime < Date.now() - this.configuration.persistWait:', updatedTime < Date.now() - this.configuration.persistWait)
         if (this.configuration.onPersist) {
-          this.configuration.onPersist(document)
+          this.configuration.onPersist({
+            document,
+            instanceName: this.configuration.instanceName,
+          })
         }
       }
 
