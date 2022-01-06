@@ -16,11 +16,9 @@ We already created some very useful extensions you should check out for sure:
 
 **[@hocuspocus/extension-monitor](/api/extensions/monitor)**: A beautiful dashboard to monitor and debug your Hocuspocus instance.
 
-**[@hocuspocus/extension-redis](/api/extensions/redis)**: Scale Hocuspocus horizontally with redis.
+**[@hocuspocus/extension-redis](/api/extensions/redis)**: Scale Hocuspocus horizontally with Redis.
 
 **[@hocuspocus/extension-logger](/api/extensions/logger)**: Add logging to Hocuspocus.
-
-**[@hocuspocus/extension-pubsub](/api/extensions/pubsub)**: Horizontally scale using Redis.
 
 **[@hocuspocus/extension-webhook](/api/extensions/webhook)**: Send document changes via webhook to your API.
 

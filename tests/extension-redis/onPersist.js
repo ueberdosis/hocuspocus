@@ -2,7 +2,7 @@ import assert from 'assert'
 import * as Y from 'yjs'
 import WebSocket from 'ws'
 import { Hocuspocus } from '@hocuspocus/server'
-import { PubSub } from '@hocuspocus/extension-pubsub'
+import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const server = new Hocuspocus()
@@ -33,7 +33,7 @@ context('pubsub/onPersist', () => {
     server.configure({
       port: 4000,
       extensions: [
-        new PubSub({
+        new Redis({
           ...redisConfiguration,
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
@@ -48,7 +48,7 @@ context('pubsub/onPersist', () => {
     anotherServer.configure({
       port: 4001,
       extensions: [
-        new PubSub({
+        new Redis({
           ...redisConfiguration,
           log: () => {},
           // log: (...args) => console.log('anotherServer:', ...args),
