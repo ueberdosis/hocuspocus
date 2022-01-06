@@ -4,10 +4,10 @@
       Text Editing with Tiptap
     </h1>
 
-    <!-- <StatusBar
+    <StatusBar
       v-if="provider"
       :provider="provider"
-    /> -->
+    />
 
     <h2>
       Editor
@@ -19,7 +19,7 @@
       />
     </div>
 
-    <button @click="provider.setAwarenessField('foo', 'bar')">test</button>
+    <button @click="provider.setAwarenessField('foo', 'bar')">provider.setAwarenessField('foo', 'bar')</button>
 
     <h2>
       Another Editor
@@ -30,6 +30,8 @@
         class="editor"
       />
     </div>
+
+    <button @click="anotherProvider.setAwarenessField('foo', 'bar')">anotherProvider.setAwarenessField('foo', 'bar')</button>
   </div>
 </template>
 
