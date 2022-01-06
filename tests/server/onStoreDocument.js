@@ -7,13 +7,13 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 let client
 
 context('server/onStoreDocument', () => {
-  it('onStoreDocument callback is called before the document is removed from memory', done => {
+  it('calls the onStoreDocument hook before the document is removed from memory', done => {
     const ydoc = new Y.Doc()
     const server = new Hocuspocus()
 
     server.configure({
       port: 4000,
-      async onStoreDocument({ document }) {
+      async onStoreDocument() {
         server.destroy()
         client.destroy()
         done()
@@ -29,6 +29,95 @@ context('server/onStoreDocument', () => {
 
     client.on('synced', () => {
       client.destroy()
+    })
+  })
+
+  it.only('doesn’t remove the document from memory when there’s a new connection established during onStoreDocument is called', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+    let anotherClient
+
+    server.configure({
+      port: 4000,
+      async onStoreDocument() {
+        return new Promise((resolve, reject) => {
+          // Sleep for 1s …
+          setTimeout(() => {
+            // Done!
+            resolve()
+          }, 1000)
+        })
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    anotherClient = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+      connect: false,
+    })
+
+    client.on('synced', () => {
+      client.destroy()
+
+      setTimeout(() => {
+        anotherClient.connect()
+      }, 100)
+
+      setTimeout(() => {
+        assert.strictEqual(server.getDocumentsCount(), 1)
+
+        server.destroy()
+        anotherClient.destroy()
+        done()
+      }, 1100)
+    })
+  })
+
+  it.only('removes the document from memory when there’s no connection after onStoreDocument is called', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+
+    server.configure({
+      port: 4000,
+      async onStoreDocument() {
+        return new Promise((resolve, reject) => {
+          // Sleep for 1s …
+          setTimeout(() => {
+            // Done!
+            resolve()
+          }, 1000)
+        })
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      client.destroy()
+    })
+
+    client.on('destroy', () => {
+      // Check if the document is removed from memory …
+      setTimeout(() => {
+        assert.strictEqual(server.getDocumentsCount(), 0)
+
+        server.destroy()
+        done()
+      }, 1100)
     })
   })
 
