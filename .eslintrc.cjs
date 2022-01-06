@@ -57,16 +57,11 @@ module.exports = {
         'vue/one-component-per-file': 'off',
         'vue/this-in-template': ['error', 'never'],
         // 'vue/max-attributes-per-line': ['error', {
-<<<<<<< HEAD
-        //   multiline: 3,
-        //   multiline: 1,
-=======
         //   singleline: 3,
         //   multiline: {
         //     max: 1,
         //     allowFirstLine: false,
         //   },
->>>>>>> main
         // }],
         'vue/singleline-html-element-content-newline': 'off',
         'no-param-reassign': 'off',
