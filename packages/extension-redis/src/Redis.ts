@@ -40,13 +40,13 @@ export interface Configuration {
    */
   prefix: string,
   /**
-   * onPersist callback will be called debounced persistWait seconds after the last document update
-   */
-  onPersist?: ({ document, identifier }: { document: Y.Doc, identifier: string }) => Promise<void> | void,
-  /**
    * A log function, if none is provided output will go to console
    */
   log: (...args: any[]) => void,
+  /**
+   * Redis Lock TTL
+   */
+  ttl: number,
 }
 
 export class Redis implements Extension {
@@ -56,6 +56,7 @@ export class Redis implements Extension {
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
     log: console.log, // eslint-disable-line
+    ttl: 1000,
   }
 
   publisher: RedisClient.Redis
@@ -80,6 +81,18 @@ export class Redis implements Extension {
 
     this.subscriber = new RedisClient(port, host, options)
     this.subscriber.on('pmessageBuffer', this.handleIncomingMessage)
+  }
+
+  private getKey(documentName: string) {
+    return `${this.configuration.prefix}:${documentName}`
+  }
+
+  private pubKey(documentName: string) {
+    return `${this.getKey(documentName)}:${this.configuration.identifier.replace(/:/g, '')}`
+  }
+
+  private subKey(documentName: string) {
+    return `${this.getKey(documentName)}:*`
   }
 
   public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
@@ -125,74 +138,49 @@ export class Redis implements Extension {
     )
   }
 
-  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
-    // Still clients connected?
-    if (clientsCount > 0) {
-      return
-    }
+  async onStoreDocument({ documentName, instance }: onStoreDocumentPayload) {
+    return new Promise((resolve, reject) => {
+      const key = `${this.getKey(documentName)}:lock`
+      // console.log(`[${instance.configuration.name}] Lock ${key}…`)
 
-    this.configuration.log('last disconnect', documentName)
-
-    this.documents.delete(documentName)
-
-    // on final connection close sub channel
-    this.subscriber.punsubscribe(this.subKey(documentName), error => {
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
-    })
-  }
-
-  async onStoreDocument({ document, documentName, instance }: onStoreDocumentPayload) {
-    const ttl = 1000
-    const key = `${this.getKey(documentName)}:lock`
-    // console.log(`[${instance.configuration.name}] Lock ${key}…`)
-
-    // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-    // if the value < debounce start then it can call the onPersist callback
-    // for the host application to write to disk
-    this.redlock.lock(key, ttl, async (error, lock) => {
-      if (error || !lock) {
-        // Expected behavior: Could not acquire lock,
-        // another instance locked it already.
-        throw new Error(error)
-      }
-
-      this.locks.set(key, lock)
-
-      if (!this.configuration.onPersist) {
-        return
-      }
-
-      // console.log(`[${instance.configuration.name}] Persist!`)
-      return this.configuration.onPersist({
-        document,
-        identifier: this.configuration.identifier,
-      })
-    })
-  }
-
-  async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
-    // TODO: Move to configuration
-    const ttl = 1000
-    const key = `${this.getKey(documentName)}:lock`
-    // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
-
-    this.locks.get(key)?.unlock()
-      .catch(error => {
-        console.error(`I’m not able to unlock Redis. The lock will expire after ${ttl}ms.`)
-
-        if (error) {
-          console.error(` - Error: ${error}`)
+      // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
+      // if the value < debounce start then it can call the onPersist callback
+      // for the host application to write to disk
+      this.redlock.lock(key, this.configuration.ttl, async (error, lock) => {
+        if (error || !lock) {
+          // Expected behavior: Could not acquire lock,
+          // another instance locked it already.
+          reject()
+          return
         }
+
+        this.locks.set(key, lock)
+
+        resolve(undefined)
       })
-      .finally(() => {
-        this.locks.delete(key)
-      })
+    })
   }
+
+  // TODO: If locks are released to quickly, all instances store documents.
+  // The TTL of 1000ms blocks all other instances from storing the document.
+  // This … feels wrong, but it works. Should we keep it like that?
+
+  // async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
+  //   const key = `${this.getKey(documentName)}:lock`
+  //   // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
+
+  //   this.locks.get(key)?.unlock()
+  //     .catch(error => {
+  //       console.error(`I’m not able to unlock Redis. The lock will expire after ${this.configuration.ttl}ms.`)
+
+  //       if (error) {
+  //         console.error(` - Error: ${error}`)
+  //       }
+  //     })
+  //     .finally(() => {
+  //       this.locks.delete(key)
+  //     })
+  // }
 
   /**
    * Handle awareness update messages received directly by this Hocuspocus instance.
@@ -234,20 +222,25 @@ export class Redis implements Extension {
     })
   }
 
-  private getKey(documentName: string) {
-    return `${this.configuration.prefix}:${documentName}`
-  }
+  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
+    // Still clients connected?
+    if (clientsCount > 0) {
+      return
+    }
 
-  private pubKey(documentName: string) {
-    return `${this.getKey(documentName)}:${this.configuration.identifier.replace(/:/g, '')}`
-  }
+    this.configuration.log('last disconnect', documentName)
 
-  private subKey(documentName: string) {
-    return `${this.getKey(documentName)}:*`
-  }
+    this.documents.delete(documentName)
 
-  private updatedKey(documentName: string) {
-    return `${this.getKey(documentName)}:updated`
+    // on final connection close sub channel
+    this.subscriber.punsubscribe(this.subKey(documentName), error => {
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
+    })
   }
 
   async onDestroy() {
