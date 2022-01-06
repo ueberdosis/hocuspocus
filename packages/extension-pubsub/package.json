@@ -28,16 +28,16 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/ioredis": "^4.27.4",
+    "@types/ioredis": "^4.28.7",
     "@types/lodash.debounce": "^4.0.6",
-    "@types/redlock": "^4.0.2"
+    "@types/redlock": "^4.0.3"
   },
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.70",
-    "ioredis": "^4.0.0",
+    "@hocuspocus/server": "^1.0.0-alpha.90",
+    "ioredis": "^4.28.2",
     "lodash.debounce": "^4.0.8",
     "redlock": "^4.2.0",
-    "yjs": "^13.5.0",
-    "y-protocols": "^1.0.0"
+    "yjs": "^13.5.23",
+    "y-protocols": "^1.0.5"
   }
 }
