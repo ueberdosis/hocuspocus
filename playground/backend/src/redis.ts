@@ -8,10 +8,15 @@ const server = new Hocuspocus().configure({
   extensions: [
     new Logger(),
     new Redis({
+      identifier: 'redis-1',
       host: '127.0.0.1',
       port: 6379,
     }),
   ],
+
+  onAwarenessUpdate: async ({ documentName, states }) => {
+    console.log('onAwarenessUpdate', documentName, states)
+  },
 })
 
 server.listen()
@@ -22,6 +27,7 @@ const anotherServer = new Hocuspocus().configure({
   extensions: [
     new Logger(),
     new Redis({
+      identifier: 'redis-2',
       host: '127.0.0.1',
       port: 6379,
     }),

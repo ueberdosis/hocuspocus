@@ -19,7 +19,7 @@
       />
     </div>
 
-    <button @click="provider.setAwarenessField('foo', 'bar')">provider.setAwarenessField('foo', 'bar')</button>
+    <button @click="provider.setAwarenessField('date', Date.now())">provider.setAwarenessField('date', Date.now())</button>
 
     <h2>
       Another Editor
@@ -31,7 +31,7 @@
       />
     </div>
 
-    <button @click="anotherProvider.setAwarenessField('foo', 'bar')">anotherProvider.setAwarenessField('foo', 'bar')</button>
+    <button @click="anotherProvider.setAwarenessField('date', Date.now())">anotherProvider.setAwarenessField('date', Date.now())</button>
   </div>
 </template>
 
@@ -76,9 +76,6 @@ export default {
       broadcast: false,
       onAwarenessChange: ({ states }) => {
         console.log('anotherProvider', states)
-      },
-      onSynced: () => {
-        console.log(this.anotherProvider.awareness.states)
       },
     })
 

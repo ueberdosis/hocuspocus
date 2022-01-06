@@ -6,12 +6,14 @@ import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import kleur from 'kleur'
 import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
+import { awarenessStatesToArray } from '@hocuspocus/provider'
 import {
   MessageType,
   Configuration,
   ConnectionConfiguration,
   WsReadyStates,
   Hook,
+  AwarenessUpdate,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -38,17 +40,18 @@ export class Hocuspocus {
   configuration: Configuration = {
     ...defaultConfiguration,
     extensions: [],
-    onChange: () => new Promise(r => r(null)),
     onConfigure: () => new Promise(r => r(null)),
+    onListen: () => new Promise(r => r(null)),
+    onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
+    onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
-    onDestroy: () => new Promise(r => r(null)),
-    onDisconnect: () => new Promise(r => r(null)),
-    onListen: () => new Promise(r => r(null)),
+    onAwarenessUpdate: () => new Promise(r => r(null)),
     onRequest: () => new Promise(r => r(null)),
-    onUpgrade: () => new Promise(r => r(null)),
+    onDisconnect: () => new Promise(r => r(null)),
+    onDestroy: () => new Promise(r => r(null)),
   }
 
   documents = new Map()
@@ -81,17 +84,18 @@ export class Hocuspocus {
     }
 
     this.configuration.extensions.push({
-      onAuthenticate: this.configuration.onAuthenticate,
-      onChange: this.configuration.onChange,
       onConfigure: this.configuration.onConfigure,
-      onConnect: this.configuration.onConnect,
-      onLoadDocument,
-      onStoreDocument: this.configuration.onStoreDocument,
-      onDestroy: this.configuration.onDestroy,
-      onDisconnect: this.configuration.onDisconnect,
       onListen: this.configuration.onListen,
-      onRequest: this.configuration.onRequest,
       onUpgrade: this.configuration.onUpgrade,
+      onConnect: this.configuration.onConnect,
+      onAuthenticate: this.configuration.onAuthenticate,
+      onLoadDocument,
+      onChange: this.configuration.onChange,
+      onStoreDocument: this.configuration.onStoreDocument,
+      onAwarenessUpdate: this.configuration.onAwarenessUpdate,
+      onRequest: this.configuration.onRequest,
+      onDisconnect: this.configuration.onDisconnect,
+      onDestroy: this.configuration.onDestroy,
     })
 
     this.hooks('onConfigure', {
@@ -531,6 +535,15 @@ export class Hocuspocus {
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+    })
+
+    document.awareness.on('update', ({ update }: { update: AwarenessUpdate }) => {
+      this.hooks('onAwarenessUpdate', {
+        ...hookPayload,
+        ...update,
+        awareness: document.awareness,
+        states: awarenessStatesToArray(document.awareness.getStates()),
+      })
     })
 
     return document

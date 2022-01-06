@@ -3,6 +3,7 @@ import {
 } from 'http'
 import { URLSearchParams } from 'url'
 import { Socket } from 'net'
+import { Awareness } from 'y-protocols/awareness'
 import Document from './Document'
 import { Hocuspocus } from './Hocuspocus'
 
@@ -38,41 +39,43 @@ export interface ConnectionConfiguration {
 }
 
 export interface Extension {
-  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
-  onChange?(data: onChangePayload): Promise<any>,
-  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
-  onConnect?(data: onConnectPayload): Promise<any>,
   onConfigure?(data: onConfigurePayload): Promise<any>,
+  onListen?(data: onListenPayload): Promise<any>,
+  onUpgrade?(data: onUpgradePayload): Promise<any>,
+  onConnect?(data: onConnectPayload): Promise<any>,
+  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadedDocument?(data: onLoadDocumentPayload): Promise<any>,
-  onDestroy?(data: onDestroyPayload): Promise<any>,
-  onDisconnect?(data: onDisconnectPayload): Promise<any>
-  onListen?(data: onListenPayload): Promise<any>,
+  onChange?(data: onChangePayload): Promise<any>,
+  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
+  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>,
   onRequest?(data: onRequestPayload): Promise<any>,
-  onUpgrade?(data: onUpgradePayload): Promise<any>,
+  onDisconnect?(data: onDisconnectPayload): Promise<any>
+  onDestroy?(data: onDestroyPayload): Promise<any>,
 }
 
 export type Hook =
-  'onAuthenticate' |
-  'onChange' |
-  'onConnect' |
   'onConfigure' |
+  'onListen' |
+  'onUpgrade' |
+  'onConnect' |
+  'onAuthenticate' |
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   'onCreateDocument' |
   'onLoadDocument' |
   'onLoadedDocument' |
+  'onChange' |
   'onStoreDocument' |
-  'onDestroy' |
-  'onDisconnect' |
-  'onListen' |
+  'onAwarenessUpdate' |
   'onRequest' |
-  'onUpgrade'
+  'onDisconnect' |
+  'onDestroy'
 
 export interface Configuration extends Extension {
   /**
@@ -177,6 +180,23 @@ export interface onStoreDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
+}
+
+export interface onAwarenessUpdatePayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  update: Uint8Array,
+  socketId: string,
+  added: number[],
+  updated: number[],
+  removed: number[],
+  awareness: Awareness,
+  states: any[],
 }
 
 export interface storePayload extends onStoreDocumentPayload {

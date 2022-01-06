@@ -71,6 +71,12 @@
     - title: Hooks
       link: /api/hooks
       items:
+        - title: onConfigure
+          link: /api/hooks/on-configure
+        - title: onListen
+          link: /api/hooks/on-listen
+        - title: onUpgrade
+          link: /api/hooks/on-upgrade
         - title: onConnect
           link: /api/hooks/on-connect
         - title: onAuthenticate
@@ -79,18 +85,16 @@
           link: /api/hooks/on-load-document
         - title: onChange
           link: /api/hooks/on-change
-        - title: onDisconnect
-          link: /api/hooks/on-disconnect
-        - title: onListen
-          link: /api/hooks/on-listen
-        - title: onDestroy
-          link: /api/hooks/on-destroy
-        - title: onConfigure
-          link: /api/hooks/on-configure
+        - title: onStoreDocument
+          link: /api/hooks/on-store-document
+        - title: onAwarenessUpdate
+          link: /api/hooks/on-awareness-update
         - title: onRequest
           link: /api/hooks/on-request
-        - title: onUpgrade
-          link: /api/hooks/on-upgrade
+        - title: onDisconnect
+          link: /api/hooks/on-disconnect
+        - title: onDestroy
+          link: /api/hooks/on-destroy
 
     - title: Extensions
       link: /api/extensions
