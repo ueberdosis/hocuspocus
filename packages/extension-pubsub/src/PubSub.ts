@@ -254,4 +254,8 @@ export class PubSub implements Extension {
   private updatedKey(documentName: string) {
     return `${this.getKey(documentName)}:updated`
   }
+
+  async onDestroy() {
+    this.redlock.quit()
+  }
 }
