@@ -26,7 +26,7 @@ context('extension-redis/onDisconnect', () => {
           prefix: 'extension-redis/onDisconnect',
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
-          onPersist: ({ document }) => {
+          onPersist: async ({ document }) => {
             assert.strictEqual(ydoc.getArray('foo').get(0), document.getArray('foo').get(0))
 
             client.destroy()

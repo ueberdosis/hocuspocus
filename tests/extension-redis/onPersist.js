@@ -24,12 +24,13 @@ context('extension-redis/onPersist', () => {
     const ydoc = new Y.Doc()
     const anotherYdoc = new Y.Doc()
 
-    const onPersist = ({ document, identifier }) => {
+    const onPersist = async ({ document, identifier }) => {
       console.log(`extension-redis/onPersist [${identifier}] onPersist`)
       assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
     }
+
     server.configure({
       port: 4000,
       extensions: [

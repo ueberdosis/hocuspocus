@@ -9,7 +9,9 @@ import {
   Document,
   Extension,
   afterLoadDocumentPayload,
+  afterStoreDocumentPayload,
   onDisconnectPayload,
+  onStoreDocumentPayload,
 } from '@hocuspocus/server'
 import { MessageReceiver } from './MessageReceiver'
 
@@ -38,10 +40,6 @@ export interface Configuration {
    */
   prefix: string,
   /**
-   * The period of time to wait between calling onPersist, you should choose a balance between reliability and load
-   */
-  persistWait: number,
-  /**
    * onPersist callback will be called debounced persistWait seconds after the last document update
    */
   onPersist?: ({ document, identifier }: { document: Y.Doc, identifier: string }) => Promise<void> | void,
@@ -57,7 +55,6 @@ export class Redis implements Extension {
     host: '127.0.0.1',
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
-    persistWait: 3000,
     log: console.log, // eslint-disable-line
   }
 
@@ -65,11 +62,11 @@ export class Redis implements Extension {
 
   subscriber: RedisClient.Redis
 
-  redlock: Redlock
-
   documents = new Map()
 
-  debouncedUpdate: (document: Document) => void
+  redlock: Redlock
+
+  locks = new Map<string, Redlock.Lock>()
 
   public constructor(configuration: Partial<Configuration>) {
     const { port, host, options } = configuration
@@ -83,19 +80,9 @@ export class Redis implements Extension {
 
     this.subscriber = new RedisClient(port, host, options)
     this.subscriber.on('pmessageBuffer', this.handleIncomingMessage)
-
-    // debounced handler should be setup here in the constructor so that the
-    // wait time can be configurable
-    this.debouncedUpdate = debounce(
-      this.handlePersistDocument,
-      this.configuration.persistWait,
-    )
   }
 
-  public async afterLoadDocument({
-    documentName,
-    document,
-  }: afterLoadDocumentPayload) {
+  public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
@@ -109,7 +96,7 @@ export class Redis implements Extension {
 
         this.configuration.log('subscribed', this.subKey(documentName))
 
-        document.on('update', this.handleUpdate(document))
+        // document.on('update', this.handleUpdate(document))
         this.publishFirstSyncStep(documentName, document)
 
         document.awareness.on('update', this.handleAwarenessUpdate(document))
@@ -159,42 +146,56 @@ export class Redis implements Extension {
     })
   }
 
-  private handlePersistDocument = async (document: Document) => {
+  async onStoreDocument({ document, documentName, instance }: onStoreDocumentPayload) {
     const ttl = 1000
+    const key = `${this.getKey(documentName)}:lock`
+    // console.log(`[${instance.configuration.name}] Lock ${key}…`)
 
-    // attempt to acquire a lock and read lastReceivedTimestamp from Redis,
+    // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    this.redlock.lock(`${this.getKey(document.name)}:lock`, ttl, async (error, lock) => {
+    this.redlock.lock(key, ttl, async (error, lock) => {
       if (error || !lock) {
-        // could not acquire lock, expected behavior.
+        // Expected behavior: Could not acquire lock,
+        // another instance locked it already.
+        throw new Error(error)
+      }
+
+      this.locks.set(key, lock)
+
+      if (!this.configuration.onPersist) {
         return
       }
 
-      const result = await this.publisher.get(this.updatedKey(document.name))
-      const updatedTime = result ? Date.parse(result) : undefined
+      // console.log(`[${instance.configuration.name}] Persist!`)
+      return this.configuration.onPersist({
+        document,
+        identifier: this.configuration.identifier,
+      })
+    })
+  }
 
-      if (updatedTime && updatedTime < Date.now() - this.configuration.persistWait) {
-        if (this.configuration.onPersist) {
-          this.configuration.onPersist({
-            document,
-            identifier: this.configuration.identifier,
-          })
-        }
-      }
+  async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
+    // TODO: Move to configuration
+    const ttl = 1000
+    const key = `${this.getKey(documentName)}:lock`
+    // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
 
-      lock.unlock(error => {
-        console.error(`I’m not able to reach Redis. The lock will expire after ${ttl}ms.`)
+    this.locks.get(key)?.unlock()
+      .catch(error => {
+        console.error(`I’m not able to unlock Redis. The lock will expire after ${ttl}ms.`)
 
         if (error) {
           console.error(` - Error: ${error}`)
         }
       })
-    })
+      .finally(() => {
+        this.locks.delete(key)
+      })
   }
 
   /**
-   * Handle awareness update messages received directly by this hocuspocus instance.
+   * Handle awareness update messages received directly by this Hocuspocus instance.
   */
   private handleAwarenessUpdate(document: Document) {
     return async () => {
@@ -202,28 +203,6 @@ export class Redis implements Extension {
         .createAwarenessUpdateMessage(document.awareness)
 
       await this.publisher.publishBuffer(this.pubKey(document.name), Buffer.from(message.toUint8Array()))
-    }
-  }
-
-  /**
-   * Handle document update messages received directly by this hocuspocus instance.
-  */
-  private handleUpdate(document: Document) {
-    return async (update: Uint8Array) => {
-      this.configuration.log('publishing local update')
-
-      const message = new OutgoingMessage()
-        .createSyncMessage()
-        .writeUpdate(update)
-
-      // forward all update messages received to redis channel
-      await this.publisher.publishBuffer(this.pubKey(document.name), Buffer.from(message.toUint8Array()))
-
-      // update the lastReceivedTimestamp in a Redis key for documentName if source is this server.
-      await this.publisher.set(this.updatedKey(document.name), new Date().toISOString())
-
-      // When a node receives an update event from the client or another server it sets an in memory debounce (eg 3 seconds)
-      this.debouncedUpdate(document)
     }
   }
 

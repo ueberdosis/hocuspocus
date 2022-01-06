@@ -453,8 +453,8 @@ export class Hocuspocus {
       update,
     }
 
-    this.hooks('onChange', hookPayload).catch(e => {
-      throw e
+    this.hooks('onChange', hookPayload).catch(error => {
+      throw error
     })
 
     this.debounce(`onStoreDocument-${document.name}`, () => {
