@@ -41,6 +41,7 @@ export class Hocuspocus {
     onConnect: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
+    onStoreDocument: () => new Promise(r => r(null)),
     onDestroy: () => new Promise(r => r(null)),
     onDisconnect: () => new Promise(r => r(null)),
     onListen: () => new Promise(r => r(null)),
@@ -83,6 +84,7 @@ export class Hocuspocus {
       onConfigure: this.configuration.onConfigure,
       onConnect: this.configuration.onConnect,
       onLoadDocument,
+      onStoreDocument: this.configuration.onStoreDocument,
       onDestroy: this.configuration.onDestroy,
       onDisconnect: this.configuration.onDisconnect,
       onListen: this.configuration.onListen,
@@ -446,6 +448,10 @@ export class Hocuspocus {
     this.hooks('onChange', hookPayload).catch(e => {
       throw e
     })
+
+    this.hooks('onStoreDocument', hookPayload).catch(e => {
+      throw e
+    })
   }
 
   /**
@@ -517,6 +523,8 @@ export class Hocuspocus {
       // new connection were to come in during that time it would rely on the
       // document in the map that we later remove.
       if (document.getConnectionsCount() <= 0) {
+        this.hooks('onStoreDocument', hookPayload)
+
         this.documents.delete(document.name)
       }
 

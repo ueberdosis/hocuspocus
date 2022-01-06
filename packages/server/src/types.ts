@@ -40,6 +40,7 @@ export interface ConnectionConfiguration {
 export interface Extension {
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   onChange?(data: onChangePayload): Promise<any>,
+  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
   onConnect?(data: onConnectPayload): Promise<any>,
   onConfigure?(data: onConfigurePayload): Promise<any>,
   /**
@@ -64,8 +65,9 @@ export type Hook =
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   'onCreateDocument' |
-  'onLoadedDocument' |
   'onLoadDocument' |
+  'onLoadedDocument' |
+  'onStoreDocument' |
   'onDestroy' |
   'onDisconnect' |
   'onListen' |
@@ -154,6 +156,17 @@ export interface onChangePayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   update: Uint8Array,
+  socketId: string,
+}
+
+export interface onStoreDocumentPayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
   socketId: string,
 }
 
