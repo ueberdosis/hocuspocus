@@ -1,7 +1,7 @@
-import os from 'os'
 import RedisClient from 'ioredis'
 import Redlock from 'redlock'
 import debounce from 'lodash.debounce'
+import { v4 as uuid } from 'uuid'
 import * as Y from 'yjs'
 import {
   IncomingMessage,
@@ -30,7 +30,7 @@ export interface Configuration {
   options?: RedisClient.RedisOptions,
   /**
    * An unique instance name, required to filter messages in Redis.
-   * If none is provided the os hostname is used.
+   * If none is provided an unique id is generated.
    */
   identifier: string,
   /**
@@ -56,7 +56,7 @@ export class Redis implements Extension {
     port: 6379,
     host: '127.0.0.1',
     prefix: 'hocuspocus',
-    identifier: os.hostname(),
+    identifier: `host-${uuid()}`,
     persistWait: 3000,
     log: console.log, // eslint-disable-line
   }

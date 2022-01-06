@@ -21,6 +21,11 @@
 
     <button @click="provider.setAwarenessField('date', Date.now())">provider.setAwarenessField('date', Date.now())</button>
 
+    <StatusBar
+      v-if="anotherProvider"
+      :provider="anotherProvider"
+    />
+
     <h2>
       Another Editor
     </h2>
@@ -97,7 +102,7 @@ export default {
           history: false,
         }),
         Collaboration.configure({
-          document: this.provider.document,
+          document: this.anotherProvider.document,
           field: 'default',
         }),
       ],

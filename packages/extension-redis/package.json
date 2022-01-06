@@ -36,8 +36,9 @@
     "ioredis": "^4.28.2",
     "lodash.debounce": "^4.0.8",
     "redlock": "^4.2.0",
-    "yjs": "^13.5.23",
-    "y-protocols": "^1.0.5"
+    "uuid": "^8.3.2",
+    "y-protocols": "^1.0.5",
+    "yjs": "^13.5.23"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
