@@ -157,7 +157,7 @@ context('server/onStoreDocument', () => {
     })
   })
 
-  it.only('debounces document changes for onStoreDocument hooks', done => {
+  it('debounces document changes for onStoreDocument hooks', done => {
     const ydoc = new Y.Doc()
     const server = new Hocuspocus()
 
