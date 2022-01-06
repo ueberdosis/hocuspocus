@@ -142,7 +142,7 @@ export interface onLoadedDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onChangePayload {
