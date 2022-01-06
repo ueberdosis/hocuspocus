@@ -25,6 +25,7 @@ context('pubsub/onPersist', () => {
     const anotherYdoc = new Y.Doc()
 
     const onPersist = ({ document, instanceName }) => {
+      console.log(`pubsub/onPersist [${instanceName}] onPersist`)
       assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
