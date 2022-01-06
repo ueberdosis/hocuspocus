@@ -2,6 +2,21 @@ import { Database, DatabaseConfiguration } from '@hocuspocus/extension-database'
 import sqlite3 from 'sqlite3'
 import kleur from 'kleur'
 
+export const schema = `CREATE TABLE IF NOT EXISTS "documents" (
+  "name" varchar(255) NOT NULL,
+  "data" blob NOT NULL,
+  UNIQUE(name)
+)`
+
+export const selectQuery = `
+  SELECT data FROM "documents" WHERE name = $name ORDER BY rowid DESC
+`
+
+export const upsertQuery = `
+  INSERT INTO "documents" ("name", "data") VALUES ($name, $data)
+    ON CONFLICT(name) DO UPDATE SET data = $data
+`
+
 export interface SQLiteConfiguration extends DatabaseConfiguration {
   /**
    * Valid values are filenames, ":memory:" for an anonymous in-memory database and an empty
@@ -22,16 +37,10 @@ export class SQLite extends Database {
 
   configuration: SQLiteConfiguration = {
     database: ':memory:',
-    schema: `CREATE TABLE IF NOT EXISTS "documents" (
-        "name" varchar(255) NOT NULL,
-        "data" blob NOT NULL,
-        UNIQUE(name)
-    );`,
+    schema,
     fetch: async ({ documentName }) => {
       return new Promise((resolve, reject) => {
-        this.db?.get(`
-          SELECT data FROM "documents" WHERE name = $name ORDER BY rowid DESC
-        `, {
+        this.db?.get(selectQuery, {
           $name: documentName,
         }, (error, row) => {
           if (error) {
@@ -42,13 +51,10 @@ export class SQLite extends Database {
         })
       })
     },
-    store: async ({ documentName, update }) => {
-      this.db?.run(`
-        INSERT INTO "documents" ("name", "data") VALUES ($name, $data)
-          ON CONFLICT(name) DO UPDATE SET data = $data
-      `, {
+    store: async ({ documentName, state }) => {
+      this.db?.run(upsertQuery, {
         $name: documentName,
-        $data: update,
+        $data: state,
       })
     },
   }

@@ -50,10 +50,10 @@ export class Database implements Extension {
   /**
    * Store new updates in the database.
    */
-  async onChange(data: onChangePayload) {
+  async onStoreDocument(data: onChangePayload) {
     return this.configuration.store({
       ...data,
-      update: Buffer.from(
+      state: Buffer.from(
         Y.encodeStateAsUpdate(data.document),
       ),
     })

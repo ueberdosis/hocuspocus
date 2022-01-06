@@ -179,8 +179,8 @@ export interface onStoreDocumentPayload {
   socketId: string,
 }
 
-export interface storePayload extends onChangePayload {
-  update: Buffer,
+export interface storePayload extends onStoreDocumentPayload {
+  state: Buffer,
 }
 
 export interface onDisconnectPayload {
