@@ -6,7 +6,7 @@ import { PubSub } from '@hocuspocus/extension-pubsub'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const server = new Hocuspocus()
-const server1 = new Hocuspocus()
+const anotherServer = new Hocuspocus()
 
 const opts = {
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -27,14 +27,14 @@ context('pubsub/onChange', () => {
       ],
     }).listen()
 
-    server1.configure({
+    anotherServer.configure({
       port: 4001,
       extensions: [
         new PubSub({
           ...opts,
-          instanceName: 'server1',
+          instanceName: 'anotherServer',
           log: () => {},
-          // log: (...args) => console.log('server1:', ...args),
+          // log: (...args) => console.log('anotherServer:', ...args),
         }),
       ],
     }).listen()
@@ -42,13 +42,13 @@ context('pubsub/onChange', () => {
 
   after(() => {
     server.destroy()
-    server1.destroy()
+    anotherServer.destroy()
   })
 
   it('syncs updates between servers and clients', done => {
     const ydoc = new Y.Doc()
-    const ydoc1 = new Y.Doc()
-    let client1
+    const anotherYdoc = new Y.Doc()
+    let anotherClient
 
     const client = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4000',
@@ -64,27 +64,27 @@ context('pubsub/onChange', () => {
       // matches the doc from the other client
       client.on('message', () => {
         setTimeout(() => {
-          assert.strictEqual(ydoc.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
+          assert.strictEqual(ydoc.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
 
           client.destroy()
-          client1.destroy()
+          anotherClient.destroy()
           done()
         }, 0)
       })
     })
 
-    client1 = new HocuspocusProvider({
+    anotherClient = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4001',
       name: 'hocuspocus-test',
-      document: ydoc1,
+      document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       broadcast: false,
       onSynced: () => {
-        // once we're setup make an edit on client1, to get to client it will need
+        // once we're setup make an edit on anotherClient, to get to client it will need
         // to pass through the pubsub extension:
-        // client1 -> server1 -> pubsub -> server -> client
-        ydoc1.getArray('foo').insert(0, ['bar'])
+        // anotherClient -> anotherServer -> pubsub -> server -> client
+        anotherYdoc.getArray('foo').insert(0, ['bar'])
       },
     })
   })

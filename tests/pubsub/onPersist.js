@@ -6,7 +6,7 @@ import { PubSub } from '@hocuspocus/extension-pubsub'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const server = new Hocuspocus()
-const server1 = new Hocuspocus()
+const anotherServer = new Hocuspocus()
 const persistWait = 1000
 
 const redisConfiguration = {
@@ -17,15 +17,15 @@ const redisConfiguration = {
 context('pubsub/onPersist', () => {
   after(() => {
     server.destroy()
-    server1.destroy()
+    anotherServer.destroy()
   })
 
   it('syncs updates between servers and clients', done => {
     const ydoc = new Y.Doc()
-    const ydoc1 = new Y.Doc()
+    const anotherYdoc = new Y.Doc()
 
     const onPersist = document => {
-      assert.strictEqual(document.getArray('foo').get(0), ydoc1.getArray('foo').get(0))
+      assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
     }
@@ -43,14 +43,14 @@ context('pubsub/onPersist', () => {
       ],
     }).listen()
 
-    server1.configure({
+    anotherServer.configure({
       port: 4001,
       extensions: [
         new PubSub({
           ...redisConfiguration,
           log: () => {},
-          // log: (...args) => console.log('server1:', ...args),
-          instanceName: 'server1',
+          // log: (...args) => console.log('anotherServer:', ...args),
+          instanceName: 'anotherServer',
           persistWait,
           onPersist,
         }),
@@ -66,18 +66,18 @@ context('pubsub/onPersist', () => {
       broadcast: false,
     })
 
-    const client1 = new HocuspocusProvider({
+    const anotherClient = new HocuspocusProvider({
       url: 'ws://127.0.0.1:4001',
       name: 'hocuspocus-test',
-      document: ydoc1,
+      document: anotherYdoc,
       WebSocketPolyfill: WebSocket,
       maxAttempts: 1,
       broadcast: false,
       onSynced: () => {
-        // once we're setup make an edit on client1, if all succeeds the onPersist
+        // once we're setup make an edit on anotherClient, if all succeeds the onPersist
         // callback will be called after the debounce period and all docs will
         // be identical
-        ydoc1.getArray('foo').insert(0, ['bar'])
+        anotherYdoc.getArray('foo').insert(0, ['bar'])
       },
     })
   })

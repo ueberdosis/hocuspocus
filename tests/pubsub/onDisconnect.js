@@ -6,7 +6,6 @@ import { PubSub } from '@hocuspocus/extension-pubsub'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const server = new Hocuspocus()
-const server1 = new Hocuspocus()
 
 const opts = {
   host: process.env.REDIS_HOST || '127.0.0.1',
