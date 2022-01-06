@@ -92,6 +92,15 @@ export interface Configuration extends Extension {
    */
   timeout: number,
   /**
+   * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
+   * Otherwise every single update would be persisted.
+   */
+  debounce: number,
+  /**
+   * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
+   */
+  maxDebounce: number
+  /**
    * By default, the servers show a start screen. If passed false, the server will start quietly.
    */
   quiet: boolean,

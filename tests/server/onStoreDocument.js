@@ -157,6 +157,51 @@ context('server/onStoreDocument', () => {
     })
   })
 
+  it.only('debounces document changes for onStoreDocument hooks', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+
+    let executedOnChange = 0
+    let executedOnStoreDocument = 0
+
+    server.configure({
+      port: 4000,
+      debounce: 10,
+      async onChange() {
+        executedOnChange += 1
+      },
+      async onStoreDocument() {
+        executedOnStoreDocument += 1
+      },
+      async onDestroy() {
+        assert.strictEqual(executedOnChange, 5)
+        assert.strictEqual(executedOnStoreDocument, 1)
+
+        client.destroy()
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      ydoc.getArray('foo').push(['foo'])
+      ydoc.getArray('foo').push(['bar'])
+      ydoc.getArray('foo').push(['barfoo'])
+      ydoc.getArray('foo').push(['foobar'])
+      ydoc.getArray('foo').push(['foofoo'])
+
+      setTimeout(() => {
+        server.destroy()
+      }, 100)
+    })
+  })
+
   it('executes onStoreDocument callback from an extension', done => {
     const ydoc = new Y.Doc()
     const server = new Hocuspocus()

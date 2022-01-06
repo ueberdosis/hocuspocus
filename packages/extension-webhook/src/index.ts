@@ -9,7 +9,6 @@ import {
 import { Doc } from 'yjs'
 import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
 import axios, { AxiosResponse } from 'axios'
-import Timeout = NodeJS.Timeout
 
 export enum Events {
   onChange = 'change',
@@ -43,7 +42,7 @@ export class Webhook implements Extension {
     ],
   }
 
-  debounced: Map<string, { timeout: Timeout, start: number }> = new Map()
+  debounced: Map<string, { timeout: NodeJS.Timeout, start: number }> = new Map()
 
   /**
    * Constructor

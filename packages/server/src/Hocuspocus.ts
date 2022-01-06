@@ -24,6 +24,8 @@ export const defaultConfiguration = {
   name: null,
   port: 80,
   timeout: 30000,
+  debounce: 2000,
+  maxDebounce: 10000,
   quiet: false,
 }
 
@@ -449,8 +451,45 @@ export class Hocuspocus {
       throw e
     })
 
-    this.hooks('onStoreDocument', hookPayload).catch(e => {
-      throw e
+    console.log('DEBOUNCE')
+    this.debounce(`onStoreDocument-${document.name}`, () => {
+      console.log('RUN')
+      this.hooks('onStoreDocument', hookPayload)
+    })
+  }
+
+  timers: Map<string, {
+    timeout: NodeJS.Timeout,
+    start: number
+  }> = new Map()
+
+  /**
+   * debounce the given function, using the given identifier
+   */
+  debounce(id: string, func: Function, immediately = false) {
+    const old = this.timers.get(id)
+    const start = old?.start || Date.now()
+
+    const run = () => {
+      this.timers.delete(id)
+      func()
+    }
+
+    if (old?.timeout) {
+      clearTimeout(old.timeout)
+    }
+
+    if (immediately) {
+      return run()
+    }
+
+    if (Date.now() - start >= this.configuration.maxDebounce) {
+      return run()
+    }
+
+    this.timers.set(id, {
+      start,
+      timeout: setTimeout(run, this.configuration.debounce),
     })
   }
 
@@ -523,18 +562,22 @@ export class Hocuspocus {
       // If it’s the last connection, we need to make sure to store the
       // document and remove it from memory then.
       if (document.getConnectionsCount() <= 0) {
-        this.hooks('onStoreDocument', hookPayload).then(() => {
-          // Check if there are still no connections to the document, as these hooks
-          // may take some time to resolve (e.g. database queries). If a
-          // new connection were to come in during that time it would rely on the
-          // document in the map that we remove now.
-          if (document.getConnectionsCount() > 0) {
-            return
-          }
+        // Use the debounce helper, to clear running timers,
+        // but make it run immediately
+        this.debounce(`onStoreDocument-${document.name}`, () => {
+          this.hooks('onStoreDocument', hookPayload).then(() => {
+            // Check if there are still no connections to the document, as these hooks
+            // may take some time to resolve (e.g. database queries). If a
+            // new connection were to come in during that time it would rely on the
+            // document in the map that we remove now.
+            if (document.getConnectionsCount() > 0) {
+              return
+            }
 
-          this.documents.delete(document.name)
-          document.destroy()
-        })
+            this.documents.delete(document.name)
+            document.destroy()
+          })
+        }, true)
       }
     })
 
