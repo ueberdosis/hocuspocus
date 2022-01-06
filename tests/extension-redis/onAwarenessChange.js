@@ -13,7 +13,7 @@ const redisConfiguration = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onAwarenessChange', () => {
+context('extension-redis/onAwarenessChange', () => {
   before(() => {
     server.configure({
       port: 4000,

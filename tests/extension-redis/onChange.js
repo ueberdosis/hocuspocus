@@ -13,7 +13,7 @@ const opts = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onChange', () => {
+context('extension-redis/onChange', () => {
   before(() => {
     server.configure({
       port: 4000,

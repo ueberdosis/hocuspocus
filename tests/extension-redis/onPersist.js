@@ -14,7 +14,7 @@ const redisConfiguration = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onPersist', () => {
+context('extension-redis/onPersist', () => {
   after(() => {
     server.destroy()
     anotherServer.destroy()
@@ -25,7 +25,7 @@ context('pubsub/onPersist', () => {
     const anotherYdoc = new Y.Doc()
 
     const onPersist = ({ document, identifier }) => {
-      console.log(`pubsub/onPersist [${identifier}] onPersist`)
+      console.log(`extension-redis/onPersist [${identifier}] onPersist`)
       assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
@@ -38,7 +38,7 @@ context('pubsub/onPersist', () => {
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
           identifier: 'server',
-          prefix: 'pubsub/onPersist',
+          prefix: 'extension-redis/onPersist',
           persistWait,
           onPersist,
         }),
@@ -53,7 +53,7 @@ context('pubsub/onPersist', () => {
           log: () => {},
           // log: (...args) => console.log('anotherServer:', ...args),
           identifier: 'anotherServer',
-          prefix: 'pubsub/onPersist',
+          prefix: 'extension-redis/onPersist',
           persistWait,
           onPersist,
         }),

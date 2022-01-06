@@ -12,7 +12,7 @@ const opts = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('pubsub/onDisconnect', () => {
+context('extension-redis/onDisconnect', () => {
   it('calls persist after last client disconnects', done => {
     const ydoc = new Y.Doc()
     let client
@@ -23,7 +23,7 @@ context('pubsub/onDisconnect', () => {
         new Redis({
           ...opts,
           identifier: 'server',
-          prefix: 'pubsub/onDisconnect',
+          prefix: 'extension-redis/onDisconnect',
           log: () => {},
           // log: (...args) => console.log('server:', ...args),
           onPersist: ({ document }) => {
