@@ -1,6 +1,8 @@
-# onAuthenticate
+---
+tableOfContents: true
+---
 
-## toc
+# onAuthenticate
 
 ## Introduction
 The `onAuthenticate` hook will be called when the server receives an authentication request from the client provider. It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.
@@ -8,7 +10,7 @@ The `onAuthenticate` hook will be called when the server receives an authenticat
 ## Hook payload
 The `data` passed to the `onAuthenticate` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingHttpHeaders } from 'http'
 import { URLSearchParams } from 'url'
 import { Doc } from 'yjs'
@@ -27,10 +29,10 @@ const data = {
 ```
 
 ## Example
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onAuthenticate(data) {
     const { token } = data
 
@@ -56,5 +58,21 @@ const hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
+```
+
+### Disabling authentication for some users
+Once the `onAuthenticate` hook is configured, the server will wait for the authentication WebSocket message. If you want to override that behaviour (for some users), you can manually do that in the `onConnect` hook.
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  async onConnect({ connection }) {
+    connection.requiresAuthentication = false
+  },
+  async onAuthenticate() {
+    // Danger! This won’t be called for that connection attempt.
+  },
+}).listen()
 ```

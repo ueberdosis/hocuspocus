@@ -1,6 +1,8 @@
-# onLoadDocument
+---
+tableOfContents: true
+---
 
-## toc
+# onLoadDocument
 
 ## Introduction
 
@@ -10,7 +12,7 @@ The `onLoadDocument` hook will be called when a new document is created. A new d
 
 The `data` passed to the `onLoadDocument` hook has the following attributes:
 
-```typescript
+```js
 import { Doc } from 'yjs'
 
 const data = {
@@ -32,7 +34,7 @@ Context contains the data provided in former `onConnect` hooks.
 This following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/api/extensions/rocksdb).
 :::
 
-```typescript
+```js
 import { readFileSync } from 'fs'
 import { Server } from '@hocuspocus/server'
 import { TiptapTransformer } from '@hocuspocus/transformer'
@@ -40,7 +42,7 @@ import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onLoadDocument(data) {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
@@ -62,8 +64,8 @@ const hocuspocus = Server.configure({
     // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
     // of extensions you use in the frontend to create a valid document
     return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [Document, Paragraph, Text])
-  }
+  },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

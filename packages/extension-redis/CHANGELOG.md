@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.53](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.52...@hocuspocus/extension-redis@1.0.0-alpha.53) (2021-12-13)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.52](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.51...@hocuspocus/extension-redis@1.0.0-alpha.52) (2021-12-09)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.51](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.50...@hocuspocus/extension-redis@1.0.0-alpha.51) (2021-12-08)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.50](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.49...@hocuspocus/extension-redis@1.0.0-alpha.50) (2021-12-07)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.49](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.48...@hocuspocus/extension-redis@1.0.0-alpha.49) (2021-12-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.48](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.47...@hocuspocus/extension-redis@1.0.0-alpha.48) (2021-12-01)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.47](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.46...@hocuspocus/extension-redis@1.0.0-alpha.47) (2021-12-01)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.46](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.45...@hocuspocus/extension-redis@1.0.0-alpha.46) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [1.0.0-alpha.45](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.44...@hocuspocus/extension-redis@1.0.0-alpha.45) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
 # [1.0.0-alpha.44](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.43...@hocuspocus/extension-redis@1.0.0-alpha.44) (2021-11-26)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

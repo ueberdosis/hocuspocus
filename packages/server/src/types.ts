@@ -31,8 +31,9 @@ export interface AwarenessUpdate {
   removed: Array<any>,
 }
 
-export interface ConnectionConfig {
+export interface ConnectionConfiguration {
   readOnly: boolean
+  requiresAuthentication: boolean
   isAuthenticated: boolean
 }
 
@@ -88,6 +89,18 @@ export interface Configuration extends Extension {
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
   timeout: number,
+  /**
+   * By default, the servers show a start screen. If passed false, the server will start quietly.
+   */
+  quiet: boolean,
+  /**
+   * Function which returns the (customized) document name based on the request
+   */
+  getDocumentName?(data: {
+    documentName: string,
+    request: IncomingMessage,
+    requestParameters: URLSearchParams,
+  }): string | Promise<string>,
 }
 
 export interface onAuthenticatePayload {
@@ -97,7 +110,7 @@ export interface onAuthenticatePayload {
   requestParameters: URLSearchParams,
   socketId: string,
   token: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onConnectPayload {
@@ -107,7 +120,7 @@ export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onLoadDocumentPayload {
@@ -118,7 +131,7 @@ export interface onLoadDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfig
+  connection: ConnectionConfiguration
 }
 
 export interface onLoadedDocumentPayload {
@@ -142,6 +155,10 @@ export interface onChangePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+}
+
+export interface storePayload extends onChangePayload {
+  update: Buffer,
 }
 
 export interface onDisconnectPayload {
@@ -181,9 +198,4 @@ export interface onConfigurePayload {
   version: string,
   yjsVersion: string,
   instance: Hocuspocus,
-}
-
-export interface CloseEvent {
-  code: number,
-  reason: string,
 }

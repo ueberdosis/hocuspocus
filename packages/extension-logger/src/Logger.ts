@@ -6,7 +6,6 @@ import {
   onLoadDocumentPayload,
   onDestroyPayload,
   onDisconnectPayload,
-  onListenPayload,
   onRequestPayload,
   onUpgradePayload,
 } from '@hocuspocus/server'
@@ -43,10 +42,6 @@ export interface LoggerConfiguration {
    */
   onRequest: boolean,
   /**
-   * Whether to log something for the `onListen` hook.
-   */
-  onListen: boolean,
-  /**
    * Whether to log something for the `onDestroy` hook.
    */
   onDestroy: boolean,
@@ -71,7 +66,6 @@ export class Logger implements Extension {
     onDisconnect: true,
     onUpgrade: true,
     onRequest: true,
-    onListen: true,
     onDestroy: true,
     onConfigure: true,
     log: console.log, // eslint-disable-line
@@ -84,6 +78,18 @@ export class Logger implements Extension {
     this.configuration = {
       ...this.configuration,
       ...configuration,
+    }
+  }
+
+  async onConfigure(data: onConfigurePayload) {
+    this.name = data.instance.configuration.name
+
+    if (!this.configuration.onConfigure) {
+      return
+    }
+
+    if (this.configuration.prefix) {
+      console.warn('[hocuspocus warn] The Logger \'prefix\' is deprecated. Pass a \'name\' to the Hocuspocus configuration instead.')
     }
   }
 
@@ -123,73 +129,23 @@ export class Logger implements Extension {
     }
   }
 
-  async onListen(data: onListenPayload) {
-    if (this.configuration.onListen) {
-      this.logRawText('Ready.')
-      this.logRawText()
-    }
-  }
-
   async onDestroy(data: onDestroyPayload) {
     if (this.configuration.onDestroy) {
       this.log('Shut down.')
     }
   }
 
-  async onConfigure(data: onConfigurePayload) {
-    if (!this.configuration.onConfigure) {
-      return
-    }
-
-    if (this.configuration.prefix) {
-      console.warn('[hocuspocus warn] The Logger \'prefix\' is deprecated. Pass a \'name\' to the Hocuspocus configuration instead.')
-    }
-
-    this.name = data.instance.configuration.name
-
-    this.logRawText()
-    this.logRawText(`Hocuspocus v${data.version} running at:`)
-    this.logRawText()
-    this.logRawText(`> HTTP: http://127.0.0.1:${data.configuration.port}`)
-    this.logRawText(`> WebSocket: ws://127.0.0.1:${data.configuration.port}`)
-
-    const { instance } = data
-
-    const extensions = instance.configuration?.extensions.map(extension => {
-      return extension.constructor?.name
-    })
-      .filter(name => name)
-      .filter(name => name !== 'Object')
-
-    if (!extensions.length) {
-      return
-    }
-
-    this.logRawText()
-    this.logRawText('Extensions:')
-
-    extensions
-      .forEach(name => {
-        this.logRawText(`- ${name}`)
-      })
-
-    this.logRawText()
-  }
-
-  private logRawText(message = '') {
-    this.configuration.log(message)
-  }
-
   private log(message: string) {
-    message = `[${(new Date()).toISOString()}] ${message}`
+    const date = (new Date()).toISOString()
+    let meta = `${date}`
 
-    const name = this.name ? this.name : this.configuration.prefix
-
-    if (name) {
-      message = `[${name}] ${message}`
+    if (this.name) {
+      meta = `${this.name} ${meta}`
     }
 
-    this.logRawText(message)
+    message = `[${meta}] ${message}`
+
+    this.configuration.log(message)
   }
 
 }

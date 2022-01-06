@@ -1,6 +1,8 @@
-# onRequest
+---
+tableOfContents: true
+---
 
-## toc
+# onRequest
 
 ## Introduction
 
@@ -12,7 +14,7 @@ This is useful if you want to create custom routes on the same port Hocuspocus r
 
 The `data` passed to the `onRequest` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingMessage, ServerResponse } from 'http'
 
 const data = {
@@ -24,10 +26,10 @@ const data = {
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   onRequest(data) {
     return new Promise((resolve, reject) => {
       const { request, response } = data
@@ -49,5 +51,5 @@ const hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

@@ -1,6 +1,8 @@
-# Scalability
+---
+tableOfContents: true
+---
 
-## toc
+# Scalability
 
 ## Introduction
 
@@ -15,7 +17,7 @@ import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 import { Redis } from '@hocuspocus/extension-redis'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   port: 80,
   extensions: [
     new Logger(),
@@ -26,7 +28,7 @@ const hocuspocus = Server.configure({
   ],
 })
 
-hocuspocus.listen()
+server.listen()
 ```
 
 ### package.json

@@ -1,6 +1,8 @@
-# Introducing hooks
+---
+tableOfContents: true
+---
 
-## toc
+# Introducing hooks
 
 ## Introduction
 

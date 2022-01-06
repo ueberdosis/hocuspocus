@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-rocksdb",
   "description": "hocuspocus persistence driver for RocksDB",
-  "version": "1.0.0-alpha.82",
+  "version": "1.0.0-alpha.91",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -27,15 +27,15 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.81",
+    "@hocuspocus/server": "^1.0.0-alpha.90",
     "@types/encoding-down": "^5.0.0",
-    "@types/levelup": "^4.3.0",
-    "@types/rocksdb": "^3.0.0",
-    "encoding-down": "^7.0.0",
-    "levelup": "^5.0.1",
-    "rocksdb": "^5.1.0",
-    "y-leveldb": "^0.1.0",
-    "yjs": "^13.5.0"
+    "@types/levelup": "^4.3.3",
+    "@types/rocksdb": "^3.0.1",
+    "encoding-down": "^7.1.0",
+    "levelup": "^5.1.1",
+    "rocksdb": "^5.2.0",
+    "y-leveldb": "^0.1.1",
+    "yjs": "^13.5.23"
   },
-  "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

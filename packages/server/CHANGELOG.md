@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.90](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.89...@hocuspocus/server@1.0.0-alpha.90) (2021-12-13)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.89](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.88...@hocuspocus/server@1.0.0-alpha.89) (2021-12-09)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.88](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.87...@hocuspocus/server@1.0.0-alpha.88) (2021-12-08)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.87](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.86...@hocuspocus/server@1.0.0-alpha.87) (2021-12-07)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.86](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.85...@hocuspocus/server@1.0.0-alpha.86) (2021-12-03)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.85](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.84...@hocuspocus/server@1.0.0-alpha.85) (2021-12-01)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.84](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.83...@hocuspocus/server@1.0.0-alpha.84) (2021-12-01)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.83](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.82...@hocuspocus/server@1.0.0-alpha.83) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [1.0.0-alpha.82](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.81...@hocuspocus/server@1.0.0-alpha.82) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
 # [1.0.0-alpha.81](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.80...@hocuspocus/server@1.0.0-alpha.81) (2021-11-26)
 
 **Note:** Version bump only for package @hocuspocus/server

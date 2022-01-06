@@ -1,0 +1,28 @@
+{
+  "name": "@hocuspocus/cli",
+  "description": "a CLI tool to start a local Hocuspocus server",
+  "version": "1.0.0-alpha.6",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "yjs",
+    "yjs-websocket"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "hocuspocus": "./src/index.js",
+    "@hocuspocus/cli": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@hocuspocus/extension-logger": "^1.0.0-alpha.64",
+    "@hocuspocus/extension-sqlite": "^1.0.0-alpha.4",
+    "@hocuspocus/extension-webhook": "^1.0.0-alpha.54",
+    "@hocuspocus/server": "^1.0.0-alpha.90",
+    "meow": "^10.1.2"
+  },
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+}

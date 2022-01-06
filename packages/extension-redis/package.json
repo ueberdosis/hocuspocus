@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-redis",
-  "version": "1.0.0-alpha.44",
+  "version": "1.0.0-alpha.53",
   "description": "hocuspocus persistence driver for Redis",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -27,9 +27,9 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.81",
-    "y-redis": "^1.0.2",
-    "yjs": "^13.5.0"
+    "@hocuspocus/server": "^1.0.0-alpha.90",
+    "y-redis": "^1.0.3",
+    "yjs": "^13.5.23"
   },
-  "gitHead": "e79cbecea514b3f6a5a04e843f6b08ccd62cabd6"
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

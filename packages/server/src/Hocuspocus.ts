@@ -4,26 +4,33 @@ import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
+import kleur from 'kleur'
+import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
 import {
-  MessageType, Configuration, ConnectionConfig, WsReadyStates, Hook,
+  MessageType,
+  Configuration,
+  ConnectionConfiguration,
+  WsReadyStates,
+  Hook,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
-import { Forbidden, ResetConnection } from './CloseEvents'
 import { OutgoingMessage } from './OutgoingMessage'
-import packageJson from '../package.json'
+import meta from '../package.json'
 import { Debugger, MessageLogger } from './Debugger'
+import { onListenPayload } from '.'
 
 export const defaultConfiguration = {
   name: null,
   port: 80,
   timeout: 30000,
+  quiet: false,
 }
 
 const defaultOnCreateDocument = () => new Promise(r => r(null))
 
 /**
- * Hocuspocus server
+ * Hocuspocus Server
  */
 export class Hocuspocus {
   configuration: Configuration = {
@@ -85,7 +92,7 @@ export class Hocuspocus {
 
     this.hooks('onConfigure', {
       configuration: this.configuration,
-      version: packageJson.version,
+      version: meta.version,
       yjsVersion: null,
       instance: this,
     })
@@ -93,7 +100,7 @@ export class Hocuspocus {
     return this
   }
 
-  get authenticationRequired(): boolean {
+  get requiresAuthentication(): boolean {
     return !!this.configuration.extensions.find(extension => {
       return extension.onAuthenticate !== undefined
     })
@@ -102,10 +109,30 @@ export class Hocuspocus {
   /**
    * Start the server
    */
-  async listen(): Promise<void> {
+  async listen(
+    portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
+    callback: any = null,
+  ): Promise<void> {
+    if (typeof portOrCallback === 'number') {
+      this.configuration.port = portOrCallback
+    }
+
+    if (typeof portOrCallback === 'function') {
+      this.configuration.extensions.push({
+        onListen: portOrCallback,
+      })
+    }
+
+    if (typeof callback === 'function') {
+      this.configuration.extensions.push({
+        onListen: callback,
+      })
+    }
+
     const webSocketServer = new WebSocketServer({ noServer: true })
-    webSocketServer.on('connection', (incoming: WebSocket, request: IncomingMessage) => {
-      this.handleConnection(incoming, request, Hocuspocus.getDocumentName(request))
+
+    webSocketServer.on('connection', async (incoming: WebSocket, request: IncomingMessage) => {
+      this.handleConnection(incoming, request, await this.getDocumentNameFromRequest(request))
     })
 
     const server = createServer((request, response) => {
@@ -151,11 +178,47 @@ export class Hocuspocus {
 
     await new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
+        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
+          this.showStartScreen()
+        }
+
         this.hooks('onListen', { port: this.configuration.port })
           .then(() => resolve())
           .catch(e => reject(e))
       })
     })
+  }
+
+  private showStartScreen() {
+    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
+
+    console.log()
+    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
+    console.log()
+    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
+    console.log(`  > WebSocket: ws://127.0.0.1:${this.configuration.port}`)
+
+    const extensions = this.configuration?.extensions.map(extension => {
+      return extension.constructor?.name
+    })
+      .filter(name => name)
+      .filter(name => name !== 'Object')
+
+    if (!extensions.length) {
+      return
+    }
+
+    console.log()
+    console.log('  Extensions:')
+
+    extensions
+      .forEach(name => {
+        console.log(`  - ${name}`)
+      })
+
+    console.log()
+    console.log(`  ${kleur.green('Ready.')}`)
+    console.log()
   }
 
   /**
@@ -215,13 +278,34 @@ export class Hocuspocus {
   }
 
   /**
-   * Handle the incoming WebSocket connection
+   * The `handleConnection` method receives incoming WebSocket connections,
+   * runs all hooks:
+   *
+   *  - onConnect for all connections
+   *  - onAuthenticate only if required
+   *
+   * … and if nothings fails it’ll fully establish the connection and
+   * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
-    // create a unique identifier for every socket connection
-    const socketId = uuid()
-    const connection: ConnectionConfig = { readOnly: false, isAuthenticated: false }
+    // Make sure to close an idle connection after a while.
+    const closeIdleConnection = setTimeout(() => {
+      incoming.close(Unauthorized.code, Unauthorized.reason)
+    }, this.configuration.timeout)
 
+    // Every new connection gets an unique identifier.
+    const socketId = uuid()
+
+    // To override settings for specific connections, we’ll
+    // keep track of a few things in the `ConnectionConfiguration`.
+    const connection: ConnectionConfiguration = {
+      readOnly: false,
+      requiresAuthentication: this.requiresAuthentication,
+      isAuthenticated: false,
+    }
+
+    // The `onConnect` and `onAuthenticate` hooks need some context
+    // to decide who’s connecting, so let’s put it together:
     const hookPayload = {
       documentName,
       instance: this,
@@ -232,32 +316,33 @@ export class Hocuspocus {
       connection,
     }
 
+    // While the connection will be establishing messages will
+    // be queued and handled later.
     const incomingMessageQueue: Uint8Array[] = []
 
-    const handleNewConnection = (listener: (input: Uint8Array) => void) => async () => {
-      if (this.authenticationRequired && !connection.isAuthenticated) {
-        return
-      }
+    // Once all hooks are run, we’ll fully establish the connection:
+    const setUpNewConnection = async (listener: (input: Uint8Array) => void) => {
+      // Not an idle connection anymore, no need to close it then.
+      clearTimeout(closeIdleConnection)
 
       // If no hook interrupts, create a document and connection
       const document = await this.createDocument(documentName, request, socketId, connection, context)
       this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
 
-      // Remove the queue listener
+      // There’s no need to queue messages anymore.
       incoming.off('message', listener)
-
-      // Work through queued messages
+      // Let’s work through queued messages.
       incomingMessageQueue.forEach(input => {
         incoming.emit('message', input)
       })
     }
 
-    // Messages are queued using this handler before the connection is
-    // authenticated and the document is loaded from persistence.
+    // This listener handles authentication messages and queues everything else.
     const queueIncomingMessageListener = (data: Uint8Array) => {
       const decoder = decoding.createDecoder(data)
       const type = decoding.readVarUint(decoder)
 
+      // Okay, we’ve got the authentication message we’re waiting for:
       if (type === MessageType.Auth) {
         // The 2nd integer contains the submessage type
         // which will always be authentication when sent from client -> server
@@ -271,12 +356,15 @@ export class Hocuspocus {
         })
 
         this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
-          // Merge the context from the hook
+          // Hooks are allowed to give us even more context and we’ll merge everything together.
+          // We’ll pass the context to other hooks then.
           context = { ...context, ...contextAdditions }
         })
           .then(() => {
+            // All `onAuthenticate` hooks passed.
             connection.isAuthenticated = true
 
+            // Let the client know that authentication was successful.
             const message = new OutgoingMessage().writeAuthenticated()
 
             this.debugger.log({
@@ -287,7 +375,10 @@ export class Hocuspocus {
 
             incoming.send(message.toUint8Array())
           })
-          .then(handleNewConnection(queueIncomingMessageListener))
+          .then(() => {
+            // Time to actually establish the connection.
+            setUpNewConnection(queueIncomingMessageListener)
+          })
           .catch(error => {
             // We could pass the Error message through to the client here but it
             // risks exposing server internals or being a very long stack trace
@@ -308,6 +399,7 @@ export class Hocuspocus {
             })
           })
       } else {
+        // It’s not the Auth message we’re waiting for, so just queue it.
         incomingMessageQueue.push(data)
       }
     }
@@ -318,7 +410,15 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-      .then(handleNewConnection(queueIncomingMessageListener))
+      .then(() => {
+        // Authentication is required, we’ll need to wait for the Authentication message.
+        if (connection.requiresAuthentication && !connection.isAuthenticated) {
+          return
+        }
+
+        // Authentication isn’t required, let’s establish the connection
+        setUpNewConnection(queueIncomingMessageListener)
+      })
       .catch(() => {
         // if a hook interrupts, close the websocket connection
         incoming.close(Forbidden.code, Forbidden.reason)
@@ -352,7 +452,7 @@ export class Hocuspocus {
    * Create a new document by the given request
    * @private
    */
-  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfig, context?: any): Promise<Document> {
+  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
       const document = this.documents.get(documentName)
       return document
@@ -491,10 +591,18 @@ export class Hocuspocus {
    * Get document name by the given request
    * @private
    */
-  private static getDocumentName(request: IncomingMessage): string {
-    return decodeURI(
+  private async getDocumentNameFromRequest(request: IncomingMessage): Promise<string> {
+    const documentName = decodeURI(
       request.url?.slice(1)?.split('?')[0] || '',
     )
+
+    if (!this.configuration.getDocumentName) {
+      return documentName
+    }
+
+    const requestParameters = Hocuspocus.getParameters(request)
+
+    return this.configuration.getDocumentName({ documentName, request, requestParameters })
   }
 
   enableDebugging() {

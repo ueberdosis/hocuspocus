@@ -13,11 +13,11 @@ The following example is the bare minimum you need to start a WebSocket server. 
 ```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   port: 80,
 })
 
-hocuspocus.listen()
+server.listen()
 ```
 
 ## 3. Connect with a frontend

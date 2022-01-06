@@ -1,6 +1,8 @@
-# Working with Documents
+---
+tableOfContents: true
+---
 
-## toc
+# Working with Documents
 
 ## Documents & room-names
 
@@ -59,7 +61,7 @@ You need to serialize the Y-Doc that Hocuspocus gives you to something you can a
 your views. Check out the [transformers section](/guide/transformers) of the guide for more
 information.
 
-```typescript
+```js
 import {debounce} from 'debounce'
 import {Server} from '@hocuspocus/server'
 import {TiptapTransformer} from '@hocuspocus/transformer'
@@ -67,7 +69,7 @@ import {writeFile} from 'fs'
 
 let debounced
 
-const Hocuspocus = Server.configure({
+const server = Server.configure({
   async onChange(data) {
     const save = () => {
       // Convert the y-doc to something you can actually use in your views.
@@ -95,7 +97,7 @@ const Hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```
 
 ## Importing documents
@@ -109,7 +111,7 @@ checkout it's [API section](/api/on-create-document).
 `onLoadDocument` expects a Y-Doc to be returned. Check out
 the [transformers section](/guide/transformers) of the guide for more information.
 
-```typescript
+```js
 import {readFileSync} from 'fs'
 import {Server} from '@hocuspocus/server'
 import {Doc} from 'yjs'
@@ -118,7 +120,7 @@ import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
-const Hocuspocus = Server.configure({
+const server = Server.configure({
   async onLoadDocument(data): Doc {
     // The tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
@@ -143,14 +145,14 @@ const Hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```
 
 ## Importing a document with multiple fields
 
 When using multiple fields you can simply merge different documents into the given document:
 
-```typescript
+```js
 import {readFileSync} from 'fs'
 import {Server} from '@hocuspocus/server'
 import {TiptapTransformer} from '@hocuspocus/transformer'
@@ -175,7 +177,7 @@ const generateSampleProsemirrorJson = (text: string) => {
   }
 }
 
-const Hocuspocus = Server.configure({
+const server = Server.configure({
   async onLoadDocument(data) {
 
     // only import things if they are not already set in the primary storage
@@ -205,7 +207,7 @@ const Hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```
 
 ## Read only mode
@@ -213,14 +215,14 @@ hocuspocus.listen()
 If you want to restrict the current user only to read the document and it's updates but not apply
 updates him- or herself, you can use the `connection` property in the `onAuthenticate` hooks payload:
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
 const usersWithWriteAccess = [
   'jane', 'john', 'christina',
 ]
 
-const Hocuspocus = Server.configure({
+const server = Server.configure({
   async onAuthenticate(data): Doc {
 
     // Example code to check if the current user has write access by a
@@ -234,5 +236,5 @@ const Hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

@@ -1,6 +1,8 @@
-# Authentication & Authorization
+---
+tableOfContents: true
+---
 
-## toc
+# Authentication & Authorization
 
 ## Introduction
 
@@ -12,7 +14,7 @@ When throwing an error (or rejecting the returned Promise), the connection to th
 
 For more information on the hook and it's payload checkout it's [API section](/api/on-authenticate).
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
@@ -39,7 +41,7 @@ server.listen()
 
 On the client you would pass the "token" parameter as one of the Hocuspocus options, like so:
 
-```typescript
+```js
 new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'example-document',

@@ -1,10 +1,9 @@
 ---
 title: Collaborative editing with Tiptap
+tableOfContents: true
 ---
 
 # Tiptap
-
-## toc
 
 ## Introduction
 [Tiptap](https://tiptap.dev) is a headless text editor, that’s fully customizable and has a first-class collaborative editing integration that’s compatible with Hocuspocus.

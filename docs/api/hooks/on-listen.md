@@ -1,6 +1,8 @@
-# onListen
+---
+tableOfContents: true
+---
 
-## toc
+# onListen
 
 ## Introduction
 
@@ -10,7 +12,7 @@ The `onListen` hook is called after the server is started and accepts connection
 
 The `data` passed to the `onListen` hook has the following attributes:
 
-```typescript
+```js
 const data = {
   port: number,
 }
@@ -18,15 +20,15 @@ const data = {
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   async onListen(data) {
     // Output some information
-    process.stdout.write(`Server is listening on port "${data.port}"!`)
+    console.log(`Server is listening on port "${data.port}"!`)
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

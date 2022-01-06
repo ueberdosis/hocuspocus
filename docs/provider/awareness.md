@@ -1,6 +1,8 @@
-# Awareness
+---
+tableOfContents: true
+---
 
-## toc
+# Awareness
 
 ## Introduction
 Through the awareness information about all present users can be shared. It allows you to sync the names, cursor positions, or even coordinates in a complex 3D world, whatever is needed. Under the hood it’s an own CRDT, but doesn’t have history of updates.

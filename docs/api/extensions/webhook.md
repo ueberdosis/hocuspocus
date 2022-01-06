@@ -1,6 +1,8 @@
-# Webhook
+---
+tableOfContents: true
+---
 
-## toc
+# Webhook
 
 ## Introduction
 
@@ -78,7 +80,7 @@ When a new user connects to the server, the onConnect webhook will be triggered 
 
 You can use this to authorize your users. By responding with a 403 status code the user is not authorized and the connection will be terminated. You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
 
-```typescript
+```js
 // authorize the user by the request parameters or headers
 if (payload.requestParameters?.get('token') !== "secret-api-token") {
   response.writeHead(403, 'unathorized')
@@ -112,7 +114,7 @@ You can use this to import a document into Hocuspocus. The webhook extension wil
 
 Just respond with all the single documents keyed by their field name. For example:
 
-```typescript
+```js
 response.writeHead(200, { 'Content-Type': 'application/json' })
 response.end(JSON.stringify({
   // Document for the "secondary" field
@@ -194,7 +196,7 @@ As you probably already know from [the guide](/guide/transformations) the Y-Doc 
 
 Because Hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use one of the transformers from the `@hocuspocus/transformer` package. Make sure to configure them properly. In this example we used the TiptapTransformer that needs the list of extensions:
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 import { Webhook } from '@hocuspocus/extension-webhook'
 import { TiptapTransformer } from '@hocuspocus/extension-transformer'
@@ -217,7 +219,7 @@ server.listen()
 ```
 Alternatively you can write your own implementation by simply passing functions that convert a Y-Doc to your representation and vice versa:
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 import { Webhook } from '@hocuspocus/extension-webhook'
 import { Doc } from 'yjs'
@@ -280,7 +282,7 @@ function verifySignature(Request $request) {
 
 ### JavaScript
 
-```typescript
+```js
 import { IncomingMessage } from 'http'
 
 const secret = '459824aaffa928e05f5b1caec411ae5f'

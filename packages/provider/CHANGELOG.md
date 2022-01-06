@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.29](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.28...@hocuspocus/provider@1.0.0-alpha.29) (2021-12-09)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.28](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.27...@hocuspocus/provider@1.0.0-alpha.28) (2021-12-07)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.27](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.26...@hocuspocus/provider@1.0.0-alpha.27) (2021-12-03)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.26](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.25...@hocuspocus/provider@1.0.0-alpha.26) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [1.0.0-alpha.25](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.24...@hocuspocus/provider@1.0.0-alpha.25) (2021-11-30)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
 # [1.0.0-alpha.24](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.23...@hocuspocus/provider@1.0.0-alpha.24) (2021-11-26)
 
 **Note:** Version bump only for package @hocuspocus/provider

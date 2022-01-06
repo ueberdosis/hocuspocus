@@ -1,6 +1,8 @@
-# Hooks
+---
+tableOfContents: true
+---
 
-## toc
+# Hooks
 
 ## Introduction
 Hooks are a core concept to control the behaviour and data flow of the server. All hooks are async. That means you can even do things like executing API requests, running DB queries, trigger webhooks or whatever you need to do to integrate it into your application.

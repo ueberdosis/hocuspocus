@@ -1,6 +1,8 @@
-# onUpgrade
+---
+tableOfContents: true
+---
 
-## toc
+# onUpgrade
 
 ## Introduction
 
@@ -12,7 +14,7 @@ This is useful if you want to create custom websocket routes on the same port Ho
 
 The `data` passed to the `onUpgrade` hook has the following attributes:
 
-```typescript
+```js
 import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 
@@ -26,11 +28,11 @@ const data = {
 
 ## Example
 
-```typescript
+```js
 import { Server } from '@hocuspocus/server'
 import WebSocket, { WebSocketServer } from 'ws'
 
-const hocuspocus = Server.configure({
+const server = Server.configure({
   onUpgrade(data) {
     return new Promise((resolve, reject) => {
       const { request, socket, head } = data
@@ -63,5 +65,5 @@ const hocuspocus = Server.configure({
   },
 })
 
-hocuspocus.listen()
+server.listen()
 ```

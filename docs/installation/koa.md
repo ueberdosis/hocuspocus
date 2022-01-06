@@ -1,6 +1,8 @@
-# Koa
+---
+tableOfContents: true
+---
 
-## toc
+# Koa
 
 ## Introduction
 TODO
