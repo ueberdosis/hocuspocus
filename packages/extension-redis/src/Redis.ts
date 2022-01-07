@@ -45,6 +45,13 @@ export interface Configuration {
 }
 
 export class Redis implements Extension {
+  /**
+   * Make sure to give that extension a higher priority, so
+   * the `onStoreDocument` hook is able to intercept the chain,
+   * before documents are stored to the database.
+   */
+  priority = 1000
+
   configuration: Configuration = {
     port: 6379,
     host: '127.0.0.1',

@@ -39,6 +39,7 @@ export interface ConnectionConfiguration {
 }
 
 export interface Extension {
+  priority?: number,
   onConfigure?(data: onConfigurePayload): Promise<any>,
   onListen?(data: onListenPayload): Promise<any>,
   onUpgrade?(data: onUpgradePayload): Promise<any>,

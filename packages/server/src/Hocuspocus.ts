@@ -84,6 +84,21 @@ export class Hocuspocus {
       onLoadDocument = this.configuration.onLoadDocument
     }
 
+    this.configuration.extensions.sort((a, b) => {
+      const one = typeof a.priority === 'undefined' ? 100 : a.priority
+      const two = typeof b.priority === 'undefined' ? 100 : b.priority
+
+      if (one > two) {
+        return -1
+      }
+
+      if (one < two) {
+        return 1
+      }
+
+      return 0
+    })
+
     this.configuration.extensions.push({
       onConfigure: this.configuration.onConfigure,
       onListen: this.configuration.onListen,

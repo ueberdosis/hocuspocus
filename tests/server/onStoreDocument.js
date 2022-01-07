@@ -329,4 +329,124 @@ context('server/onStoreDocument', () => {
       ydoc.getArray('foo').insert(0, ['bar'])
     })
   })
+
+  it('runs hooks in the given order', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+    const triggered = []
+
+    class Running {
+      async onStoreDocument() {
+        triggered.push('one')
+      }
+    }
+
+    class BreakTheChain {
+      async onStoreDocument() {
+        triggered.push('two')
+        throw Error()
+      }
+    }
+
+    class NotRunning {
+      async onStoreDocument() {
+        triggered.push('three')
+      }
+    }
+
+    server.configure({
+      port: 4000,
+      extensions: [
+        new Running(),
+        new BreakTheChain(),
+        new NotRunning(),
+      ],
+      // lowest priority
+      async onStoreDocument() {
+        triggered.push('four')
+      },
+      async afterStoreDocument() {
+        assert.deepStrictEqual(triggered, [
+          'one',
+          'two',
+        ])
+        server.destroy()
+        done()
+      },
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      client.destroy()
+    })
+  })
+
+  it('allows to overwrite the order of extension with a priority', done => {
+    const ydoc = new Y.Doc()
+    const server = new Hocuspocus()
+    const triggered = []
+
+    class Running {
+      async onStoreDocument() {
+        triggered.push('one')
+      }
+    }
+
+    class BreakTheChain {
+      async onStoreDocument() {
+        triggered.push('two')
+        throw Error()
+      }
+    }
+
+    class NotRunning {
+      async onStoreDocument() {
+        triggered.push('three')
+      }
+    }
+
+    class HighPriority {
+      priority = 1000
+
+      async onStoreDocument() {
+        triggered.push('zero')
+      }
+    }
+
+    server.configure({
+      port: 4000,
+      afterStoreDocument: async () => {
+        assert.deepStrictEqual(triggered, [
+          'zero',
+          'one',
+          'two',
+        ])
+        server.destroy()
+        done()
+      },
+      extensions: [
+        new Running(),
+        new BreakTheChain(),
+        new NotRunning(),
+        new HighPriority(),
+      ],
+    }).listen()
+
+    client = new HocuspocusProvider({
+      url: 'ws://127.0.0.1:4000',
+      name: 'hocuspocus-test',
+      document: ydoc,
+      WebSocketPolyfill: WebSocket,
+    })
+
+    client.on('synced', () => {
+      client.destroy()
+    })
+  })
 })
