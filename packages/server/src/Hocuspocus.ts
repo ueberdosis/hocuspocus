@@ -520,7 +520,6 @@ export class Hocuspocus {
    */
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
-      console.log(`${this.configuration.name} Got ${documentName} already! No need to subscribe?`)
       const document = this.documents.get(documentName)
       return document
     }

@@ -24,33 +24,38 @@ context('extension-redis/onStoreDocument', () => {
     const ydoc = new Y.Doc()
     const anotherYdoc = new Y.Doc()
 
-    const onStoreDocument = async ({ document }) => {
-      assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
-      assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
-      done()
+    class CustomStorageExtension {
+      async onStoreDocument({ document, instance }) {
+        console.log(`${instance.configuration.name} onStoreDocument`)
+        assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
+        assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
+        done()
+      }
     }
 
     server.configure({
       port: 4000,
-      onStoreDocument,
+      name: 'redis-1',
       extensions: [
         new Redis({
           ...redisConfiguration,
           identifier: 'server',
           prefix: 'extension-redis/onStoreDocument',
         }),
+        new CustomStorageExtension(),
       ],
     }).listen()
 
     anotherServer.configure({
       port: 4001,
-      onStoreDocument,
+      name: 'redis-2',
       extensions: [
         new Redis({
           ...redisConfiguration,
           identifier: 'anotherServer',
           prefix: 'extension-redis/onStoreDocument',
         }),
+        new CustomStorageExtension(),
       ],
     }).listen()
 
@@ -74,7 +79,9 @@ context('extension-redis/onStoreDocument', () => {
         // once we're setup make an edit on anotherClient, if all succeeds the onStoreDocument
         // callback will be called after the debounce period and all docs will
         // be identical
-        anotherYdoc.getArray('foo').insert(0, ['bar'])
+        // anotherYdoc.getArray('foo').insert(0, ['bar'])
+        client.destroy()
+        anotherClient.destroy()
       },
     })
   })
