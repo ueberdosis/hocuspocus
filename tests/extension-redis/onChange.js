@@ -21,8 +21,6 @@ context('extension-redis/onChange', () => {
         new Redis({
           ...opts,
           identifier: 'server',
-          log: () => {},
-          // log: (...args) => console.log('server:', ...args),
         }),
       ],
     }).listen()
@@ -33,8 +31,6 @@ context('extension-redis/onChange', () => {
         new Redis({
           ...opts,
           identifier: 'anotherServer',
-          log: () => {},
-          // log: (...args) => console.log('anotherServer:', ...args),
         }),
       ],
     }).listen()
@@ -83,7 +79,7 @@ context('extension-redis/onChange', () => {
       onSynced: () => {
         // once we're setup make an edit on anotherClient, to get to client it will need
         // to pass through the pubsub extension:
-        // anotherClient -> anotherServer -> pubsub -> server -> client
+        // anotherClient -> anotherServer -> Redis -> server -> client
         anotherYdoc.getArray('foo').insert(0, ['bar'])
       },
     })

@@ -21,8 +21,6 @@ context('extension-redis/onAwarenessChange', () => {
         new Redis({
           ...redisConfiguration,
           identifier: 'server',
-          log: () => {},
-          // log: (...args) => console.log('server:', ...args),
         }),
       ],
     }).listen()
@@ -33,8 +31,6 @@ context('extension-redis/onAwarenessChange', () => {
         new Redis({
           ...redisConfiguration,
           identifier: 'anotherServer',
-          log: () => {},
-          // log: (...args) => console.log('anotherServer:', ...args),
         }),
       ],
     }).listen()

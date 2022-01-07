@@ -14,7 +14,7 @@ const redisConfiguration = {
   port: process.env.REDIS_PORT || 6379,
 }
 
-context('extension-redis/onPersist', () => {
+context('extension-redis/onStoreDocument', () => {
   after(() => {
     server.destroy()
     anotherServer.destroy()
@@ -24,8 +24,7 @@ context('extension-redis/onPersist', () => {
     const ydoc = new Y.Doc()
     const anotherYdoc = new Y.Doc()
 
-    const onPersist = async ({ document, identifier }) => {
-      console.log(`extension-redis/onPersist [${identifier}] onPersist`)
+    const onStoreDocument = async ({ document }) => {
       assert.strictEqual(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
       assert.strictEqual(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
       done()
@@ -33,30 +32,24 @@ context('extension-redis/onPersist', () => {
 
     server.configure({
       port: 4000,
+      onStoreDocument,
       extensions: [
         new Redis({
           ...redisConfiguration,
-          log: () => {},
-          // log: (...args) => console.log('server:', ...args),
           identifier: 'server',
-          prefix: 'extension-redis/onPersist',
-          persistWait,
-          onPersist,
+          prefix: 'extension-redis/onStoreDocument',
         }),
       ],
     }).listen()
 
     anotherServer.configure({
       port: 4001,
+      onStoreDocument,
       extensions: [
         new Redis({
           ...redisConfiguration,
-          log: () => {},
-          // log: (...args) => console.log('anotherServer:', ...args),
           identifier: 'anotherServer',
-          prefix: 'extension-redis/onPersist',
-          persistWait,
-          onPersist,
+          prefix: 'extension-redis/onStoreDocument',
         }),
       ],
     }).listen()
@@ -78,7 +71,7 @@ context('extension-redis/onPersist', () => {
       maxAttempts: 1,
       broadcast: false,
       onSynced: () => {
-        // once we're setup make an edit on anotherClient, if all succeeds the onPersist
+        // once we're setup make an edit on anotherClient, if all succeeds the onStoreDocument
         // callback will be called after the debounce period and all docs will
         // be identical
         anotherYdoc.getArray('foo').insert(0, ['bar'])

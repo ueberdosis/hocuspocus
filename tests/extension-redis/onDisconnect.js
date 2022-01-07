@@ -24,17 +24,15 @@ context('extension-redis/onDisconnect', () => {
           ...opts,
           identifier: 'server',
           prefix: 'extension-redis/onDisconnect',
-          log: () => {},
-          // log: (...args) => console.log('server:', ...args),
-          onPersist: async ({ document }) => {
-            assert.strictEqual(ydoc.getArray('foo').get(0), document.getArray('foo').get(0))
-
-            client.destroy()
-            server.destroy()
-            done()
-          },
         }),
       ],
+      onStoreDocument: async ({ document }) => {
+        assert.strictEqual(ydoc.getArray('foo').get(0), document.getArray('foo').get(0))
+
+        client.destroy()
+        server.destroy()
+        done()
+      },
     }).listen()
 
     client = new HocuspocusProvider({
