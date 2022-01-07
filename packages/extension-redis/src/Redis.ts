@@ -1,6 +1,5 @@
 import RedisClient from 'ioredis'
 import Redlock from 'redlock'
-import debounce from 'lodash.debounce'
 import { v4 as uuid } from 'uuid'
 import * as Y from 'yjs'
 import {
@@ -12,6 +11,7 @@ import {
   afterStoreDocumentPayload,
   onDisconnectPayload,
   onStoreDocumentPayload,
+  onAwarenessUpdatePayload,
 } from '@hocuspocus/server'
 import { MessageReceiver } from './MessageReceiver'
 
@@ -47,6 +47,10 @@ export interface Configuration {
    * A log function, if none is provided output will go to console
    */
   log: (...args: any[]) => void,
+  /**
+   * The maximum time for the Redis lock in ms (in case it can’t be released).
+   */
+  lockTimeout: number,
 }
 
 export class Redis implements Extension {
@@ -56,11 +60,12 @@ export class Redis implements Extension {
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
     log: console.log, // eslint-disable-line
+    lockTimeout: 1000,
   }
 
-  publisher: RedisClient.Redis
+  pub: RedisClient.Redis
 
-  subscriber: RedisClient.Redis
+  sub: RedisClient.Redis
 
   documents = new Map()
 
@@ -75,20 +80,39 @@ export class Redis implements Extension {
       ...configuration,
     }
 
-    this.publisher = new RedisClient(port, host, options)
-    this.redlock = new Redlock([this.publisher])
+    this.pub = new RedisClient(port, host, options)
+    this.redlock = new Redlock([this.pub])
 
-    this.subscriber = new RedisClient(port, host, options)
-    this.subscriber.on('pmessageBuffer', this.handleIncomingMessage)
+    this.sub = new RedisClient(port, host, options)
+    this.sub.on('pmessageBuffer', this.handleIncomingMessage)
   }
 
+  private getKey(documentName: string) {
+    return `${this.configuration.prefix}:${documentName}`
+  }
+
+  private pubKey(documentName: string) {
+    return `${this.getKey(documentName)}:${this.configuration.identifier.replace(/:/g, '')}`
+  }
+
+  private subKey(documentName: string) {
+    return `${this.getKey(documentName)}:*`
+  }
+
+  private lockKey(documentName: string) {
+    return `${this.getKey(documentName)}:lock`
+  }
+
+  /**
+   * Once a document is laoded, subscribe to the channel in Redis.
+   */
   public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
       // On document creation the node will connect to pub and sub channels
       // for the document.
-      this.subscriber.psubscribe(this.subKey(documentName), async error => {
+      this.sub.psubscribe(this.subKey(documentName), async error => {
         if (error) {
           reject(error)
           return
@@ -96,10 +120,7 @@ export class Redis implements Extension {
 
         this.configuration.log('subscribed', this.subKey(documentName))
 
-        // document.on('update', this.handleUpdate(document))
         this.publishFirstSyncStep(documentName, document)
-
-        document.awareness.on('update', this.handleAwarenessUpdate(document))
         this.requestAwarenessFromOtherInstances(documentName)
 
         resolve(undefined)
@@ -107,61 +128,46 @@ export class Redis implements Extension {
     })
   }
 
+  /**
+   * Publish the first sync step through Redis.
+   */
   private async publishFirstSyncStep(documentName: string, document: Document) {
     const syncMessage = new OutgoingMessage()
       .createSyncMessage()
       .writeFirstSyncStepFor(document)
 
-    return this.publisher.publishBuffer(this.pubKey(documentName), Buffer.from(syncMessage.toUint8Array()))
+    return this.pub.publishBuffer(this.pubKey(documentName), Buffer.from(syncMessage.toUint8Array()))
   }
 
+  /**
+   * Let’s ask Redis who’s connected already.
+   */
   private async requestAwarenessFromOtherInstances(documentName: string) {
     const awarenessMessage = new OutgoingMessage()
       .writeQueryAwareness()
 
-    return this.publisher.publishBuffer(
+    return this.pub.publishBuffer(
       this.pubKey(documentName),
       Buffer.from(awarenessMessage.toUint8Array()),
     )
   }
 
-  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
-    // Still clients connected?
-    if (clientsCount > 0) {
-      return
-    }
-
-    this.configuration.log('last disconnect', documentName)
-
-    this.documents.delete(documentName)
-
-    // on final connection close sub channel
-    this.subscriber.punsubscribe(this.subKey(documentName), error => {
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
-    })
-  }
-
+  /**
+   * Before the document is stored, make sure to set a lock in Redis.
+   * That’s meant to avoid conflicts with other instances trying to store the document.
+   */
   async onStoreDocument({ document, documentName, instance }: onStoreDocumentPayload) {
-    const ttl = 1000
-    const key = `${this.getKey(documentName)}:lock`
-    // console.log(`[${instance.configuration.name}] Lock ${key}…`)
-
     // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    this.redlock.lock(key, ttl, async (error, lock) => {
+    this.redlock.lock(this.lockKey(documentName), this.configuration.lockTimeout, async (error, lock) => {
       if (error || !lock) {
         // Expected behavior: Could not acquire lock,
         // another instance locked it already.
         throw new Error(error)
       }
 
-      this.locks.set(key, lock)
+      this.locks.set(this.lockKey(documentName), lock)
 
       if (!this.configuration.onPersist) {
         return
@@ -176,34 +182,30 @@ export class Redis implements Extension {
   }
 
   async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
-    // TODO: Move to configuration
-    const ttl = 1000
-    const key = `${this.getKey(documentName)}:lock`
-    // console.log(`[${instance.configuration.name}] Unlocking ${key}`)
-
-    this.locks.get(key)?.unlock()
+    this.locks.get(this.lockKey(documentName))?.unlock()
       .catch(error => {
-        console.error(`I’m not able to unlock Redis. The lock will expire after ${ttl}ms.`)
+        console.error(`I’m not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
 
         if (error) {
           console.error(` - Error: ${error}`)
         }
       })
       .finally(() => {
-        this.locks.delete(key)
+        this.locks.delete(this.lockKey(documentName))
       })
   }
 
   /**
    * Handle awareness update messages received directly by this Hocuspocus instance.
-  */
-  private handleAwarenessUpdate(document: Document) {
-    return async () => {
-      const message = new OutgoingMessage()
-        .createAwarenessUpdateMessage(document.awareness)
+   */
+  async onAwarenessUpdate({ documentName, awareness }: onAwarenessUpdatePayload) {
+    const message = new OutgoingMessage()
+      .createAwarenessUpdateMessage(awareness)
 
-      await this.publisher.publishBuffer(this.pubKey(document.name), Buffer.from(message.toUint8Array()))
-    }
+    return this.pub.publishBuffer(
+      this.pubKey(documentName),
+      Buffer.from(message.toUint8Array()),
+    )
   }
 
   /**
@@ -227,29 +229,41 @@ export class Redis implements Extension {
     new MessageReceiver(
       new IncomingMessage(data),
     ).apply(document, reply => {
-      return this.publisher.publishBuffer(
+      return this.pub.publishBuffer(
         this.pubKey(document.name),
         Buffer.from(reply),
       )
     })
   }
 
-  private getKey(documentName: string) {
-    return `${this.configuration.prefix}:${documentName}`
+  /**
+   * Make sure to *not* listen for further changes, when there’s
+   * noone connected anymore.
+   */
+  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
+    // Do nothing, when other users are still connected to the document.
+    if (clientsCount > 0) {
+      return
+    }
+
+    // It was indeed the last connected user.
+    this.configuration.log('last disconnect', documentName)
+    this.documents.delete(documentName)
+
+    // Time to end the subscription on the document channel.
+    this.sub.punsubscribe(this.subKey(documentName), error => {
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
+    })
   }
 
-  private pubKey(documentName: string) {
-    return `${this.getKey(documentName)}:${this.configuration.identifier.replace(/:/g, '')}`
-  }
-
-  private subKey(documentName: string) {
-    return `${this.getKey(documentName)}:*`
-  }
-
-  private updatedKey(documentName: string) {
-    return `${this.getKey(documentName)}:updated`
-  }
-
+  /**
+   * Kill the Redlock connection immediately.
+   */
   async onDestroy() {
     this.redlock.quit()
   }

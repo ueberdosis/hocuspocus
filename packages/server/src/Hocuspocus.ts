@@ -438,7 +438,6 @@ export class Hocuspocus {
 
   /**
    * Handle update of the given document
-   * @private
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
     const hookPayload = {
@@ -501,7 +500,6 @@ export class Hocuspocus {
 
   /**
    * Create a new document by the given request
-   * @private
    */
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
@@ -555,7 +553,6 @@ export class Hocuspocus {
 
   /**
    * Create a new connection by the given request and document
-   * @private
    */
   private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
     const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
@@ -611,8 +608,8 @@ export class Hocuspocus {
   }
 
   /**
-   * Run the given hook on all configured extensions
-   * Runs the given callback after each hook
+   * Run the given hook on all configured extensions.
+   * Runs the given callback after each hook.
    */
   hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
@@ -647,7 +644,6 @@ export class Hocuspocus {
 
   /**
    * Get parameters by the given request
-   * @private
    */
   private static getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
@@ -656,7 +652,6 @@ export class Hocuspocus {
 
   /**
    * Get document name by the given request
-   * @private
    */
   private async getDocumentNameFromRequest(request: IncomingMessage): Promise<string> {
     const documentName = decodeURI(
