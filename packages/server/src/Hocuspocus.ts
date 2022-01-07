@@ -152,12 +152,14 @@ export class Hocuspocus {
           response.writeHead(200, { 'Content-Type': 'text/plain' })
           response.end('OK')
         })
-        .catch(e => {
+        .catch(error => {
           // if a hook rejects and the error is empty, do nothing
           // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
           // just rethrow it
-          if (e) throw e
+          if (error) {
+            throw error
+          }
         })
     })
 
@@ -174,12 +176,14 @@ export class Hocuspocus {
             webSocketServer.emit('connection', ws, request)
           })
         })
-        .catch(e => {
+        .catch(error => {
           // if a hook rejects and the error is empty, do nothing
           // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
           // just rethrow it
-          if (e) throw e
+          if (error) {
+            throw error
+          }
         })
     })
 
@@ -194,7 +198,7 @@ export class Hocuspocus {
 
         this.hooks('onListen', { port: this.configuration.port })
           .then(() => resolve())
-          .catch(e => reject(e))
+          .catch(error => reject(error))
       })
     })
   }
@@ -278,7 +282,7 @@ export class Hocuspocus {
       this.webSocketServer?.clients.forEach(client => {
         client.terminate()
       })
-    } catch (e) {
+    } catch (error) {
       //
     }
 
@@ -464,9 +468,15 @@ export class Hocuspocus {
     }
 
     this.debounce(`onStoreDocument-${document.name}`, () => {
-      this.hooks('onStoreDocument', hookPayload).then(() => {
-        this.hooks('afterStoreDocument', hookPayload)
-      })
+      this.hooks('onStoreDocument', hookPayload)
+        .catch(error => {
+          if (error?.message) {
+            throw error
+          }
+        })
+        .then(() => {
+          this.hooks('afterStoreDocument', hookPayload)
+        })
     })
   }
 
@@ -510,6 +520,7 @@ export class Hocuspocus {
    */
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
+      console.log(`${this.configuration.name} Got ${documentName} already! No need to subscribe?`)
       const document = this.documents.get(documentName)
       return document
     }
@@ -578,28 +589,32 @@ export class Hocuspocus {
 
       this.hooks('onDisconnect', hookPayload)
 
-      // If it’s the last connection, we need to make sure to store the
-      // document and remove it from memory then.
-      if (document.getConnectionsCount() <= 0) {
-        // Use the debounce helper, to clear running timers,
-        // but make it run immediately
-        this.debounce(`onStoreDocument-${document.name}`, () => {
-          this.hooks('onStoreDocument', hookPayload).then(() => {
-            this.hooks('afterStoreDocument', hookPayload)
-
-            // Check if there are still no connections to the document, as these hooks
-            // may take some time to resolve (e.g. database queries). If a
-            // new connection were to come in during that time it would rely on the
-            // document in the map that we remove now.
-            if (document.getConnectionsCount() > 0) {
-              return
-            }
-
-            this.documents.delete(document.name)
-            document.destroy()
-          })
-        }, true)
+      // Check if there are still no connections to the document, as these hooks
+      // may take some time to resolve (e.g. database queries). If a
+      // new connection were to come in during that time it would rely on the
+      // document in the map that we remove now.
+      if (document.getConnectionsCount() > 0) {
+        return
       }
+
+      // If it’s the last connection, we need to make sure to store the
+      // document. Use the debounce helper, to clear running timers,
+      // but make it run immediately (`true`).
+      this.debounce(`onStoreDocument-${document.name}`, () => {
+        this.hooks('onStoreDocument', hookPayload)
+          .catch(error => {
+            if (error?.message) {
+              throw error
+            }
+          })
+          .then(() => {
+            this.hooks('afterStoreDocument', hookPayload)
+          })
+      }, true)
+
+      // Remove document from memory.
+      this.documents.delete(document.name)
+      document.destroy()
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then
@@ -634,7 +649,7 @@ export class Hocuspocus {
           .then(() => extension[name]?.(payload))
           .catch(error => {
             // make sure to log error messages
-            if (error && error.message) {
+            if (error?.message) {
               console.error(`[${name}]`, error.message)
             }
 

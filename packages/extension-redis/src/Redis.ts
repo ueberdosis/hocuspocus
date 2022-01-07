@@ -44,10 +44,6 @@ export interface Configuration {
    */
   onPersist?: ({ document, identifier }: { document: Y.Doc, identifier: string }) => Promise<void> | void,
   /**
-   * A log function, if none is provided output will go to console
-   */
-  log: (...args: any[]) => void,
-  /**
    * The maximum time for the Redis lock in ms (in case it can’t be released).
    */
   lockTimeout: number,
@@ -59,7 +55,6 @@ export class Redis implements Extension {
     host: '127.0.0.1',
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
-    log: console.log, // eslint-disable-line
     lockTimeout: 1000,
   }
 
@@ -81,10 +76,11 @@ export class Redis implements Extension {
     }
 
     this.pub = new RedisClient(port, host, options)
-    this.redlock = new Redlock([this.pub])
 
     this.sub = new RedisClient(port, host, options)
     this.sub.on('pmessageBuffer', this.handleIncomingMessage)
+
+    this.redlock = new Redlock([this.pub])
   }
 
   private getKey(documentName: string) {
@@ -106,7 +102,7 @@ export class Redis implements Extension {
   /**
    * Once a document is laoded, subscribe to the channel in Redis.
    */
-  public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
+  public async afterLoadDocument({ documentName, document, instance }: afterLoadDocumentPayload) {
     this.documents.set(documentName, document)
 
     return new Promise((resolve, reject) => {
@@ -117,8 +113,6 @@ export class Redis implements Extension {
           reject(error)
           return
         }
-
-        this.configuration.log('subscribed', this.subKey(documentName))
 
         this.publishFirstSyncStep(documentName, document)
         this.requestAwarenessFromOtherInstances(documentName)
@@ -140,7 +134,7 @@ export class Redis implements Extension {
   }
 
   /**
-   * Let’s ask Redis who’s connected already.
+   * Let’s ask Redis who is connected already.
    */
   private async requestAwarenessFromOtherInstances(documentName: string) {
     const awarenessMessage = new OutgoingMessage()
@@ -160,35 +154,39 @@ export class Redis implements Extension {
     // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // if the value < debounce start then it can call the onPersist callback
     // for the host application to write to disk
-    this.redlock.lock(this.lockKey(documentName), this.configuration.lockTimeout, async (error, lock) => {
-      if (error || !lock) {
-        // Expected behavior: Could not acquire lock,
-        // another instance locked it already.
-        throw new Error(error)
-      }
+    return new Promise((resolve, reject) => {
+      this.redlock.lock(this.lockKey(documentName), this.configuration.lockTimeout, async (error, lock) => {
+        if (error || !lock) {
+          // Expected behavior: Could not acquire lock,
+          // another instance locked it already.
+          reject()
+          return
+        }
 
-      this.locks.set(this.lockKey(documentName), lock)
+        this.locks.set(this.lockKey(documentName), lock)
 
-      if (!this.configuration.onPersist) {
-        return
-      }
+        if (!this.configuration.onPersist) {
+          resolve(undefined)
+          return
+        }
 
-      // console.log(`[${instance.configuration.name}] Persist!`)
-      return this.configuration.onPersist({
-        document,
-        identifier: this.configuration.identifier,
+        await this.configuration.onPersist({
+          document,
+          identifier: this.configuration.identifier,
+        })
+
+        resolve(undefined)
       })
     })
   }
 
+  /**
+   * Release the Redis lock, so other instances can store documents.
+   */
   async afterStoreDocument({ documentName, instance }: afterStoreDocumentPayload) {
     this.locks.get(this.lockKey(documentName))?.unlock()
-      .catch(error => {
-        console.error(`I’m not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
-
-        if (error) {
-          console.error(` - Error: ${error}`)
-        }
+      .catch(() => {
+        console.error(`Not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
       })
       .finally(() => {
         this.locks.delete(this.lockKey(documentName))
@@ -240,24 +238,20 @@ export class Redis implements Extension {
    * Make sure to *not* listen for further changes, when there’s
    * noone connected anymore.
    */
-  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
+  public onDisconnect = async ({ documentName, clientsCount, instance }: onDisconnectPayload) => {
     // Do nothing, when other users are still connected to the document.
     if (clientsCount > 0) {
       return
     }
 
     // It was indeed the last connected user.
-    this.configuration.log('last disconnect', documentName)
     this.documents.delete(documentName)
 
     // Time to end the subscription on the document channel.
     this.sub.punsubscribe(this.subKey(documentName), error => {
       if (error) {
         console.error(error)
-        return
       }
-
-      this.configuration.log(`Unsubscribed from ${this.subKey(documentName)}`)
     })
   }
 
