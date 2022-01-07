@@ -456,6 +456,13 @@ export class Hocuspocus {
       throw error
     })
 
+    // If the update was received through other ways than the
+    // WebSocket connection, we don’t need to feel responsible for
+    // storing the content.
+    if (!connection) {
+      return
+    }
+
     this.debounce(`onStoreDocument-${document.name}`, () => {
       this.hooks('onStoreDocument', hookPayload).then(() => {
         this.hooks('afterStoreDocument', hookPayload)
