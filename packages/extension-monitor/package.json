@@ -28,8 +28,8 @@
     "src"
   ],
   "scripts": {
-    "start": "yarn --cwd dashboard start",
-    "build": "yarn --cwd dashboard build"
+    "start": "npm --prefix ./dashboard run start",
+    "build": "npm --prefix ./dashboard run build"
   },
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.90",
