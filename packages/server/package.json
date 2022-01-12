@@ -37,6 +37,7 @@
     "lib0": "^0.2.43",
     "uuid": "^8.3.2",
     "ws": "^8.3.0",
+    "y-protocols": "^1.0.5",
     "yjs": "^13.5.22"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
