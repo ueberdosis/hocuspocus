@@ -48,7 +48,7 @@ export class Hocuspocus {
     onUpgrade: () => new Promise(r => r(null)),
   }
 
-  documents = new Map()
+  documents: Map<string, Document> = new Map()
 
   httpServer?: HTTPServer
 
@@ -455,7 +455,10 @@ export class Hocuspocus {
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
       const document = this.documents.get(documentName)
-      return document
+
+      if (document) {
+        return document
+      }
     }
 
     const document = new Document(documentName)
