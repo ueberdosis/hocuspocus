@@ -20,7 +20,8 @@
 		},
 		"nodeArguments": [
       "--conditions=source",
-			"--loader=ts-node/esm",
+      "--no-warnings",
+      "--loader=ts-node/esm",
       "--experimental-specifier-resolution=node"
 		]
   },
