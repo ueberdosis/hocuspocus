@@ -6,12 +6,13 @@ import {
   readSyncStep2,
   readUpdate,
 } from 'y-protocols/sync'
-import { applyAwarenessUpdate } from 'y-protocols/awareness'
+import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness'
 import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger, MessageLogger } from './Debugger'
+import Document from './Document'
 
 export class MessageReceiver {
 
@@ -23,18 +24,27 @@ export class MessageReceiver {
     this.message = message
   }
 
-  public apply(connection: Connection) {
-    const { document } = connection
+  public apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
     const { message } = this
     const type = message.readVarUint()
 
     switch (type) {
       case MessageType.Sync:
         message.writeVarUint(MessageType.Sync)
-        this.readSyncMessage(message, connection)
+        this.readSyncMessage(message, document, connection, reply)
 
         if (message.length > 1) {
-          connection.send(message.toUint8Array())
+          if (reply) {
+            reply(message.toUint8Array())
+          } else if (connection) {
+            // TODO: We should log this, shouldn’t we?
+            // this.debugger.log({
+            //   direction: 'out',
+            //   type: MessageType.Awareness,
+            //   category: 'Update',
+            // })
+            connection.send(message.toUint8Array())
+          }
         }
 
         break
@@ -48,13 +58,17 @@ export class MessageReceiver {
         applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection)
 
         break
+      case MessageType.QueryAwareness:
+
+        this.applyQueryAwarenessMessage(document.awareness, reply)
+
+        break
       default:
         // Do nothing
     }
   }
 
-  readSyncMessage(message: IncomingMessage, connection: Connection) {
-    const { document } = connection
+  readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
     const type = message.readVarUint()
 
     switch (type) {
@@ -78,13 +92,17 @@ export class MessageReceiver {
           .createSyncMessage()
           .writeFirstSyncStepFor(document))
 
-        this.debugger.log({
-          direction: 'out',
-          type: MessageType.Sync,
-          category: 'SyncStep1',
-        })
+        if (reply) {
+          reply(syncMessage.toUint8Array())
+        } else if (connection) {
+          this.debugger.log({
+            direction: 'out',
+            type: MessageType.Sync,
+            category: 'SyncStep1',
+          })
 
-        connection.send(syncMessage.toUint8Array())
+          connection.send(syncMessage.toUint8Array())
+        }
 
         break
       }
@@ -119,5 +137,23 @@ export class MessageReceiver {
     }
 
     return type
+  }
+
+  applyQueryAwarenessMessage(awareness: Awareness, reply?: (message: Uint8Array) => void) {
+    const message = new OutgoingMessage()
+      .createAwarenessUpdateMessage(awareness)
+
+    if (reply) {
+      reply(message.toUint8Array())
+    }
+
+    // TODO: We should add support for WebSocket connections, too, right?
+    // this.debugger.log({
+    //   direction: 'out',
+    //   type: MessageType.Sync,
+    //   category: 'SyncStep1',
+    // })
+
+    // connection.send(syncMessage.toUint8Array())
   }
 }

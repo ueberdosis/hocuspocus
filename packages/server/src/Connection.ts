@@ -170,7 +170,7 @@ export class Connection {
   private handleMessage(data: Iterable<number>): void {
     new MessageReceiver(
       new IncomingMessage(data),
-    ).apply(this)
+    ).apply(this.document, this)
   }
 
   /**

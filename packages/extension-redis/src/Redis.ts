@@ -11,8 +11,8 @@ import {
   onDisconnectPayload,
   onStoreDocumentPayload,
   onAwarenessUpdatePayload,
+  MessageReceiver,
 } from '@hocuspocus/server'
-import { MessageReceiver } from './MessageReceiver'
 
 export interface Configuration {
   /**
@@ -64,7 +64,7 @@ export class Redis implements Extension {
 
   sub: RedisClient.Redis
 
-  documents = new Map()
+  documents: Map<string, Document> = new Map()
 
   redlock: Redlock
 
@@ -218,7 +218,7 @@ export class Redis implements Extension {
 
     new MessageReceiver(
       new IncomingMessage(data),
-    ).apply(document, reply => {
+    ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(
         this.pubKey(document.name),
         Buffer.from(reply),
