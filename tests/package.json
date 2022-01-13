@@ -12,7 +12,7 @@
     "@hocuspocus/transformer": "^1.0.0-alpha.18",
     "chai": "^4.3.4",
     "playwright": "^1.17.2",
-    "redis": "^4.0.2",
+    "redis": "^3.1.2",
     "sinon": "^12.0.1",
     "ws": "^8.4.1",
     "yjs": "^13.5.24"
