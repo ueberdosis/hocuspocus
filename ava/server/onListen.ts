@@ -2,16 +2,16 @@ import test from 'ava'
 import { Hocuspocus } from '@hocuspocus/server'
 
 test('executes the onListen callback', async t => {
-  const result = new Promise(resolve => {
+  await new Promise(resolve => {
     const server = new Hocuspocus()
 
     server.configure({
       port: 4000,
       async onListen() {
-        resolve('listening')
+        resolve('done')
       },
     }).listen()
   })
 
-  t.is(await result, 'listening')
+  t.pass()
 })
