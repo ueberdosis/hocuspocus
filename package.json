@@ -3,7 +3,8 @@
   "workspaces": [
     "playground/*",
     "packages/*",
-    "packages/extension-monitor/dashboard"
+    "packages/extension-monitor/dashboard",
+    "tests"
   ],
   "browserslist": [
     "defaults",
