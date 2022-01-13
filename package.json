@@ -14,7 +14,15 @@
   "ava": {
     "files": [
       "ava/**/*"
-    ]
+    ],
+		"extensions": {
+			"ts": "module"
+		},
+		"nodeArguments": [
+      "--conditions=source",
+			"--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node"
+		]
   },
   "scripts": {
     "start": "npm run playground",
@@ -40,6 +48,7 @@
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
+    "@ava/typescript": "^2.0.0",
     "@babel/core": "^7.16.0",
     "@babel/eslint-parser": "^7.16.3",
     "@babel/preset-env": "^7.16.4",
