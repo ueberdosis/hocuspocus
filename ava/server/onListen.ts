@@ -2,7 +2,7 @@ import test from 'ava'
 import { Hocuspocus } from '@hocuspocus/server'
 
 test('executes the onListen callback', async t => {
-  const server = new Promise(async resolve => {
+  const server = new Promise(resolve => {
     const server = new Hocuspocus()
 
     server.configure({
