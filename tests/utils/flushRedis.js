@@ -6,5 +6,5 @@ export default () => {
     port: process.env.REDIS_PORT || 6379,
   })
 
-  client.flushdb()
+  client.flushDb()
 }
