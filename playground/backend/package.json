@@ -8,6 +8,14 @@
     "dev": "nodemon -e ts --watch ./ --watch ../../packages --exec npm start"
   },
   "dependencies": {
+    "@hocuspocus/extension-logger": "^1.0.0-alpha.65",
+    "@hocuspocus/extension-monitor": "^1.0.0-alpha.90",
+    "@hocuspocus/extension-redis": "^1.0.0-alpha.54",
+    "@hocuspocus/extension-rocksdb": "^1.0.0-alpha.92",
+    "@hocuspocus/extension-sqlite": "^1.0.0-alpha.5",
+    "@hocuspocus/extension-webhook": "^1.0.0-alpha.55",
+    "@hocuspocus/server": "^1.0.0-alpha.91",
+    "@hocuspocus/transformer": "^1.0.0-alpha.18",
     "@tiptap/core": "^2.0.0-beta.150",
     "@tiptap/starter-kit": "^2.0.0-beta.153",
     "@types/express": "^4.17.13",

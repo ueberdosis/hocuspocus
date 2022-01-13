@@ -28,6 +28,7 @@
   ],
   "dependencies": {
     "@tiptap/core": "^2.0.0-beta.150",
+    "@tiptap/starter-kit": "^2.0.0-beta.171",
     "prosemirror-model": "^1.15.0",
     "y-prosemirror": "^1.0.13",
     "yjs": "^13.5.22"

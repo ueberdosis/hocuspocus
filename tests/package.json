@@ -1,0 +1,20 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hocuspocus/extension-logger": "^1.0.0-alpha.65",
+    "@hocuspocus/extension-redis": "^1.0.0-alpha.54",
+    "@hocuspocus/extension-rocksdb": "^1.0.0-alpha.92",
+    "@hocuspocus/provider": "^1.0.0-alpha.29",
+    "@hocuspocus/server": "^1.0.0-alpha.91",
+    "@hocuspocus/transformer": "^1.0.0-alpha.18",
+    "chai": "^4.3.4",
+    "playwright": "^1.17.2",
+    "redis": "^3.1.2",
+    "sinon": "^12.0.1",
+    "ws": "^8.4.1",
+    "yjs": "^13.5.24"
+  }
+}
