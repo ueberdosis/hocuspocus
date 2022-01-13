@@ -2,6 +2,7 @@
   "name": "tests",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@hocuspocus/extension-logger": "^1.0.0-alpha.65",
     "@hocuspocus/extension-redis": "^1.0.0-alpha.54",
