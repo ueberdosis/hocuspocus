@@ -1,5 +1,5 @@
 import * as decoding from 'lib0/decoding'
-import WebSocket, { WebSocketServer } from 'ws'
+import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
@@ -112,7 +112,7 @@ export class Hocuspocus {
   async listen(
     portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
     callback: any = null,
-  ): Promise<void> {
+  ): Promise<Hocuspocus> {
     if (typeof portOrCallback === 'number') {
       this.configuration.port = portOrCallback
     }
@@ -176,17 +176,37 @@ export class Hocuspocus {
     this.httpServer = server
     this.webSocketServer = webSocketServer
 
-    await new Promise((resolve: Function, reject: Function) => {
+    return new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
         if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }
 
-        this.hooks('onListen', { port: this.configuration.port })
-          .then(() => resolve())
-          .catch(e => reject(e))
+        this.hooks('onListen', { port: this.address.port })
+          .then(() => resolve(this))
+          .catch(error => reject(error))
       })
     })
+  }
+
+  get address(): AddressInfo {
+    return (this.httpServer?.address() || {
+      port: this.configuration.port,
+      address: '127.0.0.1',
+      family: 'IPv4',
+    }) as AddressInfo
+  }
+
+  get URL(): string {
+    return `127.0.0.1:${this.address.port}`
+  }
+
+  get webSocketURL(): string {
+    return `ws://${this.URL}`
+  }
+
+  get httpURL(): string {
+    return `http://${this.URL}`
   }
 
   private showStartScreen() {
@@ -195,8 +215,8 @@ export class Hocuspocus {
     console.log()
     console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
     console.log()
-    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
-    console.log(`  > WebSocket: ws://127.0.0.1:${this.configuration.port}`)
+    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
+    console.log(`  > WebSocket: ${this.webSocketURL}`)
 
     const extensions = this.configuration?.extensions.map(extension => {
       return extension.constructor?.name
