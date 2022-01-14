@@ -14,6 +14,8 @@ export const newHocuspocusProvider = (
     name: 'hocuspocus-test',
     // Pass a polyfill to use WebSockets in a Node.js environment.
     WebSocketPolyfill: WebSocket,
+    // There is no need to share data with other browser tabs in the testing environment.
+    broadcast: false,
     // Add or overwrite settings, depending on the test case.
     ...options,
   })
