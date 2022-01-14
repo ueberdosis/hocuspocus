@@ -13,7 +13,8 @@
   "type": "module",
   "ava": {
     "files": [
-      "ava/**/*"
+      "ava/**/*",
+      "!ava/utils/**/*"
     ],
     "extensions": {
       "ts": "module"

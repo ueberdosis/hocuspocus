@@ -1,13 +1,9 @@
 import test from 'ava'
-import { Hocuspocus } from '@hocuspocus/server'
+import { newHocuspocus } from '../utils'
 
 test('executes the onListen callback', async t => {
   await new Promise(resolve => {
-    const server = new Hocuspocus()
-
-    server.configure({
-      quiet: true,
-      port: 0,
+    newHocuspocus({
       async onListen() {
         resolve('done')
       },
