@@ -112,7 +112,7 @@ export class Hocuspocus {
   async listen(
     portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
     callback: any = null,
-  ): Promise<void> {
+  ): Promise<Hocuspocus> {
     if (typeof portOrCallback === 'number') {
       this.configuration.port = portOrCallback
     }
@@ -176,15 +176,15 @@ export class Hocuspocus {
     this.httpServer = server
     this.webSocketServer = webSocketServer
 
-    await new Promise((resolve: Function, reject: Function) => {
+    return new Promise((resolve: Function, reject: Function) => {
       server.listen(this.configuration.port, () => {
         if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }
 
         this.hooks('onListen', { port: this.address.port })
-          .then(() => resolve())
-          .catch(e => reject(e))
+          .then(() => resolve(this))
+          .catch(error => reject(error))
       })
     })
   }
