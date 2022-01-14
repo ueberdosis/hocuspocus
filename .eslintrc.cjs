@@ -16,19 +16,14 @@ module.exports = {
       ],
       plugins: [
         'html',
-        'mocha',
         '@typescript-eslint',
       ],
-      env: {
-        mocha: true,
-      },
       globals: {
         document: false,
         window: false,
         NodeJS: false,
       },
       extends: [
-        'plugin:mocha/recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:vue/strongly-recommended',
         'airbnb-base',
@@ -45,7 +40,7 @@ module.exports = {
         'no-console': ['warn', { allow: ['warn', 'error'] }],
         semi: ['error', 'never'],
         'import/extensions': 'off',
-        'import/no-extraneous-dependencies': 'off',
+        'import/no-extraneous-dependencies': 'error',
         'import/no-unresolved': 'off',
         'import/no-dynamic-require': 'off',
         'arrow-parens': ['error', 'as-needed'],
@@ -90,8 +85,6 @@ module.exports = {
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        'mocha/no-mocha-arrows': 'off',
-        'mocha/no-hooks-for-single-case': 'off',
       },
     },
   ],

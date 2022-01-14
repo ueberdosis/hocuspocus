@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-monitor",
   "description": "hocuspocus monitoring",
-  "version": "1.0.0-alpha.89",
+  "version": "1.0.0-alpha.90",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -28,11 +28,11 @@
     "src"
   ],
   "scripts": {
-    "start": "yarn --cwd dashboard start",
-    "build": "yarn --cwd dashboard build"
+    "start": "npm --prefix ./dashboard run start",
+    "build": "npm --prefix ./dashboard run build"
   },
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.90",
+    "@hocuspocus/server": "^1.0.0-alpha.91",
     "@types/node-os-utils": "^1.2.0",
     "@types/node-static": "^0.7.7",
     "bufferutil": "^4.0.6",

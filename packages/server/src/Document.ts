@@ -16,7 +16,10 @@ export class Document extends Doc {
     onUpdate: (document: Document, connection: Connection, update: Uint8Array) => {},
   }
 
-  connections = new Map()
+  connections: Map<WebSocket, {
+    clients: Set<any>,
+    connection: Connection
+  }> = new Map()
 
   name: string
 
@@ -123,7 +126,7 @@ export class Document extends Doc {
   getClients(connectionInstance: WebSocket): Set<any> {
     const connection = this.connections.get(connectionInstance)
 
-    return connection.clients === undefined ? new Set() : connection.clients
+    return connection?.clients === undefined ? new Set() : connection.clients
   }
 
   /**

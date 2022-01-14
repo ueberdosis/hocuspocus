@@ -3,7 +3,9 @@
   "workspaces": [
     "playground/*",
     "packages/*",
-    "packages/extension-monitor/dashboard"
+    "packages/extension-monitor/dashboard",
+    "tests",
+    "ava-tests"
   ],
   "browserslist": [
     "defaults",
@@ -11,6 +13,21 @@
     "maintained node versions"
   ],
   "type": "module",
+  "ava": {
+    "files": [
+      "ava-tests/**/*",
+      "!ava-tests/utils/**/*"
+    ],
+    "extensions": {
+      "ts": "module"
+    },
+    "nodeArguments": [
+      "--conditions=source",
+      "--no-warnings",
+      "--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node"
+    ]
+  },
   "scripts": {
     "start": "npm run playground",
     "playground": "npm run playground:default",
@@ -24,19 +41,22 @@
     "playground:webhook": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/webhook.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
-    "test": "NODE_ENV=testing node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
+    "test": "ava && NODE_ENV=testing node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
     "test:watch": "nodemon --quiet --watch . --exec 'npm run test || true' --ext 'ts,js'",
+    "ava": "ava",
+    "ava:watch": "ava --watch",
     "build:docs": "npm --prefix ./docs run build",
     "build:packages": "npm run clean:packages && rollup -c && npm --prefix ./packages/extension-monitor run build",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private",
-    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && npm run install"
+    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && npm install"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
     "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.16.5",
     "@babel/preset-env": "^7.16.7",
+    "@ava/typescript": "^2.0.0",
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^4.0.0",
     "@lerna/project": "^4.0.0",
@@ -48,13 +68,13 @@
     "@types/mocha": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
+    "ava": "^4.0.1",
     "chai": "^4.3.4",
     "concurrently": "^6.4.0",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-vue": "^8.2.0",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",
@@ -68,9 +88,5 @@
     "rollup-plugin-typescript2": "^0.31.1",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
-  },
-  "dependencies": {
-    "redis": "^4.0.1",
-    "sinon": "^12.0.1"
   }
 }

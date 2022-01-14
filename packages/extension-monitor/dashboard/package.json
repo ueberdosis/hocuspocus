@@ -26,8 +26,7 @@
   "resolutions": {
     "@babel/preset-env": "7.13.8"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^9.7.3",
