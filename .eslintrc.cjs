@@ -39,7 +39,7 @@ module.exports = {
         'no-console': ['warn', { allow: ['warn', 'error'] }],
         semi: ['error', 'never'],
         'import/extensions': 'off',
-        'import/no-extraneous-dependencies': 'off',
+        'import/no-extraneous-dependencies': 'error',
         'import/no-unresolved': 'off',
         'import/no-dynamic-require': 'off',
         'arrow-parens': ['error', 'as-needed'],

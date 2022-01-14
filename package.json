@@ -3,7 +3,8 @@
   "workspaces": [
     "playground/*",
     "packages/*",
-    "packages/extension-monitor/dashboard"
+    "packages/extension-monitor/dashboard",
+    "tests"
   ],
   "browserslist": [
     "defaults",
@@ -86,9 +87,5 @@
     "rollup-plugin-typescript2": "^0.31.1",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.2"
-  },
-  "dependencies": {
-    "redis": "^3.1.2",
-    "sinon": "^12.0.1"
   }
 }
