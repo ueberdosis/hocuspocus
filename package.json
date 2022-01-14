@@ -41,6 +41,7 @@
     "test": "ava",
     "test:watch": "nodemon --quiet --watch . --exec 'npm run test || true' --ext 'ts,js'",
     "ava": "ava",
+    "ava:watch": "ava --watch",
     "build:docs": "npm --prefix ./docs run build",
     "build:packages": "npm run clean:packages && rollup -c && npm --prefix ./packages/extension-monitor run build",
     "clean:packages": "rm -Rf ./packages/*/dist",

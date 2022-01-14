@@ -1,5 +1,5 @@
 import * as decoding from 'lib0/decoding'
-import WebSocket, { WebSocketServer } from 'ws'
+import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
 import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
 import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
@@ -106,6 +106,10 @@ export class Hocuspocus {
     })
   }
 
+  get address(): AddressInfo {
+    return this.httpServer?.address() as AddressInfo
+  }
+
   /**
    * Start the server
    */
@@ -182,7 +186,7 @@ export class Hocuspocus {
           this.showStartScreen()
         }
 
-        this.hooks('onListen', { port: this.configuration.port })
+        this.hooks('onListen', { port: this.address.port })
           .then(() => resolve())
           .catch(e => reject(e))
       })
@@ -195,8 +199,8 @@ export class Hocuspocus {
     console.log()
     console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
     console.log()
-    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.configuration.port}`)}`)
-    console.log(`  > WebSocket: ws://127.0.0.1:${this.configuration.port}`)
+    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.address.port}`)}`)
+    console.log(`  > WebSocket: ws://127.0.0.1:${this.address.port}`)
 
     const extensions = this.configuration?.extensions.map(extension => {
       return extension.constructor?.name

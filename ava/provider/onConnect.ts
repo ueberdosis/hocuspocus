@@ -1,15 +1,16 @@
 import test from 'ava'
-import WebSocket from 'ws'
+import WebSocket, { AddressInfo } from 'ws'
 import { Hocuspocus } from '@hocuspocus/server'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 test('executes the onConnect callback', async t => {
   await new Promise(resolve => {
     const server = new Hocuspocus()
-    server.configure({ port: 4001 }).listen()
+    server.configure({ quiet: true, port: 0 }).listen()
+    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:4001',
+      url: `ws://127.0.0.1:${port}`,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
@@ -24,10 +25,11 @@ test('executes the onConnect callback', async t => {
 test("executes the on('connect') callback", async t => {
   await new Promise(resolve => {
     const server = new Hocuspocus()
-    server.configure({ port: 4002 }).listen()
+    server.configure({ quiet: true, port: 0 }).listen()
+    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:4002',
+      url: `ws://127.0.0.1:${port}`,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
     })
@@ -40,18 +42,20 @@ test("executes the on('connect') callback", async t => {
   t.pass()
 })
 
-test.failing('doesn’t execute the onConnect callback when the server throws an error', async t => {
+test.skip('doesn’t execute the onConnect callback when the server throws an error', async t => {
   await new Promise(resolve => {
     const server = new Hocuspocus()
     server.configure({
-      port: 4003,
+      quiet: true,
+      port: 4000,
       async onConnect() {
         throw new Error()
       },
     }).listen()
+    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:4003',
+      url: `ws://127.0.0.1:${port}`,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
