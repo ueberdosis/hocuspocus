@@ -2,10 +2,9 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onConnect callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
-    server.listen()
+  const server = await newHocuspocus()
 
+  await new Promise(resolve => {
     newHocuspocusProvider(server, {
       onConnect: () => {
         resolve('done')
@@ -17,11 +16,10 @@ test('executes the onConnect callback', async t => {
 })
 
 test("executes the on('connect') callback", async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
-    server.listen()
+  const server = await newHocuspocus()
+  const provider = newHocuspocusProvider(server)
 
-    const provider = newHocuspocusProvider(server)
+  await new Promise(resolve => {
     provider.on('connect', () => {
       resolve('done')
     })
@@ -31,14 +29,13 @@ test("executes the on('connect') callback", async t => {
 })
 
 test.skip('doesn’t execute the onConnect callback when the server throws an error', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onConnect() {
-        throw new Error()
-      },
-    })
-    server.listen()
+  const server = await newHocuspocus({
+    async onConnect() {
+      throw new Error()
+    },
+  })
 
+  await new Promise(resolve => {
     newHocuspocusProvider(server, {
       onConnect: () => {
         t.fail('onConnect must not be executed')

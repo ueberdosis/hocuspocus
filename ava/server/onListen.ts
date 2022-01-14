@@ -7,7 +7,7 @@ test('executes the onListen callback', async t => {
       async onListen() {
         resolve('done')
       },
-    }).listen()
+    })
   })
 
   t.pass()
