@@ -7,10 +7,9 @@ test('executes the onConnect callback', async t => {
   await new Promise(resolve => {
     const server = new Hocuspocus()
     server.configure({ quiet: true, port: 0 }).listen()
-    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: `ws://127.0.0.1:${port}`,
+      url: server.webSocketURL,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
@@ -26,10 +25,9 @@ test("executes the on('connect') callback", async t => {
   await new Promise(resolve => {
     const server = new Hocuspocus()
     server.configure({ quiet: true, port: 0 }).listen()
-    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: `ws://127.0.0.1:${port}`,
+      url: server.webSocketURL,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
     })
@@ -52,10 +50,9 @@ test.skip('doesn’t execute the onConnect callback when the server throws an er
         throw new Error()
       },
     }).listen()
-    const { port } = server.address
 
     const client = new HocuspocusProvider({
-      url: `ws://127.0.0.1:${port}`,
+      url: server.webSocketURL,
       name: 'hocuspocus-test',
       WebSocketPolyfill: WebSocket,
       onConnect: () => {

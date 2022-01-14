@@ -106,10 +106,6 @@ export class Hocuspocus {
     })
   }
 
-  get address(): AddressInfo {
-    return this.httpServer?.address() as AddressInfo
-  }
-
   /**
    * Start the server
    */
@@ -193,14 +189,34 @@ export class Hocuspocus {
     })
   }
 
+  get address(): AddressInfo {
+    return (this.httpServer?.address() || {
+      port: this.configuration.port,
+      address: '127.0.0.1',
+      family: 'IPv4',
+    }) as AddressInfo
+  }
+
+  get URL(): string {
+    return `127.0.0.1:${this.address.port}`
+  }
+
+  get webSocketURL(): string {
+    return `ws://${this.URL}`
+  }
+
+  get httpURL(): string {
+    return `http://${this.URL}`
+  }
+
   private showStartScreen() {
     const name = this.configuration.name ? ` (${this.configuration.name})` : ''
 
     console.log()
     console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
     console.log()
-    console.log(`  > HTTP: ${kleur.cyan(`http://127.0.0.1:${this.address.port}`)}`)
-    console.log(`  > WebSocket: ws://127.0.0.1:${this.address.port}`)
+    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
+    console.log(`  > WebSocket: ${this.webSocketURL}`)
 
     const extensions = this.configuration?.extensions.map(extension => {
       return extension.constructor?.name
