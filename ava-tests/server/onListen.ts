@@ -5,18 +5,18 @@ test('executes the onListen callback', async t => {
   await new Promise(resolve => {
     newHocuspocus({
       async onListen() {
+        t.pass()
         resolve('done')
       },
     })
   })
-
-  t.pass()
 })
 
 test('executes the onListen callback from an extension', async t => {
   await new Promise(resolve => {
     class CustomExtension {
       async onListen() {
+        t.pass()
         resolve('done')
       }
     }
@@ -27,6 +27,4 @@ test('executes the onListen callback from an extension', async t => {
       ],
     })
   })
-
-  t.pass()
 })

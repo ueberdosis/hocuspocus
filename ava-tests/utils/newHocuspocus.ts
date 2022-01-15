@@ -1,6 +1,6 @@
 import { Hocuspocus, Configuration } from '@hocuspocus/server'
 
-export const newHocuspocus = (options?: Partial<Configuration>): Promise<Hocuspocus> => {
+export const newHocuspocus = (options?: Partial<Configuration>): Hocuspocus => {
   const server = new Hocuspocus()
 
   server.configure({
@@ -13,6 +13,7 @@ export const newHocuspocus = (options?: Partial<Configuration>): Promise<Hocuspo
     ...options,
   })
 
-  // It’s a Promise, it’ll wait until the server is started.
-  return server.listen()
+  server.listen()
+
+  return server
 }
