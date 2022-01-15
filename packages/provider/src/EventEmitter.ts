@@ -36,7 +36,7 @@ export default class EventEmitter {
     return this
   }
 
-  protected removeAllListeners(): void {
+  removeAllListeners(): void {
     this.callbacks = {}
   }
 }
