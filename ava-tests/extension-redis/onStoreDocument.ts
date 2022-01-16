@@ -1,5 +1,4 @@
 import test from 'ava'
-import * as Y from 'yjs'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
@@ -10,16 +9,15 @@ const connectionSettings = {
   port: parseInt(process.env.REDIS_PORT || '', 10) || 6379,
 }
 
-test('syncs updates between servers and clients', async t => {
+test('stores documents without conflicts', async t => {
   await new Promise(resolve => {
-    const ydoc = new Y.Doc()
-    const anotherYdoc = new Y.Doc()
+    let anotherProvider: HocuspocusProvider
 
     class CustomStorageExtension {
-      async onStoreDocument({ document, instance }: onStoreDocumentPayload) {
+      async onStoreDocument({ document }: onStoreDocumentPayload) {
         t.is(document.getArray('foo').get(0), 'bar')
-        t.is(document.getArray('foo').get(0), anotherYdoc.getArray('foo').get(0))
-        t.is(document.getArray('foo').get(0), ydoc.getArray('foo').get(0))
+        t.is(document.getArray('foo').get(0), anotherProvider.document.getArray('foo').get(0))
+
         resolve('done')
       }
     }
@@ -48,18 +46,15 @@ test('syncs updates between servers and clients', async t => {
       ],
     })
 
-    newHocuspocusProvider(server, {
-      document: ydoc,
-    })
+    newHocuspocusProvider(server)
 
-    const anotherProvider = newHocuspocusProvider(anotherServer, {
-      document: anotherYdoc,
+    anotherProvider = newHocuspocusProvider(anotherServer, {
       onSynced: () => {
-      // once we're setup make an edit on anotherProvider, if all succeeds the onStoreDocument
-      // callback will be called after the debounce period and all docs will
-      // be identical
-        anotherYdoc.getArray('foo').insert(0, ['bar'])
-        anotherProvider.destroy()
+        // once we're setup make an edit on anotherProvider, if all succeeds the onStoreDocument
+        // callback will be called after the debounce period and all docs will
+        // be identical
+        anotherProvider.document.getArray('foo').insert(0, ['bar'])
+        anotherProvider.disconnect()
       },
     })
   })
