@@ -1,10 +1,28 @@
+import { chromium } from 'playwright'
 import assert from 'assert'
 import { Hocuspocus } from '@hocuspocus/server'
 
 const server = new Hocuspocus()
 
 context('server/onRequest', () => {
+  let browser
+
+  before(async () => {
+    browser = await chromium.launch()
+  })
+
+  after(async () => {
+    await browser.close()
+  })
+
+  let page
+
+  beforeEach(async () => {
+    page = await browser.newPage()
+  })
+
   afterEach(async () => {
+    await page.close()
     server.destroy()
   })
 
