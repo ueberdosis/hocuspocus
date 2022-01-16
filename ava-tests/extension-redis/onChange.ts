@@ -1,18 +1,13 @@
 import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
-
-const connectionSettings = {
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: parseInt(process.env.REDIS_PORT || '', 10) || 6379,
-}
+import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('syncs updates between servers and clients', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'server',
         }),
       ],
@@ -21,7 +16,7 @@ test('syncs updates between servers and clients', async t => {
     const anotherServer = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'anotherServer',
         }),
       ],

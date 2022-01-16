@@ -2,12 +2,7 @@ import test from 'ava'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
-
-const connectionSettings = {
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: parseInt(process.env.REDIS_PORT || '', 10) || 6379,
-}
+import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('stores documents without conflicts', async t => {
   await new Promise(resolve => {
@@ -26,7 +21,7 @@ test('stores documents without conflicts', async t => {
       name: 'redis-1',
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'server',
           prefix: 'extension-redis/onStoreDocument',
         }),
@@ -38,7 +33,7 @@ test('stores documents without conflicts', async t => {
       name: 'redis-2',
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'anotherServer',
           prefix: 'extension-redis/onStoreDocument',
         }),
@@ -68,7 +63,7 @@ test('stores documents when the last client disconnects', async t => {
       extensions: [
         new Redis({
           prefix: 'extension-redis/onStoreDocument',
-          ...connectionSettings,
+          ...redisConnectionSettings,
         }),
       ],
       onStoreDocument: async ({ document }) => {

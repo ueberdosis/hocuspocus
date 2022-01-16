@@ -1,19 +1,14 @@
 import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
 import { onAwarenessChangeParameters } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
-
-const connectionSettings = {
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: parseInt(process.env.REDIS_PORT || '', 10) || 6379,
-}
+import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('syncs existing awareness state', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'server',
         }),
       ],
@@ -22,7 +17,7 @@ test('syncs existing awareness state', async t => {
     const anotherServer = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'anotherServer',
         }),
       ],
@@ -57,7 +52,7 @@ test('syncs awareness between servers and clients', async t => {
     const server = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'server',
         }),
       ],
@@ -66,7 +61,7 @@ test('syncs awareness between servers and clients', async t => {
     const anotherServer = newHocuspocus({
       extensions: [
         new Redis({
-          ...connectionSettings,
+          ...redisConnectionSettings,
           identifier: 'anotherServer',
         }),
       ],
