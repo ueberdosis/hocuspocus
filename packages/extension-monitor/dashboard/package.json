@@ -17,8 +17,8 @@
     "not IE_Mob <= 11"
   ],
   "scripts": {
-    "start": "parcel watch --public-url '.' -d dist src/index.html",
-    "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps -d dist src/index.html"
+    "start": "parcel watch --public-url '.' src/index.html",
+    "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps src/index.html"
   },
   "files": [
     "dist"
