@@ -2,7 +2,7 @@ import test from 'ava'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 const connectionSettings = {
   host: process.env.REDIS_HOST || '127.0.0.1',
