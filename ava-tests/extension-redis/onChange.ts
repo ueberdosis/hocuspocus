@@ -43,7 +43,7 @@ test('syncs updates between servers and clients', async t => {
             )
 
             resolve('done')
-          }, 100)
+          }, 200)
         })
       },
     })
