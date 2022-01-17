@@ -26,7 +26,8 @@
       "--no-warnings",
       "--loader=ts-node/esm",
       "--experimental-specifier-resolution=node"
-    ]
+    ],
+    "workerThreads": false
   },
   "scripts": {
     "start": "npm run playground",

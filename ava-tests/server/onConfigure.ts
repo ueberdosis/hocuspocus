@@ -23,7 +23,6 @@ test('executes onConfigure callback from an extension', async t => {
     }
 
     const server = newHocuspocus({
-      port: 4000,
       extensions: [
         new CustomExtension(),
       ],
