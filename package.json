@@ -56,7 +56,7 @@
     "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.16.5",
     "@babel/preset-env": "^7.16.7",
-    "@ava/typescript": "^2.0.0",
+    "@ava/typescript": "^3.0.1",
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^4.0.0",
     "@lerna/project": "^4.0.0",
