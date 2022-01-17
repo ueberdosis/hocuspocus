@@ -63,6 +63,12 @@ export class Hocuspocus {
 
   debugger: MessageLogger = Debugger
 
+  constructor(configuration?: Partial<Configuration>) {
+    if (configuration) {
+      this.configure(configuration)
+    }
+  }
+
   /**
    * Configure the server
    */
