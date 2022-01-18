@@ -17,8 +17,8 @@
     "not IE_Mob <= 11"
   ],
   "scripts": {
-    "start": "parcel watch --public-url '.' -d dist src/index.html",
-    "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps -d dist src/index.html"
+    "start": "parcel watch --public-url '.' src/index.html",
+    "build": "rm -rf dist && parcel build --public-url '.' --no-source-maps src/index.html"
   },
   "files": [
     "dist"
@@ -30,7 +30,7 @@
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^9.7.3",
-    "collect.js": "^4.29.3",
+    "collect.js": "^4.30.3",
     "moment": "^2.29.1",
     "parcel-bundler": "^1.12.3",
     "postcss": "^6",

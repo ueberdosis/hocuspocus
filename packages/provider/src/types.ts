@@ -41,3 +41,13 @@ export type ConstructableOutgoingMessage =
   Constructable<SyncStepOneMessage> |
   Constructable<SyncStepTwoMessage> |
   Constructable<UpdateMessage>
+
+export type onAwarenessUpdateParameters = {
+  states: StatesArray
+}
+
+export type onAwarenessChangeParameters = {
+  states: StatesArray
+}
+
+export type StatesArray = { clientId: number, [key: string | number]: any }[]

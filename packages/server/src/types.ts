@@ -3,6 +3,7 @@ import {
 } from 'http'
 import { URLSearchParams } from 'url'
 import { Socket } from 'net'
+import { Awareness } from 'y-protocols/awareness'
 import Document from './Document'
 import { Hocuspocus } from './Hocuspocus'
 
@@ -11,6 +12,7 @@ export enum MessageType {
   Sync = 0,
   Awareness = 1,
   Auth = 2,
+  QueryAwareness = 3,
 }
 
 /**
@@ -37,37 +39,46 @@ export interface ConnectionConfiguration {
 }
 
 export interface Extension {
-  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
-  onChange?(data: onChangePayload): Promise<any>,
-  onConnect?(data: onConnectPayload): Promise<any>,
+  priority?: number,
   onConfigure?(data: onConfigurePayload): Promise<any>,
+  onListen?(data: onListenPayload): Promise<any>,
+  onUpgrade?(data: onUpgradePayload): Promise<any>,
+  onConnect?(data: onConnectPayload): Promise<any>,
+  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
-  onDestroy?(data: onDestroyPayload): Promise<any>,
-  onDisconnect?(data: onDisconnectPayload): Promise<any>
-  onListen?(data: onListenPayload): Promise<any>,
+  afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
+  onChange?(data: onChangePayload): Promise<any>,
+  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
+  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
+  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>,
   onRequest?(data: onRequestPayload): Promise<any>,
-  onUpgrade?(data: onUpgradePayload): Promise<any>,
+  onDisconnect?(data: onDisconnectPayload): Promise<any>
+  onDestroy?(data: onDestroyPayload): Promise<any>,
 }
 
 export type Hook =
-  'onAuthenticate' |
-  'onChange' |
-  'onConnect' |
   'onConfigure' |
+  'onListen' |
+  'onUpgrade' |
+  'onConnect' |
+  'onAuthenticate' |
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
    */
   'onCreateDocument' |
   'onLoadDocument' |
-  'onDestroy' |
-  'onDisconnect' |
-  'onListen' |
+  'afterLoadDocument' |
+  'onChange' |
+  'onStoreDocument' |
+  'afterStoreDocument' |
+  'onAwarenessUpdate' |
   'onRequest' |
-  'onUpgrade'
+  'onDisconnect' |
+  'onDestroy'
 
 export interface Configuration extends Extension {
   /**
@@ -86,6 +97,15 @@ export interface Configuration extends Extension {
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
   timeout: number,
+  /**
+   * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
+   * Otherwise every single update would be persisted.
+   */
+  debounce: number,
+  /**
+   * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
+   */
+  maxDebounce: number
   /**
    * By default, the servers show a start screen. If passed false, the server will start quietly.
    */
@@ -131,6 +151,17 @@ export interface onLoadDocumentPayload {
   connection: ConnectionConfiguration
 }
 
+export interface afterLoadDocumentPayload {
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  connection: ConnectionConfiguration
+}
+
 export interface onChangePayload {
   clientsCount: number,
   context: any,
@@ -141,6 +172,40 @@ export interface onChangePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+}
+
+export interface onStoreDocumentPayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+}
+
+export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
+
+export interface onAwarenessUpdatePayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  update: Uint8Array,
+  socketId: string,
+  added: number[],
+  updated: number[],
+  removed: number[],
+  awareness: Awareness,
+  states: any[],
+}
+
+export interface storePayload extends onStoreDocumentPayload {
+  state: Buffer,
 }
 
 export interface onDisconnectPayload {

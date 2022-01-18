@@ -19,7 +19,8 @@ import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import awarenessStatesToArray from './utils/awarenessStatesToArray'
-import { ConstructableOutgoingMessage } from './types'
+import { ConstructableOutgoingMessage, StatesArray } from './types'
+import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
 
 export enum WebSocketStatus {
   Connecting = 'connecting',
@@ -119,8 +120,8 @@ export interface CompleteHocuspocusProviderConfiguration {
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
   onDestroy: () => void,
-  onAwarenessUpdate: (states: any) => void,
-  onAwarenessChange: (states: any) => void,
+  onAwarenessUpdate: ({ states }: onAwarenessUpdateParameters) => void,
+  onAwarenessChange: ({ states }: onAwarenessChangeParameters) => void,
   /**
    * Don’t output any warnings.
    */

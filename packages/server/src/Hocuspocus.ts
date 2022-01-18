@@ -6,12 +6,14 @@ import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import kleur from 'kleur'
 import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
+import { awarenessStatesToArray } from '@hocuspocus/provider'
 import {
   MessageType,
   Configuration,
   ConnectionConfiguration,
   WsReadyStates,
   Hook,
+  AwarenessUpdate,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -24,6 +26,8 @@ export const defaultConfiguration = {
   name: null,
   port: 80,
   timeout: 30000,
+  debounce: 2000,
+  maxDebounce: 10000,
   quiet: false,
 }
 
@@ -36,16 +40,19 @@ export class Hocuspocus {
   configuration: Configuration = {
     ...defaultConfiguration,
     extensions: [],
-    onChange: () => new Promise(r => r(null)),
     onConfigure: () => new Promise(r => r(null)),
+    onListen: () => new Promise(r => r(null)),
+    onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
+    onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
-    onDestroy: () => new Promise(r => r(null)),
-    onDisconnect: () => new Promise(r => r(null)),
-    onListen: () => new Promise(r => r(null)),
+    onStoreDocument: () => new Promise(r => r(null)),
+    afterStoreDocument: () => new Promise(r => r(null)),
+    onAwarenessUpdate: () => new Promise(r => r(null)),
     onRequest: () => new Promise(r => r(null)),
-    onUpgrade: () => new Promise(r => r(null)),
+    onDisconnect: () => new Promise(r => r(null)),
+    onDestroy: () => new Promise(r => r(null)),
   }
 
   documents: Map<string, Document> = new Map()
@@ -55,6 +62,12 @@ export class Hocuspocus {
   webSocketServer?: WebSocketServer
 
   debugger: MessageLogger = Debugger
+
+  constructor(configuration?: Partial<Configuration>) {
+    if (configuration) {
+      this.configure(configuration)
+    }
+  }
 
   /**
    * Configure the server
@@ -77,17 +90,35 @@ export class Hocuspocus {
       onLoadDocument = this.configuration.onLoadDocument
     }
 
+    this.configuration.extensions.sort((a, b) => {
+      const one = typeof a.priority === 'undefined' ? 100 : a.priority
+      const two = typeof b.priority === 'undefined' ? 100 : b.priority
+
+      if (one > two) {
+        return -1
+      }
+
+      if (one < two) {
+        return 1
+      }
+
+      return 0
+    })
+
     this.configuration.extensions.push({
-      onAuthenticate: this.configuration.onAuthenticate,
-      onChange: this.configuration.onChange,
       onConfigure: this.configuration.onConfigure,
-      onConnect: this.configuration.onConnect,
-      onLoadDocument,
-      onDestroy: this.configuration.onDestroy,
-      onDisconnect: this.configuration.onDisconnect,
       onListen: this.configuration.onListen,
-      onRequest: this.configuration.onRequest,
       onUpgrade: this.configuration.onUpgrade,
+      onConnect: this.configuration.onConnect,
+      onAuthenticate: this.configuration.onAuthenticate,
+      onLoadDocument,
+      onChange: this.configuration.onChange,
+      onStoreDocument: this.configuration.onStoreDocument,
+      afterStoreDocument: this.configuration.afterStoreDocument,
+      onAwarenessUpdate: this.configuration.onAwarenessUpdate,
+      onRequest: this.configuration.onRequest,
+      onDisconnect: this.configuration.onDisconnect,
+      onDestroy: this.configuration.onDestroy,
     })
 
     this.hooks('onConfigure', {
@@ -142,12 +173,14 @@ export class Hocuspocus {
           response.writeHead(200, { 'Content-Type': 'text/plain' })
           response.end('OK')
         })
-        .catch(e => {
+        .catch(error => {
           // if a hook rejects and the error is empty, do nothing
           // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
           // just rethrow it
-          if (e) throw e
+          if (error) {
+            throw error
+          }
         })
     })
 
@@ -164,12 +197,14 @@ export class Hocuspocus {
             webSocketServer.emit('connection', ws, request)
           })
         })
-        .catch(e => {
+        .catch(error => {
           // if a hook rejects and the error is empty, do nothing
           // this is only meant to prevent later hooks and the
           // default handler to do something. if a error is present
           // just rethrow it
-          if (e) throw e
+          if (error) {
+            throw error
+          }
         })
     })
 
@@ -288,7 +323,7 @@ export class Hocuspocus {
       this.webSocketServer?.clients.forEach(client => {
         client.terminate()
       })
-    } catch (e) {
+    } catch (error) {
       //
     }
 
@@ -448,7 +483,6 @@ export class Hocuspocus {
 
   /**
    * Handle update of the given document
-   * @private
    */
   private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
     const hookPayload = {
@@ -463,14 +497,67 @@ export class Hocuspocus {
       update,
     }
 
-    this.hooks('onChange', hookPayload).catch(e => {
-      throw e
+    this.hooks('onChange', hookPayload).catch(error => {
+      throw error
+    })
+
+    // If the update was received through other ways than the
+    // WebSocket connection, we don’t need to feel responsible for
+    // storing the content.
+    if (!connection) {
+      return
+    }
+
+    this.debounce(`onStoreDocument-${document.name}`, () => {
+      this.hooks('onStoreDocument', hookPayload)
+        .catch(error => {
+          if (error?.message) {
+            throw error
+          }
+        })
+        .then(() => {
+          this.hooks('afterStoreDocument', hookPayload)
+        })
+    })
+  }
+
+  timers: Map<string, {
+    timeout: NodeJS.Timeout,
+    start: number
+  }> = new Map()
+
+  /**
+   * debounce the given function, using the given identifier
+   */
+  debounce(id: string, func: Function, immediately = false) {
+    const old = this.timers.get(id)
+    const start = old?.start || Date.now()
+
+    const run = () => {
+      this.timers.delete(id)
+      func()
+    }
+
+    if (old?.timeout) {
+      clearTimeout(old.timeout)
+    }
+
+    if (immediately) {
+      return run()
+    }
+
+    if (Date.now() - start >= this.configuration.maxDebounce) {
+      return run()
+    }
+
+    this.timers.set(id, {
+      start,
+      timeout: setTimeout(run, this.configuration.debounce),
     })
   }
 
   /**
    * Create a new document by the given request
-   * @private
    */
   private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
@@ -507,8 +594,19 @@ export class Hocuspocus {
       }
     })
 
+    await this.hooks('afterLoadDocument', hookPayload)
+
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+    })
+
+    document.awareness.on('update', ({ update }: { update: AwarenessUpdate }) => {
+      this.hooks('onAwarenessUpdate', {
+        ...hookPayload,
+        ...update,
+        awareness: document.awareness,
+        states: awarenessStatesToArray(document.awareness.getStates()),
+      })
     })
 
     return document
@@ -516,7 +614,6 @@ export class Hocuspocus {
 
   /**
    * Create a new connection by the given request and document
-   * @private
    */
   private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
     const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
@@ -533,27 +630,38 @@ export class Hocuspocus {
         requestParameters: Hocuspocus.getParameters(request),
       }
 
-      // Remove the document from the map immediately before the hooks are called
-      // as these may take some time to resolve (eg persist to database). If a
+      this.hooks('onDisconnect', hookPayload)
+
+      // Check if there are still no connections to the document, as these hooks
+      // may take some time to resolve (e.g. database queries). If a
       // new connection were to come in during that time it would rely on the
-      // document in the map that we later remove.
-      if (document.getConnectionsCount() <= 0) {
-        this.documents.delete(document.name)
+      // document in the map that we remove now.
+      if (document.getConnectionsCount() > 0) {
+        return
       }
 
-      this.hooks('onDisconnect', hookPayload)
-        .catch(e => {
-          throw e
-        })
-        .finally(() => {
-          if (document.getConnectionsCount() <= 0) {
-            document.destroy()
-          }
-        })
+      // If it’s the last connection, we need to make sure to store the
+      // document. Use the debounce helper, to clear running timers,
+      // but make it run immediately (`true`).
+      this.debounce(`onStoreDocument-${document.name}`, () => {
+        this.hooks('onStoreDocument', hookPayload)
+          .catch(error => {
+            if (error?.message) {
+              throw error
+            }
+          })
+          .then(() => {
+            this.hooks('afterStoreDocument', hookPayload)
+          })
+      }, true)
+
+      // Remove document from memory.
+      this.documents.delete(document.name)
+      document.destroy()
     })
 
-    // If the websocket has already disconnected (wow, that was fast) – then
-    // immediately call close to cleanup the connection and doc in memory.
+    // If the WebSocket has already disconnected (wow, that was fast) – then
+    // immediately call close to cleanup the connection and document in memory.
     if (
       connection.readyState === WsReadyStates.Closing
       || connection.readyState === WsReadyStates.Closed
@@ -565,8 +673,8 @@ export class Hocuspocus {
   }
 
   /**
-   * Run the given hook on all configured extensions
-   * Runs the given callback after each hook
+   * Run the given hook on all configured extensions.
+   * Runs the given callback after each hook.
    */
   hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
@@ -584,7 +692,7 @@ export class Hocuspocus {
           .then(() => extension[name]?.(payload))
           .catch(error => {
             // make sure to log error messages
-            if (error && error.message) {
+            if (error?.message) {
               console.error(`[${name}]`, error.message)
             }
 
@@ -601,7 +709,6 @@ export class Hocuspocus {
 
   /**
    * Get parameters by the given request
-   * @private
    */
   private static getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
@@ -610,7 +717,6 @@ export class Hocuspocus {
 
   /**
    * Get document name by the given request
-   * @private
    */
   private async getDocumentNameFromRequest(request: IncomingMessage): Promise<string> {
     const documentName = decodeURI(

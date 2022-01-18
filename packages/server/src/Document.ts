@@ -7,7 +7,7 @@ import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger, MessageLogger } from './Debugger'
 
-class Document extends Doc {
+export class Document extends Doc {
 
   awareness: Awareness
 

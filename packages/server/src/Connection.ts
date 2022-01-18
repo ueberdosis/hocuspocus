@@ -9,7 +9,7 @@ import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger, MessageLogger } from './Debugger'
 
-class Connection {
+export class Connection {
 
   webSocket: WebSocket
 
@@ -170,7 +170,7 @@ class Connection {
   private handleMessage(data: Iterable<number>): void {
     new MessageReceiver(
       new IncomingMessage(data),
-    ).apply(this)
+    ).apply(this.document, this)
   }
 
   /**

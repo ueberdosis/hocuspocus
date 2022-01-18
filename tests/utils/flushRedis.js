@@ -1,10 +1,12 @@
-import Redis from 'redis'
+import { createClient } from 'redis'
 
-export default () => {
-  const client = Redis.createClient({
+export default async () => {
+  const redis = createClient({
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: process.env.REDIS_PORT || 6379,
   })
 
-  client.flushDb()
+  await redis.connect()
+
+  redis.flushDb()
 }

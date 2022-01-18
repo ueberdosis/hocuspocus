@@ -29,10 +29,11 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
+        "max-classes-per-file": 'off',
         'no-unreachable-loop': 'off',
-        'no-promise-executor-return': 'off',
         'default-param-last': 'off',
         'vue/multi-word-component-names': 'off',
+        'no-promise-executor-return': 'off',
 
         'no-alert': 'off',
         'no-shadow': 'off',

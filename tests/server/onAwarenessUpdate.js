@@ -4,18 +4,31 @@ import WebSocket from 'ws'
 import { Hocuspocus } from '@hocuspocus/server'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
-let client
+let anotherClient
 const ydoc = new Y.Doc()
 
-context('server/onDestroy', () => {
-  it('has the server instance', done => {
+context('server/onAwarenessUpdate', () => {
+  it('onAwarenessUpdate hook is executed', done => {
+    let client
     const server = new Hocuspocus()
+
+    let called = false
 
     server.configure({
       port: 4000,
-      async onDestroy({ instance }) {
-        assert.strictEqual(instance, server)
+      onAwarenessUpdate: ({ states }) => {
+        if (called) {
+          return
+        }
+
+        called = true
+
+        server.destroy()
         client.destroy()
+
+        assert.strictEqual(states.length, 1)
+        assert.strictEqual(states[0].foo, 'bar')
+
         done()
       },
     }).listen()
@@ -26,7 +39,7 @@ context('server/onDestroy', () => {
       document: ydoc,
       WebSocketPolyfill: WebSocket,
       onConnect: () => {
-        server.destroy()
+        client.setAwarenessField('foo', 'bar')
       },
     })
   })

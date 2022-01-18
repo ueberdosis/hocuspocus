@@ -26,6 +26,10 @@ export interface LoggerConfiguration {
    */
   onChange: boolean,
   /**
+   * Whether to log something for the `onStoreDocument` hook.
+   */
+   onStoreDocument: boolean,
+  /**
    * Whether to log something for the `onConnect` hook.
    */
   onConnect: boolean,
@@ -62,6 +66,7 @@ export class Logger implements Extension {
     prefix: null,
     onLoadDocument: true,
     onChange: true,
+    onStoreDocument: true,
     onConnect: true,
     onDisconnect: true,
     onUpgrade: true,
@@ -102,6 +107,12 @@ export class Logger implements Extension {
   async onChange(data: onChangePayload) {
     if (this.configuration.onChange) {
       this.log(`Document "${data.documentName}" changed.`)
+    }
+  }
+
+  async onStoreDocument(data: onDisconnectPayload) {
+    if (this.configuration.onStoreDocument) {
+      this.log(`Store "${data.documentName}".`)
     }
   }
 

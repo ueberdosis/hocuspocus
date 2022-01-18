@@ -1,4 +1,6 @@
-import { Extension, onChangePayload, onLoadDocumentPayload } from '@hocuspocus/server'
+import {
+  Extension, onChangePayload, onLoadDocumentPayload, storePayload,
+} from '@hocuspocus/server'
 import * as Y from 'yjs'
 
 export interface DatabaseConfiguration {
@@ -6,11 +8,11 @@ export interface DatabaseConfiguration {
    * Pass a Promise to retrieve updates from your database. The Promise should resolve to
    * an array of items with Y.js-compatible binary data.
    */
-  fetchUpdates: ({ documentName }: { documentName: string}) => Promise<Uint8Array[]>,
+  fetch: ({ documentName }: { documentName: string}) => Promise<Uint8Array | null>,
   /**
    * Pass a function to store updates in your database.
    */
-  storeUpdate: ({ update, documentName }: { update: Buffer, documentName: string}) => void,
+  store: (data: storePayload) => void,
 }
 
 export class Database implements Extension {
@@ -18,8 +20,8 @@ export class Database implements Extension {
    * Default configuration
    */
   configuration: DatabaseConfiguration = {
-    fetchUpdates: async () => [],
-    storeUpdate: async () => null,
+    fetch: async () => null,
+    store: async () => null,
   }
 
   /**
@@ -36,12 +38,10 @@ export class Database implements Extension {
    * Get stored data from the database.
    */
   async onLoadDocument({ document, documentName }: onLoadDocumentPayload): Promise<any> {
-    const updates = await this.configuration.fetchUpdates({ documentName })
+    const update = await this.configuration.fetch({ documentName })
 
-    if (updates && updates.length) {
-      updates.forEach((update: any) => {
-        Y.applyUpdate(document, update)
-      })
+    if (update) {
+      Y.applyUpdate(document, update)
     }
 
     return document
@@ -50,11 +50,12 @@ export class Database implements Extension {
   /**
    * Store new updates in the database.
    */
-  async onChange({ document, documentName }: onChangePayload) {
-    const update = Buffer.from(
-      Y.encodeStateAsUpdate(document),
-    )
-
-    return this.configuration.storeUpdate({ update, documentName })
+  async onStoreDocument(data: onChangePayload) {
+    return this.configuration.store({
+      ...data,
+      state: Buffer.from(
+        Y.encodeStateAsUpdate(data.document),
+      ),
+    })
   }
 }
