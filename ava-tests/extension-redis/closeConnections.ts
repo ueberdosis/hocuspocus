@@ -5,7 +5,7 @@ import {
   newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
 } from '../utils'
 
-test.failing('closes connections on other instances', async t => {
+test.skip('closes connections on other instances', async t => {
   const server = newHocuspocus({
     extensions: [
       new Redis({

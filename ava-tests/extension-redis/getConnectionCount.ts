@@ -4,7 +4,7 @@ import {
   newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
 } from '../utils'
 
-test.failing('adds and removes connections properly', async t => {
+test.skip('adds and removes connections properly', async t => {
   const server = newHocuspocus({
     extensions: [
       new Redis({

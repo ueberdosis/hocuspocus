@@ -4,7 +4,7 @@ import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
-test('stores documents without conflicts', async t => {
+test.skip('stores documents without conflicts', async t => {
   await new Promise(resolve => {
     let anotherProvider: HocuspocusProvider
 
@@ -55,7 +55,7 @@ test('stores documents without conflicts', async t => {
   })
 })
 
-test('stores documents when the last client disconnects', async t => {
+test.skip('stores documents when the last client disconnects', async t => {
   await new Promise(resolve => {
     let provider: HocuspocusProvider
 
