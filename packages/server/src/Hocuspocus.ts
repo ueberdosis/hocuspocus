@@ -19,7 +19,7 @@ import Document from './Document'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
 import meta from '../package.json'
-import { Debugger, MessageLogger } from './Debugger'
+import { Debugger } from './Debugger'
 import { onListenPayload } from '.'
 
 export const defaultConfiguration = {
@@ -61,7 +61,7 @@ export class Hocuspocus {
 
   webSocketServer?: WebSocketServer
 
-  debugger: MessageLogger = Debugger
+  debugger = new Debugger()
 
   constructor(configuration?: Partial<Configuration>) {
     if (configuration) {
@@ -568,7 +568,7 @@ export class Hocuspocus {
       }
     }
 
-    const document = new Document(documentName)
+    const document = new Document(documentName, this.debugger)
     this.documents.set(documentName, document)
 
     const hookPayload = {
@@ -616,7 +616,16 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    */
   private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
-    const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
+    const instance = new Connection(
+      connection,
+      request,
+      document,
+      this.configuration.timeout,
+      socketId,
+      context,
+      readOnly,
+      this.debugger,
+    )
 
     instance.onClose(document => {
       const hookPayload = {

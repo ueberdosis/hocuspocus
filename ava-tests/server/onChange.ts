@@ -1,5 +1,5 @@
 import test from 'ava'
-import { Hocuspocus, onChangePayload } from '@hocuspocus/server'
+import { onChangePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('onChange callback receives updates', async t => {
