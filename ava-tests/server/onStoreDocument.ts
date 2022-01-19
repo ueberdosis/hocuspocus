@@ -124,7 +124,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
 
         setTimeout(() => {
           server.destroy()
-        }, 100)
+        }, 200)
       },
     })
   })
