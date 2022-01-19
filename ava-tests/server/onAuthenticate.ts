@@ -1,7 +1,5 @@
 import test from 'ava'
-import {
-  onAuthenticatePayload, onLoadDocumentPayload,
-} from '@hocuspocus/server'
+import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onAuthenticate callback', async t => {

@@ -203,8 +203,10 @@ export interface onAwarenessUpdatePayload {
   updated: number[],
   removed: number[],
   awareness: Awareness,
-  states: any[],
+  states: StatesArray,
 }
+
+export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 export interface storePayload extends onStoreDocumentPayload {
   state: Buffer,
