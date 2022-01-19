@@ -1,6 +1,6 @@
 import test from 'ava'
 import {
-  Hocuspocus, onAuthenticatePayload, onChangePayload, onLoadDocumentPayload,
+  onAuthenticatePayload, onLoadDocumentPayload,
 } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
