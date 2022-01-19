@@ -1,6 +1,6 @@
 import { getDocumentNamePayload } from '@hocuspocus/server'
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('prefixes the document name', async t => {
   await new Promise(resolve => {
