@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-export default dir => {
+export const removeDirectory = (dir: string) => {
   try {
     const list = fs.readdirSync(dir)
 
@@ -13,7 +13,7 @@ export default dir => {
         // pass these files
       } else if (stat.isDirectory()) {
         // rmdir recursively
-        dir(filename)
+        removeDirectory(filename)
       } else {
         // rm fiilename
         fs.unlinkSync(filename)

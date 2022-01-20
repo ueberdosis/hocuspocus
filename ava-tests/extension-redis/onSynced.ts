@@ -1,5 +1,4 @@
 import test from 'ava'
-import { WebSocketStatus } from '@hocuspocus/provider'
 import { Redis } from '@hocuspocus/extension-redis'
 import * as Y from 'yjs'
 import {
