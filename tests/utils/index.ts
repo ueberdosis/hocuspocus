@@ -1,7 +1,6 @@
 export * from './flushRedis'
 export * from './newHocuspocus'
 export * from './newHocuspocusProvider'
-export * from './pageMacro'
 export * from './redisConnectionSettings'
 export * from './removeDirectory'
 export * from './sleep'

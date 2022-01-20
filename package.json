@@ -46,7 +46,7 @@
     "build:packages": "npm run clean:packages && rollup -c",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private",
-    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && npm install"
+    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -61,11 +61,9 @@
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.1.2",
-    "@types/expect": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
     "ava": "^4.0.1",
-    "chai": "^4.3.4",
     "concurrently": "^6.4.0",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -74,9 +72,6 @@
     "eslint-plugin-vue": "^8.2.0",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",
-    "node-window-polyfill": "^1.0.2",
-    "nodemon": "^2.0.15",
-    "playwright": "^1.17.1",
     "rollup": "^2.63.0",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
