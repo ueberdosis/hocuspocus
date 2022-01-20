@@ -21,7 +21,7 @@ test.serial('document is persisted', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
-        new Redis(redisConnectionSettings),
+        new Redis({ ...redisConnectionSettings }),
       ],
     })
 
@@ -47,7 +47,7 @@ test.serial('document can be modified', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
-        new Redis(redisConnectionSettings),
+        new Redis({ ...redisConnectionSettings }),
       ],
     })
 
@@ -73,7 +73,7 @@ test.serial('document can be restored', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
-        new Redis(redisConnectionSettings),
+        new Redis({ ...redisConnectionSettings }),
       ],
     })
 
