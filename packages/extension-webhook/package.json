@@ -31,7 +31,7 @@
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.91",
     "@hocuspocus/transformer": "^1.0.0-alpha.18",
-    "axios": "^0.24.0",
+    "axios": "^0.25.0",
     "yjs": "^13.5.24"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"

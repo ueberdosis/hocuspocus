@@ -30,7 +30,7 @@
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^9.7.3",
-    "collect.js": "^4.30.3",
+    "collect.js": "^4.31.3",
     "moment": "^2.29.1",
     "parcel-bundler": "^1.12.3",
     "postcss": "^6",
