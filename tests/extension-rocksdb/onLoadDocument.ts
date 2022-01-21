@@ -20,7 +20,7 @@ test.serial.after(() => {
   removeDirectory(path)
 })
 
-test.serial('document is persisted', async t => {
+test.serial.skip('document is persisted', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
@@ -41,7 +41,7 @@ test.serial('document is persisted', async t => {
   })
 })
 
-test.serial('document can be restored', async t => {
+test.serial.skip('document can be restored', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
