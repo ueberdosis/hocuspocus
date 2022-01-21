@@ -7,7 +7,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { WsReadyStates } from './types'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
-import { Debugger, MessageLogger } from './Debugger'
+import { Debugger } from './Debugger'
 
 export class Connection {
 
@@ -35,7 +35,7 @@ export class Connection {
 
   readOnly: Boolean
 
-  debugger: MessageLogger = Debugger
+  logger: Debugger
 
   /**
    * Constructor.
@@ -48,6 +48,7 @@ export class Connection {
     socketId: string,
     context: any,
     readOnly = false,
+    logger: Debugger,
   ) {
     this.webSocket = connection
     this.context = context
@@ -56,6 +57,7 @@ export class Connection {
     this.timeout = timeout
     this.socketId = socketId
     this.readOnly = readOnly
+    this.logger = logger
 
     this.lock = new AsyncLock()
 
@@ -154,7 +156,7 @@ export class Connection {
     const awarenessMessage = new OutgoingMessage()
       .createAwarenessUpdateMessage(this.document.awareness)
 
-    this.debugger.log({
+    this.logger.log({
       direction: 'out',
       type: awarenessMessage.type,
       category: awarenessMessage.category,
@@ -170,6 +172,7 @@ export class Connection {
   private handleMessage(data: Iterable<number>): void {
     new MessageReceiver(
       new IncomingMessage(data),
+      this.logger,
     ).apply(this.document, this)
   }
 

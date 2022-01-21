@@ -11,17 +11,18 @@ import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger, MessageLogger } from './Debugger'
+import { Debugger } from './Debugger'
 import Document from './Document'
 
 export class MessageReceiver {
 
   message: IncomingMessage
 
-  debugger: MessageLogger = Debugger
+  logger: Debugger
 
-  constructor(message: IncomingMessage) {
+  constructor(message: IncomingMessage, logger: Debugger) {
     this.message = message
+    this.logger = logger
   }
 
   public apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
@@ -38,7 +39,7 @@ export class MessageReceiver {
             reply(message.toUint8Array())
           } else if (connection) {
             // TODO: We should log this, shouldn’t we?
-            // this.debugger.log({
+            // this.logger.log({
             //   direction: 'out',
             //   type: MessageType.Awareness,
             //   category: 'Update',
@@ -49,7 +50,7 @@ export class MessageReceiver {
 
         break
       case MessageType.Awareness:
-        this.debugger.log({
+        this.logger.log({
           direction: 'in',
           type: MessageType.Awareness,
           category: 'Update',
@@ -73,7 +74,7 @@ export class MessageReceiver {
 
     switch (type) {
       case messageYjsSyncStep1: {
-        this.debugger.log({
+        this.logger.log({
           direction: 'in',
           type: MessageType.Sync,
           category: 'SyncStep1',
@@ -82,7 +83,7 @@ export class MessageReceiver {
         readSyncStep1(message.decoder, message.encoder, document)
 
         // When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
-        this.debugger.log({
+        this.logger.log({
           direction: 'out',
           type: MessageType.Sync,
           category: 'SyncStep2',
@@ -95,7 +96,7 @@ export class MessageReceiver {
         if (reply) {
           reply(syncMessage.toUint8Array())
         } else if (connection) {
-          this.debugger.log({
+          this.logger.log({
             direction: 'out',
             type: MessageType.Sync,
             category: 'SyncStep1',
@@ -107,7 +108,7 @@ export class MessageReceiver {
         break
       }
       case messageYjsSyncStep2:
-        this.debugger.log({
+        this.logger.log({
           direction: 'in',
           type: MessageType.Sync,
           category: 'SyncStep2',
@@ -120,7 +121,7 @@ export class MessageReceiver {
         readSyncStep2(message.decoder, document, connection)
         break
       case messageYjsUpdate:
-        this.debugger.log({
+        this.logger.log({
           direction: 'in',
           type: MessageType.Sync,
           category: 'Update',
@@ -148,7 +149,7 @@ export class MessageReceiver {
     }
 
     // TODO: We should add support for WebSocket connections, too, right?
-    // this.debugger.log({
+    // this.logger.log({
     //   direction: 'out',
     //   type: MessageType.Sync,
     //   category: 'SyncStep1',

@@ -1,7 +1,7 @@
 // import * as time from 'lib0/time'
 import { MessageType } from './types'
 
-export class MessageLogger {
+export class Debugger {
   logs: any[] = []
 
   listen = false
@@ -58,5 +58,3 @@ export class MessageLogger {
     }
   }
 }
-
-export const Debugger = new MessageLogger()

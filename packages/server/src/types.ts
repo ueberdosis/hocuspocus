@@ -113,11 +113,13 @@ export interface Configuration extends Extension {
   /**
    * Function which returns the (customized) document name based on the request
    */
-  getDocumentName?(data: {
-    documentName: string,
-    request: IncomingMessage,
-    requestParameters: URLSearchParams,
-  }): string | Promise<string>,
+  getDocumentName?(data: getDocumentNamePayload): string | Promise<string>,
+}
+
+export interface getDocumentNamePayload {
+  documentName: string,
+  request: IncomingMessage,
+  requestParameters: URLSearchParams,
 }
 
 export interface onAuthenticatePayload {
@@ -201,8 +203,10 @@ export interface onAwarenessUpdatePayload {
   updated: number[],
   removed: number[],
   awareness: Awareness,
-  states: any[],
+  states: StatesArray,
 }
+
+export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 export interface storePayload extends onStoreDocumentPayload {
   state: Buffer,

@@ -34,7 +34,6 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
@@ -89,15 +88,12 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm install
-
-    - uses: microsoft/playwright-github-action@v1
 
     - name: Run tests
       id: test
@@ -138,7 +134,6 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
