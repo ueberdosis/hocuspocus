@@ -13,7 +13,6 @@ test.serial.after(() => {
 })
 
 test.serial('document is persisted', async t => {
-  console.log('REDIS SETTINGS', { ...redisConnectionSettings })
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [

@@ -1,3 +1,4 @@
+export * from './createDirectory'
 export * from './flushRedis'
 export * from './newHocuspocus'
 export * from './newHocuspocusProvider'
