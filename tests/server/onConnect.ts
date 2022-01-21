@@ -119,7 +119,7 @@ test('stops when the onConnect hook throws an Error', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose: () => {
+      onClose() {
         t.pass()
         resolve('done')
       },

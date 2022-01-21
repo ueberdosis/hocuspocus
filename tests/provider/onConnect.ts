@@ -6,7 +6,7 @@ test('executes the onConnect callback', async t => {
     const server = newHocuspocus()
 
     newHocuspocusProvider(server, {
-      onConnect: () => {
+      onConnect() {
         t.pass()
         resolve('done')
       },
@@ -35,10 +35,10 @@ test.skip('doesn’t execute the onConnect callback when the server throws an er
     })
 
     newHocuspocusProvider(server, {
-      onConnect: () => {
+      onConnect() {
         t.fail('onConnect must not be executed')
       },
-      onClose: () => {
+      onClose() {
         t.pass()
         resolve('done')
       },

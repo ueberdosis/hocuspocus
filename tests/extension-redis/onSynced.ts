@@ -28,7 +28,7 @@ test.serial('document is persisted', async t => {
     server.enableDebugging()
 
     const provider = newHocuspocusProvider(server, {
-      onSynced: () => {
+      onSynced() {
         const fragment = provider.document.getXmlFragment('XMLFragment')
         fragment.insert(fragment.length, [
           new Y.XmlText('#1'),
@@ -80,7 +80,7 @@ test.serial('document can be restored', async t => {
     server.enableDebugging()
 
     const provider = newHocuspocusProvider(server, {
-      onSynced: () => {
+      onSynced() {
         const fragment = provider.document.getXmlFragment('XMLFragment')
         t.is(fragment.toString(), '#1#2')
 

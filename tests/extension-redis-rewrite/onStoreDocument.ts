@@ -44,7 +44,7 @@ test.skip('stores documents without conflicts', async t => {
     newHocuspocusProvider(server)
 
     anotherProvider = newHocuspocusProvider(anotherServer, {
-      onSynced: () => {
+      onSynced() {
         // once we're setup make an edit on anotherProvider, if all succeeds the onStoreDocument
         // callback will be called after the debounce period and all docs will
         // be identical

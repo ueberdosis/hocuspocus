@@ -32,7 +32,7 @@ test.serial('document is persisted', async t => {
     })
 
     const client = newHocuspocusProvider(server, {
-      onSynced: () => {
+      onSynced() {
         const valueBefore = client.document.getArray('foo').get(0)
         t.is(valueBefore, undefined)
 
@@ -53,7 +53,7 @@ test.serial('document can be restored', async t => {
     })
 
     const client = newHocuspocusProvider(server, {
-      onSynced: () => {
+      onSynced() {
         const value = client.document.getArray('foo').get(0)
         t.is(value, 'bar')
 
