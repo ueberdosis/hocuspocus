@@ -15,7 +15,8 @@
   "ava": {
     "files": [
       "tests/**/*",
-      "!tests/utils/**/*"
+      "!tests/utils/**/*",
+      "!database/**/*"
     ],
     "extensions": {
       "ts": "module"

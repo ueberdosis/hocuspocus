@@ -1,8 +1,8 @@
 import test from 'ava'
 import { RocksDB } from '@hocuspocus/extension-rocksdb'
-import { createDirectory, newHocuspocus, newHocuspocusProvider, removeDirectory, sleep } from '../utils'
+import { createDirectory, newHocuspocus, newHocuspocusProvider, removeDirectory } from '../utils'
 
-const path = 'node_modules/.rocksdb'
+const path = 'database'
 
 // Once it’s initialized it locks the folder for that process.
 // So let’s just use the same instance for all tests.
@@ -13,10 +13,7 @@ const RocksDBExtension = new RocksDB({
 
 test.serial.before(async () => {
   removeDirectory(path)
-  await sleep(100)
-
   createDirectory(path)
-  await sleep(100)
 })
 
 test.serial.after(() => {
