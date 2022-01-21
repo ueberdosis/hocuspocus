@@ -1,6 +1,6 @@
 import test from 'ava'
 import { RocksDB } from '@hocuspocus/extension-rocksdb'
-import { createDirectory, newHocuspocus, newHocuspocusProvider, removeDirectory } from '../utils'
+import { createDirectory, newHocuspocus, newHocuspocusProvider, removeDirectory, sleep } from '../utils'
 
 const path = 'node_modules/.rocksdb'
 
@@ -11,9 +11,12 @@ const RocksDBExtension = new RocksDB({
   path,
 })
 
-test.serial.before(() => {
+test.serial.before(async () => {
   removeDirectory(path)
+  await sleep(100)
+
   createDirectory(path)
+  await sleep(100)
 })
 
 test.serial.after(() => {
