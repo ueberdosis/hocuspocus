@@ -14,7 +14,7 @@
   "type": "module",
   "main": "dist/hocuspocus-webhook.esm.js",
   "module": "dist/hocuspocus-webhook.esm.js",
-  "types": "dist/packages/webhook/src/index.d.ts",
+  "types": "dist/packages/extension-webhook/src/index.d.ts",
   "exports": {
     "source": {
       "import": "./src"
