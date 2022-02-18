@@ -116,7 +116,7 @@ export interface CompleteHocuspocusProviderConfiguration {
   onMessage: (event: MessageEvent) => void,
   onOutgoingMessage: (message: OutgoingMessage) => void,
   onStatus: (status: any) => void,
-  onSynced: () => void,
+  onSynced: ({ state }: { state: boolean }) => void,
   onDisconnect: (event: CloseEvent) => void,
   onClose: (event: CloseEvent) => void,
   onDestroy: () => void,
