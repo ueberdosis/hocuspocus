@@ -48,7 +48,7 @@ By default data is just “stored” in `:memory:`, so it’s wiped when you sto
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { SQLite } from '@hocuspocus/extension-logger'
+import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const server = Server.configure({
   extensions: [
