@@ -1,6 +1,6 @@
 import test from 'ava'
 import { onChangePayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('onChange callback receives updates', async t => {
   await new Promise(resolve => {
@@ -94,4 +94,30 @@ test('has the server instance', async t => {
       },
     })
   })
+})
+
+test('onChange callback isn’t called for every new client', async t => {
+  let onConnectCount = 0
+  let onChangeCount = 0
+
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect() {
+        onConnectCount++
+      },
+      async onChange() {
+        onChangeCount++
+      },
+    })
+
+    newHocuspocusProvider(server)
+    newHocuspocusProvider(server)
+
+    resolve('done')
+  })
+
+  await sleep(100)
+
+  t.is(onConnectCount, 2)
+  t.is(onChangeCount, 0)
 })
