@@ -44,6 +44,7 @@ export interface Extension {
   onListen?(data: onListenPayload): Promise<any>,
   onUpgrade?(data: onUpgradePayload): Promise<any>,
   onConnect?(data: onConnectPayload): Promise<any>,
+  connected?(data: connectedPayload): Promise<any>,
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
@@ -65,6 +66,7 @@ export type Hook =
   'onListen' |
   'onUpgrade' |
   'onConnect' |
+  'connected' |
   'onAuthenticate' |
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
@@ -133,6 +135,16 @@ export interface onAuthenticatePayload {
 }
 
 export interface onConnectPayload {
+  documentName: string,
+  instance: Hocuspocus,
+  request: IncomingMessage,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  connection: ConnectionConfiguration
+}
+
+export interface connectedPayload {
   documentName: string,
   instance: Hocuspocus,
   request: IncomingMessage,

@@ -79,6 +79,8 @@
           link: /api/hooks/on-upgrade
         - title: onConnect
           link: /api/hooks/on-connect
+        - title: connected
+          link: /api/hooks/connected
         - title: onAuthenticate
           link: /api/hooks/on-authenticate
         - title: onLoadDocument

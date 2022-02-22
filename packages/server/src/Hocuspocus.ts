@@ -45,6 +45,7 @@ export class Hocuspocus {
     onListen: () => new Promise(r => r(null)),
     onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
+    connected: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
@@ -111,6 +112,7 @@ export class Hocuspocus {
       onListen: this.configuration.onListen,
       onUpgrade: this.configuration.onUpgrade,
       onConnect: this.configuration.onConnect,
+      connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument,
       onChange: this.configuration.onChange,
@@ -391,6 +393,8 @@ export class Hocuspocus {
       incomingMessageQueue.forEach(input => {
         incoming.emit('message', input)
       })
+
+      this.hooks('connected', hookPayload)
     }
 
     // This listener handles authentication messages and queues everything else.

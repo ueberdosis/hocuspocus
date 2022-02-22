@@ -90,3 +90,20 @@ test('has the server instance', async t => {
     })
   })
 })
+
+test('the connections count is correct', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onDisconnect() {
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      },
+    })
+
+    const provider = newHocuspocusProvider(server, {
+      onConnect() {
+        provider.disconnect()
+      },
+    })
+  })
+})

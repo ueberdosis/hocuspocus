@@ -237,3 +237,16 @@ test('cleans up correctly when provider disconnects during onLoadDocument', asyn
 
   })
 })
+
+test('the connections count is correct', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async connected() {
+        t.is(server.getConnectionsCount(), 1)
+        resolve('done')
+      },
+    })
+
+    newHocuspocusProvider(server)
+  })
+})
