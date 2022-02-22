@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/server",
   "description": "plug & play collaboration backend",
-  "version": "1.0.0-alpha.92",
+  "version": "1.0.0-alpha.93",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -28,7 +28,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/common": "^1.0.0-alpha.5",
+    "@hocuspocus/common": "^1.0.0-alpha.6",
     "@types/async-lock": "^1.1.3",
     "@types/uuid": "^8.3.4",
     "@types/ws": "^8.2.2",
