@@ -3,14 +3,14 @@ import {
   onConnectPayload,
 } from '@hocuspocus/server'
 
-export interface Configuration {
+export interface ThrottleConfiguration {
   throttle: number | null | false,
   banTime: number,
 }
 
 export class Throttle implements Extension {
 
-  configuration: Configuration = {
+  configuration: ThrottleConfiguration = {
     throttle: 15,
     banTime: 5,
   }
@@ -18,6 +18,16 @@ export class Throttle implements Extension {
   connectionsByIp: Map<string, Array<number>> = new Map()
 
   bannedIps: Map<string, number> = new Map()
+
+  /**
+   * Constructor
+   */
+  constructor(configuration?: Partial<ThrottleConfiguration>) {
+    this.configuration = {
+      ...this.configuration,
+      ...configuration,
+    }
+  }
 
   /**
    * Throttle requests
