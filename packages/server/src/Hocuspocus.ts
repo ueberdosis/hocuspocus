@@ -5,8 +5,9 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import kleur from 'kleur'
-import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
-import { awarenessStatesToArray } from '@hocuspocus/provider'
+import {
+  ResetConnection, Unauthorized, Forbidden, awarenessStatesToArray,
+} from '@hocuspocus/common'
 import {
   MessageType,
   Configuration,
