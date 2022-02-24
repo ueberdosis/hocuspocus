@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.10](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.9...@hocuspocus/cli@1.0.0-alpha.10) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
 # [1.0.0-alpha.9](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.8...@hocuspocus/cli@1.0.0-alpha.9) (2022-02-22)
 
 **Note:** Version bump only for package @hocuspocus/cli

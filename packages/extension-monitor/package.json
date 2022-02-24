@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-monitor",
   "description": "hocuspocus monitoring",
-  "version": "1.0.0-alpha.92",
+  "version": "1.0.0-alpha.93",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -38,7 +38,7 @@
     "build": "rm -rf dashboard/dist && parcel build --public-url '.' --no-source-maps dashboard/src/index.html --out-dir dashboard/dist"
   },
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.93",
+    "@hocuspocus/server": "^1.0.0-alpha.94",
     "@types/node-os-utils": "^1.2.0",
     "@types/node-static": "^0.7.7",
     "bufferutil": "^4.0.6",
@@ -47,12 +47,12 @@
     "node-os-utils": "^1.3.6",
     "node-static": "^0.7.11",
     "public-ip": "^4.0.4",
-    "ws": "^8.4.2",
-    "yjs": "^13.5.24",
     "tailwindcss-font-inter": "^2.0.2",
     "vue": "^2.6.14",
     "vue-plotly": "^1.1.0",
-    "vue-virtual-scroller": "^1.0.10"
+    "vue-virtual-scroller": "^1.0.10",
+    "ws": "^8.4.2",
+    "yjs": "^13.5.24"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
@@ -63,8 +63,8 @@
     "parcel-bundler": "^1.12.3",
     "postcss": "^6",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
-    "vue-template-compiler": "^2.6.14",
-    "vue-hot-reload-api": "^2.3.4"
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-template-compiler": "^2.6.14"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
