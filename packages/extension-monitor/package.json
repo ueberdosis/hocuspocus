@@ -34,7 +34,7 @@
     "src"
   ],
   "scripts": {
-    "start": "parcel watch dashboard --public-url '.' dashboard/src/index.html",
+    "start": "parcel watch dashboard --public-url '.' dashboard/src/index.html --out-dir dashboard/dist",
     "build": "rm -rf dashboard/dist && parcel build --public-url '.' --no-source-maps dashboard/src/index.html --out-dir dashboard/dist"
   },
   "dependencies": {
