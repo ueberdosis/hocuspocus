@@ -2,7 +2,7 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 import * as Y from 'yjs'
 
-test('observeDeep is called just once', async t => {
+test('observe is called just once', async t => {
   let count = 0
 
   const server = newHocuspocus()
@@ -13,8 +13,8 @@ test('observeDeep is called just once', async t => {
     Y.XmlText
   ) as unknown as Y.XmlText
 
-  // Count how often observeDeep is called …
-  type.observeDeep((events, transaction) => {
+  // Count how often observe is called …
+  type.observe((events, transaction) => {
     count++
   })
 
@@ -26,7 +26,7 @@ test('observeDeep is called just once', async t => {
   t.is(count, 1)
 })
 
-test('observeDeep is called for every single change', async t => {
+test('observe is called for every single change', async t => {
   let count = 0
 
   const server = newHocuspocus()
@@ -37,8 +37,8 @@ test('observeDeep is called for every single change', async t => {
     Y.XmlText
   ) as unknown as Y.XmlText
 
-  // Count how often observeDeep is called …
-  type.observeDeep((events, transaction) => {
+  // Count how often observe is called …
+  type.observe((events, transaction) => {
     count++
   })
 
@@ -52,7 +52,7 @@ test('observeDeep is called for every single change', async t => {
   t.is(count, 3)
 })
 
-test('observeDeep is called once for a single transaction', async t => {
+test('observe is called once for a single transaction', async t => {
   let count = 0
 
   const server = newHocuspocus()
@@ -63,8 +63,8 @@ test('observeDeep is called once for a single transaction', async t => {
     Y.XmlText
   ) as unknown as Y.XmlText
 
-  // Count how often observeDeep is called …
-  type.observeDeep((events, transaction) => {
+  // Count how often observe is called …
+  type.observe((events, transaction) => {
     count++
   })
 
