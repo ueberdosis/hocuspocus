@@ -44,7 +44,8 @@
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "test": "ava",
     "test:watch": "ava --watch",
-    "build:packages": "npm run clean:packages && rollup -c",
+    "build:packages": "npm run clean:packages && rollup -c && npm run build:dashboard",
+    "build:dashboard": "npm --prefix packages/extension-monitor run build",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private",
     "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install"
