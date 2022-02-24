@@ -437,7 +437,7 @@ export class Hocuspocus {
           })
           .then(() => {
             // Time to actually establish the connection.
-            setUpNewConnection(queueIncomingMessageListener)
+            return setUpNewConnection(queueIncomingMessageListener)
           })
           .catch(error => {
             // We could pass the Error message through to the client here but it
@@ -477,7 +477,7 @@ export class Hocuspocus {
         }
 
         // Authentication isn’t required, let’s establish the connection
-        setUpNewConnection(queueIncomingMessageListener)
+        return setUpNewConnection(queueIncomingMessageListener)
       })
       .catch(() => {
         // if a hook interrupts, close the websocket connection

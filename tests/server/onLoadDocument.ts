@@ -156,3 +156,44 @@ test('has the server instance', async t => {
     newHocuspocusProvider(server)
   })
 })
+
+/**
+ * When onLoadDocument fails (for whatever reason), the connection attempt will fail.
+ */
+test('stops when an error is thrown in onLoadDocument', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onLoadDocument() {
+        throw new Error()
+      }
+    })
+
+    newHocuspocusProvider(server, {
+      onDisconnect() {
+        t.pass()
+        resolve('done')
+      }
+    })
+  })
+})
+
+test('stops when an error is thrown in onLoadDocument, even when authenticated', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onAuthenticate() {
+        return true
+      },
+      async onLoadDocument() {
+        throw new Error()
+      }
+    })
+
+    newHocuspocusProvider(server, {
+      token: 'super-secret-token',
+      onDisconnect() {
+        t.pass()
+        resolve('done')
+      }
+    })
+  })
+})
