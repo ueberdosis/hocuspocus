@@ -19,6 +19,30 @@ test('onAwarenessChange callback is executed', async t => {
   })
 })
 
+test('onAwarenessChange callback is executed, even when no awareness fields are set', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus()
+
+    const provider = newHocuspocusProvider(server, {
+      connect: false,
+      onAwarenessChange: ({ states }) => {
+        t.is(states.length, 2)
+
+        resolve('done')
+      },
+    })
+
+    const anotherProvider = newHocuspocusProvider(server, {
+      async onConnect() {
+        anotherProvider.setAwarenessField('foo', 'bar')
+        provider.connect()
+      },
+    })
+  })
+
+  t.pass()
+})
+
 test('onAwarenessChange callback is executed on provider destroy', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus()
