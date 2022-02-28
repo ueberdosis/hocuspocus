@@ -3,13 +3,11 @@ import {
   Extension,
   onChangePayload,
   onConfigurePayload,
-  onConnectPayload,
   onLoadDocumentPayload,
-  onDestroyPayload,
   onDisconnectPayload,
-  onListenPayload,
   onRequestPayload,
   onUpgradePayload,
+  connectedPayload,
 } from '@hocuspocus/server'
 import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
@@ -141,7 +139,7 @@ export class Monitor implements Extension {
     })
   }
 
-  async onConnect(data: onConnectPayload) {
+  async connected(data: connectedPayload) {
     await this.storage.add('connectionLog', this.collector.connect(data))
   }
 
