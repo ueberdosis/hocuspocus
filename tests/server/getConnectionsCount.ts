@@ -11,6 +11,24 @@ test('returns 0 connections when there’s no one connected', async t => {
   })
 })
 
+test.only('returns 0 connections when the connection attempt fails', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect() {
+        throw new Error()
+      }
+    })
+
+    newHocuspocusProvider(server, {
+      quiet: true,
+      onDisconnect() {
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      }
+    })
+  })
+})
+
 test('outputs the total connections', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus()
