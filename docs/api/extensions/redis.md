@@ -7,10 +7,10 @@ tableOfContents: true
 ## Introduction
 
 :::warning Work in progress
-Currently, the Redis extension only syncs document changes. Awareness states, for example cursors, are not yet supported.
+Currently, the Redis extension only syncs document changes. Awareness states, for example cursors, are not yet supported. We’re working on a complete rewrite, that’s working completely different.
 :::
 
-hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.
+Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.
 
 ## Installation
 
