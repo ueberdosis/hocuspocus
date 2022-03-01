@@ -5,11 +5,55 @@ tableOfContents: true
 # onLoadDocument
 
 ## Introduction
+The `onLoadDocument` hooks are called to fetch existing data from your storage. You are probably used to load some JSON/HTML document in your application, but that’s not the Y.js-way. For Y.js to work properly, we’ll need the history of changes. Only then changes from multiple sources can be merged.
 
-The `onLoadDocument` hook will be called when a new document is created. A new document will be created if it's not in memory, so it may exist in your application but was not edited since the server started. It should return a Promise. Returning a Y-Doc loads the given document.
+You still can store a JSON/HTML document, but see it more as a “view” on your data, not as your data source.
+
+## Create a Y.js document from JSON/HTML (once)
+You can create a Y.js document from your existing data, for example JSON. You should use that to migrate data only, not as a permanent way to store your data.
+
+To do that, you can use the Transformer package. For Tiptap-compatible JSON it would look like that:
+
+```js
+import { Server } from '@hocuspocus/server'
+import { TiptapTransformer } from '@hocuspocus/transformer'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+
+const ydoc = TiptapTransformer.toYdoc(
+  // the actual JSON
+  json,
+  // the `field` you’re using in Tiptap. If you don’t know what that is, use 'default'.
+  'default',
+  // The Tiptap extensions you’re using. Those are important to create a valid schema.
+  [Document, Paragraph, Text],
+)
+```
+
+However, we expect you to return a Y.js document from the `onLoadDocument` hook, no matter where it’s from.
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  async onLoadDocument(data) {
+    // fetch the Y.js document from somewhere
+    const ydoc = …
+
+    return ydoc
+  },
+})
+
+server.listen()
+```
+
+## Fetch your Y.js documents (recommended)
+There are multiple ways to store your Y.js documents (and the history) wherever you like. Basically, you’d like to use the `onStoreDocument` hook, which is debounced and executed every few seconds for changed documents. It gives you the current Y.js document and it’s up to you to store that somewhere. No worries, we provide some convient ways for you.
+
+If you just want to to get it working, have a look at the [`SQLite`](/api/extensions/sqlite) extension for local development, and the generic [`Database`](/api/extensions/database) extension for a convenient way to fetch and store documents.
 
 ## Hook payload
-
 The `data` passed to the `onLoadDocument` hook has the following attributes:
 
 ```js
@@ -27,45 +71,3 @@ const data = {
 ```
 
 Context contains the data provided in former `onConnect` hooks.
-
-## Example
-
-:::warning Use a primary storage
-This following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to import a document if it doesn't exist in your primary storage. For example if you move from tiptap v1 to v2. For a primary storage, check out the [RocksDB extension](/api/extensions/rocksdb).
-:::
-
-```js
-import { readFileSync } from 'fs'
-import { Server } from '@hocuspocus/server'
-import { TiptapTransformer } from '@hocuspocus/transformer'
-import Document from '@tiptap/extension-document'
-import Paragraph from '@tiptap/extension-paragraph'
-import Text from '@tiptap/extension-text'
-
-const server = Server.configure({
-  async onLoadDocument(data) {
-    // The tiptap collaboration extension uses shared types of a single y-doc
-    // to store different fields in the same document.
-    // The default field in tiptap is simply called 'default'
-    const fieldName = 'default'
-
-    // Check if the given field already exists in the given y-doc.
-    // Important: Only import a document if it doesn't exist in the primary data storage!
-    if (!data.document.isEmpty(fieldName)) {
-      return
-    }
-
-    // Get the document from somwhere. In a real world application this would
-    // probably be a database query or an API call
-    const prosemirrorJSON = JSON.parse(
-      readFileSync(`/path/to/your/documents/${data.documentName}.json`) || "{}"
-    )
-
-    // Convert the editor format to a y-doc. The TiptapTransformer requires you to pass the list
-    // of extensions you use in the frontend to create a valid document
-    return TiptapTransformer.toYdoc(prosemirrorJSON, fieldName, [Document, Paragraph, Text])
-  },
-})
-
-server.listen()
-```
