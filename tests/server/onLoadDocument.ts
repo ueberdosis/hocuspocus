@@ -169,7 +169,7 @@ test('stops when an error is thrown in onLoadDocument', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onDisconnect() {
+      onClose() {
         t.pass()
         resolve('done')
       }
@@ -190,7 +190,7 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
 
     newHocuspocusProvider(server, {
       token: 'super-secret-token',
-      onDisconnect() {
+      onClose() {
         t.pass()
         resolve('done')
       }

@@ -19,6 +19,7 @@ test("executes the on('connect') callback", async t => {
     const server = newHocuspocus()
 
     const provider = newHocuspocusProvider(server)
+
     provider.on('connect', () => {
       t.pass()
       resolve('done')
@@ -26,7 +27,7 @@ test("executes the on('connect') callback", async t => {
   })
 })
 
-test.skip('doesn’t execute the onConnect callback when the server throws an error', async t => {
+test('resolves the connection attempt when onConnect throws an error', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       async onConnect() {
@@ -36,7 +37,7 @@ test.skip('doesn’t execute the onConnect callback when the server throws an er
 
     newHocuspocusProvider(server, {
       onConnect() {
-        t.fail('onConnect must not be executed')
+        t.fail('must not be called when onConnect fails')
       },
       onClose() {
         t.pass()

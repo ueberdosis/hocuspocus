@@ -15,17 +15,6 @@ export enum MessageType {
   QueryAwareness = 3,
 }
 
-/**
- * State of the WebSocket connection.
- * https://developer.mozilla.org/de/docs/Web/API/WebSocket/readyState
- */
-export enum WsReadyStates {
-  Connecting = 0,
-  Open = 1,
-  Closing = 2,
-  Closed = 3,
-}
-
 export interface AwarenessUpdate {
   added: Array<any>,
   updated: Array<any>,

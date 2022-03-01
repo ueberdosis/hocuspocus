@@ -6,13 +6,16 @@ import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import kleur from 'kleur'
 import {
-  ResetConnection, Unauthorized, Forbidden, awarenessStatesToArray,
+  ResetConnection,
+  Unauthorized,
+  Forbidden,
+  awarenessStatesToArray,
+  WsReadyStates,
 } from '@hocuspocus/common'
 import {
   MessageType,
   Configuration,
   ConnectionConfiguration,
-  WsReadyStates,
   Hook,
   AwarenessUpdate,
 } from './types'

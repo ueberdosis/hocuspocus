@@ -20,8 +20,7 @@ test.only('returns 0 connections when the connection attempt fails', async t => 
     })
 
     newHocuspocusProvider(server, {
-      quiet: true,
-      onDisconnect() {
+      onClose() {
         t.is(server.getConnectionsCount(), 0)
         resolve('done')
       }

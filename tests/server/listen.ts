@@ -24,7 +24,6 @@ test('should respond with OK on a custom port', async t => {
 
 test('should respond with OK on a custom port passed to listen()', async t => {
   const server = new Hocuspocus({
-    quiet: true,
     port: 0,
   })
 
@@ -38,7 +37,6 @@ test('should respond with OK on a custom port passed to listen()', async t => {
 
 test('should take a custom port and a callback', async t => {
   const server = new Hocuspocus({
-    quiet: true,
     port: 0,
   })
 
@@ -56,7 +54,6 @@ test('should take a custom port and a callback', async t => {
 
 test('should execute a callback', async t => {
   const server = new Hocuspocus({
-    quiet: true,
     port: 0,
   })
 
@@ -73,7 +70,6 @@ test('should execute a callback', async t => {
 
 test('should have the custom port as a parameter in the callback', async t => {
   const server = new Hocuspocus({
-    quiet: true,
     port: 0,
   })
 
