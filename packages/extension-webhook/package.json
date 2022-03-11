@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-webhook",
-  "version": "1.0.0-alpha.60",
+  "version": "1.0.0-alpha.61",
   "description": "hocuspocus webhook extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -29,8 +29,8 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.96",
-    "@hocuspocus/transformer": "^1.0.0-alpha.20",
+    "@hocuspocus/server": "^1.0.0-alpha.97",
+    "@hocuspocus/transformer": "^1.0.0-alpha.21",
     "axios": "^0.26.1",
     "yjs": "^13.5.28"
   },
