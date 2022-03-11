@@ -35,7 +35,7 @@
     "levelup": "^5.1.1",
     "rocksdb": "^5.2.0",
     "y-leveldb": "^0.1.1",
-    "yjs": "^13.5.24"
+    "yjs": "^13.5.28"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

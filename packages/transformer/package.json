@@ -27,11 +27,11 @@
     "dist"
   ],
   "dependencies": {
-    "@tiptap/core": "^2.0.0-beta.166",
-    "@tiptap/starter-kit": "^2.0.0-beta.174",
+    "@tiptap/core": "^2.0.0-beta.174",
+    "@tiptap/starter-kit": "^2.0.0-beta.183",
     "prosemirror-model": "^1.16.1",
-    "y-prosemirror": "^1.0.14",
-    "yjs": "^13.5.24"
+    "y-prosemirror": "^1.0.15",
+    "yjs": "^13.5.28"
   },
   "gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
 }
