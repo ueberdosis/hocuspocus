@@ -43,7 +43,7 @@ test.serial('document is persisted', async t => {
 })
 
 // modify '#1#2'
-test.serial('document can be modified', async t => {
+test.skip('document can be modified', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
@@ -69,7 +69,7 @@ test.serial('document can be modified', async t => {
 })
 
 // restore '#1#2'
-test.serial('document can be restored', async t => {
+test.skip('document can be restored', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [

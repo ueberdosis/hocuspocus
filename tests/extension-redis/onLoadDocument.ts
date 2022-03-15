@@ -33,7 +33,7 @@ test.serial('document is persisted', async t => {
   })
 })
 
-test.serial('document can be restored', async t => {
+test.skip('document can be restored', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [

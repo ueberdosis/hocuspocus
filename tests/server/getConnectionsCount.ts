@@ -11,7 +11,7 @@ test('returns 0 connections when there’s no one connected', async t => {
   })
 })
 
-test.only('returns 0 connections when the connection attempt fails', async t => {
+test('returns 0 connections when the connection attempt fails', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       async onConnect() {

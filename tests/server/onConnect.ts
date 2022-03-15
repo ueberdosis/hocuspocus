@@ -15,7 +15,7 @@ test('executes the onConnect callback', async t => {
   })
 })
 
-test.only('refuses connection when an error is thrown', async t => {
+test('refuses connection when an error is thrown', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       async onConnect() {
@@ -243,6 +243,59 @@ test('the connections count is correct', async t => {
     const server = newHocuspocus({
       async connected() {
         t.is(server.getConnectionsCount(), 1)
+        resolve('done')
+      },
+    })
+
+    newHocuspocusProvider(server)
+  })
+})
+
+
+test('has connection.readOnly', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect({ connection }) {
+        t.is(connection.readOnly, false)
+        resolve('done')
+      },
+    })
+
+    newHocuspocusProvider(server)
+  })
+})
+
+test('has connection.requiresAuthentication', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect({ connection }) {
+        t.is(connection.requiresAuthentication, false)
+        resolve('done')
+      },
+    })
+
+    newHocuspocusProvider(server)
+  })
+})
+
+test('has connection.isAuthenticated', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect({ connection }) {
+        t.is(connection.isAuthenticated, false)
+        resolve('done')
+      },
+    })
+
+    newHocuspocusProvider(server)
+  })
+})
+
+test('has the request', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConnect({ request }) {
+        t.is(request.complete, true)
         resolve('done')
       },
     })

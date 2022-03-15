@@ -130,7 +130,6 @@ export class Hocuspocus {
     this.hooks('onConfigure', {
       configuration: this.configuration,
       version: meta.version,
-      yjsVersion: null,
       instance: this,
     })
 

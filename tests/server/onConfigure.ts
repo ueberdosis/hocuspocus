@@ -44,3 +44,27 @@ test('has the configuration', async t => {
     })
   })
 })
+
+test('has the version', async t => {
+  await new Promise(resolve => {
+    newHocuspocus({
+      async onConfigure({ version }) {
+        t.truthy(version)
+
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('has the instance', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onConfigure({ instance }) {
+        t.is(instance, server)
+
+        resolve('done')
+      },
+    })
+  })
+})
