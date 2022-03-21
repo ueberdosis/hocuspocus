@@ -2,7 +2,7 @@ import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
-test.skip('syncs updates between servers and clients', async t => {
+test('syncs updates between servers and clients', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
