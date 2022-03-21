@@ -32,7 +32,7 @@
     "@lifeomic/attempt": "^3.0.2",
     "lib0": "^0.2.46",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.29"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }

@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.97",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.29"
   },
   "publishConfig": {
     "access": "public"
