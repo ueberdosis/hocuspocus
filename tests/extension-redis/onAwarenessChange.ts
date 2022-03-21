@@ -3,7 +3,7 @@ import { Redis } from '@hocuspocus/extension-redis'
 import { onAwarenessChangeParameters } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
-test.skip('syncs existing awareness state', async t => {
+test('syncs existing awareness state', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [
@@ -47,7 +47,7 @@ test.skip('syncs existing awareness state', async t => {
   })
 })
 
-test.skip('syncs awareness between servers and clients', async t => {
+test('syncs awareness between servers and clients', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       extensions: [

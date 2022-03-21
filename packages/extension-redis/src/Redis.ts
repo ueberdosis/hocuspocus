@@ -12,6 +12,8 @@ import {
   onStoreDocumentPayload,
   onAwarenessUpdatePayload,
   MessageReceiver,
+  Debugger,
+  onConfigurePayload,
 } from '@hocuspocus/server'
 
 export interface Configuration {
@@ -70,6 +72,8 @@ export class Redis implements Extension {
 
   locks = new Map<string, Redlock.Lock>()
 
+  logger: Debugger
+
   public constructor(configuration: Partial<Configuration>) {
     const { port, host, options } = configuration
     this.configuration = {
@@ -83,6 +87,13 @@ export class Redis implements Extension {
     this.sub.on('pmessageBuffer', this.handleIncomingMessage)
 
     this.redlock = new Redlock([this.pub])
+
+    // We’ll replace that in the onConfigure hook with the global instance.
+    this.logger = new Debugger()
+  }
+
+  async onConfigure({ instance }: onConfigurePayload) {
+    this.logger = instance.debugger
   }
 
   private getKey(documentName: string) {
@@ -218,6 +229,7 @@ export class Redis implements Extension {
 
     new MessageReceiver(
       new IncomingMessage(data),
+      this.logger,
     ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(
         this.pubKey(document.name),
