@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-webhook",
-  "version": "1.0.0-alpha.55",
+  "version": "1.0.0-alpha.62",
   "description": "hocuspocus webhook extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -14,7 +14,7 @@
   "type": "module",
   "main": "dist/hocuspocus-webhook.esm.js",
   "module": "dist/hocuspocus-webhook.esm.js",
-  "types": "dist/packages/webhook/src/index.d.ts",
+  "types": "dist/packages/extension-webhook/src/index.d.ts",
   "exports": {
     "source": {
       "import": "./src"
@@ -29,10 +29,10 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.91",
-    "@hocuspocus/transformer": "^1.0.0-alpha.18",
-    "axios": "^0.24.0",
-    "yjs": "^13.5.24"
+    "@hocuspocus/server": "^1.0.0-alpha.98",
+    "@hocuspocus/transformer": "^1.0.0-alpha.22",
+    "axios": "^0.26.1",
+    "yjs": "^13.5.29"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

@@ -79,6 +79,8 @@
           link: /api/hooks/on-upgrade
         - title: onConnect
           link: /api/hooks/on-connect
+        - title: connected
+          link: /api/hooks/connected
         - title: onAuthenticate
           link: /api/hooks/on-authenticate
         - title: onLoadDocument
@@ -99,17 +101,18 @@
     - title: Extensions
       link: /api/extensions
       items:
+        - title: Database
+          link: /api/extensions/database
         - title: Logger
           link: /api/extensions/logger
         - title: Monitor
           link: /api/extensions/monitor
-        - title: Postgres
-          link: /api/extensions/postgres
-          type: draft
         - title: Redis
           link: /api/extensions/redis
         - title: RocksDB
           link: /api/extensions/rocksdb
+        - title: SQLite
+          link: /api/extensions/sqlite
         - title: Throttle
           link: /api/extensions/throttle
         - title: Webhook

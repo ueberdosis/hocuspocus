@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/provider",
-  "version": "1.0.0-alpha.29",
+  "version": "1.0.0-alpha.35",
   "description": "hocuspocus provider",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -28,11 +28,11 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/common": "^1.0.0-alpha.4",
-    "@lifeomic/attempt": "^3.0.1",
-    "lib0": "^0.2.43",
+    "@hocuspocus/common": "^1.0.0-alpha.10",
+    "@lifeomic/attempt": "^3.0.2",
+    "lib0": "^0.2.46",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.23"
+    "yjs": "^13.5.29"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }

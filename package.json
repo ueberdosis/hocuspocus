@@ -4,8 +4,7 @@
     "playground/*",
     "packages/*",
     "packages/extension-monitor/dashboard",
-    "tests",
-    "ava-tests"
+    "tests"
   ],
   "browserslist": [
     "defaults",
@@ -15,8 +14,9 @@
   "type": "module",
   "ava": {
     "files": [
-      "ava-tests/**/*",
-      "!ava-tests/utils/**/*"
+      "tests/**/*",
+      "!tests/utils/**/*",
+      "!database/**/*"
     ],
     "extensions": {
       "ts": "module"
@@ -42,52 +42,44 @@
     "playground:webhook": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/webhook.ts\"",
     "lint": "eslint --quiet --no-error-on-unmatched-pattern ./",
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
-    "test": "ava && NODE_ENV=testing node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/lib/cli/cli --bail 'tests/**/*.js' --exit --timeout 15000",
-    "test:watch": "nodemon --quiet --watch . --exec 'npm run test || true' --ext 'ts,js'",
-    "ava": "ava",
-    "ava:watch": "ava --watch",
-    "build:docs": "npm --prefix ./docs run build",
-    "build:packages": "npm run clean:packages && rollup -c",
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "build:packages": "npm run clean:packages && rollup -c && npm run build:dashboard",
+    "build:dashboard": "npm --prefix packages/extension-monitor run build",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release": "npm run lint && npm run test && npm run build:packages && lerna publish --no-private",
-    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./yarn.lock && npm install"
+    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
+    "ncu": "ncu -i --deep && npm install"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
-    "@babel/core": "^7.16.7",
-    "@babel/eslint-parser": "^7.16.5",
-    "@babel/preset-env": "^7.16.7",
     "@ava/typescript": "^3.0.1",
+    "@babel/core": "^7.17.8",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
     "@lerna/batch-packages": "^3.16.0",
     "@lerna/filter-packages": "^4.0.0",
     "@lerna/project": "^4.0.0",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^21.0.2",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.1.2",
-    "@types/expect": "^24.3.0",
-    "@types/mocha": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "ava": "^4.0.1",
-    "chai": "^4.3.4",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "ava": "^4.1.0",
     "concurrently": "^6.4.0",
-    "eslint": "^8.6.0",
+    "eslint": "^8.11.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-vue": "^8.2.0",
+    "eslint-plugin-vue": "^8.5.0",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",
-    "mocha": "^9.1.3",
-    "node-window-polyfill": "^1.0.2",
-    "nodemon": "^2.0.15",
-    "playwright": "^1.17.1",
-    "rollup": "^2.63.0",
+    "rollup": "^2.70.1",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+    "rollup-plugin-typescript2": "^0.31.2",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.2"
   }
 }

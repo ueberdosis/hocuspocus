@@ -4,17 +4,20 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@hocuspocus/extension-logger": "^1.0.0-alpha.65",
-    "@hocuspocus/extension-redis": "^1.0.0-alpha.54",
-    "@hocuspocus/extension-rocksdb": "^1.0.0-alpha.92",
-    "@hocuspocus/provider": "^1.0.0-alpha.29",
-    "@hocuspocus/server": "^1.0.0-alpha.91",
-    "@hocuspocus/transformer": "^1.0.0-alpha.18",
-    "chai": "^4.3.4",
-    "playwright": "^1.17.2",
-    "redis": "^3.1.2",
+    "@hocuspocus/extension-logger": "^1.0.0-alpha.71",
+    "@hocuspocus/extension-redis": "^1.0.0-alpha.60",
+    "@hocuspocus/extension-rocksdb": "^1.0.0-alpha.98",
+    "@hocuspocus/provider": "^1.0.0-alpha.34",
+    "@hocuspocus/server": "^1.0.0-alpha.97",
+    "@hocuspocus/transformer": "^1.0.0-alpha.21",
+    "node-fetch": "^3.2.3",
+    "redis": "^4.0.4",
     "sinon": "^12.0.1",
-    "ws": "^8.4.1",
-    "yjs": "^13.5.24"
+    "ws": "^8.5.0",
+    "yjs": "^13.5.29"
+  },
+  "devDependencies": {
+    "@types/redis": "^4.0.11",
+    "@types/sinon": "^10.0.11"
   }
 }

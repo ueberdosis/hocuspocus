@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-database",
   "description": "a generic Hocuspocus persistence driver for the database",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.12",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -26,8 +26,8 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.91",
-    "yjs": "^13.5.23"
+    "@hocuspocus/server": "^1.0.0-alpha.98",
+    "yjs": "^13.5.29"
   },
   "publishConfig": {
     "access": "public"

@@ -105,7 +105,7 @@ Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Contributors
-[Tom Moor](https://github.com/tommoor), [kris](https://github.com/kriskbx) and [many more](../../contributors).
+[kris](https://github.com/kriskbx) (who wrote the initial version), [Tom Moor](https://github.com/tommoor) and [many more](../../contributors).
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

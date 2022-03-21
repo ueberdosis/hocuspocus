@@ -35,10 +35,10 @@ export default {
       name: 'hocuspocus-demo',
       document: this.ydoc,
       debug: true,
-      onOpen: () => {
+      onOpen() {
         console.log('[open]')
       },
-      onConnect: () => {
+      onConnect() {
         console.log('[connected]')
       },
       onStatus: ({ status }) => {
@@ -56,7 +56,7 @@ export default {
       onDisconnect: ({ event }) => {
         console.log('[disconnect]', event.code, event.reason, event)
       },
-      onDestroy: () => {
+      onDestroy() {
         console.log('[destroy]')
       },
     })

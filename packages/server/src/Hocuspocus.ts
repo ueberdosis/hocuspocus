@@ -5,13 +5,17 @@ import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
 import { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import kleur from 'kleur'
-import { ResetConnection, Unauthorized, Forbidden } from '@hocuspocus/common'
-import { awarenessStatesToArray } from '@hocuspocus/provider'
+import {
+  ResetConnection,
+  Unauthorized,
+  Forbidden,
+  awarenessStatesToArray,
+  WsReadyStates,
+} from '@hocuspocus/common'
 import {
   MessageType,
   Configuration,
   ConnectionConfiguration,
-  WsReadyStates,
   Hook,
   AwarenessUpdate,
 } from './types'
@@ -19,7 +23,7 @@ import Document from './Document'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
 import meta from '../package.json'
-import { Debugger, MessageLogger } from './Debugger'
+import { Debugger } from './Debugger'
 import { onListenPayload } from '.'
 
 export const defaultConfiguration = {
@@ -44,6 +48,7 @@ export class Hocuspocus {
     onListen: () => new Promise(r => r(null)),
     onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
+    connected: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
@@ -61,7 +66,7 @@ export class Hocuspocus {
 
   webSocketServer?: WebSocketServer
 
-  debugger: MessageLogger = Debugger
+  debugger = new Debugger()
 
   constructor(configuration?: Partial<Configuration>) {
     if (configuration) {
@@ -110,6 +115,7 @@ export class Hocuspocus {
       onListen: this.configuration.onListen,
       onUpgrade: this.configuration.onUpgrade,
       onConnect: this.configuration.onConnect,
+      connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument,
       onChange: this.configuration.onChange,
@@ -124,7 +130,6 @@ export class Hocuspocus {
     this.hooks('onConfigure', {
       configuration: this.configuration,
       version: meta.version,
-      yjsVersion: null,
       instance: this,
     })
 
@@ -390,6 +395,8 @@ export class Hocuspocus {
       incomingMessageQueue.forEach(input => {
         incoming.emit('message', input)
       })
+
+      this.hooks('connected', hookPayload)
     }
 
     // This listener handles authentication messages and queues everything else.
@@ -432,7 +439,7 @@ export class Hocuspocus {
           })
           .then(() => {
             // Time to actually establish the connection.
-            setUpNewConnection(queueIncomingMessageListener)
+            return setUpNewConnection(queueIncomingMessageListener)
           })
           .catch(error => {
             // We could pass the Error message through to the client here but it
@@ -472,7 +479,7 @@ export class Hocuspocus {
         }
 
         // Authentication isn’t required, let’s establish the connection
-        setUpNewConnection(queueIncomingMessageListener)
+        return setUpNewConnection(queueIncomingMessageListener)
       })
       .catch(() => {
         // if a hook interrupts, close the websocket connection
@@ -568,7 +575,7 @@ export class Hocuspocus {
       }
     }
 
-    const document = new Document(documentName)
+    const document = new Document(documentName, this.debugger)
     this.documents.set(documentName, document)
 
     const hookPayload = {
@@ -616,7 +623,16 @@ export class Hocuspocus {
    * Create a new connection by the given request and document
    */
   private createConnection(connection: WebSocket, request: IncomingMessage, document: Document, socketId: string, readOnly = false, context?: any): Connection {
-    const instance = new Connection(connection, request, document, this.configuration.timeout, socketId, context, readOnly)
+    const instance = new Connection(
+      connection,
+      request,
+      document,
+      this.configuration.timeout,
+      socketId,
+      context,
+      readOnly,
+      this.debugger,
+    )
 
     instance.onClose(document => {
       const hookPayload = {

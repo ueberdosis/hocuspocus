@@ -5,7 +5,7 @@ import { mutex, createMutex } from 'lib0/mutex.js'
 import { AwarenessUpdate } from './types'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger, MessageLogger } from './Debugger'
+import { Debugger } from './Debugger'
 
 export class Document extends Doc {
 
@@ -25,12 +25,12 @@ export class Document extends Doc {
 
   mux: mutex
 
-  debugger: MessageLogger = Debugger
+  logger: Debugger
 
   /**
    * Constructor.
    */
-  constructor(name: string) {
+  constructor(name: string, logger: Debugger) {
     super({ gc: true })
 
     this.name = name
@@ -41,6 +41,8 @@ export class Document extends Doc {
 
     this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
     this.on('update', this.handleUpdate.bind(this))
+
+    this.logger = logger
   }
 
   /**
@@ -172,7 +174,7 @@ export class Document extends Doc {
       const awarenessMessage = new OutgoingMessage()
         .createAwarenessUpdateMessage(this.awareness, changedClients)
 
-      this.debugger.log({
+      this.logger.log({
         direction: 'out',
         type: awarenessMessage.type,
         category: awarenessMessage.category,
@@ -197,7 +199,7 @@ export class Document extends Doc {
       .writeUpdate(update)
 
     this.getConnections().forEach(connection => {
-      this.debugger.log({
+      this.logger.log({
         direction: 'out',
         type: message.type,
         category: message.category,

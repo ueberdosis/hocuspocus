@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/common",
   "description": "shared code for multiple Hocuspocus packages",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.10",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus"
@@ -26,6 +26,6 @@
   ],
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
   "dependencies": {
-    "lib0": "^0.2.43"
+    "lib0": "^0.2.47"
   }
 }

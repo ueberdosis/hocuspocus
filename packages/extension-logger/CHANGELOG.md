@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.72](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.71...@hocuspocus/extension-logger@1.0.0-alpha.72) (2022-03-21)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.71](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.70...@hocuspocus/extension-logger@1.0.0-alpha.71) (2022-03-11)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.70](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.69...@hocuspocus/extension-logger@1.0.0-alpha.70) (2022-03-02)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.69](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.68...@hocuspocus/extension-logger@1.0.0-alpha.69) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.68](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.67...@hocuspocus/extension-logger@1.0.0-alpha.68) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.67](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.66...@hocuspocus/extension-logger@1.0.0-alpha.67) (2022-02-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [1.0.0-alpha.66](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.65...@hocuspocus/extension-logger@1.0.0-alpha.66) (2022-02-18)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
 # [1.0.0-alpha.65](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-logger@1.0.0-alpha.64...@hocuspocus/extension-logger@1.0.0-alpha.65) (2022-01-12)
 
 **Note:** Version bump only for package @hocuspocus/extension-logger

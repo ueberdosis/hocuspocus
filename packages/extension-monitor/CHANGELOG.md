@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.99](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.98...@hocuspocus/extension-monitor@1.0.0-alpha.99) (2022-03-21)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.98](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.97...@hocuspocus/extension-monitor@1.0.0-alpha.98) (2022-03-11)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.97](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.96...@hocuspocus/extension-monitor@1.0.0-alpha.97) (2022-03-11)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.96](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.95...@hocuspocus/extension-monitor@1.0.0-alpha.96) (2022-03-02)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.95](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.94...@hocuspocus/extension-monitor@1.0.0-alpha.95) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.94](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.93...@hocuspocus/extension-monitor@1.0.0-alpha.94) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.93](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.92...@hocuspocus/extension-monitor@1.0.0-alpha.93) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.92](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.91...@hocuspocus/extension-monitor@1.0.0-alpha.92) (2022-02-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
+# [1.0.0-alpha.91](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.90...@hocuspocus/extension-monitor@1.0.0-alpha.91) (2022-02-18)
+
+**Note:** Version bump only for package @hocuspocus/extension-monitor
+
+
+
+
+
 # [1.0.0-alpha.90](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-monitor@1.0.0-alpha.89...@hocuspocus/extension-monitor@1.0.0-alpha.90) (2022-01-12)
 
 **Note:** Version bump only for package @hocuspocus/extension-monitor

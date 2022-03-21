@@ -6,7 +6,9 @@ import * as mutex from 'lib0/mutex'
 import * as url from 'lib0/url'
 import type { Event, CloseEvent, MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
-import { Forbidden, Unauthorized } from '@hocuspocus/common'
+import {
+  awarenessStatesToArray, Forbidden, Unauthorized, WsReadyStates,
+} from '@hocuspocus/common'
 import EventEmitter from './EventEmitter'
 import { IncomingMessage } from './IncomingMessage'
 import { MessageReceiver } from './MessageReceiver'
@@ -17,16 +19,10 @@ import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
 import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
-import { OutgoingMessage } from './OutgoingMessage'
-import awarenessStatesToArray from './utils/awarenessStatesToArray'
-import { ConstructableOutgoingMessage, StatesArray } from './types'
+import {
+  ConstructableOutgoingMessage, onAuthenticationFailedParameters, onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters, onSyncedParameters, WebSocketStatus,
+} from './types'
 import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
-
-export enum WebSocketStatus {
-  Connecting = 'connecting',
-  Connected = 'connected',
-  Disconnected = 'disconnected',
-}
 
 export type HocuspocusProviderConfiguration =
   Required<Pick<CompleteHocuspocusProviderConfiguration, 'url' | 'name'>>
@@ -110,18 +106,18 @@ export interface CompleteHocuspocusProviderConfiguration {
    */
   timeout: number,
   onAuthenticated: () => void,
-  onAuthenticationFailed: ({ reason }: { reason: string }) => void,
-  onOpen: (event: Event) => void,
+  onAuthenticationFailed: (data: onAuthenticationFailedParameters) => void,
+  onOpen: (data: onOpenParameters) => void,
   onConnect: () => void,
-  onMessage: (event: MessageEvent) => void,
-  onOutgoingMessage: (message: OutgoingMessage) => void,
-  onStatus: (status: any) => void,
-  onSynced: () => void,
-  onDisconnect: (event: CloseEvent) => void,
-  onClose: (event: CloseEvent) => void,
+  onMessage: (data: onMessageParameters) => void,
+  onOutgoingMessage: (data: onOutgoingMessageParameters) => void,
+  onStatus: (data: onStatusParameters) => void,
+  onSynced: (data: onSyncedParameters) => void,
+  onDisconnect: (data: onDisconnectParameters) => void,
+  onClose: (data: onCloseParameters) => void,
   onDestroy: () => void,
-  onAwarenessUpdate: ({ states }: onAwarenessUpdateParameters) => void,
-  onAwarenessChange: ({ states }: onAwarenessChangeParameters) => void,
+  onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void,
+  onAwarenessChange: (data: onAwarenessChangeParameters) => void,
   /**
    * Don’t output any warnings.
    */
@@ -312,7 +308,7 @@ export class HocuspocusProvider extends EventEmitter {
       // Reset the status
       this.synced = false
       this.status = WebSocketStatus.Connecting
-      this.emit('status', { status: 'connecting' })
+      this.emit('status', { status: WebSocketStatus.Connecting })
 
       // Store resolve/reject for later use
       this.connectionAttempt = {
@@ -324,6 +320,14 @@ export class HocuspocusProvider extends EventEmitter {
 
   resolveConnectionAttempt() {
     this.connectionAttempt?.resolve()
+    this.connectionAttempt = null
+
+    this.status = WebSocketStatus.Connected
+    this.emit('status', { status: WebSocketStatus.Connected })
+    this.emit('connect')
+  }
+
+  stopConnectionAttempt() {
     this.connectionAttempt = null
   }
 
@@ -458,27 +462,8 @@ export class HocuspocusProvider extends EventEmitter {
     }
   }
 
-  onOpen(event: Event) {
+  async onOpen(event: Event) {
     this.emit('open', { event })
-
-    if (this.status !== WebSocketStatus.Connected) {
-      this.webSocketConnectionEstablished()
-    }
-  }
-
-  async getToken() {
-    if (typeof this.configuration.token === 'function') {
-      const token = await this.configuration.token()
-      return token
-    }
-
-    return this.configuration.token
-  }
-
-  async webSocketConnectionEstablished() {
-    this.status = WebSocketStatus.Connected
-    this.emit('status', { status: 'connected' })
-    this.emit('connect')
 
     if (this.isAuthenticationRequired) {
       this.send(AuthenticationMessage, {
@@ -488,6 +473,15 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.startSync()
+  }
+
+  async getToken() {
+    if (typeof this.configuration.token === 'function') {
+      const token = await this.configuration.token()
+      return token
+    }
+
+    return this.configuration.token
   }
 
   startSync() {
@@ -506,7 +500,7 @@ export class HocuspocusProvider extends EventEmitter {
       this.mux(() => { this.broadcast(Message, args) })
     }
 
-    if (this.status === WebSocketStatus.Connected) {
+    if (this.webSocket?.readyState === WsReadyStates.Open) {
       const messageSender = new MessageSender(Message, args)
 
       this.emit('outgoingMessage', { message: messageSender.message })
@@ -542,7 +536,7 @@ export class HocuspocusProvider extends EventEmitter {
       )
 
       this.status = WebSocketStatus.Disconnected
-      this.emit('status', { status: 'disconnected' })
+      this.emit('status', { status: WebSocketStatus.Disconnected })
       this.emit('disconnect', { event })
     }
 
@@ -580,7 +574,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     // Let’s update the connection status.
     this.status = WebSocketStatus.Disconnected
-    this.emit('status', { status: 'disconnected' })
+    this.emit('status', { status: WebSocketStatus.Disconnected })
     this.emit('disconnect', { event })
   }
 
@@ -595,10 +589,10 @@ export class HocuspocusProvider extends EventEmitter {
 
     removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
 
-    // If there is still a connection attempt outstanding then we should resolve
+    // If there is still a connection attempt outstanding then we should stop
     // it before calling disconnect, otherwise it will be rejected in the onClose
     // handler and trigger a retry
-    this.resolveConnectionAttempt()
+    this.stopConnectionAttempt()
 
     this.disconnect()
 

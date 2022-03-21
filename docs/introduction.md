@@ -4,17 +4,17 @@
 [![License](https://img.shields.io/npm/l/@hocuspocus/server.svg)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/WtJ49jGshW)
 
-Hocuspocus is a Node.js collaboration backend based on [Y.js](https://github.com/yjs/yjs).
+Hocuspocus is a suite of tools to bring collaboration to your application. It’s based on [Y.js](https://github.com/yjs/yjs) (by Kevin Jahns), which is amazing to sync and merge changes from clients in real-time. But you can also use it to build offline-first apps, and sync changes later. We’ll make sure to resolve conflicts and keep everything in sync, always.
 
 ## What is Y.js?
 Y.js merges changes from users without conflicts and in real-time. Compared to other implementations, it is super performant and “kicks the pants off” (Joseph Gentle, Ex-Google Wave Engineer, [source](https://josephg.com/blog/crdts-are-the-future/)).
 
-For such a Conflict-free Replication Data Type (CRDT), it doesn’t matter in which order changes are applied. It’s a little bit like Git, where it doesn’t matter when changes are committed.
+For such a Conflict-free Replication Data Type (CRDT), it doesn’t matter in which order changes are applied. It’s a little bit like Git, where it doesn’t matter when changes are committed. Also, every copy of the data is worth the same.
 
-That enables you to build performant real-time applications, add collaboration to your existing app, sync presence states and think offline-first.
+This enables you to build performant real-time applications, add collaboration to your existing app, sync awareness states and think offline-first.
 
-## So, what’s Hocuspocus then?
-You can use whatever you like to send Y.js changes to other clients, but the most popular way is to use a WebSocket. With Hocuspocus you’ve got such a WebSocket backend, that has everything to get started quickly, integrate Y.js in your existing infrastructure and scale to a million users.
+## The Hocuspocus Server
+With Y.js, you can use whatever network protocol you like to send changes to other clients, but the most popular one is a WebSocket. The Hocuspocus Server is a WebSocket backend, which has everything to get started quickly, to integrate Y.js in your existing infrastructure and to scale to a million users.
 
 ## Features
 * Merges changes without conflicts
@@ -32,10 +32,10 @@ The two code examples below show a working example of the backend *and* frontend
 
 ### Backend
 ```js
-import { Server } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server'
 
 // Configure the server …
-const server = Server.configure({
+const server = new Hocuspocus({
   port: 1234,
 })
 
@@ -48,18 +48,15 @@ server.listen()
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
-// Set up a new Y.js document
-const ydoc = new Y.Doc()
 
 // Connect it to the backend
 const provider = new HocuspocusProvider({
   url: 'ws://127.0.0.1:1234',
   name: 'example-document',
-  document: ydoc,
 })
 
 // Define `tasks` as an Array
-const tasks = ydoc.getArray('tasks')
+const tasks = provider.document.getArray('tasks')
 
 // Listen for changes
 tasks.observe(() => {

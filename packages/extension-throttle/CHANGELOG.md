@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.54](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.53...@hocuspocus/extension-throttle@1.0.0-alpha.54) (2022-03-21)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.53](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.52...@hocuspocus/extension-throttle@1.0.0-alpha.53) (2022-03-11)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.52](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.51...@hocuspocus/extension-throttle@1.0.0-alpha.52) (2022-03-02)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.51](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.50...@hocuspocus/extension-throttle@1.0.0-alpha.51) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.50](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.49...@hocuspocus/extension-throttle@1.0.0-alpha.50) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.49](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.48...@hocuspocus/extension-throttle@1.0.0-alpha.49) (2022-02-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
+# [1.0.0-alpha.48](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.47...@hocuspocus/extension-throttle@1.0.0-alpha.48) (2022-02-18)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
 # [1.0.0-alpha.47](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-throttle@1.0.0-alpha.46...@hocuspocus/extension-throttle@1.0.0-alpha.47) (2022-01-12)
 
 **Note:** Version bump only for package @hocuspocus/extension-throttle

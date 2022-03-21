@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.14](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.13...@hocuspocus/cli@1.0.0-alpha.14) (2022-03-21)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.13](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.12...@hocuspocus/cli@1.0.0-alpha.13) (2022-03-11)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.12](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.11...@hocuspocus/cli@1.0.0-alpha.12) (2022-03-02)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.11](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.10...@hocuspocus/cli@1.0.0-alpha.11) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.10](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.9...@hocuspocus/cli@1.0.0-alpha.10) (2022-02-24)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.9](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.8...@hocuspocus/cli@1.0.0-alpha.9) (2022-02-22)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
+# [1.0.0-alpha.8](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.7...@hocuspocus/cli@1.0.0-alpha.8) (2022-02-18)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
 # [1.0.0-alpha.7](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/cli@1.0.0-alpha.6...@hocuspocus/cli@1.0.0-alpha.7) (2022-01-12)
 
 **Note:** Version bump only for package @hocuspocus/cli

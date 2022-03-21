@@ -15,17 +15,6 @@ export enum MessageType {
   QueryAwareness = 3,
 }
 
-/**
- * State of the WebSocket connection.
- * https://developer.mozilla.org/de/docs/Web/API/WebSocket/readyState
- */
-export enum WsReadyStates {
-  Connecting = 0,
-  Open = 1,
-  Closing = 2,
-  Closed = 3,
-}
-
 export interface AwarenessUpdate {
   added: Array<any>,
   updated: Array<any>,
@@ -44,6 +33,7 @@ export interface Extension {
   onListen?(data: onListenPayload): Promise<any>,
   onUpgrade?(data: onUpgradePayload): Promise<any>,
   onConnect?(data: onConnectPayload): Promise<any>,
+  connected?(data: connectedPayload): Promise<any>,
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
@@ -65,6 +55,7 @@ export type Hook =
   'onListen' |
   'onUpgrade' |
   'onConnect' |
+  'connected' |
   'onAuthenticate' |
   /**
    * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
@@ -113,11 +104,13 @@ export interface Configuration extends Extension {
   /**
    * Function which returns the (customized) document name based on the request
    */
-  getDocumentName?(data: {
-    documentName: string,
-    request: IncomingMessage,
-    requestParameters: URLSearchParams,
-  }): string | Promise<string>,
+  getDocumentName?(data: getDocumentNamePayload): string | Promise<string>,
+}
+
+export interface getDocumentNamePayload {
+  documentName: string,
+  request: IncomingMessage,
+  requestParameters: URLSearchParams,
 }
 
 export interface onAuthenticatePayload {
@@ -131,6 +124,16 @@ export interface onAuthenticatePayload {
 }
 
 export interface onConnectPayload {
+  documentName: string,
+  instance: Hocuspocus,
+  request: IncomingMessage,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  connection: ConnectionConfiguration
+}
+
+export interface connectedPayload {
   documentName: string,
   instance: Hocuspocus,
   request: IncomingMessage,
@@ -201,8 +204,10 @@ export interface onAwarenessUpdatePayload {
   updated: number[],
   removed: number[],
   awareness: Awareness,
-  states: any[],
+  states: StatesArray,
 }
+
+export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 export interface storePayload extends onStoreDocumentPayload {
   state: Buffer,
@@ -243,6 +248,5 @@ export interface onDestroyPayload {
 export interface onConfigurePayload {
   configuration: Configuration,
   version: string,
-  yjsVersion: string,
   instance: Hocuspocus,
 }

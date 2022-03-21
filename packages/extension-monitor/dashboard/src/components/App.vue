@@ -60,17 +60,15 @@
       </div>
     </div>
 
-    <div class="flex mt-16 mr-1 flex-col lg:flex-row">
-      <div class="flex-1 mb-2 lg:mr-2">
-        <memory :data="memory" />
+    <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 mt-16">
+      <div class="mb-2">
+        <info :info="info" />
       </div>
-
-      <div class="flex-1 mb-2 lg:mx-2">
+      <div class="mb-2">
         <cpu :data="cpu" />
       </div>
-
-      <div class="flex-1 mb-2 lg:ml-2">
-        <info :info="info" />
+      <div class="mb-2">
+        <memory :data="memory" />
       </div>
     </div>
 
