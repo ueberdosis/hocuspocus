@@ -21,10 +21,10 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2.5.1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -34,7 +34,6 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
@@ -76,10 +75,10 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2.5.1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -89,15 +88,12 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm install
-
-    - uses: microsoft/playwright-github-action@v1
 
     - name: Run tests
       id: test
@@ -125,10 +121,10 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2.5.1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -138,7 +134,6 @@ jobs:
       with:
         path: |
           **/node_modules
-          ~/.cache/ms-playwright
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
     - name: Install dependencies
