@@ -29,8 +29,7 @@
   "devDependencies": {
     "@types/ioredis": "^4.28.7",
     "@types/lodash.debounce": "^4.0.6",
-    "@types/redlock": "^4.0.3",
-    "kleur": "^4.1.4"
+    "@types/redlock": "^4.0.3"
   },
   "dependencies": {
     "@hocuspocus/server": "^1.0.0-alpha.91",
@@ -39,7 +38,8 @@
     "redlock": "^4.2.0",
     "uuid": "^8.3.2",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.23"
+    "yjs": "^13.5.23",
+    "kleur": "^4.1.4"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
