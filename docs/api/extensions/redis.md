@@ -5,23 +5,18 @@ tableOfContents: true
 # Redis
 
 ## Introduction
+Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes and awareness states through Redis.
 
-:::warning Work in progress
-Currently, the Redis extension only syncs document changes. Awareness states, for example cursors, are not yet supported. We’re working on a complete rewrite, that’s working completely different.
-:::
-
-Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes between the instances through Redis pub/sub.
+Thanks to [@tommoor](https://github.com/tommoor) for writing the initial implementation of that extension.
 
 ## Installation
-
-Install the Redis package with:
+Install the Redis extension with:
 
 ```bash
 npm install @hocuspocus/extension-redis
 ```
 
 ## Configuration
-
 For a full documentation on all available redis and redis cluster options, check out the [ioredis API docs](https://github.com/luin/ioredis/blob/master/API.md).
 
 ```js
@@ -43,23 +38,44 @@ const server = Server.configure({
 server.listen()
 ```
 
-If you want to use a cluster instead of a single Redis instance, use the Redis cluster extension:
+## Storing documents
+The Redis extension works well with the database extension. Once an instance stores a document, it’s blocked for all other instances to avoid write conflicts.
 
 ```js
-import { Server } from '@hocuspocus/server'
-import { RedisCluster } from '@hocuspocus/redis'
+import { Hocuspocus } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
+import { Redis } from '@hocuspocus/extension-redis'
+import { SQLite } from '@hocuspocus/extension-sqlite'
 
-const server = Server.configure({
+// Server 1
+const server = new Hocuspocus({
+  name: 'server-1',
+  port: 1234,
   extensions: [
-    new RedisCluster({
-      scaleReads: 'all',
-      redisOptions: {
-        host: '127.0.0.1',
-        port: 6379,
-      },
-    })
+    new Logger(),
+    new Redis({
+      host: '127.0.0.1',
+      port: 6379,
+    }),
+    new SQLite(),
   ],
 })
 
 server.listen()
+
+// Server 2
+const anotherServer = new Hocuspocus({
+  name: 'server-2',
+  port: 1235,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: '127.0.0.1',
+      port: 6379,
+    }),
+    new SQLite(),
+  ],
+})
+
+anotherServer.listen()
 ```
