@@ -23,7 +23,6 @@ import { Configuration } from '@hocuspocus/server'
 const data = {
   configuration: Configuration,
   version: string,
-  yjsVersion: string,
   instance: Hocuspocus,
 }
 ```

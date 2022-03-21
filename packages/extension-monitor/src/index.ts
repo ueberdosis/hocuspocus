@@ -157,7 +157,6 @@ export class Monitor implements Extension {
 
   async onConfigure(data: onConfigurePayload) {
     this.collector.version = data.version
-    this.collector.yjsVersion = data.yjsVersion
 
     const sanitizedConfiguration = {}
 

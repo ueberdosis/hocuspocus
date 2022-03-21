@@ -24,8 +24,6 @@ export class Collector {
 
   version = ''
 
-  yjsVersion = ''
-
   connections = {}
 
   messages = {}
@@ -145,7 +143,6 @@ export class Collector {
       platform: process.platform,
       started: moment().subtract(process.uptime(), 'second').toISOString(),
       version: this.version,
-      yjsVersion: this.yjsVersion,
     }
   }
 
