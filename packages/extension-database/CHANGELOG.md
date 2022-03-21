@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.13](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-database@1.0.0-alpha.12...@hocuspocus/extension-database@1.0.0-alpha.13) (2022-03-21)
+
+**Note:** Version bump only for package @hocuspocus/extension-database
+
+
+
+
+
 # [1.0.0-alpha.12](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-database@1.0.0-alpha.11...@hocuspocus/extension-database@1.0.0-alpha.12) (2022-03-21)
 
 **Note:** Version bump only for package @hocuspocus/extension-database
