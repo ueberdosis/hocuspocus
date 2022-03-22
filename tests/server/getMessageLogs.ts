@@ -11,7 +11,7 @@ test('outputs the message log', async t => {
 
     server.enableDebugging()
 
-    const client = newHocuspocusProvider(server, {
+    newHocuspocusProvider(server, {
       token: 'secret',
       onSynced() {
         t.true(server.getMessageLogs().length > 0)

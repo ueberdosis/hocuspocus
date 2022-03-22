@@ -65,9 +65,8 @@ test('uses a proper close event', async t => {
       onSynced() {
         server.closeConnections()
       },
-      // @ts-ignore
       onClose({ event }) {
-      // Make sure it doesn’t reconnect.
+        // Make sure it doesn’t reconnect.
         t.is(event.code, 4205)
         t.is(event.reason, 'Reset Connection')
 

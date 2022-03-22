@@ -28,3 +28,25 @@ test('executes the onListen callback from an extension', async t => {
     })
   })
 })
+
+test('has the configuration', async t => {
+  await new Promise(resolve => {
+    newHocuspocus({
+      async onListen({ configuration }) {
+        t.is(configuration.quiet, true)
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('has the port', async t => {
+  await new Promise(resolve => {
+    newHocuspocus({
+      async onListen({ port }) {
+        t.truthy(port)
+        resolve('done')
+      },
+    })
+  })
+})

@@ -1,29 +1,30 @@
 import test from 'ava'
 import sinon from 'sinon'
 import { Logger } from '@hocuspocus/extension-logger'
-import { newHocuspocus } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 const fakeLogger = (message: any) => {
 }
 
-test.skip('logs something', async t => {
+test('logs something', async t => {
   await new Promise(resolve => {
     const spy = sinon.spy(fakeLogger)
 
     const server = newHocuspocus({
-      async onListen() {
-        server.destroy()
-
-        t.true(spy.callCount > 1, 'Expected the Logger to log something, but didn’t receive anything.')
-        t.true(spy.callCount === 11, `Expected it to log 11 times, but actually logged ${spy.callCount} times`)
-
-        resolve('done')
-      },
       extensions: [
         new Logger({
           log: spy,
         }),
       ],
+    })
+
+    newHocuspocusProvider(server, {
+      onConnect() {
+        t.true(spy.callCount > 1, 'Expected the Logger to log something, but didn’t receive anything.')
+        t.true(spy.callCount === 3, `Expected it to log 11 times, but actually logged ${spy.callCount} times`)
+
+        resolve('done')
+      }
     })
   })
 })

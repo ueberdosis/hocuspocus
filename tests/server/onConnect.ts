@@ -86,22 +86,35 @@ test('sets the provider to readOnly', async t => {
   })
 })
 
-test('encodes weird document names', async t => {
-  await new Promise(resolve => {
-    const weirdDocumentName = '<>{}|^äöüß'
+const weirdDocumentNames = [
+  'not-weird',
+  'äöü',
+  '<>{}|^ß',
+  'with space',
+  'with/slash',
+  'with\backslash',
+  'a-very-long-document-name-which-should-not-make-any-problems-at-all',
+  '🌟',
+  ':',
+  '—',
+  '漢',
+  'triple   space',
+]
 
-    const server = newHocuspocus({
-      async onConnect({ documentName }) {
-        t.is(documentName, weirdDocumentName)
+weirdDocumentNames.forEach(weirdDocumentName => {
+  test(`encodes weird document names: "${weirdDocumentName}"`, async t => {
+    await new Promise(resolve => {
+      const server = newHocuspocus({
+        async onConnect({ documentName }) {
+          t.is(documentName, weirdDocumentName)
 
-        resolve('done')
-      },
-    })
+          resolve('done')
+        },
+      })
 
-    newHocuspocusProvider(server, {
-
-      name: weirdDocumentName,
-
+      newHocuspocusProvider(server, {
+        name: weirdDocumentName,
+      })
     })
   })
 })
@@ -111,6 +124,27 @@ test('stops when the onConnect hook throws an Error', async t => {
     const server = newHocuspocus({
       onConnect() {
         throw new Error()
+      },
+      // MUST NOT BE CALLED
+      async onLoadDocument() {
+        t.fail('WARNING: When onConnect fails onLoadDocument must not be called.')
+      },
+    })
+
+    newHocuspocusProvider(server, {
+      onClose() {
+        t.pass()
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('stops when the onConnect hook returns a rejecting promise', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      onConnect() {
+        return Promise.reject()
       },
       // MUST NOT BE CALLED
       async onLoadDocument() {

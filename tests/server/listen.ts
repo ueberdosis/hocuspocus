@@ -11,6 +11,14 @@ test('should respond with OK', async t => {
   t.is(await response.text(), 'OK')
 })
 
+test('should respond with status 200', async t => {
+  const server = await newHocuspocus()
+
+  const response = await fetch(server.httpURL)
+
+  t.is(await response.status, 200)
+})
+
 test('should respond with OK on a custom port', async t => {
   const server = await newHocuspocus({
     port: 4000,

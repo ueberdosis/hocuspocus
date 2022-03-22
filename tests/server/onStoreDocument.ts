@@ -49,8 +49,7 @@ test('doesn’t remove the document from memory when there’s a new connection 
   })
 })
 
-// TODO: Timing issues when all tests run
-test.skip('removes the document from memory when there’s no connection after onStoreDocument is called', async t => {
+test('removes the document from memory when there’s no connection after onStoreDocument is called', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
       async onStoreDocument() {

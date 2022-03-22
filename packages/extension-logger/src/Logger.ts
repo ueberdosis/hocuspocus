@@ -158,5 +158,4 @@ export class Logger implements Extension {
 
     this.configuration.log(message)
   }
-
 }

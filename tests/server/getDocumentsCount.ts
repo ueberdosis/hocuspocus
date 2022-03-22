@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider, randomInteger, sleep } from '../utils'
 
 test('documents count is zero by default', async t => {
   const server = newHocuspocus()
@@ -56,4 +56,29 @@ test('adds and removes different documents properly', async t => {
   await sleep(100)
 
   t.is(server.getConnectionsCount(), 0)
+})
+
+test(`adds and removes random number of documents properly`, async t => {
+  // random number of providers
+  const server = newHocuspocus()
+  const numberOfProviders = randomInteger(10, 100)
+  const providers = []
+  for (let index = 0; index < numberOfProviders; index++) {
+    providers.push(
+      newHocuspocusProvider(server, { name: `foobar-${index}` }),
+    )
+  }
+  await sleep(100)
+
+  t.is(server.getDocumentsCount(), numberOfProviders)
+
+  // random number of disconnects
+  const numberOfDisconnects = randomInteger(1, numberOfProviders)
+  for (let index = 0; index < numberOfDisconnects; index++) {
+    providers[index].disconnect()
+  }
+  await sleep(100)
+
+  // check the count
+  t.is(server.getConnectionsCount(), numberOfProviders - numberOfDisconnects)
 })
