@@ -50,7 +50,7 @@ export interface Extension {
   onDestroy?(data: onDestroyPayload): Promise<any>,
 }
 
-export type Hook =
+export type HookName =
   'onConfigure' |
   'onListen' |
   'onUpgrade' |
@@ -70,6 +70,24 @@ export type Hook =
   'onRequest' |
   'onDisconnect' |
   'onDestroy'
+
+export type HookPayload =
+  onConfigurePayload |
+  onListenPayload |
+  onUpgradePayload |
+  onConnectPayload |
+  connectedPayload |
+  onAuthenticatePayload |
+  onLoadDocumentPayload |
+  onLoadDocumentPayload |
+  onLoadDocumentPayload |
+  onChangePayload |
+  onStoreDocumentPayload |
+  afterStoreDocumentPayload |
+  onAwarenessUpdatePayload |
+  onRequestPayload |
+  onDisconnectPayload |
+  onDestroyPayload
 
 export interface Configuration extends Extension {
   /**
@@ -231,13 +249,15 @@ export interface onRequestPayload {
 }
 
 export interface onUpgradePayload {
-  head: any,
   request: IncomingMessage,
-  socket: Socket,
+  socket: any,
+  head: any,
   instance: Hocuspocus,
 }
 
 export interface onListenPayload {
+  instance: Hocuspocus,
+  configuration: Configuration,
   port: number,
 }
 
@@ -246,7 +266,7 @@ export interface onDestroyPayload {
 }
 
 export interface onConfigurePayload {
+  instance: Hocuspocus,
   configuration: Configuration,
   version: string,
-  instance: Hocuspocus,
 }

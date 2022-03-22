@@ -16,8 +16,9 @@ import {
   MessageType,
   Configuration,
   ConnectionConfiguration,
-  Hook,
+  HookName,
   AwarenessUpdate,
+  HookPayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -191,7 +192,10 @@ export class Hocuspocus {
 
     server.on('upgrade', (request, socket, head) => {
       this.hooks('onUpgrade', {
-        request, socket, head, instance: this,
+        request,
+        socket,
+        head,
+        instance: this,
       })
         .then(() => {
           // let the default websocket server handle the connection if
@@ -222,7 +226,13 @@ export class Hocuspocus {
           this.showStartScreen()
         }
 
-        this.hooks('onListen', { port: this.address.port })
+        const onListenPayload = {
+          instance: this,
+          configuration: this.configuration,
+          port: this.address.port,
+        }
+
+        this.hooks('onListen', onListenPayload)
           .then(() => resolve(this))
           .catch(error => reject(error))
       })
@@ -692,7 +702,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
-  hooks(name: Hook, payload: any, callback: Function | null = null): Promise<any> {
+  hooks(name: HookName, payload: HookPayload, callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
     // create a new `thenable` chain
@@ -705,7 +715,7 @@ export class Hocuspocus {
       // run through all the configured hooks
       .forEach(extension => {
         chain = chain
-          .then(() => extension[name]?.(payload))
+          .then(() => (extension[name] as any)?.(payload))
           .catch(error => {
             // make sure to log error messages
             if (error?.message) {
