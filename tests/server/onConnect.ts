@@ -99,6 +99,7 @@ const weirdDocumentNames = [
   '—',
   '漢',
   'triple   space',
+  '*',
 ]
 
 weirdDocumentNames.forEach(weirdDocumentName => {
