@@ -66,9 +66,6 @@ jobs:
         - 6379/tcp
         options: --entrypoint redis-server
 
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
     strategy:
       matrix:
         node-version: [16]
@@ -101,14 +98,6 @@ jobs:
       env:
         REDIS_HOST: localhost
         REDIS_PORT: ${{ job.services.redis.ports[6379] }}
-
-    - name: Send Slack notifications
-      uses: act10ns/slack@v1
-      if: failure()
-      with:
-        status: ${{ job.status }}
-        steps: ${{ toJson(steps) }}
-        channel: '#hocuspocus-notifications'
 
   build:
     runs-on: ubuntu-latest
