@@ -1,16 +1,23 @@
 <template>
-  <card title="Info" :border="true" :full-height="true">
+  <card
+    title="Info"
+    :border="true"
+    :full-height="true"
+  >
+    <p v-if="info.configuration.name">
+      Name: <span class="text-gray-600">{{ info.configuration.name }}</span>
+    </p>
+    <p v-if="info.ipAddress">
+      Public IP: <span class="text-gray-600">{{ info.ipAddress }}</span>
+    </p>
     <p>
-      hocuspocus version: <span class="text-gray-600">{{ info.version }}</span>
+      Hocuspocus version: <span class="text-gray-600">{{ info.version }}</span>
     </p>
     <p>
       Node.js version: <span class="text-gray-600">{{ info.nodeVersion }}</span>
     </p>
     <p>
       Platform: <span class="text-gray-600">{{ info.platform }}</span>
-    </p>
-    <p>
-      Public IP: <span class="text-gray-600">{{ info.ipAddress }}</span>
     </p>
     <p>
       Started: <span class="text-gray-600">{{ started }}</span>

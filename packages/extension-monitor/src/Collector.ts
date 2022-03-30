@@ -12,10 +12,7 @@ import {
 } from '@hocuspocus/server'
 import collect from 'collect.js'
 import {
-  AbstractType,
   Doc,
-  encodeStateAsUpdate,
-  YEvent,
 } from 'yjs'
 
 export class Collector {
@@ -138,11 +135,19 @@ export class Collector {
   async info() {
     return {
       configuration: this.serverConfiguration,
-      ipAddress: await publicIp.v4(),
+      ipAddress: await this.getIpAddress(),
       nodeVersion: process.version,
       platform: process.platform,
       started: moment().subtract(process.uptime(), 'second').toISOString(),
       version: this.version,
+    }
+  }
+
+  private async getIpAddress() {
+    try {
+      return await publicIp.v4()
+    } catch {
+      return null
     }
   }
 
