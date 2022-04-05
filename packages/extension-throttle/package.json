@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-throttle",
-  "version": "1.0.0-alpha.57",
+  "version": "1.0.0-alpha.58",
   "description": "hocuspocus throttle extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -27,7 +27,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.101"
+    "@hocuspocus/server": "^1.0.0-alpha.102"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
