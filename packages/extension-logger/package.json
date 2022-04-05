@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-logger",
-  "version": "1.0.0-alpha.74",
+  "version": "1.0.0-alpha.75",
   "description": "hocuspocus logging extension",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -28,7 +28,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^1.0.0-alpha.100"
+    "@hocuspocus/server": "^1.0.0-alpha.101"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
