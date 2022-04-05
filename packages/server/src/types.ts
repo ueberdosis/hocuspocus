@@ -79,8 +79,6 @@ export type HookPayload =
   connectedPayload |
   onAuthenticatePayload |
   onLoadDocumentPayload |
-  onLoadDocumentPayload |
-  onLoadDocumentPayload |
   onChangePayload |
   onStoreDocumentPayload |
   afterStoreDocumentPayload |
@@ -226,6 +224,17 @@ export interface onAwarenessUpdatePayload {
 }
 
 export type StatesArray = { clientId: number, [key: string | number]: any }[]
+
+export interface fetchPayload {
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  connection: ConnectionConfiguration
+}
 
 export interface storePayload extends onStoreDocumentPayload {
   state: Buffer,

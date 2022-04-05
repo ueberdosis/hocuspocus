@@ -4,6 +4,7 @@ import { Monitor } from '@hocuspocus/extension-monitor'
 
 const server = Server.configure({
   port: 1234,
+  name: 'my-unique-identifier',
   extensions: [
     new Logger(),
     new Monitor(),

@@ -1,5 +1,9 @@
 import {
-  Extension, onChangePayload, onLoadDocumentPayload, storePayload,
+  Extension,
+  onChangePayload,
+  onLoadDocumentPayload,
+  storePayload,
+  fetchPayload,
 } from '@hocuspocus/server'
 import * as Y from 'yjs'
 
@@ -8,7 +12,7 @@ export interface DatabaseConfiguration {
    * Pass a Promise to retrieve updates from your database. The Promise should resolve to
    * an array of items with Y.js-compatible binary data.
    */
-  fetch: ({ documentName }: { documentName: string}) => Promise<Uint8Array | null>,
+  fetch: (data: fetchPayload) => Promise<Uint8Array | null>,
   /**
    * Pass a function to store updates in your database.
    */
@@ -37,14 +41,14 @@ export class Database implements Extension {
   /**
    * Get stored data from the database.
    */
-  async onLoadDocument({ document, documentName }: onLoadDocumentPayload): Promise<any> {
-    const update = await this.configuration.fetch({ documentName })
+  async onLoadDocument(data: onLoadDocumentPayload): Promise<any> {
+    const update = await this.configuration.fetch(data)
 
     if (update) {
-      Y.applyUpdate(document, update)
+      Y.applyUpdate(data.document, update)
     }
 
-    return document
+    return data.document
   }
 
   /**
