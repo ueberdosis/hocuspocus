@@ -11,7 +11,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-provider.esm.js",
+  "main": "dist/hocuspocus-provider.cjs",
   "module": "dist/hocuspocus-provider.esm.js",
   "types": "dist/packages/provider/src/index.d.ts",
   "exports": {

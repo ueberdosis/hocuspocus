@@ -9,7 +9,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-sqlite.esm.js",
+  "main": "dist/hocuspocus-sqlite.cjs",
   "module": "dist/hocuspocus-sqlite.esm.js",
   "types": "dist/packages/extension-sqlite/src/index.d.ts",
   "exports": {

@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-rocksdb.esm.js",
+  "main": "dist/hocuspocus-rocksdb.cjs",
   "module": "dist/hocuspocus-rocksdb.esm.js",
   "types": "dist/packages/extension-rocksdb/src/index.d.ts",
   "exports": {

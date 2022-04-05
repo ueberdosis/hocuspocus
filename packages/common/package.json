@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-common.esm.js",
+  "main": "dist/hocuspocus-common.cjs",
   "module": "dist/hocuspocus-common.esm.js",
   "types": "dist/packages/common/src/index.d.ts",
   "exports": {

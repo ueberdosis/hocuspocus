@@ -16,7 +16,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-monitor.esm.js",
+  "main": "dist/hocuspocus-monitor.cjs",
   "module": "dist/hocuspocus-monitor.esm.js",
   "types": "dist/packages/extension-monitor/src/index.d.ts",
   "exports": {

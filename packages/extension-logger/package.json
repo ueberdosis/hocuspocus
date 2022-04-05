@@ -11,7 +11,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-logger.esm.js",
+  "main": "dist/hocuspocus-logger.cjs",
   "module": "dist/hocuspocus-logger.esm.js",
   "types": "dist/packages/extension-logger/src/index.d.ts",
   "exports": {

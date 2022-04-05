@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-webhook.esm.js",
+  "main": "dist/hocuspocus-webhook.cjs",
   "module": "dist/hocuspocus-webhook.esm.js",
   "types": "dist/packages/extension-webhook/src/index.d.ts",
   "exports": {

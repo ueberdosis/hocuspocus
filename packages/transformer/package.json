@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-transformer.esm.js",
+  "main": "dist/hocuspocus-transformer.cjs",
   "module": "dist/hocuspocus-transformer.esm.js",
   "types": "dist/packages/transformer/src/index.d.ts",
   "exports": {

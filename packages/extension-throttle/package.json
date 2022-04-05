@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "main": "dist/hocuspocus-throttle.esm.js",
+  "main": "dist/hocuspocus-throttle.cjs",
   "module": "dist/hocuspocus-throttle.esm.js",
   "types": "dist/packages/extension-throttle/src/index.d.ts",
   "exports": {
