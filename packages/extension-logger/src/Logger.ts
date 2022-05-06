@@ -10,6 +10,8 @@ import {
   onUpgradePayload,
 } from '@hocuspocus/server'
 
+type LoggerFunction = (...args: any[]) => void;
+
 export interface LoggerConfiguration {
   /**
    * Prepend all logging message with a string.
@@ -54,9 +56,9 @@ export interface LoggerConfiguration {
    */
   onConfigure: boolean,
   /**
-   * A log function, if none is provided output will go to console
+   * A log function or an array of log functions, if none is provided output will go to console
    */
-  log: (...args: any[]) => void,
+  log: LoggerFunction | Array<LoggerFunction>,
 }
 
 export class Logger implements Extension {
@@ -156,6 +158,8 @@ export class Logger implements Extension {
 
     message = `[${meta}] ${message}`
 
-    this.configuration.log(message)
+    typeof this.configuration.log === 'function' ?
+      this.configuration.log(message) :
+      this.configuration.log.forEach(log => log(message))
   }
 }

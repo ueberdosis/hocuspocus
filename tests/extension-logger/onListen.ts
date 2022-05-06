@@ -29,6 +29,33 @@ test('logs something', async t => {
   })
 })
 
+test('logs multiple log functions', async t => {
+  await new Promise(resolve => {
+    const spyA = sinon.spy(fakeLogger)
+    const spyB = sinon.spy(fakeLogger)
+
+    const server = newHocuspocus({
+      extensions: [
+        new Logger({
+          log: [spyA, spyB],
+        }),
+      ],
+    })
+
+    newHocuspocusProvider(server, {
+      onConnect() {
+        t.true(spyA.callCount > 1, 'Expected the Logger A to log something, but didn’t receive anything.')
+        t.true(spyA.callCount === 3, `Expected it to log 11 times, but actually logged ${spyA.callCount} times`)
+
+        t.true(spyB.callCount > 1, 'Expected the Logger B to log something, but didn’t receive anything.')
+        t.true(spyB.callCount === 3, `Expected it to log 11 times, but actually logged ${spyA.callCount} times`)
+
+        resolve('done')
+      }
+    })
+  })
+})
+
 test('uses the global instance name', async t => {
   await new Promise(resolve => {
     const spy = sinon.spy(fakeLogger)

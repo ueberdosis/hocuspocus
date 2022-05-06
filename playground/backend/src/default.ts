@@ -6,7 +6,9 @@ const server = Server.configure({
   port: 1234,
   name: 'hocuspocus-fra1-01',
   extensions: [
-    new Logger(),
+    new Logger({
+      log: console.log,
+    }),
     new SQLite(),
   ],
   // async getDocumentName({ documentName, requestParameters }) {
