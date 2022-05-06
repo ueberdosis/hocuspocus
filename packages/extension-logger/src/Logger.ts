@@ -158,8 +158,10 @@ export class Logger implements Extension {
 
     message = `[${meta}] ${message}`
 
-    typeof this.configuration.log === 'function' ?
-      this.configuration.log(message) :
-      this.configuration.log.forEach(log => log(message))
+    if (typeof this.configuration.log === 'function') {
+      this.configuration.log(message)
+    } else {
+      this.configuration.log.forEach(logFn => logFn(message))
+    }
   }
 }
