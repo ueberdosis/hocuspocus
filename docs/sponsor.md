@@ -24,9 +24,9 @@ If you are thankful for Hocuspocus, you should say thank you to the lovely peopl
 
 AND you should definitely hire us if you want us to design und build an amazing digital product for you. Bonus points if it’s somehow text editing related.
 
-But here are the friendly faces of the two maintainers of Hocuspocus, Hans Pagel (right) and Philipp Kühn (left). You’ve probably read our names in the thousands of commits, pull requests or Tweets already.
+But here are the friendly faces of the maintainers of Tiptap.
 
-![Philipp and Hans, the maintainers of Hocuspocus, looking happy](/philipp-and-hans.jpg)
+!!team-grid
 
 ## More peace of mind
 Companies betting on Hocuspocus probably want some peace of mind and ensure that we keep maintaining Hocuspocus, but don’t forget that our work is based on the work of other lovely people that you should definitely sponsor too:
