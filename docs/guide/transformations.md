@@ -26,7 +26,7 @@ import { TiptapTransformer, ProsemirrorTransformer } from '@hocuspocus/transform
 
 ## Examples
 
-### tiptap
+### Tiptap
 
 **Convert a Y-Doc to prosemirror JSON:**
 

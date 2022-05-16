@@ -21,6 +21,6 @@ server.listen()
 ```
 
 ## 3. Connect with a frontend
-Now, you’ll need to use Y.js in your frontend and connect to the server with the WebSocket provider. With tiptap, our very own text editor, it’s also just a few lines of code.
+Now, you’ll need to use Y.js in your frontend and connect to the server with the WebSocket provider. With Tiptap, our very own text editor, it’s also just a few lines of code.
 
 That’s it. :)

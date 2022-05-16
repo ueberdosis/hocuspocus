@@ -9,9 +9,9 @@ tableOfContents: true
 [Tiptap](https://tiptap.dev) is a headless text editor, that’s fully customizable and has a first-class collaborative editing integration that’s compatible with Hocuspocus.
 
 ## Getting started
-The above examples has a lot of bells and whistles. Let’s focus on the collaborative editing part. The below example code shows everything you need to create an instance of tiptap, with all default extension, start your collaboration backend with Hocuspocus and connect everything.
+The above examples has a lot of bells and whistles. Let’s focus on the collaborative editing part. The below example code shows everything you need to create an instance of Tiptap, with all default extension, start your collaboration backend with Hocuspocus and connect everything.
 
-Add an element to your HTML document where tiptap should be initialized:
+Add an element to your HTML document where Tiptap should be initialized:
 ```html
 <div class="element"></div>
 ```
@@ -21,7 +21,7 @@ Install the required extensions:
 npm install @hocuspocus/provider @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs
 ```
 
-And create your tiptap instance:
+And create your Tiptap instance:
 ```js
 import { Editor, StarterKit } from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'

@@ -122,9 +122,9 @@ import Text from '@tiptap/extension-text'
 
 const server = Server.configure({
   async onLoadDocument(data): Doc {
-    // The tiptap collaboration extension uses shared types of a single y-doc
+    // The Tiptap collaboration extension uses shared types of a single y-doc
     // to store different fields in the same document.
-    // The default field in tiptap is simply called "default"
+    // The default field in Tiptap is simply called "default"
     const fieldName = 'default'
 
     // Check if the given field already exists in the given y-doc.
