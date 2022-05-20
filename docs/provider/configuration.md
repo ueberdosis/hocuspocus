@@ -25,7 +25,7 @@ const provider = new HocuspocusProvider({
 There is definitely more to configure. Find the full list of all available settings below.
 
 ### url
-The URL of the hocuspocus/WebSocket server.
+The URL of the Hocuspocus/WebSocket server.
 
 Default: `''`
 
