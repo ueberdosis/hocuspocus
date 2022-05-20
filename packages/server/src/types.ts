@@ -13,6 +13,7 @@ export enum MessageType {
   Awareness = 1,
   Auth = 2,
   QueryAwareness = 3,
+  SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
 }
 
 export interface AwarenessUpdate {

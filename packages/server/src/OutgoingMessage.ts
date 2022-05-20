@@ -32,6 +32,14 @@ export class OutgoingMessage {
     return this
   }
 
+  createSyncReplyMessage(): OutgoingMessage {
+    this.type = MessageType.SyncReply
+
+    writeVarUint(this.encoder, MessageType.SyncReply)
+
+    return this
+  }
+
   createAwarenessUpdateMessage(awareness: Awareness, changedClients?: Array<any>): OutgoingMessage {
     this.type = MessageType.Awareness
     this.category = 'Update'
