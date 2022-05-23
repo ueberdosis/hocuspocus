@@ -13,18 +13,16 @@ Give back to the open source community and [sponsor us on GitHub](https://github
 * Get early access to private repositories
 * Your issues and pull requests get a `sponsor ♥` label
 * Get a sponsor badge in all your comments on GitHub
-* Invest in the future of hocuspocus
+* Invest in the future of Hocuspocus
 * Give back to the open source community
 * Show support in your GitHub profile
 
 Sounds good? [Sponsor us on GitHub!](https://github.com/sponsors/ueberdosis)
 
-## The maintainers of hocuspocus
-If you are thankful for Hocuspocus, you should say thank you to the lovely people of [überdosis](https://ueberdosis.io). The amazing company we are all building together and the amazing company that funded the initial development costs of tiptap.
+## The maintainers of Hocuspocus
+If you are thankful for Hocuspocus, you should say thank you to the lovely people at [überdosis](https://ueberdosis.io), the company that builds this software.
 
 AND you should definitely hire us if you want us to design und build an amazing digital product for you. Bonus points if it’s somehow text editing related.
-
-But here are the friendly faces of the maintainers of Tiptap.
 
 !!team-grid
 
