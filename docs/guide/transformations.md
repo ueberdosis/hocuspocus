@@ -8,7 +8,7 @@ tableOfContents: true
 
 A [Y-Doc](https://docs.yjs.dev/api/y.doc) is the underlying object Yjs uses to store the collaboration history, the documents' fields as a so-called Shared Types and sync everything between clients.
 
-hocuspocus doesn't care how you structure your data, so you need to transform your existing document to a Y-Doc when importing documents and vice versa when saving it for your views. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below.
+Hocuspocus doesn't care how you structure your data, so you need to transform your existing document to a Y-Doc when importing documents and vice versa when saving it for your views. You should check out the [Yjs documentation on Shared Types](https://docs.yjs.dev/getting-started/working-with-shared-types) and how to use them, especially if you don't use any of the editors below.
 
 ## Transformers
 

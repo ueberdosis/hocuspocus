@@ -6,7 +6,7 @@ tableOfContents: true
 
 ## Introduction
 
-hocuspocus offers hooks to extend it's functionality and integrate it into existing applications. Hooks are configured as simple methods the same way as [other configuration options](/guide/configuration) are.
+Hocuspocus offers hooks to extend it's functionality and integrate it into existing applications. Hooks are configured as simple methods the same way as [other configuration options](/guide/configuration) are.
 
 Hooks accept a hook payload as first argument. The payload is an object that contains data you can use and manipulate, allowing you to built complex things on top of this simple mechanic.
 
