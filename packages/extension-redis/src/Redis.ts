@@ -11,6 +11,7 @@ import {
   onDisconnectPayload,
   onStoreDocumentPayload,
   onAwarenessUpdatePayload,
+  onChangePayload,
   MessageReceiver,
   Debugger,
   onConfigurePayload,
@@ -248,6 +249,13 @@ export class Redis implements Extension {
         Buffer.from(reply),
       )
     })
+  }
+
+  /**
+   * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
+   */
+  public async onChange(data: onChangePayload): Promise<any> {
+    return this.publishFirstSyncStep(data.documentName, data.document)
   }
 
   /**

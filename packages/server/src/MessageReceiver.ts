@@ -31,8 +31,9 @@ export class MessageReceiver {
 
     switch (type) {
       case MessageType.Sync:
+      case MessageType.SyncReply:
         message.writeVarUint(MessageType.Sync)
-        this.readSyncMessage(message, document, connection, reply)
+        this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
 
         if (message.length > 1) {
           if (reply) {
@@ -69,7 +70,7 @@ export class MessageReceiver {
     }
   }
 
-  readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
+  readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void, requestFirstSync = true) {
     const type = message.readVarUint()
 
     switch (type) {
@@ -89,13 +90,23 @@ export class MessageReceiver {
           category: 'SyncStep2',
         })
 
-        const syncMessage = (new OutgoingMessage()
-          .createSyncMessage()
-          .writeFirstSyncStepFor(document))
+        if (reply && requestFirstSync) {
+          const syncMessage = (new OutgoingMessage()
+            .createSyncReplyMessage()
+            .writeFirstSyncStepFor(document))
 
-        if (reply) {
+          this.logger.log({
+            direction: 'out',
+            type: MessageType.Sync,
+            category: 'SyncStep1',
+          })
+
           reply(syncMessage.toUint8Array())
         } else if (connection) {
+          const syncMessage = (new OutgoingMessage()
+            .createSyncMessage()
+            .writeFirstSyncStepFor(document))
+
           this.logger.log({
             direction: 'out',
             type: MessageType.Sync,
@@ -104,7 +115,6 @@ export class MessageReceiver {
 
           connection.send(syncMessage.toUint8Array())
         }
-
         break
       }
       case messageYjsSyncStep2:
