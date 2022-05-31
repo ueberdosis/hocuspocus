@@ -34,6 +34,10 @@ export const defaultConfiguration = {
   debounce: 2000,
   maxDebounce: 10000,
   quiet: false,
+  yDocOptions: {
+    gc: true,
+    gcFilter: () => true,
+  },
 }
 
 const defaultOnCreateDocument = () => new Promise(r => r(null))
@@ -585,7 +589,7 @@ export class Hocuspocus {
       }
     }
 
-    const document = new Document(documentName, this.debugger)
+    const document = new Document(documentName, this.debugger, this.configuration.yDocOptions)
     this.documents.set(documentName, document)
 
     const hookPayload = {

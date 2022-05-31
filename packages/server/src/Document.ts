@@ -30,8 +30,8 @@ export class Document extends Doc {
   /**
    * Constructor.
    */
-  constructor(name: string, logger: Debugger) {
-    super({ gc: true })
+  constructor(name: string, logger: Debugger, yDocOptions: {}) {
+    super(yDocOptions)
 
     this.name = name
     this.mux = createMutex()
