@@ -259,6 +259,8 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration = { ...this.configuration, ...configuration }
   }
 
+  boundConnect = this.connect.bind(this)
+
   async connect() {
     if (this.status === WebSocketStatus.Connected) {
       return
@@ -373,15 +375,19 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(SyncStepOneMessage, { document: this.document })
   }
 
+  boundBeforeUnload = this.beforeUnload.bind(this)
+
+  beforeUnload() {
+    removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
+  }
+
   registerEventListeners() {
     if (typeof window === 'undefined') {
       return
     }
 
-    window.addEventListener('online', this.connect.bind(this))
-    window.addEventListener('beforeunload', () => {
-      removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
-    })
+    window.addEventListener('online', this.boundConnect)
+    window.addEventListener('beforeunload', this.boundBeforeUnload)
   }
 
   documentUpdateHandler(update: Uint8Array, origin: any) {
@@ -605,12 +611,15 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.removeEventListener('online', this.connect.bind(this))
+    window.removeEventListener('online', this.boundConnect)
+    window.removeEventListener('beforeunload', this.boundBeforeUnload)
   }
 
   get broadcastChannel() {
     return `${this.serverUrl}/${this.configuration.name}`
   }
+
+  boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
 
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
@@ -623,7 +632,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   subscribeToBroadcastChannel() {
     if (!this.subscribedToBroadcastChannel) {
-      bc.subscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
+      bc.subscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber)
       this.subscribedToBroadcastChannel = true
     }
 
@@ -644,7 +653,7 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
 
     if (this.subscribedToBroadcastChannel) {
-      bc.unsubscribe(this.broadcastChannel, this.broadcastChannelSubscriber.bind(this))
+      bc.unsubscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber)
       this.subscribedToBroadcastChannel = false
     }
   }
