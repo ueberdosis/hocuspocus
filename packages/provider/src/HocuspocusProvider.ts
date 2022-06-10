@@ -182,7 +182,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   isSynced = false
 
-  unsyncedChanges = false
+  unsyncedChanges = 0
 
   isAuthenticated = false
 
@@ -349,7 +349,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   get hasUnsyncedChanges() {
-    return this.unsyncedChanges
+    return this.unsyncedChanges > 0
   }
 
   checkConnection() {
@@ -401,7 +401,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.unsyncedChanges = true
+    this.unsyncedChanges += 1
     this.send(UpdateMessage, { update }, true)
   }
 
