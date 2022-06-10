@@ -395,6 +395,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    this.synced = false
     this.send(UpdateMessage, { update }, true)
   }
 

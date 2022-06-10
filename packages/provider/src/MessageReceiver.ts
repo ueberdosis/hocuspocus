@@ -1,5 +1,5 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
-import { readSyncMessage, messageYjsSyncStep2 } from 'y-protocols/sync'
+import { readSyncMessage, messageYjsSyncStep2, messageYjsUpdate } from 'y-protocols/sync'
 import { readAuthMessage } from '@hocuspocus/common'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
@@ -75,7 +75,7 @@ export class MessageReceiver {
     )
 
     // Synced once we receive Step2
-    if (emitSynced && syncMessageType === messageYjsSyncStep2) {
+    if (emitSynced && (syncMessageType === messageYjsSyncStep2 || syncMessageType === messageYjsUpdate)) {
       provider.synced = true
     }
   }
