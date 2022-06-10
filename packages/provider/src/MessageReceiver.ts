@@ -80,7 +80,9 @@ export class MessageReceiver {
     }
 
     if (syncMessageType === messageYjsUpdate || syncMessageType === messageYjsSyncStep2) {
-      provider.unsyncedChanges -= 1
+      if (provider.unsyncedChanges > 0) {
+        provider.unsyncedChanges -= 1
+      }
     }
   }
 

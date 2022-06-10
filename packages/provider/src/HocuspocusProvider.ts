@@ -268,6 +268,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    this.unsyncedChanges = 0 // set to 0 in case we got reconnected
     this.shouldConnect = true
     this.subscribeToBroadcastChannel()
 
