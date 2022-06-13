@@ -48,7 +48,7 @@ Make sure to always include this extension in your production setups!
 With the `onChange` hook you can listen to changes of the document and handle them. It should return
 a Promise. It's payload contains the resulting document as well as the actual update in the Y-Doc
 binary format. For more information on the hook and it's payload checkout it'
-s [API section](/api/on-change).
+s [API section](/api/hooks/on-change).
 
 In a real-world application you would probably save the current document to a database, send it via
 webhook to an API or something else. If you want to send a webhook to an external API we already
