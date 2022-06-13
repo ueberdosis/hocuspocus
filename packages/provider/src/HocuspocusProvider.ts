@@ -182,6 +182,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   isSynced = false
 
+  unsyncedChanges = 0
+
   isAuthenticated = false
 
   lastMessageReceived = 0
@@ -266,6 +268,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    this.unsyncedChanges = 0 // set to 0 in case we got reconnected
     this.shouldConnect = true
     this.subscribeToBroadcastChannel()
 
@@ -346,6 +349,10 @@ export class HocuspocusProvider extends EventEmitter {
     return this.configuration.awareness
   }
 
+  get hasUnsyncedChanges() {
+    return this.unsyncedChanges > 0
+  }
+
   checkConnection() {
     // Don’t check the connection when it’s not even established
     if (this.status !== WebSocketStatus.Connected) {
@@ -395,6 +402,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    this.unsyncedChanges += 1
     this.send(UpdateMessage, { update }, true)
   }
 
