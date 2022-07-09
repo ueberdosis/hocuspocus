@@ -621,7 +621,7 @@ export class Hocuspocus {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
     })
 
-    document.awareness.on('update', ({ update }: { update: AwarenessUpdate }) => {
+    document.awareness.on('update', (update: AwarenessUpdate) => {
       this.hooks('onAwarenessUpdate', {
         ...hookPayload,
         ...update,
