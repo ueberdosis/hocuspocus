@@ -212,9 +212,12 @@ export class Redis implements Extension {
   /**
    * Handle awareness update messages received directly by this Hocuspocus instance.
    */
-  async onAwarenessUpdate({ documentName, awareness }: onAwarenessUpdatePayload) {
+  async onAwarenessUpdate({
+    documentName, awareness, added, updated, removed,
+  }: onAwarenessUpdatePayload) {
+    const changedClients = added.concat(updated, removed)
     const message = new OutgoingMessage()
-      .createAwarenessUpdateMessage(awareness)
+      .createAwarenessUpdateMessage(awareness, changedClients)
 
     return this.pub.publishBuffer(
       this.pubKey(documentName),
