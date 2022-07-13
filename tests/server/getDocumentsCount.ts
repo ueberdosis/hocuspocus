@@ -1,5 +1,6 @@
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, randomInteger, sleep } from '../utils'
+import {retryableAssertion} from "../utils/retryableAssertion";
 
 test('documents count is zero by default', async t => {
   const server = newHocuspocus()
@@ -28,14 +29,16 @@ test('the same document name counts as one document', async t => {
     newHocuspocusProvider(server, { name: 'foobar' }),
     newHocuspocusProvider(server, { name: 'foobar' }),
   ]
-  await sleep(100)
 
-  t.is(server.getDocumentsCount(), 1)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getDocumentsCount(), 1)
+  })
 
   providers.forEach(provider => provider.disconnect())
-  await sleep(100)
 
-  t.is(server.getConnectionsCount(), 0)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getConnectionsCount(), 0)
+  })
 })
 
 test('adds and removes different documents properly', async t => {
@@ -48,14 +51,16 @@ test('adds and removes different documents properly', async t => {
     newHocuspocusProvider(server, { name: 'foo-4' }),
     newHocuspocusProvider(server, { name: 'foo-5' }),
   ]
-  await sleep(100)
 
-  t.is(server.getDocumentsCount(), 5)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getDocumentsCount(), 5)
+  })
 
   providers.forEach(provider => provider.disconnect())
-  await sleep(100)
 
-  t.is(server.getConnectionsCount(), 0)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getConnectionsCount(), 0)
+  })
 })
 
 test(`adds and removes random number of documents properly`, async t => {
@@ -68,17 +73,18 @@ test(`adds and removes random number of documents properly`, async t => {
       newHocuspocusProvider(server, { name: `foobar-${index}` }),
     )
   }
-  await sleep(100)
-
-  t.is(server.getDocumentsCount(), numberOfProviders)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getDocumentsCount(), numberOfProviders)
+  })
 
   // random number of disconnects
   const numberOfDisconnects = randomInteger(1, numberOfProviders)
   for (let index = 0; index < numberOfDisconnects; index++) {
     providers[index].disconnect()
   }
-  await sleep(100)
 
   // check the count
-  t.is(server.getConnectionsCount(), numberOfProviders - numberOfDisconnects)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getConnectionsCount(), numberOfProviders - numberOfDisconnects)
+  })
 })

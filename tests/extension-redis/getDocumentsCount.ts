@@ -4,6 +4,7 @@ import {
   newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
 } from '../utils'
 import {uuidv4} from "lib0/random";
+import {retryableAssertion} from "../utils/retryableAssertion";
 
 test.skip('adds and removes connections properly', async t => {
   const server = newHocuspocus({
@@ -34,12 +35,14 @@ test.skip('adds and removes connections properly', async t => {
       name: 'bar',
     }),
   ]
-  await sleep(100)
 
-  t.is(server.getDocumentsCount(), 2)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getDocumentsCount(), 2)
+  })
 
   providers.forEach(provider => provider.disconnect())
-  await sleep(100)
 
-  t.is(server.getDocumentsCount(), 0)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getDocumentsCount(), 0)
+  })
 })
