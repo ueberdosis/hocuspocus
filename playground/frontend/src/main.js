@@ -1,7 +1,7 @@
 import Vue from 'vue/dist/vue'
 import routes from 'virtual:generated-pages'
 import VueRouter from 'vue-router'
-import StatusBar from './components/StatusBar.vue'
+import StatusBar from './Components/StatusBar.vue'
 import App from './App.vue'
 import '../index.css'
 
