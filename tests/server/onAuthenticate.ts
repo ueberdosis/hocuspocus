@@ -158,7 +158,7 @@ test('ignores the authentication token when having no onAuthenticate hook', asyn
 
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
-      onConnect() {
+      onOpen() {
         t.pass()
         resolve('done')
       },

@@ -4,13 +4,15 @@ import { Redis } from '@hocuspocus/extension-redis'
 import {
   newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
 } from '../utils'
+import {v4 as uuidv4} from "uuid";
+import {retryableAssertion} from "../utils/retryableAssertion";
 
 test.skip('closes connections on other instances', async t => {
   const server = newHocuspocus({
     extensions: [
       new Redis({
         ...redisConnectionSettings,
-        identifier: 'server',
+        identifier: 'server' + uuidv4(),
         prefix: 'extension-redis/closeConnections',
       }),
     ],
@@ -20,7 +22,7 @@ test.skip('closes connections on other instances', async t => {
     extensions: [
       new Redis({
         ...redisConnectionSettings,
-        identifier: 'anotherServer',
+        identifier: 'anotherServer' + uuidv4(),
         prefix: 'extension-redis/closeConnections',
       }),
     ],
@@ -33,11 +35,10 @@ test.skip('closes connections on other instances', async t => {
     },
   })
 
-  await sleep(100)
-
   server.closeConnections()
 
-  await sleep(100)
+  await retryableAssertion(t, (tt) => {
+    tt.is(provider.status, WebSocketStatus.Disconnected)
+  })
 
-  t.is(provider.status, WebSocketStatus.Disconnected)
 })

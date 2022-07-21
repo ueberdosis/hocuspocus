@@ -1,6 +1,7 @@
 import test from 'ava'
 import { onChangePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import {retryableAssertion} from "../utils/retryableAssertion";
 
 test('onChange callback receives updates', async t => {
   await new Promise(resolve => {
@@ -116,8 +117,9 @@ test('onChange callback isn’t called for every new client', async t => {
     resolve('done')
   })
 
-  await sleep(100)
+  await retryableAssertion(t, (tt) => {
+    tt.is(onConnectCount, 2)
+    tt.is(onChangeCount, 0)
+  })
 
-  t.is(onConnectCount, 2)
-  t.is(onChangeCount, 0)
 })

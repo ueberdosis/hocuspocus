@@ -1,6 +1,7 @@
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 import * as Y from 'yjs'
+import {retryableAssertion} from "../utils/retryableAssertion";
 
 test('observe is called just once', async t => {
   let count = 0
@@ -21,9 +22,10 @@ test('observe is called just once', async t => {
   // Insert something …
   type.insert(1, 'a')
 
-  await sleep(100)
+  await retryableAssertion(t, (tt) => {
+    tt.is(count, 1)
+  })
 
-  t.is(count, 1)
 })
 
 test('observe is called for every single change', async t => {
@@ -47,9 +49,9 @@ test('observe is called for every single change', async t => {
   type.insert(2, 'b')
   type.insert(3, 'c')
 
-  await sleep(100)
-
-  t.is(count, 3)
+  await retryableAssertion(t, (tt) => {
+    tt.is(count, 3)
+  })
 })
 
 test('observe is called once for a single transaction', async t => {
@@ -75,7 +77,7 @@ test('observe is called once for a single transaction', async t => {
     type.insert(3, 'c')
   })
 
-  await sleep(100)
-
-  t.is(count, 1)
+  await retryableAssertion(t, (tt) => {
+    tt.is(count, 1)
+  })
 })

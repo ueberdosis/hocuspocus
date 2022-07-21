@@ -1,5 +1,7 @@
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import {retryableAssertion} from "../utils/retryableAssertion";
+import {WebSocketStatus} from "@hocuspocus/provider";
 
 test('returns 0 connections when there’s no one connected', async t => {
   await new Promise(resolve => {
@@ -58,12 +60,14 @@ test('adds and removes connections properly', async t => {
     newHocuspocusProvider(server),
     newHocuspocusProvider(server),
   ]
-  await sleep(100)
 
-  t.is(server.getConnectionsCount(), 5)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getConnectionsCount(), 5)
+  })
 
   providers.forEach(provider => provider.disconnect())
-  await sleep(100)
 
-  t.is(server.getConnectionsCount(), 0)
+  await retryableAssertion(t, (tt) => {
+    tt.is(server.getConnectionsCount(), 0)
+  })
 })
