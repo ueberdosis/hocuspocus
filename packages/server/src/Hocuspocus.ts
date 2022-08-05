@@ -9,6 +9,7 @@ import {
   ResetConnection,
   Unauthorized,
   Forbidden,
+  CloseEvent,
   awarenessStatesToArray,
   WsReadyStates,
 } from '@hocuspocus/common'
@@ -495,9 +496,9 @@ export class Hocuspocus {
         // Authentication isn’t required, let’s establish the connection
         return setUpNewConnection(queueIncomingMessageListener)
       })
-      .catch(() => {
+      .catch((reason = Forbidden) => {
         // if a hook interrupts, close the websocket connection
-        incoming.close(Forbidden.code, Forbidden.reason)
+        incoming.close(reason.code ?? Forbidden.code, reason.reason ?? Forbidden.reason)
         incoming.off('message', queueIncomingMessageListener)
       })
   }
