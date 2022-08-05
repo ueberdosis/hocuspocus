@@ -56,7 +56,7 @@ export class Dashboard {
   }
 
   createServer(): void {
-    const { port } = this.configuration
+    const { port, path } = this.configuration
 
     const server = createServer((request, response) => {
       if (!this.handleRequest(request, response)) {
@@ -72,7 +72,7 @@ export class Dashboard {
     })
 
     server.listen(port, () => process.stdout.write(
-      `[${(new Date()).toISOString()}] Dashboard listening on port "${port}" … \n`,
+      `[${(new Date()).toISOString()}] Dashboard listening: http://0.0.0.0:${port}/${path}" … \n`,
     ))
   }
 
