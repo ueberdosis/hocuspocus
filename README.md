@@ -19,7 +19,7 @@ The following example is a example setup you need to start a WebSocket server. B
 
 ```js
 import { Server } from '@hocuspocus/server'
-import { RocksDB } from '@hocuspocus/extension-rocksdb'
+import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const server = Server.configure({
   port: 80,
@@ -29,8 +29,8 @@ const server = Server.configure({
   },
 
   extensions: [
-    new RocksDB({
-      path: './database',
+    new SQLite({
+      database: 'db.sqlite',
     }),
   ],
 })
