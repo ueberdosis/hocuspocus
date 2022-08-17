@@ -19,9 +19,14 @@ npm install @hocuspocus/extension-database
 
 ### fetch
 Expects an async function (or Promise) which returns a Y.js compatible Uint8Array (or null).
+Make sure to return the same Uint8Array that was saved in store(), and do not create a new Ydoc,
+as doing so would lead to a new history (and duplicated content).
+
+If you want to initially create a Ydoc based off raw text/json, you can do so here using a transformer of your choice (e.g. `TiptapTransformer.toYdoc`, or `prosemirrorJSONToYDoc`)
 
 ### store
 Expects an async function (or Promise) which persists the Y.js binary data somewhere.
+
 
 ## Usage
 The following example uses SQLite to store and retrieve data. You can replace that part with whatever data store you have. As long as you return a Promise you can store data with PostgreSQL, MySQL, MongoDB, S3 … If you actually want to use SQLite, you can have a look at the [SQLite extension](/api/extensions/sqlite).
