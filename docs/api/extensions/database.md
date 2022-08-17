@@ -5,7 +5,8 @@ tableOfContents: true
 # Database
 
 ## Introduction
-Store your data in whatever data store you already have with the generic database extension. It takes a Promise to fetch data and another Promise to store the data, that’s all. Hocuspocus will handle the rest.
+Store your data in whatever data store you already have with the generic database extension.
+It takes a Promise to fetch data and another Promise to store the data, that’s all. Hocuspocus will handle the rest.
 
 ## Installation
 Install the database extension like this:

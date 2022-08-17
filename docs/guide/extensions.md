@@ -12,7 +12,7 @@ Extensions are a quick way to add additional features to Hocuspocus. They use th
 
 We already created some very useful extensions you should check out for sure:
 
-**[@hocuspocus/extension-rocksdb](/api/extensions/rocksdb)**: An easy to use primary storage for Hocuspocus.
+**[@hocuspocus/extension-database](/api/extensions/database)**: A generic database driver that is easily adjustable to work with any database.
 
 **[@hocuspocus/extension-monitor](/api/extensions/monitor)**: A beautiful dashboard to monitor and debug your Hocuspocus instance.
 
