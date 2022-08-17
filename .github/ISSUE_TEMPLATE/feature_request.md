@@ -5,7 +5,7 @@ title: ''
 labels:
   - feature request
 assignees:
-  - hanspagel
+  - janthurau
 ---
 
 **The problem I am facing**
