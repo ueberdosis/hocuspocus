@@ -11,7 +11,6 @@
     "@hocuspocus/extension-logger": "^1.0.0-alpha.71",
     "@hocuspocus/extension-monitor": "^1.0.0-alpha.98",
     "@hocuspocus/extension-redis": "^1.0.0-alpha.60",
-    "@hocuspocus/extension-rocksdb": "^1.0.0-alpha.98",
     "@hocuspocus/extension-sqlite": "^1.0.0-alpha.11",
     "@hocuspocus/extension-webhook": "^1.0.0-alpha.61",
     "@hocuspocus/server": "^1.0.0-alpha.97",

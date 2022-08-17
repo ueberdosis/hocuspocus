@@ -1,7 +1,7 @@
 import { Server, onLoadDocumentPayload } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
-import { RocksDB } from '@hocuspocus/extension-rocksdb'
 import { TiptapTransformer } from '@hocuspocus/transformer'
+import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const getProseMirrorJSON = (text: string) => {
   return {
@@ -24,7 +24,9 @@ const server = Server.configure({
   port: 1234,
   extensions: [
     new Logger(),
-    new RocksDB(),
+    new SQLite({
+      database: 'db.sqlite',
+    }),
   ],
 
   async onConnect(data) {
