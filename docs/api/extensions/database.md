@@ -22,7 +22,7 @@ Expects an async function (or Promise) which returns a Y.js compatible Uint8Arra
 Make sure to return the same Uint8Array that was saved in store(), and do not create a new Ydoc,
 as doing so would lead to a new history (and duplicated content).
 
-If you want to initially create a Ydoc based off raw text/json, you can do so here using a transformer of your choice (e.g. `TiptapTransformer.toYdoc`, or `prosemirrorJSONToYDoc`)
+If you want to initially create a Ydoc based off raw text/json, you can do so here using a transformer of your choice (e.g. `TiptapTransformer.toYdoc`, or `ProsemirrorTransformer.toYdoc`)
 
 ### store
 Expects an async function (or Promise) which persists the Y.js binary data somewhere.
