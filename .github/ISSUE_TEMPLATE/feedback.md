@@ -6,7 +6,7 @@ title: ''
 labels:
   - documentation
 assignees:
-  - hanspagel
+  - janthurau
 ---
 
 **Part of the documentation?**

@@ -6,7 +6,7 @@ title: ''
 labels:
   - bug
 assignees:
-  - hanspagel
+  - janthurau
 ---
 
 **Description**
