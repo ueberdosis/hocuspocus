@@ -97,7 +97,7 @@ export class Webhook implements Extension {
     return axios.post(
       this.configuration.url,
       json,
-      { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json) } },
+      { headers: { 'X-Hocuspocus-Signature-256': this.createSignature(json), 'Content-Type': 'application/json' } },
     )
   }
 
