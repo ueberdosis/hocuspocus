@@ -76,7 +76,7 @@ export default {
     })
 
     this.anotherProvider = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:1235',
+      url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       broadcast: false,
       onAwarenessChange: ({ states }) => {
