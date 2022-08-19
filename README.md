@@ -41,7 +41,7 @@ server.listen()
 ## Community
 For help, discussion about best practices, or any other conversation:
 
-[Join the tiptap Discord Server](https://discord.gg/WtJ49jGshW)
+[Join the Tiptap Discord Server](https://discord.gg/WtJ49jGshW)
 
 ## Sponsors 💖
 <table>
