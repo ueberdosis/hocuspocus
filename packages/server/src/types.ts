@@ -42,6 +42,7 @@ export interface Extension {
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
+  beforeDocumentUpdate?(data: beforeDocumentUpdatePayload): Promise<any>,
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
   afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
@@ -64,6 +65,7 @@ export type HookName =
   'onCreateDocument' |
   'onLoadDocument' |
   'afterLoadDocument' |
+  'beforeDocumentUpdate' |
   'onChange' |
   'onStoreDocument' |
   'afterStoreDocument' |
@@ -191,6 +193,18 @@ export interface afterLoadDocumentPayload {
 }
 
 export interface onChangePayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  update: Uint8Array,
+  socketId: string,
+}
+
+export interface beforeDocumentUpdatePayload {
   clientsCount: number,
   context: any,
   document: Document,

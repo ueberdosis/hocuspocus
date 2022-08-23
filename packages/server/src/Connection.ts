@@ -7,6 +7,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger } from './Debugger'
+import { beforeDocumentUpdatePayload } from './types'
 
 export class Connection {
 
@@ -26,6 +27,7 @@ export class Connection {
 
   callbacks: any = {
     onClose: (document: Document) => null,
+    beforeDocumentUpdate: (document: Document, update: Uint8Array) => null,
   }
 
   socketId: string
@@ -78,6 +80,15 @@ export class Connection {
    */
   onClose(callback: (document: Document) => void): Connection {
     this.callbacks.onClose = callback
+
+    return this
+  }
+
+  /**
+   * Set a callback that will be triggered before an update is applied
+   */
+  beforeDocumentUpdate(callback: (payload: Document, update: Uint8Array) => void): Connection {
+    this.callbacks.beforeDocumentUpdate = callback
 
     return this
   }
@@ -170,6 +181,8 @@ export class Connection {
    * @private
    */
   private handleMessage(data: Iterable<number>): void {
+    this.callbacks.beforeDocumentUpdate(this.document, data)
+
     new MessageReceiver(
       new IncomingMessage(data),
       this.logger,

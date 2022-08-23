@@ -19,7 +19,7 @@ import {
   ConnectionConfiguration,
   HookName,
   AwarenessUpdate,
-  HookPayload,
+  HookPayload, beforeDocumentUpdatePayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -698,6 +698,21 @@ export class Hocuspocus {
       // Remove document from memory.
       this.documents.delete(document.name)
       document.destroy()
+    })
+    instance.beforeDocumentUpdate((document, update) => {
+      const hookPayload: beforeDocumentUpdatePayload = {
+        instance: this,
+        clientsCount: document.getConnectionsCount(),
+        context,
+        document,
+        socketId,
+        documentName: document.name,
+        requestHeaders: request.headers,
+        requestParameters: Hocuspocus.getParameters(request),
+        update,
+      }
+
+      this.hooks('beforeDocumentUpdate', hookPayload)
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then
