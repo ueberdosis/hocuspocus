@@ -191,9 +191,12 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
       }
     })
 
+    t.is(0, server.documents.size);
+
     newHocuspocusProvider(server, {
       token: 'super-secret-token',
       onClose() {
+        t.is(0, server.documents.size);
         t.pass()
         resolve('done')
       }
