@@ -168,8 +168,11 @@ test('stops when an error is thrown in onLoadDocument', async t => {
       }
     })
 
+    t.is(0, server.documents.size);
+
     newHocuspocusProvider(server, {
       onClose() {
+        t.is(0, server.documents.size);
         t.pass()
         resolve('done')
       }
