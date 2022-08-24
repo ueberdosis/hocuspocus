@@ -200,7 +200,7 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
 
 test('if a new connection connects while the previous connection still fetches the document, it will just work properly', async t => {
   let callsToOnLoadDocument = 0;
-  const resolvesNeeded = 6;
+  const resolvesNeeded = 7;
 
   await new Promise(resolve => {
     const server = newHocuspocus({
@@ -255,7 +255,7 @@ test('if a new connection connects while the previous connection still fetches t
           t.is(server.documents.size, 1)
 
           const value = provider.document.getArray('foo').get(0)
-          t.is(value, 'bar-1')
+          t.is(value, undefined) // document hasnt loaded yet because it loads for 5sec, but this runs after ~2sec
 
           console.log('provider2 synced')
           resolver()
@@ -266,7 +266,10 @@ test('if a new connection connects while the previous connection still fetches t
 
           const value = provider.document.getArray('foo').get(0)
 
-          if( provider2MessagesReceived === 1 ){
+          if( provider2MessagesReceived === 1 ) {
+            t.is(value, undefined)
+          }
+          else if( provider2MessagesReceived === 2){
           t.is(value, 'bar-updatedAfterProvider1Synced')
             setTimeout(() => {
               provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
