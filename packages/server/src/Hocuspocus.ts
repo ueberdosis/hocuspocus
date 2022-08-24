@@ -588,6 +588,7 @@ export class Hocuspocus {
     }
 
     const document = new Document(documentName, this.debugger, this.configuration.yDocOptions)
+    this.documents.set(documentName, document)
 
     const hookPayload = {
       instance: this,
@@ -612,7 +613,6 @@ export class Hocuspocus {
       }
     })
 
-    this.documents.set(documentName, document)
     await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
