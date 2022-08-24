@@ -197,3 +197,100 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
     })
   })
 })
+
+test('if a new connection connects while the previous connection still fetches the document, it will just work properly', async t => {
+  let callsToOnLoadDocument = 0;
+  const resolvesNeeded = 6;
+
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      onLoadDocument({ document }) {
+        // delay more accurately simulates a database fetch
+        return new Promise(resolve => {
+          setTimeout(() => {
+            callsToOnLoadDocument++
+            document.getArray('foo').insert(0, ['bar-' + callsToOnLoadDocument])
+            console.log('resolving onLoadDocument')
+            resolve(document)
+          }, 5000)
+        })
+      },
+    })
+
+    let provider1MessagesReceived=0;
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        t.is(server.documents.size, 1)
+
+        const value = provider.document.getArray('foo').get(0)
+        t.is(value, 'bar-1')
+
+        setTimeout(() => {
+          provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider1Synced'])
+        }, 100)
+
+        console.log('provider1 synced')
+        resolver()
+      },
+      onMessage() {
+        if( !provider.isSynced ) return;
+        provider1MessagesReceived++;
+
+        const value = provider.document.getArray('foo').get(0)
+
+        if( provider1MessagesReceived === 1 ) {
+          t.is(value, 'bar-updatedAfterProvider1Synced')
+        } else {
+          t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
+        }
+
+        resolver()
+      }
+    })
+
+    let provider2MessagesReceived=0;
+    setTimeout(() => {
+      const provider2 = newHocuspocusProvider(server, {
+        onSynced() {
+          t.is(server.documents.size, 1)
+
+          const value = provider.document.getArray('foo').get(0)
+          t.is(value, 'bar-1')
+
+          console.log('provider2 synced')
+          resolver()
+        },
+        onMessage(data){
+          if( !provider2.isSynced ) return;
+          provider2MessagesReceived++
+
+          const value = provider.document.getArray('foo').get(0)
+
+          if( provider2MessagesReceived === 1 ){
+          t.is(value, 'bar-updatedAfterProvider1Synced')
+            setTimeout(() => {
+              provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
+            }, 100)
+          } else {
+            t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
+          }
+
+          resolver()
+        }
+      })
+
+    }, 2000);
+
+
+    let resolvedNumber = 0;
+    const resolver = () => {
+      console.log('called')
+      resolvedNumber++;
+
+      if( resolvedNumber >= resolvesNeeded ){
+        t.is(callsToOnLoadDocument, 1);
+        resolve('done')
+      }
+    }
+  })
+})
