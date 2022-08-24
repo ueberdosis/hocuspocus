@@ -583,6 +583,21 @@ export class Hocuspocus {
       const document = this.documents.get(documentName)
 
       if (document) {
+        if (document.isLoading) {
+          return new Promise(resolve => {
+            const interval = setInterval(() => {
+              const memoryDoc = this.documents.get(documentName)
+
+              if (memoryDoc && !memoryDoc.isLoading) {
+                resolve(memoryDoc)
+                clearInterval(interval)
+              }
+
+            }, 100)
+
+          })
+        }
+
         return document
       }
     }
@@ -605,6 +620,9 @@ export class Hocuspocus {
       // if a hook returns a Y-Doc, encode the document state as update
       // and apply it to the newly created document
       // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
+
+      console.log('server: applying onLoadDocument Update')
+
       if (
         loadedDocument?.constructor.name === 'Document'
         || loadedDocument?.constructor.name === 'Doc'
@@ -613,6 +631,7 @@ export class Hocuspocus {
       }
     })
 
+    document.isLoading = false
     await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
