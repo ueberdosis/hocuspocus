@@ -38,8 +38,8 @@ deserializing from JSON will not store collaboration history steps but only the 
 These examples are only meant to store the resulting document for the views of your application or
 to import it if it doesn't exist in your primary storage.
 
-No worries, we have you covered! We built an extension that's meant to be used as primary storage:
-the [RocksDB extension](/api/extensions/rocksdb). It's just a couple of lines to integrate.
+No worries, we have you covered! We built an extension that makes it easy to use any database:
+the [Database extension](/api/extensions/database). It's just a couple of lines to integrate with your preferred database.
 
 Make sure to always include this extension in your production setups!
 
