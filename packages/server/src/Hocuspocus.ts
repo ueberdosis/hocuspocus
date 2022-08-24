@@ -456,11 +456,8 @@ export class Hocuspocus {
             // Time to actually establish the connection.
             return setUpNewConnection(queueIncomingMessageListener)
           })
-          .catch(error => {
-            // We could pass the Error message through to the client here but it
-            // risks exposing server internals or being a very long stack trace
-            // hardcoded to 'permission-denied' for now
-            const message = new OutgoingMessage().writePermissionDenied('permission-denied')
+          .catch((error = Forbidden) => {
+            const message = new OutgoingMessage().writePermissionDenied(error.reason ?? 'permission-denied')
 
             this.debugger.log({
               direction: 'out',
@@ -471,7 +468,7 @@ export class Hocuspocus {
             // Ensure that the permission denied message is sent before the
             // connection is closed
             incoming.send(message.toUint8Array(), () => {
-              incoming.close(Forbidden.code, Forbidden.reason)
+              incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
               incoming.off('message', queueIncomingMessageListener)
             })
           })
@@ -496,9 +493,9 @@ export class Hocuspocus {
         // Authentication isn’t required, let’s establish the connection
         return setUpNewConnection(queueIncomingMessageListener)
       })
-      .catch((reason = Forbidden) => {
+      .catch((error = Forbidden) => {
         // if a hook interrupts, close the websocket connection
-        incoming.close(reason.code ?? Forbidden.code, reason.reason ?? Forbidden.reason)
+        incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
         incoming.off('message', queueIncomingMessageListener)
       })
   }
