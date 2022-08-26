@@ -168,11 +168,8 @@ test('stops when an error is thrown in onLoadDocument', async t => {
       }
     })
 
-    t.is(server.documents.size, 0);
-
     newHocuspocusProvider(server, {
       onClose() {
-        t.is(server.documents.size, 0);
         t.pass()
         resolve('done')
       }
@@ -191,12 +188,9 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
       }
     })
 
-    t.is(server.documents.size, 0);
-
     newHocuspocusProvider(server, {
       token: 'super-secret-token',
       onClose() {
-        t.is(server.documents.size, 0);
         t.pass()
         resolve('done')
       }
