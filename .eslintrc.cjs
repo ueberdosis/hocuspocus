@@ -29,7 +29,7 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
-        "max-classes-per-file": 'off',
+        'max-classes-per-file': 'off',
         'no-unreachable-loop': 'off',
         'default-param-last': 'off',
         'vue/multi-word-component-names': 'off',
@@ -40,7 +40,7 @@ module.exports = {
         'no-console': ['warn', { allow: ['warn', 'error'] }],
         semi: ['error', 'never'],
         'import/extensions': 'off',
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["tests/**/*", "./rollup.config.js"]}],
+        'import/no-extraneous-dependencies': ['error', { 'devDependencies': ['tests/**/*', './rollup.config.js'] }],
         'import/no-unresolved': 'off',
         'import/no-dynamic-require': 'off',
         'arrow-parens': ['error', 'as-needed'],
