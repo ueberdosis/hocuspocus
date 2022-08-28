@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import {newHocuspocus, newHocuspocusProvider, sleep} from '../utils'
 
 test('still executes the deprecated onCreateDocument callback', async t => {
   await new Promise(resolve => {
@@ -53,11 +53,11 @@ test('passes the context and connection to the onLoadDocument callback', async t
     }
 
     const server = newHocuspocus({
-      async onConnect({ connection }) {
+      async onConnect({connection}) {
         connection.readOnly = true
         return mockContext
       },
-      async onLoadDocument({ context, connection }) {
+      async onLoadDocument({context, connection}) {
         t.deepEqual(context, mockContext)
         t.deepEqual(connection, {
           readOnly: true,
@@ -76,7 +76,7 @@ test('passes the context and connection to the onLoadDocument callback', async t
 test('sets the provider to readOnly', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
-      async onLoadDocument({ connection }) {
+      async onLoadDocument({connection}) {
         connection.readOnly = true
       },
     })
@@ -95,8 +95,8 @@ test('sets the provider to readOnly', async t => {
 test('creates a new document in the onLoadDocument callback', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
-      onLoadDocument({ document }) {
-      // delay more accurately simulates a database fetch
+      onLoadDocument({document}) {
+        // delay more accurately simulates a database fetch
         return new Promise(resolve => {
           setTimeout(() => {
             document.getArray('foo').insert(0, ['bar'])
@@ -120,8 +120,8 @@ test('creates a new document in the onLoadDocument callback', async t => {
 test('multiple simultanous connections do not create multiple documents', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
-      onLoadDocument({ document }) {
-      // delay more accurately simulates a database fetch
+      onLoadDocument({document}) {
+        // delay more accurately simulates a database fetch
         return new Promise(resolve => {
           setTimeout(() => {
             document.getArray('foo').insert(0, ['bar'])
@@ -146,7 +146,7 @@ test('multiple simultanous connections do not create multiple documents', async 
 test('has the server instance', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
-      async onLoadDocument({ instance }) {
+      async onLoadDocument({instance}) {
         t.is(instance, server)
 
         resolve('done')
@@ -177,6 +177,59 @@ test('stops when an error is thrown in onLoadDocument', async t => {
   })
 })
 
+test('disconnects all clients related to the document when an error is thrown in onLoadDocument', async t => {
+  const resolvesNeeded = 4
+
+  await new Promise(resolve => {
+
+    const server = newHocuspocus({
+      async onLoadDocument() {
+        return await new Promise((resolve, fail) => {
+          setTimeout(() => {
+            fail('ERROR')
+          }, 250)
+        })
+      },
+      async onStoreDocument(data) {
+        t.fail('MUST NOT call onStoreDocument')
+      }
+    })
+
+    const provider1 = newHocuspocusProvider(server, {
+      onConnect() {
+        resolver();
+      },
+      onClose(event) {
+        provider1.disconnect();
+        resolver();
+      },
+    })
+
+    const provider2= newHocuspocusProvider(server, {
+      onConnect() {
+        resolver();
+      },
+      onClose() {
+        provider2.disconnect();
+        resolver();
+      },
+    })
+
+    let resolvedNumber = 0;
+    const resolver = () => {
+      resolvedNumber++;
+
+      if (resolvedNumber >= resolvesNeeded) {
+        t.is(server.documents.size, 0)
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      }
+    }
+
+  })
+
+})
+
 test('stops when an error is thrown in onLoadDocument, even when authenticated', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
@@ -204,20 +257,18 @@ test('if a new connection connects while the previous connection still fetches t
 
   await new Promise(resolve => {
     const server = newHocuspocus({
-      onLoadDocument({ document }) {
-        // delay more accurately simulates a database fetch
+      onLoadDocument({document}) {
         return new Promise(resolve => {
           setTimeout(() => {
             callsToOnLoadDocument++
             document.getArray('foo').insert(0, ['bar-' + callsToOnLoadDocument])
-            console.log('resolving onLoadDocument')
             resolve(document)
           }, 5000)
         })
       },
     })
 
-    let provider1MessagesReceived=0;
+    let provider1MessagesReceived = 0;
     const provider = newHocuspocusProvider(server, {
       onSynced() {
         t.is(server.documents.size, 1)
@@ -229,16 +280,15 @@ test('if a new connection connects while the previous connection still fetches t
           provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider1Synced'])
         }, 100)
 
-        console.log('provider1 synced')
         resolver()
       },
       onMessage() {
-        if( !provider.isSynced ) return;
+        if (!provider.isSynced) return;
         provider1MessagesReceived++;
 
         const value = provider.document.getArray('foo').get(0)
 
-        if( provider1MessagesReceived === 1 ) {
+        if (provider1MessagesReceived === 1) {
           t.is(value, 'bar-updatedAfterProvider1Synced')
         } else {
           t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
@@ -248,7 +298,7 @@ test('if a new connection connects while the previous connection still fetches t
       }
     })
 
-    let provider2MessagesReceived=0;
+    let provider2MessagesReceived = 0;
     setTimeout(() => {
       const provider2 = newHocuspocusProvider(server, {
         onSynced() {
@@ -257,20 +307,18 @@ test('if a new connection connects while the previous connection still fetches t
           const value = provider.document.getArray('foo').get(0)
           t.is(value, undefined) // document hasnt loaded yet because it loads for 5sec, but this runs after ~2sec
 
-          console.log('provider2 synced')
           resolver()
         },
-        onMessage(data){
-          if( !provider2.isSynced ) return;
+        onMessage(data) {
+          if (!provider2.isSynced) return;
           provider2MessagesReceived++
 
           const value = provider.document.getArray('foo').get(0)
 
-          if( provider2MessagesReceived === 1 ) {
+          if (provider2MessagesReceived === 1) {
             t.is(value, undefined)
-          }
-          else if( provider2MessagesReceived === 2){
-          t.is(value, 'bar-updatedAfterProvider1Synced')
+          } else if (provider2MessagesReceived === 2) {
+            t.is(value, 'bar-updatedAfterProvider1Synced')
             setTimeout(() => {
               provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
             }, 100)
@@ -287,10 +335,9 @@ test('if a new connection connects while the previous connection still fetches t
 
     let resolvedNumber = 0;
     const resolver = () => {
-      console.log('called')
       resolvedNumber++;
 
-      if( resolvedNumber >= resolvesNeeded ){
+      if (resolvedNumber >= resolvesNeeded) {
         t.is(callsToOnLoadDocument, 1);
         resolve('done')
       }
