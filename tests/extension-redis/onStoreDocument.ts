@@ -2,8 +2,8 @@ import test from 'ava'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import { uuidv4 } from 'lib0/random'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
-import {uuidv4} from "lib0/random";
 
 test('stores documents without conflicts', async t => {
   await new Promise(resolve => {
@@ -23,7 +23,7 @@ test('stores documents without conflicts', async t => {
       extensions: [
         new Redis({
           ...redisConnectionSettings,
-          identifier: 'server' + uuidv4(),
+          identifier: `server${uuidv4()}`,
           prefix: 'extension-redis/onStoreDocument',
         }),
         new CustomStorageExtension(),
@@ -35,7 +35,7 @@ test('stores documents without conflicts', async t => {
       extensions: [
         new Redis({
           ...redisConnectionSettings,
-          identifier: 'anotherServer' + uuidv4(),
+          identifier: `anotherServer${uuidv4()}`,
           prefix: 'extension-redis/onStoreDocument',
         }),
         new CustomStorageExtension(),

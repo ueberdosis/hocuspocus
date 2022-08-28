@@ -1,4 +1,3 @@
 **/dist/**
 **/node_modules/**
 packages/extension-monitor/src/client/public
-/tests/**/*

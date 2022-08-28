@@ -24,7 +24,7 @@ test('logs something', async t => {
         t.true(spy.callCount === 3, `Expected it to log 11 times, but actually logged ${spy.callCount} times`)
 
         resolve('done')
-      }
+      },
     })
   })
 })

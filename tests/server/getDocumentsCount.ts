@@ -1,6 +1,8 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, randomInteger, sleep } from '../utils'
-import {retryableAssertion} from "../utils/retryableAssertion";
+import {
+  newHocuspocus, newHocuspocusProvider, randomInteger, sleep,
+} from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('documents count is zero by default', async t => {
   const server = newHocuspocus()
@@ -30,13 +32,13 @@ test('the same document name counts as one document', async t => {
     newHocuspocusProvider(server, { name: 'foobar' }),
   ]
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getDocumentsCount(), 1)
   })
 
   providers.forEach(provider => provider.disconnect())
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
   })
 })
@@ -52,39 +54,39 @@ test('adds and removes different documents properly', async t => {
     newHocuspocusProvider(server, { name: 'foo-5' }),
   ]
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getDocumentsCount(), 5)
   })
 
   providers.forEach(provider => provider.disconnect())
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
   })
 })
 
-test(`adds and removes random number of documents properly`, async t => {
+test('adds and removes random number of documents properly', async t => {
   // random number of providers
   const server = newHocuspocus()
   const numberOfProviders = randomInteger(10, 100)
   const providers = []
-  for (let index = 0; index < numberOfProviders; index++) {
+  for (let index = 0; index < numberOfProviders; index += 1) {
     providers.push(
       newHocuspocusProvider(server, { name: `foobar-${index}` }),
     )
   }
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getDocumentsCount(), numberOfProviders)
   })
 
   // random number of disconnects
   const numberOfDisconnects = randomInteger(1, numberOfProviders)
-  for (let index = 0; index < numberOfDisconnects; index++) {
+  for (let index = 0; index < numberOfDisconnects; index += 1) {
     providers[index].disconnect()
   }
 
   // check the count
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), numberOfProviders - numberOfDisconnects)
   })
 })

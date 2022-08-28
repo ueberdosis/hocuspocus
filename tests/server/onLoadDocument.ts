@@ -184,8 +184,9 @@ test('disconnects all clients related to the document when an error is thrown in
 
     const server = newHocuspocus({
       async onLoadDocument() {
-        return await new Promise((resolve, fail) => {
+        return new Promise((resolve, fail) => {
           setTimeout(() => {
+            // eslint-disable-next-line prefer-promise-reject-errors
             fail('ERROR')
           }, 250)
         })
@@ -194,6 +195,17 @@ test('disconnects all clients related to the document when an error is thrown in
         t.fail('MUST NOT call onStoreDocument')
       },
     })
+
+    let resolvedNumber = 0
+    const resolver = () => {
+      resolvedNumber += 1
+
+      if (resolvedNumber >= resolvesNeeded) {
+        t.is(server.documents.size, 0)
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      }
+    }
 
     const provider1 = newHocuspocusProvider(server, {
       onConnect() {
@@ -214,17 +226,6 @@ test('disconnects all clients related to the document when an error is thrown in
         resolver()
       },
     })
-
-    let resolvedNumber = 0
-    const resolver = () => {
-      resolvedNumber++
-
-      if (resolvedNumber >= resolvesNeeded) {
-        t.is(server.documents.size, 0)
-        t.is(server.getConnectionsCount(), 0)
-        resolve('done')
-      }
-    }
 
   })
 
@@ -256,11 +257,22 @@ test('if a new connection connects while the previous connection still fetches t
   const resolvesNeeded = 7
 
   await new Promise(resolve => {
+
+    let resolvedNumber = 0
+    const resolver = () => {
+      resolvedNumber += 1
+
+      if (resolvedNumber >= resolvesNeeded) {
+        t.is(callsToOnLoadDocument, 1)
+        resolve('done')
+      }
+    }
+
     const server = newHocuspocus({
       onLoadDocument({ document }) {
         return new Promise(resolve => {
           setTimeout(() => {
-            callsToOnLoadDocument++
+            callsToOnLoadDocument += 1
             document.getArray('foo').insert(0, [`bar-${callsToOnLoadDocument}`])
             resolve(document)
           }, 5000)
@@ -284,7 +296,7 @@ test('if a new connection connects while the previous connection still fetches t
       },
       onMessage() {
         if (!provider.isSynced) return
-        provider1MessagesReceived++
+        provider1MessagesReceived += 1
 
         const value = provider.document.getArray('foo').get(0)
 
@@ -311,7 +323,7 @@ test('if a new connection connects while the previous connection still fetches t
         },
         onMessage(data) {
           if (!provider2.isSynced) return
-          provider2MessagesReceived++
+          provider2MessagesReceived += 1
 
           const value = provider.document.getArray('foo').get(0)
 
@@ -331,15 +343,5 @@ test('if a new connection connects while the previous connection still fetches t
       })
 
     }, 2000)
-
-    let resolvedNumber = 0
-    const resolver = () => {
-      resolvedNumber++
-
-      if (resolvedNumber >= resolvesNeeded) {
-        t.is(callsToOnLoadDocument, 1)
-        resolve('done')
-      }
-    }
   })
 })

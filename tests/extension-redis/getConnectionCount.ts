@@ -1,17 +1,17 @@
 import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
+import { uuidv4 } from 'lib0/random'
 import {
   newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
 } from '../utils'
-import {uuidv4} from "lib0/random";
-import {retryableAssertion} from "../utils/retryableAssertion";
+import { retryableAssertion } from '../utils/retryableAssertion'
 
 test.skip('adds and removes connections properly', async t => {
   const server = newHocuspocus({
     extensions: [
       new Redis({
         ...redisConnectionSettings,
-        identifier: 'server' + uuidv4(),
+        identifier: `server${uuidv4()}`,
         prefix: 'extension-redis/getConnectionCount',
       }),
     ],
@@ -21,7 +21,7 @@ test.skip('adds and removes connections properly', async t => {
     extensions: [
       new Redis({
         ...redisConnectionSettings,
-        identifier: 'anotherServer' + uuidv4(),
+        identifier: `anotherServer${uuidv4()}`,
         prefix: 'extension-redis/getConnectionCount',
       }),
     ],
@@ -32,13 +32,13 @@ test.skip('adds and removes connections properly', async t => {
     newHocuspocusProvider(anotherServer),
   ]
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 2)
   })
 
   providers.forEach(provider => provider.disconnect())
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
   })
 })

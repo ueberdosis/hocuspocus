@@ -1,7 +1,7 @@
 import test from 'ava'
 import { WebSocketStatus } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
-import {retryableAssertion} from "../utils/retryableAssertion";
+import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('closes all connections', async t => {
   const server = newHocuspocus()
@@ -26,7 +26,7 @@ test('closes all connections', async t => {
 
   server.closeConnections()
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(provider.status, WebSocketStatus.Disconnected)
     tt.is(anotherProvider.status, WebSocketStatus.Disconnected)
   })
@@ -52,7 +52,7 @@ test('closes a specific connection when a documentName is passed', async t => {
 
   server.closeConnections('hocuspocus-test')
 
-  await retryableAssertion(t, (tt) => {
+  await retryableAssertion(t, tt => {
     tt.is(provider.status, WebSocketStatus.Disconnected)
     tt.is(anotherProvider.status, WebSocketStatus.Connected)
   })

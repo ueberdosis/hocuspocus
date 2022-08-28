@@ -1,7 +1,7 @@
 import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
+import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
-import { v4 as uuidv4 } from 'uuid';
 
 test('syncs updates between servers and clients', async t => {
   await new Promise(resolve => {
@@ -9,7 +9,7 @@ test('syncs updates between servers and clients', async t => {
       extensions: [
         new Redis({
           ...redisConnectionSettings,
-          identifier: 'server' + uuidv4(),
+          identifier: `server${uuidv4()}`,
         }),
       ],
     })
@@ -18,7 +18,7 @@ test('syncs updates between servers and clients', async t => {
       extensions: [
         new Redis({
           ...redisConnectionSettings,
-          identifier: 'anotherServer' + uuidv4(),
+          identifier: `anotherServer${uuidv4()}`,
         }),
       ],
     })
