@@ -1,6 +1,7 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Database } from '@hocuspocus/extension-database'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('fetch has the document name', async t => {
   await new Promise(resolve => {
@@ -13,13 +14,13 @@ test('fetch has the document name', async t => {
             resolve('done')
 
             return null
-          }
+          },
         }),
       ],
     })
 
     newHocuspocusProvider(server, {
-      name: 'my-unique-document-name'
+      name: 'my-unique-document-name',
     })
   })
 })
@@ -37,7 +38,7 @@ test('passes context from onAuthenticate to fetch', async t => {
             resolve('done')
 
             return null
-          }
+          },
         }),
       ],
       async onAuthenticate() {
@@ -49,7 +50,7 @@ test('passes context from onAuthenticate to fetch', async t => {
 
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
-      name: 'my-unique-document-name'
+      name: 'my-unique-document-name',
     })
   })
 })

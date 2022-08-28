@@ -286,7 +286,6 @@ test('the connections count is correct', async t => {
   })
 })
 
-
 test('has connection.readOnly', async t => {
   await new Promise(resolve => {
     const server = newHocuspocus({
