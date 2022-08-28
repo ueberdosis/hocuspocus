@@ -601,18 +601,25 @@ export class Hocuspocus {
       requestParameters: Hocuspocus.getParameters(request),
     }
 
-    await this.hooks('onLoadDocument', hookPayload, (loadedDocument: Doc | undefined) => {
-      // if a hook returns a Y-Doc, encode the document state as update
-      // and apply it to the newly created document
-      // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-      if (
-        loadedDocument?.constructor.name === 'Document'
-        || loadedDocument?.constructor.name === 'Doc'
-      ) {
-        applyUpdate(document, encodeStateAsUpdate(loadedDocument))
-      }
-    })
+    try {
+      await this.hooks('onLoadDocument', hookPayload, (loadedDocument: Doc | undefined) => {
+        // if a hook returns a Y-Doc, encode the document state as update
+        // and apply it to the newly created document
+        // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
+        if (
+          loadedDocument?.constructor.name === 'Document'
+          || loadedDocument?.constructor.name === 'Doc'
+        ) {
+          applyUpdate(document, encodeStateAsUpdate(loadedDocument))
+        }
+      })
+    } catch (e) {
+      this.closeConnections(documentName)
+      this.documents.delete(documentName)
+      throw e
+    }
 
+    document.isLoading = false
     await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
@@ -671,17 +678,22 @@ export class Hocuspocus {
       // If it’s the last connection, we need to make sure to store the
       // document. Use the debounce helper, to clear running timers,
       // but make it run immediately (`true`).
-      this.debounce(`onStoreDocument-${document.name}`, () => {
-        this.hooks('onStoreDocument', hookPayload)
-          .catch(error => {
-            if (error?.message) {
-              throw error
-            }
-          })
-          .then(() => {
-            this.hooks('afterStoreDocument', hookPayload)
-          })
-      }, true)
+      // Only run this if the document has finished loading earlier (i.e. not to persist the empty
+      // ydoc if the onLoadDocument hook returned an error)
+      if (!document.isLoading) {
+        this.debounce(`onStoreDocument-${document.name}`, () => {
+          this.hooks('onStoreDocument', hookPayload)
+            .catch(error => {
+              if (error?.message) {
+                throw error
+              }
+            })
+            .then(() => {
+              this.hooks('afterStoreDocument', hookPayload)
+            })
+        }, true)
+
+      }
 
       // Remove document from memory.
       this.documents.delete(document.name)

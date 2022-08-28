@@ -27,6 +27,8 @@ export class Document extends Doc {
 
   logger: Debugger
 
+  isLoading: boolean
+
   /**
    * Constructor.
    */
@@ -43,6 +45,7 @@ export class Document extends Doc {
     this.on('update', this.handleUpdate.bind(this))
 
     this.logger = logger
+    this.isLoading = true
   }
 
   /**
