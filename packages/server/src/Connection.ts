@@ -68,6 +68,7 @@ export class Connection {
     this.webSocket.on('close', this.close.bind(this))
     this.webSocket.on('message', this.handleMessage.bind(this))
     this.webSocket.on('pong', () => { this.pongReceived = true })
+    this.webSocket.on('error', this.handleError)
 
     this.sendCurrentAwareness()
   }
@@ -117,6 +118,7 @@ export class Connection {
 
       this.document.removeConnection(this)
       this.callbacks.onClose(this.document)
+      this.webSocket.off('error', this.handleError)
       this.webSocket.close(event?.code, event?.reason)
 
       done()
@@ -174,6 +176,17 @@ export class Connection {
       this.logger,
     ).apply(this.document, this)
   }
+
+  /**
+   * Handle a ws instance error, which is required to prevent
+   * the server from crashing when one happens
+   * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
+   * @private
+   */
+   private handleError(error: any): void {
+    this.logger.log('Error with ws instance')
+  }
+
 
   /**
    * Get the underlying connection instance
