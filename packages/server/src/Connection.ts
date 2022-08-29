@@ -183,10 +183,9 @@ export class Connection {
    * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
    * @private
    */
-   private handleError(error: any): void {
+  private handleError(error: any): void {
     this.logger.log('Error with ws instance')
   }
-
 
   /**
    * Get the underlying connection instance
