@@ -68,7 +68,7 @@ export class Connection {
     this.webSocket.on('close', this.close.bind(this))
     this.webSocket.on('message', this.handleMessage.bind(this))
     this.webSocket.on('pong', () => { this.pongReceived = true })
-    this.webSocket.on('error', this.handleError)
+    this.webSocket.on('error', this.handleError.bind(this))
 
     this.sendCurrentAwareness()
   }
@@ -118,7 +118,6 @@ export class Connection {
 
       this.document.removeConnection(this)
       this.callbacks.onClose(this.document)
-      this.webSocket.off('error', this.handleError)
       this.webSocket.close(event?.code, event?.reason)
 
       done()
