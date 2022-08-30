@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.15",
-    "ts-node": "^10.7.0"
+    "ts-node": "^10.9.1"
   }
 }
