@@ -1,12 +1,8 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('does not crash when invalid opcode is sent', async t => {
   await new Promise(resolve => {
-    const mockContext = {
-      user: 123,
-    }
-
     const server = newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
