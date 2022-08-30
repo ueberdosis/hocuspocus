@@ -183,7 +183,7 @@ export class Connection {
    * @private
    */
   private handleError(error: any): void {
-    this.logger.log('Error with ws instance:')
+    this.logger.log('Error emitted from webSocket instance:')
     this.logger.log(error)
   }
 
