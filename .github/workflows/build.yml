@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [16.16]
 
     steps:
 
@@ -68,7 +68,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [16.16]
 
     steps:
 
@@ -106,7 +106,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [16.16]
 
     steps:
 
