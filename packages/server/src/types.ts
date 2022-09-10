@@ -42,7 +42,7 @@ export interface Extension {
   onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
-  beforeDocumentUpdate?(data: beforeDocumentUpdatePayload): Promise<any>,
+  beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
   afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
@@ -65,7 +65,7 @@ export type HookName =
   'onCreateDocument' |
   'onLoadDocument' |
   'afterLoadDocument' |
-  'beforeDocumentUpdate' |
+  'beforeHandleMessage' |
   'onChange' |
   'onStoreDocument' |
   'afterStoreDocument' |
@@ -204,7 +204,7 @@ export interface onChangePayload {
   socketId: string,
 }
 
-export interface beforeDocumentUpdatePayload {
+export interface beforeHandleMessagePayload {
   clientsCount: number,
   context: any,
   document: Document,

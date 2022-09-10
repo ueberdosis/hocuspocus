@@ -9,7 +9,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger } from './Debugger'
-import { beforeDocumentUpdatePayload } from './types'
+import { beforeHandleMessagePayload } from './types'
 
 export class Connection {
 
@@ -29,7 +29,7 @@ export class Connection {
 
   callbacks: any = {
     onClose: (document: Document) => null,
-    beforeDocumentUpdate: (document: Document, update: Uint8Array) => Promise,
+    beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
   }
 
   socketId: string
@@ -87,10 +87,10 @@ export class Connection {
   }
 
   /**
-   * Set a callback that will be triggered before an update is applied
+   * Set a callback that will be triggered before an message is handled
    */
-  beforeDocumentUpdate(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
-    this.callbacks.beforeDocumentUpdate = callback
+  beforeHandleMessage(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
+    this.callbacks.beforeHandleMessage = callback
 
     return this
   }
@@ -184,11 +184,7 @@ export class Connection {
    */
   private handleMessage(data: Iterable<number>): void {
     try {
-      // TODO
-      console.log('the issue is now, that all sync messages are unhandled so when refreshing the client wont even get the document anymore')
-      console.log('maytbe thats even good, because like this we can handle expired tokens totally???!, but then the question is if beforeChangeDocument is good name, or maybe more beforeMessageHandled')
-
-      this.callbacks.beforeDocumentUpdate(this.document, data)
+      this.callbacks.beforeHandleMessage(this.document, data)
         .then(() => {
           new MessageReceiver(
             new IncomingMessage(data),

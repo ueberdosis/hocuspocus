@@ -19,7 +19,7 @@ import {
   ConnectionConfiguration,
   HookName,
   AwarenessUpdate,
-  HookPayload, beforeDocumentUpdatePayload,
+  HookPayload, beforeHandleMessagePayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -55,7 +55,7 @@ export class Hocuspocus {
     onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
     connected: () => new Promise(r => r(null)),
-    beforeDocumentUpdate: () => new Promise(r => r(null)),
+    beforeHandleMessage: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
@@ -125,7 +125,7 @@ export class Hocuspocus {
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument,
-      beforeDocumentUpdate: this.configuration.beforeDocumentUpdate,
+      beforeHandleMessage: this.configuration.beforeHandleMessage,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
       afterStoreDocument: this.configuration.afterStoreDocument,
@@ -701,10 +701,10 @@ export class Hocuspocus {
       this.documents.delete(document.name)
       document.destroy()
     })
-    instance.beforeDocumentUpdate((document, update) => {
-      console.log('instance.beforeDocumentUpdate')
+    instance.beforeHandleMessage((document, update) => {
+      console.log('instance.beforeHandleMessage')
 
-      const hookPayload: beforeDocumentUpdatePayload = {
+      const hookPayload: beforeHandleMessagePayload = {
         instance: this,
         clientsCount: document.getConnectionsCount(),
         context,
@@ -716,7 +716,7 @@ export class Hocuspocus {
         update,
       }
 
-      return this.hooks('beforeDocumentUpdate', hookPayload)
+      return this.hooks('beforeHandleMessage', hookPayload)
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then
