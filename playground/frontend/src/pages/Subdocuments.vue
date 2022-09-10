@@ -9,28 +9,35 @@
       :provider="provider"
     />
 
-    {{ notes }}
-    <!-- <h2>
+    {{ folder }}
+
+    <h2>Todos</h2>
+
+    {{ todos }}
+    <h2>
       Editor
     </h2>
     <div v-if="editor">
-      <editor-content :editor="editor" class="editor" />
-    </div> -->
+      <editor-content
+        :editor="editor"
+        class="editor"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-// import { Editor, EditorContent } from '@tiptap/vue-2'
-// import { Document } from '@tiptap/extension-document'
-// import { Paragraph } from '@tiptap/extension-paragraph'
-// import { Text } from '@tiptap/extension-text'
-// import Collaboration from '@tiptap/extension-collaboration'
+import { Editor, EditorContent } from '@tiptap/vue-2'
+import { Document } from '@tiptap/extension-document'
+import { Paragraph } from '@tiptap/extension-paragraph'
+import { Text } from '@tiptap/extension-text'
+import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 export default {
   components: {
-    // EditorContent,
+    EditorContent,
   },
 
   data() {
@@ -38,7 +45,8 @@ export default {
       provider: null,
       editor: null,
       ydoc: null,
-      notes: new Map(),
+      folder: new Map(),
+      todos: null,
     }
   },
 
@@ -46,33 +54,49 @@ export default {
 
     // Notes
     this.ydoc = new Y.Doc()
-    this.notes = this.ydoc.getMap()
+    this.folder = this.ydoc.getMap()
+    // this.todos = new Y.Doc({ autoLoad: true })
 
-    // Current note
-    const note = new Y.Doc()
-    note.getText().insert(0, 'some initial content')
+    // if (undefined === this.folder.get('todos')) {
+    // this.folder.set('todos', todosSubdoc)
+    // }
 
-    // Attach
-    const randomNumber = Math.floor(Math.random() * 1000)
-    this.notes.set(`note-${randomNumber}`, note)
+    const self = this
 
     this.provider = new HocuspocusProvider({
       url: 'ws://127.0.0.1:1234',
       name: 'hocuspocus-demo',
       document: this.ydoc,
+      onMessage(data) {
+        console.log('onMessage', data.message)
+      },
+      onSynced() {
+        // if (self.folder.get('toddos') === null) {
+        //   console.log('creating new ydoc')
+        //   self.folder.set('todos', new Y.Doc())
+        // }
+
+        self.todos = self.folder.get('todos')
+        self.todos.getArray('randomNumberList').push([Math.floor(Math.random() * 1000)])
+        self.todos.load()
+        self.todos.on('synced', () => {
+          console.log('synced', self.todos)
+          self.todos.getArray('randomNumberList').push([Math.floor(Math.random() * 1000)])
+        })
+      },
     })
 
-    // this.editor = new Editor({
-    //   extensions: [
-    //     Document,
-    //     Paragraph,
-    //     Text,
-    //     Collaboration.configure({
-    //       document: this.ydoc,
-    //       field: 'default',
-    //     }),
-    //   ],
-    // })
+    this.editor = new Editor({
+      extensions: [
+        Document,
+        Paragraph,
+        Text,
+        Collaboration.configure({
+          document: this.ydoc,
+          field: 'default',
+        }),
+      ],
+    })
   },
 
   beforeDestroy() {

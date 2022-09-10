@@ -231,6 +231,8 @@ export class HocuspocusProvider extends EventEmitter {
     })
 
     this.document.on('update', this.documentUpdateHandler.bind(this))
+    this.document.on('subdocs', this.subdocumentHandler.bind(this))
+
     this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
     this.registerEventListeners()
 
@@ -397,12 +399,23 @@ export class HocuspocusProvider extends EventEmitter {
     window.addEventListener('beforeunload', this.boundBeforeUnload)
   }
 
+  subdocumentHandler(payload: ({ added: Set<Y.Doc>, removed: Set<Y.Doc>, loaded: Set<Y.Doc> })) {
+    console.log('subdocumentHandler', payload)
+    payload.loaded.forEach(subdoc => {
+      new (subdoc.guid, subdoc)()
+    })
+
+  }
+
   documentUpdateHandler(update: Uint8Array, origin: any) {
     if (origin === this) {
       return
     }
 
     this.unsyncedChanges += 1
+
+    console.log('sending update')
+
     this.send(UpdateMessage, { update }, true)
   }
 
@@ -610,8 +623,8 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.disconnect()
 
-    this.awareness.off('update', this.awarenessUpdateHandler)
-    this.document.off('update', this.documentUpdateHandler)
+    this.awareness.off('update', this.awarenessUpdateHandler) // TODO: this (probably?) doesnt work, as we're using bind() when attaching listener
+    this.document.off('update', this.documentUpdateHandler) // TODO: this (probably?) doesnt work, as we're using bind() when attaching listener
 
     this.removeAllListeners()
 

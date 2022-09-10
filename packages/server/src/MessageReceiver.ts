@@ -32,8 +32,14 @@ export class MessageReceiver {
     switch (type) {
       case MessageType.Sync:
       case MessageType.SyncReply:
+      case MessageType.SyncSubdoc:
         message.writeVarUint(MessageType.Sync)
-        this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
+
+        if (type === MessageType.SyncSubdoc) {
+          // this.readSyncMessage(message, document.subdocs.find(FIND IT!), connection, reply, true)
+        } else {
+          this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
+        }
 
         if (message.length > 1) {
           if (reply) {

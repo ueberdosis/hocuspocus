@@ -14,6 +14,7 @@ export enum MessageType {
   Auth = 2,
   QueryAwareness = 3,
   SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
+  SyncSubdoc = 5,
 }
 
 export interface AwarenessUpdate {
