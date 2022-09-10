@@ -55,6 +55,7 @@ export class Hocuspocus {
     onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
     connected: () => new Promise(r => r(null)),
+    beforeDocumentUpdate: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
@@ -124,6 +125,7 @@ export class Hocuspocus {
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument,
+      beforeDocumentUpdate: this.configuration.beforeDocumentUpdate,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
       afterStoreDocument: this.configuration.afterStoreDocument,
@@ -700,6 +702,8 @@ export class Hocuspocus {
       document.destroy()
     })
     instance.beforeDocumentUpdate((document, update) => {
+      console.log('instance.beforeDocumentUpdate')
+
       const hookPayload: beforeDocumentUpdatePayload = {
         instance: this,
         clientsCount: document.getConnectionsCount(),
@@ -712,7 +716,7 @@ export class Hocuspocus {
         update,
       }
 
-      this.hooks('beforeDocumentUpdate', hookPayload)
+      return this.hooks('beforeDocumentUpdate', hookPayload)
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then

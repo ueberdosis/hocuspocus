@@ -1,7 +1,9 @@
 import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
 import { IncomingMessage as HTTPIncomingMessage } from 'http'
-import { CloseEvent, ConnectionTimeout, WsReadyStates } from '@hocuspocus/common'
+import {
+  CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
+} from '@hocuspocus/common'
 import Document from './Document'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
@@ -27,7 +29,7 @@ export class Connection {
 
   callbacks: any = {
     onClose: (document: Document) => null,
-    beforeDocumentUpdate: (document: Document, update: Uint8Array) => null,
+    beforeDocumentUpdate: (document: Document, update: Uint8Array) => Promise,
   }
 
   socketId: string
@@ -87,7 +89,7 @@ export class Connection {
   /**
    * Set a callback that will be triggered before an update is applied
    */
-  beforeDocumentUpdate(callback: (payload: Document, update: Uint8Array) => void): Connection {
+  beforeDocumentUpdate(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
     this.callbacks.beforeDocumentUpdate = callback
 
     return this
@@ -181,12 +183,27 @@ export class Connection {
    * @private
    */
   private handleMessage(data: Iterable<number>): void {
-    this.callbacks.beforeDocumentUpdate(this.document, data)
+    try {
+      // TODO
+      console.log('the issue is now, that all sync messages are unhandled so when refreshing the client wont even get the document anymore')
+      console.log('maytbe thats even good, because like this we can handle expired tokens totally???!, but then the question is if beforeChangeDocument is good name, or maybe more beforeMessageHandled')
 
-    new MessageReceiver(
-      new IncomingMessage(data),
-      this.logger,
-    ).apply(this.document, this)
+      this.callbacks.beforeDocumentUpdate(this.document, data)
+        .then(() => {
+          new MessageReceiver(
+            new IncomingMessage(data),
+            this.logger,
+          ).apply(this.document, this)
+        })
+        .catch(console.log)
+    } catch (e) {
+      console.warn('Caught exception during handleMessage, closing the connection: ', e)
+
+      this.close({
+        code: e instanceof CloseEvent ? e.code : Forbidden.code,
+        reason: e instanceof CloseEvent ? e.reason : Forbidden.reason,
+      })
+    }
   }
 
   /**
