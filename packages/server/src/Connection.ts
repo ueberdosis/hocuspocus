@@ -120,7 +120,6 @@ export class Connection {
    */
   close(event?: CloseEvent): void {
     this.lock.acquire('close', (done: Function) => {
-
       if (this.pingInterval) {
         clearInterval(this.pingInterval)
       }
@@ -183,23 +182,19 @@ export class Connection {
    * @private
    */
   private handleMessage(data: Iterable<number>): void {
-    try {
-      this.callbacks.beforeHandleMessage(this.document, data)
-        .then(() => {
-          new MessageReceiver(
-            new IncomingMessage(data),
-            this.logger,
-          ).apply(this.document, this)
-        })
-        .catch(console.log)
-    } catch (e) {
-      console.warn('Caught exception during handleMessage, closing the connection: ', e)
-
-      this.close({
-        code: e instanceof CloseEvent ? e.code : Forbidden.code,
-        reason: e instanceof CloseEvent ? e.reason : Forbidden.reason,
+    this.callbacks.beforeHandleMessage(this.document, data)
+      .then(() => {
+        new MessageReceiver(
+          new IncomingMessage(data),
+          this.logger,
+        ).apply(this.document, this)
       })
-    }
+      .catch((e: any) => {
+        this.close({
+          code: 'code' in e ? e.code : Forbidden.code,
+          reason: 'reason' in e ? e.reason : Forbidden.reason,
+        })
+      })
   }
 
   /**

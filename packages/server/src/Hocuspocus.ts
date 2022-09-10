@@ -346,6 +346,7 @@ export class Hocuspocus {
         client.terminate()
       })
     } catch (error) {
+      console.error(error)
       //
     }
 
@@ -702,8 +703,6 @@ export class Hocuspocus {
       document.destroy()
     })
     instance.beforeHandleMessage((document, update) => {
-      console.log('instance.beforeHandleMessage')
-
       const hookPayload: beforeHandleMessagePayload = {
         instance: this,
         clientsCount: document.getConnectionsCount(),
