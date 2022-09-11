@@ -24,7 +24,7 @@ import {
 import Document from './Document'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
-import meta from '../package.json'
+import meta from '../package.json' assert { type: 'json' }
 import { Debugger } from './Debugger'
 import { onListenPayload } from '.'
 
