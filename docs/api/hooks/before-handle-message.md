@@ -8,8 +8,9 @@ tableOfContents: true
 
 The `beforeHandleMessage` hook is called when a message was received by the server, directly before
 handling/applying it. The hook can be used to reject a message (e.g. if the authentication token has
-expired), or even to check
-the update message and reject / accept it based on custom rules.
+expired), or even to check the update message and reject / accept it based on custom rules. If you
+throw an error in the hook, the connection will be closed. You can return a custom code / reason by
+throwing an error that implements CloseEvent (see example below).
 
 ## Hook payload
 
@@ -50,7 +51,7 @@ const server = Server.configure({
   beforeHandleMessage(data) {
     if (data.context.tokenExpiresAt <= new Date()) {
       const error: CloseEvent = {
-          reason: 'Token expired'
+        reason: 'Token expired'
       }
 
       throw error;
