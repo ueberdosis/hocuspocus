@@ -6,6 +6,7 @@
 .temp
 dist
 node_modules
+.idea
 
 # Log files
 npm-debug.log*
