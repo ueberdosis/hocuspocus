@@ -5,7 +5,12 @@ tableOfContents: true
 # onAuthenticate
 
 ## Introduction
-The `onAuthenticate` hook will be called when the server receives an authentication request from the client provider. It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.
+The `onAuthenticate` hook will be called when the server receives an authentication request from the client provider.
+It should return a Promise. Throwing an exception or rejecting the Promise will terminate the connection.
+
+
+Be aware, the onAuthenticate hook will only be called after the client has sent the Auth message, which won't happen
+if there is no token provided to HocuspocusProvider.
 
 ## Hook payload
 The `data` passed to the `onAuthenticate` hook has the following attributes:
