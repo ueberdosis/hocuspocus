@@ -16,6 +16,7 @@
           link: /installation/laravel
           type: draft
     # - title: Changelog
+    # - title: Changelog
     #   link: /changelog
     - title: About the project
       link: /sponsor
@@ -88,6 +89,8 @@
           link: /api/hooks/on-load-document
         - title: onChange
           link: /api/hooks/on-change
+        - title: beforeHandleMessage
+          link: /api/hooks/before-handle-message
         - title: onStoreDocument
           link: /api/hooks/on-store-document
         - title: onAwarenessUpdate
