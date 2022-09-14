@@ -92,6 +92,7 @@
           link: /api/hooks/on-store-document
         - title: onAwarenessUpdate
           link: /api/hooks/on-awareness-update
+          type: draft
         - title: onRequest
           link: /api/hooks/on-request
         - title: onDisconnect
