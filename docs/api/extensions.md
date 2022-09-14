@@ -6,4 +6,4 @@ tableOfContents: true
 
 ## Introduction
 
-TODO
+[See more](/guide/extensions)
