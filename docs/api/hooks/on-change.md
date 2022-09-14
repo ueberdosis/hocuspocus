@@ -6,7 +6,10 @@ tableOfContents: true
 
 ## Introduction
 
-The `onChange` hook is called when the document itself changes. It should return a Promise.
+The `onChange` hook is called when the document itself has changed. It should return a Promise.
+
+It's important to understand that this hook is called just once per document. You can use it to react to changes
+by a specific connection, because we're passing `context` and `update` in the payload (see below).
 
 It's highly recommended to debounce extensive operations as this hook can be fired up to multiple times a second.
 
