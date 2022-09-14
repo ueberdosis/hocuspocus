@@ -59,7 +59,6 @@
       link: /guide/extensions
     - title: Scalability
       link: /guide/scalability
-      type: draft
 
 - title: Server
   items:
