@@ -102,7 +102,7 @@ For help, discussion about best practices, or any other conversation:
 Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
 
 ## Contributing
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](docs/CONTRIBUTING.md) for details.
 
 ## Contributors
 [kris](https://github.com/kriskbx) (who wrote the initial version), [Tom Moor](https://github.com/tommoor) and [many more](../../contributors).
