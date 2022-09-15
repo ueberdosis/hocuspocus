@@ -1,7 +1,7 @@
 import osu from 'node-os-utils'
 import process from 'process'
 import moment from 'moment'
-import publicIp from 'public-ip'
+import { publicIpv4 } from 'public-ip'
 import {
   defaultConfiguration,
   Configuration,
@@ -145,7 +145,7 @@ export class Collector {
 
   private async getIpAddress() {
     try {
-      return await publicIp.v4()
+      return await publicIpv4()
     } catch {
       return null
     }
