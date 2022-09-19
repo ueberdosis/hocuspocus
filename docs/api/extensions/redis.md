@@ -7,10 +7,10 @@ tableOfContents: true
 ## Introduction
 Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a
 load balancer and sync changes and awareness states through Redis. Hocuspocus will propagate all received updates to all other instances
-using redis and thus forward updates to all clients of all hocuspocus instances.
+using Redis and thus forward updates to all clients of all Hocuspocus instances.
 
-Please note that all messages will be handled on all instances of hocuspocus, so if you are trying to reduce cpu load by spawning multiple
-servers, you should not connect them via redis.
+Please note that all messages will be handled on all instances of Hocuspocus, so if you are trying to reduce cpu load by spawning multiple
+servers, you should not connect them via Redis.
 
 
 Thanks to [@tommoor](https://github.com/tommoor) for writing the initial implementation of that extension.
@@ -23,7 +23,7 @@ npm install @hocuspocus/extension-redis
 ```
 
 ## Configuration
-For a full documentation on all available redis and redis cluster options, check out the
+For a full documentation on all available Redis and Redis cluster options, check out the
 [ioredis API docs](https://github.com/luin/ioredis/blob/master/API.md).
 
 ```js
@@ -62,7 +62,7 @@ const server = new Hocuspocus({
   extensions: [
     new Logger(),
     new Redis({
-      host: '127.0.0.1', // make sure to use the same redis instance :-)
+      host: '127.0.0.1', // make sure to use the same Redis instance :-)
       port: 6379,
     }),
     new SQLite(),
