@@ -19,7 +19,7 @@ import {
   ConnectionConfiguration,
   HookName,
   AwarenessUpdate,
-  HookPayload,
+  HookPayload, beforeHandleMessagePayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -55,6 +55,7 @@ export class Hocuspocus {
     onUpgrade: () => new Promise(r => r(null)),
     onConnect: () => new Promise(r => r(null)),
     connected: () => new Promise(r => r(null)),
+    beforeHandleMessage: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
@@ -124,6 +125,7 @@ export class Hocuspocus {
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument,
+      beforeHandleMessage: this.configuration.beforeHandleMessage,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
       afterStoreDocument: this.configuration.afterStoreDocument,
@@ -344,6 +346,7 @@ export class Hocuspocus {
         client.terminate()
       })
     } catch (error) {
+      console.error(error)
       //
     }
 
@@ -698,6 +701,21 @@ export class Hocuspocus {
       // Remove document from memory.
       this.documents.delete(document.name)
       document.destroy()
+    })
+    instance.beforeHandleMessage((document, update) => {
+      const hookPayload: beforeHandleMessagePayload = {
+        instance: this,
+        clientsCount: document.getConnectionsCount(),
+        context,
+        document,
+        socketId,
+        documentName: document.name,
+        requestHeaders: request.headers,
+        requestParameters: Hocuspocus.getParameters(request),
+        update,
+      }
+
+      return this.hooks('beforeHandleMessage', hookPayload)
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then

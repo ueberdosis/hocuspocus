@@ -1,12 +1,15 @@
 import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
 import { IncomingMessage as HTTPIncomingMessage } from 'http'
-import { CloseEvent, ConnectionTimeout, WsReadyStates } from '@hocuspocus/common'
+import {
+  CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
+} from '@hocuspocus/common'
 import Document from './Document'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger } from './Debugger'
+import { beforeHandleMessagePayload } from './types'
 
 export class Connection {
 
@@ -26,6 +29,7 @@ export class Connection {
 
   callbacks: any = {
     onClose: (document: Document) => null,
+    beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
   }
 
   socketId: string
@@ -83,6 +87,15 @@ export class Connection {
   }
 
   /**
+   * Set a callback that will be triggered before an message is handled
+   */
+  beforeHandleMessage(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
+    this.callbacks.beforeHandleMessage = callback
+
+    return this
+  }
+
+  /**
    * Send the given message
    */
   send(message: any): void {
@@ -107,7 +120,6 @@ export class Connection {
    */
   close(event?: CloseEvent): void {
     this.lock.acquire('close', (done: Function) => {
-
       if (this.pingInterval) {
         clearInterval(this.pingInterval)
       }
@@ -170,10 +182,19 @@ export class Connection {
    * @private
    */
   private handleMessage(data: Iterable<number>): void {
-    new MessageReceiver(
-      new IncomingMessage(data),
-      this.logger,
-    ).apply(this.document, this)
+    this.callbacks.beforeHandleMessage(this.document, data)
+      .then(() => {
+        new MessageReceiver(
+          new IncomingMessage(data),
+          this.logger,
+        ).apply(this.document, this)
+      })
+      .catch((e: any) => {
+        this.close({
+          code: 'code' in e ? e.code : Forbidden.code,
+          reason: 'reason' in e ? e.reason : Forbidden.reason,
+        })
+      })
   }
 
   /**
