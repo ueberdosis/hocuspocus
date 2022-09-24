@@ -4,7 +4,7 @@
     :border="true"
     :full-height="true"
   >
-    <p v-if="info.configuration.name">
+    <p v-if="info.configuration && info.configuration.name">
       Name: <span class="text-gray-600">{{ info.configuration.name }}</span>
     </p>
     <p v-if="info.ipAddress">
