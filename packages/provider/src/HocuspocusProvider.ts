@@ -263,9 +263,15 @@ export class HocuspocusProvider extends EventEmitter {
 
   boundConnect = this.connect.bind(this)
 
+  cancelWebsocketRetry?: () => void
+
   async connect() {
     if (this.status === WebSocketStatus.Connected) {
       return
+    }
+
+    if (this.cancelWebsocketRetry) {
+      this.cancelWebsocketRetry()
     }
 
     this.unsyncedChanges = 0 // set to 0 in case we got reconnected
@@ -273,21 +279,32 @@ export class HocuspocusProvider extends EventEmitter {
     this.subscribeToBroadcastChannel()
 
     try {
-      await retry(this.createWebSocketConnection.bind(this), {
-        delay: this.configuration.delay,
-        initialDelay: this.configuration.initialDelay,
-        factor: this.configuration.factor,
-        maxAttempts: this.configuration.maxAttempts,
-        minDelay: this.configuration.minDelay,
-        maxDelay: this.configuration.maxDelay,
-        jitter: this.configuration.jitter,
-        timeout: this.configuration.timeout,
-        beforeAttempt: context => {
-          if (!this.shouldConnect) {
-            context.abort()
-          }
-        },
-      })
+      const abortableRetry = async () => {
+        let cancelAttempt = false
+
+        await retry(this.createWebSocketConnection.bind(this), {
+          delay: this.configuration.delay,
+          initialDelay: this.configuration.initialDelay,
+          factor: this.configuration.factor,
+          maxAttempts: this.configuration.maxAttempts,
+          minDelay: this.configuration.minDelay,
+          maxDelay: this.configuration.maxDelay,
+          jitter: this.configuration.jitter,
+          timeout: this.configuration.timeout,
+          beforeAttempt: context => {
+            if (!this.shouldConnect || cancelAttempt) {
+              context.abort()
+            }
+          },
+        })
+
+        return function () {
+          cancelAttempt = true
+        }
+      }
+
+      this.cancelWebsocketRetry = await abortableRetry()
+
     } catch (error: any) {
       // If we aborted the connection attempt then don’t throw an error
       // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
