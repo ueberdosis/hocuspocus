@@ -1,4 +1,4 @@
-import RedisClient from 'ioredis'
+import RedisClient, { type RedisOptions } from 'ioredis'
 import Redlock from 'redlock'
 import { v4 as uuid } from 'uuid'
 import {
@@ -33,7 +33,7 @@ export interface Configuration {
    *
    * https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
    */
-  options?: RedisClient.RedisOptions,
+  options?: RedisOptions,
   /**
    * An unique instance name, required to filter messages in Redis.
    * If none is provided an unique id is generated.
