@@ -88,7 +88,7 @@ import { Server } from '@hocuspocus/server'
 import { Monitor } from '@hocuspocus/extension-monitor'
 
 const monitor = new Monitor({
-  path: 'monitor',
+  dashboardPath: 'monitor',
 })
 
 const server = Server.configure({

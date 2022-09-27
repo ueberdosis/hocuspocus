@@ -5,7 +5,13 @@ tableOfContents: true
 # Redis
 
 ## Introduction
-Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a load balancer and sync changes and awareness states through Redis.
+Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a
+load balancer and sync changes and awareness states through Redis. Hocuspocus will propagate all received updates to all other instances
+using Redis and thus forward updates to all clients of all Hocuspocus instances.
+
+Please note that all messages will be handled on all instances of Hocuspocus, so if you are trying to reduce cpu load by spawning multiple
+servers, you should not connect them via Redis.
+
 
 Thanks to [@tommoor](https://github.com/tommoor) for writing the initial implementation of that extension.
 
@@ -17,7 +23,8 @@ npm install @hocuspocus/extension-redis
 ```
 
 ## Configuration
-For a full documentation on all available redis and redis cluster options, check out the [ioredis API docs](https://github.com/luin/ioredis/blob/master/API.md).
+For a full documentation on all available Redis and Redis cluster options, check out the
+[ioredis API docs](https://github.com/luin/ioredis/blob/master/API.md).
 
 ```js
 import { Server } from '@hocuspocus/server'
@@ -39,7 +46,8 @@ server.listen()
 ```
 
 ## Storing documents
-The Redis extension works well with the database extension. Once an instance stores a document, it’s blocked for all other instances to avoid write conflicts.
+The Redis extension works well with the database extension. Once an instance stores a document, it’s blocked for all other
+instances to avoid write conflicts.
 
 ```js
 import { Hocuspocus } from '@hocuspocus/server'
@@ -49,12 +57,12 @@ import { SQLite } from '@hocuspocus/extension-sqlite'
 
 // Server 1
 const server = new Hocuspocus({
-  name: 'server-1',
+  name: 'server-1', // make sure to use unique server names
   port: 1234,
   extensions: [
     new Logger(),
     new Redis({
-      host: '127.0.0.1',
+      host: '127.0.0.1', // make sure to use the same Redis instance :-)
       port: 6379,
     }),
     new SQLite(),

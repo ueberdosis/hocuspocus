@@ -6,4 +6,30 @@ tableOfContents: true
 
 ## Introduction
 
-TODO
+We're currently evaluating feedback subdocuments, but haven't implemented support yet.
+
+In a lot of cases, instead of subdocuments, you can also just use different `fragments` of Yjs, so
+if you're thinking about a blog port with `title`/`content`, you can create a single yDoc and use
+different editors (or anything else) that are each binding to a different fragment, like this:
+
+```js
+const ydoc = new Y.Doc()();
+
+const titleEditor = new Editor({
+  extensions: [
+    Collaboration.configure({
+      document: this.ydoc,
+      field: 'title',
+    }),
+  ]
+});
+
+const bodyEditor = new Editor({
+  extensions: [
+    Collaboration.configure({
+      document: this.ydoc,
+      field: 'body',
+    }),
+  ]
+});
+```

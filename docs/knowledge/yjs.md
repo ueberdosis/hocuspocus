@@ -1,5 +1,4 @@
 # How does Y.js work?
-TODO
 
 > A CRDT framework with a powerful abstraction of shared data
 >
