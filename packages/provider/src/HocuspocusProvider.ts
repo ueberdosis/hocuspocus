@@ -270,8 +270,10 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    // Always cancel any previously initiated connection retryer instances
     if (this.cancelWebsocketRetry) {
       this.cancelWebsocketRetry()
+      this.cancelWebsocketRetry = undefined
     }
 
     this.unsyncedChanges = 0 // set to 0 in case we got reconnected
@@ -279,10 +281,10 @@ export class HocuspocusProvider extends EventEmitter {
     this.subscribeToBroadcastChannel()
 
     try {
-      const abortableRetry = async () => {
+      const abortableRetry = () => {
         let cancelAttempt = false
 
-        await retry(this.createWebSocketConnection.bind(this), {
+        const retryPromise = retry(this.createWebSocketConnection.bind(this), {
           delay: this.configuration.delay,
           initialDelay: this.configuration.initialDelay,
           factor: this.configuration.factor,
@@ -298,13 +300,18 @@ export class HocuspocusProvider extends EventEmitter {
           },
         })
 
-        return function () {
-          cancelAttempt = true
+        return {
+          retryPromise,
+          cancelFunc: () => {
+            cancelAttempt = true
+          },
         }
       }
 
-      this.cancelWebsocketRetry = await abortableRetry()
+      const { retryPromise, cancelFunc } = abortableRetry()
+      this.cancelWebsocketRetry = cancelFunc
 
+      return retryPromise
     } catch (error: any) {
       // If we aborted the connection attempt then don’t throw an error
       // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
