@@ -321,6 +321,11 @@ export class HocuspocusProvider extends EventEmitter {
 
   createWebSocketConnection() {
     return new Promise((resolve, reject) => {
+      if (this.webSocket) {
+        this.webSocket.close()
+        this.webSocket = null
+      }
+
       // Init the WebSocket connection
       const ws = new this.configuration.WebSocketPolyfill(this.url)
       ws.binaryType = 'arraybuffer'
