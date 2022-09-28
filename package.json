@@ -54,7 +54,7 @@
     "release:patch": "lerna version patch --force-publish",
     "release:patch:pre": "lerna version prepatch --force-publish",
     "release:pre": "lerna version prerelease --force-publish",
-    "publish": "npm run lint && npm run test && npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
+    "publish": "npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
     "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
     "ncu": "ncu -i --deep && npm install"
   },
