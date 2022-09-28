@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.0.0-beta.111 (2022-09-28)
+
+
+### Features
+
+* add default schema to ProsemirrorTransformer and default extensions to TiptapTransformer, making both parameters in toYdoc optional ([e330ffd](https://github.com/ueberdosis/hocuspocus/commit/e330ffd81f8cbd98c1d57545d3ec9d51807f7db3))
+
+
+
+
+
 # [1.0.0-alpha.23](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/transformer@1.0.0-alpha.22...@hocuspocus/transformer@1.0.0-alpha.23) (2022-04-05)
 
 **Note:** Version bump only for package @hocuspocus/transformer

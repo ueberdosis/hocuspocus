@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.0.0-beta.111 (2022-09-28)
+
+
+### Features
+
+* extension-redis should watch the ydoc for changes and notify other hocuspocus instances about it (via redis pub/sub) ([bacc535](https://github.com/ueberdosis/hocuspocus/commit/bacc53594550aa771765f8e123c9797a88071a20))
+
+
+
+
+
 # [1.0.0-alpha.70](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/extension-redis@1.0.0-alpha.69...@hocuspocus/extension-redis@1.0.0-alpha.70) (2022-09-20)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

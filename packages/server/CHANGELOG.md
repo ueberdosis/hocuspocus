@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.0.0-beta.111 (2022-09-28)
+
+
+### Bug Fixes
+
+* Empty sync message causes error in client MessageReceiver ([#174](https://github.com/ueberdosis/hocuspocus/issues/174)) ([f9dca69](https://github.com/ueberdosis/hocuspocus/commit/f9dca69eb96d1ede37a0709bd3b7735bf1ff57ba))
+* fix hook promise chaining ([ee5052d](https://github.com/ueberdosis/hocuspocus/commit/ee5052d236ba0b400880dc7ca1c90cefdd372003))
+* Potential onCreateDocument race condition ([#167](https://github.com/ueberdosis/hocuspocus/issues/167)) ([b3e3e4d](https://github.com/ueberdosis/hocuspocus/commit/b3e3e4dea74f9b833ccb0c6a6521f55c001411c1))
+* Remove event listener once unused ([#220](https://github.com/ueberdosis/hocuspocus/issues/220)) ([0422196](https://github.com/ueberdosis/hocuspocus/commit/0422196f8a4e09af530c51419742b137b9ebbc69))
+* typescript strings ([0dd5f12](https://github.com/ueberdosis/hocuspocus/commit/0dd5f1292616e426cdb4cc79e83ab8ced0895bfa))
+
+
+### Features
+
+* Add connectionsCount and documentsCount methods to server ([8bdbcd8](https://github.com/ueberdosis/hocuspocus/commit/8bdbcd86b1f18462f6636b75a4cbd97ebefdb227))
+* add read only mode ([7b59d52](https://github.com/ueberdosis/hocuspocus/commit/7b59d522b966b51347db35ac6a4524211e44ae9c))
+* add request headers and parameters to onCreateDocument ([47a8b95](https://github.com/ueberdosis/hocuspocus/commit/47a8b95baf8dd22ebd71c56565420179402cdaa4))
+* Message Authentication ([#163](https://github.com/ueberdosis/hocuspocus/issues/163)) ([a1e68d5](https://github.com/ueberdosis/hocuspocus/commit/a1e68d5a272742bd17dd92522dfc908277343849))
+
+
+
+
+
 # [1.0.0-alpha.107](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/server@1.0.0-alpha.106...@hocuspocus/server@1.0.0-alpha.107) (2022-09-20)
 
 **Note:** Version bump only for package @hocuspocus/server

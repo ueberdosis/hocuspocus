@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.0.0-beta.111 (2022-09-28)
+
+
+### Bug Fixes
+
+* Account for this.webSocket being null ([#235](https://github.com/ueberdosis/hocuspocus/issues/235)) ([b1476b6](https://github.com/ueberdosis/hocuspocus/commit/b1476b60f0eceb83d70c1ded2b3139e4f865a869))
+* Empty sync message causes error in client MessageReceiver ([#174](https://github.com/ueberdosis/hocuspocus/issues/174)) ([f9dca69](https://github.com/ueberdosis/hocuspocus/commit/f9dca69eb96d1ede37a0709bd3b7735bf1ff57ba))
+* Remote client awareness not immediately available ([37703f6](https://github.com/ueberdosis/hocuspocus/commit/37703f695f6bf3b0508c287294c5d26d2e888c37))
+
+
+### Features
+
+* Message Authentication ([#163](https://github.com/ueberdosis/hocuspocus/issues/163)) ([a1e68d5](https://github.com/ueberdosis/hocuspocus/commit/a1e68d5a272742bd17dd92522dfc908277343849))
+
+
+
+
+
 # [1.0.0-alpha.40](https://github.com/ueberdosis/hocuspocus/compare/@hocuspocus/provider@1.0.0-alpha.39...@hocuspocus/provider@1.0.0-alpha.40) (2022-08-28)
 
 **Note:** Version bump only for package @hocuspocus/provider

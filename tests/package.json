@@ -1,15 +1,15 @@
 {
   "name": "tests",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.111",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@hocuspocus/extension-logger": "^1.0.0-alpha.71",
-    "@hocuspocus/extension-redis": "^1.0.0-alpha.60",
-    "@hocuspocus/extension-throttle": "^1.0.0-alpha.60",
-    "@hocuspocus/provider": "^1.0.0-alpha.34",
-    "@hocuspocus/server": "^1.0.0-alpha.97",
-    "@hocuspocus/transformer": "^1.0.0-alpha.21",
+    "@hocuspocus/extension-logger": "^1.0.0-beta.111",
+    "@hocuspocus/extension-redis": "^1.0.0-beta.111",
+    "@hocuspocus/extension-throttle": "^1.0.0-beta.111",
+    "@hocuspocus/provider": "^1.0.0-beta.111",
+    "@hocuspocus/server": "^1.0.0-beta.111",
+    "@hocuspocus/transformer": "^1.0.0-beta.111",
     "node-fetch": "^3.2.3",
     "redis": "^4.0.4",
     "sinon": "^12.0.1",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/redis": "^4.0.11",
     "@types/sinon": "^10.0.11",
-    "uuid": "^8.3.2",
-    "lib0": "^0.2.47"
+    "lib0": "^0.2.47",
+    "uuid": "^8.3.2"
   }
 }
