@@ -270,52 +270,62 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    // Always cancel any previously initiated connection retryer instances
     if (this.cancelWebsocketRetry) {
       this.cancelWebsocketRetry()
+      this.cancelWebsocketRetry = undefined
     }
 
     this.unsyncedChanges = 0 // set to 0 in case we got reconnected
     this.shouldConnect = true
     this.subscribeToBroadcastChannel()
 
-    try {
-      const abortableRetry = async () => {
-        let cancelAttempt = false
+    const abortableRetry = () => {
+      let cancelAttempt = false
 
-        await retry(this.createWebSocketConnection.bind(this), {
-          delay: this.configuration.delay,
-          initialDelay: this.configuration.initialDelay,
-          factor: this.configuration.factor,
-          maxAttempts: this.configuration.maxAttempts,
-          minDelay: this.configuration.minDelay,
-          maxDelay: this.configuration.maxDelay,
-          jitter: this.configuration.jitter,
-          timeout: this.configuration.timeout,
-          beforeAttempt: context => {
-            if (!this.shouldConnect || cancelAttempt) {
-              context.abort()
-            }
-          },
-        })
-
-        return function () {
-          cancelAttempt = true
+      const retryPromise = retry(this.createWebSocketConnection.bind(this), {
+        delay: this.configuration.delay,
+        initialDelay: this.configuration.initialDelay,
+        factor: this.configuration.factor,
+        maxAttempts: this.configuration.maxAttempts,
+        minDelay: this.configuration.minDelay,
+        maxDelay: this.configuration.maxDelay,
+        jitter: this.configuration.jitter,
+        timeout: this.configuration.timeout,
+        beforeAttempt: context => {
+          if (!this.shouldConnect || cancelAttempt) {
+            context.abort()
+          }
+        },
+      }).catch((error: any) => {
+        // If we aborted the connection attempt then don’t throw an error
+        // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
+        if (error && error.code !== 'ATTEMPT_ABORTED') {
+          throw error
         }
-      }
+      })
 
-      this.cancelWebsocketRetry = await abortableRetry()
-
-    } catch (error: any) {
-      // If we aborted the connection attempt then don’t throw an error
-      // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
-      if (error && error.code !== 'ATTEMPT_ABORTED') {
-        throw error
+      return {
+        retryPromise,
+        cancelFunc: () => {
+          cancelAttempt = true
+        },
       }
     }
+
+    const { retryPromise, cancelFunc } = abortableRetry()
+    this.cancelWebsocketRetry = cancelFunc
+
+    return retryPromise
   }
 
   createWebSocketConnection() {
     return new Promise((resolve, reject) => {
+      if (this.webSocket) {
+        this.webSocket.close()
+        this.webSocket = null
+      }
+
       // Init the WebSocket connection
       const ws = new this.configuration.WebSocketPolyfill(this.url)
       ws.binaryType = 'arraybuffer'
