@@ -1,4 +1,5 @@
 import test from 'ava'
+import { onAuthenticatePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('does not crash when invalid opcode is sent', async t => {
@@ -21,5 +22,35 @@ test('does not crash when invalid opcode is sent', async t => {
         resolve(true)
       },
     })
+  })
+})
+
+test('does not crash when invalid utf-8 sequence is sent', async t => {
+  await new Promise(resolve => {
+    const server = newHocuspocus({
+      async onAuthenticate(data: onAuthenticatePayload) {
+        return new Promise(resolve => {
+          setTimeout(resolve, 2000)
+        })
+      },
+    })
+
+    const provider = newHocuspocusProvider(server, {
+      token: 'test123',
+      onClose({ event }) {
+        t.is(event.code, 1002)
+        provider.destroy()
+      },
+      onDestroy() {
+        t.pass()
+        resolve(true)
+      },
+    })
+
+    setInterval(() => {
+      // @ts-ignore
+      provider.webSocket?._socket.write(Buffer.from([0x81, 0x04, 0xce, 0xba, 0xe1, 0xbd])) // eslint-disable-line
+    }, 500)
+
   })
 })
