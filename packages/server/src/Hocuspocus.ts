@@ -176,6 +176,18 @@ export class Hocuspocus {
     const webSocketServer = new WebSocketServer({ noServer: true })
 
     webSocketServer.on('connection', async (incoming: WebSocket, request: IncomingMessage) => {
+
+      incoming.on('error', error => {
+        /**
+         * Handle a ws instance error, which is required to prevent
+         * the server from crashing when one happens
+         * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
+         * @private
+         */
+        this.debugger.log('Error emitted from webSocket instance:')
+        this.debugger.log(error)
+      })
+
       this.handleConnection(incoming, request, await this.getDocumentNameFromRequest(request))
     })
 
