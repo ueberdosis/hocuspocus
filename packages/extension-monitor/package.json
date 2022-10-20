@@ -51,7 +51,9 @@
     "vue": "^2.6.14",
     "vue-plotly": "^1.1.0",
     "vue-virtual-scroller": "^1.0.10",
-    "ws": "^8.5.0",
+    "ws": "^8.5.0"
+  },
+  "peerDependencies": {
     "yjs": "^13.5.29"
   },
   "devDependencies": {

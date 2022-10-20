@@ -30,7 +30,9 @@
   "dependencies": {
     "@hocuspocus/common": "^1.0.0-beta.2",
     "@lifeomic/attempt": "^3.0.2",
-    "lib0": "^0.2.46",
+    "lib0": "^0.2.46"
+  },
+  "peerDependencies": {
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.29"
   },
