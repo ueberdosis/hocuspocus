@@ -9,6 +9,7 @@ import {
 import { Doc } from 'yjs'
 import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
 import axios, { AxiosResponse } from 'axios'
+import { Forbidden } from '@hocuspocus/common'
 
 export enum Events {
   onChange = 'change',
@@ -175,8 +176,8 @@ export class Webhook implements Extension {
         ? JSON.parse(response.data)
         : response.data
     } catch (e) {
-      // eslint-disable-next-line no-throw-literal
-      throw null
+      console.error(`Caught error in extension-webhook: ${e}`)
+      throw Forbidden
     }
   }
 
