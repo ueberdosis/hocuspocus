@@ -29,6 +29,7 @@
     "dist"
   ],
   "dependencies": {
+    "@hocuspocus/common": "^1.0.0-beta.3",
     "@hocuspocus/server": "^1.0.0-beta.3",
     "@hocuspocus/transformer": "^1.0.0-beta.3",
     "axios": "^0.27.2"
