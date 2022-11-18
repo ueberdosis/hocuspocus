@@ -47,7 +47,6 @@ test('doesn’t execute the onAuthenticate callback when no token is passed to t
     })
 
     newHocuspocusProvider(server, {
-    // token: 'SUPER-SECRET-TOKEN',
       onOpen() {
         setTimeout(() => {
           t.pass()
