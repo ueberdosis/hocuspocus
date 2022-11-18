@@ -434,20 +434,20 @@ export class Hocuspocus {
       try {
         const decoder = decoding.createDecoder(data)
         const type = decoding.readVarUint(decoder)
-  
+
         // Okay, we’ve got the authentication message we’re waiting for:
         if (type === MessageType.Auth) {
           // The 2nd integer contains the submessage type
           // which will always be authentication when sent from client -> server
           decoding.readVarUint(decoder)
           const token = decoding.readVarString(decoder)
-  
+
           this.debugger.log({
             direction: 'in',
             type,
             category: 'Token',
           })
-  
+
           this.hooks('onAuthenticate', { token, ...hookPayload }, (contextAdditions: any) => {
             // Hooks are allowed to give us even more context and we’ll merge everything together.
             // We’ll pass the context to other hooks then.
@@ -456,16 +456,16 @@ export class Hocuspocus {
             .then(() => {
               // All `onAuthenticate` hooks passed.
               connection.isAuthenticated = true
-  
+
               // Let the client know that authentication was successful.
               const message = new OutgoingMessage().writeAuthenticated()
-  
+
               this.debugger.log({
                 direction: 'out',
                 type: message.type,
                 category: message.category,
               })
-  
+
               incoming.send(message.toUint8Array())
             })
             .then(() => {
@@ -474,13 +474,13 @@ export class Hocuspocus {
             })
             .catch((error = Forbidden) => {
               const message = new OutgoingMessage().writePermissionDenied(error.reason ?? 'permission-denied')
-  
+
               this.debugger.log({
                 direction: 'out',
                 type: message.type,
                 category: message.category,
               })
-  
+
               // Ensure that the permission denied message is sent before the
               // connection is closed
               incoming.send(message.toUint8Array(), () => {
