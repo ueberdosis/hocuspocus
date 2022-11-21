@@ -9,7 +9,6 @@ import {
   ResetConnection,
   Unauthorized,
   Forbidden,
-  CloseEvent,
   awarenessStatesToArray,
   WsReadyStates,
 } from '@hocuspocus/common'
@@ -206,8 +205,6 @@ export class Hocuspocus {
         .then(() => {
           // let the default websocket server handle the connection if
           // prior hooks don't interfere
-          // TODO: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
-          // @ts-ignore
           webSocketServer.handleUpgrade(request, socket, head, ws => {
             webSocketServer.emit('connection', ws, request)
           })
