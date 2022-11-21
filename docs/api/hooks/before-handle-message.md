@@ -2,7 +2,7 @@
 tableOfContents: true
 ---
 
-# onChange
+# beforeHandleMessage
 
 ## Introduction
 
