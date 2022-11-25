@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.4](https://github.com/ueberdosis/hocuspocus/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2022-11-25)
+
+
+### Bug Fixes
+
+* Crash when websocket receives out of bound characters pre-auth ([#444](https://github.com/ueberdosis/hocuspocus/issues/444)) ([73d8a48](https://github.com/ueberdosis/hocuspocus/commit/73d8a4812a4d9a851c97a52b6d62180a1fa4b56b))
+
+
+
+
+
 # [1.0.0-beta.3](https://github.com/ueberdosis/hocuspocus/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2022-11-03)
 
 **Note:** Version bump only for package @hocuspocus/server
