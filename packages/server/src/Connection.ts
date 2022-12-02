@@ -123,13 +123,11 @@ export class Connection {
         clearInterval(this.pingInterval)
       }
 
-      if (!this.document.hasConnection(this)) {
-        return
+      if (this.document.hasConnection(this)) {
+        this.document.removeConnection(this)
+        this.callbacks.onClose(this.document)
+        this.webSocket.close(event?.code, event?.reason)
       }
-
-      this.document.removeConnection(this)
-      this.callbacks.onClose(this.document)
-      this.webSocket.close(event?.code, event?.reason)
 
       done()
     })
