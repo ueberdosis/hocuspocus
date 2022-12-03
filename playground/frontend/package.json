@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/provider-demos",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "private": true,
   "scripts": {
     "start": "vite",
@@ -8,7 +8,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@hocuspocus/provider": "^1.0.0-beta.5",
+    "@hocuspocus/provider": "^1.0.0-beta.6",
     "@tiptap/extension-collaboration": "^2.0.0-beta.33",
     "@tiptap/starter-kit": "^2.0.0-beta.183",
     "@tiptap/vue-2": "^2.0.0-beta.77",
