@@ -1,6 +1,6 @@
 import { Hocuspocus, Configuration } from '@hocuspocus/server'
 
-export const newHocuspocus = (options?: Partial<Configuration>): Hocuspocus => {
+export const newHocuspocus = (options?: Partial<Configuration>) => {
   const server = new Hocuspocus({
     // We don’t need the logging in testing.
     quiet: true,

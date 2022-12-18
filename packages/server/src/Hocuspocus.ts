@@ -31,6 +31,7 @@ import { onListenPayload } from '.'
 export const defaultConfiguration = {
   name: null,
   port: 80,
+  address: '0.0.0.0',
   timeout: 30000,
   debounce: 2000,
   maxDebounce: 10000,
@@ -240,7 +241,7 @@ export class Hocuspocus {
     this.webSocketServer = webSocketServer
 
     return new Promise((resolve: Function, reject: Function) => {
-      server.listen(this.configuration.port, () => {
+      server.listen(this.configuration.port, this.configuration.address, undefined, () => {
         if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }
@@ -261,13 +262,13 @@ export class Hocuspocus {
   get address(): AddressInfo {
     return (this.httpServer?.address() || {
       port: this.configuration.port,
-      address: '127.0.0.1',
+      address: this.configuration.address,
       family: 'IPv4',
     }) as AddressInfo
   }
 
   get URL(): string {
-    return `127.0.0.1:${this.address.port}`
+    return `${this.configuration.address}:${this.address.port}`
   }
 
   get webSocketURL(): string {
