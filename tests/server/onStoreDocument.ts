@@ -4,8 +4,8 @@ import { HocuspocusProvider } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('calls the onStoreDocument hook before the document is removed from memory', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onStoreDocument() {
         t.pass()
         resolve('done')
@@ -21,10 +21,10 @@ test('calls the onStoreDocument hook before the document is removed from memory'
 })
 
 test('doesn’t remove the document from memory when there’s a new connection established during onStoreDocument is called', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     let anotherProvider: HocuspocusProvider
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       async onStoreDocument() {
         return sleep(1000)
       },
@@ -50,8 +50,8 @@ test('doesn’t remove the document from memory when there’s a new connection 
 })
 
 test('removes the document from memory when there’s no connection after onStoreDocument is called', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onStoreDocument() {
         return sleep(1000)
       },
@@ -74,8 +74,8 @@ test('removes the document from memory when there’s no connection after onStor
 })
 
 test('onStoreDocument callback receives document updates', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onStoreDocument({ document }: onStoreDocumentPayload) {
         const value = document.getArray('foo').get(0)
         t.is(value, 'bar')
@@ -93,11 +93,11 @@ test('onStoreDocument callback receives document updates', async t => {
 })
 
 test('debounces document changes for onStoreDocument hooks', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     let executedOnChange = 0
     let executedOnStoreDocument = 0
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       debounce: 10,
       async onChange() {
         executedOnChange += 1
@@ -130,7 +130,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
 })
 
 test('executes onStoreDocument callback from an extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
 
     class CustomExtension {
       async onStoreDocument({ document }: onStoreDocumentPayload) {
@@ -141,7 +141,7 @@ test('executes onStoreDocument callback from an extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
@@ -156,7 +156,7 @@ test('executes onStoreDocument callback from an extension', async t => {
 })
 
 test('stops when one of the onStoreDocument hooks throws an error', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class BreakingTheChain {
       async onStoreDocument() {
         setTimeout(() => {
@@ -177,7 +177,7 @@ test('stops when one of the onStoreDocument hooks throws an error', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new BreakingTheChain(),
         new NotExecuted(),
@@ -193,9 +193,9 @@ test('stops when one of the onStoreDocument hooks throws an error', async t => {
 })
 
 test('has the server instance', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       async onStoreDocument({ instance }) {
         t.is(instance, server)
 
@@ -212,7 +212,7 @@ test('has the server instance', async t => {
 })
 
 test('runs hooks in the given order', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const triggered: string[] = []
 
     class Running {
@@ -234,7 +234,7 @@ test('runs hooks in the given order', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new Running(),
         new BreakTheChain(),
@@ -263,7 +263,7 @@ test('runs hooks in the given order', async t => {
 })
 
 test('allows to overwrite the order of extension with a priority', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const triggered: string[] = []
 
     class Running {
@@ -293,7 +293,7 @@ test('allows to overwrite the order of extension with a priority', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       afterStoreDocument: async () => {
         t.deepEqual(triggered, [
           'zero',

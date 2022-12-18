@@ -4,22 +4,21 @@ import fetch from 'node-fetch'
 import { newHocuspocus } from '../utils'
 
 test('executes the onRequest callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onListen() {
-        await fetch(`${server.httpURL}/foobar`)
-      },
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onRequest({ request }: onRequestPayload) {
         t.is(request.url, '/foobar')
 
         resolve('done')
       },
     })
+
+    await fetch(`${server.httpURL}/foobar`)
   })
 })
 
 test('executes the onRequest callback of a custom extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onRequest({ response }: onRequestPayload) {
         return new Promise((resolve, reject) => {
@@ -32,32 +31,21 @@ test('executes the onRequest callback of a custom extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
-      async onListen() {
-        const response = await fetch(server.httpURL)
-
-        t.is(await response.text(), 'I like cats.')
-
-        resolve('done')
-      },
     })
+
+    const response = await fetch(server.httpURL)
+    t.is(await response.text(), 'I like cats.')
+    resolve('done')
   })
 })
 
 test('can intercept specific URLs', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onListen() {
-        const interceptedResponse = await fetch(`${server.httpURL}/foobar`)
-        t.is(await interceptedResponse.text(), 'I like cats.')
-
-        const regularResponse = await fetch(server.httpURL)
-        t.is(await regularResponse.text(), 'OK')
-        resolve('done')
-      },
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onRequest({ response, request }: onRequestPayload) {
         if (request.url === '/foobar') {
           return new Promise((resolve, reject) => {
@@ -70,19 +58,25 @@ test('can intercept specific URLs', async t => {
         }
       },
     })
+
+    const interceptedResponse = await fetch(`${server.httpURL}/foobar`)
+    t.is(await interceptedResponse.text(), 'I like cats.')
+
+    const regularResponse = await fetch(server.httpURL)
+    t.is(await regularResponse.text(), 'OK')
+    resolve('done')
   })
 })
 
 test('has the instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onListen() {
-        await fetch(`${server.httpURL}/foobar`)
-      },
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onRequest({ instance }) {
         t.is(instance, server)
         resolve('done')
       },
     })
+
+    await fetch(`${server.httpURL}/foobar`)
   })
 })

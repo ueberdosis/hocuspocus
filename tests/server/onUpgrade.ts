@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onUpgrade callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onUpgrade() {
         t.pass()
         resolve('done')
@@ -15,7 +15,7 @@ test('executes the onUpgrade callback', async t => {
 })
 
 test('executes the onUpgrade callback from an extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onUpgrade() {
         t.pass()
@@ -23,7 +23,7 @@ test('executes the onUpgrade callback from an extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
@@ -34,8 +34,8 @@ test('executes the onUpgrade callback from an extension', async t => {
 })
 
 test('has the server instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
 
       async onUpgrade({ instance }) {
         t.is(instance, server)
@@ -48,8 +48,8 @@ test('has the server instance', async t => {
 })
 
 test('has the request', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
 
       async onUpgrade({ request }) {
         t.is(request.url, '/hocuspocus-test')
@@ -62,8 +62,8 @@ test('has the request', async t => {
 })
 
 test('has the socket', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
 
       async onUpgrade({ socket }) {
         t.truthy(socket)
@@ -76,8 +76,8 @@ test('has the socket', async t => {
 })
 
 test('has the head', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
 
       async onUpgrade({ head }) {
         t.truthy(head)

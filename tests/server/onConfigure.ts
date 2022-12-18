@@ -1,20 +1,24 @@
 import test from 'ava'
+import { Hocuspocus } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('onConfigure callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onConfigure({ instance }) {
-        t.is(instance, server)
+  await new Promise(async resolve => {
+    let givenInstance = null
 
-        resolve('done')
+    const server = await newHocuspocus({
+      async onConfigure({ instance }) {
+        givenInstance = instance
       },
     })
+
+    t.is(givenInstance as unknown as Hocuspocus, server)
+    resolve('done')
   })
 })
 
 test('executes onConfigure callback from an extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onConfigure() {
         t.pass()
@@ -22,7 +26,7 @@ test('executes onConfigure callback from an extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
@@ -33,7 +37,7 @@ test('executes onConfigure callback from an extension', async t => {
 })
 
 test('has the configuration', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     newHocuspocus({
       port: 1337,
       async onConfigure({ configuration }) {
@@ -46,22 +50,10 @@ test('has the configuration', async t => {
 })
 
 test('has the version', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     newHocuspocus({
       async onConfigure({ version }) {
         t.truthy(version)
-
-        resolve('done')
-      },
-    })
-  })
-})
-
-test('has the instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
-      async onConfigure({ instance }) {
-        t.is(instance, server)
 
         resolve('done')
       },

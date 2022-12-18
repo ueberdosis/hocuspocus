@@ -4,8 +4,8 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('returns 0 connections when there’s no one connected', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     t.is(server.getConnectionsCount(), 0)
 
@@ -14,8 +14,8 @@ test('returns 0 connections when there’s no one connected', async t => {
 })
 
 test('returns 0 connections when the connection attempt fails', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect() {
         throw new Error()
       },
@@ -31,8 +31,8 @@ test('returns 0 connections when the connection attempt fails', async t => {
 })
 
 test('outputs the total connections', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       onSynced() {
@@ -51,7 +51,7 @@ test('outputs the total connections', async t => {
 })
 
 test('adds and removes connections properly', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   const providers = [
     newHocuspocusProvider(server),

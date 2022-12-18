@@ -4,7 +4,7 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('closes all connections', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   const provider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
@@ -34,7 +34,7 @@ test('closes all connections', async t => {
 })
 
 test('closes a specific connection when a documentName is passed', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   const provider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
@@ -59,8 +59,8 @@ test('closes a specific connection when a documentName is passed', async t => {
 })
 
 test('uses a proper close event', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       name: 'hocuspocus-test',

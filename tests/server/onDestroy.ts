@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus } from '../utils'
 
 test('executes the onDestroy hook and has the instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onDestroy({ instance }) {
         t.is(instance, server)
 
@@ -16,7 +16,7 @@ test('executes the onDestroy hook and has the instance', async t => {
 })
 
 test('executes the onDestroy hook from a custom extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onDestroy() {
         t.pass()
@@ -25,7 +25,7 @@ test('executes the onDestroy hook from a custom extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],

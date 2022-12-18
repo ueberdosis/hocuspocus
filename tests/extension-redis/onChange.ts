@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('syncs updates between servers and clients', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,
@@ -14,7 +14,7 @@ test('syncs updates between servers and clients', async t => {
       ],
     })
 
-    const anotherServer = newHocuspocus({
+    const anotherServer = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,

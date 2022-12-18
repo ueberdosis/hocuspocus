@@ -6,7 +6,7 @@ import { uuidv4 } from 'lib0/random'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('stores documents without conflicts', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     let anotherProvider: HocuspocusProvider
 
     class CustomStorageExtension {
@@ -18,7 +18,7 @@ test('stores documents without conflicts', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       name: 'redis-1',
       extensions: [
         new Redis({
@@ -30,7 +30,7 @@ test('stores documents without conflicts', async t => {
       ],
     })
 
-    const anotherServer = newHocuspocus({
+    const anotherServer = await newHocuspocus({
       name: 'redis-2',
       extensions: [
         new Redis({
@@ -57,10 +57,10 @@ test('stores documents without conflicts', async t => {
 })
 
 test('stores documents when the last client disconnects', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     let provider: HocuspocusProvider
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new Redis({
           prefix: 'extension-redis/onStoreDocument',

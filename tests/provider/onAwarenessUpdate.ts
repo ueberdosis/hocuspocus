@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('onAwarenessUpdate callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({ })
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ })
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
@@ -20,8 +20,8 @@ test('onAwarenessUpdate callback is executed', async t => {
 })
 
 test('shares awareness state with other users', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({ })
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ })
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
@@ -53,8 +53,8 @@ test('shares awareness state with other users', async t => {
 })
 
 test('does not share awareness state with users in other documents', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({ })
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ })
 
     newHocuspocusProvider(server, {
       async onConnect() {

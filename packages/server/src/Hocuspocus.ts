@@ -13,6 +13,7 @@ import {
   awarenessStatesToArray,
   WsReadyStates,
 } from '@hocuspocus/common'
+import { ListenOptions } from 'net'
 import {
   MessageType,
   Configuration,
@@ -241,7 +242,10 @@ export class Hocuspocus {
     this.webSocketServer = webSocketServer
 
     return new Promise((resolve: Function, reject: Function) => {
-      server.listen(this.configuration.port, this.configuration.address, undefined, () => {
+      server.listen({
+        port: this.configuration.port,
+        host: this.configuration.address,
+      } as ListenOptions, () => {
         if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }

@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onMessage callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({ })
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ })
 
     newHocuspocusProvider(server, {
       onMessage() {
@@ -15,8 +15,8 @@ test('executes the onMessage callback', async t => {
 })
 
 test("executes the on('message') callback", async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server)
 

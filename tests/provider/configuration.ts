@@ -2,7 +2,7 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('has default configuration (maxDelay = 30000)', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const client = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
   })
@@ -11,7 +11,7 @@ test('has default configuration (maxDelay = 30000)', async t => {
 })
 
 test('overwrites the default configuration', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const client = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
     maxDelay: 10000,

@@ -11,7 +11,5 @@ export const newHocuspocus = (options?: Partial<Configuration>) => {
     ...options,
   })
 
-  server.listen()
-
-  return server
+  return server.listen()
 }

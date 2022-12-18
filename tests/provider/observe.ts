@@ -6,7 +6,7 @@ import { retryableAssertion } from '../utils/retryableAssertion'
 test('observe is called just once', async t => {
   let count = 0
 
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const provider = newHocuspocusProvider(server)
 
   const type = provider.document.get(
@@ -31,7 +31,7 @@ test('observe is called just once', async t => {
 test('observe is called for every single change', async t => {
   let count = 0
 
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const provider = newHocuspocusProvider(server)
 
   const type = provider.document.get(
@@ -57,7 +57,7 @@ test('observe is called for every single change', async t => {
 test('observe is called once for a single transaction', async t => {
   let count = 0
 
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const provider = newHocuspocusProvider(server)
 
   const type = provider.document.get(
