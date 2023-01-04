@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('onDisconnect callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
@@ -18,8 +18,8 @@ test('onDisconnect callback is executed', async t => {
 })
 
 test("on('disconnect') callback is executed", async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server)
 

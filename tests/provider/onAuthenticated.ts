@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onAuthenticated callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -22,8 +22,8 @@ test('executes the onAuthenticated callback', async t => {
 })
 
 test('executes the onAuthenticated callback when token is provided as a function that returns a promise', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -42,8 +42,8 @@ test('executes the onAuthenticated callback when token is provided as a function
 })
 
 test('executes the onAuthenticated callback when token is provided as a function that returns a string', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()

@@ -8,7 +8,7 @@ import {
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test.skip('closes connections on other instances', async t => {
-  const server = newHocuspocus({
+  const server = await newHocuspocus({
     extensions: [
       new Redis({
         ...redisConnectionSettings,
@@ -18,7 +18,7 @@ test.skip('closes connections on other instances', async t => {
     ],
   })
 
-  const anotherServer = newHocuspocus({
+  const anotherServer = await newHocuspocus({
     extensions: [
       new Redis({
         ...redisConnectionSettings,

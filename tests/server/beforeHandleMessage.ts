@@ -3,7 +3,7 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('beforeHandleMessage gets called in proper order', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const mockContext = {
       user: 123,
     }
@@ -15,7 +15,7 @@ test('beforeHandleMessage gets called in proper order', async t => {
     ]
     let callNumber = 0
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       async onConnect() {
         return mockContext
       },
@@ -52,8 +52,8 @@ test('beforeHandleMessage callback is called for every new client', async t => {
   let onConnectCount = 0
   let beforeHandleMessageCount = 0
 
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect() {
         onConnectCount += 1
       },
@@ -84,8 +84,8 @@ test('beforeHandleMessage callback is called for every new client', async t => {
 })
 
 test('an exception thrown in beforeHandleMessage closes the connection', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async beforeHandleMessage() {
         throw new Error()
       },

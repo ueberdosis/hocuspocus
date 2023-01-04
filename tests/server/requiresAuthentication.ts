@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('requires a token when the onAuthenticate hook is present', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         //
       },
@@ -15,8 +15,8 @@ test('requires a token when the onAuthenticate hook is present', async t => {
 })
 
 test('doesn’t require a token when the onAuthenticate hook isn’t present', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     t.is(server.requiresAuthentication, false)
     resolve('done')
@@ -24,14 +24,14 @@ test('doesn’t require a token when the onAuthenticate hook isn’t present', a
 })
 
 test('requires a token when the onAuthenticate hook is present in a extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onAuthenticate() {
       //
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
       // @ts-ignore
         new CustomExtension(),

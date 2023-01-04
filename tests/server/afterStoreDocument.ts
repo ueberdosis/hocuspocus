@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('calls the afterStoreDocument hook', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async afterStoreDocument() {
         t.pass()
 
@@ -20,7 +20,7 @@ test('calls the afterStoreDocument hook', async t => {
 })
 
 test('executes afterStoreDocument callback from a custom extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async afterStoreDocument() {
         t.pass()
@@ -29,7 +29,7 @@ test('executes afterStoreDocument callback from a custom extension', async t => 
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],

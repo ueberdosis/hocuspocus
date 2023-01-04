@@ -4,12 +4,12 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('onChange callback receives updates', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const mockContext = {
       user: 123,
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       async onConnect() {
         return mockContext
       },
@@ -32,7 +32,7 @@ test('onChange callback receives updates', async t => {
 })
 
 test('executes onChange callback from an extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onChange({ document }: onChangePayload) {
         const value = document.getArray('foo').get(0)
@@ -43,7 +43,7 @@ test('executes onChange callback from an extension', async t => {
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
@@ -58,8 +58,8 @@ test('executes onChange callback from an extension', async t => {
 })
 
 test('onChange callback is not called after onLoadDocument', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onChange(data) {
         t.fail()
       },
@@ -80,8 +80,8 @@ test('onChange callback is not called after onLoadDocument', async t => {
 })
 
 test('has the server instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onChange({ instance }) {
         t.is(instance, server)
 
@@ -101,8 +101,8 @@ test('onChange callback isn’t called for every new client', async t => {
   let onConnectCount = 0
   let onChangeCount = 0
 
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect() {
         onConnectCount += 1
       },

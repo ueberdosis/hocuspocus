@@ -3,8 +3,8 @@ import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onAuthenticate callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         t.pass()
         resolve('done')
@@ -18,7 +18,7 @@ test('executes the onAuthenticate callback', async t => {
 })
 
 test('executes the onAuthenticate callback from a custom extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onAuthenticate() {
         t.pass()
@@ -26,7 +26,7 @@ test('executes the onAuthenticate callback from a custom extension', async t => 
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
@@ -39,8 +39,8 @@ test('executes the onAuthenticate callback from a custom extension', async t => 
 })
 
 test('doesn’t execute the onAuthenticate callback when no token is passed to the provider', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         t.fail()
       },
@@ -58,8 +58,8 @@ test('doesn’t execute the onAuthenticate callback when no token is passed to t
 })
 
 test('doesn’t send any message when no token is provided, but the onAuthenticate hook is configured', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         t.fail()
       },
@@ -80,8 +80,8 @@ test('doesn’t send any message when no token is provided, but the onAuthentica
 })
 
 test('confirms the `Token` message with an `Authenticated` message', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
       // success
         return true
@@ -104,8 +104,8 @@ test('confirms the `Token` message with an `Authenticated` message', async t => 
 })
 
 test('replies with a `PermissionDenied` message when authentication fails', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         // fail
         throw Error()
@@ -129,12 +129,12 @@ test('replies with a `PermissionDenied` message when authentication fails', asyn
 })
 
 test('passes context from onAuthenticate to onLoadDocument', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const mockContext = {
       user: 123,
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       async onAuthenticate() {
         return mockContext
       },
@@ -152,8 +152,8 @@ test('passes context from onAuthenticate to onLoadDocument', async t => {
 })
 
 test('ignores the authentication token when having no onAuthenticate hook', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
@@ -166,8 +166,8 @@ test('ignores the authentication token when having no onAuthenticate hook', asyn
 })
 
 test('ignores the onAuthenticate hook when `authenticationRequired` is set to false', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         connection.requiresAuthentication = false
       },
@@ -186,8 +186,8 @@ test('ignores the onAuthenticate hook when `authenticationRequired` is set to fa
 })
 
 test('has the authentication token', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate({ token }: onAuthenticatePayload) {
         t.is(token, 'SUPER-SECRET-TOKEN')
 
@@ -202,8 +202,8 @@ test('has the authentication token', async t => {
 })
 
 test('stops when the onAuthenticate hook throws an Error', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate() {
         throw new Error()
       },
@@ -224,8 +224,8 @@ test('stops when the onAuthenticate hook throws an Error', async t => {
 })
 
 test('connects with the correct token', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate({ token }: onAuthenticatePayload) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()

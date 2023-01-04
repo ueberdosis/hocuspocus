@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('onOpen callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       onOpen() {
@@ -15,8 +15,8 @@ test('onOpen callback is executed', async t => {
 })
 
 test("on('open') callback is executed", async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server)
 

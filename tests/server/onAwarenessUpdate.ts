@@ -3,8 +3,8 @@ import { onAwarenessUpdatePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('executes the onAwarenessUpdate callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAwarenessUpdate({ states }) {
         t.is(states.length, 1)
         t.is(states[0].foo, 'bar')
@@ -22,7 +22,7 @@ test('executes the onAwarenessUpdate callback', async t => {
 })
 
 test('executes the onAwarenessUpdate callback from a custom extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onAwarenessUpdate({ states }: onAwarenessUpdatePayload) {
         t.is(states.length, 1)
@@ -32,7 +32,7 @@ test('executes the onAwarenessUpdate callback from a custom extension', async t 
       }
     }
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],

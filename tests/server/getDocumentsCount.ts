@@ -5,14 +5,14 @@ import {
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('documents count is zero by default', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   t.is(server.getDocumentsCount(), 0)
 })
 
 test('documents count is 1 when one provider is connected', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       onSynced() {
@@ -25,7 +25,7 @@ test('documents count is 1 when one provider is connected', async t => {
 })
 
 test('the same document name counts as one document', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   const providers = [
     newHocuspocusProvider(server, { name: 'foobar' }),
@@ -44,7 +44,7 @@ test('the same document name counts as one document', async t => {
 })
 
 test('adds and removes different documents properly', async t => {
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
 
   const providers = [
     newHocuspocusProvider(server, { name: 'foo-1' }),
@@ -67,7 +67,7 @@ test('adds and removes different documents properly', async t => {
 
 test('adds and removes random number of documents properly', async t => {
   // random number of providers
-  const server = newHocuspocus()
+  const server = await newHocuspocus()
   const numberOfProviders = randomInteger(10, 100)
   const providers = []
   for (let index = 0; index < numberOfProviders; index += 1) {

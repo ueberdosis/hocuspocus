@@ -3,8 +3,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('executes the onConnect callback', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect() {
         t.pass()
         resolve('done')
@@ -16,8 +16,8 @@ test('executes the onConnect callback', async t => {
 })
 
 test('refuses connection when an error is thrown', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect() {
         throw new Error()
       },
@@ -33,8 +33,8 @@ test('refuses connection when an error is thrown', async t => {
 })
 
 test('executes the onConnect callback from an extension', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     class CustomExtension {
       async onConnect() {
@@ -54,8 +54,8 @@ test('executes the onConnect callback from an extension', async t => {
 })
 
 test('has the document name', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ documentName }) {
         t.is(documentName, 'hocuspocus-test')
         resolve('done')
@@ -67,8 +67,8 @@ test('has the document name', async t => {
 })
 
 test('sets the provider to readOnly', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         connection.readOnly = true
       },
@@ -104,8 +104,8 @@ const weirdDocumentNames = [
 
 weirdDocumentNames.forEach(weirdDocumentName => {
   test(`encodes weird document names: "${weirdDocumentName}"`, async t => {
-    await new Promise(resolve => {
-      const server = newHocuspocus({
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
         async onConnect({ documentName }) {
           t.is(documentName, weirdDocumentName)
 
@@ -121,8 +121,8 @@ weirdDocumentNames.forEach(weirdDocumentName => {
 })
 
 test('stops when the onConnect hook throws an Error', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       onConnect() {
         throw new Error()
       },
@@ -142,8 +142,8 @@ test('stops when the onConnect hook throws an Error', async t => {
 })
 
 test('stops when the onConnect hook returns a rejecting promise', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       onConnect() {
         return Promise.reject()
       },
@@ -163,8 +163,8 @@ test('stops when the onConnect hook returns a rejecting promise', async t => {
 })
 
 test('has the request parameters', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ requestParameters }) {
         t.is(requestParameters instanceof URLSearchParams, true)
         t.is(requestParameters.has('foo'), true)
@@ -183,8 +183,8 @@ test('has the request parameters', async t => {
 })
 
 test('has the request headers', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ requestHeaders }) {
         t.is(requestHeaders.connection !== undefined, true)
         resolve('done')
@@ -196,8 +196,8 @@ test('has the request headers', async t => {
 })
 
 test('has the whole request', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ request }) {
         t.is(request.url, '/hocuspocus-test')
         resolve('done')
@@ -209,8 +209,8 @@ test('has the whole request', async t => {
 })
 
 test('has the socketId', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ socketId }) {
         t.is(socketId !== undefined, true)
         resolve('done')
@@ -222,8 +222,8 @@ test('has the socketId', async t => {
 })
 
 test('has the server instance', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ instance }) {
         t.is(instance, server)
         resolve('done')
@@ -235,8 +235,8 @@ test('has the server instance', async t => {
 })
 
 test('defaults to readOnly = false', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         t.is(connection.readOnly, false)
         resolve('done')
@@ -248,10 +248,10 @@ test('defaults to readOnly = false', async t => {
 })
 
 test('cleans up correctly when provider disconnects during onLoadDocument', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     let provider: HocuspocusProvider
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       onLoadDocument: async () => {
         provider.disconnect()
 
@@ -274,8 +274,8 @@ test('cleans up correctly when provider disconnects during onLoadDocument', asyn
 })
 
 test('the connections count is correct', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async connected() {
         t.is(server.getConnectionsCount(), 1)
         resolve('done')
@@ -287,8 +287,8 @@ test('the connections count is correct', async t => {
 })
 
 test('has connection.readOnly', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         t.is(connection.readOnly, false)
         resolve('done')
@@ -300,8 +300,8 @@ test('has connection.readOnly', async t => {
 })
 
 test('has connection.requiresAuthentication', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         t.is(connection.requiresAuthentication, false)
         resolve('done')
@@ -313,8 +313,8 @@ test('has connection.requiresAuthentication', async t => {
 })
 
 test('has connection.isAuthenticated', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ connection }) {
         t.is(connection.isAuthenticated, false)
         resolve('done')
@@ -326,8 +326,8 @@ test('has connection.isAuthenticated', async t => {
 })
 
 test('has the request', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect({ request }) {
         t.is(request.complete, true)
         resolve('done')

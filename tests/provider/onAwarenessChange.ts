@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('onAwarenessChange callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
@@ -20,8 +20,8 @@ test('onAwarenessChange callback is executed', async t => {
 })
 
 test('onAwarenessChange callback is executed, even when no awareness fields are set', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       connect: false,
@@ -44,8 +44,8 @@ test('onAwarenessChange callback is executed, even when no awareness fields are 
 })
 
 test('onAwarenessChange callback is executed on provider destroy', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       maxAttempts: 1,
@@ -61,8 +61,8 @@ test('onAwarenessChange callback is executed on provider destroy', async t => {
 })
 
 test('gets the current awareness states from the server', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     server.enableDebugging()
 
@@ -105,8 +105,8 @@ test('gets the current awareness states from the server', async t => {
 })
 
 test('shares awareness state with other users', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
@@ -138,8 +138,8 @@ test('shares awareness state with other users', async t => {
 })
 
 test('does not share awareness state with users in other documents', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       async onConnect() {

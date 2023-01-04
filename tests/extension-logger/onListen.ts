@@ -7,10 +7,10 @@ const fakeLogger = (message: any) => {
 }
 
 test('logs something', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       extensions: [
         new Logger({
           log: spy,
@@ -30,14 +30,11 @@ test('logs something', async t => {
 })
 
 test('uses the global instance name', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const server = newHocuspocus({
+    const server = await newHocuspocus({
       name: 'FOOBAR123',
-      async onListen() {
-        server.destroy()
-      },
       async onDestroy() {
         t.is(spy.args[spy.args.length - 1][0].includes('FOOBAR123'), true, 'Expected the Logger to use the configured instance name.')
 
@@ -49,17 +46,17 @@ test('uses the global instance name', async t => {
         }),
       ],
     })
+
+    await server.destroy()
   })
+
 })
 
 test('doesn’t log anything if all messages are disabled', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const server = newHocuspocus({
-      async onListen() {
-        server.destroy()
-      },
+    const server = await newHocuspocus({
       async onDestroy() {
         t.is(spy.callCount, 0, 'Expected the Logger to not log anything.')
 
@@ -82,5 +79,7 @@ test('doesn’t log anything if all messages are disabled', async t => {
         }),
       ],
     })
+
+    await server.destroy()
   })
 })

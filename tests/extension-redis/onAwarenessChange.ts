@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
 
 test('syncs existing awareness state', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,
@@ -15,7 +15,7 @@ test('syncs existing awareness state', async t => {
       ],
     })
 
-    const anotherServer = newHocuspocus({
+    const anotherServer = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,
@@ -49,8 +49,8 @@ test('syncs existing awareness state', async t => {
 })
 
 test('syncs awareness between servers and clients', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,
@@ -59,7 +59,7 @@ test('syncs awareness between servers and clients', async t => {
       ],
     })
 
-    const anotherServer = newHocuspocus({
+    const anotherServer = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,

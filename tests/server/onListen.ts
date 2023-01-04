@@ -2,7 +2,7 @@ import test from 'ava'
 import { newHocuspocus } from '../utils'
 
 test('executes the onListen callback', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     newHocuspocus({
       async onListen() {
         t.pass()
@@ -13,7 +13,7 @@ test('executes the onListen callback', async t => {
 })
 
 test('executes the onListen callback from an extension', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     class CustomExtension {
       async onListen() {
         t.pass()
@@ -30,7 +30,7 @@ test('executes the onListen callback from an extension', async t => {
 })
 
 test('has the configuration', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     newHocuspocus({
       async onListen({ configuration }) {
         t.is(configuration.quiet, true)
@@ -41,7 +41,7 @@ test('has the configuration', async t => {
 })
 
 test('has the port', async t => {
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     newHocuspocus({
       async onListen({ port }) {
         t.truthy(port)

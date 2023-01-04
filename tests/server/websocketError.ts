@@ -3,8 +3,8 @@ import { onAuthenticatePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils'
 
 test('does not crash when invalid opcode is sent', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
@@ -26,10 +26,10 @@ test('does not crash when invalid opcode is sent', async t => {
 })
 
 test('does not crash when invalid utf-8 sequence is sent pre-authentication', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate(data: onAuthenticatePayload) {
-        return new Promise(resolve => {
+        return new Promise(async resolve => {
           setTimeout(resolve, 2000)
         })
       },
@@ -53,10 +53,10 @@ test('does not crash when invalid utf-8 sequence is sent pre-authentication', as
 })
 
 test('does not crash when invalid utf-8 sequence is sent post-authentication', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onAuthenticate(data: onAuthenticatePayload) {
-        return new Promise(resolve => {
+        return new Promise(async resolve => {
           setTimeout(resolve, 2000)
         })
       },

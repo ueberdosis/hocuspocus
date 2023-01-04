@@ -48,7 +48,7 @@ test('should take a custom port and a callback', async t => {
     port: 0,
   })
 
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     server.listen(4002, () => {
       resolve('done')
     })
@@ -65,7 +65,7 @@ test('should execute a callback', async t => {
     port: 0,
   })
 
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     server.listen(async () => {
       resolve('done')
     })
@@ -81,7 +81,7 @@ test('should have the custom port as a parameter in the callback', async t => {
     port: 0,
   })
 
-  await new Promise(resolve => {
+  await new Promise(async resolve => {
     server.listen(async ({ port }) => {
       t.is(port, server.address.port)
       resolve('done')

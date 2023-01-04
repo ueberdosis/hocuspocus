@@ -2,8 +2,8 @@ import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('onSynced callback is executed', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     newHocuspocusProvider(server, {
       onSynced() {
@@ -15,8 +15,8 @@ test('onSynced callback is executed', async t => {
 })
 
 test("on('synced') callback is executed", async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus()
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server)
 
@@ -28,8 +28,8 @@ test("on('synced') callback is executed", async t => {
 })
 
 test('onSynced callback is executed, even when the onConnect takes longer', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onConnect(data) {
         await sleep(100)
       },
@@ -45,8 +45,8 @@ test('onSynced callback is executed, even when the onConnect takes longer', asyn
 })
 
 test('onSynced callback is executed when the document is actually synced', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
@@ -66,8 +66,8 @@ test('onSynced callback is executed when the document is actually synced', async
 })
 
 test('send all messages according to the protocol', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
@@ -106,8 +106,8 @@ test('send all messages according to the protocol', async t => {
 })
 
 test('onSynced callback is executed when the document is actually synced, even if it takes longer', async t => {
-  await new Promise(resolve => {
-    const server = newHocuspocus({
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
       async onLoadDocument({ document }) {
         await sleep(100)
 
