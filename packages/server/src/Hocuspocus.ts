@@ -25,7 +25,7 @@ import {
 import Document from './Document'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
-import meta from '../package.json' assert { type: 'json' }
+import meta from '../package.json' assert {type: 'json'}
 import { Debugger } from './Debugger'
 import { onListenPayload } from '.'
 
@@ -498,8 +498,9 @@ export class Hocuspocus {
           incomingMessageQueue.push(data)
         }
 
-      // Catch errors due to failed decoding of data
+        // Catch errors due to failed decoding of data
       } catch (error) {
+        console.error(error)
         incoming.close(Unauthorized.code, Unauthorized.reason)
         incoming.off('message', queueIncomingMessageListener)
       }
@@ -522,7 +523,14 @@ export class Hocuspocus {
       })
       .catch((error = Forbidden) => {
         // if a hook interrupts, close the websocket connection
-        incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+        try {
+          incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+        } catch (closeError) {
+          // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
+          console.error(closeError)
+          incoming.close(Unauthorized.code, Unauthorized.reason)
+        }
+
         incoming.off('message', queueIncomingMessageListener)
       })
   }
