@@ -36,10 +36,6 @@ export interface Extension {
   onConnect?(data: onConnectPayload): Promise<any>,
   connected?(data: connectedPayload): Promise<any>,
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
-  /**
-   * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
-   */
-  onCreateDocument?(data: onLoadDocumentPayload): Promise<any>,
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
@@ -59,10 +55,6 @@ export type HookName =
   'onConnect' |
   'connected' |
   'onAuthenticate' |
-  /**
-   * @deprecated onCreateDocument is deprecated, use onLoadDocument instead
-   */
-  'onCreateDocument' |
   'onLoadDocument' |
   'afterLoadDocument' |
   'beforeHandleMessage' |

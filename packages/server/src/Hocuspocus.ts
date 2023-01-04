@@ -9,7 +9,6 @@ import {
   ResetConnection,
   Unauthorized,
   Forbidden,
-  CloseEvent,
   awarenessStatesToArray,
   WsReadyStates,
 } from '@hocuspocus/common'
@@ -43,8 +42,6 @@ export const defaultConfiguration = {
   },
 }
 
-const defaultOnCreateDocument = () => new Promise(r => r(null))
-
 /**
  * Hocuspocus Server
  */
@@ -59,7 +56,6 @@ export class Hocuspocus {
     connected: () => new Promise(r => r(null)),
     beforeHandleMessage: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
-    onCreateDocument: defaultOnCreateDocument,
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
     afterStoreDocument: () => new Promise(r => r(null)),
@@ -92,18 +88,6 @@ export class Hocuspocus {
       ...configuration,
     }
 
-    /**
-     * The `onCreateDocument` hook has been renamed to `onLoadDocument`.
-     * We’ll keep this workaround to support the deprecated hook for a while, but output a warning.
-     */
-    let onLoadDocument
-    if (this.configuration.onCreateDocument !== defaultOnCreateDocument) {
-      console.warn('[hocuspocus warn]: The onCreateDocument hook has been renamed. Use the onLoadDocument hook instead.')
-      onLoadDocument = this.configuration.onCreateDocument
-    } else {
-      onLoadDocument = this.configuration.onLoadDocument
-    }
-
     this.configuration.extensions.sort((a, b) => {
       const one = typeof a.priority === 'undefined' ? 100 : a.priority
       const two = typeof b.priority === 'undefined' ? 100 : b.priority
@@ -126,7 +110,7 @@ export class Hocuspocus {
       onConnect: this.configuration.onConnect,
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
-      onLoadDocument,
+      onLoadDocument: this.configuration.onLoadDocument,
       beforeHandleMessage: this.configuration.beforeHandleMessage,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
@@ -221,8 +205,6 @@ export class Hocuspocus {
         .then(() => {
           // let the default websocket server handle the connection if
           // prior hooks don't interfere
-          // TODO: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
-          // @ts-ignore
           webSocketServer.handleUpgrade(request, socket, head, ws => {
             webSocketServer.emit('connection', ws, request)
           })

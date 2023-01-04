@@ -1,19 +1,6 @@
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
-test('still executes the deprecated onCreateDocument callback', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onCreateDocument() {
-        t.pass()
-        resolve('done')
-      },
-    })
-
-    newHocuspocusProvider(server)
-  })
-})
-
 test('executes the onLoadDocument callback', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
