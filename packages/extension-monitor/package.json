@@ -59,7 +59,7 @@
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
-    "autoprefixer": "^9.7.3",
+    "autoprefixer": "^10.4.13",
     "collect.js": "^4.32.0",
     "moment": "^2.29.1",
     "parcel-bundler": "^1.12.3",
