@@ -32,7 +32,7 @@
     "@hocuspocus/common": "^1.0.0-beta.6",
     "@hocuspocus/server": "^1.0.0-beta.6",
     "@hocuspocus/transformer": "^1.0.0-beta.6",
-    "axios": "^0.27.2"
+    "axios": "^1.2.2"
   },
   "peerDependencies": {
     "yjs": "^13.5.29"
