@@ -47,7 +47,7 @@
     "node-os-utils": "^1.3.6",
     "node-static": "^0.7.11",
     "public-ip": "^6.0.1",
-    "tailwindcss-font-inter": "^2.0.2",
+    "tailwindcss-font-inter": "^3.0.1",
     "vue": "^2.6.14",
     "vue-plotly": "^1.1.0",
     "vue-virtual-scroller": "^1.0.10",
