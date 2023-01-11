@@ -10,11 +10,75 @@ updates:
     schedule:
       interval: 'weekly'
       day: 'monday'
-    reviewers:
-      - 'bdbch'
 
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "packages/cli"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/common"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-database"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-logger"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-monitor"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-redis"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-sqlite"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-throttle"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/extension-webhook"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/provider"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/server"
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+
+  - package-ecosystem: "npm"
+    directory: "packages/transformer"
     schedule:
       interval: 'weekly'
       day: 'monday'
