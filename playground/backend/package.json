@@ -27,6 +27,7 @@
     "yjs": "^13.5.29"
   },
   "devDependencies": {
+    "@types/koa": "^2.13.5",
     "nodemon": "^2.0.15",
     "ts-node": "^10.7.0"
   }

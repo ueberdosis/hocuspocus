@@ -23,8 +23,9 @@
     },
     "lib": [
       "esnext",
-      "dom",
-    ]
+      "dom"
+    ],
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts"
