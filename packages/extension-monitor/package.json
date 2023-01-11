@@ -57,7 +57,7 @@
     "yjs": "^13.5.29"
   },
   "devDependencies": {
-    "@fullhuman/postcss-purgecss": "^3.0.0",
+    "@fullhuman/postcss-purgecss": "^5.0.0",
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^10.4.13",
     "collect.js": "^4.32.0",
