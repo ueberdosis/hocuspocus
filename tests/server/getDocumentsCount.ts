@@ -1,6 +1,6 @@
 import test from 'ava'
 import {
-  newHocuspocus, newHocuspocusProvider, randomInteger, sleep,
+  newHocuspocus, newHocuspocusProvider, randomInteger,
 } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
@@ -36,7 +36,7 @@ test('the same document name counts as one document', async t => {
     tt.is(server.getDocumentsCount(), 1)
   })
 
-  providers.forEach(provider => provider.disconnect())
+  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
 
   await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
@@ -58,7 +58,7 @@ test('adds and removes different documents properly', async t => {
     tt.is(server.getDocumentsCount(), 5)
   })
 
-  providers.forEach(provider => provider.disconnect())
+  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
 
   await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
@@ -83,6 +83,7 @@ test('adds and removes random number of documents properly', async t => {
   const numberOfDisconnects = randomInteger(1, numberOfProviders)
   for (let index = 0; index < numberOfDisconnects; index += 1) {
     providers[index].disconnect()
+    providers[index].configuration.websocketProvider.disconnect()
   }
 
   // check the count

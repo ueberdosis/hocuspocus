@@ -1,4 +1,3 @@
-import * as Y from 'yjs'
 import * as encoding from 'lib0/encoding'
 import * as syncProtocol from 'y-protocols/sync'
 import { MessageType, OutgoingMessageArguments } from '../types'
@@ -14,6 +13,7 @@ export class SyncStepTwoMessage extends OutgoingMessage {
       throw new Error('The sync step two message requires document as an argument')
     }
 
+    encoding.writeVarString(this.encoder, args.documentName!)
     encoding.writeVarUint(this.encoder, this.type)
     syncProtocol.writeSyncStep2(this.encoder, args.document)
 

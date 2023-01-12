@@ -174,7 +174,7 @@ test('has the request parameters', async t => {
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(server, {}, {
       parameters: {
         foo: 'bar',
       },
@@ -199,7 +199,7 @@ test('has the whole request', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
       async onConnect({ request }) {
-        t.is(request.url, '/hocuspocus-test')
+        t.is(request.url, '/')
         resolve('done')
       },
     })
@@ -253,6 +253,7 @@ test('cleans up correctly when provider disconnects during onLoadDocument', asyn
 
     const server = await newHocuspocus({
       onLoadDocument: async () => {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
 
         // pretent we loaded data from async source

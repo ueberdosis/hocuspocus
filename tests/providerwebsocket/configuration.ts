@@ -1,19 +1,16 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { newHocuspocus, newHocuspocusProviderWebsocket } from '../utils'
 
 test('has default configuration (maxDelay = 30000)', async t => {
   const server = await newHocuspocus()
-  const client = newHocuspocusProvider(server, {
-    name: 'hocuspocus-test',
-  })
+  const client = newHocuspocusProviderWebsocket(server)
 
   t.is(client.configuration.maxDelay, 30000)
 })
 
 test('overwrites the default configuration', async t => {
   const server = await newHocuspocus()
-  const client = newHocuspocusProvider(server, {
-    name: 'hocuspocus-test',
+  const client = newHocuspocusProviderWebsocket(server, {
     maxDelay: 10000,
   })
 

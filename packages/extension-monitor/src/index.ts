@@ -1,3 +1,4 @@
+import { IncomingMessage, ServerResponse } from 'http'
 import {
   defaultConfiguration,
   Extension,
@@ -9,7 +10,6 @@ import {
   onUpgradePayload,
   connectedPayload,
 } from '@hocuspocus/server'
-import { IncomingMessage, ServerResponse } from 'http'
 import WebSocket from 'ws'
 import moment from 'moment'
 import { Storage } from './Storage'

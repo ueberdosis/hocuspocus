@@ -1,5 +1,5 @@
-import osu from 'node-os-utils'
 import process from 'process'
+import osu from 'node-os-utils'
 import moment from 'moment'
 import { publicIpv4 } from 'public-ip'
 import {

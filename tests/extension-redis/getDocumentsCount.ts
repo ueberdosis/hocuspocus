@@ -2,7 +2,7 @@ import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
 import { uuidv4 } from 'lib0/random'
 import {
-  newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
+  newHocuspocus, newHocuspocusProvider, redisConnectionSettings,
 } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 

@@ -21,8 +21,10 @@ export class OutgoingMessage {
 
   category?: string
 
-  constructor() {
+  constructor(documentName: string) {
     this.encoder = createEncoder()
+
+    writeVarString(this.encoder, documentName)
   }
 
   createSyncMessage(): OutgoingMessage {
@@ -122,4 +124,5 @@ export class OutgoingMessage {
   toUint8Array(): Uint8Array {
     return toUint8Array(this.encoder)
   }
+
 }

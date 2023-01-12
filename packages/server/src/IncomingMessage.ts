@@ -10,6 +10,7 @@ import {
   Encoder,
   toUint8Array,
   writeVarUint,
+  writeVarString,
   length,
 } from 'lib0/encoding'
 import { MessageType } from './types'
@@ -52,6 +53,10 @@ export class IncomingMessage {
 
   writeVarUint(type: MessageType) {
     writeVarUint(this.encoder, type)
+  }
+
+  writeVarString(string: string) {
+    writeVarString(this.encoder, string)
   }
 
   get length(): number {

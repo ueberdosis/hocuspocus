@@ -2,7 +2,6 @@ import {
   IncomingHttpHeaders, IncomingMessage, ServerResponse,
 } from 'http'
 import { URLSearchParams } from 'url'
-import { Socket } from 'net'
 import { Awareness } from 'y-protocols/awareness'
 import Document from './Document'
 import { Hocuspocus } from './Hocuspocus'
