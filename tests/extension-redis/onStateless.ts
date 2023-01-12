@@ -2,7 +2,6 @@ import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
 import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('syncs broadcast stateless message between servers and clients', async t => {
   const redisPrefix = uuidv4()

@@ -7,7 +7,7 @@ test('onClose callback is executed', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
-        provider.disconnect()
+        provider.configuration.websocketProvider.disconnect()
       },
       onClose() {
         t.pass()
@@ -24,7 +24,7 @@ test("on('close') callback is executed", async t => {
     const provider = newHocuspocusProvider(server)
 
     provider.on('connect', () => {
-      provider.disconnect()
+      provider.configuration.websocketProvider.disconnect()
     })
 
     provider.on('close', () => {

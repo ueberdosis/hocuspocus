@@ -7,6 +7,7 @@ module.exports = {
     es6: true,
     node: true,
   },
+  plugins: ['unused-imports'],
   overrides: [
     {
       files: [
@@ -29,6 +30,7 @@ module.exports = {
         'airbnb-base',
       ],
       rules: {
+        "unused-imports/no-unused-imports": "error",
         'max-classes-per-file': 'off',
         'no-unreachable-loop': 'off',
         'default-param-last': 'off',
@@ -43,6 +45,7 @@ module.exports = {
         'import/no-extraneous-dependencies': ['error', { 'devDependencies': ['tests/**/*', './rollup.config.js'] }],
         'import/no-unresolved': 'off',
         'import/no-dynamic-require': 'off',
+        'import/order': ['error', { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] }],
         'arrow-parens': ['error', 'as-needed'],
         'padded-blocks': 'off',
         'class-methods-use-this': 'off',

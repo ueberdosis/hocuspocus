@@ -24,18 +24,17 @@ test('onAwarenessChange callback is executed, even when no awareness fields are 
     const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
-      connect: false,
       onAwarenessChange: ({ states }) => {
         t.is(states.length, 2)
 
         resolve('done')
       },
-    })
+    }, { connect: false })
 
     const anotherProvider = newHocuspocusProvider(server, {
       async onConnect() {
         anotherProvider.setAwarenessField('foo', 'bar')
-        provider.connect()
+        provider.configuration.websocketProvider.connect()
       },
     })
   })
@@ -48,7 +47,6 @@ test('onAwarenessChange callback is executed on provider destroy', async t => {
     const server = await newHocuspocus()
 
     const provider = newHocuspocusProvider(server, {
-      maxAttempts: 1,
       onConnect() {
         provider.destroy()
       },
@@ -56,6 +54,8 @@ test('onAwarenessChange callback is executed on provider destroy', async t => {
         t.is(states.length, 0)
         resolve('done')
       },
+    }, {
+      maxAttempts: 1,
     })
   })
 })

@@ -1,25 +1,31 @@
 import test from 'ava'
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import {
+  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+} from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('closes all connections', async t => {
   const server = await newHocuspocus()
+  const socket = newHocuspocusProviderWebsocket(server)
+  const socket2 = newHocuspocusProviderWebsocket(server)
 
   const provider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
     onClose() {
       // Make sure it doesn’t reconnect.
-      provider.disconnect()
+      socket.disconnect()
     },
+    websocketProvider: socket,
   })
 
   const anotherProvider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test-2',
     onClose() {
       // Make sure it doesn’t reconnect.
-      anotherProvider.disconnect()
+      socket2.disconnect()
     },
+    websocketProvider: socket2,
   })
 
   await sleep(100)
@@ -35,17 +41,21 @@ test('closes all connections', async t => {
 
 test('closes a specific connection when a documentName is passed', async t => {
   const server = await newHocuspocus()
+  const socket = newHocuspocusProviderWebsocket(server)
+  const socket2 = newHocuspocusProviderWebsocket(server)
 
   const provider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test',
     onClose() {
       // Make sure it doesn’t reconnect.
-      provider.disconnect()
+      socket.disconnect()
     },
+    websocketProvider: socket,
   })
 
   const anotherProvider = newHocuspocusProvider(server, {
     name: 'hocuspocus-test-2',
+    websocketProvider: socket2,
   })
 
   await sleep(100)

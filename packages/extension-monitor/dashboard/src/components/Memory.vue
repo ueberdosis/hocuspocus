@@ -1,5 +1,9 @@
 <template>
-  <graph-card :data="data" metric="usage" title="Memory Usage">
+  <graph-card
+    :data="data"
+    metric="usage"
+    title="Memory Usage"
+  >
     <template slot-scope="{ latest }">
       <div v-if="latest">
         {{ Math.floor(latest.total - latest.free) }}Mb is used ({{ Math.round(latest.usage * 100) / 100 }}%)

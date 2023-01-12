@@ -2,11 +2,16 @@ import {
   HocuspocusProvider,
   HocuspocusProviderConfiguration,
 } from './HocuspocusProvider'
+import {
+  HocuspocusProviderWebsocket,
+  HocuspocusProviderWebsocketConfiguration,
+} from './HocuspocusProviderWebsocket'
 
 export type HocuspocusCloudProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
   Partial<HocuspocusProviderConfiguration> &
-  AdditionalHocuspocusCloudProviderConfiguration
+  Partial<Pick<HocuspocusProviderWebsocketConfiguration, 'url'>> &
+AdditionalHocuspocusCloudProviderConfiguration
 
 export interface AdditionalHocuspocusCloudProviderConfiguration {
   /**
@@ -28,6 +33,8 @@ export class HocuspocusCloudProvider extends HocuspocusProvider {
 
       configuration.parameters.key = configuration.key
     }
+
+    configuration.websocketProvider = new HocuspocusProviderWebsocket({ url: configuration.url })
 
     super(configuration as HocuspocusProviderConfiguration)
   }

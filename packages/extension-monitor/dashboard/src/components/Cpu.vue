@@ -1,5 +1,9 @@
 <template>
-  <graph-card :data="data" metric="usage" title="CPU Usage">
+  <graph-card
+    :data="data"
+    metric="usage"
+    title="CPU Usage"
+  >
     <template slot-scope="{ latest }">
       <div v-if="latest">
         {{ latest.usage }}% across all {{ latest.count }} cores

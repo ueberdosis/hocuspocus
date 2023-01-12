@@ -1,10 +1,10 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
-import WebSocket, { WebSocketServer } from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import staticHandler from 'serve-handler'
 import { Socket } from 'net'
 import process from 'process'
+import staticHandler from 'serve-handler'
+import WebSocket, { WebSocketServer } from 'ws'
 import { Storage } from './Storage'
 
 export interface Configuration {

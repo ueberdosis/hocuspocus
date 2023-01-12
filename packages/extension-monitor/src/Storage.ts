@@ -1,6 +1,6 @@
+import EventEmitter from 'events'
 import moment from 'moment'
 import collect from 'collect.js'
-import EventEmitter from 'events'
 
 export class Storage extends EventEmitter {
 
