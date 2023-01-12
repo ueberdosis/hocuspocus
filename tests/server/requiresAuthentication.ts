@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { newHocuspocus } from '../utils'
 
 test('requires a token when the onAuthenticate hook is present', async t => {
   await new Promise(async resolve => {

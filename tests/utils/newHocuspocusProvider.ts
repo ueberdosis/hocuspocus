@@ -1,19 +1,19 @@
-import { HocuspocusProvider, HocuspocusProviderConfiguration } from '@hocuspocus/provider'
+import {
+  HocuspocusProvider,
+  HocuspocusProviderConfiguration, HocuspocusProviderWebsocketConfiguration,
+} from '@hocuspocus/provider'
 import { Hocuspocus } from '@hocuspocus/server'
-import WebSocket from 'ws'
+import { newHocuspocusProviderWebsocket } from './newHocuspocusProviderWebsocket'
 
 export const newHocuspocusProvider = (
   server: Hocuspocus,
-  options: Partial<Omit<HocuspocusProviderConfiguration, 'url'>> = {},
+  options: Partial<HocuspocusProviderConfiguration> = {},
+  websocketOptions: Partial<HocuspocusProviderWebsocketConfiguration> = {},
 ): HocuspocusProvider => {
   return new HocuspocusProvider({
-    // We don’t need which port the server is running on, but
-    // we can get the URL from the passed server instance.
-    url: server.webSocketURL,
+    websocketProvider: newHocuspocusProviderWebsocket(server, websocketOptions),
     // Just use a generic document name for all tests.
     name: 'hocuspocus-test',
-    // Pass a polyfill to use WebSockets in a Node.js environment.
-    WebSocketPolyfill: WebSocket,
     // There is no need to share data with other browser tabs in the testing environment.
     broadcast: false,
     // We don’t need console logging in tests. If we actually do, we can overwrite it anyway.

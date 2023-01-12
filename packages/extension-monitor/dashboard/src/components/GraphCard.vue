@@ -1,5 +1,8 @@
 <template>
-  <card :title="title" :border="true">
+  <card
+    :title="title"
+    :border="true"
+  >
     <div>
       <div>
         <slot :latest="latest" />

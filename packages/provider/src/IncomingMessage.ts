@@ -2,6 +2,7 @@ import {
   createDecoder,
   readVarUint,
   readVarUint8Array,
+  readVarString,
   Decoder,
 } from 'lib0/decoding'
 import {
@@ -9,6 +10,7 @@ import {
   createEncoder,
   writeVarUint,
   writeVarUint8Array,
+  writeVarString,
   length,
 } from 'lib0/encoding'
 import { MessageType } from './types'
@@ -31,12 +33,20 @@ export class IncomingMessage {
     return readVarUint(this.decoder)
   }
 
+  readVarString(): string {
+    return readVarString(this.decoder)
+  }
+
   readVarUint8Array() {
     return readVarUint8Array(this.decoder)
   }
 
   writeVarUint(type: MessageType) {
     return writeVarUint(this.encoder, type)
+  }
+
+  writeVarString(string: string) {
+    return writeVarString(this.encoder, string)
   }
 
   writeVarUint8Array(data: Uint8Array) {

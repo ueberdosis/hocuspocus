@@ -3,7 +3,7 @@ import { WebSocketStatus } from '@hocuspocus/provider'
 import { Redis } from '@hocuspocus/extension-redis'
 import { v4 as uuidv4 } from 'uuid'
 import {
-  newHocuspocus, newHocuspocusProvider, sleep, redisConnectionSettings,
+  newHocuspocus, newHocuspocusProvider, redisConnectionSettings,
 } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 

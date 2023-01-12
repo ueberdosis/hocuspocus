@@ -185,7 +185,7 @@ export class Redis implements Extension {
    * Publish the first sync step through Redis.
    */
   private async publishFirstSyncStep(documentName: string, document: Document) {
-    const syncMessage = new OutgoingMessage()
+    const syncMessage = new OutgoingMessage(documentName)
       .createSyncMessage()
       .writeFirstSyncStepFor(document)
 
@@ -196,7 +196,7 @@ export class Redis implements Extension {
    * Let’s ask Redis who is connected already.
    */
   private async requestAwarenessFromOtherInstances(documentName: string) {
-    const awarenessMessage = new OutgoingMessage()
+    const awarenessMessage = new OutgoingMessage(documentName)
       .writeQueryAwareness()
 
     return this.pub.publishBuffer(
@@ -249,7 +249,7 @@ export class Redis implements Extension {
     documentName, awareness, added, updated, removed,
   }: onAwarenessUpdatePayload) {
     const changedClients = added.concat(updated, removed)
-    const message = new OutgoingMessage()
+    const message = new OutgoingMessage(documentName)
       .createAwarenessUpdateMessage(awareness, changedClients)
 
     return this.pub.publishBuffer(
@@ -264,6 +264,11 @@ export class Redis implements Extension {
    * in Redis to filter these.
   */
   private handleIncomingMessage = async (channel: Buffer, pattern: Buffer, data: Buffer) => {
+    const message = new IncomingMessage(data)
+    // we don't need the documentName from the message, we are just taking it from the redis channelName.
+    // we have to immediately write it back to the encoder though, to make sure the structure of the message is correct
+    message.writeVarString(message.readVarString())
+
     const channelName = pattern.toString()
     const [_, documentName, identifier] = channelName.split(':')
     const document = this.documents.get(documentName)
@@ -277,7 +282,7 @@ export class Redis implements Extension {
     }
 
     new MessageReceiver(
-      new IncomingMessage(data),
+      message,
       this.logger,
     ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(
@@ -316,7 +321,7 @@ export class Redis implements Extension {
   }
 
   async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
-    const message = new OutgoingMessage()
+    const message = new OutgoingMessage(data.documentName)
       .writeBroadcastStateless(data.payload)
 
     return this.pub.publishBuffer(

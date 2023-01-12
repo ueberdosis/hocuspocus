@@ -1,7 +1,8 @@
 import test from 'ava'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
-import { HocuspocusProvider } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import {
+  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+} from '../utils'
 
 test('calls the onStoreDocument hook before the document is removed from memory', async t => {
   await new Promise(async resolve => {
@@ -12,9 +13,12 @@ test('calls the onStoreDocument hook before the document is removed from memory'
       },
     })
 
+    const socket = newHocuspocusProviderWebsocket(server)
+
     const provider = newHocuspocusProvider(server, {
+      websocketProvider: socket,
       onSynced() {
-        provider.destroy()
+        socket.destroy()
       },
     })
   })
@@ -22,18 +26,21 @@ test('calls the onStoreDocument hook before the document is removed from memory'
 
 test('doesn’t remove the document from memory when there’s a new connection established during onStoreDocument is called', async t => {
   await new Promise(async resolve => {
-    let anotherProvider: HocuspocusProvider
-
     const server = await newHocuspocus({
       async onStoreDocument() {
         return sleep(1000)
       },
     })
+    const socket = newHocuspocusProviderWebsocket(server)
+    const anotherSocket = newHocuspocusProviderWebsocket(server, {
+      connect: false,
+    })
 
     newHocuspocusProvider(server, {
+      websocketProvider: socket,
       onSynced() {
         setTimeout(() => {
-          anotherProvider.connect()
+          anotherSocket.connect()
         }, 100)
 
         setTimeout(() => {
@@ -42,9 +49,8 @@ test('doesn’t remove the document from memory when there’s a new connection 
         }, 1100)
       },
     })
-
-    anotherProvider = newHocuspocusProvider(server, {
-      connect: false,
+    newHocuspocusProvider(server, {
+      websocketProvider: anotherSocket,
     })
   })
 })
@@ -59,6 +65,7 @@ test('removes the document from memory when there’s no connection after onStor
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        provider.configuration.websocketProvider.destroy()
         provider.destroy()
       },
       onDestroy() {
@@ -256,6 +263,7 @@ test('runs hooks in the given order', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        provider.configuration.websocketProvider.destroy()
         provider.destroy()
       },
     })
@@ -313,6 +321,7 @@ test('allows to overwrite the order of extension with a priority', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        provider.configuration.websocketProvider.destroy()
         provider.destroy()
       },
     })

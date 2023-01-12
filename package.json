@@ -24,7 +24,7 @@
     "nodeArguments": [
       "--conditions=source",
       "--no-warnings",
-      "--loader=ts-node/esm",
+      "--loader=ts-node/esm/transpile-only",
       "--experimental-specifier-resolution=node"
     ],
     "workerThreads": false
@@ -81,6 +81,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "eslint-plugin-vue": "^8.5.0",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",

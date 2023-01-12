@@ -1,6 +1,6 @@
 import test from 'ava'
 import * as Y from 'yjs'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('observeDeep is called just once', async t => {

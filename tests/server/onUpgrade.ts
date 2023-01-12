@@ -52,7 +52,7 @@ test('has the request', async t => {
     const server = await newHocuspocus({
 
       async onUpgrade({ request }) {
-        t.is(request.url, '/hocuspocus-test')
+        t.is(request.url, '/')
         resolve('done')
       },
     })
