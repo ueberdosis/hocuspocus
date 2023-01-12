@@ -178,11 +178,16 @@ export class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(data: Iterable<number>): void {
+  private handleMessage(data: Uint8Array): void {
+    const message = new IncomingMessage(data)
+    const documentName = message.readVarString()
+
+    if (documentName !== this.document.name) return
+
     this.callbacks.beforeHandleMessage(this.document, data)
       .then(() => {
         new MessageReceiver(
-          new IncomingMessage(data),
+          message,
           this.logger,
         ).apply(this.document, this)
       })
