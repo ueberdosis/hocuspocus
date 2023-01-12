@@ -14,6 +14,7 @@ export class SyncStepTwoMessage extends OutgoingMessage {
       throw new Error('The sync step two message requires document as an argument')
     }
 
+    encoding.writeVarString(this.encoder, args.documentName!)
     encoding.writeVarUint(this.encoder, this.type)
     syncProtocol.writeSyncStep2(this.encoder, args.document)
 

@@ -75,14 +75,14 @@ export default {
       },
     })
 
-    this.anotherProvider = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:1234',
-      name: 'hocuspocus-demo',
-      broadcast: false,
-      onAwarenessChange: ({ states }) => {
-        console.log('anotherProvider', states)
-      },
-    })
+    // this.anotherProvider = new HocuspocusProvider({
+    //   url: 'ws://127.0.0.1:1234',
+    //   name: 'hocuspocus-demo',
+    //   broadcast: false,
+    //   onAwarenessChange: ({ states }) => {
+    //     console.log('anotherProvider', states)
+    //   },
+    // })
 
     this.editor = new Editor({
       extensions: [
@@ -96,24 +96,24 @@ export default {
       ],
     })
 
-    this.anotherEditor = new Editor({
-      extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
-        Collaboration.configure({
-          document: this.anotherProvider.document,
-          field: 'default',
-        }),
-      ],
-    })
+    // this.anotherEditor = new Editor({
+    //   extensions: [
+    //     StarterKit.configure({
+    //       history: false,
+    //     }),
+    //     Collaboration.configure({
+    //       document: this.anotherProvider.document,
+    //       field: 'default',
+    //     }),
+    //   ],
+    // })
   },
 
   beforeDestroy() {
     this.editor.destroy()
     this.anotherEditor.destroy()
     this.provider.destroy()
-    this.anotherProvider.destroy()
+    // this.anotherProvider.destroy()
   },
 }
 </script>

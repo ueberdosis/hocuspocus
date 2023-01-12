@@ -13,6 +13,7 @@ import {
   WsReadyStates,
 } from '@hocuspocus/common'
 import { ListenOptions } from 'net'
+import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage'
 import {
   MessageType,
   Configuration,
@@ -26,7 +27,7 @@ import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
 import meta from '../package.json' assert {type: 'json'}
 import { Debugger } from './Debugger'
-import { onListenPayload } from '.'
+import { MessageReceiver, onListenPayload } from '.'
 import document from './Document'
 
 export const defaultConfiguration = {
@@ -413,6 +414,7 @@ export class Hocuspocus {
       incoming.off('message', listener)
       // Let’s work through queued messages.
       incomingMessageQueue.forEach(input => {
+        console.log('emitting queue')
         incoming.emit('message', input)
       })
 
@@ -421,18 +423,24 @@ export class Hocuspocus {
 
     // This listener handles authentication messages and queues everything else.
     const queueIncomingMessageListener = (data: Uint8Array) => {
+      console.log('queueIncomingMessageListener')
       try {
         const decoder = decoding.createDecoder(data)
 
         if (hookPayload.documentName !== decoding.readVarString(decoder)) {
           // message is meant for another listener
+          console.log('queueIncomingMessageListener: wrong listener')
           return
         }
+
+        console.log('queueIncomingMessageListener: handling')
 
         const type = decoding.readVarUint(decoder)
 
         // Okay, we’ve got the authentication message we’re waiting for:
         if (type === MessageType.Auth) {
+          console.log('queueIncomingMessageListener: auth')
+
           // The 2nd integer contains the submessage type
           // which will always be authentication when sent from client -> server
           decoding.readVarUint(decoder)
@@ -469,6 +477,7 @@ export class Hocuspocus {
               return setUpNewConnection(hookPayload.documentName, queueIncomingMessageListener)
             })
             .catch((error = Forbidden) => {
+              console.log('onAuthenticate failed, sending error')
               const message = new OutgoingMessage().writePermissionDenied(error.reason ?? 'permission-denied')
 
               this.debugger.log({
@@ -485,14 +494,20 @@ export class Hocuspocus {
               })
             })
         } else if (!connection.requiresAuthentication) {
+          console.log('queueIncomingMessageListener: auth not required, setUpNewConnection')
+
           return setUpNewConnection(hookPayload.documentName, queueIncomingMessageListener)
         } else {
+          console.log('queueIncomingMessageListener: queueing')
+
           // It’s not the Auth message we’re waiting for, so just queue it.
           incomingMessageQueue.push(data)
         }
 
         // Catch errors due to failed decoding of data
       } catch (error) {
+        console.log('queueIncomingMessageListener ERROR')
+
         console.error(error)
         incoming.close(Unauthorized.code, Unauthorized.reason)
         incoming.off('message', queueIncomingMessageListener)
@@ -500,11 +515,26 @@ export class Hocuspocus {
     }
 
     const messageHandler = (data: Uint8Array) => {
-      const decoder = decoding.createDecoder(data)
-      const documentName = decoding.readVarString(decoder)
+
+      console.log('got message', data)
+
+      console.log('messageHandler')
+      const tmpMsg = new SocketIncomingMessage(data)
+
+      let documentName = ''
+      try {
+        documentName = decoding.readVarString(tmpMsg.decoder)
+        const type = decoding.readVarUint(tmpMsg.decoder)
+
+        console.log(`Received ${type} for ${documentName}`)
+      } catch (e) {
+        console.log('still didnt work :(')
+        throw e
+      }
 
       if (documentConnections[documentName]) {
         // we already have a `Connection` set up for this document
+        console.log('connection already there')
         return
       }
 
@@ -516,8 +546,10 @@ export class Hocuspocus {
       this.hooks('onConnect', hookPayload, (contextAdditions: any) => {
         // merge context from all hooks
         context = { ...context, ...contextAdditions }
+        console.log('onConnect finished')
       })
         .catch((error = Forbidden) => {
+          console.log('caught error during onConnect')
           // if a hook interrupts, close the websocket connection
           try {
             incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)

@@ -545,6 +545,9 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     if (this.webSocket?.readyState === WsReadyStates.Open) {
+      console.log('Sending message from provider!')
+      console.log(message)
+      console.log(args)
       const messageSender = new MessageSender(message, args)
 
       this.emit('outgoingMessage', { message: messageSender.message })
@@ -553,6 +556,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
+    console.log('Provider received message!', event)
+
     this.resolveConnectionAttempt()
 
     this.lastMessageReceived = time.getUnixTime()

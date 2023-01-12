@@ -9,6 +9,7 @@ import {
   createEncoder,
   writeVarUint,
   writeVarUint8Array,
+  writeVarString,
   length,
 } from 'lib0/encoding'
 import { MessageType } from './types'
@@ -37,6 +38,11 @@ export class IncomingMessage {
 
   writeVarUint(type: MessageType) {
     return writeVarUint(this.encoder, type)
+  }
+
+  writeVarString(string: string) {
+    console.log('writeVarString provider incomingMessage:', this.encoder.cpos, string)
+    return writeVarString(this.encoder, string)
   }
 
   writeVarUint8Array(data: Uint8Array) {

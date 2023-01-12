@@ -26,6 +26,9 @@ export class MessageReceiver {
     const { message } = this
     const type = message.readVarUint()
 
+    console.log(`provider applying ${type}`)
+    message.writeVarString(provider.configuration.name)
+
     switch (type) {
       case MessageType.Sync:
         this.applySyncMessage(provider, emitSynced)

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node",
-    "dev": "nodemon -e ts --watch ./ --watch ../../packages --exec npm start"
+    "dev": "nodemon --inspect -e ts --watch ./ --watch ../../packages --exec npm start"
   },
   "dependencies": {
     "@hocuspocus/extension-logger": "^1.0.0",

@@ -8,6 +8,11 @@ export class QueryAwarenessMessage extends OutgoingMessage {
   description = 'Queries awareness states'
 
   get(args: Partial<OutgoingMessageArguments>) {
+
+    console.log('queryAwareness: writing string docName', args.documentName)
+    console.log(this.encoder.cpos)
+
+    encoding.writeVarString(this.encoder, args.documentName!)
     encoding.writeVarUint(this.encoder, this.type)
 
     return this.encoder
