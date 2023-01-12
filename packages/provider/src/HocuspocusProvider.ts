@@ -467,7 +467,7 @@ export class HocuspocusProvider extends EventEmitter {
   get url() {
     const encodedParams = url.encodeQueryParams(this.configuration.parameters)
 
-    return `${this.serverUrl}/${this.configuration.name}${encodedParams.length === 0 ? '' : `?${encodedParams}`}`
+    return `${this.serverUrl}${encodedParams.length === 0 ? '' : `?${encodedParams}`}`
   }
 
   get synced(): boolean {

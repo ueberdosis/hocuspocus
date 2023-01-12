@@ -174,7 +174,7 @@ export class Hocuspocus {
         this.debugger.log(error)
       })
 
-      this.handleConnection(incoming, request, await this.getDocumentNameFromRequest(request))
+      this.handleConnection(incoming, request)
     })
 
     const server = createServer((request, response) => {
@@ -364,7 +364,7 @@ export class Hocuspocus {
    * … and if nothings fails it’ll fully establish the connection and
    * load the Document then.
    */
-  handleConnection(incoming: WebSocket, request: IncomingMessage, documentName: string, context: any = null): void {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
     // Make sure to close an idle connection after a while.
     const closeIdleConnection = setTimeout(() => {
       incoming.close(Unauthorized.code, Unauthorized.reason)
@@ -398,7 +398,7 @@ export class Hocuspocus {
     const incomingMessageQueue: Uint8Array[] = []
 
     // Once all hooks are run, we’ll fully establish the connection:
-    const setUpNewConnection = async (listener: (input: Uint8Array) => void) => {
+    const setUpNewConnection = async (documentName: string, listener: (input: Uint8Array) => void) => {
       // Not an idle connection anymore, no need to close it then.
       clearTimeout(closeIdleConnection)
 
@@ -420,6 +420,7 @@ export class Hocuspocus {
     const queueIncomingMessageListener = (data: Uint8Array) => {
       try {
         const decoder = decoding.createDecoder(data)
+        const documentName = decoding.readVarString(decoder)
         const type = decoding.readVarUint(decoder)
 
         // Okay, we’ve got the authentication message we’re waiting for:
@@ -457,7 +458,7 @@ export class Hocuspocus {
             })
             .then(() => {
               // Time to actually establish the connection.
-              return setUpNewConnection(queueIncomingMessageListener)
+              return setUpNewConnection(documentName, queueIncomingMessageListener)
             })
             .catch((error = Forbidden) => {
               const message = new OutgoingMessage().writePermissionDenied(error.reason ?? 'permission-denied')
@@ -475,6 +476,8 @@ export class Hocuspocus {
                 incoming.off('message', queueIncomingMessageListener)
               })
             })
+        } else if (!connection.requiresAuthentication) {
+          return setUpNewConnection(documentName, queueIncomingMessageListener)
         } else {
           // It’s not the Auth message we’re waiting for, so just queue it.
           incomingMessageQueue.push(data)
@@ -494,15 +497,6 @@ export class Hocuspocus {
       // merge context from all hooks
       context = { ...context, ...contextAdditions }
     })
-      .then(() => {
-        // Authentication is required, we’ll need to wait for the Authentication message.
-        if (connection.requiresAuthentication && !connection.isAuthenticated) {
-          return
-        }
-
-        // Authentication isn’t required, let’s establish the connection
-        return setUpNewConnection(queueIncomingMessageListener)
-      })
       .catch((error = Forbidden) => {
         // if a hook interrupts, close the websocket connection
         try {
@@ -785,23 +779,6 @@ export class Hocuspocus {
   private static getParameters(request: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
-  }
-
-  /**
-   * Get document name by the given request
-   */
-  private async getDocumentNameFromRequest(request: IncomingMessage): Promise<string> {
-    const documentName = decodeURI(
-      request.url?.slice(1)?.split('?')[0] || '',
-    )
-
-    if (!this.configuration.getDocumentName) {
-      return documentName
-    }
-
-    const requestParameters = Hocuspocus.getParameters(request)
-
-    return this.configuration.getDocumentName({ documentName, request, requestParameters })
   }
 
   enableDebugging() {
