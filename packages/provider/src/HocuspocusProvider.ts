@@ -406,7 +406,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.send(SyncStepOneMessage, { document: this.document })
+    this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
 
   boundBeforeUnload = this.beforeUnload.bind(this)
@@ -430,7 +430,7 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.unsyncedChanges += 1
-    this.send(UpdateMessage, { update }, true)
+    this.send(UpdateMessage, { update, documentName: this.configuration.name }, true)
   }
 
   awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
@@ -439,6 +439,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(AwarenessMessage, {
       awareness: this.awareness,
       clients: changedClients,
+      documentName: this.configuration.name,
     }, true)
   }
 
@@ -509,6 +510,7 @@ export class HocuspocusProvider extends EventEmitter {
     if (this.isAuthenticationRequired) {
       this.send(AuthenticationMessage, {
         token: await this.getToken(),
+        documentName: this.configuration.name,
       })
       return
     }
@@ -526,23 +528,24 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   startSync() {
-    this.send(SyncStepOneMessage, { document: this.document })
+    this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
     if (this.awareness.getLocalState() !== null) {
       this.send(AwarenessMessage, {
         awareness: this.awareness,
         clients: [this.document.clientID],
+        documentName: this.configuration.name,
       })
     }
   }
 
-  send(Message: ConstructableOutgoingMessage, args: any, broadcast = false) {
+  send(message: ConstructableOutgoingMessage, args: any, broadcast = false) {
     if (broadcast) {
-      this.mux(() => { this.broadcast(Message, args) })
+      this.mux(() => { this.broadcast(message, args) })
     }
 
     if (this.webSocket?.readyState === WsReadyStates.Open) {
-      const messageSender = new MessageSender(Message, args)
+      const messageSender = new MessageSender(message, args)
 
       this.emit('outgoingMessage', { message: messageSender.message })
       messageSender.send(this.webSocket)
@@ -685,6 +688,7 @@ export class HocuspocusProvider extends EventEmitter {
       awareness: this.awareness,
       clients: [this.document.clientID],
       states: new Map(),
+      documentName: this.configuration.name,
     }, true)
 
     if (this.subscribedToBroadcastChannel) {

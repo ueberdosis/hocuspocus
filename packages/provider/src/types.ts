@@ -30,6 +30,7 @@ export interface OutgoingMessageInterface {
 }
 
 export interface OutgoingMessageArguments {
+  documentName: string,
   token: string,
   document: Y.Doc,
   awareness: Awareness,
