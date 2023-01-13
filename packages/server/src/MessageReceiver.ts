@@ -29,6 +29,9 @@ export class MessageReceiver {
     const { message } = this
     const type = message.readVarUint()
 
+    console.log(message)
+    console.log(`Server received message of type ${type}`)
+
     switch (type) {
       case MessageType.Sync:
       case MessageType.SyncReply:
@@ -66,12 +69,16 @@ export class MessageReceiver {
 
         break
       default:
+        console.log(`Unable to handle message of type ${type}: no handler defined!`)
         // Do nothing
     }
   }
 
   readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void, requestFirstSync = true) {
     const type = message.readVarUint()
+
+    console.log(`yjs message type ${type}`)
+    console.log(this.message)
 
     switch (type) {
       case messageYjsSyncStep1: {

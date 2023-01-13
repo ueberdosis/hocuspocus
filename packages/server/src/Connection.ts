@@ -73,7 +73,7 @@ export class Connection {
     this.webSocket.on('message', this.handleMessage.bind(this))
     this.webSocket.on('pong', () => { this.pongReceived = true })
 
-    this.sendCurrentAwareness()
+    // this.sendCurrentAwareness()
   }
 
   /**
@@ -98,6 +98,8 @@ export class Connection {
    * Send the given message
    */
   send(message: any): void {
+    console.log('server sending new message to client:', message)
+
     if (
       this.webSocket.readyState === WsReadyStates.Closing
       || this.webSocket.readyState === WsReadyStates.Closed
@@ -179,10 +181,16 @@ export class Connection {
    * @private
    */
   private handleMessage(data: Uint8Array): void {
+    console.log('Connection::handleMessage', data)
+
     const message = new IncomingMessage(data)
     const documentName = message.readVarString()
 
+    // console.log(`Server received message for doc ${documentName}`)
+    //
     if (documentName !== this.document.name) return
+    //
+    // console.log(`Server handling message for doc ${documentName}`)
 
     this.callbacks.beforeHandleMessage(this.document, data)
       .then(() => {
@@ -192,6 +200,7 @@ export class Connection {
         ).apply(this.document, this)
       })
       .catch((e: any) => {
+        console.log('closing connection because of exception', e)
         this.close({
           code: 'code' in e ? e.code : Forbidden.code,
           reason: 'reason' in e ? e.reason : Forbidden.reason,

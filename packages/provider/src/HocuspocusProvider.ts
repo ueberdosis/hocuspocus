@@ -219,19 +219,19 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('disconnect', this.configuration.onDisconnect)
     this.on('close', this.configuration.onClose)
     this.on('destroy', this.configuration.onDestroy)
-    this.on('awarenessUpdate', this.configuration.onAwarenessUpdate)
-    this.on('awarenessChange', this.configuration.onAwarenessChange)
+    // this.on('awarenessUpdate', this.configuration.onAwarenessUpdate)
+    // this.on('awarenessChange', this.configuration.onAwarenessChange)
 
-    this.awareness.on('update', () => {
-      this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
-    })
-
-    this.awareness.on('change', () => {
-      this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) })
-    })
+    // this.awareness.on('update', () => {
+    //   this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
+    // })
+    //
+    // this.awareness.on('change', () => {
+    //   this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) })
+    // })
 
     this.document.on('update', this.documentUpdateHandler.bind(this))
-    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
+    // this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
     this.registerEventListeners()
 
     this.intervals.connectionChecker = setInterval(
@@ -530,13 +530,13 @@ export class HocuspocusProvider extends EventEmitter {
   startSync() {
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
-    if (this.awareness.getLocalState() !== null) {
-      this.send(AwarenessMessage, {
-        awareness: this.awareness,
-        clients: [this.document.clientID],
-        documentName: this.configuration.name,
-      })
-    }
+    // if (this.awareness.getLocalState() !== null) {
+    //   this.send(AwarenessMessage, {
+    //     awareness: this.awareness,
+    //     clients: [this.document.clientID],
+    //     documentName: this.configuration.name,
+    //   })
+    // }
   }
 
   send(message: ConstructableOutgoingMessage, args: any, broadcast = false) {
@@ -600,6 +600,7 @@ export class HocuspocusProvider extends EventEmitter {
     if (event.code === Forbidden.code) {
       if (!this.configuration.quiet) {
         console.warn('[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.')
+        return // TODO REMOVE ME
       }
     }
 
@@ -645,8 +646,8 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.disconnect()
 
-    this.awareness.off('update', this.awarenessUpdateHandler)
-    this.document.off('update', this.documentUpdateHandler)
+    // this.awareness.off('update', this.awarenessUpdateHandler)
+    // this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
 
@@ -689,12 +690,12 @@ export class HocuspocusProvider extends EventEmitter {
 
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
-    this.send(AwarenessMessage, {
-      awareness: this.awareness,
-      clients: [this.document.clientID],
-      states: new Map(),
-      documentName: this.configuration.name,
-    }, true)
+    // this.send(AwarenessMessage, {
+    //   awareness: this.awareness,
+    //   clients: [this.document.clientID],
+    //   states: new Map(),
+    //   documentName: this.configuration.name,
+    // }, true)
 
     if (this.subscribedToBroadcastChannel) {
       bc.unsubscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber)
