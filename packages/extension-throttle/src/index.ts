@@ -2,10 +2,9 @@ import {
   Extension,
   onConnectPayload,
 } from '@hocuspocus/server'
-import { uuidv4 } from 'lib0/random'
 
 export interface ThrottleConfiguration {
-  throttle: number | null | false, // how many requests within time interval until we're throttling
+  throttle: number | null | false, // how many requests within time interval until we're throttling (setting this to 15 means the 16th request will be throttled)
   consideredSeconds: number, // how many seconds to consider
   banTime: number, // for how long to ban after receiving too many requests (minutes!)
   cleanupInterval: number // how often to clean up the records of IPs - should be higher than `consideredSeconds` and `banTime`
@@ -46,7 +45,7 @@ export class Throttle implements Extension {
     return Promise.resolve()
   }
 
-  private clearMaps() {
+  public clearMaps() {
     this.connectionsByIp.forEach((value, key) => {
       const filteredValue = value
         .filter(timestamp => timestamp + (this.configuration.consideredSeconds * 1000) > Date.now())

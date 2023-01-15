@@ -83,6 +83,7 @@
     "eslint-plugin-vue": "^8.5.0",
     "lerna": "^4.0.0",
     "minimist": "^1.2.5",
+    "mockdate": "^3.0.5",
     "rollup": "^2.70.1",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-import-assertions": "^0.4.0",
