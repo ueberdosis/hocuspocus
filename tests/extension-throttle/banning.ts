@@ -1,7 +1,7 @@
 import test from 'ava'
-import { Throttle } from '@hocuspocus/extension-throttle'
 import { onConnectPayload } from '@hocuspocus/server'
 import * as MockDate from 'mockdate'
+import { Throttle } from '@hocuspocus/extension-throttle'
 
 const getOnConnectPayload = (ip: string) => {
   return {
@@ -59,7 +59,7 @@ test('throttle extension unbans properly', async t => {
   MockDate.reset()
 })
 
-test('map cleanup works for connectionsByIp', async t => {
+test.serial('map cleanup works for connectionsByIp', async t => {
   const throttle = new Throttle({ consideredSeconds: 60 })
   const ip = '127.0.0.1'
 
@@ -76,7 +76,7 @@ test('map cleanup works for connectionsByIp', async t => {
   MockDate.reset()
 })
 
-test('map cleanup works for bannedIps', async t => {
+test.serial('map cleanup works for bannedIps', async t => {
   const throttle = new Throttle({ consideredSeconds: 60, throttle: 15 })
   const ip = '127.0.0.1'
 
