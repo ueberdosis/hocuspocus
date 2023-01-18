@@ -40,7 +40,6 @@ users.
 * Sends changes to Webhooks
 * Scales to millions of users with Redis
 * Written in TypeScript
-* Part of the [Y-Collective](https://opencollective.com/y-collective), a fund for the Y.js ecosystem
 
 ## Quickstart
 
