@@ -36,16 +36,16 @@ hocuspocus --sqlite
 
 ```bash
 npm install @hocuspocus/cli
-./node_modules/.bin/@hocuspocus/cli
-./node_modules/.bin/@hocuspocus/cli --port 8080
-./node_modules/.bin/@hocuspocus/cli --webhook http://localhost/webhooks/hocuspocus
-./node_modules/.bin/@hocuspocus/cli --sqlite
+npx hocuspocus
+npx hocuspocus --port 8080
+npx hocuspocus --webhook http://localhost/webhooks/hocuspocus
+npx hocuspocus --sqlite
 ```
 
 ```bash
 yarn add @hocuspocus/cli
-./node_modules/.bin/@hocuspocus/cli
-./node_modules/.bin/@hocuspocus/cli --port 8080
-./node_modules/.bin/@hocuspocus/cli --webhook http://localhost/webhooks/hocuspocus
-./node_modules/.bin/@hocuspocus/cli --sqlite
+npx hocuspocus
+npx hocuspocus --port 8080
+npx hocuspocus --webhook http://localhost/webhooks/hocuspocus
+npx hocuspocus --sqlite
 ```
