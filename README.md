@@ -12,7 +12,7 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 The full documentation is a available on [hocuspocus.dev/introduction](https://www.hocuspocus.dev/introduction).
 
 ## Feedback
-Send all your questions, feedback and bug reports to [humans@hocuspocus.dev](mailto:humans@hocuspocus.dev) or [create an issue](https://github.com/ueberdosis/hocuspocus/issues/new/choose) here.
+Send all your questions, feedback and bug reports to [humans@tiptap.dev](mailto:humans@tiptap.dev) or [create an issue](https://github.com/ueberdosis/hocuspocus/issues/new/choose) here.
 
 ## Usage
 The following example is a example setup you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
