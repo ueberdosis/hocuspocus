@@ -4,6 +4,7 @@ import {
   toUint8Array,
   writeVarUint,
   writeVarUint8Array,
+  writeVarString,
 } from 'lib0/encoding'
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
@@ -20,8 +21,10 @@ export class OutgoingMessage {
 
   category?: string
 
-  constructor() {
+  constructor(documentName: string) {
     this.encoder = createEncoder()
+
+    writeVarString(this.encoder, documentName)
   }
 
   createSyncMessage(): OutgoingMessage {
@@ -103,4 +106,5 @@ export class OutgoingMessage {
   toUint8Array(): Uint8Array {
     return toUint8Array(this.encoder)
   }
+
 }

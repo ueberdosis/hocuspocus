@@ -462,7 +462,7 @@ export class Hocuspocus {
               connection.isAuthenticated = true
 
               // Let the client know that authentication was successful.
-              const message = new OutgoingMessage().writeAuthenticated()
+              const message = new OutgoingMessage(document.name).writeAuthenticated()
 
               this.debugger.log({
                 direction: 'out',
@@ -478,7 +478,7 @@ export class Hocuspocus {
             })
             .catch((error = Forbidden) => {
               console.log('onAuthenticate failed, sending error')
-              const message = new OutgoingMessage().writePermissionDenied(error.reason ?? 'permission-denied')
+              const message = new OutgoingMessage(document.name).writePermissionDenied(error.reason ?? 'permission-denied')
 
               this.debugger.log({
                 direction: 'out',

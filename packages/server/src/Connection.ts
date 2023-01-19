@@ -164,7 +164,7 @@ export class Connection {
       return
     }
 
-    const awarenessMessage = new OutgoingMessage()
+    const awarenessMessage = new OutgoingMessage(this.document.name)
       .createAwarenessUpdateMessage(this.document.awareness)
 
     this.logger.log({
@@ -189,6 +189,8 @@ export class Connection {
     // console.log(`Server received message for doc ${documentName}`)
     //
     if (documentName !== this.document.name) return
+
+    message.writeVarString(documentName)
     //
     // console.log(`Server handling message for doc ${documentName}`)
 

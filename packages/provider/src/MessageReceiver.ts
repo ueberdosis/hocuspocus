@@ -27,7 +27,6 @@ export class MessageReceiver {
     const type = message.readVarUint()
 
     console.log(`provider applying ${type}`)
-    message.writeVarString(provider.configuration.name)
     const emptyMessageLength = message.length()
 
     switch (type) {

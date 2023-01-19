@@ -564,6 +564,11 @@ export class HocuspocusProvider extends EventEmitter {
 
     const message = new IncomingMessage(event.data)
 
+    const documentName = message.readVarString()
+    console.log(`got msg for ${documentName}`)
+
+    message.writeVarString(documentName)
+
     this.emit('message', { event, message })
 
     new MessageReceiver(message).apply(this)

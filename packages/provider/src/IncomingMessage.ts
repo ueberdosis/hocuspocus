@@ -2,6 +2,7 @@ import {
   createDecoder,
   readVarUint,
   readVarUint8Array,
+  readVarString,
   Decoder,
 } from 'lib0/decoding'
 import {
@@ -30,6 +31,10 @@ export class IncomingMessage {
 
   readVarUint(): MessageType {
     return readVarUint(this.decoder)
+  }
+
+  readVarString(): string {
+    return readVarString(this.decoder)
   }
 
   readVarUint8Array() {
