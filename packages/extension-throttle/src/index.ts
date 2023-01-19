@@ -66,7 +66,7 @@ export class Throttle implements Extension {
 
   isBanned(ip: string) {
     const bannedAt = this.bannedIps.get(ip) || 0
-    return Date.now() < (bannedAt + (this.configuration.banTime * this.configuration.consideredSeconds * 1000))
+    return Date.now() < (bannedAt + (this.configuration.banTime * 60 * 1000))
   }
 
   /**
