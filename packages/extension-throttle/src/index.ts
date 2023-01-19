@@ -4,10 +4,10 @@ import {
 } from '@hocuspocus/server'
 
 export interface ThrottleConfiguration {
-  throttle: number | null | false, // how many requests within time interval until we're throttling (setting this to 15 means the 16th request will be throttled)
-  consideredSeconds: number, // how many seconds to consider
-  banTime: number, // for how long to ban after receiving too many requests (minutes!)
-  cleanupInterval: number // how often to clean up the records of IPs - should be higher than `consideredSeconds` and `banTime`
+  throttle: number | null | false, // how many requests within `consideredSeconds` until we're rejecting requests (setting this to 15 means the 16th request will be rejected)
+  consideredSeconds: number, // how many seconds to consider (default is last 60 seconds from the current connection attempt)
+  banTime: number, // for how long to ban after receiving too many requests (in minutes!)
+  cleanupInterval: number // how often to clean up the records of IPs (this won't delete ips that are still blocked or recent enough by `consideredSeconds`)
 }
 
 export class Throttle implements Extension {
