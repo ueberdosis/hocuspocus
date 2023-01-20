@@ -6,14 +6,14 @@ tableOfContents: true
 
 ## Introduction
 
-We're currently evaluating feedback subdocuments, but haven't implemented support yet.
+We're currently evaluating feedback for subdocuments, but haven't implemented support yet.
 
-In a lot of cases, instead of subdocuments, you can also just use different `fragments` of Yjs, so
-if you're thinking about a blog port with `title`/`content`, you can create a single yDoc and use
+In a lot of cases, instead of subdocuments, you can use different `fragments` of Yjs, so
+if you're thinking about a blog post with `title`/`content`, you can create a single yDoc and use
 different editors (or anything else) that are each binding to a different fragment, like this:
 
 ```js
-const ydoc = new Y.Doc()();
+const ydoc = new Y.Doc()
 
 const titleEditor = new Editor({
   extensions: [
@@ -22,7 +22,7 @@ const titleEditor = new Editor({
       field: 'title',
     }),
   ]
-});
+})
 
 const bodyEditor = new Editor({
   extensions: [
@@ -31,5 +31,5 @@ const bodyEditor = new Editor({
       field: 'body',
     }),
   ]
-});
+})
 ```

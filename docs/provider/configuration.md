@@ -5,10 +5,7 @@ tableOfContents: true
 # Configuration
 
 ## Introduction
-Pass a single object with all your custom settings to the provider and you’re good to go.
-
-## Configure the provider
-There is not much required to set up the provider, here is how a minimal setup should look like:
+Pass a single configuration object to the provider and you’re good to go.
 
 ```js
 const ydoc = new Y.Doc()
