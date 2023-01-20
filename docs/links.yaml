@@ -1,141 +1,51 @@
 - title: Overview
   items:
     - title: Introduction
-      link: /introduction
-    - title: Installation
-      link: /installation
-      items:
-        - title: CLI
-          link: /installation/cli
-        - title: Express
-          link: /installation/express
-        - title: Koa
-          link: /installation/koa
-          type: draft
-        - title: Laravel
-          link: /installation/laravel
-          type: draft
+      link: /overview/Introduction
+    - title: Getting Started
+      link: /overview/getting-started
     - title: About the project
-      link: /sponsor
+      link: /overview/sponsor
       type: sponsor
     - title: Contributing
-      link: /contributing
-
-- title: Use cases
-  items:
-    - title: Awareness
-      link: /examples/awareness
-    # - title: Tasks
-    #   link: /examples/tasks
-    #   type: draft
-    - title: Tiptap
-      link: /examples/tiptap
-    - title: Quill
-      link: /examples/quill
-    - title: Monaco
-      link: /examples/monaco
-    - title: CodeMirror 5
-      link: /examples/codemirror
-    - title: Slate
-      link: /examples/slate
-      type: draft
-
-- title: Guide
-  items:
-    - title: Configuration
-      link: /guide/configuration
-    - title: Authorization
-      link: /guide/authentication-and-authorization
-    - title: Documents
-      link: /guide/documents
-    - title: Hooks
-      link: /guide/hooks
-    - title: Working with JSON
-      link: /guide/transformations
-    - title: Subdocuments
-      link: /guide/subdocuments
-      type: draft
-    - title: Custom extensions
-      link: /guide/extensions
-    - title: Scalability
-      link: /guide/scalability
+      link: /overview/contributing
 
 - title: Server
   items:
     - title: Configuration
-      link: /api/configuration
+      link: /server/configuration
     - title: Methods
-      link: /api/methods
+      link: /server/methods
     - title: Hooks
-      link: /api/hooks
-      items:
-        - title: onConfigure
-          link: /api/hooks/on-configure
-        - title: onListen
-          link: /api/hooks/on-listen
-        - title: onUpgrade
-          link: /api/hooks/on-upgrade
-        - title: onConnect
-          link: /api/hooks/on-connect
-        - title: connected
-          link: /api/hooks/connected
-        - title: onAuthenticate
-          link: /api/hooks/on-authenticate
-        - title: onLoadDocument
-          link: /api/hooks/on-load-document
-        - title: onChange
-          link: /api/hooks/on-change
-        - title: beforeHandleMessage
-          link: /api/hooks/before-handle-message
-        - title: beforeBroadcastStateless
-          link: /api/hooks/before-broadcast-stateless
-        - title: onStoreDocument
-          link: /api/hooks/on-store-document
-        - title: onAwarenessUpdate
-          link: /api/hooks/on-awareness-update
-        - title: onRequest
-          link: /api/hooks/on-request
-        - title: onDisconnect
-          link: /api/hooks/on-disconnect
-        - title: onDestroy
-          link: /api/hooks/on-destroy
-
+      link: /server/hooks
     - title: Extensions
-      link: /api/extensions
-      items:
-        - title: Database
-          link: /api/extensions/database
-        - title: Logger
-          link: /api/extensions/logger
-        - title: Monitor
-          link: /api/extensions/monitor
-        - title: Redis
-          link: /api/extensions/redis
-        - title: SQLite
-          link: /api/extensions/sqlite
-        - title: Throttle
-          link: /api/extensions/throttle
-        - title: Webhook
-          link: /api/extensions/webhook
+      link: /server/extensions
+    - title: Examples
+      link: /server/examples
 
 - title: Provider
   items:
     - title: Introduction
       link: /provider/introduction
-    - title: Installation
-      link: /provider/installation
     - title: Configuration
       link: /provider/configuration
     - title: Events
       link: /provider/events
-    - title: Awareness
-      link: /provider/awareness
+    - title: Examples
+      link: /provider/examples
 
-# - title: Knowledge
-#   items:
-#     - title: What’s a CRDT?
-#       link: /knowledge/crdt
-#       type: draft
-#     - title: How does Y.js work?
-#       link: /knowledge/yjs
-#       type: draft
+- title: Guides
+  items:
+    - title: Auth
+      link: /guides/auth
+    - title: Persistence
+      link: /guides/persistence
+    - title: Multi/Sub-documents
+      link: /guides/multi-subdocuments
+      type: draft
+    - title: Scalability
+      link: /guides/scalability
+    - title: Awareness
+      link: /guidess/awareness
+    - title: Custom Extensions
+      link: /guides/custom-extensions

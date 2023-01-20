@@ -30,4 +30,3 @@ const provider = new HocuspocusProvider({
 ```
 
 Done! You’ve now connected a Y.js document to the Hocuspocus server. Changes to the Y.js document will be synced to all other connected users.
-

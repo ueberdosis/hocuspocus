@@ -32,58 +32,11 @@ users.
 
 ## Features
 
-* Merges changes without conflicts
-* Doesn’t care when changes come in
-* Can sync your whole application state
-* Collaborative text editing (with Tiptap, Slate, Quill, Monaco or ProseMirror)
-* Integrates into existing applications
-* Sends changes to Webhooks
-* Scales to millions of users with Redis
-* Written in TypeScript
-
-## Quickstart
-
-The two code examples below show a working example of the backend *and* frontend to sync an array
-with multiple users. We have also added some examples in the `playground` folder of the
-repo (https://github.com/ueberdosis/hocuspocus/tree/main/playground), that you can start by
-running `npm run playground` in the repository root. They are meant for internal usage during hocuspocus
-development, but they might be useful to understand how everything can be used.
-
-### Backend
-
-```js
-import {Hocuspocus} from '@hocuspocus/server'
-
-// Configure the server …
-const server = new Hocuspocus({
-  port: 1234,
-})
-
-// … and run it!
-server.listen()
-```
-
-### Frontend
-
-```js
-import * as Y from 'yjs'
-import {HocuspocusProvider} from '@hocuspocus/provider'
-
-
-// Connect it to the backend
-const provider = new HocuspocusProvider({
-  url: 'ws://127.0.0.1:1234',
-  name: 'example-document',
-})
-
-// Define `tasks` as an Array
-const tasks = provider.document.getArray('tasks')
-
-// Listen for changes
-tasks.observe(() => {
-  console.log('tasks were modified')
-})
-
-// Add a new task
-tasks.push(['buy milk'])
-```
+- Merges changes without conflicts
+- Doesn’t care when changes come in
+- Can sync your whole application state
+- Collaborative text editing (with Tiptap, Slate, Quill, Monaco or ProseMirror)
+- Integrates into existing applications
+- Sends changes to Webhooks
+- Scales to millions of users with Redis
+- Written in TypeScript
