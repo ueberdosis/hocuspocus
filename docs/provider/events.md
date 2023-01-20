@@ -8,7 +8,7 @@ tableOfContents: true
 Events are a great way to react to different states, for example when the provider has successfully connected. You can choose to bind event listeners on initialization or later, that’s up to you.
 
 ## Option 1: Configuration
-Passing event listeners feels very clean and makes sure they are registered during initialization.
+Passing event listeners to the constructor ensures they are registered during initialization.
 
 ```js
 const provider = new HocuspocusProvider({
@@ -58,7 +58,7 @@ const provider = new HocuspocusProvider({
 ```
 
 ## Option 2: Binding
-Sometimes, you want to register an event listener after the intialization, even if it’s right after. Also, that’s a great way to bind and unbind event listeners.
+Sometimes you want to register an event listener after the intialization, even if it’s right after. Also, that’s a great way to bind and unbind event listeners.
 
 ### Bind event listeners
 
