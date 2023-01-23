@@ -2,7 +2,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import WebSocket, { WebSocketServer } from 'ws'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import nodeStatic from 'node-static'
+import { Server as NodeStaticServer } from 'node-static'
 import { Socket } from 'net'
 import process from 'process'
 import { Storage } from './Storage'
@@ -87,7 +87,7 @@ export class Dashboard {
       request.url = request.url.replace(path, '')
 
       const publicPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dashboard', 'dist')
-      const server = new nodeStatic.Server(publicPath, { cache: 0 })
+      const server = new NodeStaticServer(publicPath, { cache: 0 })
 
       request.addListener('end', () => server.serve(request, response)).resume()
 
