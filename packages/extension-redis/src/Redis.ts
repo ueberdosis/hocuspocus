@@ -152,7 +152,7 @@ export class Redis implements Extension {
    * Publish the first sync step through Redis.
    */
   private async publishFirstSyncStep(documentName: string, document: Document) {
-    const syncMessage = new OutgoingMessage()
+    const syncMessage = new OutgoingMessage(documentName)
       .createSyncMessage()
       .writeFirstSyncStepFor(document)
 
@@ -163,7 +163,7 @@ export class Redis implements Extension {
    * Let’s ask Redis who is connected already.
    */
   private async requestAwarenessFromOtherInstances(documentName: string) {
-    const awarenessMessage = new OutgoingMessage()
+    const awarenessMessage = new OutgoingMessage(documentName)
       .writeQueryAwareness()
 
     return this.pub.publishBuffer(
@@ -216,7 +216,7 @@ export class Redis implements Extension {
     documentName, awareness, added, updated, removed,
   }: onAwarenessUpdatePayload) {
     const changedClients = added.concat(updated, removed)
-    const message = new OutgoingMessage()
+    const message = new OutgoingMessage(documentName)
       .createAwarenessUpdateMessage(awareness, changedClients)
 
     return this.pub.publishBuffer(
