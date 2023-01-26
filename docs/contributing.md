@@ -32,7 +32,10 @@ It’s not too hard to tinker around with the official repository. You’ll need
 There is an eslint config that ensures a consistent code style. To check for errors, run `$ npm run lint`. That’ll be checked when you send a pull request, too. Make sure it’s passing, before sending a pull request.
 
 ## Testing for errors
-Your pull request will automatically execute all our existing tests. Make sure that they all pass, before sending a pull request. Run all tests locally with `$ npm run test` or run single tests (e. g. when writing new ones) with `$ npm run test:open`.
+Make sure all tests pass before sending a pull request. Your pull request will automatically execute all tests via the GitHub Workflow. 
+
+- Run all tests locally: `$ npm run test`
+- Run all tests of a single package: `$ npm run test -- tests/PACKAGE_NAME`
 
 ## Further questions
 Any further questions? Create a new issue or discussion in the repository. We’ll get back to you.
