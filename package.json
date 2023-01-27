@@ -47,6 +47,7 @@
     "test:watch": "ava --watch",
     "build:packages": "npm run clean:packages && rollup -c && npm run build:dashboard",
     "build:dashboard": "npm --prefix packages/extension-monitor run build",
+    "build:watch": "npm run clean:packages && rollup -wc",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release:major": "lerna version major --force-publish",
     "release:major:pre": "lerna version premajor --force-publish",
