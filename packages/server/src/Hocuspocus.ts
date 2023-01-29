@@ -493,11 +493,6 @@ export class Hocuspocus {
                 incoming.off('message', queueIncomingMessageListener)
               })
             })
-        } else if (!connection.requiresAuthentication) {
-          console.log('queueIncomingMessageListener: auth not required, setUpNewConnection')
-          incomingMessageQueue.push(data)
-
-          return setUpNewConnection(hookPayload.documentName, queueIncomingMessageListener)
         } else {
           console.log('queueIncomingMessageListener: queueing')
 
@@ -550,6 +545,14 @@ export class Hocuspocus {
         context = { ...context, ...contextAdditions }
         console.log('onConnect finished')
       })
+        .then(() => {
+          // Authentication is required, we’ll need to wait for the Authentication message.
+          if (connection.requiresAuthentication && !connection.isAuthenticated) {
+            return
+          }
+
+          return setUpNewConnection(hookPayload.documentName, queueIncomingMessageListener)
+        })
         .catch((error = Forbidden) => {
           console.log('caught error during onConnect')
           // if a hook interrupts, close the websocket connection
