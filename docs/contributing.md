@@ -28,6 +28,12 @@ It’s not too hard to tinker around with the official repository. You’ll need
 4. Open http://localhost:3000 in your favorite browser.
 5. Start playing around!
 
+Compile and watch for changes:
+
+```sh
+npm run build:watch
+```
+
 ## Our code style
 There is an eslint config that ensures a consistent code style. To check for errors, run `$ npm run lint`. That’ll be checked when you send a pull request, too. Make sure it’s passing, before sending a pull request.
 
