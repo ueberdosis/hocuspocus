@@ -471,7 +471,14 @@ export class Hocuspocus {
               // Ensure that the permission denied message is sent before the
               // connection is closed
               incoming.send(message.toUint8Array(), () => {
-                incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+                try {
+                  incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+                } catch (closeError) {
+                  // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
+                  console.error(closeError);
+                  incoming.close(Forbidden.code, Forbidden.reason);
+                }
+
                 incoming.off('message', queueIncomingMessageListener)
               })
             })
