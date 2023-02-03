@@ -31,9 +31,12 @@
     "@tiptap/starter-kit": "^2.0.0-beta.183"
   },
   "peerDependencies": {
-    "prosemirror-model": "^1.16.1",
+    "@tiptap/pm": "^2.0.0-beta.212",
     "y-prosemirror": "^1.0.15",
     "yjs": "^13.5.29"
+  },
+  "devDependencies": {
+    "@tiptap/pm": "^2.0.0-beta.212"
   },
   "gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
 }
