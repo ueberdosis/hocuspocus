@@ -182,16 +182,21 @@ export class Webhook implements Extension {
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    if (!this.configuration.events.includes(Events.onConnect)) {
+    if (!this.configuration.events.includes(Events.onDisconnect)) {
       return
     }
 
-    await this.sendRequest(Events.onDisconnect, {
-      documentName: data.documentName,
-      requestHeaders: data.requestHeaders,
-      requestParameters: Object.fromEntries(data.requestParameters.entries()),
-      context: data.context,
-    })
+    try {
+        await this.sendRequest(Events.onDisconnect, {
+          documentName: data.documentName,
+          requestHeaders: data.requestHeaders,
+          requestParameters: Object.fromEntries(data.requestParameters.entries()),
+          context: data.context,
+        })
+    } catch (e) {
+      console.error(`Caught error in extension-webhook: ${e}`)
+      throw Forbidden
+    }
   }
 
 }
