@@ -19,7 +19,8 @@
     "vue-router": "^3.5.3",
     "y-indexeddb": "^9.0.7",
     "y-websocket": "^1.4.0",
-    "yjs": "^13.5.29"
+    "yjs": "^13.5.29",
+    "y-prosemirror": "1.0.20"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.10.1",
