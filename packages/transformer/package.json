@@ -27,7 +27,7 @@
     "dist"
   ],
   "dependencies": {
-    "@tiptap/core": "^2.0.0-beta.174",
+    "@tiptap/core": "^2.0.0-beta.210",
     "@tiptap/starter-kit": "^2.0.0-beta.183"
   },
   "peerDependencies": {
