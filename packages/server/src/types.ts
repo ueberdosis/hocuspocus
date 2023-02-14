@@ -6,6 +6,7 @@ import { Socket } from 'net'
 import { Awareness } from 'y-protocols/awareness'
 import Document from './Document'
 import { Hocuspocus } from './Hocuspocus'
+import Connection from './Connection'
 
 export enum MessageType {
   Unknown = -1,
@@ -14,6 +15,7 @@ export enum MessageType {
   Auth = 2,
   QueryAwareness = 3,
   SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
+  Stateless = 5,
 }
 
 export interface AwarenessUpdate {
@@ -39,6 +41,7 @@ export interface Extension {
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
+  onStateless?(payload: onStatelessPayload): Promise<any>;
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
   afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
@@ -58,6 +61,7 @@ export type HookName =
   'onLoadDocument' |
   'afterLoadDocument' |
   'beforeHandleMessage' |
+  'onStateless' |
   'onChange' |
   'onStoreDocument' |
   'afterStoreDocument' |
@@ -74,6 +78,7 @@ export type HookPayload =
   connectedPayload |
   onAuthenticatePayload |
   onLoadDocumentPayload |
+  onStatelessPayload |
   onChangePayload |
   onStoreDocumentPayload |
   afterStoreDocumentPayload |
@@ -134,6 +139,13 @@ export interface getDocumentNamePayload {
   documentName: string,
   request: IncomingMessage,
   requestParameters: URLSearchParams,
+}
+
+export interface onStatelessPayload {
+  connection: Connection,
+  documentName: string,
+  document: Document,
+  payload: string,
 }
 
 export interface onAuthenticatePayload {

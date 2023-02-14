@@ -9,7 +9,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { MessageReceiver } from './MessageReceiver'
 import { Debugger } from './Debugger'
-import { beforeHandleMessagePayload } from './types'
+import { onStatelessPayload } from './types'
 
 export class Connection {
 
@@ -30,6 +30,7 @@ export class Connection {
   callbacks: any = {
     onClose: (document: Document) => null,
     beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
+    statelessCallback: ({}) => Promise,
   }
 
   socketId: string
@@ -86,6 +87,15 @@ export class Connection {
   }
 
   /**
+   * Set a callback that will be triggered when an stateless message is received
+   */
+  onStatelessCallback(callback: (payload: onStatelessPayload) => Promise<void>): Connection {
+    this.callbacks.statelessCallback = callback
+
+    return this
+  }
+
+  /**
    * Set a callback that will be triggered before an message is handled
    */
   beforeHandleMessage(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
@@ -112,6 +122,22 @@ export class Connection {
     } catch (exception) {
       this.close()
     }
+  }
+
+
+  public sendStateless(payload: string): void {
+    const message = new OutgoingMessage()
+      .writeStateless(payload)
+
+    this.logger.log({
+      direction: 'out',
+      type: message.type,
+      category: message.category,
+    })
+
+    this.send(
+      message.toUint8Array(),
+    )
   }
 
   /**

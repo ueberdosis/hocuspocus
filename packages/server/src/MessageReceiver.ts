@@ -13,6 +13,7 @@ import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger } from './Debugger'
 import Document from './Document'
+import { readVarString } from 'lib0/decoding'
 
 export class MessageReceiver {
 
@@ -65,6 +66,18 @@ export class MessageReceiver {
         this.applyQueryAwarenessMessage(document.awareness, reply)
 
         break
+
+      case MessageType.Stateless:
+
+        connection?.callbacks.statelessCallback({
+          connection,
+          documentName: document.name,
+          document,
+          payload: readVarString(message.decoder),
+        })
+
+        break
+
       default:
         // Do nothing
     }

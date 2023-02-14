@@ -54,6 +54,9 @@ const provider = new HocuspocusProvider({
   onAwarenessChange: ({ states }) => {
     // …
   },
+  onStateless: ({ payload }) => {
+    // ...
+  }
 })
 ```
 
@@ -103,3 +106,4 @@ provider.off('onMessage', onMessage)
 | destroy              | When the provider will be destroyed.                                       |
 | awarenessUpdate      | When the awareness updates  (see https://docs.yjs.dev/api/about-awareness) |
 | awarenessChange      | When the awareness changes  (see https://docs.yjs.dev/api/about-awareness) |
+| stateless            | When the stateless message was received.                                   |

@@ -5,6 +5,7 @@ import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
+import { readVarString } from 'lib0/decoding'
 
 export class MessageReceiver {
 
@@ -42,6 +43,10 @@ export class MessageReceiver {
       case MessageType.QueryAwareness:
         this.applyQueryAwarenessMessage(provider)
         break
+
+        case MessageType.Stateless:
+          provider.receiveStateless(readVarString(message.decoder))
+          break
 
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)

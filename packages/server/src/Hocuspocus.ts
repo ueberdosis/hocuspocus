@@ -19,7 +19,8 @@ import {
   ConnectionConfiguration,
   HookName,
   AwarenessUpdate,
-  HookPayload, beforeHandleMessagePayload,
+  HookPayload, 
+  beforeHandleMessagePayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -55,6 +56,7 @@ export class Hocuspocus {
     onConnect: () => new Promise(r => r(null)),
     connected: () => new Promise(r => r(null)),
     beforeHandleMessage: () => new Promise(r => r(null)),
+    onStateless: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
@@ -112,6 +114,7 @@ export class Hocuspocus {
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument: this.configuration.onLoadDocument,
       beforeHandleMessage: this.configuration.beforeHandleMessage,
+      onStateless: this.configuration.onStateless,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
       afterStoreDocument: this.configuration.afterStoreDocument,
@@ -723,6 +726,16 @@ export class Hocuspocus {
       this.documents.delete(document.name)
       document.destroy()
     })
+
+    instance.onStatelessCallback(payload => {
+      return this.hooks('onStateless', payload)
+        .catch(error => {
+          if (error?.message) {
+            throw error
+          }
+        })
+    })
+
     instance.beforeHandleMessage((document, update) => {
       const hookPayload: beforeHandleMessagePayload = {
         instance: this,
