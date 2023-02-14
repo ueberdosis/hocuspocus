@@ -19,7 +19,7 @@ import {
   ConnectionConfiguration,
   HookName,
   AwarenessUpdate,
-  HookPayload, 
+  HookPayload,
   beforeHandleMessagePayload,
 } from './types'
 import Document from './Document'

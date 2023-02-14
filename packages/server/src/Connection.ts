@@ -30,7 +30,7 @@ export class Connection {
   callbacks: any = {
     onClose: (document: Document) => null,
     beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
-    statelessCallback: ({}) => Promise,
+    statelessCallback: () => Promise,
   }
 
   socketId: string
@@ -123,7 +123,6 @@ export class Connection {
       this.close()
     }
   }
-
 
   public sendStateless(payload: string): void {
     const message = new OutgoingMessage()

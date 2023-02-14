@@ -7,13 +7,13 @@ import {
   readUpdate,
 } from 'y-protocols/sync'
 import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness'
+import { readVarString } from 'lib0/decoding'
 import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger } from './Debugger'
 import Document from './Document'
-import { readVarString } from 'lib0/decoding'
 
 export class MessageReceiver {
 

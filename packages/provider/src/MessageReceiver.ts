@@ -1,11 +1,11 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { readSyncMessage, messageYjsSyncStep2, messageYjsUpdate } from 'y-protocols/sync'
 import { readAuthMessage } from '@hocuspocus/common'
+import { readVarString } from 'lib0/decoding'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
 import { OutgoingMessage } from './OutgoingMessage'
-import { readVarString } from 'lib0/decoding'
 
 export class MessageReceiver {
 
@@ -44,9 +44,9 @@ export class MessageReceiver {
         this.applyQueryAwarenessMessage(provider)
         break
 
-        case MessageType.Stateless:
-          provider.receiveStateless(readVarString(message.decoder))
-          break
+      case MessageType.Stateless:
+        provider.receiveStateless(readVarString(message.decoder))
+        break
 
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)

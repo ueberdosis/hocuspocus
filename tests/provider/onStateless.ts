@@ -14,7 +14,7 @@ test('executes the onStateless callback', async t => {
       const provider = newHocuspocusProvider(server, {
         onSynced: () => {
           provider.sendStateless(payloadToSend)
-        }
+        },
       })
     })
   })
