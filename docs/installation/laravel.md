@@ -6,7 +6,7 @@ You can find details about it here: [ueberdosis/hocuspocus-laravel](https://gith
 
 ## Custom integration
 
-The primary storage for Hocuspocus must be as a Y.Doc Uint8Array binary. At the moment, there are no compatible PHP libraries to read the YJS format therefore we have two options to access the data: save the data in a Laravel compatible format such as JSON _in addition_ to the primary storage, or create a seperate nodejs server with an API to read the primary storage, parse the YJS format and return it to Laravel.
+The primary storage for Hocuspocus must be as a Y.Doc Uint8Array binary. At the moment, there are no compatible PHP libraries to read the YJS format therefore we have two options to access the data: save the data in a Laravel compatible format such as JSON _in addition_ to the primary storage, or create a separate nodejs server with an API to read the primary storage, parse the YJS format and return it to Laravel.
 
 _Note: Do not be tempted to store the Y.Doc as JSON and recreate it as YJS binary when the user connects. This will cause issues with merging of updates and content will duplicate on new connections. The data must be stored as binary to make use of the YJS format._
 
@@ -30,7 +30,7 @@ return new class extends Migration
 };
 ```
 
-In the Hocuspoucs server, you can use the dotenv library to retrieve the DB login details from `.env`:
+In the Hocuspocus server, you can use the dotenv library to retrieve the DB login details from `.env`:
 ```
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
@@ -51,7 +51,7 @@ And then use the [database extension](https://tiptap.dev/hocuspocus/api/extensio
 
 ### Option 1: Additionally storing the data in another format
 
-Use the [webhook extension](https://tiptap.dev/hocuspocus/api/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format.
+Use the [webhook extension](https://tiptap.dev/hocuspocus/api/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
 
 ### Option 2: Retrieve the data on demand using a seperate nodejs daemon (advanced)
 
@@ -62,7 +62,7 @@ const server = http.createServer(
 ).listen(3000, '127.0.0.1')
 ```
 
-Use the dotenv package as above to retireve the mysql login details and perform the mysql request. You can then use the YJS library to parse the binary data (`Y.applyUpdate(doc, row.data)`). You are free to format it in whatever way is needed and then return it to Laravel.
+Use the dotenv package as above to retrieve the mysql login details and perform the mysql request. You can then use the YJS library to parse the binary data (`Y.applyUpdate(doc, row.data)`). You are free to format it in whatever way is needed and then return it to Laravel.
 
 ### Auth integration
 
