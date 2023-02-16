@@ -6,7 +6,7 @@ tableOfContents: true
 
 ## Introduction
 
-The `onStateless` hook is called after the server is received a stateless message. It should return a Promise.
+The `onStateless` hook is called after the server has received a stateless message. It should return a Promise.
 
 ## Hook payload
 
@@ -29,7 +29,7 @@ import { Server } from '@hocuspocus/server'
 const server = Server.configure({
   async onStateless(data) {
     // Output some information
-    console.log(`Server is received a stateless message "${data.payload}"!`)
+    console.log(`Server has received a stateless message "${data.payload}"!`)
   },
 })
 
