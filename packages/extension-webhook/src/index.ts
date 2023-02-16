@@ -182,7 +182,7 @@ export class Webhook implements Extension {
   }
 
   async onDisconnect(data: onDisconnectPayload) {
-    if (!this.configuration.events.includes(Events.onConnect)) {
+    if (!this.configuration.events.includes(Events.onDisconnect)) {
       return
     }
 

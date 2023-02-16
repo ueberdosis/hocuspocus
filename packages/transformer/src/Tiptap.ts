@@ -1,6 +1,5 @@
 import { Doc } from 'yjs'
-import { Extensions } from '@tiptap/core/dist/packages/core/src/types'
-import { getSchema } from '@tiptap/core'
+import { Extensions, getSchema } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import { Transformer } from './types'
 import { ProsemirrorTransformer } from './Prosemirror'
