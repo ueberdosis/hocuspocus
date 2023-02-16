@@ -112,10 +112,10 @@ checkout it's [API section](/api/on-create-document).
 the [transformers section](/guide/transformers) of the guide for more information.
 
 ```js
-import {readFileSync} from 'fs'
-import {Server} from '@hocuspocus/server'
-import {Doc} from 'yjs'
-import {TiptapTransformer} from '@hocuspocus/transformer'
+import { readFileSync } from 'fs'
+import { Server } from '@hocuspocus/server'
+import { Doc } from 'yjs'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
