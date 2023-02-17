@@ -124,6 +124,9 @@ export class Connection {
     }
   }
 
+  /**
+   * Send a stateless message with payload
+   */
   public sendStateless(payload: string): void {
     const message = new OutgoingMessage()
       .writeStateless(payload)

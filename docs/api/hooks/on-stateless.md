@@ -27,9 +27,13 @@ const data = {
 import { Server } from '@hocuspocus/server'
 
 const server = Server.configure({
-  async onStateless(data) {
+  async onStateless({ payload, document, connection }) {
     // Output some information
-    console.log(`Server has received a stateless message "${data.payload}"!`)
+    console.log(`Server has received a stateless message "${payload}"!`)
+    // Broadcast a stateless message to all connections based on document
+    document.sendStateless('This is a broadcast message.')
+    // Send a stateless message to a specific connection
+    connection.sendStateless('This is a specific message.')
   },
 })
 
