@@ -31,7 +31,7 @@ const server = Server.configure({
     // Output some information
     console.log(`Server has received a stateless message "${payload}"!`)
     // Broadcast a stateless message to all connections based on document
-    document.sendStateless('This is a broadcast message.')
+    document.broadcastStateless('This is a broadcast message.')
     // Send a stateless message to a specific connection
     connection.sendStateless('This is a specific message.')
   },

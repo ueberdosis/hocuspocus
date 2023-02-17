@@ -219,7 +219,7 @@ export class Document extends Doc {
   /**
    * Broadcast stateless message to all connections
    */
-  public sendStateless(payload: string): void {
+  public broadcastStateless(payload: string): void {
     this.getConnections().forEach(connection => {
       connection.sendStateless(payload)
     })

@@ -7,7 +7,7 @@ test('broadcast stateless message to all connections', async t => {
     const payloadToSend = 'STATELESS-MESSAGE'
     const server = await newHocuspocus({
       onStateless: async ({ document }) => {
-        await document.sendStateless(payloadToSend)
+        await document.broadcastStateless(payloadToSend)
       },
     })
 
@@ -89,7 +89,7 @@ test('the server actively sends a stateless message', async t => {
   await new Promise(resolve => {
     newHocuspocusProvider(server, {
       onSynced: async () => {
-        server.documents.get('hocuspocus-test')?.sendStateless(payloadToSend)
+        server.documents.get('hocuspocus-test')?.broadcastStateless(payloadToSend)
       },
       onStateless: async ({ payload }) => {
         t.is(payload, payloadToSend)
