@@ -19,7 +19,7 @@ import {
 } from '@hocuspocus/server'
 import kleur from 'kleur'
 
-export type RedisIntance = RedisClient.Cluster | RedisClient.Redis
+export type RedisInstance = RedisClient.Cluster | RedisClient.Redis
 
 export interface Configuration {
   /**
@@ -37,11 +37,11 @@ export interface Configuration {
   /**
    * Duplicate from an existed Redis instance
    */
-  redis?: RedisIntance,
+  redis?: RedisInstance,
   /**
    * Redis instance creator
    */
-  createClient?: () => RedisIntance,
+  createClient?: () => RedisInstance,
   /**
    * Options passed directly to Redis constructor
    *
@@ -79,9 +79,9 @@ export class Redis implements Extension {
     lockTimeout: 1000,
   }
 
-  pub: RedisIntance
+  pub: RedisInstance
 
-  sub: RedisIntance
+  sub: RedisInstance
 
   documents: Map<string, Document> = new Map()
 
