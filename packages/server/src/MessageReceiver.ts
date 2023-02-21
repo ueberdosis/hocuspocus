@@ -69,12 +69,16 @@ export class MessageReceiver {
 
       case MessageType.Stateless:
 
-        connection?.callbacks.statelessCallback({
-          connection,
-          documentName: document.name,
-          document,
-          payload: readVarString(message.decoder),
-        })
+        if (reply) {
+          document.broadcastStateless(readVarString(message.decoder))
+        } else if (connection) {
+          connection?.callbacks.statelessCallback({
+            connection,
+            documentName: document.name,
+            document,
+            payload: readVarString(message.decoder),
+          })
+        }
 
         break
 

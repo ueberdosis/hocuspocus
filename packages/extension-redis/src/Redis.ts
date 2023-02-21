@@ -16,6 +16,7 @@ import {
   Debugger,
   onConfigurePayload,
   onListenPayload,
+  beforeBroadcastStatelessPayload,
 } from '@hocuspocus/server'
 import kleur from 'kleur'
 
@@ -146,6 +147,16 @@ export class Redis implements Extension {
         resolve(undefined)
       })
     })
+  }
+
+  /**
+   * Publish the broadcast stateless message through Redis.
+   */
+  public async beforeBroadcastStateless({ documentName, payload }: beforeBroadcastStatelessPayload): Promise<any> {
+    const statelessMessage = new OutgoingMessage()
+      .writeStateless(payload)
+
+    return this.pub.publishBuffer(this.pubKey(documentName), Buffer.from(statelessMessage.toUint8Array()))
   }
 
   /**

@@ -21,6 +21,7 @@ import {
   AwarenessUpdate,
   HookPayload,
   beforeHandleMessagePayload,
+  beforeBroadcastStatelessPayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
@@ -56,6 +57,7 @@ export class Hocuspocus {
     onConnect: () => new Promise(r => r(null)),
     connected: () => new Promise(r => r(null)),
     beforeHandleMessage: () => new Promise(r => r(null)),
+    beforeBroadcastStateless: () => new Promise(r => r(null)),
     onStateless: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
     onLoadDocument: () => new Promise(r => r(null)),
@@ -114,6 +116,7 @@ export class Hocuspocus {
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument: this.configuration.onLoadDocument,
       beforeHandleMessage: this.configuration.beforeHandleMessage,
+      beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
       onStateless: this.configuration.onStateless,
       onChange: this.configuration.onChange,
       onStoreDocument: this.configuration.onStoreDocument,
@@ -651,6 +654,16 @@ export class Hocuspocus {
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
       this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+    })
+
+    document.onBroadcastStateless((document: Document, payload: string) => {
+      const hookPayload: beforeBroadcastStatelessPayload = {
+        document,
+        documentName,
+        payload,
+      }
+
+      this.hooks('beforeBroadcastStateless', hookPayload)
     })
 
     document.awareness.on('update', (update: AwarenessUpdate) => {

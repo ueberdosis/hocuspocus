@@ -41,6 +41,7 @@ export interface Extension {
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
+  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>,
   onStateless?(payload: onStatelessPayload): Promise<any>;
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
@@ -61,6 +62,7 @@ export type HookName =
   'onLoadDocument' |
   'afterLoadDocument' |
   'beforeHandleMessage' |
+  'beforeBroadcastStateless' |
   'onStateless' |
   'onChange' |
   'onStoreDocument' |
@@ -78,6 +80,7 @@ export type HookPayload =
   connectedPayload |
   onAuthenticatePayload |
   onLoadDocumentPayload |
+  beforeBroadcastStatelessPayload |
   onStatelessPayload |
   onChangePayload |
   onStoreDocumentPayload |
@@ -139,6 +142,12 @@ export interface getDocumentNamePayload {
   documentName: string,
   request: IncomingMessage,
   requestParameters: URLSearchParams,
+}
+
+export interface beforeBroadcastStatelessPayload {
+  documentName: string,
+  document: Document,
+  payload: string,
 }
 
 export interface onStatelessPayload {
