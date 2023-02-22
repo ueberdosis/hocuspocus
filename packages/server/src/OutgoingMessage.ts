@@ -2,6 +2,7 @@ import {
   createEncoder,
   Encoder,
   toUint8Array,
+  writeVarString,
   writeVarUint,
   writeVarUint8Array,
 } from 'lib0/encoding'
@@ -96,6 +97,15 @@ export class OutgoingMessage {
     this.category = 'Update'
 
     writeUpdate(this.encoder, update)
+
+    return this
+  }
+
+  writeStateless(payload: string): OutgoingMessage {
+    this.category = 'Stateless'
+
+    writeVarUint(this.encoder, MessageType.Stateless)
+    writeVarString(this.encoder, payload)
 
     return this
   }

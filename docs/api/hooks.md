@@ -27,6 +27,7 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 | `onRequest`           | When a HTTP request comes in              | [Read more](/api/hooks/on-request)            |
 | `onStoreDocument`     | When a document has been changed          | [Read more](/api/hooks/on-store-document)     |
 | `onUpgrade`           | When the WebSocket connection is upgraded | [Read more](/api/hooks/on-upgrade)            |
+| `onStateless`         | When the Stateless message is received    | [Read more](/api/hooks/on-stateless)          |
 
 ## Usage
 
