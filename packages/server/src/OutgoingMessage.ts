@@ -110,6 +110,15 @@ export class OutgoingMessage {
     return this
   }
 
+  writeBroadcastStateless(payload: string): OutgoingMessage {
+    this.category = 'Stateless'
+
+    writeVarUint(this.encoder, MessageType.BroadcastStateless)
+    writeVarString(this.encoder, payload)
+
+    return this
+  }
+
   toUint8Array(): Uint8Array {
     return toUint8Array(this.encoder)
   }

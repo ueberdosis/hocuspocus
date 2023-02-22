@@ -3,6 +3,7 @@ import {
   Decoder,
   readVarUint,
   readVarUint8Array,
+  readVarString,
 } from 'lib0/decoding'
 import {
   createEncoder,
@@ -39,6 +40,10 @@ export class IncomingMessage {
 
   readVarUint() {
     return readVarUint(this.decoder)
+  }
+
+  readVarString() {
+    return readVarString(this.decoder)
   }
 
   toUint8Array() {

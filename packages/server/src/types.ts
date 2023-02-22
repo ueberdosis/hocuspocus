@@ -16,6 +16,7 @@ export enum MessageType {
   QueryAwareness = 3,
   SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
   Stateless = 5,
+  BroadcastStateless = 6,
 }
 
 export interface AwarenessUpdate {
@@ -41,6 +42,7 @@ export interface Extension {
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
+  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>,
   onStateless?(payload: onStatelessPayload): Promise<any>;
   onChange?(data: onChangePayload): Promise<any>,
   onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
@@ -61,6 +63,7 @@ export type HookName =
   'onLoadDocument' |
   'afterLoadDocument' |
   'beforeHandleMessage' |
+  'beforeBroadcastStateless' |
   'onStateless' |
   'onChange' |
   'onStoreDocument' |
@@ -79,6 +82,8 @@ export type HookPayload =
   onAuthenticatePayload |
   onLoadDocumentPayload |
   onStatelessPayload |
+  beforeHandleMessagePayload |
+  beforeBroadcastStatelessPayload |
   onChangePayload |
   onStoreDocumentPayload |
   afterStoreDocumentPayload |
@@ -222,6 +227,12 @@ export interface beforeHandleMessagePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+}
+
+export interface beforeBroadcastStatelessPayload {
+  document: Document,
+  documentName: string,
+  stateless: string,
 }
 
 export interface onStoreDocumentPayload {
