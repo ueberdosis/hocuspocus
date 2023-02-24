@@ -45,3 +45,86 @@ test('syncs broadcast stateless message between servers and clients', async t =>
     })
   })
 })
+
+test('client stateless messages shouldnt propagate to other server', async t => {
+  await new Promise(async resolve => {
+    const payloadToSend = 'STATELESS-MESSAGE'
+    const server = await newHocuspocus({
+      extensions: [
+        new Redis({
+          ...redisConnectionSettings,
+          identifier: `server${uuidv4()}`,
+        }),
+      ],
+      async onStateless({ payload }) {
+        t.is(payloadToSend, payload)
+        t.pass()
+        resolve('done')
+      },
+    })
+
+    const anotherServer = await newHocuspocus({
+      extensions: [
+        new Redis({
+          ...redisConnectionSettings,
+          identifier: `anotherServer${uuidv4()}`,
+        }),
+      ],
+      async onStateless() {
+        console.log('failed')
+        t.fail()
+      },
+    })
+
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        provider.sendStateless(payloadToSend)
+      },
+    })
+  })
+})
+
+test('server client stateless messages shouldnt propagate to other client', async t => {
+  await new Promise(async resolve => {
+    const payloadToSend = 'STATELESS-MESSAGE'
+    const server = await newHocuspocus({
+      extensions: [
+        new Redis({
+          ...redisConnectionSettings,
+          identifier: `server${uuidv4()}`,
+        }),
+      ],
+      async onStateless({ connection }) {
+        connection.sendStateless('test123')
+      },
+    })
+
+    const anotherServer = await newHocuspocus({
+      extensions: [
+        new Redis({
+          ...redisConnectionSettings,
+          identifier: `anotherServer${uuidv4()}`,
+        }),
+      ],
+      async onStateless() {
+        t.fail()
+      },
+    })
+
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        provider.sendStateless('ok')
+      },
+      onStateless() {
+        t.pass()
+        resolve('ok')
+      },
+    })
+
+    const provider2 = newHocuspocusProvider(anotherServer, {
+      onStateless() {
+        t.fail()
+      },
+    })
+  })
+})
