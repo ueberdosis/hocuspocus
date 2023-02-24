@@ -80,7 +80,7 @@ const prosemirrorJSON = ProsemirrorTransformer.fromYdoc(ydoc, 'field-name')
 
 ```js
 import { ProsemirrorTransformer } from '@hocuspocus/transformer'
-import { Schema } from 'prosemirror-model'
+import { Schema } from '@tiptap/pm/model'
 
 const prosemirrorJSON = {
   type: 'doc',

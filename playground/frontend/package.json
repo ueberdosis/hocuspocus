@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@hocuspocus/provider": "^1.0.2",
-    "@tiptap/extension-collaboration": "^2.0.0-beta.33",
-    "@tiptap/starter-kit": "^2.0.0-beta.183",
-    "@tiptap/vue-2": "^2.0.0-beta.77",
+    "@tiptap/extension-collaboration": "^2.0.0-beta.218",
+    "@tiptap/starter-kit": "^2.0.0-beta.218",
+    "@tiptap/vue-2": "^2.0.0-beta.218",
     "vite": "^2.8.6",
     "vite-plugin-pages": "^0.21.4",
     "vite-plugin-vue2": "^1.9.3",
@@ -19,7 +19,8 @@
     "vue-router": "^3.5.3",
     "y-indexeddb": "^9.0.7",
     "y-websocket": "^1.4.0",
-    "yjs": "^13.5.29"
+    "yjs": "^13.5.29",
+    "y-prosemirror": "1.0.20"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.10.1",
