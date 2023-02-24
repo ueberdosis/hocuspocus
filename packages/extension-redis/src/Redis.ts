@@ -182,16 +182,6 @@ export class Redis implements Extension {
   }
 
   /**
-   * Publish the broadcast stateless message through Redis.
-   */
-  public async beforeBroadcastStateless({ documentName, payload }: beforeBroadcastStatelessPayload): Promise<any> {
-    const statelessMessage = new OutgoingMessage()
-      .writeStateless(payload)
-
-    return this.pub.publishBuffer(this.pubKey(documentName), Buffer.from(statelessMessage.toUint8Array()))
-  }
-
-  /**
    * Publish the first sync step through Redis.
    */
   private async publishFirstSyncStep(documentName: string, document: Document) {
