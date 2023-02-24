@@ -5,6 +5,8 @@ import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '.
 import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('syncs broadcast stateless message between servers and clients', async t => {
+  const redisPrefix = uuidv4()
+
   await new Promise(async resolve => {
     const payloadToSend = 'STATELESS-MESSAGE'
     const server = await newHocuspocus({
@@ -12,6 +14,7 @@ test('syncs broadcast stateless message between servers and clients', async t =>
         new Redis({
           ...redisConnectionSettings,
           identifier: `server${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
     })
@@ -21,6 +24,7 @@ test('syncs broadcast stateless message between servers and clients', async t =>
         new Redis({
           ...redisConnectionSettings,
           identifier: `anotherServer${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
     })
@@ -48,6 +52,8 @@ test('syncs broadcast stateless message between servers and clients', async t =>
 })
 
 test('client stateless messages shouldnt propagate to other server', async t => {
+  const redisPrefix = uuidv4()
+
   await new Promise(async resolve => {
     const payloadToSend = 'STATELESS-MESSAGE'
     const server = await newHocuspocus({
@@ -55,6 +61,7 @@ test('client stateless messages shouldnt propagate to other server', async t => 
         new Redis({
           ...redisConnectionSettings,
           identifier: `server${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
       async onStateless({ payload }) {
@@ -69,6 +76,7 @@ test('client stateless messages shouldnt propagate to other server', async t => 
         new Redis({
           ...redisConnectionSettings,
           identifier: `anotherServer${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
       async onStateless() {
@@ -87,12 +95,14 @@ test('client stateless messages shouldnt propagate to other server', async t => 
 
 test('server client stateless messages shouldnt propagate to other client', async t => {
   await new Promise(async resolve => {
-    const payloadToSend = 'STATELESS-MESSAGE'
+    const redisPrefix = uuidv4()
+
     const server = await newHocuspocus({
       extensions: [
         new Redis({
           ...redisConnectionSettings,
           identifier: `server${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
       async onStateless({ connection, document }) {
@@ -105,6 +115,7 @@ test('server client stateless messages shouldnt propagate to other client', asyn
         new Redis({
           ...redisConnectionSettings,
           identifier: `anotherServer${uuidv4()}`,
+          prefix: redisPrefix,
         }),
       ],
       async onStateless() {
