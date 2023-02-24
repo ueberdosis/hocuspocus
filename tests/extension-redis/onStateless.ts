@@ -2,6 +2,7 @@ import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
 import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('syncs broadcast stateless message between servers and clients', async t => {
   await new Promise(async resolve => {
@@ -94,7 +95,7 @@ test('server client stateless messages shouldnt propagate to other client', asyn
           identifier: `server${uuidv4()}`,
         }),
       ],
-      async onStateless({ connection }) {
+      async onStateless({ connection, document }) {
         connection.sendStateless('test123')
       },
     })
@@ -111,20 +112,24 @@ test('server client stateless messages shouldnt propagate to other client', asyn
       },
     })
 
+    const provider2 = newHocuspocusProvider(anotherServer, {
+      onStateless() {
+        t.fail()
+      },
+    })
+
     const provider = newHocuspocusProvider(server, {
       onSynced() {
         provider.sendStateless('ok')
       },
       onStateless() {
         t.pass()
-        resolve('ok')
       },
     })
 
-    const provider2 = newHocuspocusProvider(anotherServer, {
-      onStateless() {
-        t.fail()
-      },
-    })
+    setTimeout(() => {
+      resolve('done')
+    }, 200)
+
   })
 })
