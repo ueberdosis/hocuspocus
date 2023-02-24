@@ -232,7 +232,7 @@ export interface beforeHandleMessagePayload {
 export interface beforeBroadcastStatelessPayload {
   document: Document,
   documentName: string,
-  stateless: string,
+  payload: string,
 }
 
 export interface onStoreDocumentPayload {
