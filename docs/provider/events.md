@@ -56,6 +56,7 @@ const provider = new HocuspocusProvider({
   },
   onStateless: ({ payload }) => {
     // ...
+    // the provider can also send a custom message to the server: provider.sendStateless('any string payload')
   }
 })
 ```
