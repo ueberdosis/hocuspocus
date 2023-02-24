@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.2](https://github.com/ueberdosis/hocuspocus/compare/v1.0.1...v1.0.2) (2023-02-16)
+
+
+### Bug Fixes
+
+* make `transformer` compatible with `@tiptap/core@^2.0.0-beta.210` ([#512](https://github.com/ueberdosis/hocuspocus/issues/512)) ([591103f](https://github.com/ueberdosis/hocuspocus/commit/591103fe15d3c3760b7e59e65785a34e1d736c16))
+
+
+
+
+
 ## [1.0.1](https://github.com/ueberdosis/hocuspocus/compare/v1.0.0...v1.0.1) (2023-01-30)
 
 **Note:** Version bump only for package hocuspocus

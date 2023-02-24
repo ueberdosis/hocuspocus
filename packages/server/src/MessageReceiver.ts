@@ -7,6 +7,7 @@ import {
   readUpdate,
 } from 'y-protocols/sync'
 import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness'
+import { readVarString } from 'lib0/decoding'
 import { MessageType } from './types'
 import Connection from './Connection'
 import { IncomingMessage } from './IncomingMessage'
@@ -65,6 +66,18 @@ export class MessageReceiver {
         this.applyQueryAwarenessMessage(document.awareness, reply)
 
         break
+
+      case MessageType.Stateless:
+
+        connection?.callbacks.statelessCallback({
+          connection,
+          documentName: document.name,
+          document,
+          payload: readVarString(message.decoder),
+        })
+
+        break
+
       default:
         // Do nothing
     }

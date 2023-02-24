@@ -1,6 +1,7 @@
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { readSyncMessage, messageYjsSyncStep2, messageYjsUpdate } from 'y-protocols/sync'
 import { readAuthMessage } from '@hocuspocus/common'
+import { readVarString } from 'lib0/decoding'
 import { MessageType } from './types'
 import { HocuspocusProvider } from './HocuspocusProvider'
 import { IncomingMessage } from './IncomingMessage'
@@ -41,6 +42,10 @@ export class MessageReceiver {
 
       case MessageType.QueryAwareness:
         this.applyQueryAwarenessMessage(provider)
+        break
+
+      case MessageType.Stateless:
+        provider.receiveStateless(readVarString(message.decoder))
         break
 
       default:

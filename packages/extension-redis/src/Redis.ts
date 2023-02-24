@@ -1,4 +1,4 @@
-import RedisClient from 'ioredis'
+import RedisClient, { ClusterNode, ClusterOptions, RedisOptions } from 'ioredis'
 import Redlock from 'redlock'
 import { v4 as uuid } from 'uuid'
 import {
@@ -19,6 +19,8 @@ import {
 } from '@hocuspocus/server'
 import kleur from 'kleur'
 
+export type RedisInstance = RedisClient.Cluster | RedisClient.Redis
+
 export interface Configuration {
   /**
    * Redis port
@@ -29,11 +31,23 @@ export interface Configuration {
    */
   host: string,
   /**
+   * Redis Cluster
+   */
+  nodes?: ClusterNode[],
+  /**
+   * Duplicate from an existed Redis instance
+   */
+  redis?: RedisInstance,
+  /**
+   * Redis instance creator
+   */
+  createClient?: () => RedisInstance,
+  /**
    * Options passed directly to Redis constructor
    *
    * https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
    */
-  options?: RedisClient.RedisOptions,
+  options?: ClusterOptions | RedisOptions,
   /**
    * An unique instance name, required to filter messages in Redis.
    * If none is provided an unique id is generated.
@@ -65,9 +79,9 @@ export class Redis implements Extension {
     lockTimeout: 1000,
   }
 
-  pub: RedisClient.Redis
+  pub: RedisInstance
 
-  sub: RedisClient.Redis
+  sub: RedisInstance
 
   documents: Map<string, Document> = new Map()
 
@@ -83,17 +97,35 @@ export class Redis implements Extension {
       ...configuration,
     }
 
-    const { port, host, options } = this.configuration
+    // We’ll replace that in the onConfigure hook with the global instance.
+    this.logger = new Debugger()
 
-    this.pub = new RedisClient(port, host, options)
+    // Create Redis instance
+    const {
+      port,
+      host,
+      options,
+      nodes,
+      redis,
+      createClient,
+    } = this.configuration
 
-    this.sub = new RedisClient(port, host, options)
+    if (typeof createClient === 'function') {
+      this.pub = createClient()
+      this.sub = createClient()
+    } else if (redis) {
+      this.pub = redis.duplicate()
+      this.sub = redis.duplicate()
+    } else if (nodes && nodes.length > 0) {
+      this.pub = new RedisClient.Cluster(nodes, options)
+      this.sub = new RedisClient.Cluster(nodes, options)
+    } else {
+      this.pub = new RedisClient(port, host, options)
+      this.sub = new RedisClient(port, host, options)
+    }
     this.sub.on('pmessageBuffer', this.handleIncomingMessage)
 
     this.redlock = new Redlock([this.pub])
-
-    // We’ll replace that in the onConfigure hook with the global instance.
-    this.logger = new Debugger()
   }
 
   async onConfigure({ instance }: onConfigurePayload) {

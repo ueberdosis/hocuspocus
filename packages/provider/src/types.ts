@@ -16,6 +16,7 @@ export enum MessageType {
   Awareness = 1,
   Auth = 2,
   QueryAwareness = 3,
+  Stateless = 5,
 }
 
 export enum WebSocketStatus {
@@ -36,6 +37,7 @@ export interface OutgoingMessageArguments {
   clients: number[],
   states: Map<number, { [key: string]: any; }>,
   update: any,
+  payload: string,
   encoder: Encoder,
 }
 
@@ -90,6 +92,10 @@ export type onAwarenessUpdateParameters = {
 
 export type onAwarenessChangeParameters = {
   states: StatesArray
+}
+
+export type onStatelessParameters = {
+  payload: string
 }
 
 export type StatesArray = { clientId: number, [key: string | number]: any }[]

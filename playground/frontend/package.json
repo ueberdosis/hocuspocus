@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/provider-demos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "start": "vite",
@@ -8,10 +8,10 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@hocuspocus/provider": "^1.0.1",
-    "@tiptap/extension-collaboration": "^2.0.0-beta.217",
-    "@tiptap/starter-kit": "^2.0.0-beta.217",
-    "@tiptap/vue-2": "^2.0.0-beta.217",
+    "@hocuspocus/provider": "^1.0.2",
+    "@tiptap/extension-collaboration": "^2.0.0-beta.218",
+    "@tiptap/starter-kit": "^2.0.0-beta.218",
+    "@tiptap/vue-2": "^2.0.0-beta.218",
     "vite": "^2.8.6",
     "vite-plugin-pages": "^0.21.4",
     "vite-plugin-vue2": "^1.9.3",

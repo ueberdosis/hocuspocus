@@ -20,9 +20,10 @@ import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
 import {
-  ConstructableOutgoingMessage, onAuthenticationFailedParameters, onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters, onSyncedParameters, WebSocketStatus,
+  ConstructableOutgoingMessage, onAuthenticationFailedParameters, onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatelessParameters, onStatusParameters, onSyncedParameters, WebSocketStatus,
 } from './types'
 import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
+import { StatelessMessage } from './OutgoingMessages/StatelessMessage'
 
 export type HocuspocusProviderConfiguration =
   Required<Pick<CompleteHocuspocusProviderConfiguration, 'url' | 'name'>>
@@ -118,6 +119,8 @@ export interface CompleteHocuspocusProviderConfiguration {
   onDestroy: () => void,
   onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void,
   onAwarenessChange: (data: onAwarenessChangeParameters) => void,
+  onStateless: (data: onStatelessParameters) => void
+
   /**
    * Don’t output any warnings.
    */
@@ -169,6 +172,7 @@ export class HocuspocusProvider extends EventEmitter {
     onDestroy: () => null,
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
+    onStateless: () => null,
     quiet: false,
   }
 
@@ -221,6 +225,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('destroy', this.configuration.onDestroy)
     this.on('awarenessUpdate', this.configuration.onAwarenessUpdate)
     this.on('awarenessChange', this.configuration.onAwarenessChange)
+    this.on('stateless', this.configuration.onStateless)
 
     this.awareness.on('update', () => {
       this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
@@ -424,6 +429,10 @@ export class HocuspocusProvider extends EventEmitter {
     window.addEventListener('beforeunload', this.boundBeforeUnload)
   }
 
+  sendStateless(payload: string) {
+    this.send(StatelessMessage, { payload })
+  }
+
   documentUpdateHandler(update: Uint8Array, origin: any) {
     if (origin === this) {
       return
@@ -482,6 +491,10 @@ export class HocuspocusProvider extends EventEmitter {
     this.isSynced = state
     this.emit('synced', { state })
     this.emit('sync', { state })
+  }
+
+  receiveStateless(payload: string) {
+    this.emit('stateless', { payload })
   }
 
   get isAuthenticationRequired(): boolean {
