@@ -14,6 +14,7 @@ export class Document extends Doc {
   callbacks = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onUpdate: (document: Document, connection: Connection, update: Uint8Array) => {},
+    beforeBroadcastStateless: (document: Document, stateless: string) => {},
   }
 
   connections: Map<WebSocket, {
@@ -72,6 +73,15 @@ export class Document extends Doc {
    */
   onUpdate(callback: (document: Document, connection: Connection, update: Uint8Array) => void): Document {
     this.callbacks.onUpdate = callback
+
+    return this
+  }
+
+  /**
+   * Set a callback that will be triggered before a stateless message is broadcasted
+   */
+  beforeBroadcastStateless(callback: (document: Document, stateless: string) => void): Document {
+    this.callbacks.beforeBroadcastStateless = callback
 
     return this
   }
@@ -220,6 +230,8 @@ export class Document extends Doc {
    * Broadcast stateless message to all connections
    */
   public broadcastStateless(payload: string): void {
+    this.callbacks.beforeBroadcastStateless(this, payload)
+
     this.getConnections().forEach(connection => {
       connection.sendStateless(payload)
     })
