@@ -129,7 +129,7 @@ test('server client stateless messages shouldnt propagate to other client', asyn
 
     setTimeout(() => {
       resolve('done')
-    }, 200)
+    }, 500)
 
   })
 })
