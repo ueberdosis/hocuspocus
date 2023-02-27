@@ -193,7 +193,7 @@ export class HocuspocusProvider extends EventEmitter {
       )
     }
 
-    this.startSync()
+    this.configuration.websocketProvider.attach(this)
   }
 
   private onStatus({ status } : {status: WebSocketStatus}) {

@@ -6,11 +6,12 @@ import { retry } from '@lifeomic/attempt'
 import {
   Forbidden, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
+import { Event } from 'ws'
 import EventEmitter from './EventEmitter'
 import {
   onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters, WebSocketStatus,
 } from './types'
-import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
+import { HocuspocusProvider, onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
 
 export type HocuspocusProviderWebsocketConfiguration =
   Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, 'url'>>
@@ -160,6 +161,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.configuration.WebSocketPolyfill = configuration.WebSocketPolyfill ? configuration.WebSocketPolyfill : WebSocket
 
     this.on('open', this.configuration.onOpen)
+    this.on('open', this.onOpen.bind(this))
     this.on('connect', this.configuration.onConnect)
     this.on('message', this.configuration.onMessage)
     this.on('outgoingMessage', this.configuration.onOutgoingMessage)
@@ -189,6 +191,18 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     }
 
     this.connect()
+  }
+
+  receivedOnOpenPayload?: Event | undefined = undefined
+
+  async onOpen(event: Event) {
+    this.receivedOnOpenPayload = event
+  }
+
+  attach(provider: HocuspocusProvider) {
+    if (this.receivedOnOpenPayload) {
+      provider.onOpen(this.receivedOnOpenPayload)
+    }
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {}): void {
