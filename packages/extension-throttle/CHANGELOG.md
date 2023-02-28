@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [1.1.1](https://github.com/ueberdosis/hocuspocus/compare/v1.1.0...v1.1.1) (2023-03-02)
+# [2.0.0-alpha.0](https://github.com/ueberdosis/hocuspocus/compare/v1.1.0...v2.0.0-alpha.0) (2023-02-28)
 
 **Note:** Version bump only for package @hocuspocus/extension-throttle
 
