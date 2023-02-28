@@ -166,7 +166,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.on('close', (e: Event) => this.emit('close', e))
 
     this.configuration.websocketProvider.on('status', this.onStatus.bind(this))
-    this.configuration.websocketProvider.on('status', (e: Event) => this.emit('status', e))
 
     this.configuration.websocketProvider.on('disconnect', this.configuration.onDisconnect)
     this.configuration.websocketProvider.on('disconnect', (e: Event) => this.emit('disconnect', e))
@@ -196,8 +195,11 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.attach(this)
   }
 
-  private onStatus({ status } : {status: WebSocketStatus}) {
+  public onStatus({ status } : onStatusParameters) {
     this.status = status
+
+    this.configuration.onStatus({ status })
+    this.emit('status', { status })
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderConfiguration> = {}): void {
@@ -281,6 +283,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   disconnect() {
     this.disconnectBroadcastChannel()
+    this.configuration.websocketProvider.detach(this)
   }
 
   async onOpen(event: Event) {
