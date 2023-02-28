@@ -166,6 +166,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.on('message', this.configuration.onMessage)
     this.on('outgoingMessage', this.configuration.onOutgoingMessage)
     this.on('status', this.configuration.onStatus)
+    this.on('status', this.onStatus.bind(this))
     this.on('disconnect', this.configuration.onDisconnect)
     this.on('close', this.configuration.onClose)
     this.on('destroy', this.configuration.onDestroy)
@@ -195,14 +196,29 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
   receivedOnOpenPayload?: Event | undefined = undefined
 
+  receivedOnStatusPayload?: onStatusParameters | undefined = undefined
+
   async onOpen(event: Event) {
     this.receivedOnOpenPayload = event
+  }
+
+  async onStatus(data: onStatusParameters) {
+    this.receivedOnStatusPayload = data
   }
 
   attach(provider: HocuspocusProvider) {
     if (this.receivedOnOpenPayload) {
       provider.onOpen(this.receivedOnOpenPayload)
     }
+
+    if (this.receivedOnStatusPayload) {
+      provider.onStatus(this.receivedOnStatusPayload)
+    }
+  }
+
+  detach(provider: HocuspocusProvider) {
+    // tell the server to remove the listener
+
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {}): void {
