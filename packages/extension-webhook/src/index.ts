@@ -8,7 +8,7 @@ import {
 } from '@hocuspocus/server'
 import { Doc } from 'yjs'
 import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import { Forbidden } from '@hocuspocus/common'
 
 export enum Events {
@@ -111,13 +111,17 @@ export class Webhook implements Extension {
     }
 
     const save = () => {
-      this.sendRequest(Events.onChange, {
-        document: this.configuration.transformer.fromYdoc(data.document),
-        documentName: data.documentName,
-        context: data.context,
-        requestHeaders: data.requestHeaders,
-        requestParameters: Object.fromEntries(data.requestParameters.entries()),
-      })
+      try {
+        this.sendRequest(Events.onChange, {
+          document: this.configuration.transformer.fromYdoc(data.document),
+          documentName: data.documentName,
+          context: data.context,
+          requestHeaders: data.requestHeaders,
+          requestParameters: Object.fromEntries(data.requestParameters.entries()),
+        })
+      } catch (e) {
+        console.error(`Caught error in extension-webhook: ${e}`)
+      }
     }
 
     if (!this.configuration.debounce) {
@@ -135,25 +139,29 @@ export class Webhook implements Extension {
       return
     }
 
-    const response = <AxiosResponse> await this.sendRequest(Events.onCreate, {
-      documentName: data.documentName,
-      requestHeaders: data.requestHeaders,
-      requestParameters: Object.fromEntries(data.requestParameters.entries()),
-    })
+    try {
+      const response = await this.sendRequest(Events.onCreate, {
+        documentName: data.documentName,
+        requestHeaders: data.requestHeaders,
+        requestParameters: Object.fromEntries(data.requestParameters.entries()),
+      })
 
-    if (response.status !== 200 || !response.data) return
+      if (response.status !== 200 || !response.data) return
 
-    const document = typeof response.data === 'string'
-      ? JSON.parse(response.data)
-      : response.data
+      const document = typeof response.data === 'string'
+        ? JSON.parse(response.data)
+        : response.data
 
-    // eslint-disable-next-line guard-for-in,no-restricted-syntax
-    for (const fieldName in document) {
-      if (data.document.isEmpty(fieldName)) {
-        data.document.merge(
-          this.configuration.transformer.toYdoc(document[fieldName], fieldName),
-        )
+      // eslint-disable-next-line guard-for-in,no-restricted-syntax
+      for (const fieldName in document) {
+        if (data.document.isEmpty(fieldName)) {
+          data.document.merge(
+            this.configuration.transformer.toYdoc(document[fieldName], fieldName),
+          )
+        }
       }
+    } catch (e) {
+      console.error(`Caught error in extension-webhook: ${e}`)
     }
   }
 
@@ -166,7 +174,7 @@ export class Webhook implements Extension {
     }
 
     try {
-      const response = <AxiosResponse> await this.sendRequest(Events.onConnect, {
+      const response = await this.sendRequest(Events.onConnect, {
         documentName: data.documentName,
         requestHeaders: data.requestHeaders,
         requestParameters: Object.fromEntries(data.requestParameters.entries()),
@@ -186,12 +194,16 @@ export class Webhook implements Extension {
       return
     }
 
-    await this.sendRequest(Events.onDisconnect, {
-      documentName: data.documentName,
-      requestHeaders: data.requestHeaders,
-      requestParameters: Object.fromEntries(data.requestParameters.entries()),
-      context: data.context,
-    })
+    try {
+      await this.sendRequest(Events.onDisconnect, {
+        documentName: data.documentName,
+        requestHeaders: data.requestHeaders,
+        requestParameters: Object.fromEntries(data.requestParameters.entries()),
+        context: data.context,
+      })
+    } catch (e) {
+      console.error(`Caught error in extension-webhook: ${e}`)
+    }
   }
 
 }
