@@ -82,6 +82,7 @@ export default {
       name: 'hocuspocus-demo',
       broadcast: false,
     })
+    window.provider = this.provider
 
     this.anotherProvider = new HocuspocusProvider({
       websocketProvider: socket,
