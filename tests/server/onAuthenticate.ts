@@ -95,8 +95,12 @@ test('confirms the `Token` message with an `Authenticated` message', async t => 
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         t.deepEqual(server.getMessageLogs(), [
-          { category: 'Token', direction: 'in', type: 'Auth' },
-          { category: 'Authenticated', direction: 'out', type: 'Auth' },
+          { direction: 'in', type: 'Auth', category: 'Token' },
+          { direction: 'out', type: 'Auth', category: 'Authenticated' },
+          { direction: 'in', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'out', type: 'Sync', category: 'SyncStep2' },
+          { direction: 'out', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'in', type: 'Awareness', category: 'Update' },
         ])
 
         resolve('done')
