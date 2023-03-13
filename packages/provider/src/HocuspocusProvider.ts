@@ -281,6 +281,11 @@ export class HocuspocusProvider extends EventEmitter {
     return !!this.configuration.token && !this.isAuthenticated
   }
 
+  // not needed, but provides backward compatibility with e.g. lexicla/yjs
+  async connect() {
+    return this.configuration.websocketProvider.connect()
+  }
+
   disconnect() {
     this.disconnectBroadcastChannel()
     this.configuration.websocketProvider.detach(this)
