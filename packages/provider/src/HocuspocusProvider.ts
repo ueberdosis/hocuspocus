@@ -294,7 +294,6 @@ export class HocuspocusProvider extends EventEmitter {
         token: await this.getToken(),
         documentName: this.configuration.name,
       })
-      return
     }
 
     this.startSync()
