@@ -78,25 +78,6 @@ When a new user connects to the server, the onConnect webhook will be triggered 
 }
 ```
 
-You can use this to authorize your users. By responding with a 403 status code the user is not authorized and the connection will be terminated. You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
-
-```js
-// authorize the user by the request parameters or headers
-if (payload.requestParameters?.get('token') !== "secret-api-token") {
-  response.writeHead(403, 'unathorized')
-  return response.end()
-}
-
-// return context if authorized
-response.writeHead(200, { 'Content-Type': 'application/json' })
-response.end(JSON.stringify({
-  user: {
-    id: 1,
-    name: 'Jane Doe',
-  },
-}))
-```
-
 ### onCreate
 
 When a new document is created the onCreate webhook will be triggered with the following payload:
