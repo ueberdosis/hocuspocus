@@ -13,8 +13,6 @@ Actually, you don't even have to use those 2 hooks! We have already created on t
 
 However, in case you are a curious mind, here is an example of what it would be like to do it with hooks (It can be a good way to familiarize yourself with the concepts).
 
-TO-DO: replace `onChange` with `onStoreDocument`
-
 ```ts
 import { debounce } from "debounce";
 import { Server } from "@hocuspocus/server";
@@ -53,4 +51,6 @@ function createInitialDocTemplate() {
 
 ## FAQ: In what format should I save my document?
 
-In Uint8Array, [which is the format that Yjs encodes its documents](https://docs.yjs.dev/api/document-updates). You can persist your documents **ALSO** in another format like JSON if for some reason you want to. Other formats can give you the current state of the document, but you need your Y.Doc if you want the historical steps of the document, which is very much what RTC is all about!
+In Uint8Array, [which is the format that Yjs encodes its documents](https://docs.yjs.dev/api/document-updates).
+You can persist your documents **ALSO** in another format like JSON if for some reason you want to.
+Other formats can give you the current state of the document, but you need your Y.Doc. If you don't, you'll end up with duplicate content.

@@ -1,14 +1,14 @@
 - title: Overview
   items:
     - title: Introduction
-      link: /overview/Introduction
+      link: /introduction
     - title: Getting Started
-      link: /overview/getting-started
+      link: /getting-started
     - title: About the project
-      link: /overview/sponsor
+      link: /sponsor
       type: sponsor
     - title: Contributing
-      link: /overview/contributing
+      link: /contributing
 
 - title: Server
   items:
@@ -46,6 +46,6 @@
     - title: Scalability
       link: /guides/scalability
     - title: Awareness
-      link: /guidess/awareness
+      link: /guides/awareness
     - title: Custom Extensions
       link: /guides/custom-extensions

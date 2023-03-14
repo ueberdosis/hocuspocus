@@ -541,7 +541,7 @@ When a new user connects to the server, the onConnect webhook will be triggered 
 }
 ```
 
-You can use this to authorize your users. By responding with a 403 status code the user is not authorized and the connection will be terminated. You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
+You can respond with a JSON payload that will be set as context throughout the rest of the application. For example:
 
 ```js
 // authorize the user by the request parameters or headers
@@ -659,7 +659,7 @@ When a user disconnects the onDisconnect webhook will be triggered with the foll
 
 ### Transformation
 
-As you probably already know from [the guide](/guide/transformations) the Y-Doc must be serialized into something readable by your application and when importing a document it must be converted into a Y-Doc respectively.
+The Y-Doc must be serialized into something readable by your application and when importing a document it must be converted into a Y-Doc respectively.
 
 Because Hocuspocus doesn't know how your data is structured, you need to pass a transformer to the Webhook extension. You can use one of the transformers from the `@hocuspocus/transformer` package. Make sure to configure them properly. In this example we used the TiptapTransformer that needs the list of extensions:
 

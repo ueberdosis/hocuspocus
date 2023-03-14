@@ -24,16 +24,16 @@ Extensions use hooks to add additional functionality to Hocuspocus. They will be
 
 If the Promise in a hook is rejected it will not be called for the following extensions or your configuration. It's like a stack of middlewares a request has to go through. Keep that in mind when working with hooks.
 
-By way of illustration, if a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` hook. Nice, isn’t it?
+By way of illustration, if a user isn’t allowed to connect: Just throw an error in the `onAuthenticate()` hook. Nice, isn’t it?
 
 ## Summary Table
 
 | Hook                  | Description                               | Link                                             |
-| --------------------- | ----------------------------------------- | ------------------------------------------------ |
+| --------------------- |-------------------------------------------| ------------------------------------------------ |
 | `beforeHandleMessage` | Before handling a message                 | [Read more](/server/hooks#before-handle-message) |
 | `onConnect`           | When a connection is established          | [Read more](/server/hooks#on-connect)            |
 | `connected`           | After a connection has been establied     | [Read more](/server/hooks#connected)             |
-| `onAuthenticate`      | When authentication is passed             | [Read more](/server/hooks#on-authenticate)       |
+| `onAuthenticate`      | When authentication is required           | [Read more](/server/hooks#on-authenticate)       |
 | `onAwarenessUpdate`   | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)   |
 | `onLoadDocument`      | When a new document is created            | [Read more](/server/hooks#on-load-document)      |
 | `onChange`            | When a document has changed               | [Read more](/server/hooks#on-change)             |
@@ -307,6 +307,7 @@ Context contains the data provided in former `onConnect` hooks.
 
 :::warning Use a primary storage
 The following example is not intended to be your primary storage as serializing to and deserializing from JSON will not store collaboration history steps but only the resulting document. This example is only meant to store the resulting document for the views of your application. For a primary storage, check out the [Database extension](/server/extensions#Database).
+:::
 
 ```js
 import { debounce } from "debounce";
