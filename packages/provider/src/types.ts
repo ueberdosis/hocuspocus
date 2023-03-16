@@ -17,6 +17,7 @@ export enum MessageType {
   Auth = 2,
   QueryAwareness = 3,
   Stateless = 5,
+  CLOSE = 7,
 }
 
 export enum WebSocketStatus {
