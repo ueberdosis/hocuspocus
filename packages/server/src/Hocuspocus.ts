@@ -406,6 +406,9 @@ export class Hocuspocus {
     // be queued and handled later.
     const incomingMessageQueue: Record<string, Uint8Array[]> = {}
 
+    // While the connection is establishing
+    const connectionEstablishing: Record<string, boolean> = {}
+
     // Once all hooks are run, we’ll fully establish the connection:
     const setUpNewConnection = async (documentName: string) => {
       // Not an idle connection anymore, no need to close it then.
@@ -413,7 +416,17 @@ export class Hocuspocus {
 
       // If no hook interrupts, create a document and connection
       const document = await this.createDocument(documentName, request, socketId, connection, context)
-      this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+      const instance = this.createConnection(incoming, request, document, socketId, connection.readOnly, context)
+
+      instance.onClose((document, event) => {
+        delete documentConnections[documentName]
+        delete incomingMessageQueue[documentName]
+        delete connectionEstablishing[documentName]
+
+        if (Object.keys(documentConnections).length === 0) {
+          instance.webSocket.close(event?.code, event?.reason) // TODO: Move this to Hocuspocus connection handler
+        }
+      })
 
       documentConnections[documentName] = true
 
@@ -435,7 +448,9 @@ export class Hocuspocus {
         const type = decoding.readVarUint(tmpMsg.decoder)
 
         // Okay, we’ve got the authentication message we’re waiting for:
-        if (type === MessageType.Auth) {
+        if (type === MessageType.Auth && !connectionEstablishing[documentName]) {
+          connectionEstablishing[documentName] = true
+
           // The 2nd integer contains the submessage type
           // which will always be authentication when sent from client -> server
           decoding.readVarUint(tmpMsg.decoder)
@@ -526,9 +541,10 @@ export class Hocuspocus {
           })
             .then(() => {
               // Authentication is required, we’ll need to wait for the Authentication message.
-              if (connection.requiresAuthentication) {
+              if (connection.requiresAuthentication || connectionEstablishing[documentName]) {
                 return
               }
+              connectionEstablishing[documentName] = true
 
               return setUpNewConnection(documentName)
             })

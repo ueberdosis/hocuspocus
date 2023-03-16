@@ -28,6 +28,7 @@ import {
 } from './types'
 import { HocuspocusProviderWebsocket } from './HocuspocusProviderWebsocket'
 import { StatelessMessage } from './OutgoingMessages/StatelessMessage'
+import { CloseMessage } from './OutgoingMessages/CloseMessage'
 import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
 
 export type HocuspocusProviderConfiguration =
@@ -379,6 +380,8 @@ export class HocuspocusProvider extends EventEmitter {
     this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
+
+    this.send(CloseMessage, { documentName: this.configuration.name })
 
     if (typeof window === 'undefined') {
       return
