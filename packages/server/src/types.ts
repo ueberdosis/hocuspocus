@@ -16,6 +16,8 @@ export enum MessageType {
   SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
   Stateless = 5,
   BroadcastStateless = 6,
+
+  CLOSE = 7,
 }
 
 export interface AwarenessUpdate {

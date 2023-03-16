@@ -82,7 +82,13 @@ export class MessageReceiver {
         document.getConnections().forEach(connection => {
           connection.sendStateless(message.readVarString())
         })
+        break
 
+      case MessageType.CLOSE:
+        connection?.close({
+          code: 1000,
+          reason: 'provider_initiated',
+        })
         break
 
       default:
