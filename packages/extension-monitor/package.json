@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-monitor",
   "description": "hocuspocus monitoring",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -38,7 +38,7 @@
     "build": "rm -rf dashboard/dist && parcel build --public-url '.' --no-source-maps dashboard/src/index.html --out-dir dashboard/dist"
   },
   "dependencies": {
-    "@hocuspocus/server": "^1.1.1",
+    "@hocuspocus/server": "^1.1.2",
     "@types/node-os-utils": "^1.2.0",
     "bufferutil": "^4.0.6",
     "collect.js": "^4.32.0",
