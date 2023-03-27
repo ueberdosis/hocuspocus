@@ -1,3 +1,3 @@
 export * from './HocuspocusProvider'
-export * from './TipTapCollabProvider'
+export * from './TiptapCollabProvider'
 export * from './types'

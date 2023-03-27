@@ -3,20 +3,20 @@ import {
   HocuspocusProviderConfiguration,
 } from './HocuspocusProvider'
 
-export type TipTapCollabProviderConfiguration =
+export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
   Partial<HocuspocusProviderConfiguration> &
-  AdditionalTipTapCollabProviderConfiguration
+  AdditionalTiptapCollabProviderConfiguration
 
-export interface AdditionalTipTapCollabProviderConfiguration {
+export interface AdditionalTiptapCollabProviderConfiguration {
   /**
    * A Hocuspocus Cloud App ID, get one here: https://tt-collab.de
    */
   appId: string,
 }
 
-export class TipTapCollabProvider extends HocuspocusProvider {
-  constructor(configuration: TipTapCollabProviderConfiguration) {
+export class TiptapCollabProvider extends HocuspocusProvider {
+  constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.url) {
       configuration.url = `wss://${configuration.appId}.tt-collab.de`
     }
