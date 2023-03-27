@@ -26,14 +26,20 @@ import {
   onSyncedParameters,
   WebSocketStatus,
 } from './types'
-import { HocuspocusProviderWebsocket } from './HocuspocusProviderWebsocket'
+import {
+  CompleteHocuspocusProviderWebsocketConfiguration,
+  HocuspocusProviderWebsocket,
+} from './HocuspocusProviderWebsocket'
 import { StatelessMessage } from './OutgoingMessages/StatelessMessage'
 import { CloseMessage } from './OutgoingMessages/CloseMessage'
 import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
 
 export type HocuspocusProviderConfiguration =
-  Required<Pick<CompleteHocuspocusProviderConfiguration, 'name' | 'websocketProvider'>>
-  & Partial<CompleteHocuspocusProviderConfiguration>
+  Required<Pick<CompleteHocuspocusProviderConfiguration, 'name'>>
+    & Partial<CompleteHocuspocusProviderConfiguration> & (
+  Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, 'url'>> |
+  Required<Pick<CompleteHocuspocusProviderConfiguration, 'websocketProvider'>>
+  )
 
 export interface CompleteHocuspocusProviderConfiguration {
    /**
@@ -206,6 +212,10 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderConfiguration> = {}): void {
+    if (!configuration.websocketProvider && (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url) {
+      this.configuration.websocketProvider = new HocuspocusProviderWebsocket({ url: (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url })
+    }
+
     this.configuration = { ...this.configuration, ...configuration }
   }
 
