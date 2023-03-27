@@ -135,6 +135,8 @@ export class HocuspocusProvider extends EventEmitter {
     forceSync: null,
   }
 
+  isConnected = true
+
   constructor(configuration: HocuspocusProviderConfiguration) {
     super()
     this.setConfiguration(configuration)
@@ -327,6 +329,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   send(message: ConstructableOutgoingMessage, args: any, broadcast = false) {
+    if (!this.isConnected) return
+
     if (broadcast) {
       this.mux(() => { this.broadcast(message, args) })
     }
@@ -382,6 +386,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.removeAllListeners()
 
     this.send(CloseMessage, { documentName: this.configuration.name })
+    this.isConnected = false
 
     if (typeof window === 'undefined') {
       return
