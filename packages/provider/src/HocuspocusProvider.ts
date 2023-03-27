@@ -596,7 +596,11 @@ export class HocuspocusProvider extends EventEmitter {
 
     if (event.code === Unauthorized.code) {
       if (!this.configuration.quiet) {
-        console.warn('[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.')
+        if (event.reason === Unauthorized.reason) {
+          console.warn('[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.')
+        } else {
+          console.warn(`[HocuspocusProvider] Connection closed with status Unauthorized: ${event.reason}`)
+        }
       }
 
       this.shouldConnect = false
