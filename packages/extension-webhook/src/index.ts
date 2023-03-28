@@ -180,7 +180,7 @@ export class Webhook implements Extension {
         requestParameters: Object.fromEntries(data.requestParameters.entries()),
       })
 
-      return typeof response.data === 'string'
+      return typeof response.data === 'string' && response.data.length > 0
         ? JSON.parse(response.data)
         : response.data
     } catch (e) {
