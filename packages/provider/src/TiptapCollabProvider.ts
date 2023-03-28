@@ -18,7 +18,11 @@ export interface AdditionalTiptapCollabProviderConfiguration {
 export class TiptapCollabProvider extends HocuspocusProvider {
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.url) {
-      configuration.url = `wss://${configuration.appId}.tt-collab.de`
+      configuration.url = `wss://${configuration.appId}.collab.tiptap.cloud`
+    }
+
+    if (!configuration.token) {
+      configuration.token = 'notoken'
     }
 
     super(configuration as HocuspocusProviderConfiguration)
