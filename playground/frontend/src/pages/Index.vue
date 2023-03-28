@@ -44,7 +44,7 @@
 import { Editor, EditorContent } from '@tiptap/vue-2'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import { HocuspocusProvider, HocuspocusCloudProvider } from '@hocuspocus/provider'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 export default {
   components: {
