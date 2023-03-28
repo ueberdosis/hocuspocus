@@ -10,7 +10,7 @@ export type TiptapCollabProviderConfiguration =
 
 export interface AdditionalTiptapCollabProviderConfiguration {
   /**
-   * A Hocuspocus Cloud App ID, get one here: https://tt-collab.de
+   * A Hocuspocus Cloud App ID, get one here: https://collab.tiptap.dev
    */
   appId: string,
 }
