@@ -19,5 +19,10 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run publish
+        if: "!github.event.release.prerelease"
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - run: npm run publish:pre
+        if: "github.event.release.prerelease"
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
