@@ -49,7 +49,7 @@ export class SQLite extends Database {
             reject(error)
           }
 
-          resolve(row?.data)
+          resolve((row as any)?.data)
         })
       })
     },
