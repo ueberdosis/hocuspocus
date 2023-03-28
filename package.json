@@ -82,7 +82,7 @@
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-vue": "^8.5.0",
-    "lerna": "^4.0.0",
+    "lerna": "^6.6.1",
     "minimist": "^1.2.5",
     "rollup": "^2.70.1",
     "rollup-plugin-auto-external": "^2.0.0",
