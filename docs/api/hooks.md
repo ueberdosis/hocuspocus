@@ -21,7 +21,7 @@ If a user isn’t allowed to connect: Just send `reject()` in the `onConnect()` 
 | `onLoadDocument`           | When a new document is created            | [Read more](/api/hooks/on-load-document)          |
 | `onChange`                 | When a document has changed               | [Read more](/api/hooks/on-change)                 |
 | `onDisconnect`             | When a connection was closed              | [Read more](/api/hooks/on-disconnect)             |
-| `onListen`                 | When the serer is intialized              | [Read more](/api/hooks/on-listen)                 |
+| `onListen`                 | When the server is initialized            | [Read more](/api/hooks/on-listen)                 |
 | `onDestroy`                | When the server will be destroyed         | [Read more](/api/hooks/on-destroy)                |
 | `onConfigure`              | When the server has been configured       | [Read more](/api/hooks/on-configure)              |
 | `onRequest`                | When a HTTP request comes in              | [Read more](/api/hooks/on-request)                |
