@@ -17,6 +17,8 @@ export const upsertQuery = `
     ON CONFLICT(name) DO UPDATE SET data = $data
 `
 
+const SQLITE_INMEMORY = ':memory:'
+
 export interface SQLiteConfiguration extends DatabaseConfiguration {
   /**
    * Valid values are filenames, ":memory:" for an anonymous in-memory database and an empty
@@ -36,7 +38,7 @@ export class SQLite extends Database {
   db?: sqlite3.Database
 
   configuration: SQLiteConfiguration = {
-    database: ':memory:',
+    database: SQLITE_INMEMORY,
     schema,
     fetch: async ({ documentName }) => {
       return new Promise((resolve, reject) => {
@@ -74,7 +76,9 @@ export class SQLite extends Database {
   }
 
   async onListen() {
-    console.warn(`  ${kleur.yellow('The SQLite extension is intended to be used in a local development environment, not in a production environment.')}`)
-    console.log()
+    if (this.configuration.database === SQLITE_INMEMORY) {
+      console.warn(`  ${kleur.yellow('The SQLite extension is configured as an in-memory database. All changes will be lost on restart!')}`)
+      console.log()
+    }
   }
 }
