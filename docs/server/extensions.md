@@ -7,13 +7,13 @@ You can see [our guide to custom extensions](/guides/custom-extensions) to find 
 We already created some very useful extensions you should check out for sure:
 
 | Extension                               | Description                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------------ |
-| [Database](/server/extensions#Database) | A generic database driver that is easily adjustable to work with any database. |
-| [Monitor](/server/extensions#Monitor)   | A beautiful dashboard to monitor and debug your Hocuspocus instance.           |
-| [Redis](/server/extensions#Redis)       | Scale Hocuspocus horizontally with Redis.                                      |
-| [Logger](/server/extensions#Logger)     | Add logging to Hocuspocus.                                                     |
-| [Webhook](/server/extensions#Webhook)   | Send document changes via webhook to your API.                                 |
-| [Throttle](/server/extensions#Throttle) | Throttle connections by ips.                                                   |
+|-----------------------------------------| ------------------------------------------------------------------------------ |
+| [Database](/server/extensions#database) | A generic database driver that is easily adjustable to work with any database. |
+| [Monitor](/server/extensions#monitor)   | A beautiful dashboard to monitor and debug your Hocuspocus instance.           |
+| [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
+| [Logger](/server/extensions#logger)     | Add logging to Hocuspocus.                                                     |
+| [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
+| [Throttle](/server/extensions#throttle) | Throttle connections by ips.                                                   |
 
 ## Database
 
