@@ -19,7 +19,7 @@ Add an element to your HTML document where Tiptap should be initialized:
 Install the required extensions:
 
 ```bash
-npm install @hocuspocus/provider @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs
+npm install @hocuspocus/provider @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs y-prosemirror
 ```
 
 And create your Tiptap instance:
