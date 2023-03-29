@@ -228,6 +228,7 @@ export interface beforeHandleMessagePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+  connection: Connection
 }
 
 export interface beforeBroadcastStatelessPayload {

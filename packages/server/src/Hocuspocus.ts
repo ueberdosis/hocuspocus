@@ -791,13 +791,14 @@ export class Hocuspocus {
         })
     })
 
-    instance.beforeHandleMessage((document, update) => {
+    instance.beforeHandleMessage((connection, update) => {
       const hookPayload: beforeHandleMessagePayload = {
         instance: this,
         clientsCount: document.getConnectionsCount(),
         context,
         document,
         socketId,
+        connection,
         documentName: document.name,
         requestHeaders: request.headers,
         requestParameters: Hocuspocus.getParameters(request),
