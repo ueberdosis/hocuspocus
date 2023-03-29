@@ -93,8 +93,6 @@ provider.off("onMessage", onMessage);
 
 ## List of events
 
-<<<<<<< HEAD
-=======
 | Name                 | Description                                                               |
 | -------------------- | ------------------------------------------------------------------------- |
 | open                 | When the WebSocket connection is created.                                 |
