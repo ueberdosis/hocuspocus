@@ -25,11 +25,12 @@ npm install @hocuspocus/provider @tiptap/core @tiptap/pm @tiptap/starter-kit @ti
 And create your Tiptap instance:
 
 ```js
-import { Editor, StarterKit } from "@tiptap/starter-kit";
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
-import * as Y from "yjs";
-import { HocuspocusProvider } from "@hocuspocus/provider";
+import { Editor } from '@tiptap/core'
+import { StarterKit } from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import * as Y from 'yjs'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const ydoc = new Y.Doc();
 
