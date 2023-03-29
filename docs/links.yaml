@@ -42,7 +42,6 @@
       link: /guides/persistence
     - title: Multi/Sub-documents
       link: /guides/multi-subdocuments
-      type: draft
     - title: Scalability
       link: /guides/scalability
     - title: Awareness
