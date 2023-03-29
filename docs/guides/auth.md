@@ -12,7 +12,7 @@ With the `onAuthenticate` hook you can check if a client is authenticated and au
 
 When throwing an error or rejecting the returned Promise, the connection to the client will be terminated (see [server hooks lifecycle](/server/hooks#lifecycle)). If the client is authorized and authenticated you can also return contextual data such as a user id which will be accessible in other hooks. But you don’t need to.
 
-For more information on the hook and it's payload checkout it's [section](/server/hooks).
+For more information on the hook and it's payload checkout it's [section](/server/hooks#on-authenticate).
 
 ```js
 import { Server } from "@hocuspocus/server";
