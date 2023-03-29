@@ -3,7 +3,7 @@
 ```
 Hi!
 
-Welcome to the playground. This is mainly meant for internal usage during hocuspocus development,
+Welcome to the playground. This is mainly meant for internal usage during Hocuspocus development,
 but feel free to fiddle around here and find a few examples of how things can work.
 
 Please note that there are different packages used in frontend / backend folders, so you should

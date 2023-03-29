@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve hocuspocus
+about: Create a report to help us improve Hocuspocus
 url: https://github.com/ueberdosis/hocuspocus/issues/new
 title: ''
 labels:
@@ -29,7 +29,7 @@ If applicable, add screenshots to help explain your problem.
  - operating system:
  - browser:
  - mobile/desktop:
- - hocuspocus version:
+ - Hocuspocus version:
 
 **Additional context**
 Add any other context about the problem here.
