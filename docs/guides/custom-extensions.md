@@ -49,7 +49,7 @@ export class MyHocuspocusExtension implements Extension {
 }
 ```
 
-Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the HOOKS section of this documentation which explains them in more detail.
+Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the [hooks](/server/hooks) section of this documentation which explains them in more detail.
 
 Now you can add a constructor that accepts your extension's configuration and merges the default one. It's good practise at this point to create an interface for your configuration too.
 
