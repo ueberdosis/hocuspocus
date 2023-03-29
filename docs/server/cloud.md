@@ -3,7 +3,9 @@
 Tiptap Collab is our hosted solution of Hocuspocus for those who don't want to maintain their own deployment.
 
 :::warning Pro Feature
-To get started, you need a Tiptap Pro account ([sign up here](https://tiptap.dev/pro)). You can then connect with Tiptap Collab (collab.tiptap.dev).
+To get started, you need a Tiptap Pro account ([sign up here](https://tiptap.dev/pro)).
+
+If you already have one, just click [here](https://tiptap.dev/pro) and follow the Tiptap Collab banner.
 :::
 
 Note that you need `@hocuspocus/provider` >= [v1.1.3](https://github.com/ueberdosis/hocuspocus/releases/tag/v1.1.3)
