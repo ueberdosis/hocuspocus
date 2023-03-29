@@ -1,4 +1,4 @@
-import { writeVarUint } from 'lib0/encoding'
+import { writeVarString, writeVarUint } from 'lib0/encoding'
 import { writeAuthentication } from '@hocuspocus/common'
 import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
@@ -13,6 +13,7 @@ export class AuthenticationMessage extends OutgoingMessage {
       throw new Error('The authentication message requires `token` as an argument.')
     }
 
+    writeVarString(this.encoder, args.documentName!)
     writeVarUint(this.encoder, this.type)
     writeAuthentication(this.encoder, args.token)
 

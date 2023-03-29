@@ -1,6 +1,8 @@
 import test from 'ava'
 import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { WebSocketStatus } from '@hocuspocus/provider'
+import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('executes the onAuthenticate callback', async t => {
   await new Promise(async resolve => {
@@ -93,8 +95,12 @@ test('confirms the `Token` message with an `Authenticated` message', async t => 
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         t.deepEqual(server.getMessageLogs(), [
-          { category: 'Token', direction: 'in', type: 'Auth' },
-          { category: 'Authenticated', direction: 'out', type: 'Auth' },
+          { direction: 'in', type: 'Auth', category: 'Token' },
+          { direction: 'out', type: 'Auth', category: 'Authenticated' },
+          { direction: 'in', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'out', type: 'Sync', category: 'SyncStep2' },
+          { direction: 'out', type: 'Sync', category: 'SyncStep1' },
+          { direction: 'in', type: 'Awareness', category: 'Update' },
         ])
 
         resolve('done')
@@ -241,4 +247,77 @@ test('connects with the correct token', async t => {
       token: 'SUPER-SECRET-TOKEN',
     })
   })
+})
+
+test('onAuthenticate has access to document name', async t => {
+  const docName = 'superSecretDoc'
+  const requiredToken = 'SUPER-SECRET-TOKEN'
+
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      async onAuthenticate({ token, documentName }: onAuthenticatePayload) {
+        if (documentName !== docName) {
+          throw new Error()
+        }
+
+        if (token !== requiredToken) {
+          throw new Error()
+        }
+      },
+    })
+
+    newHocuspocusProvider(server, {
+      token: requiredToken,
+      name: docName,
+      onAuthenticated() {
+        t.pass()
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing)', async t => {
+  const docName = 'superSecretDoc'
+  const requiredToken = 'SUPER-SECRET-TOKEN'
+
+  const server = await newHocuspocus({
+    async onAuthenticate({ token, documentName }: onAuthenticatePayload) {
+      if (documentName !== docName) {
+        throw new Error()
+      }
+
+      if (token !== requiredToken) {
+        throw new Error()
+      }
+    },
+  })
+
+  const socket = newHocuspocusProviderWebsocket(server)
+
+  const providerOK = newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    token: requiredToken,
+    name: docName,
+    onAuthenticationFailed() {
+      t.fail()
+    },
+  })
+
+  const providerFail = newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    token: 'wrongToken',
+    name: 'otherDocu',
+    onAuthenticated() {
+      t.fail()
+    },
+  })
+
+  await retryableAssertion(t, tt => {
+    tt.is(providerOK.status, WebSocketStatus.Connected)
+    tt.is(providerFail.status, WebSocketStatus.Disconnected)
+    tt.is(server.getDocumentsCount(), 1)
+    tt.is(server.getConnectionsCount(), 1)
+  })
+
 })

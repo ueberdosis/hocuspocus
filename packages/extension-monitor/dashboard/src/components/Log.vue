@@ -5,7 +5,10 @@
 
     <div class="text-sm">
       <div class="flex items-stretch border-b-2 border-black font-bold py-2">
-        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 8rem;">
+        <div
+          class="flex items-center flex-grow flex-shrink-0"
+          style="flex-basis: 8rem;"
+        >
           Event: <input
             type="text"
             class="flex-auto ml-1"
@@ -13,7 +16,10 @@
             placeholder="Filter"
           >
         </div>
-        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 15rem;">
+        <div
+          class="flex items-center flex-grow flex-shrink-0"
+          style="flex-basis: 15rem;"
+        >
           Socket: <input
             type="text"
             class="flex-auto ml-1"
@@ -21,7 +27,10 @@
             placeholder="Filter"
           >
         </div>
-        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 20rem;">
+        <div
+          class="flex items-center flex-grow flex-shrink-0"
+          style="flex-basis: 20rem;"
+        >
           Document Name: <input
             type="text"
             class="flex-auto ml-1"
@@ -29,7 +38,10 @@
             placeholder="Filter"
           >
         </div>
-        <div class="flex items-center flex-grow flex-shrink-0" style="flex-basis: 6rem;">
+        <div
+          class="flex items-center flex-grow flex-shrink-0"
+          style="flex-basis: 6rem;"
+        >
           Time: <input
             type="text"
             class="flex-auto ml-1"
@@ -45,7 +57,10 @@
         v-slot="{ item }"
       >
         <div class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch">
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 8rem;">
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 8rem;"
+          >
             <span
               class="px-2 py-1 rounded text-sm"
               :class="{
@@ -59,9 +74,24 @@
               {{ item.label }}
             </span>
           </div>
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 15rem;">{{ item.socket }}</div>
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 20rem;">{{ item.details }}</div>
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 6rem;">{{ item.time }}</div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 15rem;"
+          >
+            {{ item.socket }}
+          </div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 20rem;"
+          >
+            {{ item.details }}
+          </div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 6rem;"
+          >
+            {{ item.time }}
+          </div>
         </div>
       </RecycleScroller>
     </div>

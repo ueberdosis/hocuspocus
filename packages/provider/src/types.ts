@@ -17,6 +17,7 @@ export enum MessageType {
   Auth = 2,
   QueryAwareness = 3,
   Stateless = 5,
+  CLOSE = 7,
 }
 
 export enum WebSocketStatus {
@@ -31,6 +32,7 @@ export interface OutgoingMessageInterface {
 }
 
 export interface OutgoingMessageArguments {
+  documentName: string,
   token: string,
   document: Y.Doc,
   awareness: Awareness,

@@ -27,6 +27,8 @@ export class MessageReceiver {
     const { message } = this
     const type = message.readVarUint()
 
+    const emptyMessageLength = message.length()
+
     switch (type) {
       case MessageType.Sync:
         this.applySyncMessage(provider, emitSynced)
@@ -53,7 +55,7 @@ export class MessageReceiver {
     }
 
     // Reply
-    if (message.length() > 1) {
+    if (message.length() > emptyMessageLength + 1) { // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
       if (this.broadcasted) {
         // TODO: Some weird TypeScript error
         // @ts-ignore
@@ -80,7 +82,7 @@ export class MessageReceiver {
     )
 
     // Synced once we receive Step2
-    if (emitSynced && (syncMessageType === messageYjsSyncStep2)) {
+    if (emitSynced && syncMessageType === messageYjsSyncStep2) {
       provider.synced = true
     }
 

@@ -5,14 +5,29 @@
     </h1>
 
     <table class="border border-gray-300 w-full">
-      <tr :key="room.name" v-for="room in rooms">
+      <tr
+        :key="room.name"
+        v-for="room in rooms"
+      >
         <td class="p-3 border border-gray-300">{{ room.name }}</td>
         <td class="p-3 border border-gray-300 text-center">{{ room.status }}</td>
         <td class="p-3 border border-gray-300 text-center">{{ room.numberOfUsers }}</td>
         <td class="p-3 border border-gray-300">{{ room.states }}</td>
         <td class="p-3 border border-gray-300 text-center">
-          <button v-if="room.status !== 'connected'" @click="room.connect()" class="border-2 border-black bg-black text-white px-4 py-2 rounded">connect</button>
-          <button v-if="room.status !== 'disconnected'" @click="room.disconnect()" class="border-2 border-black px-4 py-2 rounded">disconnect</button>
+          <button
+            v-if="room.status !== 'connected'"
+            @click="room.connect()"
+            class="border-2 border-black bg-black text-white px-4 py-2 rounded"
+          >
+            connect
+          </button>
+          <button
+            v-if="room.status !== 'disconnected'"
+            @click="room.disconnect()"
+            class="border-2 border-black px-4 py-2 rounded"
+          >
+            disconnect
+          </button>
         </td>
       </tr>
     </table>

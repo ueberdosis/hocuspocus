@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [1.1.3](https://github.com/ueberdosis/hocuspocus/compare/v1.1.2...v1.1.3) (2023-03-28)
+# [2.0.0-beta.0](https://github.com/ueberdosis/hocuspocus/compare/v1.1.1...v2.0.0-beta.0) (2023-03-28)
 
 **Note:** Version bump only for package tests
 
@@ -11,7 +11,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [1.1.2](https://github.com/ueberdosis/hocuspocus/compare/v1.1.1...v1.1.2) (2023-03-27)
+# [2.0.0-alpha.1](https://github.com/ueberdosis/hocuspocus/compare/v2.0.0-alpha.0...v2.0.0-alpha.1) (2023-03-23)
 
 **Note:** Version bump only for package tests
 
@@ -19,7 +19,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [1.1.1](https://github.com/ueberdosis/hocuspocus/compare/v1.1.0...v1.1.1) (2023-03-02)
+# [2.0.0-alpha.0](https://github.com/ueberdosis/hocuspocus/compare/v1.1.0...v2.0.0-alpha.0) (2023-02-28)
 
 **Note:** Version bump only for package tests
 

@@ -2,16 +2,12 @@ import * as encoding from 'lib0/encoding'
 import { MessageType, OutgoingMessageArguments } from '../types'
 import { OutgoingMessage } from '../OutgoingMessage'
 
-export class QueryAwarenessMessage extends OutgoingMessage {
-  type = MessageType.QueryAwareness
+export class CloseMessage extends OutgoingMessage {
+  type = MessageType.CLOSE
 
-  description = 'Queries awareness states'
+  description = 'Ask the server to close the connection'
 
   get(args: Partial<OutgoingMessageArguments>) {
-
-    console.log('queryAwareness: writing string docName', args.documentName)
-    console.log(this.encoder.cpos)
-
     encoding.writeVarString(this.encoder, args.documentName!)
     encoding.writeVarUint(this.encoder, this.type)
 

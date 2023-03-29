@@ -184,7 +184,7 @@ export class Document extends Doc {
     }
 
     this.getConnections().forEach(connection => {
-      const awarenessMessage = new OutgoingMessage()
+      const awarenessMessage = new OutgoingMessage(this.name)
         .createAwarenessUpdateMessage(this.awareness, changedClients)
 
       this.logger.log({
@@ -207,7 +207,7 @@ export class Document extends Doc {
   private handleUpdate(update: Uint8Array, connection: Connection): Document {
     this.callbacks.onUpdate(this, connection, update)
 
-    const message = new OutgoingMessage()
+    const message = new OutgoingMessage(this.name)
       .createSyncMessage()
       .writeUpdate(update)
 

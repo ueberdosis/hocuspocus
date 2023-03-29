@@ -6,7 +6,7 @@ import {
   readSyncStep2,
   readUpdate,
 } from 'y-protocols/sync'
-import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness'
+import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import { readVarString } from 'lib0/decoding'
 import { MessageType } from './types'
 import Connection from './Connection'
@@ -29,6 +29,7 @@ export class MessageReceiver {
   public apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
     const { message } = this
     const type = message.readVarUint()
+    const emptyMessageLength = message.length
 
     switch (type) {
       case MessageType.Sync:
@@ -36,7 +37,7 @@ export class MessageReceiver {
         message.writeVarUint(MessageType.Sync)
         this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
 
-        if (message.length > 1) {
+        if (message.length > emptyMessageLength + 1) {
           if (reply) {
             reply(message.toUint8Array())
           } else if (connection) {
@@ -63,7 +64,7 @@ export class MessageReceiver {
         break
       case MessageType.QueryAwareness:
 
-        this.applyQueryAwarenessMessage(document.awareness, reply)
+        this.applyQueryAwarenessMessage(document, reply)
 
         break
 
@@ -81,10 +82,17 @@ export class MessageReceiver {
         document.getConnections().forEach(connection => {
           connection.sendStateless(message.readVarString())
         })
+        break
 
+      case MessageType.CLOSE:
+        connection?.close({
+          code: 1000,
+          reason: 'provider_initiated',
+        })
         break
 
       default:
+        console.error(`Unable to handle message of type ${type}: no handler defined!`)
         // Do nothing
     }
   }
@@ -110,7 +118,7 @@ export class MessageReceiver {
         })
 
         if (reply && requestFirstSync) {
-          const syncMessage = (new OutgoingMessage()
+          const syncMessage = (new OutgoingMessage(document.name)
             .createSyncReplyMessage()
             .writeFirstSyncStepFor(document))
 
@@ -122,7 +130,7 @@ export class MessageReceiver {
 
           reply(syncMessage.toUint8Array())
         } else if (connection) {
-          const syncMessage = (new OutgoingMessage()
+          const syncMessage = (new OutgoingMessage(document.name)
             .createSyncMessage()
             .writeFirstSyncStepFor(document))
 
@@ -169,9 +177,9 @@ export class MessageReceiver {
     return type
   }
 
-  applyQueryAwarenessMessage(awareness: Awareness, reply?: (message: Uint8Array) => void) {
-    const message = new OutgoingMessage()
-      .createAwarenessUpdateMessage(awareness)
+  applyQueryAwarenessMessage(document: Document, reply?: (message: Uint8Array) => void) {
+    const message = new OutgoingMessage(document.name)
+      .createAwarenessUpdateMessage(document.awareness)
 
     if (reply) {
       reply(message.toUint8Array())

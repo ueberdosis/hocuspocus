@@ -13,6 +13,7 @@ test('calls the afterStoreDocument hook', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        provider.configuration.websocketProvider.destroy()
         provider.destroy()
       },
     })

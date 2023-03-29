@@ -1,6 +1,6 @@
+import { IncomingMessage as HTTPIncomingMessage } from 'http'
 import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
-import { IncomingMessage as HTTPIncomingMessage } from 'http'
 import {
   CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
 } from '@hocuspocus/common'
@@ -28,7 +28,7 @@ export class Connection {
   timeout: number
 
   callbacks: any = {
-    onClose: (document: Document) => null,
+    onClose: [(document: Document, event?: CloseEvent) => null],
     beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
     statelessCallback: () => Promise,
   }
@@ -70,18 +70,28 @@ export class Connection {
 
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)
 
-    this.webSocket.on('close', this.close.bind(this))
-    this.webSocket.on('message', this.handleMessage.bind(this))
-    this.webSocket.on('pong', () => { this.pongReceived = true })
+    this.webSocket.on('close', this.boundClose)
+    this.webSocket.on('message', this.boundHandleMessage)
+    this.webSocket.on('pong', this.boundHandlePong)
 
     this.sendCurrentAwareness()
+  }
+
+  boundClose = this.close.bind(this)
+
+  boundHandleMessage = this.handleMessage.bind(this)
+
+  boundHandlePong = this.handlePong.bind(this)
+
+  handlePong() {
+    this.pongReceived = true
   }
 
   /**
    * Set a callback that will be triggered when the connection is closed
    */
-  onClose(callback: (document: Document) => void): Connection {
-    this.callbacks.onClose = callback
+  onClose(callback: (document: Document, event?: CloseEvent) => void): Connection {
+    this.callbacks.onClose.push(callback)
 
     return this
   }
@@ -128,7 +138,7 @@ export class Connection {
    * Send a stateless message with payload
    */
   public sendStateless(payload: string): void {
-    const message = new OutgoingMessage()
+    const message = new OutgoingMessage(this.document.name)
       .writeStateless(payload)
 
     this.logger.log({
@@ -153,8 +163,13 @@ export class Connection {
 
       if (this.document.hasConnection(this)) {
         this.document.removeConnection(this)
-        this.callbacks.onClose(this.document)
-        this.webSocket.close(event?.code, event?.reason)
+        clearInterval(this.pingInterval)
+
+        this.webSocket.removeListener('close', this.boundClose)
+        this.webSocket.removeListener('message', this.boundHandleMessage)
+        this.webSocket.removeListener('pong', this.boundHandlePong)
+
+        this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) => callback(this.document, event))
       }
 
       done()
@@ -190,7 +205,7 @@ export class Connection {
       return
     }
 
-    const awarenessMessage = new OutgoingMessage()
+    const awarenessMessage = new OutgoingMessage(this.document.name)
       .createAwarenessUpdateMessage(this.document.awareness)
 
     this.logger.log({
@@ -206,15 +221,23 @@ export class Connection {
    * Handle an incoming message
    * @private
    */
-  private handleMessage(data: Iterable<number>): void {
+  private handleMessage(data: Uint8Array): void {
+    const message = new IncomingMessage(data)
+    const documentName = message.readVarString()
+
+    if (documentName !== this.document.name) return
+
+    message.writeVarString(documentName)
+
     this.callbacks.beforeHandleMessage(this.document, data)
       .then(() => {
         new MessageReceiver(
-          new IncomingMessage(data),
+          message,
           this.logger,
         ).apply(this.document, this)
       })
       .catch((e: any) => {
+        console.log('closing connection because of exception', e)
         this.close({
           code: 'code' in e ? e.code : Forbidden.code,
           reason: 'reason' in e ? e.reason : Forbidden.reason,
@@ -222,25 +245,6 @@ export class Connection {
       })
   }
 
-  /**
-   * Get the underlying connection instance
-   * @deprecated
-   */
-  get instance(): WebSocket {
-    console.warn('connection.instance is deprecated, use `connection.webSocket` instead.')
-
-    return this.webSocket
-  }
-
-  /**
-   * Get the underlying connection instance
-   * @deprecated
-   */
-  public get connection(): WebSocket {
-    console.warn('connection.connection is deprecated, use `connection.webSocket` instead.')
-
-    return this.webSocket
-  }
 }
 
 export default Connection

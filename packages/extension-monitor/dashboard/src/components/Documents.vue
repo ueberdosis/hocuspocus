@@ -2,9 +2,24 @@
   <card>
     <div class="flex flex-col text-sm">
       <div class="flex items-stretch border-b-2 border-black font-bold py-2">
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Document</div>
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Active connections</div>
-        <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">Messages</div>
+        <div
+          class="flex-grow flex-shrink-0"
+          style="flex-basis: 10rem;"
+        >
+          Document
+        </div>
+        <div
+          class="flex-grow flex-shrink-0"
+          style="flex-basis: 10rem;"
+        >
+          Active connections
+        </div>
+        <div
+          class="flex-grow flex-shrink-0"
+          style="flex-basis: 10rem;"
+        >
+          Messages
+        </div>
       </div>
 
       <RecycleScroller
@@ -14,9 +29,24 @@
         v-slot="{ item }"
       >
         <div class="flex border-t border-black py-3 hover:bg-yellow-300 items-stretch">
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.name }}</div>
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.connections }}</div>
-          <div class="flex-grow flex-shrink-0" style="flex-basis: 10rem;">{{ item.messages }}</div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 10rem;"
+          >
+            {{ item.name }}
+          </div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 10rem;"
+          >
+            {{ item.connections }}
+          </div>
+          <div
+            class="flex-grow flex-shrink-0"
+            style="flex-basis: 10rem;"
+          >
+            {{ item.messages }}
+          </div>
         </div>
       </RecycleScroller>
     </div>

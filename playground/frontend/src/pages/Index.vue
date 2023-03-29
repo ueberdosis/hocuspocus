@@ -7,6 +7,7 @@
     <StatusBar
       v-if="provider"
       :provider="provider"
+      :socket="socket"
     />
 
     <h2>
@@ -24,6 +25,7 @@
     <StatusBar
       v-if="anotherProvider"
       :provider="anotherProvider"
+      :socket="socket"
     />
 
     <h2>
@@ -44,7 +46,10 @@
 import { Editor, EditorContent } from '@tiptap/vue-2'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import {
+  HocuspocusProvider,
+  HocuspocusProviderWebsocket,
+} from '@hocuspocus/provider'
 
 export default {
   components: {
@@ -57,6 +62,7 @@ export default {
       anotherProvider: null,
       editor: null,
       anotherEditor: null,
+      socket: null,
     }
   },
 
@@ -66,22 +72,22 @@ export default {
     //   name: 'hocuspocus-demo',
     // })
 
-    this.provider = new HocuspocusProvider({
+    const socket = new HocuspocusProviderWebsocket({
       url: 'ws://127.0.0.1:1234',
+    })
+    this.socket = socket
+
+    this.provider = new HocuspocusProvider({
+      websocketProvider: socket,
       name: 'hocuspocus-demo',
       broadcast: false,
-      onAwarenessChange: ({ states }) => {
-        console.log('provider', states)
-      },
     })
+    window.provider = this.provider
 
     this.anotherProvider = new HocuspocusProvider({
-      url: 'ws://127.0.0.1:1234',
-      name: 'hocuspocus-demo',
+      websocketProvider: socket,
+      name: 'hocuspocus-demo2',
       broadcast: false,
-      onAwarenessChange: ({ states }) => {
-        console.log('anotherProvider', states)
-      },
     })
 
     this.editor = new Editor({

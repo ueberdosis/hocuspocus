@@ -12,6 +12,7 @@ test('executes the onDisconnect callback', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
       },
     })
@@ -38,6 +39,7 @@ test('executes the onDisconnect callback from an extension', async t => {
     const provider = newHocuspocusProvider(server, {
 
       onConnect() {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
       },
     })
@@ -66,6 +68,7 @@ test('passes the context to the onLoadDocument callback', async t => {
     const provider = newHocuspocusProvider(server, {
 
       onConnect() {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
       },
     })
@@ -85,6 +88,7 @@ test('has the server instance', async t => {
     const provider = newHocuspocusProvider(server, {
 
       onConnect() {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
       },
     })
@@ -102,6 +106,7 @@ test('the connections count is correct', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onConnect() {
+        provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
       },
     })

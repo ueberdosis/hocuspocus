@@ -17,6 +17,7 @@ export class AwarenessMessage extends OutgoingMessage {
       throw new Error('The awareness message requires clients as an argument')
     }
 
+    encoding.writeVarString(this.encoder, args.documentName!)
     encoding.writeVarUint(this.encoder, this.type)
 
     let awarenessUpdate
