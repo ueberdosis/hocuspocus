@@ -2,27 +2,11 @@
 tableOfContents: true
 ---
 
-# Extensions
-
-## Introduction
-
-Extensions are a quick way to add additional features to Hocuspocus. They use the same API and the same hooks you saw in the previous chapters.
+# Custom Extensions
 
 ## Official extensions
 
-We already created some very useful extensions you should check out for sure:
-
-**[@hocuspocus/extension-database](/api/extensions/database)**: A generic database driver that is easily adjustable to work with any database.
-
-**[@hocuspocus/extension-monitor](/api/extensions/monitor)**: A beautiful dashboard to monitor and debug your Hocuspocus instance.
-
-**[@hocuspocus/extension-redis](/api/extensions/redis)**: Scale Hocuspocus horizontally with Redis.
-
-**[@hocuspocus/extension-logger](/api/extensions/logger)**: Add logging to Hocuspocus.
-
-**[@hocuspocus/extension-webhook](/api/extensions/webhook)**: Send document changes via webhook to your API.
-
-**[@hocuspocus/extension-throttle](/api/extensions/throttle)**: Throttle connections by ips.
+You can see the extensions we have already created [here](/server/extensions).
 
 ## Create your own extension
 
@@ -40,10 +24,9 @@ import {
   onAuthenticatePayload,
   onLoadDocumentPayload,
   onDisconnectPayload,
-} from '@hocuspocus/server'
+} from "@hocuspocus/server";
 
 export class MyHocuspocusExtension implements Extension {
-
   async onLoadDocument(data: onLoadDocumentPayload): Promise<void> {}
 
   async onChange(data: onChangePayload): Promise<void> {}
@@ -63,11 +46,10 @@ export class MyHocuspocusExtension implements Extension {
   async onDestroy(data: onDestroyPayload): Promise<void> {}
 
   async onConfigure(data: onConfigurePayload): Promise<void> {}
-
 }
 ```
 
-Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the HOOKS section of this documentation which explains them in more detail.
+Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the [hooks](/server/hooks) section of this documentation which explains them in more detail.
 
 Now you can add a constructor that accepts your extension's configuration and merges the default one. It's good practise at this point to create an interface for your configuration too.
 
@@ -81,22 +63,21 @@ import {
   onAuthenticatePayload,
   onLoadDocumentPayload,
   onDisconnectPayload,
-} from '@hocuspocus/server'
+} from "@hocuspocus/server";
 
 export interface Configuration {
-  myConfigurationOption: string,
-  myOptionalConfigurationOption: number | undefined,
+  myConfigurationOption: string;
+  myOptionalConfigurationOption: number | undefined;
 }
 
 export class MyHocuspocusExtension implements Extension {
-
   configuration: Configuration = {
-    myConfigurationOption: 'foobar',
+    myConfigurationOption: "foobar",
     myOptionalConfigurationOption: 42,
-  }
+  };
 
-  constructor(configuration ?: Partial<Configuration>) {
-    this.configuration = { ...this.configuration, ...configuration }
+  constructor(configuration?: Partial<Configuration>) {
+    this.configuration = { ...this.configuration, ...configuration };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -128,24 +109,23 @@ export class MyHocuspocusExtension implements Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async onConfigure(data: onConfigurePayload): Promise<void> {}
-
 }
 ```
 
 That's it. The only thing missing now is your code. Happy extension writing! When you're done you can simply import and register your extension like any other:
 
 ```js
-import { Server } from '@hocuspocus/server'
-import { MyHocuspocusExtension } from './extensions/my-hocuspocus-extension'
+import { Server } from "@hocuspocus/server";
+import { MyHocuspocusExtension } from "./extensions/my-hocuspocus-extension";
 
 const server = Server.configure({
   extensions: [
     new MyHocuspocusExtension({
-      myConfigurationOption: 'baz',
+      myConfigurationOption: "baz",
       myOptionalConfigurationOption: 1337,
-    })
+    }),
   ],
-})
+});
 
-server.listen()
+server.listen();
 ```

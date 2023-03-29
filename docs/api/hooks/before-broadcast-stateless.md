@@ -6,7 +6,7 @@ tableOfContents: true
 
 ## Introduction
 
-The `beforeBroadcastStateless` hook is called before the server broadcast a stateless message.
+The `beforeBroadcastStateless` hooks are called before the server broadcast a stateless message.
 
 ## Hook payload
 
