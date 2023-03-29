@@ -53,4 +53,5 @@ function createInitialDocTemplate() {
 
 In Uint8Array, [which is the format that Yjs encodes its documents](https://docs.yjs.dev/api/document-updates).
 You can persist your documents **ALSO** in another format like JSON if for some reason you want to.
-Other formats can give you the current state of the document, but you need your Y.Doc. If you don't, you'll end up with duplicate content.
+
+Note: Do not be tempted to store the Y.Doc as JSON and recreate it as YJS binary when the user connects. This will cause issues with merging of updates and content will duplicate on new connections. The data must be stored as binary to make use of the YJS format.
