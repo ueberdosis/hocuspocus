@@ -46,7 +46,7 @@ There is an eslint config that ensures a consistent code style. To check for err
 ## Testing for errors
 Your pull request will automatically execute all our existing tests. Make sure they all pass before sending a pull request. Your pull request will automatically execute all tests via the GitHub Workflow.
 
-- Start a redis server: `$ docker run redis -P`
+- Start a redis server: `$ docker run -d --name hocuspocus-redis -p 6379:6379 redis:7`
 - Run all tests locally: `$ npm run test`
 - Run all tests of a single package: `$ npm run test -- tests/PACKAGE_NAME`
 
