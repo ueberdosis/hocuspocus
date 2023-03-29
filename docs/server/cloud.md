@@ -58,4 +58,4 @@ All requests contain a header `X-Hocuspocus-Signature-256` which signs the entir
 
 ### Need anything else?
 
-Contact us on [Discord](https://tiptap.dev/discord) or send an email to humans@tiptap.dev
+Contact us on [Discord](https://tiptap.dev/discord) or send an email to [humans@tiptap.dev](mailto:humans@tiptap.dev).
