@@ -6,7 +6,7 @@ tableOfContents: true
 
 ## Introduction
 
-The `onStateless` hook is called after the server has received a stateless message. It should return a Promise.
+The `onStateless` hooks are called after the server has received a stateless message. It should return a Promise.
 
 ## Hook payload
 

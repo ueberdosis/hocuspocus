@@ -70,7 +70,7 @@ server.listen();
 
 ### beforeHandleMessage
 
-The `beforeHandleMessage` hook is called when a message was received by the server, directly before
+The `beforeHandleMessage` hooks are called when a message was received by the server, directly before
 handling / applying it. The hook can be used to reject a message (e.g. if the authentication token has
 expired), or even to check the update message and reject / accept it based on custom rules. If you
 throw an error in the hook, the connection will be closed. You can return a custom code / reason by
@@ -128,7 +128,7 @@ server.listen();
 
 ### connected
 
-The `connected` hook is called after a new connection has been successfully established.
+The `connected` hooks are called after a new connection has been successfully established.
 
 **Example**
 
@@ -210,7 +210,7 @@ server.listen();
 
 **Disabling authentication for some users**
 
-Once the `onAuthenticate` hook is configured, the server will wait for the authentication WebSocket message. If you want to override that behaviour (for some users), you can manually do that in the `onConnect` hook.
+Once The `onAuthenticate` hooks are configured, the server will wait for the authentication WebSocket message. If you want to override that behaviour (for some users), you can manually do that in the `onConnect` hook.
 
 ```js
 import { Server } from "@hocuspocus/server";
@@ -227,7 +227,7 @@ const server = Server.configure({
 
 ### onAwarenessUpdate
 
-The `onAwarenessUpdate` hook is called when awareness changed ([Provider Awareness API](/provider/events)).
+The `onAwarenessUpdate` hooks are called when awareness changed ([Provider Awareness API](/provider/events)).
 
 **Hook payload**
 
@@ -272,7 +272,7 @@ const provider = new HocuspocusProvider({
 
 ### onChange
 
-The `onChange` hook is called when the document itself has changed. It should return a Promise.
+The `onChange` hooks are called when the document itself has changed. It should return a Promise.
 
 It's important to understand that this hook is called just once per document. You can use it to react to changes
 by a specific connection, because we're passing `context` and `update` in the payload (see below).
@@ -347,7 +347,7 @@ server.listen();
 
 ### onConfigure
 
-The `onConfigure` hook is called after the server was configured using the [configure method](/server/methods). It should return a Promise.
+The `onConfigure` hooks are called after the server was configured using the [configure method](/server/methods). It should return a Promise.
 
 **Default configuration**
 
@@ -429,7 +429,7 @@ server.listen();
 
 ### onDestroy
 
-The `onDestroy` hook is called after the server was shut down using the [destroy](/server/methods) method. It should return a Promise.
+The `onDestroy` hooks are called after the server was shut down using the [destroy](/server/methods) method. It should return a Promise.
 
 **Hook payload**
 
@@ -458,7 +458,7 @@ server.listen();
 
 ### onDisconnect
 
-The `onDisconnect` hook is called when a connection is terminated. It should return a Promise.
+The `onDisconnect` hooks are called when a connection is terminated. It should return a Promise.
 
 **Hook payload**
 
@@ -500,7 +500,7 @@ server.listen();
 
 ### onListen
 
-The `onListen` hook is called after the server is started and accepts connections. It should return a Promise.
+The `onListen` hooks are called after the server is started and accepts connections. It should return a Promise.
 
 **Hook payload**
 
@@ -601,7 +601,7 @@ Context contains the data provided in former `onConnect` hooks.
 
 ### onRequest
 
-The `onRequest` hook is called when the HTTP server inside Hocuspocus receives a new request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond to the request yourself. It's similar to the concept of request middlewares.
+The `onRequest` hooks are called when the HTTP server inside Hocuspocus receives a new request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond to the request yourself. It's similar to the concept of request middlewares.
 
 This is useful if you want to create custom routes on the same port Hocuspocus runs on.
 
@@ -650,7 +650,7 @@ server.listen();
 
 ### onStoreDocument
 
-The `onStoreDocument` hook is called after the document has been changed (after the onChange hook) and can
+The `onStoreDocument` hooks are called after the document has been changed (after the onChange hook) and can
 be used to store the changed document to a persistent storage. Calls to `onStoreDocument` are debounced by default
 (see `debounce` and `maxDebounce` configuration options).
 
@@ -682,7 +682,7 @@ const data = {
 
 ### onUpgrade
 
-The `onUpgrade` hook is called when the HTTP server inside Hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
+The `onUpgrade` hooks are called when the HTTP server inside Hocuspocus receives a new upgrade request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond and upgrade the request yourself. It's similar to the concept of request middlewares.
 
 This is useful if you want to create custom websocket routes on the same port Hocuspocus runs on.
 
