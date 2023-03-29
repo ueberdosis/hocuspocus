@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/server-demos",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,13 +8,13 @@
     "dev": "nodemon --inspect -e ts --watch ./ --watch ../../packages --exec npm start"
   },
   "dependencies": {
-    "@hocuspocus/extension-logger": "^2.0.0-beta.0",
-    "@hocuspocus/extension-monitor": "^2.0.0-beta.0",
-    "@hocuspocus/extension-redis": "^2.0.0-beta.0",
-    "@hocuspocus/extension-sqlite": "^2.0.0-beta.0",
-    "@hocuspocus/extension-webhook": "^2.0.0-beta.0",
-    "@hocuspocus/server": "^2.0.0-beta.0",
-    "@hocuspocus/transformer": "^2.0.0-beta.0",
+    "@hocuspocus/extension-logger": "^2.0.0",
+    "@hocuspocus/extension-monitor": "^2.0.0",
+    "@hocuspocus/extension-redis": "^2.0.0",
+    "@hocuspocus/extension-sqlite": "^2.0.0",
+    "@hocuspocus/extension-webhook": "^2.0.0",
+    "@hocuspocus/server": "^2.0.0",
+    "@hocuspocus/transformer": "^2.0.0",
     "@tiptap/core": "^2.0.0-beta.218",
     "@tiptap/pm": "^2.0.0-beta.218",
     "@tiptap/starter-kit": "^2.0.0-beta.218",
