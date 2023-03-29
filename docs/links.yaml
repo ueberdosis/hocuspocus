@@ -12,6 +12,9 @@
 
 - title: Server
   items:
+    - title: Cloud
+      link: /server/cloud
+      type: new
     - title: Configuration
       link: /server/configuration
     - title: Methods
