@@ -31,15 +31,4 @@ tableOfContents: true
 
 ## Usage
 
-There is not much required to set up the provider, here is how a minimal setup should look like:
-
-```js
-const ydoc = new Y.Doc();
-
-const provider = new HocuspocusProvider({
-  url: "ws://127.0.0.1:1234",
-  name: "example-document",
-  document: ydoc,
-  // …
-});
-```
+There is not much required to set up the provider, a simple example can be found in [Getting started](/getting-started#frontend)
