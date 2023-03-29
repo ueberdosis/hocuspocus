@@ -2,9 +2,11 @@
 
 Tiptap Collab is our hosted solution of Hocuspocus for those who don't want to maintain their own deployment.
 
-To get started, you need a Tiptap Pro account (sign up here). You can then connect with Tiptap Collab (collab.tiptap.dev).
+:::warning Pro Feature
+To get started, you need a Tiptap Pro account ([sign up here](https://tiptap.dev/pro)). You can then connect with Tiptap Collab (collab.tiptap.dev).
+:::
 
-Note that you need @hocuspocus/provider >= [v1.1.3](https://github.com/ueberdosis/hocuspocus/releases/tag/v1.1.3)
+Note that you need `@hocuspocus/provider` >= [v1.1.3](https://github.com/ueberdosis/hocuspocus/releases/tag/v1.1.3)
 
 ### Upgrade from self-hosted deployment
 
@@ -22,9 +24,9 @@ const provider = new TiptapCollabProvider({
 
 ##### Authentication
 
-Authentication is done using JWT tokens. You can see your secret in the admin interface and use it to generate tokens for your clients.
+Authentication is done using JWT tokens. You can see your secret in the admin interface and use it to generate tokens for your clients. Note that we are not supporting per-document authentication yet, so we recommend choosing a non-guessable documentName (e.g. using uuidv4() or any other random string)
 
-In nodeJS, you can generate a JWT like this:
+In Node.js, you can generate a JWT like this:
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
@@ -41,7 +43,7 @@ const jwt = jsonwebtoken.sign(data, 'your_secret')
 
 If you want to access the JSON representation (we're currently exporting the `default` fragment of the YDoc), you can add a webhook in the admin interface. We are calling it when storing to our database, so it's debounced by 2 seconds (max 10 seconds).
 
-All requested are signed with 'your_secret' (find it in the settings). The payload looks like this:
+All requests contain a header `X-Hocuspocus-Signature-256` which signs the entire message using 'your_secret' (find it in the settings). The payload looks like this:
 
 ```json
 {
@@ -54,4 +56,4 @@ All requested are signed with 'your_secret' (find it in the settings). The paylo
 
 ### Need anything else?
 
-Contact us on [Discord](http://localhost/discord) or send an email to humans@tiptap.dev
+Contact us on [Discord](https://tiptap.dev/discord) or send an email to humans@tiptap.dev
