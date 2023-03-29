@@ -3,7 +3,7 @@
 The two code examples below show a working example of the backend _and_ frontend to sync an array
 with multiple users. We have also added some examples in the [playground folder of the
 repo](https://github.com/ueberdosis/hocuspocus/tree/main/playground), that you can start by
-running `npm run playground` in the repository root. They are meant for internal usage during hocuspocus
+running `npm run playground` in the repository root. They are meant for internal usage during Hocuspocus
 development, but they might be useful to understand how everything can be used.
 
 ## Backend

@@ -28,7 +28,7 @@ import express from "express";
 import expressWebsockets from "express-ws";
 import { Hocuspocus } from "@hocuspocus/server";
 
-// Configure hocuspocus
+// Configure Hocuspocus
 const server = Hocuspocus.configure({
   // ...
 });
@@ -41,7 +41,7 @@ app.get("/", (request, response) => {
   response.send("Hello World!");
 });
 
-// Add a websocket route for hocuspocus
+// Add a websocket route for Hocuspocus
 // Note: make sure to include a parameter for the document name.
 // You can set any contextual data like in the onConnect hook
 // and pass it to the handleConnection method.
@@ -70,7 +70,7 @@ import websocket from "koa-easy-ws";
 import { Hocuspocus } from "@hocuspocus/server";
 import { Logger } from "@hocuspocus/extension-logger";
 
-// Configure hocuspocus
+// Configure Hocuspocus
 const server = Hocuspocus.configure({
   // …
 });
@@ -80,7 +80,7 @@ const app = new Koa();
 // Setup your koa instance using the koa-easy-ws extension
 app.use(websocket());
 
-// Add a websocket route for hocuspocus
+// Add a websocket route for Hocuspocus
 // Note: make sure to include a parameter for the document name.
 // You can set any contextual data like in the onConnect hook
 // and pass it to the handleConnection method.

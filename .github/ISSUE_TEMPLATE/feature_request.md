@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new feature for hocuspocus
+about: Suggest a new feature for Hocuspocus
 title: ''
 labels:
   - feature request
