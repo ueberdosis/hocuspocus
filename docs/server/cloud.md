@@ -1,14 +1,19 @@
+---
+tableOfContents: true
+---
+
 # Tiptap Collab
 
 Tiptap Collab is our hosted solution of Hocuspocus for those who don't want to maintain their own deployment.
 
 :::warning Pro Feature
-To get started, you need a Tiptap Pro account ([sign up here](https://tiptap.dev/pro)).
-
-If you already have one, just click [here](https://tiptap.dev/pro) and follow the Tiptap Collab banner.
+To get started, you need a Tiptap Pro account ([sign up / login here](https://tiptap.dev/pro)).
 :::
 
+[![Cloud Dashboard](http://localhost/images/docs/server/cloud/dashboard.png)](http://localhost/images/docs/server/cloud/dashboard.png)
+
 Note that you need `@hocuspocus/provider` [~v2.0.0](https://github.com/ueberdosis/hocuspocus/releases/tag/v2.0.0)
+
 
 ## Getting started
 
@@ -22,7 +27,7 @@ const provider = new TiptapCollabProvider({
 });
 ```
 
-### Upgrade from self-hosted deployment
+### Upgrade from self-hosted deployments
 
 If you are upgrading from a self-hosted deployment, on the frontend you just need to replace `HocuspocusProvider` with the new `TiptapCollabProvider`. The API is the same, it's just a wrapper that handles hostnames / auth.
 
@@ -62,6 +67,12 @@ All requests contain a header `X-Hocuspocus-Signature-256` which signs the entir
   "clientsCount": 100 // number of currently connected clients
 }
 ```
+
+### Screenshots
+
+[![Cloud Documents](http://localhost/images/docs/server/cloud/documents.png)](http://localhost/images/docs/server/cloud/documents.png)
+
+[![Cloud Settings](http://localhost/images/docs/server/cloud/settings.png)](http://localhost/images/docs/server/cloud/settings.png)
 
 ### Need anything else?
 
