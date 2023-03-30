@@ -8,7 +8,7 @@ To get started, you need a Tiptap Pro account ([sign up here](https://tiptap.dev
 If you already have one, just click [here](https://tiptap.dev/pro) and follow the Tiptap Collab banner.
 :::
 
-Note that you need `@hocuspocus/provider` [>=v1.1.3<v2.0.0](https://github.com/ueberdosis/hocuspocus/releases/tag/v1.1.3)
+Note that you need `@hocuspocus/provider` [~v2.0.0](https://github.com/ueberdosis/hocuspocus/releases/tag/v1.1.3)
 
 ### Upgrade from self-hosted deployment
 
