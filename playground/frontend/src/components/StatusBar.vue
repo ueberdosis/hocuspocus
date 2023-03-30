@@ -30,29 +30,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      status: 'connecting',
-    }
-  },
+<script setup lang="ts">
+import { ref, defineProps, onMounted } from 'vue'
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
 
-  props: {
-    provider: {
-      default: null,
-      type: Object,
-    },
-    socket: {
-      default: null,
-      type: Object,
-    },
-  },
+const status = ref('')
+const props = defineProps<{
+  provider: HocuspocusProvider,
+  socket: HocuspocusProviderWebsocket
+}>()
 
-  mounted() {
-    this.socket.on('status', ({ status }) => {
-      this.status = status
-    })
-  },
-}
+onMounted(() => {
+  props.socket.on('status', event => {
+    status.value = event.status
+  })
+})
 </script>

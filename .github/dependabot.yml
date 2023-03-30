@@ -36,12 +36,6 @@ updates:
       day: 'monday'
 
   - package-ecosystem: "npm"
-    directory: "packages/extension-monitor"
-    schedule:
-      interval: 'weekly'
-      day: 'monday'
-
-  - package-ecosystem: "npm"
     directory: "packages/extension-redis"
     schedule:
       interval: 'weekly'

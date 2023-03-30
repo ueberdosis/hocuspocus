@@ -3,7 +3,6 @@
   "workspaces": [
     "playground/*",
     "packages/*",
-    "packages/extension-monitor/dashboard",
     "tests"
   ],
   "browserslist": [
@@ -35,7 +34,6 @@
     "playground:load-document": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/load-document.ts\"",
     "playground:express": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/express.ts\"",
     "playground:koa": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/koa.ts\"",
-    "playground:monitor": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/monitor.ts\" \"npm --prefix ./packages/extension-monitor start\"",
     "playground:default": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/default.ts\"",
     "playground:slow": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/slow.ts\"",
     "playground:redis": "concurrently --kill-others \"npm --prefix ./playground/frontend run start\" \"npm --prefix ./playground/backend run dev src/redis.ts\"",
@@ -45,8 +43,7 @@
     "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
     "test": "ava",
     "test:watch": "ava --watch",
-    "build:packages": "npm run clean:packages && rollup -c && npm run build:dashboard",
-    "build:dashboard": "npm --prefix packages/extension-monitor run build",
+    "build:packages": "npm run clean:packages && rollup -c",
     "build:watch": "npm run clean:packages && rollup -wc",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release:major": "lerna version major --force-publish",

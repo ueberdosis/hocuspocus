@@ -42,86 +42,55 @@
   </div>
 </template>
 
-<script>
-import { Editor, EditorContent } from '@tiptap/vue-2'
+<script setup lang="ts">
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import {
   HocuspocusProvider,
   HocuspocusProviderWebsocket,
 } from '@hocuspocus/provider'
+import StatusBar from '../components/StatusBar.vue'
 
-export default {
-  components: {
-    EditorContent,
-  },
+const socket = new HocuspocusProviderWebsocket({
+  url: 'ws://127.0.0.1:1234',
+})
 
-  data() {
-    return {
-      provider: null,
-      anotherProvider: null,
-      editor: null,
-      anotherEditor: null,
-      socket: null,
-    }
-  },
+const provider = new HocuspocusProvider({
+  websocketProvider: socket,
+  name: 'hocuspocus-demo',
+  broadcast: false,
+})
 
-  mounted() {
-    // this.provider = new HocuspocusCloudProvider({
-    //   key: '',
-    //   name: 'hocuspocus-demo',
-    // })
+const anotherProvider = new HocuspocusProvider({
+  websocketProvider: socket,
+  name: 'hocuspocus-demo2',
+  broadcast: false,
+})
 
-    const socket = new HocuspocusProviderWebsocket({
-      url: 'ws://127.0.0.1:1234',
-    })
-    this.socket = socket
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      history: false,
+    }),
+    Collaboration.configure({
+      document: provider.document,
+      field: 'default',
+    }),
+  ],
+})
 
-    this.provider = new HocuspocusProvider({
-      websocketProvider: socket,
-      name: 'hocuspocus-demo',
-      broadcast: false,
-    })
-    window.provider = this.provider
-
-    this.anotherProvider = new HocuspocusProvider({
-      websocketProvider: socket,
-      name: 'hocuspocus-demo2',
-      broadcast: false,
-    })
-
-    this.editor = new Editor({
-      extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
-        Collaboration.configure({
-          document: this.provider.document,
-          field: 'default',
-        }),
-      ],
-    })
-
-    this.anotherEditor = new Editor({
-      extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
-        Collaboration.configure({
-          document: this.anotherProvider.document,
-          field: 'default',
-        }),
-      ],
-    })
-  },
-
-  beforeDestroy() {
-    this.editor.destroy()
-    this.anotherEditor.destroy()
-    this.provider.destroy()
-    this.anotherProvider.destroy()
-  },
-}
+const anotherEditor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      history: false,
+    }),
+    Collaboration.configure({
+      document: anotherProvider.document,
+      field: 'default',
+    }),
+  ],
+})
 </script>
 
 <style>
