@@ -33,7 +33,7 @@ export class MessageReceiver {
 
     switch (type) {
       case MessageType.Sync:
-      case MessageType.SyncReply:
+      case MessageType.SyncReply: {
         message.writeVarUint(MessageType.Sync)
         this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
 
@@ -52,7 +52,8 @@ export class MessageReceiver {
         }
 
         break
-      case MessageType.Awareness:
+      }
+      case MessageType.Awareness: {
         this.logger.log({
           direction: 'in',
           type: MessageType.Awareness,
@@ -62,13 +63,14 @@ export class MessageReceiver {
         applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection)
 
         break
-      case MessageType.QueryAwareness:
+      }
+      case MessageType.QueryAwareness: {
 
         this.applyQueryAwarenessMessage(document, reply)
 
         break
-
-      case MessageType.Stateless:
+      }
+      case MessageType.Stateless: {
         connection?.callbacks.statelessCallback({
           connection,
           documentName: document.name,
@@ -77,20 +79,22 @@ export class MessageReceiver {
         })
 
         break
-
-      case MessageType.BroadcastStateless:
+      }
+      case MessageType.BroadcastStateless: {
+        const msg = message.readVarString()
         document.getConnections().forEach(connection => {
-          connection.sendStateless(message.readVarString())
+          connection.sendStateless(msg)
         })
         break
+      }
 
-      case MessageType.CLOSE:
+      case MessageType.CLOSE: {
         connection?.close({
           code: 1000,
           reason: 'provider_initiated',
         })
         break
-
+      }
       default:
         console.error(`Unable to handle message of type ${type}: no handler defined!`)
         // Do nothing
