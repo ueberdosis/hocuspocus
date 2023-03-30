@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/ueberdosis/hocuspocus/compare/v2.0.0...v2.0.1) (2023-03-30)
+
+
+### Bug Fixes
+
+* connection.sendStateless error when connections more than one ([#556](https://github.com/ueberdosis/hocuspocus/issues/556)) ([9a9260f](https://github.com/ueberdosis/hocuspocus/commit/9a9260ffd5ee559bdc4f8ba4e7c1b1c12c2944d0))
+
+
+
+
+
 # [2.0.0](https://github.com/ueberdosis/hocuspocus/compare/v1.1.3...v2.0.0) (2023-03-29)
 
 **Note:** Version bump only for package hocuspocus
