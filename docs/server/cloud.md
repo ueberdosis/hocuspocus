@@ -26,7 +26,7 @@ const provider = new TiptapCollabProvider({
 
 ##### Authentication
 
-Authentication is done using JWT. You can see your secret in the admin interface and use it to generate tokens for your clients. Note that we are not supporting per-document authentication yet, so we recommend choosing a non-guessable documentName (e.g. using uuidv4() or any random string)
+Authentication is done using JWT. You can see your secret in the admin interface and use it to generate tokens for your clients. If you want to generate a JWT and add some attributes for testing, you can use http://jwtbuilder.jamiekurtz.com/ . You can leave all fields default, just replace the "key" with the secret from your settings.
 
 In Node.js, you can generate a JWT like this:
 
@@ -34,7 +34,10 @@ In Node.js, you can generate a JWT like this:
 import jsonwebtoken from 'jsonwebtoken'
 
 const data = {
-  ... // add whatever you want (e.g. a user ID). Currently this data is not used, but we're considering adding this to support per-document authentication.
+  // use this list to limit the number of documents that can be accessed by this client.
+  // empty array means no access at all
+  // not sending this property means access to all documents
+  allowedDocumentNames: ['document-1', 'document-2']
 }
 
 const jwt = jsonwebtoken.sign(data, 'your_secret')
