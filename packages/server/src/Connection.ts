@@ -29,7 +29,7 @@ export class Connection {
 
   callbacks: any = {
     onClose: [(document: Document, event?: CloseEvent) => null],
-    beforeHandleMessage: (document: Document, update: Uint8Array) => Promise,
+    beforeHandleMessage: (connection: Connection, update: Uint8Array) => Promise,
     statelessCallback: () => Promise,
   }
 
@@ -108,7 +108,7 @@ export class Connection {
   /**
    * Set a callback that will be triggered before an message is handled
    */
-  beforeHandleMessage(callback: (payload: Document, update: Uint8Array) => Promise<any>): Connection {
+  beforeHandleMessage(callback: (connection: Connection, update: Uint8Array) => Promise<any>): Connection {
     this.callbacks.beforeHandleMessage = callback
 
     return this
@@ -229,7 +229,7 @@ export class Connection {
 
     message.writeVarString(documentName)
 
-    this.callbacks.beforeHandleMessage(this.document, data)
+    this.callbacks.beforeHandleMessage(this, data)
       .then(() => {
         new MessageReceiver(
           message,
