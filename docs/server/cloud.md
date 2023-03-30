@@ -10,7 +10,7 @@ Tiptap Collab is our hosted solution of Hocuspocus for those who don't want to m
 To get started, you need a Tiptap Pro account ([sign up / login here](https://tiptap.dev/pro)).
 :::
 
-[![Cloud Dashboard](http://localhost/images/docs/server/cloud/dashboard.png)](http://localhost/images/docs/server/cloud/dashboard.png)
+[![Cloud Dashboard](https://tiptap.dev/images/docs/server/cloud/dashboard.png)](https://tiptap.dev/images/docs/server/cloud/dashboard.png)
 
 Note that you need `@hocuspocus/provider` [~v2.0.0](https://github.com/ueberdosis/hocuspocus/releases/tag/v2.0.0)
 
@@ -70,9 +70,9 @@ All requests contain a header `X-Hocuspocus-Signature-256` which signs the entir
 
 ### Screenshots
 
-[![Cloud Documents](http://localhost/images/docs/server/cloud/documents.png)](http://localhost/images/docs/server/cloud/documents.png)
+[![Cloud Documents](https://tiptap.dev/images/docs/server/cloud/documents.png)](https://tiptap.dev/images/docs/server/cloud/documents.png)
 
-[![Cloud Settings](http://localhost/images/docs/server/cloud/settings.png)](http://localhost/images/docs/server/cloud/settings.png)
+[![Cloud Settings](https://tiptap.dev/images/docs/server/cloud/settings.png)](https://tiptap.dev/images/docs/server/cloud/settings.png)
 
 ### Need anything else?
 
