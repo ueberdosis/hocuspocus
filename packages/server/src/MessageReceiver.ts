@@ -78,12 +78,13 @@ export class MessageReceiver {
 
         break
 
-      case MessageType.BroadcastStateless:
+      case MessageType.BroadcastStateless: {
         const msg = message.readVarString()
         document.getConnections().forEach(connection => {
           connection.sendStateless(msg)
         })
         break
+      }
 
       case MessageType.CLOSE:
         connection?.close({
