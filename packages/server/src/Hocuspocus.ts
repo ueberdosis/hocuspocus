@@ -575,16 +575,16 @@ export class Hocuspocus {
   /**
    * Handle update of the given document
    */
-  private handleDocumentUpdate(document: Document, connection: Connection, update: Uint8Array, request: IncomingMessage, socketId: string): void {
+  private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
     const hookPayload = {
       instance: this,
       clientsCount: document.getConnectionsCount(),
       context: connection?.context || {},
       document,
       documentName: document.name,
-      requestHeaders: request.headers,
+      requestHeaders: request?.headers,
       requestParameters: Hocuspocus.getParameters(request),
-      socketId,
+      socketId: connection?.socketId,
       update,
     }
 
@@ -695,7 +695,7 @@ export class Hocuspocus {
     await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
-      this.handleDocumentUpdate(document, connection, update, connection.request, connection?.socketId)
+      this.handleDocumentUpdate(document, connection, update, connection?.request)
     })
 
     document.beforeBroadcastStateless((document: Document, stateless: string) => {
@@ -857,7 +857,7 @@ export class Hocuspocus {
   /**
    * Get parameters by the given request
    */
-  private static getParameters(request: IncomingMessage): URLSearchParams {
+  private static getParameters(request?: IncomingMessage): URLSearchParams {
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
   }
