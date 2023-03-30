@@ -695,7 +695,7 @@ export class Hocuspocus {
     await this.hooks('afterLoadDocument', hookPayload)
 
     document.onUpdate((document: Document, connection: Connection, update: Uint8Array) => {
-      this.handleDocumentUpdate(document, connection, update, request, connection?.socketId)
+      this.handleDocumentUpdate(document, connection, update, connection.request, connection?.socketId)
     })
 
     document.beforeBroadcastStateless((document: Document, stateless: string) => {
