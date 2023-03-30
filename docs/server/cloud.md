@@ -10,9 +10,7 @@ If you already have one, just click [here](https://tiptap.dev/pro) and follow th
 
 Note that you need `@hocuspocus/provider` [~v2.0.0](https://github.com/ueberdosis/hocuspocus/releases/tag/v2.0.0)
 
-### Upgrade from self-hosted deployment
-
-If you are upgrading from a self-hosted deployment, on the frontend you just need to replace `HocuspocusProvider` with the new `TiptapCollabProvider`. The API is the same, it's just a wrapper that handles hostnames / auth.
+## Getting started
 
 ```typescript
 import { TiptapCollabProvider } from '@hocuspocus/provider'
@@ -23,6 +21,12 @@ const provider = new TiptapCollabProvider({
   token: 'your_JWT', // see "Authentication" below
 });
 ```
+
+### Upgrade from self-hosted deployment
+
+If you are upgrading from a self-hosted deployment, on the frontend you just need to replace `HocuspocusProvider` with the new `TiptapCollabProvider`. The API is the same, it's just a wrapper that handles hostnames / auth.
+
+## Examples
 
 ##### Authentication
 
