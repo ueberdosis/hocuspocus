@@ -7,6 +7,7 @@
     <StatusBar
       v-if="provider"
       :provider="provider"
+      :socket="provider.configuration.websocketProvider"
     />
 
     {{ notes }}
@@ -20,16 +21,18 @@
 </template>
 
 <script>
-// import { Editor, EditorContent } from '@tiptap/vue-2'
+// import { Editor, EditorContent } from '@tiptap/vue-3'
 // import { Document } from '@tiptap/extension-document'
 // import { Paragraph } from '@tiptap/extension-paragraph'
 // import { Text } from '@tiptap/extension-text'
 // import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import StatusBar from '../components/StatusBar.vue'
 
 export default {
   components: {
+    StatusBar,
     // EditorContent,
   },
 

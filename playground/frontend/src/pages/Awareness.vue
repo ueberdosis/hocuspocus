@@ -7,6 +7,7 @@
     <StatusBar
       v-if="provider"
       :provider="provider"
+      :socket="provider.configuration.websocketProvider"
     />
 
     <h2>
@@ -52,8 +53,12 @@
 <script>
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import StatusBar from '../components/StatusBar.vue'
 
 export default {
+  components: {
+    StatusBar,
+  },
   data() {
     return {
       ydoc: null,
