@@ -4,31 +4,49 @@
       Collaborative Editing with TiptapCollab
     </h1>
 
-    <p>
-      If this demo doesnt work:
-    </p>
+    <p class="border p-2">Make sure that your backend is running the tiptapcollab server: npm run dev src/tiptapcollab.ts</p>
 
-    <ul>
-      <li>Make sure that your backend is running the tiptapcollab server: npm run dev src/tiptapcollab.ts</li>
-      <li>Make sure the appIds below and the secret in tiptapcollab.ts are from your tiptapcollab instance</li>
-    </ul><br>
+    <div class="my-5">
+      <label
+        for="appId"
+        class="mr-2"
+      >App ID</label>
 
-    <StatusBar
-      v-if="provider"
-      :provider="provider"
-      :socket="provider.configuration.websocketProvider"
-    />
+      <input
+        id="appId"
+        v-model="appId"
+        class="border border-black p-2 my-2"
+      >
 
-    <h2>
-      Editor
-    </h2>
-    <div v-if="editor">
-      <editor-content
-        :editor="editor"
-        class="editor"
-      />
+      <label
+        for="secret"
+        class="mx-2"
+      >Secret</label>
+
+      <input
+        id="secret"
+        v-model="secret"
+        class="border border-black p-2 my-2 w-1/2"
+      >
     </div>
 
+    <div class="my-5">
+      <StatusBar
+        v-if="provider"
+        :provider="provider"
+        :socket="provider.configuration.websocketProvider"
+      />
+
+      <h2>
+        Editor
+      </h2>
+      <div v-if="editor">
+        <editor-content
+          :editor="editor"
+          class="editor"
+        />
+      </div>
+    </div>
     <StatusBar
       v-if="provider2"
       :provider="provider2"
@@ -47,82 +65,77 @@
   </div>
 </template>
 
-<script>
-import { Editor, EditorContent } from '@tiptap/vue-2'
+<script setup lang="ts">
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import { TiptapCollabProvider } from '@hocuspocus/provider'
 import axios from 'axios'
+import {
+  nextTick, onMounted, ref, shallowRef, watch,
+} from 'vue'
+import StatusBar from '../components/StatusBar.vue'
 
-export default {
-  components: {
-    EditorContent,
-  },
+const appId = ref('')
+const secret = ref('')
+const jwt = ref('')
+const provider = shallowRef<TiptapCollabProvider>()
+const provider2 = shallowRef<TiptapCollabProvider>()
+const editor = shallowRef<Editor>()
+const editor2 = shallowRef<Editor>()
 
-  data() {
-    return {
-      provider: null,
-      editor: null,
-      provider2: null,
-      editor2: null,
-      jwt: null,
-    }
-  },
+watch([jwt, appId, secret], () => {
+  if (editor.value) editor.value.destroy()
+  if (editor2.value) editor2.value.destroy()
+  if (provider.value) provider.value.destroy()
+  if (provider2.value) provider2.value.destroy()
 
-  watch: {
-    jwt() {
-      if (!this.jwt) return
+  provider.value = new TiptapCollabProvider({
+    appId: appId.value,
+    name: 'test1',
+    token: jwt.value,
+  })
 
-      this.provider = new TiptapCollabProvider({
-        appId: 'XY9DJ9E6',
-        name: 'test1',
-        token: this.jwt,
-      })
+  provider2.value = new TiptapCollabProvider({
+    appId: appId.value,
+    name: 'test2',
+    token: jwt.value,
+  })
 
-      this.provider2 = new TiptapCollabProvider({
-        appId: 'XY9DJ9E6',
-        name: 'test2',
-        token: this.jwt,
-      })
-
-      this.editor = new Editor({
-        extensions: [
-          StarterKit.configure({
-            history: false,
-          }),
-          Collaboration.configure({
-            document: this.provider.document,
-            field: 'default',
-          }),
-        ],
-      })
-
-      this.editor2 = new Editor({
-        extensions: [
-          StarterKit.configure({
-            history: false,
-          }),
-          Collaboration.configure({
-            document: this.provider2.document,
-            field: 'default',
-          }),
-        ],
-      })
-
-    },
-  },
-
-  mounted() {
-    axios.get('http://127.0.0.1:1234').then(data => {
-      this.jwt = data.data
+  nextTick(() => {
+    editor.value = new Editor({
+      extensions: [
+        StarterKit.configure({
+          history: false,
+        }),
+        Collaboration.configure({
+          document: provider.value?.document,
+          field: 'default',
+        }),
+      ],
     })
-  },
 
-  beforeDestroy() {
-    this.editor.destroy()
-    this.provider.destroy()
-  },
-}
+    editor2.value = new Editor({
+      extensions: [
+        StarterKit.configure({
+          history: false,
+        }),
+        Collaboration.configure({
+          document: provider2.value?.document,
+          field: 'default',
+        }),
+      ],
+    })
+  })
+})
+
+onMounted(() => {
+  // do NOT transfer the secret like this in production, this is just for demoing purposes. The secret should be stored on and never leave the server.
+  axios.get(`http://127.0.0.1:1234?secret=${secret.value}`).then(data => {
+    jwt.value = data.data
+  })
+})
+
 </script>
 
 <style>
