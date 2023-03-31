@@ -9,6 +9,14 @@
           <li>
             <router-link
               class="block px-8 py-3"
+              to="/collab"
+            >
+              TiptapCollab
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              class="block px-8 py-3"
               to="/"
             >
               Text editing
