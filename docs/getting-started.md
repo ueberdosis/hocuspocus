@@ -8,7 +8,7 @@ development, but they might be useful to understand how everything can be used.
 
 ## Backend
 
-### Instalation
+### Installation
 
 You can install other packages later, let’s start with a basic version for now:
 
@@ -32,7 +32,7 @@ server.listen();
 
 ## Frontend
 
-### Instalation
+### Installation
 
 ```bash
 npm install @hocuspocus/provider yjs
