@@ -9,7 +9,7 @@ To persist the documents you must instruct the server to:
 1. Store the document in the `onStoreDocument` hook (which is the same as the `onChange` but with debounce already configured).
 2. Load the document from the database using the `onLoadDocument` hook.
 
-Actually, you don't even have to use those 2 hooks! We have already created on top of them a simple abstraction in the form of a [database extension](https://tiptap.dev/hocuspocus/server/database-extensions)
+Actually, you don't even have to use those 2 hooks! We have already created on top of them a simple abstraction in the form of a [database extension](https://tiptap.dev/hocuspocus/server/extensions#database).
 
 However, in case you are a curious mind, here is an example of what it would be like to do it with hooks (It can be a good way to familiarize yourself with the concepts).
 
