@@ -213,7 +213,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   public setConfiguration(configuration: Partial<HocuspocusProviderConfiguration> = {}): void {
     if (!configuration.websocketProvider && (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url) {
-      this.configuration.websocketProvider = new HocuspocusProviderWebsocket({ url: (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url })
+      this.configuration.websocketProvider = new HocuspocusProviderWebsocket({ url: (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url, parameters: (configuration as CompleteHocuspocusProviderConfiguration).parameters })
     }
 
     this.configuration = { ...this.configuration, ...configuration }
