@@ -26,10 +26,10 @@ To use Hocuspocus with [Express](https://expressjs.com), you need to use the `ex
 ```js
 import express from "express";
 import expressWebsockets from "express-ws";
-import { Hocuspocus } from "@hocuspocus/server";
+import { Server } from "@hocuspocus/server";
 
 // Configure Hocuspocus
-const server = Hocuspocus.configure({
+const server = Server.configure({
   // ...
 });
 
@@ -67,11 +67,11 @@ IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks
 ```js
 import Koa from "koa";
 import websocket from "koa-easy-ws";
-import { Hocuspocus } from "@hocuspocus/server";
+import { Server } from "@hocuspocus/server";
 import { Logger } from "@hocuspocus/extension-logger";
 
 // Configure Hocuspocus
-const server = Hocuspocus.configure({
+const server = Server.configure({
   // …
 });
 
