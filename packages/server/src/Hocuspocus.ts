@@ -462,7 +462,11 @@ export class Hocuspocus {
             category: 'Token',
           })
 
-          this.hooks('onAuthenticate', { token, ...hookPayload, documentName }, (contextAdditions: any) => {
+          this.hooks('onAuthenticate', {
+            token,
+            ...hookPayload,
+            documentName,
+          }, (contextAdditions: any) => {
             // Hooks are allowed to give us even more context and we’ll merge everything together.
             // We’ll pass the context to other hooks then.
             context = { ...context, ...contextAdditions }
@@ -771,15 +775,24 @@ export class Hocuspocus {
               }
             })
             .then(() => {
-              this.hooks('afterStoreDocument', hookPayload)
+              this.hooks('afterStoreDocument', hookPayload).then(() => {
+                // Remove document from memory.
+
+                if (document.getConnectionsCount() > 0) {
+                  return
+                }
+
+                this.documents.delete(document.name)
+                document.destroy()
+              })
             })
         }, true)
 
+      } else {
+        // Remove document from memory immediately
+        this.documents.delete(document.name)
+        document.destroy()
       }
-
-      // Remove document from memory.
-      this.documents.delete(document.name)
-      document.destroy()
     })
 
     instance.onStatelessCallback(payload => {

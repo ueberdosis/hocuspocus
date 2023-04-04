@@ -327,3 +327,51 @@ test('allows to overwrite the order of extension with a priority', async t => {
     })
   })
 })
+
+test('if a connection connects while another disconnects onStoreDocument is still running, onLoadDocument will be called after onStoreDocument finished', async t => {
+
+  await new Promise(async testResolve => {
+    let isStoredOnDb = false
+    let loadCalls = 0
+
+    const server = await newHocuspocus({
+      async onStoreDocument({ instance }) {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            isStoredOnDb = true
+            resolve(true)
+          }, 200)
+        })
+      },
+      async onLoadDocument() {
+        return new Promise(resolve => {
+          if (loadCalls > 0) {
+            t.true(isStoredOnDb)
+            testResolve(true)
+          }
+
+          loadCalls += 1
+          resolve(true)
+
+        })
+      },
+    })
+
+    const provider = newHocuspocusProvider(server)
+    provider.on('synced', () => {
+      provider.configuration.websocketProvider.disconnect()
+
+      setTimeout(() => {
+        const provider2 = newHocuspocusProvider(server)
+
+        provider2.on('synced', () => {
+          provider2.configuration.websocketProvider.disconnect()
+          testResolve(true)
+          t.pass()
+        })
+
+      }, 50)
+    })
+  })
+
+})
