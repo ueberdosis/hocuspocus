@@ -291,6 +291,10 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
+    if (state && this.unsyncedChanges > 0) {
+      this.updateUnsyncedChanges(-1 * this.unsyncedChanges)
+    }
+
     this.isSynced = state
     this.emit('synced', { state })
     this.emit('sync', { state })
