@@ -88,7 +88,7 @@ export class MessageReceiver {
 
     if (syncMessageType === messageYjsUpdate || syncMessageType === messageYjsSyncStep2) {
       if (provider.unsyncedChanges > 0) {
-        provider.unsyncedChanges -= 1
+        provider.updateUnsyncedChanges(-1)
       }
     }
   }

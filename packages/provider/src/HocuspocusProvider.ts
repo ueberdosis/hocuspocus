@@ -232,8 +232,13 @@ export class HocuspocusProvider extends EventEmitter {
     return this.configuration.awareness
   }
 
-  get hasUnsyncedChanges() {
+  get hasUnsyncedChanges(): boolean {
     return this.unsyncedChanges > 0
+  }
+
+  updateUnsyncedChanges(unsyncedChanges = 0) {
+    this.unsyncedChanges += unsyncedChanges
+    this.emit('unsyncedChanges', this.unsyncedChanges)
   }
 
   forceSync() {
@@ -263,7 +268,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.unsyncedChanges += 1
+    this.updateUnsyncedChanges(1)
     this.send(UpdateMessage, { update, documentName: this.configuration.name }, true)
   }
 
@@ -284,6 +289,10 @@ export class HocuspocusProvider extends EventEmitter {
   set synced(state) {
     if (this.isSynced === state) {
       return
+    }
+
+    if (state && this.unsyncedChanges > 0) {
+      this.updateUnsyncedChanges(-1 * this.unsyncedChanges)
     }
 
     this.isSynced = state
