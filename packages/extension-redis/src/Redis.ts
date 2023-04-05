@@ -62,6 +62,11 @@ export interface Configuration {
    * The maximum time for the Redis lock in ms (in case it can’t be released).
    */
   lockTimeout: number,
+  /**
+   * A delay before onDisconnect is executed. This allows last minute updates'
+   * sync messages to be received by the subscription before it's closed.
+   */
+  disconnectDelay: number,
 }
 
 export class Redis implements Extension {
@@ -78,6 +83,7 @@ export class Redis implements Extension {
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
     lockTimeout: 1000,
+    disconnectDelay: 1000,
   }
 
   pub: RedisInstance
@@ -303,21 +309,25 @@ export class Redis implements Extension {
    * Make sure to *not* listen for further changes, when there’s
    * noone connected anymore.
    */
-  public onDisconnect = async ({ documentName, clientsCount }: onDisconnectPayload) => {
-    // Do nothing, when other users are still connected to the document.
-    if (clientsCount > 0) {
-      return
-    }
-
-    // It was indeed the last connected user.
-    this.documents.delete(documentName)
-
-    // Time to end the subscription on the document channel.
-    this.sub.punsubscribe(this.subKey(documentName), error => {
-      if (error) {
-        console.error(error)
+  public onDisconnect = async ({ document, documentName }: onDisconnectPayload) => {
+    const disconnect = () => {
+      // Do nothing, when other users are still connected to the document.
+      if (document.getConnectionsCount() > 0) {
+        return
       }
-    })
+
+      // It was indeed the last connected user.
+      this.documents.delete(documentName)
+
+      // Time to end the subscription on the document channel.
+      this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
+        if (error) {
+          console.error(error)
+        }
+      })
+    }
+    // Delay the disconnect procedure to allow last minute syncs to happen
+    setTimeout(disconnect, this.configuration.disconnectDelay)
   }
 
   async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
