@@ -4,7 +4,7 @@
       {{ status }} to {{ provider.configuration.name }} at {{ socket.configuration.url }}
     </div>
     <div class="flex-1 flex flex-col justify-center text-center">
-      <template v-if="provider.synced">
+      <template v-if="synced">
         synced
       </template>
       <span v-else>
@@ -40,9 +40,13 @@ const props = defineProps<{
   socket: HocuspocusProviderWebsocket
 }>()
 
+const synced = ref(false)
+
 onMounted(() => {
   props.socket.on('status', event => {
     status.value = event.status
   })
+
+  props.provider.on('synced', () => { synced.value = props.provider.synced })
 })
 </script>
