@@ -33,6 +33,12 @@ If you are upgrading from a self-hosted deployment, on the frontend you just nee
 
 ## Examples
 
+##### replit / Sandbox: Fully functional prototype
+
+We have created a simple client / server setup using replit, which you can review and fork here: https://replit.com/@ueberdosis/TiptapCollab?v=1
+
+The example load multiple documents over the same websocket (multiplexing), and shows how to realize per-document authentication using JWT.
+
 ##### Authentication
 
 Authentication is done using JWT. You can see your secret in the admin interface and use it to generate tokens for your clients. If you want to generate a JWT and add some attributes for testing, you can use http://jwtbuilder.jamiekurtz.com/ . You can leave all fields default, just replace the "key" with the secret from your settings.
