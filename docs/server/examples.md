@@ -53,7 +53,7 @@ app.ws("/collaboration/:document", (websocket, request) => {
     },
   };
 
-  server.handleConnection(websocket, request, request.params.document, context);
+  server.handleConnection(websocket, request, context);
 });
 
 // Start the server
@@ -91,7 +91,6 @@ app.use(async (ctx, next) => {
   server.handleConnection(
     ws,
     ctx.request,
-    documentName,
     // additional data (optional)
     {
       user_id: 1234,

@@ -9,7 +9,6 @@ We already created some very useful extensions you should check out for sure:
 | Extension                               | Description                                                                    |
 |-----------------------------------------| ------------------------------------------------------------------------------ |
 | [Database](/server/extensions#database) | A generic database driver that is easily adjustable to work with any database. |
-| [Monitor](/server/extensions#monitor)   | A beautiful dashboard to monitor and debug your Hocuspocus instance.           |
 | [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
 | [Logger](/server/extensions#logger)     | Add logging to Hocuspocus.                                                     |
 | [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
