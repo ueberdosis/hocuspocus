@@ -556,6 +556,8 @@ const ydoc = TiptapTransformer.toYdoc(
 );
 ```
 
+If you want to import HTML, you have to [convert it to Tiptap-compatible JSON first](https://tiptap.dev/api/utilities/html/#generate-json-from-html)
+
 However, we expect you to return a Y.js document from the `onLoadDocument` hook, no matter where it’s from.
 
 ```js
