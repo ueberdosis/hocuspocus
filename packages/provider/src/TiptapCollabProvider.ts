@@ -2,9 +2,8 @@ import {
   HocuspocusProvider,
   HocuspocusProviderConfiguration,
 } from './HocuspocusProvider'
-import {
-  HocuspocusProviderWebsocket,
-} from './HocuspocusProviderWebsocket'
+
+import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -21,11 +20,11 @@ export interface AdditionalTiptapCollabProviderConfiguration {
 export class TiptapCollabProvider extends HocuspocusProvider {
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
-      configuration.websocketProvider = new HocuspocusProviderWebsocket({ url: `wss://${configuration.appId}.collab.tiptap.cloud` })
+      configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: configuration.appId })
     }
 
     if (!configuration.token) {
-      configuration.token = 'notoken'
+      configuration.token = 'notoken' // need to send a token anyway (which will be ignored)
     }
 
     super(configuration as HocuspocusProviderConfiguration)
