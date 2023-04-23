@@ -427,7 +427,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
     if (event.code === MessageTooBig.code) {
       console.warn(`[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`)
-      this.shouldConnect = false;
+      this.shouldConnect = false
     }
 
     if (this.connectionAttempt) {
