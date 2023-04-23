@@ -319,6 +319,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   async onOpen(event: Event) {
+    this.isAuthenticated = false
+
     this.emit('open', { event })
 
     if (this.isAuthenticationRequired) {
