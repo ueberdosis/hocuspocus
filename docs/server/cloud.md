@@ -67,9 +67,11 @@ All requests contain a header `X-Hocuspocus-Signature-256` which signs the entir
 
 ```json
 {
-  "name": '', // name of your app
+  "appName": '', // name of your app
+  "name": '', // name of the document
   "time": // current time as ISOString (new Date()).toISOString())
-  "data": {}, // ydoc.getArray('default').toJSON()
+  "tiptapData": {}, // JSON output from Tiptap (see https://tiptap.dev/guide/output#option-1-json): TiptapTransformer.fromYdoc()
+  "ydocState"?: {}, // optionally contains the entire yDoc as base64. Contact us to enable this property!
   "clientsCount": 100 // number of currently connected clients
 }
 ```
