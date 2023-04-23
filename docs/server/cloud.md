@@ -35,7 +35,11 @@ If you are upgrading from a self-hosted deployment, on the frontend you just nee
 
 ##### replit / Sandbox: Fully functional prototype
 
-We have created a simple client / server setup using replit, which you can review and fork here: https://replit.com/@ueberdosis/TiptapCollab?v=1
+[![Cloud Documents](https://tiptap.dev/images/docs/server/cloud/tiptapcollab-demo.png)](https://tiptap.dev/images/docs/server/cloud/tiptapcollab-demo.png)
+
+We have created a simple client / server setup using replit, which you can review and fork here:
+
+[Github](https://github.com/janthurau/TiptapCollab) or [Replit (Live-Demo)](https://replit.com/@ueberdosis/TiptapCollab?v=1)
 
 The example load multiple documents over the same websocket (multiplexing), and shows how to realize per-document authentication using JWT.
 
