@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.4](https://github.com/ueberdosis/hocuspocus/compare/v2.0.3...v2.0.4) (2023-04-23)
+
+
+### Bug Fixes
+
+* Do not retry connection if data is too large ([#586](https://github.com/ueberdosis/hocuspocus/issues/586)) ([462a87f](https://github.com/ueberdosis/hocuspocus/commit/462a87f08bfdcaece4adb1ef8dca25ae42b3cb36))
+* npm scripts for frontend playground ([#578](https://github.com/ueberdosis/hocuspocus/issues/578)) ([b4b61a0](https://github.com/ueberdosis/hocuspocus/commit/b4b61a0fc45524ed690d1b831c2d5ae67c6a5314))
+
+
+
+
+
 ## [2.0.3](https://github.com/ueberdosis/hocuspocus/compare/v2.0.2...v2.0.3) (2023-04-05)
 
 **Note:** Version bump only for package hocuspocus
