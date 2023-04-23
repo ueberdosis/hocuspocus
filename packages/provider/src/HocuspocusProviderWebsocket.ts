@@ -4,7 +4,7 @@ import * as url from 'lib0/url'
 import type { MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
 import {
-  Forbidden, Unauthorized, WsReadyStates,
+  Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import { Event } from 'ws'
 import EventEmitter from './EventEmitter'
@@ -423,6 +423,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
         console.warn('[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.')
         return // TODO REMOVE ME
       }
+    }
+
+    if (event.code === MessageTooBig.code) {
+      console.warn(`[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`)
+      this.shouldConnect = false
     }
 
     if (this.connectionAttempt) {
