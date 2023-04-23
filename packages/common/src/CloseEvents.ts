@@ -4,6 +4,16 @@ export interface CloseEvent {
 }
 
 /**
+ * The server is terminating the connection because a data frame was received
+ * that is too large.
+ * See: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+ */
+export const MessageTooBig: CloseEvent = {
+  code: 1009,
+  reason: 'Message Too Big',
+}
+
+/**
  * The server successfully processed the request, asks that the requester reset
  * its document view, and is not returning any content.
  */
