@@ -16,7 +16,7 @@ import {
   Debugger,
   onConfigurePayload,
   onListenPayload,
-  beforeBroadcastStatelessPayload,
+  beforeBroadcastStatelessPayload, Hocuspocus,
 } from '@hocuspocus/server'
 import kleur from 'kleur'
 
@@ -90,7 +90,7 @@ export class Redis implements Extension {
 
   sub: RedisInstance
 
-  documents: Map<string, Document> = new Map()
+  instance!: Hocuspocus
 
   redlock: Redlock
 
@@ -137,6 +137,7 @@ export class Redis implements Extension {
 
   async onConfigure({ instance }: onConfigurePayload) {
     this.logger = instance.debugger
+    this.instance = instance
   }
 
   async onListen({ configuration }: onListenPayload) {
@@ -168,8 +169,6 @@ export class Redis implements Extension {
    * Once a document is laoded, subscribe to the channel in Redis.
    */
   public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
-    this.documents.set(documentName, document)
-
     return new Promise((resolve, reject) => {
       // On document creation the node will connect to pub and sub channels
       // for the document.
@@ -277,7 +276,7 @@ export class Redis implements Extension {
 
     const channelName = pattern.toString()
     const [_, documentName, identifier] = channelName.split(':')
-    const document = this.documents.get(documentName)
+    const document = this.instance.documents.get(documentName)
 
     if (identifier === this.configuration.identifier) {
       return
@@ -310,24 +309,26 @@ export class Redis implements Extension {
    * noone connected anymore.
    */
   public onDisconnect = async ({ document, documentName }: onDisconnectPayload) => {
-    const disconnect = () => {
+    return new Promise(resolve => {
+
+      const disconnect = () => {
       // Do nothing, when other users are still connected to the document.
-      if (document.getConnectionsCount() > 0) {
-        return
-      }
-
-      // It was indeed the last connected user.
-      this.documents.delete(documentName)
-
-      // Time to end the subscription on the document channel.
-      this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
-        if (error) {
-          console.error(error)
+        if (document.getConnectionsCount() > 0) {
+          return
         }
-      })
-    }
-    // Delay the disconnect procedure to allow last minute syncs to happen
-    setTimeout(disconnect, this.configuration.disconnectDelay)
+
+        // Time to end the subscription on the document channel.
+        this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
+          if (error) {
+            console.error(error)
+          }
+
+          resolve('')
+        })
+      }
+      // Delay the disconnect procedure to allow last minute syncs to happen
+      setTimeout(disconnect, this.configuration.disconnectDelay)
+    })
   }
 
   async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
