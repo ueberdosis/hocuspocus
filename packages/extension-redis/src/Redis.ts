@@ -308,28 +308,24 @@ export class Redis implements Extension {
    * Make sure to *not* listen for further changes, when there’s
    * noone connected anymore.
    */
-  public onDisconnect = async ({ document, documentName }: onDisconnectPayload) => {
-    return new Promise(resolve => {
+  public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
+    const disconnect = () => {
+      const document = this.instance.documents.get(documentName)
 
-      const disconnect = () => {
       // Do nothing, when other users are still connected to the document.
-        if (document.getConnectionsCount() > 0) {
-          resolve('')
-          return
-        }
-
-        // Time to end the subscription on the document channel.
-        this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
-          if (error) {
-            console.error(error)
-          }
-
-          resolve('')
-        })
+      if (document && document.getConnectionsCount() > 0) {
+        return
       }
-      // Delay the disconnect procedure to allow last minute syncs to happen
-      setTimeout(disconnect, this.configuration.disconnectDelay)
-    })
+
+      // Time to end the subscription on the document channel.
+      this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
+        if (error) {
+          console.error(error)
+        }
+      })
+    }
+    // Delay the disconnect procedure to allow last minute syncs to happen
+    setTimeout(disconnect, this.configuration.disconnectDelay)
   }
 
   async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
