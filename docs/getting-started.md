@@ -14,6 +14,10 @@ You can install other packages later, let’s start with a basic version for now
 
 ```bash
 npm install @hocuspocus/server
+
+# Please note, yarn does not install peer-deps by default, so when using yarn,
+# you'll need to install y-protocols and yjs as well.
+yarn add @hocuspocus/server y-protocols yjs
 ```
 
 ### Usage
