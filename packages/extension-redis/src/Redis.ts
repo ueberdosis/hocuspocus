@@ -314,6 +314,7 @@ export class Redis implements Extension {
       const disconnect = () => {
       // Do nothing, when other users are still connected to the document.
         if (document.getConnectionsCount() > 0) {
+          resolve('')
           return
         }
 
