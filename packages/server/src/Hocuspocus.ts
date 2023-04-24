@@ -751,48 +751,49 @@ export class Hocuspocus {
         requestParameters: Hocuspocus.getParameters(request),
       }
 
-      this.hooks('onDisconnect', hookPayload)
+      this.hooks('onDisconnect', hookPayload).then(() => {
+        // Check if there are still no connections to the document, as these hooks
+        // may take some time to resolve (e.g. database queries). If a
+        // new connection were to come in during that time it would rely on the
+        // document in the map that we remove now.
+        if (document.getConnectionsCount() > 0) {
+          return
+        }
 
-      // Check if there are still no connections to the document, as these hooks
-      // may take some time to resolve (e.g. database queries). If a
-      // new connection were to come in during that time it would rely on the
-      // document in the map that we remove now.
-      if (document.getConnectionsCount() > 0) {
-        return
-      }
-
-      // If it’s the last connection, we need to make sure to store the
-      // document. Use the debounce helper, to clear running timers,
-      // but make it run immediately (`true`).
-      // Only run this if the document has finished loading earlier (i.e. not to persist the empty
-      // ydoc if the onLoadDocument hook returned an error)
-      if (!document.isLoading) {
-        this.debounce(`onStoreDocument-${document.name}`, () => {
-          this.hooks('onStoreDocument', hookPayload)
-            .catch(error => {
-              if (error?.message) {
-                throw error
-              }
-            })
-            .then(() => {
-              this.hooks('afterStoreDocument', hookPayload).then(() => {
+        // If it’s the last connection, we need to make sure to store the
+        // document. Use the debounce helper, to clear running timers,
+        // but make it run immediately (`true`).
+        // Only run this if the document has finished loading earlier (i.e. not to persist the empty
+        // ydoc if the onLoadDocument hook returned an error)
+        if (!document.isLoading) {
+          this.debounce(`onStoreDocument-${document.name}`, () => {
+            this.hooks('onStoreDocument', hookPayload)
+              .catch(error => {
+                if (error?.message) {
+                  throw error
+                }
+              })
+              .then(() => {
+                this.hooks('afterStoreDocument', hookPayload).then(() => {
                 // Remove document from memory.
 
-                if (document.getConnectionsCount() > 0) {
-                  return
-                }
+                  if (document.getConnectionsCount() > 0) {
+                    return
+                  }
 
-                this.documents.delete(document.name)
-                document.destroy()
+                  this.documents.delete(document.name)
+                  document.destroy()
+                })
               })
-            })
-        }, true)
+          }, true)
 
-      } else {
+        } else {
         // Remove document from memory immediately
-        this.documents.delete(document.name)
-        document.destroy()
-      }
+          this.documents.delete(document.name)
+          document.destroy()
+        }
+      })
+
     })
 
     instance.onStatelessCallback(payload => {
