@@ -633,7 +633,7 @@ const server = Server.configure({
 
       // Check if the request hits your custom route
       if (request.url?.split("/")[1] === "custom-route") {
-        // Respond with your custum content
+        // Respond with your custom content
         response.writeHead(200, { "Content-Type": "text/plain" });
         response.end("This is my custom response, yay!");
 
