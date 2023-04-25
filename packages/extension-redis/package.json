@@ -27,15 +27,13 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.6",
-    "@types/redlock": "^4.0.3"
+    "@types/lodash.debounce": "^4.0.6"
   },
   "dependencies": {
     "@hocuspocus/server": "^2.0.6",
     "ioredis": "^5.0.4",
     "kleur": "^4.1.4",
     "lodash.debounce": "^4.0.8",
-    "redlock": "^4.2.0",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {

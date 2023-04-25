@@ -1,7 +1,6 @@
 import RedisClient, {
   ClusterNode, ClusterOptions, RedisOptions, Cluster as RedisClusterClient,
 } from 'ioredis'
-import Redlock, { CompatibleRedisClient, Lock } from 'redlock'
 import { v4 as uuid } from 'uuid'
 import {
   IncomingMessage,
@@ -9,9 +8,7 @@ import {
   Document,
   Extension,
   afterLoadDocumentPayload,
-  afterStoreDocumentPayload,
   onDisconnectPayload,
-  onStoreDocumentPayload,
   onAwarenessUpdatePayload,
   onChangePayload,
   MessageReceiver,
@@ -59,10 +56,6 @@ export interface Configuration {
    */
   prefix: string,
   /**
-   * The maximum time for the Redis lock in ms (in case it can’t be released).
-   */
-  lockTimeout: number,
-  /**
    * A delay before onDisconnect is executed. This allows last minute updates'
    * sync messages to be received by the subscription before it's closed.
    */
@@ -82,7 +75,6 @@ export class Redis implements Extension {
     host: '127.0.0.1',
     prefix: 'hocuspocus',
     identifier: `host-${uuid()}`,
-    lockTimeout: 1000,
     disconnectDelay: 1000,
   }
 
@@ -91,10 +83,6 @@ export class Redis implements Extension {
   sub: RedisInstance
 
   instance!: Hocuspocus
-
-  redlock: Redlock
-
-  locks = new Map<string, Lock>()
 
   logger: Debugger
 
@@ -129,8 +117,6 @@ export class Redis implements Extension {
     }
     this.sub.on('pmessageBuffer', this.handleIncomingMessage)
 
-    this.redlock = new Redlock([this.pub as unknown as CompatibleRedisClient])
-
     // We’ll replace that in the onConfigure hook with the global instance.
     this.logger = new Debugger()
   }
@@ -150,10 +136,6 @@ export class Redis implements Extension {
 
   private subKey(documentName: string) {
     return `${this.getKey(documentName)}:*`
-  }
-
-  private lockKey(documentName: string) {
-    return `${this.getKey(documentName)}:lock`
   }
 
   /**
@@ -199,43 +181,6 @@ export class Redis implements Extension {
       this.pubKey(documentName),
       Buffer.from(awarenessMessage.toUint8Array()),
     )
-  }
-
-  /**
-   * Before the document is stored, make sure to set a lock in Redis.
-   * That’s meant to avoid conflicts with other instances trying to store the document.
-   */
-  async onStoreDocument({ documentName }: onStoreDocumentPayload) {
-    // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-    // to avoid conflict with other instances storing the same document.
-    return new Promise((resolve, reject) => {
-      this.redlock.lock(this.lockKey(documentName), this.configuration.lockTimeout, async (error, lock) => {
-        if (error || !lock) {
-          // Expected behavior: Could not acquire lock, another instance locked it already.
-          // No further `onStoreDocument` hooks will be executed.
-          reject()
-          return
-        }
-
-        this.locks.set(this.lockKey(documentName), lock)
-
-        resolve(undefined)
-      })
-    })
-  }
-
-  /**
-   * Release the Redis lock, so other instances can store documents.
-   */
-  async afterStoreDocument({ documentName }: afterStoreDocumentPayload) {
-    this.locks.get(this.lockKey(documentName))?.unlock()
-      .catch(() => {
-        // Not able to unlock Redis. The lock will expire after ${lockTimeout} ms.
-        // console.error(`Not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
-      })
-      .finally(() => {
-        this.locks.delete(this.lockKey(documentName))
-      })
   }
 
   /**
@@ -329,10 +274,4 @@ export class Redis implements Extension {
     )
   }
 
-  /**
-   * Kill the Redlock connection immediately.
-   */
-  async onDestroy() {
-    this.redlock.quit()
-  }
 }
