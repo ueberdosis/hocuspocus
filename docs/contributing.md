@@ -40,6 +40,22 @@ Compile and watch for changes:
 npm run build:watch
 ```
 
+## How to include local hocuspocus packages in your development project
+
+If you want to include a local hocuspocus package in your project, you'll need to follow the following steps. I have tried using `npm link`, but havent managed to make it work reliably because of duplicated yjs imports. The following is the only way I made it work:
+
+```bash
+$ cd other_project # execute the following commands within the other project that should include local
+ # hocuspocus dependencies. Replace `provider` by the package that you want to replace.
+ # Replace HOCUSPOCUS_LOCAL_REPO_PATH by the path of "this" repo.
+$ rm -Rf node_modules/yjs node_modules/@hocuspocus/provider
+$ ln -s HOCUSPOCUS_LOCAL_REPO_PATH/packages/provider node_modules/@hocuspocus/provider
+$ ln -s HOCUSPOCUS_LOCAL_REPO_PATH/node_modules/yjs ./node_modules/yjs
+```
+
+Still doesnt work? -> rm -Rf node_modules && npm install ; then try again
+
+
 ## Our code style
 
 There is an eslint config that ensures a consistent code style. To check for errors, run `$ npm run lint`. That’ll be checked when you send a pull request, too. Make sure it’s passing, before sending a pull request.
