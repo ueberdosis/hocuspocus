@@ -44,6 +44,12 @@ npm run build:watch
 
 If you want to include a local hocuspocus package in your project, you'll need to follow the following steps. I have tried using `npm link`, but havent managed to make it work reliably because of duplicated yjs imports. The following is the only way I made it work:
 
+Execute the following command in this (hocupsocus) repo to compile the sources:
+
+`$ rollup -c -w`
+
+Then ..
+
 ```bash
 $ cd other_project # execute the following commands within the other project that should include local
  # hocuspocus dependencies. Replace `provider` by the package that you want to replace.
