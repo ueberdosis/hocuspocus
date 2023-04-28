@@ -15,10 +15,8 @@ import {
   MessageReceiver,
   Debugger,
   onConfigurePayload,
-  onListenPayload,
   beforeBroadcastStatelessPayload, Hocuspocus,
 } from '@hocuspocus/server'
-import kleur from 'kleur'
 
 export type RedisInstance = RedisClient.Cluster | RedisClient.Redis
 
@@ -138,15 +136,6 @@ export class Redis implements Extension {
   async onConfigure({ instance }: onConfigurePayload) {
     this.logger = instance.debugger
     this.instance = instance
-  }
-
-  async onListen({ configuration }: onListenPayload) {
-    if (configuration.quiet) {
-      return
-    }
-
-    console.warn(`  ${kleur.yellow('[BREAKING CHANGE] Wait, the Redis extension got an overhaul. The new Redis extension doesn’t persist data, it only syncs data between instances. Use @hocuspocus/extension-database to store your documents. It works well with the Redis extension.')}`)
-    console.log()
   }
 
   private getKey(documentName: string) {
