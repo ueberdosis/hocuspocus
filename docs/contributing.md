@@ -28,7 +28,8 @@ Make sure to open an issue and outline your idea first. We’ll get back to you 
 It’s not too hard to tinker around with the official repository. You’ll need [Git](https://github.com/git-guides/install-git), [Node and NPM](https://nodejs.org/en/download/) installed. Here is what you need to do then:
 
 1. Copy the code to your local machine: `$ git clone git@github.com:ueberdosis/hocuspocus.git`
-2. Install dependencies: `$ npm install`
+3. Install dependencies: `$ npm install`
+4. Build packages `$ npm build:packages`
 3. Start the development environment: `$ npm run start`
 4. Open http://localhost:3000 in your favorite browser.
 5. Start playing around!
