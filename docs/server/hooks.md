@@ -677,7 +677,6 @@ const data = {
   instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
-  update: Uint8Array,
   socketId: string,
 };
 ```
