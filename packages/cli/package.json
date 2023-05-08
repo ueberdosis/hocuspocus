@@ -22,7 +22,7 @@
     "@hocuspocus/extension-sqlite": "^2.0.6",
     "@hocuspocus/extension-webhook": "^2.0.6",
     "@hocuspocus/server": "^2.0.6",
-    "meow": "^11.0.0"
+    "meow": "^12.0.1"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
