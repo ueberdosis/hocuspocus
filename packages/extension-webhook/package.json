@@ -21,7 +21,8 @@
     },
     "default": {
       "import": "./dist/hocuspocus-webhook.esm.js",
-      "require": "./dist/hocuspocus-webhook.cjs"
+      "require": "./dist/hocuspocus-webhook.cjs",
+      "types": "./dist/packages/webhook/src/index.d.ts"
     }
   },
   "files": [

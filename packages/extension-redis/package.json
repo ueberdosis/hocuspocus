@@ -19,7 +19,8 @@
     },
     "default": {
       "import": "./dist/hocuspocus-redis.esm.js",
-      "require": "./dist/hocuspocus-redis.cjs"
+      "require": "./dist/hocuspocus-redis.cjs",
+      "types": "./dist/packages/redis/src/index.d.ts"
     }
   },
   "files": [
