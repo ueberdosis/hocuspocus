@@ -232,3 +232,34 @@ function createWebsocketProvider(
 ## Slate (Draft)
 
 Learn more: https://github.com/BitPhinix/slate-yjs
+
+## Multiplexing
+
+In order to use multiplexing with TiptapCollab or Hocuspocus, you'll need to create the socket and the provider separately.
+The example below will show how it works with TiptapCollab, but you can just replace `TiptapCollabProviderWebsocket` with `HocuspocusProviderWebsocket` and `TiptapCollabProvider` with `HocuspocusProvider` for use with Hocuspocus.
+
+Note that the authentication has to be taken care of per document, thus `token` is part of the Provider, not the ProviderWebsocket.
+```typescript
+import {
+  TiptapCollabProvider,
+  TiptapCollabProviderWebsocket
+} from "@hocuspocus/provider";
+
+const socket = new TiptapCollabProviderWebsocket({
+  appId: '', // or `url` if using `HocuspocusProviderWebsocket`
+})
+
+const provider1 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document1',
+  token: '',
+})
+
+const provider2 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document2',
+  token: '',
+})
+
+
+```
