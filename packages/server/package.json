@@ -20,7 +20,8 @@
     },
     "default": {
       "import": "./dist/hocuspocus-server.esm.js",
-      "require": "./dist/hocuspocus-server.cjs"
+      "require": "./dist/hocuspocus-server.cjs",
+      "types": "./dist/packages/server/src/index.d.ts"
     }
   },
   "files": [

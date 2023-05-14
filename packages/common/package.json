@@ -17,7 +17,8 @@
     },
     "default": {
       "import": "./dist/hocuspocus-common.esm.js",
-      "require": "./dist/hocuspocus-common.cjs"
+      "require": "./dist/hocuspocus-common.cjs",
+      "types": "./dist/packages/common/src/index.d.ts"
     }
   },
   "files": [
