@@ -331,6 +331,8 @@ export class Redis implements Extension {
    * Kill the Redlock connection immediately.
    */
   async onDestroy() {
-    this.redlock.quit()
+    await this.redlock.quit()
+    this.pub.disconnect(false)
+    this.sub.disconnect(false)
   }
 }
