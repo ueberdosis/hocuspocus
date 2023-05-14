@@ -22,7 +22,7 @@
     "yjs": "^13.5.29"
   },
   "devDependencies": {
-    "typescript": "^4.9.3",
-    "vue-tsc": "^1.2.0"
+    "typescript": "^5.0.4",
+    "vue-tsc": "^1.6.5"
   }
 }
