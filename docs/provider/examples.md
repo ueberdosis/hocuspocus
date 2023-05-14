@@ -63,7 +63,6 @@ new Editor({
 import * as Y from "yjs";
 import { CodemirrorBinding } from "y-codemirror";
 import { WebsocketProvider } from "y-websocket";
-
 import CodeMirror from "codemirror";
 
 const ydoc = new Y.Doc();
@@ -143,7 +142,6 @@ Learn more: https://github.com/yjs/y-monaco
 ```js
 import Quill from "quill";
 import QuillCursors from "quill-cursors";
-
 import * as Y from "yjs";
 import { QuillBinding } from "y-quill";
 import { WebsocketProvider } from "y-websocket";
@@ -172,6 +170,14 @@ Learn more: https://github.com/yjs/y-quill
 ## Lexical
 
 ```tsx
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { CollaborationPlugin } from "@lexical/react/LexicalCollaborationPlugin";
+import * as Y from "yjs";
+import { TiptapCollabProvider } from "@hocuspocus/provider";
+
 export default function Editor({
   initialEditorState,
   key
