@@ -169,6 +169,60 @@ new QuillBinding(type, quill, provider.awareness);
 
 Learn more: https://github.com/yjs/y-quill
 
+## Lexical
+
+```tsx
+export default function Editor({
+  initialEditorState,
+  key
+}: {
+  initialEditorState: string | null;
+  key: string;
+}) {
+  return (
+    <LexicalComposer
+      key={key}
+      initialConfig={{
+        editorState: null,
+        namespace: "test",
+      }}
+    >
+      <PlainTextPlugin
+        contentEditable={<ContentEditable />}
+        placeholder={<div>Enter some text...</div>}
+        ErrorBoundary={LexicalErrorBoundary}
+      />
+      <CollaborationPlugin
+        id={key}
+        providerFactory={createWebsocketProvider}
+        initialEditorState={initialEditorState}
+        shouldBootstrap={true}
+      />
+    </LexicalComposer>
+);
+}
+
+function createWebsocketProvider(
+  id: string,
+  yjsDocMap: Map<string, Y.Doc>
+): Provider {
+  const doc = new Y.Doc();
+  yjsDocMap.set(id, doc);
+
+// @TODO: REPLACE APP ID
+// @TODO: PUT PROPER TOKEN
+// @TODO: OR USE `HocuspocusProvider` with Hocuspocus URL
+  const hocuspocusProvider = new TiptapCollabProvider({
+    appId: 'YOUR_APP_ID',
+    name: `lexical-${id}`,
+    token: 'YOUR_TOKEN',
+    document: doc,
+  });
+
+  return hocuspocusProvider;
+}
+```
+
 ## Slate (Draft)
 
 Learn more: https://github.com/BitPhinix/slate-yjs
