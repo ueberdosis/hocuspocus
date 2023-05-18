@@ -13,7 +13,7 @@ import {
   writeVarString,
   length,
 } from 'lib0/encoding'
-import { MessageType } from './types'
+import { MessageType } from './types.js'
 
 export class IncomingMessage {
   /**

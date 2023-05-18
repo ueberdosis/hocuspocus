@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus } from '../utils'
+import { newHocuspocus } from '../utils/index.js'
 
 test('returns a dynamic HTTP/WebSocket address with the correct port', async t => {
   const server = await newHocuspocus({

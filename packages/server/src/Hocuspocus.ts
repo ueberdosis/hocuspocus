@@ -14,7 +14,7 @@ import {
   WsReadyStates,
 } from '@hocuspocus/common'
 import meta from '../package.json' assert {type: 'json'}
-import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage'
+import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
 import {
   MessageType,
   Configuration,
@@ -26,12 +26,12 @@ import {
   beforeBroadcastStatelessPayload,
   onListenPayload,
   onStoreDocumentPayload,
-} from './types'
-import Document from './Document'
-import Connection from './Connection'
-import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger } from './Debugger'
-import { DirectConnection } from './DirectConnection'
+} from './types.js'
+import Document from './Document.js'
+import Connection from './Connection.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { Debugger } from './Debugger.js'
+import { DirectConnection } from './DirectConnection.js'
 
 export const defaultConfiguration = {
   name: null,

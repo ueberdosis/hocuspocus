@@ -8,12 +8,12 @@ import {
 } from 'y-protocols/sync'
 import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import { readVarString } from 'lib0/decoding'
-import { MessageType } from './types'
-import Connection from './Connection'
-import { IncomingMessage } from './IncomingMessage'
-import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger } from './Debugger'
-import Document from './Document'
+import { MessageType } from './types.js'
+import Connection from './Connection.js'
+import { IncomingMessage } from './IncomingMessage.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { Debugger } from './Debugger.js'
+import Document from './Document.js'
 
 export class MessageReceiver {
 

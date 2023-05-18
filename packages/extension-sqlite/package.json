@@ -19,7 +19,7 @@
     "default": {
       "import": "./dist/hocuspocus-sqlite.esm.js",
       "require": "./dist/hocuspocus-sqlite.cjs",
-      "types": "./dist/packages/sqlite/src/index.d.ts"
+      "types": "./dist/packages/extension-sqlite/src/index.d.ts"
     }
   },
   "files": [

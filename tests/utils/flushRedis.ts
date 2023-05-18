@@ -1,6 +1,6 @@
 // @ts-ignore
 import { createClient } from 'redis'
-import { redisConnectionSettings } from './redisConnectionSettings'
+import { redisConnectionSettings } from './redisConnectionSettings.js'
 
 export const flushRedis = async () => {
   const client = createClient({

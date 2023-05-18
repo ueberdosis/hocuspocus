@@ -4,12 +4,12 @@ import WebSocket from 'ws'
 import {
   CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
 } from '@hocuspocus/common'
-import Document from './Document'
-import { IncomingMessage } from './IncomingMessage'
-import { OutgoingMessage } from './OutgoingMessage'
-import { MessageReceiver } from './MessageReceiver'
-import { Debugger } from './Debugger'
-import { onStatelessPayload } from './types'
+import Document from './Document.js'
+import { IncomingMessage } from './IncomingMessage.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { MessageReceiver } from './MessageReceiver.js'
+import { Debugger } from './Debugger.js'
+import { onStatelessPayload } from './types.js'
 
 export class Connection {
 

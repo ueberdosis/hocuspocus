@@ -1,8 +1,8 @@
 import test from 'ava'
 import {
   newHocuspocus, newHocuspocusProvider, randomInteger,
-} from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+} from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test('documents count is zero by default', async t => {
   const server = await newHocuspocus()

@@ -1,6 +1,6 @@
 import { URLSearchParams } from 'url'
-import Document from './Document'
-import type { Hocuspocus } from './Hocuspocus'
+import Document from './Document.js'
+import type { Hocuspocus } from './Hocuspocus.js'
 
 export class DirectConnection {
   document: Document | null = null

@@ -1,8 +1,8 @@
 import test from 'ava'
 import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test('executes the onAuthenticate callback', async t => {
   await new Promise(async resolve => {

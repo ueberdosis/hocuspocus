@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus } from '../utils'
+import { newHocuspocus } from '../utils/index.js'
 
 test('executes the onDestroy hook and has the instance', async t => {
   await new Promise(async resolve => {

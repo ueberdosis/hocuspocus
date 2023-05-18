@@ -1,5 +1,5 @@
 // import * as time from 'lib0/time'
-import { MessageType } from './types'
+import { MessageType } from './types.js'
 
 export class Debugger {
   logs: any[] = []

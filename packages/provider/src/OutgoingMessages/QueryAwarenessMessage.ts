@@ -1,6 +1,6 @@
 import * as encoding from 'lib0/encoding'
-import { MessageType, OutgoingMessageArguments } from '../types'
-import { OutgoingMessage } from '../OutgoingMessage'
+import { MessageType, OutgoingMessageArguments } from '../types.js'
+import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class QueryAwarenessMessage extends OutgoingMessage {
   type = MessageType.QueryAwareness

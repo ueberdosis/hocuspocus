@@ -19,7 +19,7 @@
     "default": {
       "import": "./dist/hocuspocus-database.esm.js",
       "require": "./dist/hocuspocus-database.cjs",
-      "types": "./dist/packages/database/src/index.d.ts"
+      "types": "./dist/packages/extension-database/src/index.d.ts"
     }
   },
   "files": [

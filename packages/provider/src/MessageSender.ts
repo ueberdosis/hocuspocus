@@ -1,6 +1,6 @@
 import { Encoder, toUint8Array } from 'lib0/encoding'
 import * as bc from 'lib0/broadcastchannel'
-import { ConstructableOutgoingMessage } from './types'
+import { ConstructableOutgoingMessage } from './types.js'
 
 export class MessageSender {
 

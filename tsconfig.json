@@ -6,7 +6,7 @@
     "jsx": "preserve",
     "importHelpers": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
@@ -18,7 +18,6 @@
     "paths": {
       "@hocuspocus/*": [
         "packages/*/src",
-        "packages/*/dist"
       ]
     },
     "lib": [

@@ -1,6 +1,6 @@
 import test from 'ava'
-import { retryableAssertion } from '../utils/retryableAssertion'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
 test('returns 0 connections when there’s no one connected', async t => {
   await new Promise(async resolve => {

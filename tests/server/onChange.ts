@@ -1,7 +1,7 @@
 import test from 'ava'
 import { onChangePayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test('onChange callback receives updates', async t => {
   await new Promise(async resolve => {

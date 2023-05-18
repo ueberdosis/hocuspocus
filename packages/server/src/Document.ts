@@ -2,10 +2,10 @@ import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
 import { mutex, createMutex } from 'lib0/mutex.js'
-import { AwarenessUpdate } from './types'
-import Connection from './Connection'
-import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger } from './Debugger'
+import { AwarenessUpdate } from './types.js'
+import Connection from './Connection.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { Debugger } from './Debugger.js'
 
 export class Document extends Doc {
 

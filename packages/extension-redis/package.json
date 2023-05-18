@@ -20,7 +20,7 @@
     "default": {
       "import": "./dist/hocuspocus-redis.esm.js",
       "require": "./dist/hocuspocus-redis.cjs",
-      "types": "./dist/packages/redis/src/index.d.ts"
+      "types": "./dist/packages/extension-redis/src/index.d.ts"
     }
   },
   "files": [
