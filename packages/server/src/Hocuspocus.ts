@@ -436,7 +436,12 @@ export class Hocuspocus {
         incoming.emit('message', input)
       })
 
-      this.hooks('connected', { ...hookPayload, documentName })
+      this.hooks('connected', {
+        ...hookPayload,
+        documentName,
+        context,
+        connectionInstance: instance,
+      })
     }
 
     // This listener handles authentication messages and queues everything else.
