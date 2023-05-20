@@ -25,11 +25,13 @@ import {
   beforeHandleMessagePayload,
   beforeBroadcastStatelessPayload,
   onListenPayload,
+  onStoreDocumentPayload,
 } from './types'
 import Document from './Document'
 import Connection from './Connection'
 import { OutgoingMessage } from './OutgoingMessage'
 import { Debugger } from './Debugger'
+import { DirectConnection } from './DirectConnection'
 
 export const defaultConfiguration = {
   name: null,
@@ -659,7 +661,7 @@ export class Hocuspocus {
   /**
    * Create a new document by the given request
    */
-  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  private async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
       const document = this.documents.get(documentName)
 
@@ -772,24 +774,7 @@ export class Hocuspocus {
         // ydoc if the onLoadDocument hook returned an error)
         if (!document.isLoading) {
           this.debounce(`onStoreDocument-${document.name}`, () => {
-            this.hooks('onStoreDocument', hookPayload)
-              .catch(error => {
-                if (error?.message) {
-                  throw error
-                }
-              })
-              .then(() => {
-                this.hooks('afterStoreDocument', hookPayload).then(() => {
-                // Remove document from memory.
-
-                  if (document.getConnectionsCount() > 0) {
-                    return
-                  }
-
-                  this.documents.delete(document.name)
-                  document.destroy()
-                })
-              })
+            this.storeDocumentHooks(document, hookPayload)
           }, true)
 
         } else {
@@ -839,6 +824,27 @@ export class Hocuspocus {
     return instance
   }
 
+  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
+    this.hooks('onStoreDocument', hookPayload)
+      .catch(error => {
+        if (error?.message) {
+          throw error
+        }
+      })
+      .then(() => {
+        this.hooks('afterStoreDocument', hookPayload).then(() => {
+        // Remove document from memory.
+
+          if (document.getConnectionsCount() > 0) {
+            return
+          }
+
+          this.documents.delete(document.name)
+          document.destroy()
+        })
+      })
+  }
+
   /**
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
@@ -877,7 +883,7 @@ export class Hocuspocus {
   /**
    * Get parameters by the given request
    */
-  private static getParameters(request?: IncomingMessage): URLSearchParams {
+  private static getParameters(request?: Pick<IncomingMessage, 'url'>): URLSearchParams {
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
   }
@@ -907,6 +913,24 @@ export class Hocuspocus {
 
   getMessageLogs() {
     return this.debugger.get()?.logs
+  }
+
+  getDirectConnection({ documentName, context }: { documentName: string, context?: any }): DirectConnection {
+    const connectionConfig: ConnectionConfiguration = {
+      isAuthenticated: true,
+      readOnly: false,
+      requiresAuthentication: true,
+    }
+
+    const documentPromise: Promise<Document> = this.createDocument(
+      documentName,
+      {}, // direct connection has no request params
+      uuid(),
+      connectionConfig,
+      context,
+    )
+
+    return new DirectConnection(documentPromise, context)
   }
 }
 

@@ -22,6 +22,9 @@ export class Document extends Doc {
     connection: Connection
   }> = new Map()
 
+  // The number of direct (non-websocket) connections to this document
+  directConnectionsCount = 0
+
   name: string
 
   mux: mutex
@@ -121,11 +124,25 @@ export class Document extends Doc {
     return this
   }
 
+  addDirectConnection(): Document {
+    this.directConnectionsCount += 1
+
+    return this
+  }
+
+  removeDirectConnection(): Document {
+    if (this.directConnectionsCount > 0) {
+      this.directConnectionsCount -= 1
+    }
+
+    return this
+  }
+
   /**
    * Get the number of active connections for this document
    */
   getConnectionsCount(): number {
-    return this.connections.size
+    return this.connections.size + this.directConnectionsCount
   }
 
   /**
