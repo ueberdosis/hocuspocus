@@ -67,12 +67,12 @@ export class OutgoingMessage {
     return this
   }
 
-  writeAuthenticated(): OutgoingMessage {
+  writeAuthenticated(readonly: boolean): OutgoingMessage {
     this.type = MessageType.Auth
     this.category = 'Authenticated'
 
     writeVarUint(this.encoder, MessageType.Auth)
-    writeAuthenticated(this.encoder)
+    writeAuthenticated(this.encoder, readonly ? 'readonly' : 'read-write')
 
     return this
   }

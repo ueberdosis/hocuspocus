@@ -135,6 +135,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   isAuthenticated = false
 
+  authorizedScope: string | undefined = undefined
+
   mux = mutex.createMutex()
 
   intervals: any = {
@@ -428,8 +430,9 @@ export class HocuspocusProvider extends EventEmitter {
     this.status = WebSocketStatus.Disconnected
   }
 
-  authenticatedHandler() {
+  authenticatedHandler(scope: string) {
     this.isAuthenticated = true
+    this.authorizedScope = scope
 
     this.emit('authenticated')
     this.startSync()
