@@ -52,28 +52,6 @@ test('has unsynced changes when in readonly mode', async t => {
   t.is(provider.hasUnsyncedChanges, true)
 })
 
-test.only('has unsynced changes when in readonly mode and initial document has changed', async t => {
-
-  const server = await newHocuspocus({
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
-    },
-  })
-
-  const document = new Y.Doc()
-  document.getMap('test').set('foo', 'bar')
-
-  const provider = newHocuspocusProvider(server, { document })
-
-  await retryableAssertion(t, tt => {
-    tt.is(provider.hasUnsyncedChanges, true)
-  })
-
-  await sleep(100)
-
-  t.is(provider.hasUnsyncedChanges, true)
-})
-
 test('has unsynced changes when in readonly mode and receiving external update', async t => {
 
   const server = await newHocuspocus({
@@ -106,4 +84,26 @@ test('has unsynced changes when in readonly mode and receiving external update',
 
   t.is(provider2.hasUnsyncedChanges, false)
   t.is(provider.hasUnsyncedChanges, true) // TODO: this currently fails
+})
+
+test('has unsynced changes when in readonly mode and initial document has changed', async t => {
+
+  const server = await newHocuspocus({
+    async onAuthenticate({ connection }) {
+      connection.readOnly = true
+    },
+  })
+
+  const document = new Y.Doc()
+  document.getMap('test').set('foo', 'bar')
+
+  const provider = newHocuspocusProvider(server, { document })
+
+  await retryableAssertion(t, tt => {
+    tt.is(provider.hasUnsyncedChanges, true)
+  })
+
+  await sleep(100)
+
+  t.is(provider.hasUnsyncedChanges, true)
 })
