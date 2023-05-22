@@ -100,7 +100,7 @@ test('has unsynced changes when in readonly mode and initial document has change
   const provider = newHocuspocusProvider(server, { document })
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.hasUnsyncedChanges, true)
+    tt.is(provider.hasUnsyncedChanges, true) // TODO: this also fails
   })
 
   await sleep(100)
