@@ -5,7 +5,7 @@ test('direct connection prevents document from being removed from memory', async
   await new Promise(async resolve => {
     const server = await newHocuspocus()
 
-    await server.getDirectConnection({ documentName: 'hocuspocus-test' })
+    await server.openDirectConnection('hocuspocus-test')
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
@@ -24,7 +24,7 @@ test('direct connection prevents document from being removed from memory', async
 test('direct connection can transact', async t => {
   const server = await newHocuspocus()
 
-  const direct = await server.getDirectConnection({ documentName: 'hocuspocus-test' })
+  const direct = await server.openDirectConnection('hocuspocus-test')
 
   await direct.transact(document => {
     document.getArray('test').insert(0, ['value'])
@@ -36,7 +36,7 @@ test('direct connection can transact', async t => {
 test('direct connection cannot transact once closed', async t => {
   const server = await newHocuspocus()
 
-  const direct = await server.getDirectConnection({ documentName: 'hocuspocus-test' })
+  const direct = await server.openDirectConnection('hocuspocus-test')
   direct.disconnect()
 
   try {

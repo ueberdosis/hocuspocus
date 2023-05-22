@@ -915,7 +915,7 @@ export class Hocuspocus {
     return this.debugger.get()?.logs
   }
 
-  async getDirectConnection({ documentName, context }: { documentName: string, context?: any }): Promise<DirectConnection> {
+  async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,

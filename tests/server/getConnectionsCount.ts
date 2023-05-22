@@ -53,7 +53,7 @@ test('total connections includes direct connections', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({ name: 'hocuspocus-test' })
 
-    await server.getDirectConnection({ documentName: 'hocuspocus-test' })
+    await server.openDirectConnection('hocuspocus-test')
     t.is(server.getConnectionsCount(), 1)
 
     newHocuspocusProvider(server, {
