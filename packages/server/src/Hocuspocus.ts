@@ -915,14 +915,14 @@ export class Hocuspocus {
     return this.debugger.get()?.logs
   }
 
-  getDirectConnection({ documentName, context }: { documentName: string, context?: any }): DirectConnection {
+  async getDirectConnection({ documentName, context }: { documentName: string, context?: any }): Promise<DirectConnection> {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,
       requiresAuthentication: true,
     }
 
-    const documentPromise: Promise<Document> = this.createDocument(
+    const document: Document = await this.createDocument(
       documentName,
       {}, // direct connection has no request params
       uuid(),
@@ -930,7 +930,7 @@ export class Hocuspocus {
       context,
     )
 
-    return new DirectConnection(documentPromise, context)
+    return new DirectConnection(document, this, context)
   }
 }
 

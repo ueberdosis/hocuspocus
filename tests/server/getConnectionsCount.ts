@@ -49,6 +49,23 @@ test('outputs the total connections', async t => {
   })
 })
 
+test('total connections includes direct connections', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ name: 'hocuspocus-test' })
+
+    await server.getDirectConnection({ documentName: 'hocuspocus-test' })
+    t.is(server.getConnectionsCount(), 1)
+
+    newHocuspocusProvider(server, {
+      onSynced() {
+        t.is(server.getConnectionsCount(), 2)
+
+        resolve('done')
+      },
+    })
+  })
+})
+
 test('adds and removes connections properly', async t => {
   const server = await newHocuspocus()
 

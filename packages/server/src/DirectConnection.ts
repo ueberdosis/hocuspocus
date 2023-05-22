@@ -3,34 +3,31 @@ import Document from './Document'
 import type { Hocuspocus } from './Hocuspocus'
 
 export class DirectConnection {
-  documentPromise: Promise<Document> | null = null
+  document: Document | null = null
 
   instance!: Hocuspocus
 
   context: any
 
-  document?: Document
-
   /**
    * Constructor.
    */
   constructor(
-    documentPromise: Promise<Document>,
+    document: Document,
     instance: Hocuspocus,
     context?: any,
   ) {
-    this.documentPromise = documentPromise
+    this.document = document
     this.instance = instance
     this.context = context
+
+    this.document.addDirectConnection()
   }
 
   async transact(transaction: (document: Document) => void) {
-    if (!this.documentPromise) {
+    if (!this.document) {
       throw new Error('direct connection closed')
     }
-
-    this.document = await this.documentPromise
-    this.document.addDirectConnection()
 
     transaction(this.document)
 
@@ -46,8 +43,8 @@ export class DirectConnection {
     })
   }
 
-  close() {
+  disconnect() {
     this.document?.removeDirectConnection()
-    this.documentPromise = null
+    this.document = null
   }
 }
