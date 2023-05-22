@@ -481,7 +481,7 @@ export class Hocuspocus {
               connection.isAuthenticated = true
 
               // Let the client know that authentication was successful.
-              const message = new OutgoingMessage(documentName).writeAuthenticated()
+              const message = new OutgoingMessage(documentName).writeAuthenticated(connection.readOnly)
 
               this.debugger.log({
                 direction: 'out',
