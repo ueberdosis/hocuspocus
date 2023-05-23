@@ -593,9 +593,9 @@ export class Hocuspocus {
       context: connection?.context || {},
       document,
       documentName: document.name,
-      requestHeaders: request?.headers,
+      requestHeaders: request?.headers ?? {},
       requestParameters: Hocuspocus.getParameters(request),
-      socketId: connection?.socketId,
+      socketId: connection?.socketId ?? '',
       update,
     }
 
@@ -611,15 +611,7 @@ export class Hocuspocus {
     }
 
     this.debounce(`onStoreDocument-${document.name}`, () => {
-      this.hooks('onStoreDocument', hookPayload)
-        .catch(error => {
-          if (error?.message) {
-            throw error
-          }
-        })
-        .then(() => {
-          this.hooks('afterStoreDocument', hookPayload)
-        })
+      this.storeDocumentHooks(document, hookPayload)
     })
   }
 
