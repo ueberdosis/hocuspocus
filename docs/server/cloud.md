@@ -56,7 +56,8 @@ const data = {
   // use this list to limit the number of documents that can be accessed by this client.
   // empty array means no access at all
   // not sending this property means access to all documents
-  allowedDocumentNames: ['document-1', 'document-2']
+  // we are supporting a wildcard at the end of the string (only there)
+  allowedDocumentNames: ['document-1', 'document-2', 'my-user-uuid/*', 'my-organization-uuid/*']
 }
 
 const jwt = jsonwebtoken.sign(data, 'your_secret')
