@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/ueberdosis/hocuspocus/compare/v2.0.6...v2.1.0) (2023-06-03)
+
+
+### Bug Fixes
+
+* export typings for recent typescript ([#602](https://github.com/ueberdosis/hocuspocus/issues/602)) ([551d27f](https://github.com/ueberdosis/hocuspocus/commit/551d27fa6de9c746c67bf0f1e3bb56167aebbca5)), closes [/github.com/artalar/reatom/issues/560#issuecomment-1528997739](https://github.com//github.com/artalar/reatom/issues/560/issues/issuecomment-1528997739)
+
+
+
+
+
 ## [2.0.6](https://github.com/ueberdosis/hocuspocus/compare/v2.0.5...v2.0.6) (2023-04-25)
 
 **Note:** Version bump only for package @hocuspocus/extension-sqlite
