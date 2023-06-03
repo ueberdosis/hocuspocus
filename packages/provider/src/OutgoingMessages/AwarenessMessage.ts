@@ -1,7 +1,7 @@
 import * as encoding from 'lib0/encoding'
 import { encodeAwarenessUpdate } from 'y-protocols/awareness'
-import { MessageType, OutgoingMessageArguments } from '../types'
-import { OutgoingMessage } from '../OutgoingMessage'
+import { MessageType, OutgoingMessageArguments } from '../types.js'
+import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class AwarenessMessage extends OutgoingMessage {
   type = MessageType.Awareness

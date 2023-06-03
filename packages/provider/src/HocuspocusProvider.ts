@@ -4,16 +4,16 @@ import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import type { CloseEvent, Event, MessageEvent } from 'ws'
 import { awarenessStatesToArray } from '@hocuspocus/common'
-import EventEmitter from './EventEmitter'
-import { IncomingMessage } from './IncomingMessage'
-import { MessageReceiver } from './MessageReceiver'
-import { MessageSender } from './MessageSender'
-import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage'
-import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage'
-import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage'
-import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage'
-import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage'
-import { UpdateMessage } from './OutgoingMessages/UpdateMessage'
+import EventEmitter from './EventEmitter.js'
+import { IncomingMessage } from './IncomingMessage.js'
+import { MessageReceiver } from './MessageReceiver.js'
+import { MessageSender } from './MessageSender.js'
+import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
+import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage.js'
+import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage.js'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.js'
+import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.js'
+import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
 import {
   ConstructableOutgoingMessage,
   onAuthenticationFailedParameters,
@@ -25,14 +25,15 @@ import {
   onStatusParameters,
   onSyncedParameters,
   WebSocketStatus,
-} from './types'
+  onAwarenessChangeParameters,
+  onAwarenessUpdateParameters,
+} from './types.js'
 import {
   CompleteHocuspocusProviderWebsocketConfiguration,
   HocuspocusProviderWebsocket,
-} from './HocuspocusProviderWebsocket'
-import { StatelessMessage } from './OutgoingMessages/StatelessMessage'
-import { CloseMessage } from './OutgoingMessages/CloseMessage'
-import { onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
+} from './HocuspocusProviderWebsocket.js'
+import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
+import { CloseMessage } from './OutgoingMessages/CloseMessage.js'
 
 export type HocuspocusProviderConfiguration =
   Required<Pick<CompleteHocuspocusProviderConfiguration, 'name'>>

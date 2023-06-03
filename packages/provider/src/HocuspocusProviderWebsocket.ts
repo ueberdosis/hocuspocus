@@ -7,11 +7,12 @@ import {
   Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import { Event } from 'ws'
-import EventEmitter from './EventEmitter'
+import EventEmitter from './EventEmitter.js'
 import {
   onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters, WebSocketStatus,
-} from './types'
-import { HocuspocusProvider, onAwarenessChangeParameters, onAwarenessUpdateParameters } from '.'
+  onAwarenessChangeParameters, onAwarenessUpdateParameters,
+} from './types.js'
+import { HocuspocusProvider } from './HocuspocusProvider.js'
 
 export type HocuspocusProviderWebsocketConfiguration =
   Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, 'url'>>

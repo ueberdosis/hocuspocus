@@ -1,5 +1,5 @@
 import { ExecutionContext } from 'ava'
-import { sleep } from './sleep'
+import { sleep } from './sleep.js'
 
 /* eslint-disable no-await-in-loop */
 export const retryableAssertion = async (t: ExecutionContext, recoverableTry: (tt: ExecutionContext) => void) => {

@@ -4,8 +4,8 @@ import { Redis } from '@hocuspocus/extension-redis'
 import { v4 as uuidv4 } from 'uuid'
 import {
   newHocuspocus, newHocuspocusProvider, redisConnectionSettings,
-} from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+} from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test.skip('closes connections on other instances', async t => {
   const server = await newHocuspocus({

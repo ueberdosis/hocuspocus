@@ -1,7 +1,7 @@
 import { writeVarString, writeVarUint } from 'lib0/encoding'
 import { writeAuthentication } from '@hocuspocus/common'
-import { MessageType, OutgoingMessageArguments } from '../types'
-import { OutgoingMessage } from '../OutgoingMessage'
+import { MessageType, OutgoingMessageArguments } from '../types.js'
+import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class AuthenticationMessage extends OutgoingMessage {
   type = MessageType.Auth

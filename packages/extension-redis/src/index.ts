@@ -1,1 +1,1 @@
-export * from './Redis'
+export * from './Redis.js'

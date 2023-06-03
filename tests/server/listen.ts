@@ -1,7 +1,7 @@
 import test from 'ava'
 import { Hocuspocus } from '@hocuspocus/server'
 import fetch from 'node-fetch'
-import { newHocuspocus } from '../utils'
+import { newHocuspocus } from '../utils/index.js'
 
 test('should respond with OK', async t => {
   const server = await newHocuspocus()

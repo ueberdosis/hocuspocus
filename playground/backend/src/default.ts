@@ -4,7 +4,7 @@ import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const server = Server.configure({
   port: 1234,
-  address: '127.0.0.1',
+  address: '192.168.0.7',
   name: 'hocuspocus-fra1-01',
   extensions: [
     new Logger(),

@@ -21,7 +21,7 @@
     "default": {
       "import": "./dist/hocuspocus-logger.esm.js",
       "require": "./dist/hocuspocus-logger.cjs",
-      "types": "./dist/packages/logger/src/index.d.ts"
+      "types": "./dist/packages/extension-logger/src/index.d.ts"
     }
   },
   "files": [
