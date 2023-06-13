@@ -1,26 +1,37 @@
+import { createServer, IncomingMessage, Server as HTTPServer } from 'http'
+import { URLSearchParams } from 'url'
+import { ListenOptions } from 'net'
+import * as decoding from 'lib0/decoding'
+import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
+import { Doc, encodeStateAsUpdate, applyUpdate } from 'yjs'
+import { v4 as uuid } from 'uuid'
+import kleur from 'kleur'
 import {
-  Forbidden,
   ResetConnection,
   Unauthorized,
-  WsReadyStates,
+  Forbidden,
   awarenessStatesToArray,
+  WsReadyStates,
 } from '@hocuspocus/common'
-import meta from '../package.json' assert { type: 'json' }
-import Connection from './Connection.js'
-import { Debugger } from './Debugger.js'
-import { DirectConnection } from './DirectConnection.js'
-import Document from './Document.js'
+import meta from '../package.json' assert {type: 'json'}
 import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
 import {
-  AwarenessUpdate,
+  MessageType,
   Configuration,
   ConnectionConfiguration,
-  MessageType,
-  beforeBroadcastStatelessPayload,
+  HookName,
+  AwarenessUpdate,
+  HookPayload,
   beforeHandleMessagePayload,
+  beforeBroadcastStatelessPayload,
   onListenPayload,
+  onStoreDocumentPayload,
 } from './types.js'
+import Document from './Document.js'
+import Connection from './Connection.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { Debugger } from './Debugger.js'
+import { DirectConnection } from './DirectConnection.js'
 
 export const defaultConfiguration = {
   name: null,
