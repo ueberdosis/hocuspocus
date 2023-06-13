@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProviderWebsocket } from '../utils'
+import { newHocuspocus, newHocuspocusProviderWebsocket } from '../utils/index.js'
 
 test('has default configuration (maxDelay = 30000)', async t => {
   const server = await newHocuspocus()

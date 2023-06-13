@@ -1,7 +1,7 @@
 import * as encoding from 'lib0/encoding'
 import * as syncProtocol from 'y-protocols/sync'
-import { MessageType, OutgoingMessageArguments } from '../types'
-import { OutgoingMessage } from '../OutgoingMessage'
+import { MessageType, OutgoingMessageArguments } from '../types.js'
+import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class SyncStepTwoMessage extends OutgoingMessage {
   type = MessageType.Sync

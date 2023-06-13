@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
 test('calls the beforeBroadcastStateless hook', async t => {
   await new Promise(async resolve => {

@@ -10,8 +10,8 @@ import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 
 import { writeAuthenticated, writePermissionDenied } from '@hocuspocus/common'
-import { MessageType } from './types'
-import Document from './Document'
+import { MessageType } from './types.js'
+import Document from './Document.js'
 
 export class OutgoingMessage {
 
@@ -67,12 +67,12 @@ export class OutgoingMessage {
     return this
   }
 
-  writeAuthenticated(): OutgoingMessage {
+  writeAuthenticated(readonly: boolean): OutgoingMessage {
     this.type = MessageType.Auth
     this.category = 'Authenticated'
 
     writeVarUint(this.encoder, MessageType.Auth)
-    writeAuthenticated(this.encoder)
+    writeAuthenticated(this.encoder, readonly ? 'readonly' : 'read-write')
 
     return this
   }

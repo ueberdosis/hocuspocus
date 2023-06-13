@@ -2,10 +2,10 @@ import WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
 import { mutex, createMutex } from 'lib0/mutex.js'
-import { AwarenessUpdate } from './types'
-import Connection from './Connection'
-import { OutgoingMessage } from './OutgoingMessage'
-import { Debugger } from './Debugger'
+import { AwarenessUpdate } from './types.js'
+import Connection from './Connection.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { Debugger } from './Debugger.js'
 
 export class Document extends Doc {
 
@@ -21,6 +21,9 @@ export class Document extends Doc {
     clients: Set<any>,
     connection: Connection
   }> = new Map()
+
+  // The number of direct (non-websocket) connections to this document
+  directConnectionsCount = 0
 
   name: string
 
@@ -121,11 +124,25 @@ export class Document extends Doc {
     return this
   }
 
+  addDirectConnection(): Document {
+    this.directConnectionsCount += 1
+
+    return this
+  }
+
+  removeDirectConnection(): Document {
+    if (this.directConnectionsCount > 0) {
+      this.directConnectionsCount -= 1
+    }
+
+    return this
+  }
+
   /**
    * Get the number of active connections for this document
    */
   getConnectionsCount(): number {
-    return this.connections.size
+    return this.connections.size + this.directConnectionsCount
   }
 
   /**

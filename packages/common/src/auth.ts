@@ -17,14 +17,15 @@ export const writePermissionDenied = (encoder: encoding.Encoder, reason: string)
   encoding.writeVarString(encoder, reason)
 }
 
-export const writeAuthenticated = (encoder: encoding.Encoder) => {
+export const writeAuthenticated = (encoder: encoding.Encoder, scope: 'readonly' | 'read-write') => {
   encoding.writeVarUint(encoder, AuthMessageType.Authenticated)
+  encoding.writeVarString(encoder, scope)
 }
 
 export const readAuthMessage = (
   decoder: decoding.Decoder,
   permissionDeniedHandler: (reason: string) => void,
-  authenticatedHandler: () => void,
+  authenticatedHandler: (scope: string) => void,
 ) => {
   switch (decoding.readVarUint(decoder)) {
     case AuthMessageType.PermissionDenied: {
@@ -32,7 +33,7 @@ export const readAuthMessage = (
       break
     }
     case AuthMessageType.Authenticated: {
-      authenticatedHandler()
+      authenticatedHandler(decoding.readVarString(decoder))
       break
     }
     default:

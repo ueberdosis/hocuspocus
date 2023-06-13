@@ -5,20 +5,13 @@ import {
   WsReadyStates,
   awarenessStatesToArray,
 } from '@hocuspocus/common'
-import { Server as HTTPServer, IncomingMessage, createServer } from 'http'
-import kleur from 'kleur'
-import * as decoding from 'lib0/decoding'
-import { ListenOptions } from 'net'
-import { URLSearchParams } from 'url'
-import { v4 as uuid } from 'uuid'
-import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' assert { type: 'json' }
-import Connection from './Connection'
-import { Debugger } from './Debugger'
-import Document from './Document'
-import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage'
-import { OutgoingMessage } from './OutgoingMessage'
+import Connection from './Connection.js'
+import { Debugger } from './Debugger.js'
+import { DirectConnection } from './DirectConnection.js'
+import Document from './Document.js'
+import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
 import {
   AwarenessUpdate,
   Configuration,
@@ -27,7 +20,7 @@ import {
   beforeBroadcastStatelessPayload,
   beforeHandleMessagePayload,
   onListenPayload,
-} from './types'
+} from './types.js'
 
 export const defaultConfiguration = {
   name: null,
@@ -488,7 +481,7 @@ export class Hocuspocus {
           connection.isAuthenticated = true
 
           // Let the client know that authentication was successful.
-          const message = new OutgoingMessage(documentName).writeAuthenticated()
+          const message = new OutgoingMessage(documentName).writeAuthenticated(connection.readOnly)
 
           this.debugger.log({
             direction: 'out',
@@ -596,9 +589,9 @@ export class Hocuspocus {
       context: connection?.context || {},
       document,
       documentName: document.name,
-      requestHeaders: request?.headers,
+      requestHeaders: request?.headers ?? {},
       requestParameters: Hocuspocus.getParameters(request),
-      socketId: connection?.socketId,
+      socketId: connection?.socketId ?? '',
       update,
     }
 
@@ -614,16 +607,8 @@ export class Hocuspocus {
       return
     }
 
-    this.debounce(`onStoreDocument-${document.name}`, async () => {
-      try {
-        await this.hooks('onStoreDocument', hookPayload)
-      } catch (error: any) {
-        if (error?.message) {
-          throw error
-        }
-      } finally {
-        this.hooks('afterStoreDocument', hookPayload)
-      }
+    this.debounce(`onStoreDocument-${document.name}`, () => {
+      this.storeDocumentHooks(document, hookPayload)
     })
   }
 
@@ -665,7 +650,7 @@ export class Hocuspocus {
   /**
    * Create a new document by the given request
    */
-  private async createDocument(documentName: string, request: IncomingMessage, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  private async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     if (this.documents.has(documentName)) {
       const document = this.documents.get(documentName)
 
@@ -777,30 +762,9 @@ export class Hocuspocus {
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        this.debounce(
-          `onStoreDocument-${document.name}`,
-          async () => {
-            try {
-              await this.hooks('onStoreDocument', hookPayload)
-            } catch (error: any) {
-              // TODO: document / do we want this?
-              if (error?.message) {
-                throw error
-              }
-            }
-            await this.hooks('afterStoreDocument', hookPayload)
-
-            // Remove document from memory.
-
-            if (document.getConnectionsCount() > 0) {
-              return
-            }
-
-            this.documents.delete(document.name)
-            document.destroy()
-          },
-          true,
-        )
+        this.debounce(`onStoreDocument-${document.name}`, () => {
+          this.storeDocumentHooks(document, hookPayload)
+        }, true)
       } else {
         // Remove document from memory immediately
         this.documents.delete(document.name)
@@ -848,6 +812,27 @@ export class Hocuspocus {
     return instance
   }
 
+  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
+    this.hooks('onStoreDocument', hookPayload)
+      .catch(error => {
+        if (error?.message) {
+          throw error
+        }
+      })
+      .then(() => {
+        this.hooks('afterStoreDocument', hookPayload).then(() => {
+        // Remove document from memory.
+
+          if (document.getConnectionsCount() > 0) {
+            return
+          }
+
+          this.documents.delete(document.name)
+          document.destroy()
+        })
+      })
+  }
+
   /**
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
@@ -886,7 +871,7 @@ export class Hocuspocus {
   /**
    * Get parameters by the given request
    */
-  private static getParameters(request?: IncomingMessage): URLSearchParams {
+  private static getParameters(request?: Pick<IncomingMessage, 'url'>): URLSearchParams {
     const query = request?.url?.split('?') || []
     return new URLSearchParams(query[1] ? query[1] : '')
   }
@@ -916,6 +901,24 @@ export class Hocuspocus {
 
   getMessageLogs() {
     return this.debugger.get()?.logs
+  }
+
+  async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {
+    const connectionConfig: ConnectionConfiguration = {
+      isAuthenticated: true,
+      readOnly: false,
+      requiresAuthentication: true,
+    }
+
+    const document: Document = await this.createDocument(
+      documentName,
+      {}, // direct connection has no request params
+      uuid(),
+      connectionConfig,
+      context,
+    )
+
+    return new DirectConnection(document, this, context)
   }
 }
 

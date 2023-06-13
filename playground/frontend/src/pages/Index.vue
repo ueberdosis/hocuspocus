@@ -53,7 +53,7 @@ import {
 import StatusBar from '../components/StatusBar.vue'
 
 const socket = new HocuspocusProviderWebsocket({
-  url: 'ws://127.0.0.1:1234',
+  url: 'ws://192.168.0.7:1234',
 })
 
 const provider = new HocuspocusProvider({

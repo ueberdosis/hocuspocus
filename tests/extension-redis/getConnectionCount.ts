@@ -3,8 +3,8 @@ import { Redis } from '@hocuspocus/extension-redis'
 import { uuidv4 } from 'lib0/random'
 import {
   newHocuspocus, newHocuspocusProvider, redisConnectionSettings,
-} from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+} from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test.skip('adds and removes connections properly', async t => {
   const server = await newHocuspocus({

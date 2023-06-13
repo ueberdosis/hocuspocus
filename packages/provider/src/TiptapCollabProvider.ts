@@ -1,9 +1,9 @@
 import {
   HocuspocusProvider,
   HocuspocusProviderConfiguration,
-} from './HocuspocusProvider'
+} from './HocuspocusProvider.js'
 
-import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket'
+import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &

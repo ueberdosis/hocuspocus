@@ -1,7 +1,7 @@
 import {
   CompleteHocuspocusProviderWebsocketConfiguration,
   HocuspocusProviderWebsocket, HocuspocusProviderWebsocketConfiguration,
-} from './HocuspocusProviderWebsocket'
+} from './HocuspocusProviderWebsocket.js'
 
 export type TiptapCollabProviderWebsocketConfiguration =
   Partial<CompleteHocuspocusProviderWebsocketConfiguration> &

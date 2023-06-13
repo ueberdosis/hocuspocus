@@ -1,7 +1,7 @@
 import test from 'ava'
 import { onChangePayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test('onChange callback receives updates', async t => {
   await new Promise(async resolve => {
@@ -122,4 +122,23 @@ test('onChange callback isn’t called for every new client', async t => {
     tt.is(onChangeCount, 0)
   })
 
+})
+
+test('onChange works propery for changes from direct connections', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      name: 'hocuspocus-test',
+      async onChange(data) {
+        resolve('')
+        t.pass()
+      },
+    })
+
+    const conn = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getConnectionsCount(), 1)
+
+    conn.transact(doc => {
+      doc.getMap('t').set('g', 'b')
+    })
+  })
 })

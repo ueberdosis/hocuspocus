@@ -1,6 +1,6 @@
 import test from 'ava'
-import { retryableAssertion } from '../utils/retryableAssertion'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
 test('returns 0 connections when there’s no one connected', async t => {
   await new Promise(async resolve => {
@@ -44,6 +44,23 @@ test('outputs the total connections', async t => {
             resolve('done')
           },
         })
+      },
+    })
+  })
+})
+
+test('total connections includes direct connections', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ name: 'hocuspocus-test' })
+
+    await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getConnectionsCount(), 1)
+
+    newHocuspocusProvider(server, {
+      onSynced() {
+        t.is(server.getConnectionsCount(), 2)
+
+        resolve('done')
       },
     })
   })

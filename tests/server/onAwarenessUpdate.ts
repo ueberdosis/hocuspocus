@@ -1,6 +1,6 @@
 import test from 'ava'
 import { onAwarenessUpdatePayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider } from '../utils'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
 test('executes the onAwarenessUpdate callback', async t => {
   await new Promise(async resolve => {
