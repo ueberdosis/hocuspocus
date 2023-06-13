@@ -593,7 +593,7 @@ export class Hocuspocus {
   /**
    * Handle update of the given document
    */
-  private async handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
+  private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
     const hookPayload = {
       instance: this,
       clientsCount: document.getConnectionsCount(),
