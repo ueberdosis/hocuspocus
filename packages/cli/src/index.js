@@ -26,17 +26,17 @@ export const cli = meow(`
   flags: {
     port: {
       type: 'string',
-      alias: 'p',
+      shortFlag: 'p',
       default: '1234',
     },
     webhook: {
       type: 'string',
-      alias: 'w',
+      shortFlag: 'w',
       default: '',
     },
     sqlite: {
       type: 'string',
-      alias: 's',
+      shortFlag: 's',
       default: '',
     },
   },
