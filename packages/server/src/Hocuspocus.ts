@@ -404,6 +404,74 @@ export class Hocuspocus {
   }
 
   /**
+   * Handle update of the given document
+   */
+  private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
+    const hookPayload = {
+      instance: this,
+      clientsCount: document.getConnectionsCount(),
+      context: connection?.context || {},
+      document,
+      documentName: document.name,
+      requestHeaders: request?.headers ?? {},
+      requestParameters: getParameters(request),
+      socketId: connection?.socketId ?? '',
+      update,
+    }
+
+    this.hooks('onChange', hookPayload).catch(error => {
+      // TODO: what's the intention of this catch -> throw?
+      throw error
+    })
+
+    // If the update was received through other ways than the
+    // WebSocket connection, we don’t need to feel responsible for
+    // storing the content.
+    if (!connection) {
+      return
+    }
+
+    this.debounce(`onStoreDocument-${document.name}`, () => {
+      this.storeDocumentHooks(document, hookPayload)
+    })
+  }
+
+  timers: Map<string, {
+    timeout: NodeJS.Timeout,
+    start: number
+  }> = new Map()
+
+  /**
+   * debounce the given function, using the given identifier
+   */
+  debounce(id: string, func: Function, immediately = false) {
+    const old = this.timers.get(id)
+    const start = old?.start || Date.now()
+
+    const run = () => {
+      this.timers.delete(id)
+      func()
+    }
+
+    if (old?.timeout) {
+      clearTimeout(old.timeout)
+    }
+
+    if (immediately) {
+      return run()
+    }
+
+    if (Date.now() - start >= this.configuration.maxDebounce) {
+      return run()
+    }
+
+    this.timers.set(id, {
+      start,
+      timeout: setTimeout(run, this.configuration.debounce),
+    })
+  }
+
+  /**
    * Create a new document by the given request
    */
   public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
@@ -474,74 +542,6 @@ export class Hocuspocus {
     })
 
     return document
-  }
-
-  /**
-   * Handle update of the given document
-   */
-  private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
-    const hookPayload = {
-      instance: this,
-      clientsCount: document.getConnectionsCount(),
-      context: connection?.context || {},
-      document,
-      documentName: document.name,
-      requestHeaders: request?.headers ?? {},
-      requestParameters: getParameters(request),
-      socketId: connection?.socketId ?? '',
-      update,
-    }
-
-    this.hooks('onChange', hookPayload).catch(error => {
-      // TODO: what's the intention of this catch -> throw?
-      throw error
-    })
-
-    // If the update was received through other ways than the
-    // WebSocket connection, we don’t need to feel responsible for
-    // storing the content.
-    if (!connection) {
-      return
-    }
-
-    this.debounce(`onStoreDocument-${document.name}`, () => {
-      this.storeDocumentHooks(document, hookPayload)
-    })
-  }
-
-  timers: Map<string, {
-    timeout: NodeJS.Timeout,
-    start: number
-  }> = new Map()
-
-  /**
-   * debounce the given function, using the given identifier
-   */
-  debounce(id: string, func: Function, immediately = false) {
-    const old = this.timers.get(id)
-    const start = old?.start || Date.now()
-
-    const run = () => {
-      this.timers.delete(id)
-      func()
-    }
-
-    if (old?.timeout) {
-      clearTimeout(old.timeout)
-    }
-
-    if (immediately) {
-      return run()
-    }
-
-    if (Date.now() - start >= this.configuration.maxDebounce) {
-      return run()
-    }
-
-    this.timers.set(id, {
-      start,
-      timeout: setTimeout(run, this.configuration.debounce),
-    })
   }
 
   storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
