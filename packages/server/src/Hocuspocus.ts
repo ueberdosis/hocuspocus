@@ -186,47 +186,49 @@ export class Hocuspocus {
       this.handleConnection(incoming, request)
     })
 
-    const server = createServer((request, response) => {
-      this.hooks('onRequest', { request, response, instance: this })
-        .then(() => {
-          // default response if all prior hooks don't interfere
-          response.writeHead(200, { 'Content-Type': 'text/plain' })
-          response.end('OK')
-        })
-        .catch(error => {
-          // if a hook rejects and the error is empty, do nothing
-          // this is only meant to prevent later hooks and the
-          // default handler to do something. if a error is present
-          // just rethrow it
-          if (error) {
-            throw error
-          }
-        })
+    const server = createServer(async (request, response) => {
+      try {
+        await this.hooks('onRequest', { request, response, instance: this })
+
+        // default response if all prior hooks don't interfere
+        response.writeHead(200, { 'Content-Type': 'text/plain' })
+        response.end('OK')
+      } catch (error) {
+        // if a hook rejects and the error is empty, do nothing
+        // this is only meant to prevent later hooks and the
+        // default handler to do something. if a error is present
+        // just rethrow it
+        if (error) {
+          throw error
+        }
+      }
     })
 
-    server.on('upgrade', (request, socket, head) => {
-      this.hooks('onUpgrade', {
-        request,
-        socket,
-        head,
-        instance: this,
-      })
-        .then(() => {
-          // let the default websocket server handle the connection if
-          // prior hooks don't interfere
-          webSocketServer.handleUpgrade(request, socket, head, ws => {
-            webSocketServer.emit('connection', ws, request)
-          })
+    server.on('upgrade', async (request, socket, head) => {
+      try {
+        await this.hooks('onUpgrade', {
+          request,
+          socket,
+          head,
+          instance: this,
         })
-        .catch(error => {
-          // if a hook rejects and the error is empty, do nothing
-          // this is only meant to prevent later hooks and the
-          // default handler to do something. if a error is present
-          // just rethrow it
-          if (error) {
-            throw error
-          }
+
+        // let the default websocket server handle the connection if
+        // prior hooks don't interfere
+        webSocketServer.handleUpgrade(request, socket, head, ws => {
+          webSocketServer.emit('connection', ws, request)
         })
+      } catch (error) {
+        // if a hook rejects and the error is empty, do nothing
+        // this is only meant to prevent later hooks and the
+        // default handler to do something. if a error is present
+        // just rethrow it
+
+        // TODO: why?
+        if (error) {
+          throw error
+        }
+      }
     })
 
     this.httpServer = server
@@ -236,7 +238,7 @@ export class Hocuspocus {
       server.listen({
         port: this.configuration.port,
         host: this.configuration.address,
-      } as ListenOptions, () => {
+      } as ListenOptions, async () => {
         if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
           this.showStartScreen()
         }
@@ -247,9 +249,12 @@ export class Hocuspocus {
           port: this.address.port,
         }
 
-        this.hooks('onListen', onListenPayload)
-          .then(() => resolve(this))
-          .catch(error => reject(error))
+        try {
+          await this.hooks('onListen', onListenPayload)
+          resolve(this)
+        } catch (e) {
+          reject(e)
+        }
       })
     })
   }
@@ -447,81 +452,81 @@ export class Hocuspocus {
     }
 
     // This listener handles authentication messages and queues everything else.
-    const handleQueueingMessage = (data: Uint8Array) => {
+    const handleQueueingMessage = async (data: Uint8Array) => {
       try {
         const tmpMsg = new SocketIncomingMessage(data)
 
         const documentName = decoding.readVarString(tmpMsg.decoder)
         const type = decoding.readVarUint(tmpMsg.decoder)
 
+        if (!(type === MessageType.Auth && !connectionEstablishing[documentName])) {
+          incomingMessageQueue[documentName].push(data)
+          return
+        }
+
         // Okay, we’ve got the authentication message we’re waiting for:
-        if (type === MessageType.Auth && !connectionEstablishing[documentName]) {
-          connectionEstablishing[documentName] = true
+        connectionEstablishing[documentName] = true
 
-          // The 2nd integer contains the submessage type
-          // which will always be authentication when sent from client -> server
-          decoding.readVarUint(tmpMsg.decoder)
-          const token = decoding.readVarString(tmpMsg.decoder)
+        // The 2nd integer contains the submessage type
+        // which will always be authentication when sent from client -> server
+        decoding.readVarUint(tmpMsg.decoder)
+        const token = decoding.readVarString(tmpMsg.decoder)
 
-          this.debugger.log({
-            direction: 'in',
-            type,
-            category: 'Token',
-          })
+        this.debugger.log({
+          direction: 'in',
+          type,
+          category: 'Token',
+        })
 
-          this.hooks('onAuthenticate', {
+        try {
+          await this.hooks('onAuthenticate', {
             token,
             ...hookPayload,
             documentName,
           }, (contextAdditions: any) => {
-            // Hooks are allowed to give us even more context and we’ll merge everything together.
-            // We’ll pass the context to other hooks then.
+          // Hooks are allowed to give us even more context and we’ll merge everything together.
+          // We’ll pass the context to other hooks then.
             context = { ...context, ...contextAdditions }
           })
-            .then(() => {
-              // All `onAuthenticate` hooks passed.
-              connection.isAuthenticated = true
+          // All `onAuthenticate` hooks passed.
+          connection.isAuthenticated = true
 
-              // Let the client know that authentication was successful.
-              const message = new OutgoingMessage(documentName).writeAuthenticated(connection.readOnly)
+          // Let the client know that authentication was successful.
+          const message = new OutgoingMessage(documentName).writeAuthenticated(connection.readOnly)
 
-              this.debugger.log({
-                direction: 'out',
-                type: message.type,
-                category: message.category,
-              })
+          this.debugger.log({
+            direction: 'out',
+            type: message.type,
+            category: message.category,
+          })
 
-              incoming.send(message.toUint8Array())
-            })
-            .then(() => {
-              // Time to actually establish the connection.
-              return setUpNewConnection(documentName)
-            })
-            .catch((error = Forbidden) => {
-              const message = new OutgoingMessage(documentName).writePermissionDenied(error.reason ?? 'permission-denied')
+          incoming.send(message.toUint8Array())
 
-              this.debugger.log({
-                direction: 'out',
-                type: message.type,
-                category: message.category,
-              })
+          // Time to actually establish the connection.
+          await setUpNewConnection(documentName)
+        } catch (err: any) {
+          const error = err || Forbidden
+          const message = new OutgoingMessage(documentName).writePermissionDenied(error.reason ?? 'permission-denied')
 
-              // Ensure that the permission denied message is sent before the
-              // connection is closed
-              incoming.send(message.toUint8Array(), () => {
-                if (Object.keys(documentConnections).length === 0) {
-                  try {
-                    incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
-                  } catch (closeError) {
-                    // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
-                    console.error(closeError)
-                    incoming.close(Forbidden.code, Forbidden.reason)
-                  }
-                }
-              })
-            })
-        } else {
-          incomingMessageQueue[documentName].push(data)
+          this.debugger.log({
+            direction: 'out',
+            type: message.type,
+            category: message.category,
+          })
+
+          // Ensure that the permission denied message is sent before the
+          // connection is closed
+          incoming.send(message.toUint8Array(), () => {
+            if (Object.keys(documentConnections).length === 0) {
+              try {
+                incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+              } catch (closeError) {
+                // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
+                console.error(closeError)
+                incoming.close(Forbidden.code, Forbidden.reason)
+              }
+            }
+          })
         }
 
         // Catch errors due to failed decoding of data
@@ -531,7 +536,7 @@ export class Hocuspocus {
       }
     }
 
-    const messageHandler = (data: Uint8Array) => {
+    const messageHandler = async (data: Uint8Array) => {
       try {
         const tmpMsg = new SocketIncomingMessage(data)
 
@@ -542,42 +547,44 @@ export class Hocuspocus {
           return
         }
 
-        // if this is the first message, trigger onConnect & check if we can start the connection (only if no auth is required)
-        if (incomingMessageQueue[documentName] === undefined) {
+        const isFirst = incomingMessageQueue[documentName] === undefined
+        if (isFirst) {
           incomingMessageQueue[documentName] = []
-
-          this.hooks('onConnect', { ...hookPayload, documentName }, (contextAdditions: any) => {
-            // merge context from all hooks
-            context = { ...context, ...contextAdditions }
-          })
-            .then(() => {
-              // Authentication is required, we’ll need to wait for the Authentication message.
-              if (connection.requiresAuthentication || connectionEstablishing[documentName]) {
-                return
-              }
-              connectionEstablishing[documentName] = true
-
-              return setUpNewConnection(documentName)
-            })
-            .catch((error = Forbidden) => {
-              // if a hook interrupts, close the websocket connection
-              try {
-                incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
-              } catch (closeError) {
-                // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
-                console.error(closeError)
-                incoming.close(Unauthorized.code, Unauthorized.reason)
-              }
-            })
         }
-
         handleQueueingMessage(data)
+
+        if (isFirst) {
+          // if this is the first message, trigger onConnect & check if we can start the connection (only if no auth is required)
+          try {
+            await this.hooks('onConnect', { ...hookPayload, documentName }, (contextAdditions: any) => {
+              // merge context from all hooks
+              context = { ...context, ...contextAdditions }
+            })
+
+            if (connection.requiresAuthentication || connectionEstablishing[documentName]) {
+              // Authentication is required, we’ll need to wait for the Authentication message.
+              return
+            }
+            connectionEstablishing[documentName] = true
+
+            await setUpNewConnection(documentName)
+          } catch (err: any) {
+            // if a hook interrupts, close the websocket connection
+            const error = err || Forbidden
+            try {
+              incoming.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
+            } catch (closeError) {
+              // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
+              console.error(closeError)
+              incoming.close(Unauthorized.code, Unauthorized.reason)
+            }
+          }
+        }
       } catch (closeError) {
         // catch is needed in case an invalid payload crashes the parsing of the Uint8Array
         console.error(closeError)
         incoming.close(Unauthorized.code, Unauthorized.reason)
       }
-
     }
 
     incoming.on('message', messageHandler)
@@ -600,6 +607,7 @@ export class Hocuspocus {
     }
 
     this.hooks('onChange', hookPayload).catch(error => {
+      // TODO: what's the intention of this catch -> throw?
       throw error
     })
 
@@ -738,7 +746,7 @@ export class Hocuspocus {
       this.debugger,
     )
 
-    instance.onClose(document => {
+    instance.onClose(async document => {
       const hookPayload = {
         instance: this,
         clientsCount: document.getConnectionsCount(),
@@ -750,41 +758,40 @@ export class Hocuspocus {
         requestParameters: Hocuspocus.getParameters(request),
       }
 
-      this.hooks('onDisconnect', hookPayload).then(() => {
-        // Check if there are still no connections to the document, as these hooks
-        // may take some time to resolve (e.g. database queries). If a
-        // new connection were to come in during that time it would rely on the
-        // document in the map that we remove now.
-        if (document.getConnectionsCount() > 0) {
-          return
-        }
+      await this.hooks('onDisconnect', hookPayload)
+      // Check if there are still no connections to the document, as these hooks
+      // may take some time to resolve (e.g. database queries). If a
+      // new connection were to come in during that time it would rely on the
+      // document in the map that we remove now.
+      if (document.getConnectionsCount() > 0) {
+        return
+      }
 
-        // If it’s the last connection, we need to make sure to store the
-        // document. Use the debounce helper, to clear running timers,
-        // but make it run immediately (`true`).
-        // Only run this if the document has finished loading earlier (i.e. not to persist the empty
-        // ydoc if the onLoadDocument hook returned an error)
-        if (!document.isLoading) {
-          this.debounce(`onStoreDocument-${document.name}`, () => {
-            this.storeDocumentHooks(document, hookPayload)
-          }, true)
-
-        } else {
+      // If it’s the last connection, we need to make sure to store the
+      // document. Use the debounce helper, to clear running timers,
+      // but make it run immediately (`true`).
+      // Only run this if the document has finished loading earlier (i.e. not to persist the empty
+      // ydoc if the onLoadDocument hook returned an error)
+      if (!document.isLoading) {
+        this.debounce(`onStoreDocument-${document.name}`, () => {
+          this.storeDocumentHooks(document, hookPayload)
+        }, true)
+      } else {
         // Remove document from memory immediately
-          this.documents.delete(document.name)
-          document.destroy()
-        }
-      })
-
+        this.documents.delete(document.name)
+        document.destroy()
+      }
     })
 
-    instance.onStatelessCallback(payload => {
-      return this.hooks('onStateless', payload)
-        .catch(error => {
-          if (error?.message) {
-            throw error
-          }
-        })
+    instance.onStatelessCallback(async payload => {
+      try {
+        return await this.hooks('onStateless', payload)
+      } catch (error: any) {
+        // TODO: weird pattern, what's the use of this?
+        if (error?.message) {
+          throw error
+        }
+      }
     })
 
     instance.beforeHandleMessage((connection, update) => {
