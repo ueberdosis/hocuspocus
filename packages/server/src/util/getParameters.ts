@@ -1,4 +1,5 @@
 import { IncomingMessage } from 'http'
+import { URLSearchParams } from 'url'
 
 /**
    * Get parameters by the given request

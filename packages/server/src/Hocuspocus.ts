@@ -23,7 +23,7 @@ import {
   beforeBroadcastStatelessPayload,
   onDisconnectPayload,
   onListenPayload,
-  onStoreDocumentPayload,
+  onStoreDocumentPayload, onChangePayload,
 } from './types.js'
 import { getParameters } from './util/getParameters'
 
@@ -407,7 +407,7 @@ export class Hocuspocus {
    * Handle update of the given document
    */
   private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
-    const hookPayload = {
+    const hookPayload: onChangePayload | onStoreDocumentPayload = {
       instance: this,
       clientsCount: document.getConnectionsCount(),
       context: connection?.context || {},
