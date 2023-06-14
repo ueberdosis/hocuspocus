@@ -28,22 +28,25 @@ By way of illustration, if a user isn’t allowed to connect: Just throw an erro
 
 ## Summary Table
 
-| Hook                  | Description                               | Link                                             |
-| --------------------- |-------------------------------------------| ------------------------------------------------ |
-| `beforeHandleMessage` | Before handling a message                 | [Read more](/server/hooks#before-handle-message) |
-| `onConnect`           | When a connection is established          | [Read more](/server/hooks#on-connect)            |
-| `connected`           | After a connection has been establied     | [Read more](/server/hooks#connected)             |
-| `onAuthenticate`      | When authentication is required           | [Read more](/server/hooks#on-authenticate)       |
-| `onAwarenessUpdate`   | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)   |
-| `onLoadDocument`      | When a new document is created            | [Read more](/server/hooks#on-load-document)      |
-| `onChange`            | When a document has changed               | [Read more](/server/hooks#on-change)             |
-| `onDisconnect`        | When a connection was closed              | [Read more](/server/hooks#on-disconnect)         |
-| `onListen`            | When the server is intialized             | [Read more](/server/hooks#on-listen)             |
-| `onDestroy`           | When the server will be destroyed         | [Read more](/server/hooks#on-destroy)            |
-| `onConfigure`         | When the server has been configured       | [Read more](/server/hooks#on-configure)          |
-| `onRequest`           | When a HTTP request comes in              | [Read more](/server/hooks#on-request)            |
-| `onStoreDocument`     | When a document has been changed          | [Read more](/server/hooks#on-store-document)     |
-| `onUpgrade`           | When the WebSocket connection is upgraded | [Read more](/server/hooks#on-upgrade)            |
+| Hook                  | Description                               | Link                                                  |
+| --------------------- |-------------------------------------------|-------------------------------------------------------|
+| `beforeHandleMessage` | Before handling a message                 | [Read more](/server/hooks#before-handle-message)      |
+| `onConnect`           | When a connection is established          | [Read more](/server/hooks#on-connect)                 |
+| `connected`           | After a connection has been establied     | [Read more](/server/hooks#connected)                  |
+| `onAuthenticate`      | When authentication is required           | [Read more](/server/hooks#on-authenticate)            |
+| `onAwarenessUpdate`   | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)        |
+| `onLoadDocument`      | When a new document is created            | [Read more](/server/hooks#on-load-document)           |
+| `onChange`            | When a document has changed               | [Read more](/server/hooks#on-change)                  |
+| `onDisconnect`        | When a connection was closed              | [Read more](/server/hooks#on-disconnect)              |
+| `onListen`            | When the server is initialized            | [Read more](/server/hooks#on-listen)                  |
+| `onDestroy`           | When the server will be destroyed         | [Read more](/server/hooks#on-destroy)                 |
+| `onConfigure`         | When the server has been configured       | [Read more](/server/hooks#on-configure)               |
+| `onRequest`           | When a HTTP request comes in              | [Read more](/server/hooks#on-request)                 |
+| `onStoreDocument`     | When a document has been changed          | [Read more](/server/hooks#on-store-document)          |
+| `onUpgrade`           | When the WebSocket connection is upgraded | [Read more](/server/hooks#on-upgrade)                 |
+| `onStateless`              | When the Stateless message is received    | [Read more](/server/hooks#on-stateless)               |
+| `beforeBroadcastStateless` | Before broadcast a stateless message      | [Read more](/server/hooks#before-broadcast-stateless) |
+
 
 ## Usage
 
@@ -742,4 +745,73 @@ const server = Server.configure({
 });
 
 server.listen();
+```
+
+
+### onStateless
+
+The `onStateless` hooks are called after the server has received a stateless message. It should return a Promise.
+
+**Hook payload**
+
+The `data` passed to the `onListen` hook has the following attributes:
+
+```js
+const data = {
+  connection: Connection,
+  documentName: string,
+  document: Document,
+  payload: string,
+}
+```
+
+**Example**
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  async onStateless({ payload, document, connection }) {
+    // Output some information
+    console.log(`Server has received a stateless message "${payload}"!`)
+    // Broadcast a stateless message to all connections based on document
+    document.broadcastStateless('This is a broadcast message.')
+    // Send a stateless message to a specific connection
+    connection.sendStateless('This is a specific message.')
+  },
+})
+
+server.listen()
+```
+
+### beforeBroadcastStateless
+
+The `beforeBroadcastStateless` hooks are called before the server broadcast a stateless message.
+
+**Hook payload**
+
+The `data` passed to the `beforeBroadcastStateless` hook has the following attributes:
+
+```js
+import { Doc } from 'yjs'
+
+const data = {
+  documentName: string,
+  document: Doc,
+  payload: string,
+}
+```
+
+**Example**
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  beforeBroadcastStateless({ payload }) {
+    console.log(`Server will broadcast a stateless message: "${payload}"!`)
+  },
+})
+
+server.listen()
 ```

@@ -152,11 +152,11 @@ const pool = mysql.createPool({
 });
 ```
 
-And then use the [database extension](https://tiptap.dev/hocuspocus/api/extensions/database) to store and retrieve the binary using `pool.query`.
+And then use the [database extension](https://tiptap.dev/hocuspocus/server/extensions#database) to store and retrieve the binary using `pool.query`.
 
 ### Option 1: Additionally storing the data in another format
 
-Use the [webhook extension](https://tiptap.dev/hocuspocus/api/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
+Use the [webhook extension](https://tiptap.dev/hocuspocus/server/extensions#webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
 
 ### Option 2: Retrieve the data on demand using a seperate nodejs daemon (advanced)
 
