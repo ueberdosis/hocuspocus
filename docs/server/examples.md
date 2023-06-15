@@ -104,6 +104,60 @@ app.listen(1234);
 
 IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
 
+## NestJS(Express)
+
+```js
+import { NestFactory } from "@nestjs/core";
+import { WsAdapter } from "@nestjs/platform-ws";
+import { Module } from "@nestjs/common";
+import { OnGatewayConnection, WebSocketGateway } from "@nestjs/websockets";
+import WebSocket from "ws";
+import { IncomingMessage } from "http";
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+
+// Configure Hocuspocus
+const server = Server.configure({
+  // …
+});
+
+// Create gateway
+@WebSocketGateway({ path: '/collaboration/:document' });
+class HocuspocusGateway implements OnGatewayConnection {
+  handleConnection(
+    websocket: WebSocket,
+    request: IncomingMessage,
+  ) {
+    const context = {
+      user: {
+        id: 1234,
+        name: 'Jane',
+      },
+    };
+
+    server.handleConnection(websocket, request, context);
+  }
+}
+
+@Module({
+  exports: [HocuspocusGateway],
+  providers: [HocuspocusGateway],
+})
+class HocuspocusModule {};
+
+// Start the server
+async function bootstrap() {
+  const app = await NestFactory.create(HocuspocusModule);
+
+  app.useWebSocketAdapter(new WsAdapter(app));
+
+  await app.listen(1234);
+}
+bootstrap();
+```
+
+IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
+
 ## Laravel (Draft)
 
 We've created a Laravel package to make integrating Laravel and Hocuspocus seamless.
