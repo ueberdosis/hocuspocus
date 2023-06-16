@@ -1,4 +1,4 @@
-import { IncomingMessage } from 'http'
+import { IncomingHttpHeaders, IncomingMessage } from 'http'
 import {
   Forbidden, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
@@ -9,7 +9,7 @@ import WebSocket from 'ws'
 import Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
 import Document from './Document.js'
-import type { Hocuspocus } from './Hocuspocus.js'
+import { Hocuspocus } from './Hocuspocus.js'
 import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
 import {
@@ -24,7 +24,6 @@ import { getParameters } from './util/getParameters.js'
  * The `ClientConnection` class is responsible for handling an incoming WebSocket
  *
  * TODO-refactor:
- * - untangle code: extract all nested methods to top level handlers
  * - use event handlers instead of calling hooks directly, hooks should probably be called from Hocuspocus.ts
  */
 export class ClientConnection {
@@ -39,9 +38,15 @@ export class ClientConnection {
   private readonly documentConnectionsEstablished = new Set<string>()
 
   // hooks payload by Document
-  // private readonly hookPayloads: Record<string, boolean> = {}
-
-  private hookPayload: any
+  private readonly hookPayloads: Record<string, {
+    instance: Hocuspocus,
+    request: IncomingMessage,
+    requestHeaders: IncomingHttpHeaders,
+    requestParameters: URLSearchParams,
+    socketId: string,
+    connection: ConnectionConfiguration,
+    context: any,
+  }> = {}
 
   private readonly callbacks = {
     onClose: [(document: Document, payload: onDisconnectPayload) => {}],
@@ -49,8 +54,11 @@ export class ClientConnection {
 
   private readonly closeIdleConnectionTimeout: NodeJS.Timeout
 
+  // Every new connection gets a unique identifier.
+  private readonly socketId = uuid()
+
   /**
-    * The `handleConnection` method receives incoming WebSocket connections,
+    * The `ClientConnection` class receives incoming WebSocket connections,
     * runs all hooks:
     *
     *  - onConnect for all connections
@@ -61,7 +69,7 @@ export class ClientConnection {
     */
   constructor(
     private readonly websocket: WebSocket,
-    request: IncomingMessage,
+    private readonly request: IncomingMessage,
     private readonly documentProvider: {
         createDocument: Hocuspocus['createDocument'],
     },
@@ -77,30 +85,6 @@ export class ClientConnection {
     this.closeIdleConnectionTimeout = setTimeout(() => {
       websocket.close(Unauthorized.code, Unauthorized.reason)
     }, opts.timeout)
-
-    // Every new connection gets a unique identifier.
-    const socketId = uuid()
-
-    // To override settings for specific connections, we’ll
-    // keep track of a few things in the `ConnectionConfiguration`.
-    const connection: ConnectionConfiguration = {
-      readOnly: false,
-      requiresAuthentication: opts.requiresAuthentication,
-      isAuthenticated: false,
-    }
-
-    // The `onConnect` and `onAuthenticate` hooks need some context
-    // to decide who’s connecting, so let’s put it together:
-    // TODO, keeping one instance of hookPayload causes issues like https://github.com/ueberdosis/hocuspocus/pull/613
-    this.hookPayload = {
-      instance: documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
-      request,
-      requestHeaders: request.headers,
-      requestParameters: getParameters(request),
-      socketId,
-      connection,
-      context: null,
-    }
 
     websocket.on('message', this.messageHandler)
   }
@@ -118,31 +102,32 @@ export class ClientConnection {
    * Create a new connection by the given request and document
    */
   private createConnection(connection: WebSocket, document: Document): Connection {
+    const hookPayload = this.hookPayloads[document.name]
     const instance = new Connection(
       connection,
-      this.hookPayload.request,
+      hookPayload.request,
       document,
       this.opts.timeout,
-      this.hookPayload.socketId,
-      this.hookPayload.context,
-      this.hookPayload.connection.readOnly,
+      hookPayload.socketId,
+      hookPayload.context,
+      hookPayload.connection.readOnly,
       this.debuggerTool,
     )
 
     instance.onClose(async (document, event) => {
-      const hookPayload = {
+      const disconnectHookPayload: onDisconnectPayload = {
         instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
         clientsCount: document.getConnectionsCount(),
-        context: this.hookPayload.context,
+        context: hookPayload.context,
         document,
-        socketId: this.hookPayload.socketId,
+        socketId: hookPayload.socketId,
         documentName: document.name,
-        requestHeaders: this.hookPayload.request.headers,
-        requestParameters: getParameters(this.hookPayload.request),
+        requestHeaders: hookPayload.request.headers,
+        requestParameters: getParameters(hookPayload.request),
       }
 
       await this.hooks('onDisconnect', hookPayload)
-      this.callbacks.onClose.forEach((callback => callback(document, hookPayload)))
+      this.callbacks.onClose.forEach((callback => callback(document, disconnectHookPayload)))
     })
 
     instance.onStatelessCallback(async payload => {
@@ -157,20 +142,20 @@ export class ClientConnection {
     })
 
     instance.beforeHandleMessage((connection, update) => {
-      const hookPayload: beforeHandleMessagePayload = {
+      const beforeHandleMessagePayload: beforeHandleMessagePayload = {
         instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
         clientsCount: document.getConnectionsCount(),
-        context: this.hookPayload.context,
+        context: hookPayload.context,
         document,
-        socketId: this.hookPayload.socketId,
+        socketId: hookPayload.socketId,
         connection,
         documentName: document.name,
-        requestHeaders: this.hookPayload.request.headers,
-        requestParameters: getParameters(this.hookPayload.request),
+        requestHeaders: hookPayload.request.headers,
+        requestParameters: getParameters(hookPayload.request),
         update,
       }
 
-      return this.hooks('beforeHandleMessage', hookPayload)
+      return this.hooks('beforeHandleMessage', beforeHandleMessagePayload)
     })
 
     // If the WebSocket has already disconnected (wow, that was fast) – then
@@ -190,11 +175,13 @@ export class ClientConnection {
     // Not an idle connection anymore, no need to close it then.
     clearTimeout(this.closeIdleConnectionTimeout)
 
+    const hookPayload = this.hookPayloads[documentName]
     // If no hook interrupts, create a document and connection
-    const document = await this.documentProvider.createDocument(documentName, this.hookPayload.request, this.hookPayload.socketId, this.hookPayload.connection, this.hookPayload.context)
+    const document = await this.documentProvider.createDocument(documentName, hookPayload.request, hookPayload.socketId, hookPayload.connection, hookPayload.context)
     const instance = this.createConnection(this.websocket, document)
 
     instance.onClose((document, event) => {
+      delete this.hookPayloads[documentName]
       delete this.documentConnections[documentName]
       delete this.incomingMessageQueue[documentName]
       this.documentConnectionsEstablished.delete(documentName)
@@ -213,9 +200,9 @@ export class ClientConnection {
     })
 
     this.hooks('connected', {
-      ...this.hookPayload,
+      ...hookPayload,
       documentName,
-      context: this.hookPayload.context,
+      context: hookPayload.context,
       connectionInstance: instance,
     })
   }
@@ -248,20 +235,21 @@ export class ClientConnection {
       })
 
       try {
+        const hookPayload = this.hookPayloads[documentName]
         await this.hooks('onAuthenticate', {
           token,
-          ...this.hookPayload,
+          ...hookPayload,
           documentName,
         }, (contextAdditions: any) => {
           // Hooks are allowed to give us even more context and we’ll merge everything together.
           // We’ll pass the context to other hooks then.
-          this.hookPayload.context = { ...this.hookPayload.context, ...contextAdditions }
+          hookPayload.context = { ...hookPayload.context, ...contextAdditions }
         })
         // All `onAuthenticate` hooks passed.
-        this.hookPayload.connection.isAuthenticated = true
+        hookPayload.connection.isAuthenticated = true
 
         // Let the client know that authentication was successful.
-        const message = new OutgoingMessage(documentName).writeAuthenticated(this.hookPayload.connection.readOnly)
+        const message = new OutgoingMessage(documentName).writeAuthenticated(hookPayload.connection.readOnly)
 
         this.debuggerTool.log({
           direction: 'out',
@@ -319,18 +307,38 @@ export class ClientConnection {
       const isFirst = this.incomingMessageQueue[documentName] === undefined
       if (isFirst) {
         this.incomingMessageQueue[documentName] = []
+        if (this.hookPayloads[documentName]) {
+          throw new Error('first message, but hookPayloads exists')
+        }
+
+        const hookPayload = {
+          instance: this.documentProvider as Hocuspocus,
+          request: this.request,
+          connection: {
+            readOnly: false,
+            requiresAuthentication: this.opts.requiresAuthentication,
+            isAuthenticated: false,
+          },
+          requestHeaders: this.request.headers,
+          requestParameters: getParameters(this.request),
+          socketId: this.socketId,
+          context: {},
+        }
+
+        this.hookPayloads[documentName] = hookPayload
       }
       this.handleQueueingMessage(data)
 
       if (isFirst) {
+        const hookPayload = this.hookPayloads[documentName]
         // if this is the first message, trigger onConnect & check if we can start the connection (only if no auth is required)
         try {
-          await this.hooks('onConnect', { ...this.hookPayload, documentName }, (contextAdditions: any) => {
+          await this.hooks('onConnect', { ...hookPayload, documentName }, (contextAdditions: any) => {
             // merge context from all hooks
-            this.hookPayload.context = { ...this.hookPayload.context, ...contextAdditions }
+            hookPayload.context = { ...hookPayload.context, ...contextAdditions }
           })
 
-          if (this.hookPayload.connection.requiresAuthentication || this.documentConnectionsEstablished.has(documentName)) {
+          if (hookPayload.connection.requiresAuthentication || this.documentConnectionsEstablished.has(documentName)) {
             // Authentication is required, we’ll need to wait for the Authentication message.
             return
           }

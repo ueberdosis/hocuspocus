@@ -1,7 +1,7 @@
+import { Logger } from '@hocuspocus/extension-logger'
+import { Server } from '@hocuspocus/server'
 import express from 'express'
 import expressWebsockets from 'express-ws'
-import { Server } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/extension-logger'
 
 const server = Server.configure({
   extensions: [
@@ -16,8 +16,7 @@ app.get('/', (request, response) => {
 })
 
 app.ws('/:documentName', (websocket, request: any) => {
-  const context = { user_id: 1234 }
-  server.handleConnection(websocket, request, context)
+  server.handleConnection(websocket, request)
 })
 
 app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234…'))
