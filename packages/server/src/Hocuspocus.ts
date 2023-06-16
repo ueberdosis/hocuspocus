@@ -21,9 +21,10 @@ import {
   HookName,
   HookPayload,
   beforeBroadcastStatelessPayload,
+  onChangePayload,
   onDisconnectPayload,
   onListenPayload,
-  onStoreDocumentPayload, onChangePayload,
+  onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters'
 
@@ -372,8 +373,8 @@ export class Hocuspocus {
    * … and if nothings fails it’ll fully establish the connection and
    * load the Document then.
    */
-  handleConnection(incoming: WebSocket, request: IncomingMessage, context: any = null): void {
-    const clientConnection = new ClientConnection(incoming, request, context, this, this.hooks.bind(this), this.debugger, {
+  handleConnection(incoming: WebSocket, request: IncomingMessage): void {
+    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
       requiresAuthentication: this.requiresAuthentication,
       timeout: this.configuration.timeout,
     })

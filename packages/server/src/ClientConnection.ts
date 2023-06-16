@@ -62,7 +62,6 @@ export class ClientConnection {
   constructor(
     private readonly websocket: WebSocket,
     request: IncomingMessage,
-    context: any = null,
     private readonly documentProvider: {
         createDocument: Hocuspocus['createDocument'],
     },
