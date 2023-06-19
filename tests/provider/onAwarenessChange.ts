@@ -94,6 +94,16 @@ test('gets the current awareness states from the server', async t => {
             direction: 'out',
             type: 'Awareness',
           },
+          {
+            category: 'Update',
+            direction: 'in',
+            type: 'Awareness',
+          },
+          {
+            category: 'SyncStep2',
+            direction: 'in',
+            type: 'Sync',
+          },
         ])
 
         resolve('done')

@@ -158,6 +158,9 @@ export class MessageReceiver {
         })
 
         if (connection?.readOnly) {
+          // We're in read-only mode, so we can't apply the update.
+          // Let's use snapshotContainsUpdate to see if the update actually contains changes.
+          // If not, we can still ack the update
           const snapshot = Y.snapshot(document)
           const update = decoding.readVarUint8Array(message.decoder)
           if (Y.snapshotContainsUpdate(snapshot, update)) {
@@ -178,11 +181,14 @@ export class MessageReceiver {
 
         readSyncStep2(message.decoder, document, connection)
 
-        connection!.send(new OutgoingMessage(document.name)
-          .writeSyncStatus(true).toUint8Array())
+        if (connection) {
+          // TODO: how should this work if connection is not set? should we use reply?
+          // reply is used by redis, but I'm unsure how that code path works
+          connection.send(new OutgoingMessage(document.name)
+            .writeSyncStatus(true).toUint8Array())
+        }
         break
       case messageYjsUpdate:
-        console.log('read update')
         this.logger.log({
           direction: 'in',
           type: MessageType.Sync,
@@ -190,14 +196,18 @@ export class MessageReceiver {
         })
 
         if (connection?.readOnly) {
-          connection!.send(new OutgoingMessage(document.name)
+          connection.send(new OutgoingMessage(document.name)
             .writeSyncStatus(false).toUint8Array())
           break
         }
 
         readUpdate(message.decoder, document, connection)
-        connection!.send(new OutgoingMessage(document.name)
-          .writeSyncStatus(true).toUint8Array())
+        if (connection) {
+          // TODO: how should this work if connection is not set? should we use reply?
+          // reply is used by redis, but I'm unsure how that code path works
+          connection.send(new OutgoingMessage(document.name)
+            .writeSyncStatus(true).toUint8Array())
+        }
         break
       default:
         throw new Error(`Received a message with an unknown type: ${type}`)
