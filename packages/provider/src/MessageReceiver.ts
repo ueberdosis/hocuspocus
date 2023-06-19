@@ -1,11 +1,11 @@
-import * as awarenessProtocol from 'y-protocols/awareness'
-import { readSyncMessage, messageYjsSyncStep2, messageYjsUpdate } from 'y-protocols/sync'
 import { readAuthMessage } from '@hocuspocus/common'
-import { readVarString } from 'lib0/decoding'
-import { MessageType } from './types.js'
+import { readVarInt, readVarString } from 'lib0/decoding'
+import * as awarenessProtocol from 'y-protocols/awareness'
+import { readSyncMessage } from 'y-protocols/sync'
 import { HocuspocusProvider } from './HocuspocusProvider.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
+import { MessageType } from './types.js'
 
 export class MessageReceiver {
 
@@ -23,7 +23,7 @@ export class MessageReceiver {
     return this
   }
 
-  public apply(provider: HocuspocusProvider, emitSynced = true) {
+  public apply(provider: HocuspocusProvider) {
     const { message } = this
     const type = message.readVarUint()
 
@@ -31,7 +31,7 @@ export class MessageReceiver {
 
     switch (type) {
       case MessageType.Sync:
-        this.applySyncMessage(provider, emitSynced)
+        this.applySyncMessage(provider)
         break
 
       case MessageType.Awareness:
@@ -50,6 +50,9 @@ export class MessageReceiver {
         provider.receiveStateless(readVarString(message.decoder))
         break
 
+      case MessageType.SyncStatus:
+        this.applySyncStatusMessage(provider, readVarInt(message.decoder) === 1)
+        break
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }
@@ -68,28 +71,23 @@ export class MessageReceiver {
     }
   }
 
-  private applySyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
+  private applySyncMessage(provider: HocuspocusProvider) {
     const { message } = this
 
     message.writeVarUint(MessageType.Sync)
 
     // Apply update
-    const syncMessageType = readSyncMessage(
+    readSyncMessage(
       message.decoder,
       message.encoder,
       provider.document,
       provider,
     )
+  }
 
-    // Synced once we receive Step2
-    if (emitSynced && syncMessageType === messageYjsSyncStep2) {
-      provider.synced = true
-    }
-
-    if (syncMessageType === messageYjsUpdate || syncMessageType === messageYjsSyncStep2) {
-      if (provider.unsyncedChanges > 0) {
-        provider.updateUnsyncedChanges(-1)
-      }
+  applySyncStatusMessage(provider: HocuspocusProvider, applied: boolean) {
+    if (applied) {
+      provider.decrementUnsyncedChanges()
     }
   }
 

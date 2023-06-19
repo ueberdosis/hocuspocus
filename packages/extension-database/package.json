@@ -30,7 +30,7 @@
     "@hocuspocus/server": "^2.2.0"
   },
   "peerDependencies": {
-    "yjs": "^13.5.29"
+    "yjs": "^13.6.4"
   },
   "publishConfig": {
     "access": "public"

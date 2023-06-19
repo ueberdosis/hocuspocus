@@ -1,18 +1,19 @@
-import * as time from 'lib0/time'
-import * as mutex from 'lib0/mutex'
-import * as url from 'lib0/url'
-import type { MessageEvent } from 'ws'
-import { retry } from '@lifeomic/attempt'
 import {
   Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
+import { retry } from '@lifeomic/attempt'
+import * as mutex from 'lib0/mutex'
+import * as time from 'lib0/time'
+import * as url from 'lib0/url'
+import type { MessageEvent } from 'ws'
 import { Event } from 'ws'
 import EventEmitter from './EventEmitter.js'
-import {
-  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters, WebSocketStatus,
-  onAwarenessChangeParameters, onAwarenessUpdateParameters,
-} from './types.js'
 import { HocuspocusProvider } from './HocuspocusProvider.js'
+import {
+  WebSocketStatus,
+  onAwarenessChangeParameters, onAwarenessUpdateParameters,
+  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters,
+} from './types.js'
 
 export type HocuspocusProviderWebsocketConfiguration =
   Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, 'url'>>
@@ -91,6 +92,8 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 }
 
 export class HocuspocusProviderWebsocket extends EventEmitter {
+  private messageQueue: any[] = []
+
   public configuration: CompleteHocuspocusProviderWebsocketConfiguration = {
     url: '',
     // @ts-ignore
@@ -285,6 +288,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   createWebSocketConnection() {
     return new Promise((resolve, reject) => {
       if (this.webSocket) {
+        this.messageQueue = []
         this.webSocket.close()
         this.webSocket = null
       }
@@ -324,6 +328,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       this.status = WebSocketStatus.Connected
       this.emit('status', { status: WebSocketStatus.Connected })
       this.emit('connect')
+      this.messageQueue.forEach(message => this.send(message))
+      this.messageQueue = []
     }
   }
 
@@ -355,6 +361,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     // No message received in a long time, not even your own
     // Awareness updates, which are updated every 15 seconds.
     this.webSocket?.close()
+    this.messageQueue = []
   }
 
   registerEventListeners() {
@@ -389,6 +396,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
     try {
       this.webSocket.close()
+      this.messageQueue = []
     } catch {
       //
     }
@@ -397,6 +405,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   send(message: any) {
     if (this.webSocket?.readyState === WsReadyStates.Open) {
       this.webSocket.send(message)
+    } else {
+      this.messageQueue.push(message)
     }
   }
 

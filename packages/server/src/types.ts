@@ -3,9 +3,9 @@ import {
 } from 'http'
 import { URLSearchParams } from 'url'
 import { Awareness } from 'y-protocols/awareness'
+import Connection from './Connection.js'
 import Document from './Document.js'
 import { Hocuspocus } from './Hocuspocus.js'
-import Connection from './Connection.js'
 
 export enum MessageType {
   Unknown = -1,
@@ -16,8 +16,8 @@ export enum MessageType {
   SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
   Stateless = 5,
   BroadcastStateless = 6,
-
   CLOSE = 7,
+  SyncStatus = 8, // TODO: should this be 8?
 }
 
 export interface AwarenessUpdate {

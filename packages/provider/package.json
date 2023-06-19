@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.29"
+    "yjs": "^13.6.4"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }

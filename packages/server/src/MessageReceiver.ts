@@ -1,3 +1,6 @@
+import * as decoding from 'lib0/decoding'
+import { readVarString } from 'lib0/decoding'
+import { applyAwarenessUpdate } from 'y-protocols/awareness'
 import {
   messageYjsSyncStep1,
   messageYjsSyncStep2,
@@ -6,14 +9,13 @@ import {
   readSyncStep2,
   readUpdate,
 } from 'y-protocols/sync'
-import { applyAwarenessUpdate } from 'y-protocols/awareness'
-import { readVarString } from 'lib0/decoding'
-import { MessageType } from './types.js'
+import * as Y from 'yjs'
 import Connection from './Connection.js'
-import { IncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
 import { Debugger } from './Debugger.js'
 import Document from './Document.js'
+import { IncomingMessage } from './IncomingMessage.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
+import { MessageType } from './types.js'
 
 export class MessageReceiver {
 
@@ -156,12 +158,31 @@ export class MessageReceiver {
         })
 
         if (connection?.readOnly) {
+          const snapshot = Y.snapshot(document)
+          const update = decoding.readVarUint8Array(message.decoder)
+          if (Y.snapshotContainsUpdate(snapshot, update)) {
+            // no new changes in update
+            const ackMessage = new OutgoingMessage(document.name)
+              .writeSyncStatus(true)
+
+            connection.send(ackMessage.toUint8Array())
+          } else {
+            // new changes in update that we can't apply, because readOnly
+            const ackMessage = new OutgoingMessage(document.name)
+              .writeSyncStatus(false)
+
+            connection.send(ackMessage.toUint8Array())
+          }
           break
         }
 
         readSyncStep2(message.decoder, document, connection)
+
+        connection!.send(new OutgoingMessage(document.name)
+          .writeSyncStatus(true).toUint8Array())
         break
       case messageYjsUpdate:
+        console.log('read update')
         this.logger.log({
           direction: 'in',
           type: MessageType.Sync,
@@ -169,10 +190,14 @@ export class MessageReceiver {
         })
 
         if (connection?.readOnly) {
+          connection!.send(new OutgoingMessage(document.name)
+            .writeSyncStatus(false).toUint8Array())
           break
         }
 
         readUpdate(message.decoder, document, connection)
+        connection!.send(new OutgoingMessage(document.name)
+          .writeSyncStatus(true).toUint8Array())
         break
       default:
         throw new Error(`Received a message with an unknown type: ${type}`)
