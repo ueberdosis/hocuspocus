@@ -219,7 +219,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
   detach(provider: HocuspocusProvider) {
     // tell the server to remove the listener
-
+    this.destroy()
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {}): void {
