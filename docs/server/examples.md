@@ -2,7 +2,7 @@
 tableOfContents: true
 ---
 
-# Examples
+# Examples (Running Hocuspocus)
 
 ## Command-line interface (CLI)
 
@@ -211,3 +211,19 @@ Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
 ```
 
 That's it!
+
+# Editing a document locally
+
+If you want to edit a document directly on the server (while keeping hooks and syncing running), the easiest way is to use Hocuspocus' `getDirectConnection` method.
+
+```typescript
+const server = new Hocuspocus();
+
+const docConnection = await server.openDirectConnection('my-document', {})
+
+await docConnection.transact((doc) => {
+  doc.getMap('test').set('a', 'b');
+});
+
+docConnection.disconnect()
+```
