@@ -337,3 +337,8 @@ export interface onConfigurePayload {
   configuration: Configuration,
   version: string,
 }
+
+export interface DirectConnection {
+  transact(transaction: (document: Document) => void): Promise<void>,
+  disconnect(): void
+}
