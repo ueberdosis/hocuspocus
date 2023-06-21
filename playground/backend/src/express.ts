@@ -1,7 +1,7 @@
+import { Logger } from '@hocuspocus/extension-logger'
+import { Server } from '@hocuspocus/server'
 import express from 'express'
 import expressWebsockets from 'express-ws'
-import { Server } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/extension-logger'
 
 const server = Server.configure({
   extensions: [

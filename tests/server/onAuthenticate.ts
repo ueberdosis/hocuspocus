@@ -319,5 +319,48 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
     tt.is(server.getDocumentsCount(), 1)
     tt.is(server.getConnectionsCount(), 1)
   })
+})
 
+test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', async t => {
+
+  const server = await newHocuspocus({
+    async onAuthenticate({ token, documentName, connection }: onAuthenticatePayload) {
+      if (token === 'readonly') {
+        connection.readOnly = true
+      }
+    },
+  })
+
+  const socket = newHocuspocusProviderWebsocket(server)
+
+  const providerReadOnly = newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    token: 'readonly',
+    name: 'doc1',
+    onAuthenticationFailed() {
+      t.fail()
+    },
+  })
+
+  const providerOK = newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    token: 'read+write',
+    name: 'doc2',
+    onAuthenticationFailed() {
+      t.fail()
+    },
+  })
+
+  await retryableAssertion(t, tt => {
+    tt.is(providerOK.status, WebSocketStatus.Connected)
+    tt.is(providerReadOnly.status, WebSocketStatus.Connected)
+    tt.is(server.getDocumentsCount(), 2)
+    tt.is(server.getConnectionsCount(), 2)
+    tt.is(socket.status, WebSocketStatus.Connected)
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  t.is(server.documents.get('doc1')!.connections.values().next().value.connection.readOnly, true)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  t.is(server.documents.get('doc2')!.connections.values().next().value.connection.readOnly, false)
 })
