@@ -293,6 +293,12 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
   }
 
+  /**
+   * Indicates whether a first handshake with the server has been established
+   *
+   * Note: this does not mean all updates from the client have been persisted to the backend. For this,
+   * use `hasUnsyncedChanges`.
+   */
   get synced(): boolean {
     return this.isSynced
   }
@@ -390,7 +396,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('message', { event, message: new IncomingMessage(event.data) })
 
-    new MessageReceiver(message).apply(this)
+    new MessageReceiver(message).apply(this, true)
   }
 
   onClose(event: CloseEvent) {
@@ -462,7 +468,7 @@ export class HocuspocusProvider extends EventEmitter {
 
       new MessageReceiver(message)
         .setBroadcasted(true)
-        .apply(this)
+        .apply(this, false)
     })
   }
 

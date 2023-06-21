@@ -1,7 +1,7 @@
 import { readAuthMessage } from '@hocuspocus/common'
 import { readVarInt, readVarString } from 'lib0/decoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
-import { readSyncMessage } from 'y-protocols/sync'
+import { messageYjsSyncStep2, readSyncMessage } from 'y-protocols/sync'
 import { HocuspocusProvider } from './HocuspocusProvider.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
@@ -23,7 +23,7 @@ export class MessageReceiver {
     return this
   }
 
-  public apply(provider: HocuspocusProvider) {
+  public apply(provider: HocuspocusProvider, emitSynced: boolean) {
     const { message } = this
     const type = message.readVarUint()
 
@@ -31,7 +31,7 @@ export class MessageReceiver {
 
     switch (type) {
       case MessageType.Sync:
-        this.applySyncMessage(provider)
+        this.applySyncMessage(provider, emitSynced)
         break
 
       case MessageType.Awareness:
@@ -71,18 +71,23 @@ export class MessageReceiver {
     }
   }
 
-  private applySyncMessage(provider: HocuspocusProvider) {
+  private applySyncMessage(provider: HocuspocusProvider, emitSynced: boolean) {
     const { message } = this
 
     message.writeVarUint(MessageType.Sync)
 
     // Apply update
-    readSyncMessage(
+    const syncMessageType = readSyncMessage(
       message.decoder,
       message.encoder,
       provider.document,
       provider,
     )
+
+    // Synced once we receive Step2
+    if (emitSynced && syncMessageType === messageYjsSyncStep2) {
+      provider.synced = true
+    }
   }
 
   applySyncStatusMessage(provider: HocuspocusProvider, applied: boolean) {
