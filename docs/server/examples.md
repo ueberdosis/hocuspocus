@@ -2,9 +2,11 @@
 tableOfContents: true
 ---
 
-# Examples (Running Hocuspocus)
+# Examples
 
-## Command-line interface (CLI)
+## Running Hocuspocus
+
+### Command-line interface (CLI)
 
 Sometimes, you just want to spin up a local Hocuspocus instance really fast. Maybe just to give it a try, or to test your webhooks locally. Our CLI brings Hocuspocus to your command line in seconds.
 
@@ -17,7 +19,7 @@ npx @hocuspocus/cli --webhook http://localhost/webhooks/hocuspocus
 npx @hocuspocus/cli --sqlite
 ```
 
-## Express
+### Express
 
 Hocuspocus can be used with any WebSocket implementation that uses `ws` under the hood. When you don't call `listen()` on Hocuspocus, it will not start a WebSocket server itself but rather relies on you calling it's [`handleConnection()` method](/server/methods) manually.
 
@@ -62,7 +64,7 @@ app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
 
 IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
 
-## Koa
+### Koa
 
 ```js
 import Koa from "koa";
@@ -104,20 +106,18 @@ app.listen(1234);
 
 IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
 
-## Laravel (Draft)
+### PHP / Laravel (Draft)
 
 We've created a Laravel package to make integrating Laravel and Hocuspocus seamless.
 
 You can find details about it here: [ueberdosis/hocuspocus-laravel](https://github.com/ueberdosis/hocuspocus-laravel)
 
 
-## Custom integration
-
 The primary storage for Hocuspocus must be as a Y.Doc Uint8Array binary. At the moment, there are no compatible PHP libraries to read the YJS format therefore we have two options to access the data: save the data in a Laravel compatible format such as JSON _in addition_ to the primary storage, or create a separate nodejs server with an API to read the primary storage, parse the YJS format and return it to Laravel.
 
 _Note: Do not be tempted to store the Y.Doc as JSON and recreate it as YJS binary when the user connects. This will cause issues with merging of updates and content will duplicate on new connections. The data must be stored as binary to make use of the YJS format._
 
-### Saving the data in primary storage
+#### Saving the data in primary storage
 
 Use Laravels migration system to create a table to store the YJS binaries:
 ```
@@ -154,11 +154,11 @@ const pool = mysql.createPool({
 
 And then use the [database extension](https://tiptap.dev/hocuspocus/server/extensions#database) to store and retrieve the binary using `pool.query`.
 
-### Option 1: Additionally storing the data in another format
+##### Option 1: Additionally storing the data in another format
 
 Use the [webhook extension](https://tiptap.dev/hocuspocus/server/extensions#webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
 
-### Option 2: Retrieve the data on demand using a seperate nodejs daemon (advanced)
+##### Option 2: Retrieve the data on demand using a seperate nodejs daemon (advanced)
 
 Create a nodejs server using the http module:
 ```
@@ -169,7 +169,7 @@ const server = http.createServer(
 
 Use the dotenv package as above to retrieve the mysql login details and perform the mysql request. You can then use the YJS library to parse the binary data (`Y.applyUpdate(doc, row.data)`). You are free to format it in whatever way is needed and then return it to Laravel.
 
-### Auth integration
+#### Auth integration
 
 You can use the webhook extension for auth - rejecting the `onConnect` request will cause the Hocuspocus server to disconnect - however for security critical applications it is better to use a custom `onAuthenicate` hook as an attacker may be able to retrieve some data from the Hocuspocus server before The `onConnect` hooks are rejected.
 
@@ -212,7 +212,7 @@ Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
 
 That's it!
 
-# Editing a document locally
+## Editing a document locally
 
 If you want to edit a document directly on the server (while keeping hooks and syncing running), the easiest way is to use Hocuspocus' `getDirectConnection` method.
 
