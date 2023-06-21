@@ -11,6 +11,11 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 ## Documentation
 The full documentation is a available on [hocuspocus.dev/introduction](https://www.hocuspocus.dev/introduction).
 
+## Cloud Hosting
+
+You want to use Hocuspocus, but don't want to care about hosting? Check our [Cloud Offering: Tiptap Collab](https://tiptap.dev/collab)
+
+
 ## Feedback
 Send all your questions, feedback and bug reports to [humans@tiptap.dev](mailto:humans@tiptap.dev) or [create an issue](https://github.com/ueberdosis/hocuspocus/issues/new/choose) here.
 
@@ -105,7 +110,7 @@ Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a
 Please see [CONTRIBUTING](docs/contributing.md) for details.
 
 ## Contributors
-[kris](https://github.com/kriskbx) (who wrote the initial version), [Tom Moor](https://github.com/tommoor) and [many more](../../contributors).
+[kris](https://github.com/kriskbx) (who wrote the initial version), [Tom Moor](https://github.com/tommoor), [YousefED (@TypeCellOS)](https://github.com/YousefED) and [many more](../../contributors).
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
