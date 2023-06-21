@@ -373,11 +373,11 @@ export class Hocuspocus {
    * … and if nothings fails it’ll fully establish the connection and
    * load the Document then.
    */
-  handleConnection(incoming: WebSocket, request: IncomingMessage): void {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
     const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
       requiresAuthentication: this.requiresAuthentication,
       timeout: this.configuration.timeout,
-    })
+    }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
       // Check if there are still no connections to the document, as these hooks
       // may take some time to resolve (e.g. database queries). If a

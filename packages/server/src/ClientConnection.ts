@@ -80,6 +80,7 @@ export class ClientConnection {
         requiresAuthentication: boolean,
         timeout: number,
     },
+    private readonly defaultContext: any = {},
   ) {
     // Make sure to close an idle connection after a while.
     this.closeIdleConnectionTimeout = setTimeout(() => {
@@ -322,7 +323,9 @@ export class ClientConnection {
           requestHeaders: this.request.headers,
           requestParameters: getParameters(this.request),
           socketId: this.socketId,
-          context: {},
+          context: {
+            ...this.defaultContext,
+          },
         }
 
         this.hookPayloads[documentName] = hookPayload

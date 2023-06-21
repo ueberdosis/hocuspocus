@@ -16,7 +16,8 @@ app.get('/', (request, response) => {
 })
 
 app.ws('/:documentName', (websocket, request: any) => {
-  server.handleConnection(websocket, request)
+  const context = { user_id: 1234 }
+  server.handleConnection(websocket, request, context)
 })
 
 app.listen(1234, () => console.log('Listening on http://127.0.0.1:1234…'))
