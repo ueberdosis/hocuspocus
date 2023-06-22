@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/ueberdosis/hocuspocus/compare/v2.1.0...v2.2.0) (2023-06-22)
+
+
+### Bug Fixes
+
+* docs/contributing.md ([#621](https://github.com/ueberdosis/hocuspocus/issues/621)) ([8dbe872](https://github.com/ueberdosis/hocuspocus/commit/8dbe872d2eb6a68361b4257728bf222ad60fa516))
+
+
+
+
+
 # [2.1.0](https://github.com/ueberdosis/hocuspocus/compare/v2.0.6...v2.1.0) (2023-06-03)
 
 
