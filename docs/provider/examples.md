@@ -235,7 +235,7 @@ Learn more: https://github.com/BitPhinix/slate-yjs
 
 ## Multiplexing
 
-In order to use multiplexing with TiptapCollab or Hocuspocus, you'll need to create the socket and the provider separately.
+In order to use multiplexing (i.e. opening multiple documents over the same websocket connection) with TiptapCollab or Hocuspocus, you'll need to create the socket and the provider separately.
 The example below will show how it works with TiptapCollab, but you can just replace `TiptapCollabProviderWebsocket` with `HocuspocusProviderWebsocket` and `TiptapCollabProvider` with `HocuspocusProvider` for use with Hocuspocus.
 
 Note that the authentication has to be taken care of per document, thus `token` is part of the Provider, not the ProviderWebsocket.
