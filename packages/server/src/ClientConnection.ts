@@ -127,7 +127,7 @@ export class ClientConnection {
         requestParameters: getParameters(hookPayload.request),
       }
 
-      await this.hooks('onDisconnect', hookPayload)
+      await this.hooks('onDisconnect', disconnectHookPayload)
       this.callbacks.onClose.forEach((callback => callback(document, disconnectHookPayload)))
     })
 
