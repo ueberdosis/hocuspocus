@@ -1,6 +1,5 @@
 import * as Y from 'yjs'
 import * as bc from 'lib0/broadcastchannel'
-import * as time from 'lib0/time'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import type { CloseEvent, Event, MessageEvent } from 'ws'
@@ -369,8 +368,6 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   onMessage(event: MessageEvent) {
-    this.configuration.websocketProvider.lastMessageReceived = time.getUnixTime()
-
     const message = new IncomingMessage(event.data)
 
     const documentName = message.readVarString()
