@@ -314,6 +314,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
   onMessage(event: MessageEvent) {
     this.resolveConnectionAttempt()
+
+    this.lastMessageReceived = time.getUnixTime()
   }
 
   resolveConnectionAttempt() {
