@@ -47,3 +47,12 @@ export const ConnectionTimeout: CloseEvent = {
   code: 4408,
   reason: 'Connection Timeout',
 }
+
+/**
+ * The server timed out after the client became idle.
+ * See closeIdleConnectionTimeout
+ */
+export const IdleTimeout: CloseEvent = {
+  code: 4409,
+  reason: 'Idle Timeout',
+}

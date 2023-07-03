@@ -4,7 +4,7 @@ import * as url from 'lib0/url'
 import type { MessageEvent } from 'ws'
 import { retry } from '@lifeomic/attempt'
 import {
-  Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
+  Forbidden, IdleTimeout, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import { Event } from 'ws'
 import EventEmitter from './EventEmitter.js'
@@ -416,6 +416,16 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
         console.warn('[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.')
       } else {
         console.warn(`[HocuspocusProvider] Connection closed with status Unauthorized: ${event.reason}`)
+      }
+
+      this.shouldConnect = false
+    }
+
+    if (event.code === IdleTimeout.code) {
+      if (event.reason === IdleTimeout.reason) {
+        console.info('[HocuspocusProvider] Connection timed out due to inactivity.')
+      } else {
+        console.info(`[HocuspocusProvider] Connection closed with status IdleTimeout: ${event.reason}`)
       }
 
       this.shouldConnect = false

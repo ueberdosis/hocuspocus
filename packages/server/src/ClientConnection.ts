@@ -1,6 +1,6 @@
 import { IncomingHttpHeaders, IncomingMessage } from 'http'
 import {
-  Forbidden, Unauthorized, WsReadyStates,
+  Forbidden, IdleTimeout, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import * as decoding from 'lib0/decoding'
 import { v4 as uuid } from 'uuid'
@@ -84,7 +84,7 @@ export class ClientConnection {
   ) {
     // Make sure to close an idle connection after a while.
     this.closeIdleConnectionTimeout = setTimeout(() => {
-      websocket.close(Unauthorized.code, Unauthorized.reason)
+      websocket.close(IdleTimeout.code, IdleTimeout.reason)
     }, opts.timeout)
 
     websocket.on('message', this.messageHandler)
