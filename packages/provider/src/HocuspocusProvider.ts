@@ -166,24 +166,24 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('authenticationFailed', this.configuration.onAuthenticationFailed)
 
     this.configuration.websocketProvider.on('connect', this.configuration.onConnect)
-    this.configuration.websocketProvider.on('connect', (e: Event) => this.emit('connect', e))
+    this.configuration.websocketProvider.on('connect', this.forwardConnect)
 
-    this.configuration.websocketProvider.on('open', this.onOpen.bind(this))
-    this.configuration.websocketProvider.on('open', (e: Event) => this.emit('open', e))
+    this.configuration.websocketProvider.on('open', this.boundOnOpen)
+    this.configuration.websocketProvider.on('open', this.forwardOpen)
 
-    this.configuration.websocketProvider.on('message', this.onMessage.bind(this))
+    this.configuration.websocketProvider.on('message', this.boundOnMessage)
 
-    this.configuration.websocketProvider.on('close', this.onClose.bind(this))
+    this.configuration.websocketProvider.on('close', this.boundOnClose)
     this.configuration.websocketProvider.on('close', this.configuration.onClose)
-    this.configuration.websocketProvider.on('close', (e: Event) => this.emit('close', e))
+    this.configuration.websocketProvider.on('close', this.forwardClose)
 
-    this.configuration.websocketProvider.on('status', this.onStatus.bind(this))
+    this.configuration.websocketProvider.on('status', this.boundOnStatus)
 
     this.configuration.websocketProvider.on('disconnect', this.configuration.onDisconnect)
-    this.configuration.websocketProvider.on('disconnect', (e: Event) => this.emit('disconnect', e))
+    this.configuration.websocketProvider.on('disconnect', this.forwardDisconnect)
 
     this.configuration.websocketProvider.on('destroy', this.configuration.onDestroy)
-    this.configuration.websocketProvider.on('destroy', (e: Event) => this.emit('destroy', e))
+    this.configuration.websocketProvider.on('destroy', this.forwardDestroy)
 
     this.awareness.on('update', () => {
       this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
@@ -206,6 +206,28 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.configuration.websocketProvider.attach(this)
   }
+
+  boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
+
+  boundBeforeUnload = this.beforeUnload.bind(this)
+
+  boundOnOpen = this.onOpen.bind(this)
+
+  boundOnMessage = this.onMessage.bind(this)
+
+  boundOnClose = this.onClose.bind(this)
+
+  boundOnStatus = this.onStatus.bind(this)
+
+  forwardConnect = (e: any) => this.emit('connect', e)
+
+  forwardOpen = (e: any) => this.emit('open', e)
+
+  forwardClose = (e: any) => this.emit('close', e)
+
+  forwardDisconnect = (e: any) => this.emit('disconnect', e)
+
+  forwardDestroy = (e: any) => this.emit('destroy', e)
 
   public onStatus({ status } : onStatusParameters) {
     this.status = status
@@ -247,8 +269,6 @@ export class HocuspocusProvider extends EventEmitter {
   forceSync() {
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
-
-  boundBeforeUnload = this.beforeUnload.bind(this)
 
   beforeUnload() {
     removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
@@ -414,6 +434,20 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.removeAllListeners()
 
+    this.configuration.websocketProvider.off('connect', this.configuration.onConnect)
+    this.configuration.websocketProvider.off('connect', this.forwardConnect)
+    this.configuration.websocketProvider.off('open', this.boundOnOpen)
+    this.configuration.websocketProvider.off('open', this.forwardOpen)
+    this.configuration.websocketProvider.off('message', this.boundOnMessage)
+    this.configuration.websocketProvider.off('close', this.boundOnClose)
+    this.configuration.websocketProvider.off('close', this.configuration.onClose)
+    this.configuration.websocketProvider.off('close', this.forwardClose)
+    this.configuration.websocketProvider.off('status', this.boundOnStatus)
+    this.configuration.websocketProvider.off('disconnect', this.configuration.onDisconnect)
+    this.configuration.websocketProvider.off('disconnect', this.forwardDisconnect)
+    this.configuration.websocketProvider.off('destroy', this.configuration.onDestroy)
+    this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
+
     this.send(CloseMessage, { documentName: this.configuration.name })
     this.isConnected = false
 
@@ -442,8 +476,6 @@ export class HocuspocusProvider extends EventEmitter {
   get broadcastChannel() {
     return `${this.configuration.name}`
   }
-
-  boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
 
   broadcastChannelSubscriber(data: ArrayBuffer) {
     this.mux(() => {
