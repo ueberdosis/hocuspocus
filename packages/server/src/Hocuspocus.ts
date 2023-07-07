@@ -26,7 +26,7 @@ import {
   onListenPayload,
   onStoreDocumentPayload,
 } from './types.js'
-import { getParameters } from './util/getParameters'
+import { getParameters } from './util/getParameters.js'
 
 export const defaultConfiguration = {
   name: null,
