@@ -20,6 +20,12 @@ export interface AdditionalTiptapCollabProviderConfiguration {
   websocketProvider?: TiptapCollabProviderWebsocket
 }
 
+type TAuditHistoryVersion = {
+  name?: string;
+  version: number;
+  date: number;
+}
+
 export class TiptapCollabProvider extends HocuspocusProvider {
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
@@ -32,4 +38,25 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     super(configuration as HocuspocusProviderConfiguration)
   }
+
+  revertToVersion(targetVersion: number) {
+    return this.sendStateless(JSON.stringify({ action: 'revertTo', version: targetVersion }))
+  }
+
+  getVersions(): TAuditHistoryVersion[] {
+    return this.configuration.document.getArray<TAuditHistoryVersion>('__tiptapcollab__versions').toArray()
+  }
+
+  isAutoVersioning(): boolean {
+    return !!this.configuration.document.getMap<number>('__tiptapcollab__config').get('autoVersioning')
+  }
+
+  enableAutoVersioning() {
+    return this.configuration.document.getMap<number>('__tiptapcollab__config').set('autoVersioning', 1)
+  }
+
+  disableAutoVersioning() {
+    return this.configuration.document.getMap<number>('__tiptapcollab__config').set('autoVersioning', 0)
+  }
+
 }
