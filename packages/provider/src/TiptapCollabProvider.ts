@@ -8,7 +8,7 @@ import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.j
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
   Partial<HocuspocusProviderConfiguration> &
-  ({ websocketProvider: TiptapCollabProviderWebsocket } |
+  (Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>> |
   AdditionalTiptapCollabProviderConfiguration)
 
 export interface AdditionalTiptapCollabProviderConfiguration {
@@ -16,6 +16,8 @@ export interface AdditionalTiptapCollabProviderConfiguration {
    * A Hocuspocus Cloud App ID, get one here: https://collab.tiptap.dev
    */
   appId: string,
+
+  websocketProvider?: TiptapCollabProviderWebsocket
 }
 
 export class TiptapCollabProvider extends HocuspocusProvider {
