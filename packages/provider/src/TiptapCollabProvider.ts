@@ -43,34 +43,42 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   createVersion(name?: string) {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.sendStateless(JSON.stringify({ action: 'version.create', name }))
   }
 
   revertToVersion(targetVersion: number) {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.sendStateless(JSON.stringify({ action: 'version.revert', version: targetVersion }))
   }
 
   getVersions(): AuditHistoryVersion[] {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getArray<AuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
   }
 
   watchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['observe']>[0]) {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').observe(callback)
   }
 
   unwatchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['unobserve']>[0]) {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').unobserve(callback)
   }
 
   isAutoVersioning(): boolean {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return !!this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).get('autoVersioning')
   }
 
   enableAutoVersioning() {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 1)
   }
 
   disableAutoVersioning() {
+    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
