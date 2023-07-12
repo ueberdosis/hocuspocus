@@ -20,13 +20,15 @@ export interface AdditionalTiptapCollabProviderConfiguration {
   websocketProvider?: TiptapCollabProviderWebsocket
 }
 
-type TAuditHistoryVersion = {
+export type TAuditHistoryVersion = {
   name?: string;
   version: number;
   date: number;
 }
 
 export class TiptapCollabProvider extends HocuspocusProvider {
+  tiptapCollabConfigurationPrefix = '__tiptapcollab__'
+
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
       configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>).appId })
@@ -44,19 +46,19 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   getVersions(): TAuditHistoryVersion[] {
-    return this.configuration.document.getArray<TAuditHistoryVersion>('__tiptapcollab__versions').toArray()
+    return this.configuration.document.getArray<TAuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
   }
 
   isAutoVersioning(): boolean {
-    return !!this.configuration.document.getMap<number>('__tiptapcollab__config').get('autoVersioning')
+    return !!this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).get('autoVersioning')
   }
 
   enableAutoVersioning() {
-    return this.configuration.document.getMap<number>('__tiptapcollab__config').set('autoVersioning', 1)
+    return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 1)
   }
 
   disableAutoVersioning() {
-    return this.configuration.document.getMap<number>('__tiptapcollab__config').set('autoVersioning', 0)
+    return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
 }
