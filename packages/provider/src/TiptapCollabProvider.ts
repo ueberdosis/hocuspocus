@@ -1,3 +1,4 @@
+import type { AbstractType, YArrayEvent } from 'yjs'
 import {
   HocuspocusProvider,
   HocuspocusProviderConfiguration,
@@ -41,12 +42,24 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     super(configuration as HocuspocusProviderConfiguration)
   }
 
+  createVersion(name?: string) {
+    return this.sendStateless(JSON.stringify({ action: 'version.create', name }))
+  }
+
   revertToVersion(targetVersion: number) {
-    return this.sendStateless(JSON.stringify({ action: 'revertTo', version: targetVersion }))
+    return this.sendStateless(JSON.stringify({ action: 'version.revert', version: targetVersion }))
   }
 
   getVersions(): AuditHistoryVersion[] {
     return this.configuration.document.getArray<AuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
+  }
+
+  watchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['observe']>[0]) {
+    return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').observe(callback)
+  }
+
+  unwatchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['unobserve']>[0]) {
+    return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').unobserve(callback)
   }
 
   isAutoVersioning(): boolean {
