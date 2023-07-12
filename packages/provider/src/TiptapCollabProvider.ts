@@ -20,7 +20,7 @@ export interface AdditionalTiptapCollabProviderConfiguration {
   websocketProvider?: TiptapCollabProviderWebsocket
 }
 
-export type TAuditHistoryVersion = {
+export type AuditHistoryVersion = {
   name?: string;
   version: number;
   date: number;
@@ -45,8 +45,8 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.sendStateless(JSON.stringify({ action: 'revertTo', version: targetVersion }))
   }
 
-  getVersions(): TAuditHistoryVersion[] {
-    return this.configuration.document.getArray<TAuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
+  getVersions(): AuditHistoryVersion[] {
+    return this.configuration.document.getArray<AuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
   }
 
   isAutoVersioning(): boolean {
