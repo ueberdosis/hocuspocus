@@ -133,7 +133,7 @@ test('has unsynced changes when in readonly mode and initial document has change
   t.is(provider.hasUnsyncedChanges, true)
 })
 
-test.only('has unsynced changes when in readonly mode and initial document has changed (deletion)', async t => {
+test('has unsynced changes when in readonly mode and initial document has changed (deletion)', async t => {
   const document = new Y.Doc()
   document.getMap('test').set('foo', 'bar')
   const initialState = Y.encodeStateAsUpdate(document)
