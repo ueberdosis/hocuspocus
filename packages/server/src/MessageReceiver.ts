@@ -182,8 +182,6 @@ export class MessageReceiver {
         readSyncStep2(message.decoder, document, connection)
 
         if (connection) {
-          // TODO: how should this work if connection is not set? should we use reply?
-          // reply is used by redis, but I'm unsure how that code path works
           connection.send(new OutgoingMessage(document.name)
             .writeSyncStatus(true).toUint8Array())
         }
@@ -203,8 +201,6 @@ export class MessageReceiver {
 
         readUpdate(message.decoder, document, connection)
         if (connection) {
-          // TODO: how should this work if connection is not set? should we use reply?
-          // reply is used by redis, but I'm unsure how that code path works
           connection.send(new OutgoingMessage(document.name)
             .writeSyncStatus(true).toUint8Array())
         }

@@ -17,7 +17,7 @@ export enum MessageType {
   Stateless = 5,
   BroadcastStateless = 6,
   CLOSE = 7,
-  SyncStatus = 8, // TODO: should this be 8?
+  SyncStatus = 8,
 }
 
 export interface AwarenessUpdate {
