@@ -241,7 +241,7 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
 
 test('if a new connection connects while the previous connection still fetches the document, it will just work properly', async t => {
   let callsToOnLoadDocument = 0
-  const resolvesNeeded = 7
+  const resolvesNeeded = 11
 
   await new Promise(async resolve => {
 
@@ -289,6 +289,10 @@ test('if a new connection connects while the previous connection still fetches t
         const value = provider.document.getArray('foo').get(0)
 
         if (provider1MessagesReceived === 1) {
+          // do nothing, this is just the ACK for the sync
+        } else if (provider1MessagesReceived === 2) {
+          // do nothing, this is just the ACK for the received update (set "bar-updatedAfterProvider1Synced")
+        } else if (provider1MessagesReceived === 3) {
           t.is(value, 'bar-updatedAfterProvider1Synced')
         } else {
           t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
@@ -318,8 +322,12 @@ test('if a new connection connects while the previous connection still fetches t
           const value = provider.document.getArray('foo').get(0)
 
           if (provider2MessagesReceived === 1) {
+            // do nothing, this is just the ACK for the sync
             t.is(value, undefined)
           } else if (provider2MessagesReceived === 2) {
+            // initial state is now synced
+            t.is(value, undefined)
+          } else if (provider2MessagesReceived === 3) {
             t.is(value, 'bar-updatedAfterProvider1Synced')
             setTimeout(() => {
               provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
