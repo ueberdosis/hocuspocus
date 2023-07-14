@@ -68,35 +68,48 @@ test('gets the current awareness states from the server', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
-        t.deepEqual(server.getMessageLogs(), [
-          {
-            category: 'SyncStep1',
-            direction: 'in',
-            type: 'Sync',
-          },
-          {
-            category: 'SyncStep2',
-            direction: 'out',
-            type: 'Sync',
-          },
-          {
-            category: 'SyncStep1',
-            direction: 'out',
-            type: 'Sync',
-          },
-          {
-            category: 'Update',
-            direction: 'in',
-            type: 'Awareness',
-          },
-          {
-            category: 'Update',
-            direction: 'out',
-            type: 'Awareness',
-          },
-        ])
+        setTimeout(() => {
 
-        resolve('done')
+          t.deepEqual(server.getMessageLogs(), [
+            {
+              category: 'SyncStep1',
+              direction: 'in',
+              type: 'Sync',
+            },
+            {
+              category: 'SyncStep2',
+              direction: 'out',
+              type: 'Sync',
+            },
+            {
+              category: 'SyncStep1',
+              direction: 'out',
+              type: 'Sync',
+            },
+            {
+              category: 'Update',
+              direction: 'in',
+              type: 'Awareness',
+            },
+            {
+              category: 'Update',
+              direction: 'out',
+              type: 'Awareness',
+            },
+            {
+              category: 'Update',
+              direction: 'in',
+              type: 'Awareness',
+            },
+            {
+              category: 'SyncStep2',
+              direction: 'in',
+              type: 'Sync',
+            },
+          ])
+
+          resolve('done')
+        }, 100)
       },
     })
 
