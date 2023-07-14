@@ -50,6 +50,10 @@ export class MessageReceiver {
         provider.receiveStateless(readVarString(message.decoder))
         break
 
+      case MessageType.SyncStatus:
+        // nothing for now; forward-compatability
+        break
+
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }

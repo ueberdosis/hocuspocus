@@ -1,15 +1,15 @@
+import { Encoder } from 'lib0/encoding'
+import type { CloseEvent, Event, MessageEvent } from 'ws'
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
-import { Encoder } from 'lib0/encoding'
-import type { Event, CloseEvent, MessageEvent } from 'ws'
+import { IncomingMessage } from './IncomingMessage.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
 import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.js'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.js'
 import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage.js'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
 import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage.js'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
-import { IncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
 
 export enum MessageType {
   Sync = 0,
@@ -18,6 +18,7 @@ export enum MessageType {
   QueryAwareness = 3,
   Stateless = 5,
   CLOSE = 7,
+  SyncStatus = 8,
 }
 
 export enum WebSocketStatus {
