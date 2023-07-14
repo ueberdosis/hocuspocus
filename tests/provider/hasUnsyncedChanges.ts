@@ -4,12 +4,22 @@ import * as Y from 'yjs'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test("initially doesn't have unsynced changes", async t => {
-  const server = await newHocuspocus()
+  return new Promise(async resolve => {
 
-  const provider = newHocuspocusProvider(server)
+    const server = await newHocuspocus()
 
-  t.is(provider.hasUnsyncedChanges, false)
-  t.is(provider.synced, false)
+    const provider = newHocuspocusProvider(server)
+
+    t.is(provider.hasUnsyncedChanges, false)
+    t.is(provider.synced, false)
+
+    setTimeout(() => {
+      t.is(provider.hasUnsyncedChanges, false)
+      t.is(provider.synced, true)
+
+      resolve()
+    }, 100)
+  })
 })
 
 test('has unsynced changes when updating', async t => {
