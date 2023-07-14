@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.3](https://github.com/ueberdosis/hocuspocus/compare/v2.2.2...v2.2.3) (2023-07-14)
+
+**Note:** Version bump only for package @hocuspocus/extension-webhook
+
+
+
+
+
 ## [2.2.2](https://github.com/ueberdosis/hocuspocus/compare/v2.2.1...v2.2.2) (2023-07-14)
 
 **Note:** Version bump only for package @hocuspocus/extension-webhook
