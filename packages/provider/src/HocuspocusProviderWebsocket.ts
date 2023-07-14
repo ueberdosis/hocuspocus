@@ -245,6 +245,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       this.cancelWebsocketRetry = undefined
     }
 
+    this.receivedOnOpenPayload = undefined
+    this.receivedOnStatusPayload = undefined
     this.shouldConnect = true
 
     const abortableRetry = () => {
