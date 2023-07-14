@@ -6,12 +6,12 @@ import {
   writeVarUint,
   writeVarUint8Array,
 } from 'lib0/encoding'
-import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 
 import { writeAuthenticated, writePermissionDenied } from '@hocuspocus/common'
-import { MessageType } from './types.js'
 import Document from './Document.js'
+import { MessageType } from './types.js'
 
 export class OutgoingMessage {
 
@@ -117,6 +117,16 @@ export class OutgoingMessage {
 
     writeVarUint(this.encoder, MessageType.BroadcastStateless)
     writeVarString(this.encoder, payload)
+
+    return this
+  }
+
+  // TODO: should this be write* or create* as method name?
+  writeSyncStatus(updateSaved: boolean): OutgoingMessage {
+    this.category = 'SyncStatus'
+
+    writeVarUint(this.encoder, MessageType.SyncStatus)
+    writeVarUint(this.encoder, updateSaved ? 1 : 0)
 
     return this
   }

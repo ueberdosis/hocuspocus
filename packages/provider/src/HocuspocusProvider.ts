@@ -1,22 +1,31 @@
-import * as Y from 'yjs'
+import { awarenessStatesToArray } from '@hocuspocus/common'
 import * as bc from 'lib0/broadcastchannel'
-import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as mutex from 'lib0/mutex'
 import type { CloseEvent, Event, MessageEvent } from 'ws'
-import { awarenessStatesToArray } from '@hocuspocus/common'
+import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
+import * as Y from 'yjs'
 import EventEmitter from './EventEmitter.js'
+import {
+  CompleteHocuspocusProviderWebsocketConfiguration,
+  HocuspocusProviderWebsocket,
+} from './HocuspocusProviderWebsocket.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { MessageReceiver } from './MessageReceiver.js'
 import { MessageSender } from './MessageSender.js'
-import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
-import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage.js'
-import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage.js'
 import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.js'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.js'
+import { CloseMessage } from './OutgoingMessages/CloseMessage.js'
+import { QueryAwarenessMessage } from './OutgoingMessages/QueryAwarenessMessage.js'
+import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
+import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
+import { SyncStepTwoMessage } from './OutgoingMessages/SyncStepTwoMessage.js'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
 import {
   ConstructableOutgoingMessage,
+  WebSocketStatus,
   onAuthenticationFailedParameters,
+  onAwarenessChangeParameters,
+  onAwarenessUpdateParameters,
   onCloseParameters,
   onDisconnectParameters,
   onMessageParameters,
@@ -24,16 +33,7 @@ import {
   onOutgoingMessageParameters, onStatelessParameters,
   onStatusParameters,
   onSyncedParameters,
-  WebSocketStatus,
-  onAwarenessChangeParameters,
-  onAwarenessUpdateParameters,
 } from './types.js'
-import {
-  CompleteHocuspocusProviderWebsocketConfiguration,
-  HocuspocusProviderWebsocket,
-} from './HocuspocusProviderWebsocket.js'
-import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
-import { CloseMessage } from './OutgoingMessages/CloseMessage.js'
 
 export type HocuspocusProviderConfiguration =
   Required<Pick<CompleteHocuspocusProviderConfiguration, 'name'>>
@@ -261,8 +261,16 @@ export class HocuspocusProvider extends EventEmitter {
     return this.unsyncedChanges > 0
   }
 
-  updateUnsyncedChanges(unsyncedChanges = 0) {
-    this.unsyncedChanges += unsyncedChanges
+  incrementUnsyncedChanges() {
+    this.unsyncedChanges += 1
+    this.emit('unsyncedChanges', this.unsyncedChanges)
+  }
+
+  decrementUnsyncedChanges() {
+    this.unsyncedChanges -= 1
+    if (this.unsyncedChanges === 0) {
+      this.synced = true
+    }
     this.emit('unsyncedChanges', this.unsyncedChanges)
   }
 
@@ -291,7 +299,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    this.updateUnsyncedChanges(1)
+    this.incrementUnsyncedChanges()
     this.send(UpdateMessage, { update, documentName: this.configuration.name }, true)
   }
 
@@ -305,6 +313,12 @@ export class HocuspocusProvider extends EventEmitter {
     }, true)
   }
 
+  /**
+   * Indicates whether a first handshake with the server has been established
+   *
+   * Note: this does not mean all updates from the client have been persisted to the backend. For this,
+   * use `hasUnsyncedChanges`.
+   */
   get synced(): boolean {
     return this.isSynced
   }
@@ -312,10 +326,6 @@ export class HocuspocusProvider extends EventEmitter {
   set synced(state) {
     if (this.isSynced === state) {
       return
-    }
-
-    if (state && this.unsyncedChanges > 0) {
-      this.updateUnsyncedChanges(-1 * this.unsyncedChanges)
     }
 
     this.isSynced = state
@@ -366,6 +376,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   startSync() {
+    this.incrementUnsyncedChanges()
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
     if (this.awareness.getLocalState() !== null) {
@@ -378,7 +389,9 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   send(message: ConstructableOutgoingMessage, args: any, broadcast = false) {
-    if (!this.isConnected) return
+    if (!this.isConnected) {
+      return
+    }
 
     if (broadcast) {
       this.mux(() => { this.broadcast(message, args) })
@@ -403,7 +416,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('message', { event, message: new IncomingMessage(event.data) })
 
-    new MessageReceiver(message).apply(this)
+    new MessageReceiver(message).apply(this, true)
   }
 
   onClose(event: CloseEvent) {

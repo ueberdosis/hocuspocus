@@ -19,7 +19,7 @@
     "vite-plugin-pages": "^0.29.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
-    "yjs": "^13.5.29"
+    "yjs": "^13.6.4"
   },
   "devDependencies": {
     "typescript": "^5.0.4",
