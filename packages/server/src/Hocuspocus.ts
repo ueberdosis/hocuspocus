@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
 import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' assert { type: 'json' }
-import { ClientConnection } from './ClientConnection'
+import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
 import Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
