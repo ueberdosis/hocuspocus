@@ -28,24 +28,26 @@ By way of illustration, if a user isn’t allowed to connect: Just throw an erro
 
 ## Summary Table
 
-| Hook                  | Description                               | Link                                                  |
-| --------------------- |-------------------------------------------|-------------------------------------------------------|
-| `beforeHandleMessage` | Before handling a message                 | [Read more](/server/hooks#before-handle-message)      |
-| `onConnect`           | When a connection is established          | [Read more](/server/hooks#on-connect)                 |
-| `connected`           | After a connection has been establied     | [Read more](/server/hooks#connected)                  |
-| `onAuthenticate`      | When authentication is required           | [Read more](/server/hooks#on-authenticate)            |
-| `onAwarenessUpdate`   | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)        |
-| `onLoadDocument`      | When a new document is created            | [Read more](/server/hooks#on-load-document)           |
-| `onChange`            | When a document has changed               | [Read more](/server/hooks#on-change)                  |
-| `onDisconnect`        | When a connection was closed              | [Read more](/server/hooks#on-disconnect)              |
-| `onListen`            | When the server is initialized            | [Read more](/server/hooks#on-listen)                  |
-| `onDestroy`           | When the server will be destroyed         | [Read more](/server/hooks#on-destroy)                 |
-| `onConfigure`         | When the server has been configured       | [Read more](/server/hooks#on-configure)               |
-| `onRequest`           | When a HTTP request comes in              | [Read more](/server/hooks#on-request)                 |
-| `onStoreDocument`     | When a document has been changed          | [Read more](/server/hooks#on-store-document)          |
-| `onUpgrade`           | When the WebSocket connection is upgraded | [Read more](/server/hooks#on-upgrade)                 |
+| Hook                       | Description                               | Link                                                  |
+| -------------------------- |-------------------------------------------|-------------------------------------------------------|
+| `beforeHandleMessage`      | Before handling a message                 | [Read more](/server/hooks#before-handle-message)      |
+| `onConnect`                | When a connection is established          | [Read more](/server/hooks#on-connect)                 |
+| `connected`                | After a connection has been establied     | [Read more](/server/hooks#connected)                  |
+| `onAuthenticate`           | When authentication is required           | [Read more](/server/hooks#on-authenticate)            |
+| `onAwarenessUpdate`        | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)        |
+| `onLoadDocument`           | During the creation of a new document     | [Read more](/server/hooks#on-load-document)           |
+| `afterLoadDocument`        | After a document is created               | [Read more](/server/hooks#after-load-document)        |
+| `onChange`                 | When a document has changed               | [Read more](/server/hooks#on-change)                  |
+| `onDisconnect`             | When a connection was closed              | [Read more](/server/hooks#on-disconnect)              |
+| `onListen`                 | When the server is initialized            | [Read more](/server/hooks#on-listen)                  |
+| `onDestroy`                | When the server will be destroyed         | [Read more](/server/hooks#on-destroy)                 |
+| `onConfigure`              | When the server has been configured       | [Read more](/server/hooks#on-configure)               |
+| `onRequest`                | When a HTTP request comes in              | [Read more](/server/hooks#on-request)                 |
+| `onStoreDocument`          | When a document has been changed          | [Read more](/server/hooks#on-store-document)          |
+| `onUpgrade`                | When the WebSocket connection is upgraded | [Read more](/server/hooks#on-upgrade)                 |
 | `onStateless`              | When the Stateless message is received    | [Read more](/server/hooks#on-stateless)               |
 | `beforeBroadcastStateless` | Before broadcast a stateless message      | [Read more](/server/hooks#before-broadcast-stateless) |
+| `afterUnloadDocument`      | When a document is closed                 | [Read more](/server/hooks#after-unload-document)      |
 
 
 ## Usage
@@ -604,6 +606,33 @@ const data = {
 
 Context contains the data provided in former `onConnect` hooks.
 
+### afterLoadDocument
+
+The `afterLoadDocument` hooks are called after a document is successfully loaded. This is different 
+to the `onLoadDocument` hooks which are part of the document creation process and could potentially
+fail if for instance the document cannot be found in the database.
+
+Because `afterLoadDocument` only runs after all `onLoadDocument` hooks are successful at this point
+you know the document is considered open on the server.
+
+**Hook payload**
+
+The `data` passed to the `afterLoadDocument` hook has the following attributes:
+
+```js
+import { Doc } from "yjs";
+
+const data = {
+  context: any,
+  document: Doc,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+};
+```
+
 ### onRequest
 
 The `onRequest` hooks are called when the HTTP server inside Hocuspocus receives a new request. It should return a Promise. If you throw an empty exception or reject the returned Promise the following hooks in the chain will not run and thus enable you to respond to the request yourself. It's similar to the concept of request middlewares.
@@ -814,4 +843,39 @@ const server = Server.configure({
 })
 
 server.listen()
+```
+
+### afterUnloadDocument
+
+The `afterUnloadDocument` hooks are called after a document was closed on the server. You can no
+longer access the document at this point as it has been destroyed but you may notify anything
+that was subscribed to the document.
+
+Note: `afterUnloadDocument` may be called even if `afterLoadDocument` never was for a given document
+as an extension may have aborted the loading of the document during the `onLoadDocument` phase.
+
+**Hook payload**
+
+The `data` passed to the `onDestroy` hook has the following attributes:
+
+```js
+const data = {
+  instance: Hocuspocus,
+  documentName: string,
+};
+```
+
+**Example**
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = Server.configure({
+  async afterUnloadDocument(data) {
+    // Output some information
+    console.log(`Document ${data.documentName} was closed`);
+  },
+});
+
+server.listen();
 ```

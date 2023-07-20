@@ -155,7 +155,7 @@ export class Redis implements Extension {
   }
 
   /**
-   * Once a document is laoded, subscribe to the channel in Redis.
+   * Once a document is loaded, subscribe to the channel in Redis.
    */
   public async afterLoadDocument({ documentName, document }: afterLoadDocumentPayload) {
     return new Promise((resolve, reject) => {

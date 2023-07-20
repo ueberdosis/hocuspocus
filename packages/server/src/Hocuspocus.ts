@@ -19,7 +19,7 @@ import {
   Configuration,
   ConnectionConfiguration,
   HookName,
-  HookPayload,
+  HookPayloadByName,
   beforeBroadcastStatelessPayload,
   onChangePayload,
   onDisconnectPayload,
@@ -398,8 +398,7 @@ export class Hocuspocus {
         }, true)
       } else {
         // Remove document from memory immediately
-        this.documents.delete(document.name)
-        document.destroy()
+        this.unloadDocument(document)
       }
     })
   }
@@ -494,7 +493,7 @@ export class Hocuspocus {
       document,
       documentName,
       socketId,
-      requestHeaders: request.headers,
+      requestHeaders: request.headers ?? {},
       requestParameters: getParameters(request),
     }
 
@@ -512,7 +511,7 @@ export class Hocuspocus {
       })
     } catch (e) {
       this.closeConnections(documentName)
-      this.documents.delete(documentName)
+      this.unloadDocument(document)
       throw e
     }
 
@@ -560,8 +559,7 @@ export class Hocuspocus {
             return
           }
 
-          this.documents.delete(document.name)
-          document.destroy()
+          this.unloadDocument(document)
         })
       })
   }
@@ -570,7 +568,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
-  hooks(name: HookName, payload: HookPayload, callback: Function | null = null): Promise<any> {
+  hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
     // create a new `thenable` chain
@@ -599,6 +597,15 @@ export class Hocuspocus {
       })
 
     return chain
+  }
+
+  unloadDocument(document: Document) {
+    const documentName = document.name
+    if (!this.documents.has(documentName)) return
+
+    this.documents.delete(documentName)
+    document.destroy()
+    this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
 
   enableDebugging() {
