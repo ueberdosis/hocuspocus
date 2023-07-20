@@ -1,4 +1,5 @@
 import { IncomingHttpHeaders, IncomingMessage } from 'http'
+import { URLSearchParams } from 'url'
 import {
   Forbidden, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
