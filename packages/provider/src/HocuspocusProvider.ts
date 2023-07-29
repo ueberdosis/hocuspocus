@@ -209,7 +209,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
 
-  boundBeforeUnload = this.beforeUnload.bind(this)
+  boundPageUnload = this.pageUnload.bind(this)
 
   boundOnOpen = this.onOpen.bind(this)
 
@@ -278,7 +278,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
 
-  beforeUnload() {
+  pageUnload() {
     removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
   }
 
@@ -287,7 +287,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.addEventListener('beforeunload', this.boundBeforeUnload)
+    window.addEventListener('unload', this.boundPageUnload)
   }
 
   sendStateless(payload: string) {
@@ -468,7 +468,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.removeEventListener('beforeunload', this.boundBeforeUnload)
+    window.removeEventListener('unload', this.boundPageUnload)
   }
 
   permissionDeniedHandler(reason: string) {
