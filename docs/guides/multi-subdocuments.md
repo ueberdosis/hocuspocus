@@ -93,7 +93,8 @@ const server = Server.configure({
       // Get a Y-Doc for the 'default' field …
       const defaultField = TiptapTransformer.toYdoc(
         generateSampleProsemirrorJson("What is love?"),
-        "default"[(Document, Paragraph, Text)]
+        "default",
+        [(Document, Paragraph, Text)]
       );
       // … and merge it into the given document
       data.document.merge(defaultField);
@@ -102,7 +103,8 @@ const server = Server.configure({
       // Get a Y-Doc for the 'secondary' field …
       const secondaryField = TiptapTransformer.toYdoc(
         generateSampleProsemirrorJson("Baby don't hurt me…"),
-        "secondary"[(Document, Paragraph, Text)]
+        "secondary",
+        [(Document, Paragraph, Text)]
       );
       // … and merge it into the given document
       data.document.merge(secondaryField);
