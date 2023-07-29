@@ -33,25 +33,26 @@ export interface ConnectionConfiguration {
 }
 
 export interface Extension {
-  priority?: number,
-  onConfigure?(data: onConfigurePayload): Promise<any>,
-  onListen?(data: onListenPayload): Promise<any>,
-  onUpgrade?(data: onUpgradePayload): Promise<any>,
-  onConnect?(data: onConnectPayload): Promise<any>,
-  connected?(data: connectedPayload): Promise<any>,
-  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
-  onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
-  afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
-  beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
-  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>,
+  priority?: number;
+  onConfigure?(data: onConfigurePayload): Promise<any>;
+  onListen?(data: onListenPayload): Promise<any>;
+  onUpgrade?(data: onUpgradePayload): Promise<any>;
+  onConnect?(data: onConnectPayload): Promise<any>;
+  connected?(data: connectedPayload): Promise<any>;
+  onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
+  onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
+  afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
+  beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
+  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>;
   onStateless?(payload: onStatelessPayload): Promise<any>;
-  onChange?(data: onChangePayload): Promise<any>,
-  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
-  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
-  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>,
-  onRequest?(data: onRequestPayload): Promise<any>,
-  onDisconnect?(data: onDisconnectPayload): Promise<any>
-  onDestroy?(data: onDestroyPayload): Promise<any>,
+  onChange?(data: onChangePayload): Promise<any>;
+  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>;
+  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>;
+  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
+  onRequest?(data: onRequestPayload): Promise<any>;
+  onDisconnect?(data: onDisconnectPayload): Promise<any>;
+  afterUnloadDocument?(data: onLoadDocumentPayload): Promise<any>;
+  onDestroy?(data: onDestroyPayload): Promise<any>;
 }
 
 export type HookName =
@@ -72,27 +73,30 @@ export type HookName =
   'onAwarenessUpdate' |
   'onRequest' |
   'onDisconnect' |
+  'afterUnloadDocument' |
   'onDestroy'
 
-export type HookPayload =
-  onConfigurePayload |
-  onListenPayload |
-  onUpgradePayload |
-  onConnectPayload |
-  connectedPayload |
-  onAuthenticatePayload |
-  onLoadDocumentPayload |
-  onStatelessPayload |
-  beforeHandleMessagePayload |
-  beforeBroadcastStatelessPayload |
-  onChangePayload |
-  onStoreDocumentPayload |
-  afterStoreDocumentPayload |
-  onAwarenessUpdatePayload |
-  onRequestPayload |
-  onDisconnectPayload |
-  onDestroyPayload
-
+export type HookPayloadByName = {
+  onConfigure: onConfigurePayload,
+  onListen: onListenPayload,
+  onUpgrade: onUpgradePayload,
+  onConnect: onConnectPayload,
+  connected: connectedPayload,
+  onAuthenticate: onAuthenticatePayload,
+  onLoadDocument: onLoadDocumentPayload,
+  afterLoadDocument: onLoadDocumentPayload,
+  beforeHandleMessage: beforeHandleMessagePayload,
+  beforeBroadcastStateless: beforeBroadcastStatelessPayload,
+  onStateless: onStatelessPayload,
+  onChange: onChangePayload,
+  onStoreDocument: onStoreDocumentPayload,
+  afterStoreDocument: afterStoreDocumentPayload,
+  onAwarenessUpdate: onAwarenessUpdatePayload,
+  onRequest: onRequestPayload,
+  onDisconnect: onDisconnectPayload,
+  afterUnloadDocument: afterUnloadDocumentPayload,
+  onDestroy: onDestroyPayload,
+}
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.
@@ -263,14 +267,12 @@ export interface onStoreDocumentPayload {
 export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
 
 export interface onAwarenessUpdatePayload {
-  clientsCount: number,
   context: any,
   document: Document,
   documentName: string,
   instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
-  update: Uint8Array,
   socketId: string,
   added: number[],
   updated: number[],
@@ -336,6 +338,11 @@ export interface onConfigurePayload {
   instance: Hocuspocus,
   configuration: Configuration,
   version: string,
+}
+
+export interface afterUnloadDocumentPayload {
+  instance: Hocuspocus;
+  documentName: string;
 }
 
 export interface DirectConnection {
