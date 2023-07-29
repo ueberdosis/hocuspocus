@@ -62,3 +62,26 @@
     </div>
   </div>
 </template>
+
+<style>
+.special-button {
+  border-radius: 8px;
+  background-color: #155EFA;
+  color: #FFFFFF;
+  padding: 8px 16px;
+}
+
+pre {
+  background: #0d0d0d;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.8rem;
+}
+</style>

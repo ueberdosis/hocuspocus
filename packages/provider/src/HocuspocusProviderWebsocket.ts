@@ -211,7 +211,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   attach(provider: HocuspocusProvider) {
-    if (this.status === WebSocketStatus.Disconnected) {
+    if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
       this.connect()
     }
 

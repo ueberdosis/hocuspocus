@@ -10,7 +10,7 @@
       :socket="provider.configuration.websocketProvider"
     />
 
-    <h2>
+    <h2 class="mb-2">
       Users
     </h2>
 
@@ -19,7 +19,7 @@
         v-for="state in states"
         :key="state.clientId"
       >
-        <span :style="`background-color: ${state.user.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
+        <span :style="`background-color: ${state.user?.color}; width: 1rem; height: 1rem; margin-right: 0.5rem; display: inline-block;`" />
         #{{ state.clientId }} {{ state.user.name }} ({{ state.user.clientX }}, {{ state.user.clientY }})
       </li>
     </ul>
@@ -29,9 +29,9 @@
       :key="state.clientId"
       :style="`
         position: absolute;
-        background-color: ${state.user.color};
-        top: ${state.user.clientY}px;
-        left: ${state.user.clientX}px;
+        background-color: ${state.user?.color};
+        top: ${state.user?.clientY}px;
+        left: ${state.user?.clientX}px;
         width: 12px;
         height: 12px;
         margin-left: -6px;
