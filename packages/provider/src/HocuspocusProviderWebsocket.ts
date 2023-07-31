@@ -350,6 +350,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.connectionAttempt = null
   }
 
+  closeTries = 0
+
   checkConnection() {
     // Don’t check the connection when it’s not even established
     if (this.status !== WebSocketStatus.Connected) {
@@ -368,8 +370,21 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
     // No message received in a long time, not even your own
     // Awareness updates, which are updated every 15 seconds.
-    this.webSocket?.close()
-    this.messageQueue = []
+    this.closeTries += 1
+    // https://bugs.webkit.org/show_bug.cgi?id=247943
+    if (this.closeTries > 2) {
+      this.onClose({
+        event: {
+          code: 4408,
+          reason: 'forced',
+        },
+      })
+      this.closeTries = 0
+    } else {
+      this.webSocket?.close()
+      this.messageQueue = []
+    }
+
   }
 
   registerEventListeners() {
@@ -419,6 +434,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   onClose({ event }: onCloseParameters) {
+    this.closeTries = 0
     this.webSocket = null
 
     if (this.status === WebSocketStatus.Connected) {
