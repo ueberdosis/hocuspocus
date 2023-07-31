@@ -13,7 +13,7 @@
 - title: Server
   items:
     - title: Cloud
-      link: /cloud
+      link: /../cloud
       type: new
     - title: Configuration
       link: /server/configuration
