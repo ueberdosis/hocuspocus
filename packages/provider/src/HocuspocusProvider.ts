@@ -43,9 +43,9 @@ export type HocuspocusProviderConfiguration =
   )
 
 export interface CompleteHocuspocusProviderConfiguration {
-   /**
-    * The identifier/name of your document
-    */
+  /**
+  * The identifier/name of your document
+  */
    name: string,
   /**
    * The actual Y.js document
@@ -96,6 +96,16 @@ export interface CompleteHocuspocusProviderConfiguration {
    * Don’t output any warnings.
    */
   quiet: boolean,
+
+  /**
+   * Pass `false` to start the connection manually.
+   */
+  connect: boolean,
+
+  /**
+   * Pass `false` to close the connection manually.
+   */
+  preserveConnection: boolean,
 }
 
 export class HocuspocusProvider extends EventEmitter {
@@ -124,6 +134,8 @@ export class HocuspocusProvider extends EventEmitter {
     onAwarenessChange: () => null,
     onStateless: () => null,
     quiet: false,
+    connect: true,
+    preserveConnection: true,
   }
 
   subscribedToBroadcastChannel = false
@@ -242,6 +254,7 @@ export class HocuspocusProvider extends EventEmitter {
 
       this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
         url: websocketProviderConfig.url,
+        connect: websocketProviderConfig.connect,
         parameters: websocketProviderConfig.parameters,
       })
     }
@@ -349,6 +362,9 @@ export class HocuspocusProvider extends EventEmitter {
   disconnect() {
     this.disconnectBroadcastChannel()
     this.configuration.websocketProvider.detach(this)
+    if (!this.configuration.preserveConnection) {
+      this.configuration.websocketProvider.disconnect()
+    }
   }
 
   async onOpen(event: Event) {

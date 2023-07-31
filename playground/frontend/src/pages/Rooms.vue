@@ -15,14 +15,15 @@
         <td class="p-3 border border-gray-300">{{ room.states }}</td>
         <td class="p-3 border border-gray-300 text-center">
           <button
-            v-if="room.status !== 'connected'"
+            v-if="room.status === 'disconnected'"
             @click="room.connect()"
             class="border-2 border-black bg-black text-white px-4 py-2 rounded"
           >
             connect
           </button>
+
           <button
-            v-if="room.status !== 'disconnected'"
+            v-else-if="room.status === 'connected'"
             @click="room.disconnect()"
             class="border-2 border-black px-4 py-2 rounded"
           >
@@ -34,43 +35,53 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import * as Y from 'yjs'
-// import { WebsocketProvider } from 'y-websocket'
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import { ref } from 'vue'
+import { HocuspocusProvider, StatesArray } from '@hocuspocus/provider'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { awarenessStatesToArray } from '@hocuspocus/common'
 
 class Room {
   doc = new Y.Doc()
 
   name = ''
 
-  status = 'disconnected'
+  status = ref('disconnected')
 
-  states = []
+  numberOfUsers = ref(0)
 
-  constructor(name) {
+  states: StatesArray = []
+
+  provider: HocuspocusProvider
+
+  constructor(name: string) {
     this.name = name
     // this.provider = new WebsocketProvider('ws://localhost:1234', this.name, this.doc)
     this.provider = new HocuspocusProvider({
       url: 'ws://localhost:1234',
       document: this.doc,
       name: this.name,
+      broadcast: false,
+      connect: false,
+      preserveConnection: false,
       onStatus: ({ status }) => {
-        this.status = status
+        this.status.value = status
       },
       onAwarenessUpdate: ({ states }) => {
         this.states = states
+        this.numberOfUsers.value = awarenessStatesToArray(this.provider.awareness.getStates()).filter((state => 'user' in state)).length
+      },
+      onDisconnect: () => {
+        this.states = []
+        this.numberOfUsers.value = 0
       },
     })
 
-    this.provider.setAwarenessField('user', { name: `Jon @ ${this.name}` })
-  }
-
-  get numberOfUsers() {
-    return this.provider.awareness.getStates().size
   }
 
   connect() {
+    this.provider.setAwarenessField('user', { name: `Jon @ ${this.name}` })
     this.provider.connect()
   }
 
@@ -86,7 +97,7 @@ class Room {
 export default {
   data() {
     return {
-      rooms: [],
+      rooms: [] as Room[],
     }
   },
 

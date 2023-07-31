@@ -10,7 +10,7 @@
       :socket="socket"
     />
 
-    <h2>
+    <h2 class="mb-2">
       Editor
     </h2>
     <div v-if="editor">
@@ -20,7 +20,14 @@
       />
     </div>
 
-    <button @click="provider.setAwarenessField('date', Date.now())">provider.setAwarenessField('date', Date.now())</button>
+    <button
+      class="special-button"
+      @click="provider.setAwarenessField('date', Date.now())"
+    >
+      Update Date
+    </button>
+
+    <pre><code>{{ $states1 }}</code></pre>
 
     <StatusBar
       v-if="anotherProvider"
@@ -28,7 +35,7 @@
       :socket="socket"
     />
 
-    <h2>
+    <h2 class="mb-2">
       Another Editor
     </h2>
     <div v-if="anotherEditor">
@@ -38,11 +45,19 @@
       />
     </div>
 
-    <button @click="anotherProvider.setAwarenessField('date', Date.now())">anotherProvider.setAwarenessField('date', Date.now())</button>
+    <button
+      class="special-button"
+      @click="anotherProvider.setAwarenessField('date', Date.now())"
+    >
+      Update Date
+    </button>
+
+    <pre><code>{{ $states2 }}</code></pre>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
@@ -56,16 +71,25 @@ const socket = new HocuspocusProviderWebsocket({
   url: 'ws://127.0.0.1:1234',
 })
 
+const $states1 = ref({})
+const $states2 = ref({})
+
 const provider = new HocuspocusProvider({
   websocketProvider: socket,
   name: 'hocuspocus-demo',
   broadcast: false,
+  onAwarenessUpdate: ({ states }) => {
+    $states1.value = states
+  },
 })
 
 const anotherProvider = new HocuspocusProvider({
   websocketProvider: socket,
   name: 'hocuspocus-demo2',
   broadcast: false,
+  onAwarenessUpdate: ({ states }) => {
+    $states2.value = states
+  },
 })
 
 const editor = new Editor({
@@ -91,9 +115,10 @@ const anotherEditor = new Editor({
     }),
   ],
 })
+
 </script>
 
-<style>
+<style >
 .ProseMirror {
   border: 1px solid grey;
   padding: 1rem;
