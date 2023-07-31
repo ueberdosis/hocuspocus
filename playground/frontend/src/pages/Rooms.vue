@@ -64,7 +64,7 @@ class Room {
       name: this.name,
       broadcast: false,
       connect: false,
-      disconnect: true,
+      preserveConnection: false,
       onStatus: ({ status }) => {
         this.status.value = status
       },

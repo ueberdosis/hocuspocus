@@ -105,7 +105,7 @@ export interface CompleteHocuspocusProviderConfiguration {
   /**
    * Pass `false` to close the connection manually.
    */
-  disconnect: boolean,
+  preserveConnection: boolean,
 }
 
 export class HocuspocusProvider extends EventEmitter {
@@ -135,7 +135,7 @@ export class HocuspocusProvider extends EventEmitter {
     onStateless: () => null,
     quiet: false,
     connect: true,
-    disconnect: false,
+    preserveConnection: true,
   }
 
   subscribedToBroadcastChannel = false
@@ -249,8 +249,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   public setConfiguration(configuration: Partial<HocuspocusProviderConfiguration> = {}): void {
-    const hasWebSocketConfig = (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url || (configuration as CompleteHocuspocusProviderWebsocketConfiguration).connect
-    if (!configuration.websocketProvider && hasWebSocketConfig) {
+    if (!configuration.websocketProvider && (configuration as CompleteHocuspocusProviderWebsocketConfiguration).url) {
       const websocketProviderConfig = configuration as CompleteHocuspocusProviderWebsocketConfiguration
 
       this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
@@ -363,7 +362,9 @@ export class HocuspocusProvider extends EventEmitter {
   disconnect() {
     this.disconnectBroadcastChannel()
     this.configuration.websocketProvider.detach(this)
-    if (this.configuration.disconnect) return this.configuration.websocketProvider.disconnect()
+    if (!this.configuration.preserveConnection) {
+      this.configuration.websocketProvider.disconnect()
+    }
   }
 
   async onOpen(event: Event) {
