@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/ueberdosis/hocuspocus/compare/v2.2.3...v2.3.0) (2023-07-31)
+
+
+### Bug Fixes
+
+* hocuspocus provider auto connect and disconnect behavior ([#663](https://github.com/ueberdosis/hocuspocus/issues/663)) ([a035c09](https://github.com/ueberdosis/hocuspocus/commit/a035c09b0da4347b0de7cdbf4cfe7f59a14b76f3))
+* remove awareness states on page unload instead of beforeunload ([#658](https://github.com/ueberdosis/hocuspocus/issues/658)) ([e1bd3f1](https://github.com/ueberdosis/hocuspocus/commit/e1bd3f1c9d9486382e1a856faac5118220a39087))
+
+
+
+
+
 ## [2.2.3](https://github.com/ueberdosis/hocuspocus/compare/v2.2.2...v2.2.3) (2023-07-14)
 
 **Note:** Version bump only for package hocuspocus
