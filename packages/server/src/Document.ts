@@ -57,7 +57,7 @@ export class Document extends Doc {
    */
   isEmpty(fieldName: string): boolean {
     // eslint-disable-next-line no-underscore-dangle
-    return !this.get(fieldName)._start || !this.get(fieldName)._map.size
+    return !this.get(fieldName)._start && !this.get(fieldName)._map.size
   }
 
   /**
