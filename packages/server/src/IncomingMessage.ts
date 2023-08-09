@@ -22,7 +22,9 @@ export class IncomingMessage {
   decoder: Decoder
 
   /**
-   * Access to the reply.
+   * Private encoder; can be undefined.
+   *
+   * Lazy creation of the encoder speeds up IncomingMessages that need only a decoder.
    */
   private encoderInternal?: Encoder
 
