@@ -31,6 +31,8 @@ export class ClientConnection {
   // this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
   private readonly documentConnections: Record<string, boolean> = {}
 
+  private readonly connections: Record<string, Connection> = {}
+
   // While the connection will be establishing messages will
   // be queued and handled later.
   private readonly incomingMessageQueue: Record<string, Uint8Array[]> = {}
@@ -116,6 +118,8 @@ export class ClientConnection {
       this.debuggerTool,
     )
 
+    this.connections[document.name] = instance
+
     instance.onClose(async (document, event) => {
       const disconnectHookPayload: onDisconnectPayload = {
         instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
@@ -127,6 +131,8 @@ export class ClientConnection {
         requestHeaders: hookPayload.request.headers,
         requestParameters: getParameters(hookPayload.request),
       }
+
+      delete this.connections[document.name]
 
       await this.hooks('onDisconnect', disconnectHookPayload)
       this.callbacks.onClose.forEach((callback => callback(document, disconnectHookPayload)))
@@ -288,6 +294,11 @@ export class ClientConnection {
       const tmpMsg = new SocketIncomingMessage(data)
 
       const documentName = decoding.readVarString(tmpMsg.decoder)
+
+      const instance = this.connections[documentName]
+      if (instance) {
+        instance.handleMessage(data)
+      }
 
       if (this.documentConnections[documentName] === true) {
         // we already have a `Connection` set up for this document
