@@ -24,15 +24,21 @@ export class IncomingMessage {
   /**
    * Access to the reply.
    */
-  encoder: Encoder
+  private encoderInternal?: Encoder
 
   constructor(input: any) {
     if (!(input instanceof Uint8Array)) {
       input = new Uint8Array(input)
     }
 
-    this.encoder = createEncoder()
     this.decoder = createDecoder(input)
+  }
+
+  get encoder() {
+    if (!this.encoderInternal) {
+      this.encoderInternal = createEncoder()
+    }
+    return this.encoderInternal
   }
 
   readVarUint8Array() {
