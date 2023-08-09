@@ -163,14 +163,12 @@ export class Connection {
 
       if (this.document.hasConnection(this)) {
         this.document.removeConnection(this)
-        clearInterval(this.pingInterval)
-
-        this.webSocket.removeListener('close', this.boundClose)
-        this.webSocket.removeListener('message', this.boundHandleMessage)
-        this.webSocket.removeListener('pong', this.boundHandlePong)
-
         this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) => callback(this.document, event))
       }
+
+      this.webSocket.removeListener('close', this.boundClose)
+      this.webSocket.removeListener('message', this.boundHandleMessage)
+      this.webSocket.removeListener('pong', this.boundHandlePong)
 
       done()
     })
