@@ -98,8 +98,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     url: '',
     // @ts-ignore
     document: undefined,
-    // @ts-ignore
-    awareness: undefined,
     WebSocketPolyfill: undefined,
     parameters: {},
     connect: true,
@@ -369,7 +367,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     }
 
     // No message received in a long time, not even your own
-    // Awareness updates, which are updated every 15 seconds.
+    // Awareness updates, which are updated every 15 seconds
+    // if awareness is enabled.
     this.closeTries += 1
     // https://bugs.webkit.org/show_bug.cgi?id=247943
     if (this.closeTries > 2) {

@@ -1,4 +1,5 @@
 import test from 'ava'
+import { AwarenessError } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
 
 test('onAwarenessUpdate callback is executed', async t => {
@@ -76,6 +77,46 @@ test('does not share awareness state with users in other documents', async t => 
       name: 'hocuspocus-completly-different-and-unrelated-document',
       onConnect() {
         anotherProvider.setAwarenessField('name', 'player2')
+      },
+    })
+  })
+})
+
+test('allows awareness to be null', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({ })
+
+    newHocuspocusProvider(server, {
+      awareness: null,
+      async onConnect() {
+        await sleep(100)
+
+        t.pass()
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('throws an error in setAwarenessFields if awareness is null', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    const provider = newHocuspocusProvider(server, {
+      awareness: null,
+      onConnect() {
+        try {
+          provider.setAwarenessField('foo', 'bar')
+          t.fail()
+        } catch (err: any) {
+          if (err instanceof AwarenessError) {
+            t.pass()
+          } else {
+            t.fail()
+          }
+        } finally {
+          resolve('done')
+        }
       },
     })
   })

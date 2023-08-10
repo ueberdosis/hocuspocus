@@ -59,7 +59,7 @@ export interface CompleteHocuspocusProviderConfiguration {
   /**
    * An Awareness instance to keep the presence state of all clients.
    */
-  awareness: Awareness,
+  awareness: Awareness | null,
   /**
    * A token that’s sent to the backend for authentication purposes.
    */
@@ -106,6 +106,10 @@ export interface CompleteHocuspocusProviderConfiguration {
    * Pass `false` to close the connection manually.
    */
   preserveConnection: boolean,
+}
+
+export class AwarenessError extends Error {
+  code = 1001
 }
 
 export class HocuspocusProvider extends EventEmitter {
@@ -163,7 +167,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.setConfiguration(configuration)
 
     this.configuration.document = configuration.document ? configuration.document : new Y.Doc()
-    this.configuration.awareness = configuration.awareness ? configuration.awareness : new Awareness(this.document)
+    this.configuration.awareness = configuration.awareness !== undefined ? configuration.awareness : new Awareness(this.document)
 
     this.on('open', this.configuration.onOpen)
     this.on('message', this.configuration.onMessage)
@@ -197,16 +201,16 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.on('destroy', this.configuration.onDestroy)
     this.configuration.websocketProvider.on('destroy', this.forwardDestroy)
 
-    this.awareness.on('update', () => {
-      this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) })
+    this.awareness?.on('update', () => {
+      this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness!.getStates()) })
     })
 
-    this.awareness.on('change', () => {
-      this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) })
+    this.awareness?.on('change', () => {
+      this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness!.getStates()) })
     })
 
     this.document.on('update', this.documentUpdateHandler.bind(this))
-    this.awareness.on('update', this.awarenessUpdateHandler.bind(this))
+    this.awareness?.on('update', this.awarenessUpdateHandler.bind(this))
     this.registerEventListeners()
 
     if (this.configuration.forceSyncInterval) {
@@ -292,7 +296,9 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   pageUnload() {
-    removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
+    if (this.awareness) {
+      removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
+    }
   }
 
   registerEventListeners() {
@@ -395,7 +401,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.incrementUnsyncedChanges()
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
-    if (this.awareness.getLocalState() !== null) {
+    if (this.awareness && this.awareness.getLocalState() !== null) {
       this.send(AwarenessMessage, {
         awareness: this.awareness,
         clients: [this.document.clientID],
@@ -440,11 +446,13 @@ export class HocuspocusProvider extends EventEmitter {
     this.synced = false
 
     // update awareness (all users except local left)
-    removeAwarenessStates(
-      this.awareness,
-      Array.from(this.awareness.getStates().keys()).filter(client => client !== this.document.clientID),
-      this,
-    )
+    if (this.awareness) {
+      removeAwarenessStates(
+        this.awareness,
+        Array.from(this.awareness.getStates().keys()).filter(client => client !== this.document.clientID),
+        this,
+      )
+    }
   }
 
   destroy() {
@@ -454,11 +462,13 @@ export class HocuspocusProvider extends EventEmitter {
       clearInterval(this.intervals.forceSync)
     }
 
-    removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+    if (this.awareness) {
+      removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+    }
 
     this.disconnect()
 
-    this.awareness.off('update', this.awarenessUpdateHandler)
+    this.awareness?.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
@@ -530,18 +540,22 @@ export class HocuspocusProvider extends EventEmitter {
       this.broadcast(SyncStepOneMessage, { document: this.document })
       this.broadcast(SyncStepTwoMessage, { document: this.document })
       this.broadcast(QueryAwarenessMessage, { document: this.document })
-      this.broadcast(AwarenessMessage, { awareness: this.awareness, clients: [this.document.clientID], document: this.document })
+      if (this.awareness) {
+        this.broadcast(AwarenessMessage, { awareness: this.awareness, clients: [this.document.clientID], document: this.document })
+      }
     })
   }
 
   disconnectBroadcastChannel() {
     // broadcast message with local awareness state set to null (indicating disconnect)
-    this.send(AwarenessMessage, {
-      awareness: this.awareness,
-      clients: [this.document.clientID],
-      states: new Map(),
-      documentName: this.configuration.name,
-    }, true)
+    if (this.awareness) {
+      this.send(AwarenessMessage, {
+        awareness: this.awareness,
+        clients: [this.document.clientID],
+        states: new Map(),
+        documentName: this.configuration.name,
+      }, true)
+    }
 
     if (this.subscribedToBroadcastChannel) {
       bc.unsubscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber)
@@ -562,6 +576,9 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   setAwarenessField(key: string, value: any) {
+    if (!this.awareness) {
+      throw new AwarenessError(`Cannot set awareness field "${key}" to ${JSON.stringify(value)}. You have disabled Awareness for this provider by explicitly passing awareness: null in the provider configuration.`)
+    }
     this.awareness.setLocalStateField(key, value)
   }
 }
