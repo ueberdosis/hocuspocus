@@ -22,17 +22,25 @@ export class IncomingMessage {
   decoder: Decoder
 
   /**
-   * Access to the reply.
+   * Private encoder; can be undefined.
+   *
+   * Lazy creation of the encoder speeds up IncomingMessages that need only a decoder.
    */
-  encoder: Encoder
+  private encoderInternal?: Encoder
 
   constructor(input: any) {
     if (!(input instanceof Uint8Array)) {
       input = new Uint8Array(input)
     }
 
-    this.encoder = createEncoder()
     this.decoder = createDecoder(input)
+  }
+
+  get encoder() {
+    if (!this.encoderInternal) {
+      this.encoderInternal = createEncoder()
+    }
+    return this.encoderInternal
   }
 
   readVarUint8Array() {
