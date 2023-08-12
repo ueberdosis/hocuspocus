@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.4.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.3.1...v2.4.0-rc.0) (2023-08-12)
+
+
+### Bug Fixes
+
+* check if ymap is empty ([#666](https://github.com/ueberdosis/hocuspocus/issues/666)) ([4450372](https://github.com/ueberdosis/hocuspocus/commit/4450372e7bff40693d32aa6b6c425dcfdb868ded))
+
+
+
+
+
 ## [2.3.1](https://github.com/ueberdosis/hocuspocus/compare/v2.3.0...v2.3.1) (2023-08-01)
 
 **Note:** Version bump only for package @hocuspocus/server
