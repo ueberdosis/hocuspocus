@@ -19,10 +19,10 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run publish
-        if: !contains(github.ref, '-rc.')
+        if: "!contains(github.ref, '-rc.')"
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - run: npm run publish:pre
-        if: contains(github.ref, '-rc.')
+        if: "contains(github.ref, '-rc.')"
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
