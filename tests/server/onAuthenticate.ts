@@ -1,7 +1,9 @@
 import test from 'ava'
 import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.js'
+import {
+  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+} from '../utils'
 import { retryableAssertion } from '../utils/retryableAssertion.js'
 
 test('executes the onAuthenticate callback', async t => {
@@ -207,25 +209,28 @@ test('has the authentication token', async t => {
   })
 })
 
-test('stops when the onAuthenticate hook throws an Error', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onAuthenticate() {
-        throw new Error()
-      },
-      // MUST NOT BE CALLED
-      async onLoadDocument() {
-        t.fail('WARNING: When onAuthenticate fails onLoadDocument must not be called.')
-      },
-    })
+test('disconnects provider when the onAuthenticate hook throws an Error', async t => {
+  const server = await newHocuspocus({
+    async onAuthenticate() {
+      throw new Error()
+    },
+    // MUST NOT BE CALLED
+    async onLoadDocument() {
+      t.fail('WARNING: When onAuthenticate fails onLoadDocument must not be called.')
+    },
+  })
 
-    newHocuspocusProvider(server, {
-      onClose() {
-        t.pass()
-        resolve('done')
-      },
-      token: 'SUPER-SECRET-TOKEN',
-    })
+  const provider = newHocuspocusProvider(server, {
+    onClose() {
+      t.fail()
+    },
+    token: 'SUPER-SECRET-TOKEN',
+  })
+
+  await retryableAssertion(t, tt => {
+    tt.is(provider.status, WebSocketStatus.Disconnected)
+    tt.is(server.getDocumentsCount(), 0)
+    tt.is(server.getConnectionsCount(), 0)
   })
 })
 
@@ -295,20 +300,22 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 
   const socket = newHocuspocusProviderWebsocket(server)
 
-  const providerOK = newHocuspocusProvider(server, {
-    websocketProvider: socket,
-    token: requiredToken,
-    name: docName,
-    onAuthenticationFailed() {
-      t.fail()
-    },
-  })
-
   const providerFail = newHocuspocusProvider(server, {
     websocketProvider: socket,
     token: 'wrongToken',
     name: 'otherDocu',
     onAuthenticated() {
+      t.fail()
+    },
+  })
+
+  await sleep(100)
+
+  const providerOK = newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    token: requiredToken,
+    name: docName,
+    onAuthenticationFailed() {
       t.fail()
     },
   })

@@ -273,19 +273,7 @@ export class ClientConnection {
           category: message.category,
         })
 
-        // Ensure that the permission denied message is sent before the
-        // connection is closed
-        this.websocket.send(message.toUint8Array(), () => {
-          if (Object.keys(this.documentConnections).length === 0) {
-            try {
-              this.websocket.close(error.code ?? Forbidden.code, error.reason ?? Forbidden.reason)
-            } catch (closeError) {
-              // catch is needed in case invalid error code is returned by hook (that would fail sending the close message)
-              console.error(closeError)
-              this.websocket.close(Forbidden.code, Forbidden.reason)
-            }
-          }
-        })
+        this.websocket.send(message.toUint8Array())
       }
 
       // Catch errors due to failed decoding of data
