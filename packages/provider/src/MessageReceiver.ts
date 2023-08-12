@@ -97,6 +97,8 @@ export class MessageReceiver {
   }
 
   private applyAwarenessMessage(provider: HocuspocusProvider) {
+    if (!provider.awareness) return
+
     const { message } = this
 
     awarenessProtocol.applyAwarenessUpdate(
@@ -117,6 +119,8 @@ export class MessageReceiver {
   }
 
   private applyQueryAwarenessMessage(provider: HocuspocusProvider) {
+    if (!provider.awareness) return
+
     const { message } = this
 
     message.writeVarUint(MessageType.Awareness)
