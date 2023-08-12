@@ -53,11 +53,11 @@ export class Document extends Doc {
   }
 
   /**
-   * Check if the Document is empty
+   * Check if the Document (XMLFragment or Map) is empty
    */
   isEmpty(fieldName: string): boolean {
     // eslint-disable-next-line no-underscore-dangle
-    return !this.get(fieldName)._start
+    return !this.get(fieldName)._start && !this.get(fieldName)._map.size
   }
 
   /**
