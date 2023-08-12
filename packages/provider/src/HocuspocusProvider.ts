@@ -58,6 +58,11 @@ export interface CompleteHocuspocusProviderConfiguration {
   broadcast: boolean,
   /**
    * An Awareness instance to keep the presence state of all clients.
+   *
+   * You can disable sharing awareness information by passing `null`.
+   * Note that having no awareness information shared across all connections will break our ping checks
+   * and thus trigger reconnects. You should always have at least one Provider with enabled awareness per
+   * socket connection, or ensure that the Provider receives messages before running into `HocuspocusProviderWebsocket.messageReconnectTimeout`.
    */
   awareness: Awareness | null,
   /**
