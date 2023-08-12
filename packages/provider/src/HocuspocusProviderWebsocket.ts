@@ -356,7 +356,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       return
     }
 
-    // Don’t close then connection while waiting for the first message
+    // Don’t close the connection while waiting for the first message
     if (!this.lastMessageReceived) {
       return
     }
