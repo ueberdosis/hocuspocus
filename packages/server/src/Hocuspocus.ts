@@ -284,7 +284,7 @@ export class Hocuspocus {
     console.log(`  > WebSocket: ${this.webSocketURL}`)
 
     const extensions = this.configuration?.extensions.map(extension => {
-      return extension.constructor?.name
+      return extension.extensionName ?? extension.constructor?.name
     })
       .filter(name => name)
       .filter(name => name !== 'Object')
