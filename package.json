@@ -52,7 +52,7 @@
     "release:minor:pre": "lerna version preminor --force-publish --preid rc",
     "release:patch": "lerna version patch --force-publish",
     "release:patch:pre": "lerna version prepatch --force-publish --preid rc",
-    "release:pre": "echo 'doesnt work yet'; exit 1; lerna version prerelease --force-publish --preid rc",
+    "release:pre": "lerna version prerelease --force-publish --preid rc",
     "publish": "npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
     "publish:pre": "npm run build:packages && lerna exec --since --no-private -- npm publish --tag next --access public",
     "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
