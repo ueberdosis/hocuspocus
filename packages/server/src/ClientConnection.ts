@@ -29,7 +29,7 @@ import { getParameters } from './util/getParameters.js'
  */
 export class ClientConnection {
   // this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
-  private readonly documentConnections: Record<string, boolean> = {}
+  private readonly documentConnections: Record<string, Connection> = {}
 
   // While the connection will be establishing messages will
   // be queued and handled later.
@@ -193,7 +193,7 @@ export class ClientConnection {
       }
     })
 
-    this.documentConnections[documentName] = true
+    this.documentConnections[documentName] = instance
 
     // There’s no need to queue messages anymore.
     // Let’s work through queued messages.
@@ -289,7 +289,11 @@ export class ClientConnection {
 
       const documentName = decoding.readVarString(tmpMsg.decoder)
 
-      if (this.documentConnections[documentName] === true) {
+      const connection = this.documentConnections[documentName]
+      if (connection) {
+        // forward the message to the connection
+        connection.handleMessage(data)
+
         // we already have a `Connection` set up for this document
         return
       }
