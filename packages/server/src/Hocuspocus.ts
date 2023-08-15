@@ -1,13 +1,14 @@
-import { Server as HTTPServer, IncomingMessage, createServer } from 'http'
+import { IncomingMessage } from 'http'
 import { ListenOptions } from 'net'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import kleur from 'kleur'
 import { v4 as uuid } from 'uuid'
-import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
+import WebSocket, { AddressInfo } from 'ws'
 import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' assert { type: 'json' }
+import { Server as HocuspocusServer } from './Server'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
 import Connection from './Connection.js'
@@ -69,9 +70,7 @@ export class Hocuspocus {
 
   documents: Map<string, Document> = new Map()
 
-  httpServer?: HTTPServer
-
-  webSocketServer?: WebSocketServer
+  server?: HocuspocusServer
 
   debugger = new Debugger()
 
@@ -163,74 +162,10 @@ export class Hocuspocus {
       })
     }
 
-    const webSocketServer = new WebSocketServer({ noServer: true })
-
-    webSocketServer.on('connection', async (incoming: WebSocket, request: IncomingMessage) => {
-
-      incoming.on('error', error => {
-        /**
-         * Handle a ws instance error, which is required to prevent
-         * the server from crashing when one happens
-         * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
-         * @private
-         */
-        this.debugger.log('Error emitted from webSocket instance:')
-        this.debugger.log(error)
-      })
-
-      this.handleConnection(incoming, request)
-    })
-
-    const server = createServer(async (request, response) => {
-      try {
-        await this.hooks('onRequest', { request, response, instance: this })
-
-        // default response if all prior hooks don't interfere
-        response.writeHead(200, { 'Content-Type': 'text/plain' })
-        response.end('OK')
-      } catch (error) {
-        // if a hook rejects and the error is empty, do nothing
-        // this is only meant to prevent later hooks and the
-        // default handler to do something. if a error is present
-        // just rethrow it
-        if (error) {
-          throw error
-        }
-      }
-    })
-
-    server.on('upgrade', async (request, socket, head) => {
-      try {
-        await this.hooks('onUpgrade', {
-          request,
-          socket,
-          head,
-          instance: this,
-        })
-
-        // let the default websocket server handle the connection if
-        // prior hooks don't interfere
-        webSocketServer.handleUpgrade(request, socket, head, ws => {
-          webSocketServer.emit('connection', ws, request)
-        })
-      } catch (error) {
-        // if a hook rejects and the error is empty, do nothing
-        // this is only meant to prevent later hooks and the
-        // default handler to do something. if a error is present
-        // just rethrow it
-
-        // TODO: why?
-        if (error) {
-          throw error
-        }
-      }
-    })
-
-    this.httpServer = server
-    this.webSocketServer = webSocketServer
+    this.server = new HocuspocusServer(this)
 
     return new Promise((resolve: Function, reject: Function) => {
-      server.listen({
+      this.server?.httpServer.listen({
         port: this.configuration.port,
         host: this.configuration.address,
       } as ListenOptions, async () => {
@@ -255,7 +190,7 @@ export class Hocuspocus {
   }
 
   get address(): AddressInfo {
-    return (this.httpServer?.address() || {
+    return (this.server?.httpServer?.address() || {
       port: this.configuration.port,
       address: this.configuration.address,
       family: 'IPv4',
@@ -346,16 +281,15 @@ export class Hocuspocus {
    * Destroy the server
    */
   async destroy(): Promise<any> {
-    this.httpServer?.close()
+    this.server?.httpServer?.close()
 
     try {
-      this.webSocketServer?.close()
-      this.webSocketServer?.clients.forEach(client => {
+      this.server?.webSocketServer?.close()
+      this.server?.webSocketServer?.clients.forEach(client => {
         client.terminate()
       })
     } catch (error) {
       console.error(error)
-      //
     }
 
     this.debugger.flush()
@@ -370,7 +304,7 @@ export class Hocuspocus {
    *  - onConnect for all connections
    *  - onAuthenticate only if required
    *
-   * … and if nothings fails it’ll fully establish the connection and
+   * … and if nothing fails it’ll fully establish the connection and
    * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
