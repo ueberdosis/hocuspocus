@@ -1,4 +1,6 @@
 import test from 'ava'
+import * as Y from 'yjs'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
 
 test('direct connection prevents document from being removed from memory', async t => {
@@ -18,6 +20,66 @@ test('direct connection prevents document from being removed from memory', async
         })
       },
     })
+  })
+})
+test('direct connection works even if provider is connected', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        provider.document.getMap('config').set('a', 'valueFromProvider')
+      },
+    })
+
+    await sleep(100)
+
+    const directConnection = await server.openDirectConnection('hocuspocus-test')
+    await directConnection.transact(doc => {
+      t.is('valueFromProvider', String(doc.getMap('config').get('a')))
+      doc.getMap('config').set('b', 'valueFromServerDirectConnection')
+    })
+
+    await sleep(100)
+    t.is('valueFromServerDirectConnection', String(provider.document.getMap('config').get('b')))
+
+    resolve(1)
+    t.pass()
+  })
+})
+
+test('direct connection can apply yjsUpdate', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    const provider = newHocuspocusProvider(server)
+
+    t.is('', provider.document.getXmlFragment('default').toJSON())
+
+    const directConnection = await server.openDirectConnection('hocuspocus-test')
+    await directConnection.transact(doc => {
+      Y.applyUpdate(doc, Y.encodeStateAsUpdate(TiptapTransformer.toYdoc({
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Example Paragraph',
+              },
+            ],
+          },
+        ],
+      })))
+    })
+
+    await sleep(100)
+
+    t.is('<paragraph>Example Paragraph</paragraph>', provider.document.getXmlFragment('default').toJSON())
+
+    resolve(1)
+    t.pass()
   })
 })
 
