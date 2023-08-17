@@ -395,7 +395,7 @@ test('waits before calling onStoreDocument after the last user disconnects when 
       },
     })
 
-    const socket = newHocuspocusProviderWebsocket(server);
+    const socket = newHocuspocusProviderWebsocket(server)
 
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,

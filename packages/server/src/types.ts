@@ -152,7 +152,7 @@ export interface Configuration extends Extension {
    * Function which returns the (customized) document name based on the request
    */
   getDocumentName?(data: getDocumentNamePayload): string | Promise<string>,
-  
+
 }
 
 export interface getDocumentNamePayload {
