@@ -542,7 +542,7 @@ You still can store a JSON/HTML document, but see it more as a “view” on you
 
 You can create a Y.js document from your existing data, for example JSON. You should use this to migrate data only, not as a permanent way to store your data.
 
-To do this, you can use the Transformer package. For Tiptap-compatible JSON it would look like that:
+To do this, you can use the Transformer package. For Tiptap-compatible JSON it would look like this:
 
 ```js
 import { Server } from "@hocuspocus/server";
