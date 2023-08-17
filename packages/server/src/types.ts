@@ -132,6 +132,14 @@ export interface Configuration extends Extension {
    * By default, the servers show a start screen. If passed false, the server will start quietly.
    */
   quiet: boolean,
+  /**
+   * If set to false, respects the debounce time of `onStoreDocument` before unloading a document.
+   * Otherwise, the document will be unloaded immediately.
+   *
+   * This prevents a client from DOSing the server by repeatedly connecting and disconnecting when
+   * your onStoreDocument is rate-limited.
+   */
+  unloadImmediately: boolean,
 
   /**
    * options to pass to the ydoc document
@@ -144,6 +152,7 @@ export interface Configuration extends Extension {
    * Function which returns the (customized) document name based on the request
    */
   getDocumentName?(data: getDocumentNamePayload): string | Promise<string>,
+  
 }
 
 export interface getDocumentNamePayload {

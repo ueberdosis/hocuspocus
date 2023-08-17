@@ -375,3 +375,34 @@ test('if a connection connects while another disconnects onStoreDocument is stil
   })
 
 })
+
+test('waits before calling onStoreDocument after the last user disconnects when configured', async t => {
+  await new Promise(async resolve => {
+    let startTime = 0
+    const server = await newHocuspocus({
+      unloadImmediately: false,
+      debounce: 500,
+      async onStoreDocument() {
+        const endTime = Date.now()
+        if (startTime === 0) {
+          t.fail('startTime not set')
+        } else if (endTime - startTime < 500) {
+          t.fail('did not wait 500ms to call onStoreDocument when closing')
+        } else {
+          t.pass()
+        }
+        resolve('done')
+      },
+    })
+
+    const socket = newHocuspocusProviderWebsocket(server);
+
+    const provider = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      onSynced() {
+        startTime = Date.now()
+        socket.destroy()
+      },
+    })
+  })
+})

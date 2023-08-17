@@ -41,6 +41,7 @@ export const defaultConfiguration = {
     gc: true,
     gcFilter: () => true,
   },
+  unloadImmediately: true,
 }
 
 /**
@@ -323,13 +324,13 @@ export class Hocuspocus {
 
       // If it’s the last connection, we need to make sure to store the
       // document. Use the debounce helper, to clear running timers,
-      // but make it run immediately (`true`).
+      // but make it run immediately if configured.
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
         this.debounce(`onStoreDocument-${document.name}`, () => {
           this.storeDocumentHooks(document, hookPayload)
-        }, true)
+        }, this.configuration.unloadImmediately)
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
