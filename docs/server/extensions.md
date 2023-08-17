@@ -43,7 +43,7 @@ Expects an async function (or Promise) which persists the Y.js binary data somew
 
 ### Usage
 
-The following example uses SQLite to store and retrieve data. You can replace that part with whatever data store you have. As long as you return a Promise you can store data with PostgreSQL, MySQL, MongoDB, S3 … If you actually want to use SQLite, you can have a look at the [SQLite extension](/server/extensions#Sqlite).
+The following example uses SQLite to store and retrieve data. You can replace that part with whatever data store you have. As long as you return a Promise you can store data with PostgreSQL, MySQL, MongoDB, S3 … If you actually want to use SQLite, you can have a look at the [SQLite extension](/server/extensions#sq-lite).
 
 ```js
 import { Server } from "@hocuspocus/server";
