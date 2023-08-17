@@ -290,7 +290,12 @@ export class Redis implements Extension {
    * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
    */
   public async onChange(data: onChangePayload): Promise<any> {
-    return this.publishFirstSyncStep(data.documentName, data.document)
+    const { documentName } = data
+    const updateMessage = new OutgoingMessage(documentName)
+      .createSyncMessage()
+      .writeUpdate(data.update)
+
+    return this.pub.publishBuffer(this.pubKey(documentName), Buffer.from(updateMessage.toUint8Array()))
   }
 
   /**
