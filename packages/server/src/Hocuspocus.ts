@@ -28,8 +28,6 @@ import { getParameters } from './util/getParameters.js'
 
 export const defaultConfiguration = {
   name: null,
-  port: 80,
-  address: '0.0.0.0',
   timeout: 30000,
   debounce: 2000,
   maxDebounce: 10000,

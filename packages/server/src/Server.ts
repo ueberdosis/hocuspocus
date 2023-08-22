@@ -8,6 +8,16 @@ import meta from '../package.json' assert { type: 'json' }
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus'
 import { Configuration, onListenPayload } from './types'
 
+export interface ServerConfiguration extends Configuration {
+  port?: number,
+  address?: string,
+}
+
+export const defaultServerConfiguration = {
+  port: 80,
+  address: '0.0.0.0',
+}
+
 export class Server {
   httpServer: HTTPServer
 
@@ -15,12 +25,13 @@ export class Server {
 
   hocuspocus: Hocuspocus
 
-  configuration: Configuration = {
+  configuration: ServerConfiguration = {
     ...defaultConfiguration,
+    ...defaultServerConfiguration,
     extensions: [],
   }
 
-  constructor(configuration?: Partial<Configuration>) {
+  constructor(configuration?: Partial<ServerConfiguration>) {
     if (configuration) {
       this.configuration = {
         ...this.configuration,
@@ -30,6 +41,7 @@ export class Server {
 
     this.hocuspocus = new Hocuspocus(this.configuration)
     this.hocuspocus.server = this
+
     this.httpServer = createServer(this.requestHandler)
     this.webSocketServer = new WebSocketServer({ noServer: true })
 
@@ -105,16 +117,9 @@ export class Server {
   async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
     if (port) {
       this.configuration.port = port
-      // TODO: This does probably not work.
-      this.hocuspocus.configuration.port = port
     }
 
     if (typeof callback === 'function') {
-      this.configuration.extensions.push({
-        onListen: callback,
-      })
-
-      // TODO: Do we need the onListen callback actually? or can we remove it totally from hocuspocus? Only the server is listening.
       this.hocuspocus.configuration.extensions.push({
         onListen: callback,
       })

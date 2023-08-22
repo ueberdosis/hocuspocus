@@ -109,14 +109,6 @@ export interface Configuration extends Extension {
    */
   extensions: Array<Extension>,
   /**
-   * The port which the server listens on.
-   */
-  port?: number,
-  /**
-   * The address which the server listens on.
-   */
-  address?: string,
-  /**
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
   timeout: number,
