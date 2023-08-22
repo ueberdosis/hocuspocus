@@ -1,14 +1,12 @@
 import { IncomingMessage } from 'http'
-import { ListenOptions } from 'net'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
-import kleur from 'kleur'
 import { v4 as uuid } from 'uuid'
-import WebSocket, { AddressInfo } from 'ws'
+import WebSocket from 'ws'
 import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' assert { type: 'json' }
-import { Server as HocuspocusServer } from './Server'
+import { Server } from './Server'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
 import Connection from './Connection.js'
@@ -24,7 +22,6 @@ import {
   beforeBroadcastStatelessPayload,
   onChangePayload,
   onDisconnectPayload,
-  onListenPayload,
   onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
@@ -70,7 +67,7 @@ export class Hocuspocus {
 
   documents: Map<string, Document> = new Map()
 
-  server?: HocuspocusServer
+  server?: Server
 
   debugger = new Debugger()
 
@@ -81,7 +78,7 @@ export class Hocuspocus {
   }
 
   /**
-   * Configure the server
+   * Configure Hocuspocus
    */
   configure(configuration: Partial<Configuration>): Hocuspocus {
     this.configuration = {
@@ -137,108 +134,6 @@ export class Hocuspocus {
     return !!this.configuration.extensions.find(extension => {
       return extension.onAuthenticate !== undefined
     })
-  }
-
-  /**
-   * Start the server
-   */
-  async listen(
-    portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
-    callback: any = null,
-  ): Promise<Hocuspocus> {
-    if (typeof portOrCallback === 'number') {
-      this.configuration.port = portOrCallback
-    }
-
-    if (typeof portOrCallback === 'function') {
-      this.configuration.extensions.push({
-        onListen: portOrCallback,
-      })
-    }
-
-    if (typeof callback === 'function') {
-      this.configuration.extensions.push({
-        onListen: callback,
-      })
-    }
-
-    this.server = new HocuspocusServer(this)
-
-    return new Promise((resolve: Function, reject: Function) => {
-      this.server?.httpServer.listen({
-        port: this.configuration.port,
-        host: this.configuration.address,
-      } as ListenOptions, async () => {
-        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
-          this.showStartScreen()
-        }
-
-        const onListenPayload = {
-          instance: this,
-          configuration: this.configuration,
-          port: this.address.port,
-        }
-
-        try {
-          await this.hooks('onListen', onListenPayload)
-          resolve(this)
-        } catch (e) {
-          reject(e)
-        }
-      })
-    })
-  }
-
-  get address(): AddressInfo {
-    return (this.server?.httpServer?.address() || {
-      port: this.configuration.port,
-      address: this.configuration.address,
-      family: 'IPv4',
-    }) as AddressInfo
-  }
-
-  get URL(): string {
-    return `${this.configuration.address}:${this.address.port}`
-  }
-
-  get webSocketURL(): string {
-    return `ws://${this.URL}`
-  }
-
-  get httpURL(): string {
-    return `http://${this.URL}`
-  }
-
-  private showStartScreen() {
-    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
-
-    console.log()
-    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
-    console.log()
-    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
-    console.log(`  > WebSocket: ${this.webSocketURL}`)
-
-    const extensions = this.configuration?.extensions.map(extension => {
-      return extension.extensionName ?? extension.constructor?.name
-    })
-      .filter(name => name)
-      .filter(name => name !== 'Object')
-
-    if (!extensions.length) {
-      return
-    }
-
-    console.log()
-    console.log('  Extensions:')
-
-    extensions
-      .forEach(name => {
-        console.log(`  - ${name}`)
-      })
-
-    console.log()
-    console.log(`  ${kleur.green('Ready.')}`)
-    console.log()
   }
 
   /**
@@ -587,5 +482,3 @@ export class Hocuspocus {
     return new DirectConnection(document, this, context)
   }
 }
-
-export const Server = new Hocuspocus()

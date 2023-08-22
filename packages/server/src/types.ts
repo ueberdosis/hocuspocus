@@ -98,6 +98,7 @@ export type HookPayloadByName = {
   afterUnloadDocument: afterUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
 }
+
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.

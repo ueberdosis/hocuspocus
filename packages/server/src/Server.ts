@@ -1,8 +1,12 @@
 import {
   createServer, IncomingMessage, Server as HTTPServer, ServerResponse,
 } from 'http'
-import WebSocket, { WebSocketServer } from 'ws'
-import { Hocuspocus } from './Hocuspocus'
+import { ListenOptions } from 'net'
+import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
+import kleur from 'kleur'
+import meta from '../package.json' assert { type: 'json' }
+import { defaultConfiguration, Hocuspocus } from './Hocuspocus'
+import { Configuration, onListenPayload } from './types'
 
 export class Server {
   httpServer: HTTPServer
@@ -11,8 +15,21 @@ export class Server {
 
   hocuspocus: Hocuspocus
 
-  constructor(hocuspocus: Hocuspocus) {
-    this.hocuspocus = hocuspocus
+  configuration: Configuration = {
+    ...defaultConfiguration,
+    extensions: [],
+  }
+
+  constructor(configuration?: Partial<Configuration>) {
+    if (configuration) {
+      this.configuration = {
+        ...this.configuration,
+        ...configuration,
+      }
+    }
+
+    this.hocuspocus = new Hocuspocus(this.configuration)
+    this.hocuspocus.server = this
     this.httpServer = createServer(this.requestHandler)
     this.webSocketServer = new WebSocketServer({ noServer: true })
 
@@ -83,5 +100,101 @@ export class Server {
         throw error
       }
     }
+  }
+
+  async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
+    if (port) {
+      this.configuration.port = port
+      // TODO: This does probably not work.
+      this.hocuspocus.configuration.port = port
+    }
+
+    if (typeof callback === 'function') {
+      this.configuration.extensions.push({
+        onListen: callback,
+      })
+
+      // TODO: Do we need the onListen callback actually? or can we remove it totally from hocuspocus? Only the server is listening.
+      this.hocuspocus.configuration.extensions.push({
+        onListen: callback,
+      })
+    }
+
+    return new Promise((resolve: Function, reject: Function) => {
+      this.httpServer.listen({
+        port: this.configuration.port,
+        address: this.configuration.address,
+      } as ListenOptions, async () => {
+        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
+          this.showStartScreen()
+        }
+
+        const onListenPayload = {
+          instance: this.hocuspocus,
+          configuration: this.configuration,
+          port: this.address.port,
+        } as onListenPayload
+
+        try {
+          await this.hocuspocus.hooks('onListen', onListenPayload)
+          resolve(this.hocuspocus)
+        } catch (e) {
+          reject(e)
+        }
+      })
+    })
+  }
+
+  get address(): AddressInfo {
+    return (this.httpServer.address() || {
+      port: this.configuration.port,
+      address: this.configuration.address,
+      family: 'IPv4',
+    }) as AddressInfo
+  }
+
+  get URL(): string {
+    return `${this.configuration.address}:${this.configuration.port}`
+  }
+
+  get webSocketURL(): string {
+    return `ws://${this.URL}`
+  }
+
+  get httpURL(): string {
+    return `http://${this.URL}`
+  }
+
+  private showStartScreen() {
+    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
+
+    console.log()
+    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
+    console.log()
+
+    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
+    console.log(`  > WebSocket: ${this.webSocketURL}`)
+
+    const extensions = this.configuration?.extensions.map(extension => {
+      return extension.extensionName ?? extension.constructor?.name
+    })
+      .filter(name => name)
+      .filter(name => name !== 'Object')
+
+    if (!extensions.length) {
+      return
+    }
+
+    console.log()
+    console.log('  Extensions:')
+
+    extensions
+      .forEach(name => {
+        console.log(`  - ${name}`)
+      })
+
+    console.log()
+    console.log(`  ${kleur.green('Ready.')}`)
+    console.log()
   }
 }
