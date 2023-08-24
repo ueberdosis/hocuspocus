@@ -25,7 +25,7 @@ export class DirectConnection implements DirectConnectionInterface {
     this.document.addDirectConnection()
   }
 
-  async transact(transaction: (document: Document) => void) {
+  async transact(transaction: (document: Document) => void, transactionOrigin?: any) {
     if (!this.document) {
       throw new Error('direct connection closed')
     }
@@ -41,6 +41,7 @@ export class DirectConnection implements DirectConnectionInterface {
       requestHeaders: {},
       requestParameters: new URLSearchParams(),
       socketId: 'server',
+      transactionOrigin,
     })
   }
 
