@@ -233,6 +233,7 @@ export interface onChangePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+  transactionOrigin?: any,
 }
 
 export interface beforeHandleMessagePayload {
@@ -263,6 +264,7 @@ export interface onStoreDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
+  transactionOrigin?: any,
 }
 
 export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
