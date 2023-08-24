@@ -148,17 +148,7 @@ export interface Configuration extends Extension {
     gc: boolean, // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
     gcFilter: () => boolean, // will be called before garbage collecting ; return false to keep it
   },
-  /**
-   * Function which returns the (customized) document name based on the request
-   */
-  getDocumentName?(data: getDocumentNamePayload): string | Promise<string>,
 
-}
-
-export interface getDocumentNamePayload {
-  documentName: string,
-  request: IncomingMessage,
-  requestParameters: URLSearchParams,
 }
 
 export interface onStatelessPayload {
