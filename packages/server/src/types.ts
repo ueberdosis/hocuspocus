@@ -233,7 +233,7 @@ export interface onChangePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
-  transactionOrigin?: any,
+  transactionOrigin: any,
 }
 
 export interface beforeHandleMessagePayload {
