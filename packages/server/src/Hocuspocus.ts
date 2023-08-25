@@ -36,6 +36,7 @@ export const defaultConfiguration = {
     gc: true,
     gcFilter: () => true,
   },
+  unloadImmediately: true,
 }
 
 /**
@@ -216,13 +217,13 @@ export class Hocuspocus {
 
       // If it’s the last connection, we need to make sure to store the
       // document. Use the debounce helper, to clear running timers,
-      // but make it run immediately (`true`).
+      // but make it run immediately if configured.
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
         this.debounce(`onStoreDocument-${document.name}`, () => {
           this.storeDocumentHooks(document, hookPayload)
-        }, true)
+        }, this.configuration.unloadImmediately)
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
@@ -232,6 +233,9 @@ export class Hocuspocus {
 
   /**
    * Handle update of the given document
+   *
+   * "connection" is not necessarily type "Connection", it's the Yjs "origin" (which is "Connection" if
+   * the update is incoming from the provider, but can be anything if the updates is originated from an extension.
    */
   private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
     const hookPayload: onChangePayload | onStoreDocumentPayload = {
@@ -244,6 +248,7 @@ export class Hocuspocus {
       requestParameters: getParameters(request),
       socketId: connection?.socketId ?? '',
       update,
+      transactionOrigin: connection,
     }
 
     this.hooks('onChange', hookPayload).catch(error => {
