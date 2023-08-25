@@ -5,7 +5,7 @@ import { newHocuspocus } from '../utils/index.js'
 
 test('executes the onRequest callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onRequest({ request }: onRequestPayload) {
         t.is(request.url, '/foobar')
 
@@ -13,7 +13,7 @@ test('executes the onRequest callback', async t => {
       },
     })
 
-    await fetch(`${server.httpURL}/foobar`)
+    await fetch(`${hocuspocus.server!.httpURL}/foobar`)
   })
 })
 
@@ -31,13 +31,13 @@ test('executes the onRequest callback of a custom extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    const response = await fetch(server.httpURL)
+    const response = await fetch(hocuspocus.server!.httpURL)
     t.is(await response.text(), 'I like cats.')
     resolve('done')
   })
@@ -45,7 +45,7 @@ test('executes the onRequest callback of a custom extension', async t => {
 
 test('can intercept specific URLs', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onRequest({ response, request }: onRequestPayload) {
         if (request.url === '/foobar') {
           return new Promise((resolve, reject) => {
@@ -59,10 +59,10 @@ test('can intercept specific URLs', async t => {
       },
     })
 
-    const interceptedResponse = await fetch(`${server.httpURL}/foobar`)
+    const interceptedResponse = await fetch(`${hocuspocus.server!.httpURL}/foobar`)
     t.is(await interceptedResponse.text(), 'I like cats.')
 
-    const regularResponse = await fetch(server.httpURL)
+    const regularResponse = await fetch(hocuspocus.server!.httpURL)
     t.is(await regularResponse.text(), 'OK')
     resolve('done')
   })
@@ -70,13 +70,13 @@ test('can intercept specific URLs', async t => {
 
 test('has the instance', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onRequest({ instance }) {
-        t.is(instance, server)
+        t.is(instance, hocuspocus)
         resolve('done')
       },
     })
 
-    await fetch(`${server.httpURL}/foobar`)
+    await fetch(`${hocuspocus.server!.httpURL}/foobar`)
   })
 })
