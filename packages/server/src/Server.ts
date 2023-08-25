@@ -159,7 +159,7 @@ export class Server {
   }
 
   get URL(): string {
-    return `${this.configuration.address}:${this.configuration.port}`
+    return `${this.configuration.address}:${this.address.port}`
   }
 
   get webSocketURL(): string {
