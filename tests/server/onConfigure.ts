@@ -39,9 +39,9 @@ test('executes onConfigure callback from an extension', async t => {
 test('has the configuration', async t => {
   await new Promise(async resolve => {
     newHocuspocus({
-      port: 1337,
+      timeout: 40000,
       async onConfigure({ configuration }) {
-        t.is(configuration.port, 1337)
+        t.is(configuration.debounce, 40000)
 
         resolve('done')
       },
