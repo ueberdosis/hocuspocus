@@ -33,7 +33,7 @@ test('uses the global instance name', async t => {
   await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const server = await newHocuspocus({
+    const hocuspoucs = await newHocuspocus({
       name: 'FOOBAR123',
       async onDestroy() {
         t.is(spy.args[spy.args.length - 1][0].includes('FOOBAR123'), true, 'Expected the Logger to use the configured instance name.')
@@ -47,7 +47,7 @@ test('uses the global instance name', async t => {
       ],
     })
 
-    await server.destroy()
+    await hocuspoucs.server!.destroy()
   })
 
 })
@@ -56,7 +56,7 @@ test('doesn’t log anything if all messages are disabled', async t => {
   await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onDestroy() {
         t.is(spy.callCount, 0, 'Expected the Logger to not log anything.')
 
@@ -80,6 +80,6 @@ test('doesn’t log anything if all messages are disabled', async t => {
       ],
     })
 
-    await server.destroy()
+    await hocuspocus.server!.destroy()
   })
 })

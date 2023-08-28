@@ -158,6 +158,23 @@ export class Server {
     }) as AddressInfo
   }
 
+  async destroy(): Promise<any> {
+    this.httpServer.close()
+
+    try {
+      this.webSocketServer.close()
+      this.webSocketServer.clients.forEach(client => {
+        client.terminate()
+      })
+    } catch (error) {
+      console.error(error)
+    }
+
+    this.hocuspocus.debugger.flush()
+
+    await this.hocuspocus.hooks('onDestroy', { instance: this.hocuspocus })
+  }
+
   get URL(): string {
     return `${this.configuration.address}:${this.address.port}`
   }

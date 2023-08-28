@@ -172,26 +172,6 @@ export class Hocuspocus {
   }
 
   /**
-   * Destroy the server
-   */
-  async destroy(): Promise<any> {
-    this.server?.httpServer?.close()
-
-    try {
-      this.server?.webSocketServer?.close()
-      this.server?.webSocketServer?.clients.forEach(client => {
-        client.terminate()
-      })
-    } catch (error) {
-      console.error(error)
-    }
-
-    this.debugger.flush()
-
-    await this.hooks('onDestroy', { instance: this })
-  }
-
-  /**
    * The `handleConnection` method receives incoming WebSocket connections,
    * runs all hooks:
    *

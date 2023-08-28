@@ -3,15 +3,15 @@ import { newHocuspocus } from '../utils/index.js'
 
 test('executes the onDestroy hook and has the instance', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onDestroy({ instance }) {
-        t.is(instance, server)
+        t.is(instance, hocuspocus)
 
         resolve('done')
       },
     })
 
-    server.destroy()
+    hocuspocus.server!.destroy()
   })
 })
 
@@ -25,12 +25,12 @@ test('executes the onDestroy hook from a custom extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    server.destroy()
+    hocuspocus.server!.destroy()
   })
 })
