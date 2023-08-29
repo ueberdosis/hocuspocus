@@ -296,6 +296,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
         this.webSocket.close()
         this.webSocket = null
       }
+      this.lastMessageReceived = 0
 
       // Init the WebSocket connection
       const ws = new this.configuration.WebSocketPolyfill(this.url)
