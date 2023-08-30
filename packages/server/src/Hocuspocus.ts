@@ -39,9 +39,6 @@ export const defaultConfiguration = {
   unloadImmediately: true,
 }
 
-/**
- * Hocuspocus Server
- */
 export class Hocuspocus {
   configuration: Configuration = {
     ...defaultConfiguration,

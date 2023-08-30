@@ -17,7 +17,7 @@ For more information on the hook and it's payload checkout it's [section](/serve
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onAuthenticate(data) {
     const { token } = data;
 
@@ -60,7 +60,7 @@ import { Server } from "@hocuspocus/server";
 
 const usersWithWriteAccess = ["jane", "john", "christina"];
 
-const server = Server.configure({
+const server = new Server({
   async onAuthenticate(data): Doc {
     // Example code to check if the current user has write access by a
     // request parameter. In a real world application you would probably

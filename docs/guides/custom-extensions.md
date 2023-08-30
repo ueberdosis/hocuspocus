@@ -118,7 +118,7 @@ That's it. The only thing missing now is your code. Happy extension writing! Whe
 import { Server } from "@hocuspocus/server";
 import { MyHocuspocusExtension } from "./extensions/my-hocuspocus-extension";
 
-const server = Server.configure({
+const server = new Server({
   extensions: [
     new MyHocuspocusExtension({
       myConfigurationOption: "baz",

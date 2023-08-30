@@ -17,12 +17,27 @@
       type: new
     - title: Configuration
       link: /server/configuration
+    - title: Usage
+      link: /server/usage
     - title: Methods
       link: /server/methods
     - title: Hooks
       link: /server/hooks
     - title: Extensions
       link: /server/extensions
+      items:
+        - title: Database
+          link: /server/extensions/database
+        - title: SQLite
+          link: /server/extensions/sqlite
+        - title: Redis
+          link: /server/extensions/redis
+        - title: Logger
+          link: /server/extensions/logger
+        - title: Webhook
+          link: /server/extensions/webhook
+        - title: Throttle
+          link: /server/extensions/throttle
     - title: Examples
       link: /server/examples
 
