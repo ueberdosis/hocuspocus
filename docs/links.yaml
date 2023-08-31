@@ -9,6 +9,8 @@
       type: sponsor
     - title: Contributing
       link: /contributing
+    - title: Upgrade Guide
+      link: /upgrade
 
 - title: Server
   items:
