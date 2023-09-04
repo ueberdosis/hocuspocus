@@ -84,6 +84,8 @@ export class Redis implements Extension {
     disconnectDelay: 1000,
   }
 
+  redisTransactionOrigin = '__hocuspocus__redis__origin__'
+
   pub: RedisInstance
 
   sub: RedisInstance
@@ -295,6 +297,7 @@ export class Redis implements Extension {
     new MessageReceiver(
       message,
       this.logger,
+      this.redisTransactionOrigin,
     ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(
         this.pubKey(document.name),
@@ -307,7 +310,9 @@ export class Redis implements Extension {
    * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
    */
   public async onChange(data: onChangePayload): Promise<any> {
-    return this.publishFirstSyncStep(data.documentName, data.document)
+    if (data.transactionOrigin !== this.redisTransactionOrigin) {
+      return this.publishFirstSyncStep(data.documentName, data.document)
+    }
   }
 
   /**
