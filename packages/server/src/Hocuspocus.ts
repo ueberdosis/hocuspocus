@@ -28,7 +28,7 @@ import {
   onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
-import { debounce } from './util/debounce'
+import { useDebounce } from './util/debounce'
 
 export const defaultConfiguration = {
   name: null,
@@ -75,6 +75,8 @@ export class Hocuspocus {
   server?: HocuspocusServer
 
   debugger = new Debugger()
+
+  debounce = useDebounce()
 
   constructor(configuration?: Partial<Configuration>) {
     if (configuration) {
@@ -329,7 +331,7 @@ export class Hocuspocus {
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        debounce(
+        this.debounce(
           `onStoreDocument-${document.name}`,
           () => {
             this.storeDocumentHooks(document, hookPayload)
@@ -376,7 +378,7 @@ export class Hocuspocus {
       return
     }
 
-    debounce(
+    this.debounce(
       `onStoreDocument-${document.name}`,
       () => {
         this.storeDocumentHooks(document, hookPayload)
