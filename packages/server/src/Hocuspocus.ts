@@ -28,6 +28,7 @@ import {
   onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
+import { debounce } from './util/debounce'
 
 export const defaultConfiguration = {
   name: null,
@@ -328,9 +329,14 @@ export class Hocuspocus {
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        this.debounce(`onStoreDocument-${document.name}`, () => {
-          this.storeDocumentHooks(document, hookPayload)
-        }, this.configuration.unloadImmediately)
+        debounce(
+          `onStoreDocument-${document.name}`,
+          () => {
+            this.storeDocumentHooks(document, hookPayload)
+          },
+          this.configuration.unloadImmediately ? 0 : this.configuration.debounce,
+          this.configuration.maxDebounce,
+        )
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
@@ -370,44 +376,14 @@ export class Hocuspocus {
       return
     }
 
-    this.debounce(`onStoreDocument-${document.name}`, () => {
-      this.storeDocumentHooks(document, hookPayload)
-    })
-  }
-
-  timers: Map<string, {
-    timeout: NodeJS.Timeout,
-    start: number
-  }> = new Map()
-
-  /**
-   * debounce the given function, using the given identifier
-   */
-  debounce(id: string, func: Function, immediately = false) {
-    const old = this.timers.get(id)
-    const start = old?.start || Date.now()
-
-    const run = () => {
-      this.timers.delete(id)
-      func()
-    }
-
-    if (old?.timeout) {
-      clearTimeout(old.timeout)
-    }
-
-    if (immediately) {
-      return run()
-    }
-
-    if (Date.now() - start >= this.configuration.maxDebounce) {
-      return run()
-    }
-
-    this.timers.set(id, {
-      start,
-      timeout: setTimeout(run, this.configuration.debounce),
-    })
+    debounce(
+      `onStoreDocument-${document.name}`,
+      () => {
+        this.storeDocumentHooks(document, hookPayload)
+      },
+      this.configuration.debounce,
+      this.configuration.maxDebounce,
+    )
   }
 
   /**
