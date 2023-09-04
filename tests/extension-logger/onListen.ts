@@ -33,7 +33,7 @@ test('uses the global instance name', async t => {
   await new Promise(async resolve => {
     const spy = sinon.spy(fakeLogger)
 
-    const hocuspoucs = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       name: 'FOOBAR123',
       async onDestroy() {
         t.is(spy.args[spy.args.length - 1][0].includes('FOOBAR123'), true, 'Expected the Logger to use the configured instance name.')
@@ -47,7 +47,7 @@ test('uses the global instance name', async t => {
       ],
     })
 
-    await hocuspoucs.server!.destroy()
+    await hocuspocus.server!.destroy()
   })
 
 })

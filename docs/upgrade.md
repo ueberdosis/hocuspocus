@@ -5,7 +5,7 @@
 With the upgrade to the new version, the initialization of hocuspocus has changed. As described on the [usage](/server/usage)
 side, there are two ways on how you can use hocuspocus. With the built-in server. Or like a library with other
 frameworks (like [express](/server/examples#express)). To make things simpler and enable more features in the future,
-we seperated classes and put the server into its own class.
+we separated classes and put the server into its own class.
 
 ### Usage with .configure()
 
