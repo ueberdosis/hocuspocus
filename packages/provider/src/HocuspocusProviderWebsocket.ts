@@ -7,7 +7,6 @@ import * as time from 'lib0/time'
 import * as url from 'lib0/url'
 import type { MessageEvent } from 'ws'
 import { Event } from 'ws'
-import { uuidv4 } from 'lib0/random.js'
 import EventEmitter from './EventEmitter.js'
 import { HocuspocusProvider } from './HocuspocusProvider.js'
 import {
@@ -148,6 +147,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   status = WebSocketStatus.Disconnected
 
   lastMessageReceived = 0
+
+  identifier = 0
 
   mux = mutex.createMutex()
 
@@ -340,11 +341,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
         this.cleanupWebSocket()
       }
       this.lastMessageReceived = 0
+      this.identifier += 1
 
       // Init the WebSocket connection
       const ws = new this.configuration.WebSocketPolyfill(this.url)
       ws.binaryType = 'arraybuffer'
-      ws.identifier = uuidv4()
+      ws.identifier = this.identifier
 
       this.attachWebSocketListeners(ws, reject)
 
