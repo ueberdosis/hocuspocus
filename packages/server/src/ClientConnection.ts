@@ -88,7 +88,12 @@ export class ClientConnection {
       websocket.close(Unauthorized.code, Unauthorized.reason)
     }, opts.timeout)
 
+    console.log('on(message)', this.socketId)
     websocket.on('message', this.messageHandler)
+    websocket.once('close', () => {
+      console.log('off(message)', this.socketId)
+      websocket.removeListener('message', this.messageHandler)
+    })
   }
 
   /**
