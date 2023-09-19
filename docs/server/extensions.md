@@ -9,10 +9,11 @@ We already created some very useful extensions you should check out for sure:
 | Extension                               | Description                                                                    |
 |-----------------------------------------| ------------------------------------------------------------------------------ |
 | [Database](/server/extensions#database) | A generic database driver that is easily adjustable to work with any database. |
-| [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
 | [Logger](/server/extensions#logger)     | Add logging to Hocuspocus.                                                     |
-| [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
+| [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
+| [SQLite](/server/extensions#sq-lite)    | Persist documents to SQLite.        |
 | [Throttle](/server/extensions#throttle) | Throttle connections by ips.                                                   |
+| [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
 
 ## Database
 
