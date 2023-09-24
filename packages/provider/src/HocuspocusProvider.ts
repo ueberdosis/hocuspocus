@@ -367,6 +367,10 @@ export class HocuspocusProvider extends EventEmitter {
 
   // not needed, but provides backward compatibility with e.g. lexicla/yjs
   async connect() {
+    if (this.configuration.broadcast) {
+      this.subscribeToBroadcastChannel()
+    }
+
     return this.configuration.websocketProvider.connect()
   }
 
