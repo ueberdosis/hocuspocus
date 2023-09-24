@@ -5,6 +5,7 @@ import {
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
+import type { THistoryVersion } from './types'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -19,12 +20,6 @@ export interface AdditionalTiptapCollabProviderConfiguration {
   appId?: string,
 
   websocketProvider?: TiptapCollabProviderWebsocket
-}
-
-export type AuditHistoryVersion = {
-  name?: string;
-  version: number;
-  date: number;
 }
 
 export class TiptapCollabProvider extends HocuspocusProvider {
@@ -42,43 +37,53 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     super(configuration as HocuspocusProviderConfiguration)
   }
 
+  /**
+   * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
+   */
   createVersion(name?: string) {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.sendStateless(JSON.stringify({ action: 'version.create', name }))
   }
 
+  /**
+   * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
+   */
   revertToVersion(targetVersion: number) {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
-    return this.sendStateless(JSON.stringify({ action: 'version.revert', version: targetVersion }))
+    return this.sendStateless(JSON.stringify({ action: 'document.revert', version: targetVersion }))
   }
 
-  getVersions(): AuditHistoryVersion[] {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
-    return this.configuration.document.getArray<AuditHistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
+  /**
+   * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
+   *
+   * The server will reply with a stateless message (THistoryVersionPreviewEvent)
+   */
+  previewVersion(targetVersion: number) {
+    return this.sendStateless(JSON.stringify({ action: 'version.preview', version: targetVersion }))
   }
 
-  watchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['observe']>[0]) {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
-    return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').observe(callback)
+  /**
+   * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
+   */
+  getVersions(): THistoryVersion[] {
+    return this.configuration.document.getArray<THistoryVersion>(`${this.tiptapCollabConfigurationPrefix}versions`).toArray()
   }
 
-  unwatchVersions(callback: Parameters<AbstractType<YArrayEvent<AuditHistoryVersion>>['unobserve']>[0]) {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
-    return this.configuration.document.getArray<AuditHistoryVersion>('__tiptapcollab__versions').unobserve(callback)
+  watchVersions(callback: Parameters<AbstractType<YArrayEvent<THistoryVersion>>['observe']>[0]) {
+    return this.configuration.document.getArray<THistoryVersion>('__tiptapcollab__versions').observe(callback)
+  }
+
+  unwatchVersions(callback: Parameters<AbstractType<YArrayEvent<THistoryVersion>>['unobserve']>[0]) {
+    return this.configuration.document.getArray<THistoryVersion>('__tiptapcollab__versions').unobserve(callback)
   }
 
   isAutoVersioning(): boolean {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return !!this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).get('autoVersioning')
   }
 
   enableAutoVersioning() {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 1)
   }
 
   disableAutoVersioning() {
-    console.error('This doesnt work yet! If you want to join as a beta tester, send an email to humans@tiptap.dev')
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
