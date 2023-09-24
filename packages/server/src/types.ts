@@ -173,6 +173,7 @@ export interface onAuthenticatePayload {
 // @todo Change 'connection' to 'connectionConfig' in next major release
 // see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
 export interface onConnectPayload {
+  context: any,
   documentName: string,
   instance: Hocuspocus,
   request: IncomingMessage,
