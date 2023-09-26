@@ -44,10 +44,9 @@ app.get("/", (request, response) => {
 });
 
 // Add a websocket route for Hocuspocus
-// Note: make sure to include a parameter for the document name.
 // You can set any contextual data like in the onConnect hook
 // and pass it to the handleConnection method.
-app.ws("/collaboration/:document", (websocket, request) => {
+app.ws("/collaboration", (websocket, request) => {
   const context = {
     user: {
       id: 1234,
@@ -83,12 +82,10 @@ const app = new Koa();
 app.use(websocket());
 
 // Add a websocket route for Hocuspocus
-// Note: make sure to include a parameter for the document name.
 // You can set any contextual data like in the onConnect hook
 // and pass it to the handleConnection method.
 app.use(async (ctx, next) => {
   const ws = await ctx.ws();
-  const documentName = ctx.request.path.substring(1);
 
   server.handleConnection(
     ws,
