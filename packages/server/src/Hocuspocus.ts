@@ -463,14 +463,9 @@ export class Hocuspocus {
 
   storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
     this.hooks('onStoreDocument', hookPayload)
-      .catch(error => {
-        if (error?.message) {
-          throw error
-        }
-      })
       .then(() => {
         this.hooks('afterStoreDocument', hookPayload).then(() => {
-        // Remove document from memory.
+          // Remove document from memory.
 
           if (document.getConnectionsCount() > 0) {
             return
@@ -478,6 +473,13 @@ export class Hocuspocus {
 
           this.unloadDocument(document)
         })
+      })
+      .catch(error => {
+        console.error('Caught error during storeDocumentHooks', error)
+
+        if (error?.message) {
+          throw error
+        }
       })
   }
 

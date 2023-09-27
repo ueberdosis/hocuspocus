@@ -252,12 +252,7 @@ test('runs hooks in the given order', async t => {
         triggered.push('four')
       },
       async afterStoreDocument() {
-        t.deepEqual(triggered, [
-          'one',
-          'two',
-        ])
-
-        resolve('done')
+        t.fail() // this shouldnt run
       },
     })
 
@@ -265,6 +260,15 @@ test('runs hooks in the given order', async t => {
       onSynced() {
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
+
+        setTimeout(() => {
+          t.deepEqual(triggered, [
+            'one',
+            'two',
+          ])
+
+          resolve(true)
+        }, 250)
       },
     })
   })
@@ -303,13 +307,7 @@ test('allows to overwrite the order of extension with a priority', async t => {
 
     const server = await newHocuspocus({
       afterStoreDocument: async () => {
-        t.deepEqual(triggered, [
-          'zero',
-          'one',
-          'two',
-        ])
-
-        resolve('done')
+        t.fail()
       },
       extensions: [
         new Running(),
@@ -323,6 +321,16 @@ test('allows to overwrite the order of extension with a priority', async t => {
       onSynced() {
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
+
+        setTimeout(() => {
+          t.deepEqual(triggered, [
+            'zero',
+            'one',
+            'two',
+          ])
+
+          resolve(true)
+        }, 250)
       },
     })
   })
