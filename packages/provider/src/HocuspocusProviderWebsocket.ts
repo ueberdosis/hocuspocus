@@ -328,8 +328,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
     Object.keys(handlers).forEach(name => {
       this.webSocket?.removeEventListener(name, handlers[name])
-      delete this.webSocketHandlers[identifier]
     })
+    delete this.webSocketHandlers[identifier]
     this.webSocket.close()
     this.webSocket = null
   }
