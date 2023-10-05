@@ -62,10 +62,8 @@ import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import {
-  HocuspocusProvider,
-  HocuspocusProviderWebsocket,
+  HocuspocusProvider, HocuspocusProviderWebsocket,
 } from '@hocuspocus/provider'
-import StatusBar from '../components/StatusBar.vue'
 
 const socket = new HocuspocusProviderWebsocket({
   url: 'ws://127.0.0.1:1234',
@@ -77,20 +75,22 @@ const $states2 = ref({})
 const provider = new HocuspocusProvider({
   websocketProvider: socket,
   name: 'hocuspocus-demo',
-  broadcast: false,
+  broadcast: true,
   onAwarenessUpdate: ({ states }) => {
     $states1.value = states
   },
 })
+provider.subscribeToBroadcastChannel()
 
 const anotherProvider = new HocuspocusProvider({
   websocketProvider: socket,
   name: 'hocuspocus-demo2',
-  broadcast: false,
+  broadcast: true,
   onAwarenessUpdate: ({ states }) => {
     $states2.value = states
   },
 })
+anotherProvider.subscribeToBroadcastChannel()
 
 const editor = new Editor({
   extensions: [
