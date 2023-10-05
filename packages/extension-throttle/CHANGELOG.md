@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.1](https://github.com/ueberdosis/hocuspocus/compare/v2.6.0...v2.6.1) (2023-10-05)
+
+**Note:** Version bump only for package @hocuspocus/extension-throttle
+
+
+
+
+
 # [2.6.0](https://github.com/ueberdosis/hocuspocus/compare/v2.5.0...v2.6.0) (2023-10-04)
 
 **Note:** Version bump only for package @hocuspocus/extension-throttle

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.1](https://github.com/ueberdosis/hocuspocus/compare/v2.6.0...v2.6.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* add `documentName` into broadcast message ([#713](https://github.com/ueberdosis/hocuspocus/issues/713)) ([8400928](https://github.com/ueberdosis/hocuspocus/commit/840092861fa2801c62d5c12d5574bfe24e266c3f))
+
+
+
+
+
 # [2.6.0](https://github.com/ueberdosis/hocuspocus/compare/v2.5.0...v2.6.0) (2023-10-04)
 
 **Note:** Version bump only for package @hocuspocus/provider
