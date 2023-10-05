@@ -546,11 +546,16 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.mux(() => {
-      this.broadcast(SyncStepOneMessage, { document: this.document })
-      this.broadcast(SyncStepTwoMessage, { document: this.document })
-      this.broadcast(QueryAwarenessMessage, { document: this.document })
+      this.broadcast(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
+      this.broadcast(SyncStepTwoMessage, { document: this.document, documentName: this.configuration.name })
+      this.broadcast(QueryAwarenessMessage, { document: this.document, documentName: this.configuration.name })
       if (this.awareness) {
-        this.broadcast(AwarenessMessage, { awareness: this.awareness, clients: [this.document.clientID], document: this.document })
+        this.broadcast(AwarenessMessage, {
+          awareness: this.awareness,
+          clients: [this.document.clientID],
+          document: this.document,
+          documentName: this.configuration.name,
+        })
       }
     })
   }
