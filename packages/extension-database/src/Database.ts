@@ -16,7 +16,7 @@ export interface DatabaseConfiguration {
   /**
    * Pass a function to store updates in your database.
    */
-  store: (data: storePayload) => void,
+  store: (data: storePayload) => Promise<void>,
 }
 
 export class Database implements Extension {
@@ -25,7 +25,7 @@ export class Database implements Extension {
    */
   configuration: DatabaseConfiguration = {
     fetch: async () => null,
-    store: async () => null,
+    store: async () => {},
   }
 
   /**
@@ -55,7 +55,7 @@ export class Database implements Extension {
    * Store new updates in the database.
    */
   async onStoreDocument(data: onChangePayload) {
-    return this.configuration.store({
+    await this.configuration.store({
       ...data,
       state: Buffer.from(
         Y.encodeStateAsUpdate(data.document),
