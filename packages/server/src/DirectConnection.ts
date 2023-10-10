@@ -46,6 +46,10 @@ export class DirectConnection implements DirectConnectionInterface {
   }
 
   disconnect() {
+    if (this.document && this.document.getConnectionsCount() === 1) {
+      this.instance.unloadDocument(this.document)
+    }
+
     this.document?.removeDirectConnection()
     this.document = null
   }

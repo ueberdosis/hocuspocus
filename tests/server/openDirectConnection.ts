@@ -114,3 +114,23 @@ test('direct connection cannot transact once closed', async t => {
     }
   }
 })
+
+test('if a direct connection closes, the document should be unloaded if there is no other connection left', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    await direct.transact(document => {
+      document.getArray('test').insert(0, ['value'])
+    })
+
+    direct.disconnect()
+
+    t.is(server.getConnectionsCount(), 0)
+    t.is(server.getDocumentsCount(), 0)
+    resolve('done')
+  })
+})
