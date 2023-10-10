@@ -387,9 +387,17 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.emit('open', { event })
 
+    let token: string | null
+    try {
+      token = await this.getToken()
+    } catch (error) {
+      this.permissionDeniedHandler(`Failed to get token: ${error}`)
+      return
+    }
+
     if (this.isAuthenticationRequired) {
       this.send(AuthenticationMessage, {
-        token: await this.getToken(),
+        token,
         documentName: this.configuration.name,
       })
     }
