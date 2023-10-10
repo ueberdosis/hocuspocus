@@ -134,3 +134,34 @@ test('if a direct connection closes, the document should be unloaded if there is
     resolve('done')
   })
 })
+
+test('direct connection transact awaits until onStoreDocument has finished', async t => {
+  let onStoreDocumentFinished = false
+
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      onStoreDocument: async () => {
+        onStoreDocumentFinished = false
+        await sleep(200)
+        onStoreDocumentFinished = true
+      },
+    })
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    t.is(onStoreDocumentFinished, false)
+    await direct.transact(document => {
+      document.getArray('test').insert(0, ['value'])
+    })
+    t.is(onStoreDocumentFinished, true)
+
+    direct.disconnect()
+
+    t.is(server.getConnectionsCount(), 0)
+    t.is(server.getDocumentsCount(), 0)
+    t.is(onStoreDocumentFinished, true)
+    resolve('done')
+  })
+})

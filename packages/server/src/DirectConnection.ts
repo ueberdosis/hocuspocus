@@ -32,7 +32,7 @@ export class DirectConnection implements DirectConnectionInterface {
 
     transaction(this.document)
 
-    this.instance.storeDocumentHooks(this.document, {
+    await this.instance.storeDocumentHooks(this.document, {
       clientsCount: this.document.getConnectionsCount(),
       context: this.context,
       document: this.document,
