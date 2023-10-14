@@ -4,7 +4,7 @@ import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class QueryAwarenessMessage extends OutgoingMessage {
   type = MessageType.QueryAwareness
-  
+
   description = 'Queries awareness states'
 
   get(args: Partial<OutgoingMessageArguments>) {
