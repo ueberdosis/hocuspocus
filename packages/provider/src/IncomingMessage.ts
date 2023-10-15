@@ -1,5 +1,6 @@
 import {
   createDecoder,
+  peekVarString,
   readVarUint,
   readVarUint8Array,
   readVarString,
@@ -27,6 +28,10 @@ export class IncomingMessage {
     this.data = data
     this.encoder = createEncoder()
     this.decoder = createDecoder(new Uint8Array(this.data))
+  }
+
+  peekVarString(): string {
+    return peekVarString(this.decoder)
   }
 
   readVarUint(): MessageType {

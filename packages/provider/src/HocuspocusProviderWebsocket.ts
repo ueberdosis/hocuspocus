@@ -379,8 +379,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.lastMessageReceived = time.getUnixTime()
 
     const message = new IncomingMessage(event.data)
-    const documentName = message.readVarString()
-    message.writeVarString(documentName)
+    const documentName = message.peekVarString()
 
     this.configuration.providerMap.get(documentName)?.onMessage(event)
   }
