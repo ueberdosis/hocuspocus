@@ -14,6 +14,7 @@ import {
   onAwarenessChangeParameters, onAwarenessUpdateParameters,
   onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters,
 } from './types.js'
+import { IncomingMessage } from './IncomingMessage.js'
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
@@ -91,6 +92,11 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
    * Don’t output any warnings.
    */
   quiet: boolean,
+
+  /**
+   * Map of attached providers keyed by documentName.
+   */
+  providerMap: Map<string, HocuspocusProvider>,
 }
 
 export class HocuspocusProviderWebsocket extends EventEmitter {
@@ -134,6 +140,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
     quiet: false,
+    providerMap: new Map(),
   }
 
   subscribedToBroadcastChannel = false
@@ -215,6 +222,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   attach(provider: HocuspocusProvider) {
+    this.configuration.providerMap.set(provider.configuration.name, provider)
+
     if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
       this.connect()
     }
@@ -229,7 +238,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   detach(provider: HocuspocusProvider) {
-    // tell the server to remove the listener
+    this.configuration.providerMap.delete(provider.configuration.name)
   }
 
   public setConfiguration(
@@ -368,6 +377,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.resolveConnectionAttempt()
 
     this.lastMessageReceived = time.getUnixTime()
+
+    const message = new IncomingMessage(event.data)
+    const documentName = message.readVarString()
+    message.writeVarString(documentName)
+
+    this.configuration.providerMap.get(documentName)?.onMessage(event)
   }
 
   resolveConnectionAttempt() {

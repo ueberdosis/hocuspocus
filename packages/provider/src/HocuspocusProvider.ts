@@ -192,8 +192,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.on('open', this.boundOnOpen)
     this.configuration.websocketProvider.on('open', this.forwardOpen)
 
-    this.configuration.websocketProvider.on('message', this.boundOnMessage)
-
     this.configuration.websocketProvider.on('close', this.boundOnClose)
     this.configuration.websocketProvider.on('close', this.configuration.onClose)
     this.configuration.websocketProvider.on('close', this.forwardClose)
@@ -233,8 +231,6 @@ export class HocuspocusProvider extends EventEmitter {
   boundPageUnload = this.pageUnload.bind(this)
 
   boundOnOpen = this.onOpen.bind(this)
-
-  boundOnMessage = this.onMessage.bind(this)
 
   boundOnClose = this.onClose.bind(this)
 
@@ -447,10 +443,6 @@ export class HocuspocusProvider extends EventEmitter {
 
     const documentName = message.readVarString()
 
-    if (documentName !== this.configuration.name) {
-      return // message is meant for another provider
-    }
-
     message.writeVarString(documentName)
 
     this.emit('message', { event, message: new IncomingMessage(event.data) })
@@ -494,7 +486,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('connect', this.forwardConnect)
     this.configuration.websocketProvider.off('open', this.boundOnOpen)
     this.configuration.websocketProvider.off('open', this.forwardOpen)
-    this.configuration.websocketProvider.off('message', this.boundOnMessage)
     this.configuration.websocketProvider.off('close', this.boundOnClose)
     this.configuration.websocketProvider.off('close', this.configuration.onClose)
     this.configuration.websocketProvider.off('close', this.forwardClose)
