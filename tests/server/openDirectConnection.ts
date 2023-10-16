@@ -99,7 +99,7 @@ test('direct connection cannot transact once closed', async t => {
   const server = await newHocuspocus()
 
   const direct = await server.openDirectConnection('hocuspocus-test')
-  direct.disconnect()
+  await direct.disconnect()
 
   try {
     await direct.transact(document => {
@@ -113,4 +113,108 @@ test('direct connection cannot transact once closed', async t => {
       t.fail('unknown error')
     }
   }
+})
+
+test('if a direct connection closes, the document should be unloaded if there is no other connection left', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    await direct.transact(document => {
+      document.getArray('test').insert(0, ['value'])
+    })
+
+    await direct.disconnect()
+
+    t.is(server.getConnectionsCount(), 0)
+    t.is(server.getDocumentsCount(), 0)
+    resolve('done')
+  })
+})
+
+test('direct connection transact awaits until onStoreDocument has finished', async t => {
+  let onStoreDocumentFinished = false
+
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      onStoreDocument: async () => {
+        onStoreDocumentFinished = false
+        await sleep(200)
+        onStoreDocumentFinished = true
+      },
+    })
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    t.is(onStoreDocumentFinished, false)
+    await direct.transact(document => {
+      document.getArray('test').insert(0, ['value'])
+    })
+    t.is(onStoreDocumentFinished, true)
+
+    await direct.disconnect()
+
+    t.is(server.getConnectionsCount(), 0)
+    t.is(server.getDocumentsCount(), 0)
+    t.is(onStoreDocumentFinished, true)
+    resolve('done')
+  })
+})
+
+test('direct connection transact awaits until onStoreDocument has finished, even if unloadImmediately=false', async t => {
+  let onStoreDocumentFinished = false
+  let directConnDisconnecting = false
+  let storedAfterDisconnect = false
+
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      unloadImmediately: true,
+      onStoreDocument: async () => {
+
+        onStoreDocumentFinished = false
+        await sleep(200)
+        onStoreDocumentFinished = true
+
+        if (directConnDisconnecting) {
+          storedAfterDisconnect = true
+        }
+      },
+      afterUnloadDocument: async data => {
+        if (directConnDisconnecting) {
+          t.fail('this shouldnt be called')
+        }
+      },
+    })
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    t.is(onStoreDocumentFinished, false)
+    await direct.transact(document => {
+      document.getArray('test').insert(0, ['value'])
+    })
+    t.is(onStoreDocumentFinished, true)
+
+    const provider = newHocuspocusProvider(server)
+    provider.document.getMap('aaa').set('bb', 'b')
+    provider.disconnect()
+    provider.configuration.websocketProvider.disconnect()
+
+    await sleep(100)
+
+    directConnDisconnecting = true
+    await direct.disconnect()
+
+    t.is(server.getConnectionsCount(), 0)
+
+    t.is(storedAfterDisconnect, true)
+
+    resolve('done')
+  })
 })

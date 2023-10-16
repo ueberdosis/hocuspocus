@@ -462,7 +462,7 @@ export class Hocuspocus {
   }
 
   storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
-    this.hooks('onStoreDocument', hookPayload)
+    return this.hooks('onStoreDocument', hookPayload)
       .then(() => {
         this.hooks('afterStoreDocument', hookPayload).then(() => {
           // Remove document from memory.
