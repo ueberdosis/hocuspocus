@@ -167,6 +167,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   isConnected = true
 
+  subdocProviders: HocuspocusProvider[] = []
+
   constructor(configuration: HocuspocusProviderConfiguration) {
     super()
     this.setConfiguration(configuration)
@@ -222,6 +224,18 @@ export class HocuspocusProvider extends EventEmitter {
         this.configuration.forceSyncInterval,
       )
     }
+
+    this.document.on('subdocs', (payload: {loaded: Set<Y.Doc>, added: Set<Y.Doc>, removed: Set<Y.Doc>}) => {
+
+      payload.loaded.forEach(loaded => {
+        this.subdocProviders.push(new HocuspocusProvider({
+          name: `${this.configuration.name}__SUBDOC_ID__${loaded.guid}`,
+          document: loaded,
+          websocketProvider: this.configuration.websocketProvider,
+        }))
+      })
+
+    })
 
     this.configuration.websocketProvider.attach(this)
   }

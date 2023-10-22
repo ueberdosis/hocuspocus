@@ -25,7 +25,7 @@ import {
   onChangePayload,
   onDisconnectPayload,
   onListenPayload,
-  onStoreDocumentPayload,
+  onStoreDocumentPayload, onLoadDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
 import { useDebounce } from './util/debounce'
@@ -404,7 +404,7 @@ export class Hocuspocus {
     const document = new Document(documentName, this.debugger, this.configuration.yDocOptions)
     this.documents.set(documentName, document)
 
-    const hookPayload = {
+    const hookPayload: onLoadDocumentPayload = {
       instance: this,
       context,
       connection,
