@@ -72,3 +72,23 @@ test('subdocs are loaded when loaded specifically', async t => {
     })
   })
 })
+
+test('subdocs of subdocs work as well', t => {
+  t.fail('TO DO')
+})
+
+test('subdoc changes are synced properly', t => {
+  t.fail('TO DO')
+})
+
+test('subdoc changes are stored properly', t => {
+  t.fail('TO DO')
+})
+
+test('subdoc changes are stored properly on destroy / disconnect of connection', t => {
+  t.fail('TO DO')
+})
+
+test('subdoc changes synced through redis properly', t => {
+  t.fail('TO DO')
+})
