@@ -2,7 +2,6 @@ import {
   Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
-import * as mutex from 'lib0/mutex'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
 import type { MessageEvent } from 'ws'
@@ -143,8 +142,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     providerMap: new Map(),
   }
 
-  subscribedToBroadcastChannel = false
-
   webSocket: HocusPocusWebSocket | null = null
 
   webSocketHandlers: { [key: string]: any } = {}
@@ -156,8 +153,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   lastMessageReceived = 0
 
   identifier = 0
-
-  mux = mutex.createMutex()
 
   intervals: any = {
     forceSync: null,
@@ -246,8 +241,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   ): void {
     this.configuration = { ...this.configuration, ...configuration }
   }
-
-  boundConnect = this.connect.bind(this)
 
   cancelWebsocketRetry?: () => void
 

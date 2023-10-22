@@ -100,8 +100,13 @@ export class MessageReceiver {
         })
         break
       }
+
+      case MessageType.Auth:
+        console.error('Received an authentication message on a connection that is already fully authenticated. Probably your provider has been destroyed + recreated really fast.')
+        break
+
       default:
-        console.error(`Unable to handle message of type ${type}: no handler defined!`)
+        console.error(`Unable to handle message of type ${type}: no handler defined! Are your provider/server versions aligned?`)
         // Do nothing
     }
   }
