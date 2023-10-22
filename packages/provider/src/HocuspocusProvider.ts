@@ -373,13 +373,17 @@ export class HocuspocusProvider extends EventEmitter {
   disconnect() {
     this.disconnectBroadcastChannel()
     this.configuration.websocketProvider.detach(this)
+    this.isConnected = false
+
     if (!this.configuration.preserveConnection) {
       this.configuration.websocketProvider.disconnect()
     }
+
   }
 
   async onOpen(event: Event) {
     this.isAuthenticated = false
+    this.isConnected = true
 
     this.emit('open', { event })
 
@@ -475,8 +479,6 @@ export class HocuspocusProvider extends EventEmitter {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
     }
 
-    this.disconnect()
-
     this.awareness?.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
 
@@ -496,7 +498,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
 
     this.send(CloseMessage, { documentName: this.configuration.name })
-    this.isConnected = false
+    this.disconnect()
 
     if (typeof window === 'undefined') {
       return
