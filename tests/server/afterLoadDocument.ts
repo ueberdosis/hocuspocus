@@ -1,37 +1,27 @@
 import test from 'ava'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
 
-test('executes the afterUnloadDocument callback', async t => {
+test('executes the afterLoadDocument callback', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async afterUnloadDocument() {
+      async afterLoadDocument() {
         t.pass()
         resolve('done')
       },
     })
 
-    const p = newHocuspocusProvider(server, {
-      onSynced(data) {
-        p.configuration.websocketProvider.disconnect()
-        p.disconnect()
-      },
-    })
+    newHocuspocusProvider(server, {})
   })
 })
 
-test('executes the afterUnloadDocument callback when all clients disconnect after a document was loaded', async t => {
+test('executes the afterLoadDocument callback in an extension', async t => {
   await new Promise(async resolve => {
     let provider: HocuspocusProvider
 
     class CustomExtension {
       async afterLoadDocument() {
-        provider.configuration.websocketProvider.disconnect()
-        provider.disconnect()
-      }
-
-      async afterUnloadDocument() {
         t.pass()
         resolve('done')
       }
@@ -41,11 +31,11 @@ test('executes the afterUnloadDocument callback when all clients disconnect afte
       extensions: [new CustomExtension()],
     })
 
-    provider = newHocuspocusProvider(server)
+    newHocuspocusProvider(server)
   })
 })
 
-test('executes the afterUnloadDocument callback when document fails to load', async t => {
+test('does not execute the afterLoadDocument callback when document fails to load', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus()
 
@@ -54,8 +44,8 @@ test('executes the afterUnloadDocument callback when document fails to load', as
         throw new Error('oops!')
       }
 
-      async afterUnloadDocument() {
-        t.pass()
+      async afterLoadDocument() {
+        t.fail('this should not be executed')
         resolve('done')
       }
     }
@@ -67,5 +57,9 @@ test('executes the afterUnloadDocument callback when document fails to load', as
     })
 
     newHocuspocusProvider(server)
+
+    await sleep(300)
+    t.pass()
+    resolve('')
   })
 })
