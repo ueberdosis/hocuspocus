@@ -116,6 +116,7 @@ export class Hocuspocus {
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument: this.configuration.onLoadDocument,
+      afterLoadDocument: this.configuration.afterLoadDocument,
       beforeHandleMessage: this.configuration.beforeHandleMessage,
       beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
       onStateless: this.configuration.onStateless,
@@ -124,6 +125,7 @@ export class Hocuspocus {
       afterStoreDocument: this.configuration.afterStoreDocument,
       onAwarenessUpdate: this.configuration.onAwarenessUpdate,
       onRequest: this.configuration.onRequest,
+      afterUnloadDocument: this.configuration.afterUnloadDocument,
       onDisconnect: this.configuration.onDisconnect,
       onDestroy: this.configuration.onDestroy,
     })

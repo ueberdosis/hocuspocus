@@ -173,7 +173,7 @@ test('direct connection transact awaits until onStoreDocument has finished, even
 
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      unloadImmediately: true,
+      unloadImmediately: false,
       onStoreDocument: async () => {
 
         onStoreDocumentFinished = false
@@ -185,7 +185,7 @@ test('direct connection transact awaits until onStoreDocument has finished, even
         }
       },
       afterUnloadDocument: async data => {
-        if (directConnDisconnecting) {
+        if (!storedAfterDisconnect) {
           t.fail('this shouldnt be called')
         }
       },
