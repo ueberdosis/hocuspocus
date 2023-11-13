@@ -78,7 +78,6 @@ test('destroy calls onStoreDocument before returning', async t => {
   })
 })
 
-
 test('destroy calls onStoreDocument before returning, even with unloadImmediately=false', async t => {
   await new Promise(async resolve => {
     let called = false
@@ -97,6 +96,60 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
     t.is(called, false)
     await server.destroy()
     t.is(called, true)
+
+    resolve('')
+  })
+})
+
+test('destroy calls onStoreDocument before returning, even with unloadImmediately=false, with multiple docs', async t => {
+  await new Promise(async resolve => {
+    let called = 0
+
+    const server = await newHocuspocus({
+      async onStoreDocument() {
+        called += 1
+      },
+      unloadImmediately: false,
+    })
+
+    const provider1 = newHocuspocusProvider(server, { name: 'test1' })
+    const provider2 = newHocuspocusProvider(server, { name: 'test2' })
+    const provider3 = newHocuspocusProvider(server, { name: 'test3' })
+
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider3.synced, true))
+
+    t.is(called, 0)
+    await server.destroy()
+    t.is(called, 3)
+
+    resolve('')
+  })
+})
+
+test('destroy calls onStoreDocument before returning, with multiple docs', async t => {
+  await new Promise(async resolve => {
+    let called = 0
+
+    const server = await newHocuspocus({
+      async onStoreDocument() {
+        called += 1
+      },
+      unloadImmediately: true,
+    })
+
+    const provider1 = newHocuspocusProvider(server, { name: 'test1' })
+    const provider2 = newHocuspocusProvider(server, { name: 'test2' })
+    const provider3 = newHocuspocusProvider(server, { name: 'test3' })
+
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider3.synced, true))
+
+    t.is(called, 0)
+    await server.destroy()
+    t.is(called, 3)
 
     resolve('')
   })

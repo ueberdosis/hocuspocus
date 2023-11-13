@@ -185,6 +185,15 @@ export class Hocuspocus {
           port: this.address.port,
         }
 
+        const signalHandler = async () => {
+          await this.destroy()
+          process.exit(0)
+        }
+
+        process.on('SIGINT', signalHandler)
+        process.on('SIGQUIT', signalHandler)
+        process.on('SIGTERM', signalHandler)
+
         try {
           await this.hooks('onListen', onListenPayload)
           resolve(this)
@@ -286,21 +295,30 @@ export class Hocuspocus {
   /**
    * Destroy the server
    */
-  async destroy(): Promise<any> {
-    this.server?.httpServer?.close()
+  destroy(): Promise<any> {
+    return new Promise(async resolve => {
 
-    try {
-      this.server?.webSocketServer?.close()
-      this.server?.webSocketServer?.clients.forEach(client => {
-        client.terminate()
-      })
-    } catch (error) {
-      console.error(error)
-    }
+      this.server?.httpServer?.close()
 
-    this.debugger.flush()
+      try {
 
-    await this.hooks('onDestroy', { instance: this })
+        this.configuration.extensions.push({
+          async afterUnloadDocument({ instance }) {
+            if (instance.getDocumentsCount() === 0) resolve('')
+          },
+        })
+
+        this.server?.webSocketServer?.close()
+        this.closeConnections()
+      } catch (error) {
+        console.error(error)
+      }
+
+      this.debugger.flush()
+
+      await this.hooks('onDestroy', { instance: this })
+    })
+
   }
 
   /**
