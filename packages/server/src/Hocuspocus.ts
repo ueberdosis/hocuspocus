@@ -43,6 +43,7 @@ export const defaultConfiguration = {
     gcFilter: () => true,
   },
   unloadImmediately: true,
+  stopOnSignals: true,
 }
 
 /**
@@ -170,6 +171,17 @@ export class Hocuspocus {
 
     this.server = new HocuspocusServer(this)
 
+    if (this.configuration.stopOnSignals) {
+      const signalHandler = async () => {
+        await this.destroy()
+        process.exit(0)
+      }
+
+      process.on('SIGINT', signalHandler)
+      process.on('SIGQUIT', signalHandler)
+      process.on('SIGTERM', signalHandler)
+    }
+
     return new Promise((resolve: Function, reject: Function) => {
       this.server?.httpServer.listen({
         port: this.configuration.port,
@@ -184,15 +196,6 @@ export class Hocuspocus {
           configuration: this.configuration,
           port: this.address.port,
         }
-
-        const signalHandler = async () => {
-          await this.destroy()
-          process.exit(0)
-        }
-
-        process.on('SIGINT', signalHandler)
-        process.on('SIGQUIT', signalHandler)
-        process.on('SIGTERM', signalHandler)
 
         try {
           await this.hooks('onListen', onListenPayload)
