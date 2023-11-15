@@ -142,6 +142,13 @@ export interface Configuration extends Extension {
   unloadImmediately: boolean,
 
   /**
+   * the server will gracefully stop if SIGINT, SIGQUIT or SIGTERM is received.
+   *
+   * Set this to false if you don't want that.
+   */
+  stopOnSignals: boolean,
+
+  /**
    * options to pass to the ydoc document
    */
   yDocOptions: {
