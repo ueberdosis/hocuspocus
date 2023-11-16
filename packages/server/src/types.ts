@@ -96,14 +96,14 @@ export type HookPayloadByName = {
   onDisconnect: onDisconnectPayload,
   afterUnloadDocument: afterUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
-},
+}
 
 export type StorageQueueConfigs = {
   [key: string]: {
     debounce?: number,
     maxDebounce?: number,
   },
-},
+}
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.
