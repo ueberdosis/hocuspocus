@@ -1,8 +1,8 @@
 export const useDebounce = () => {
   const timers: Map<string, {
     timeout: NodeJS.Timeout,
-    promise: Promise<void>,
-    resolve: () => void,
+    promise: Promise<unknown>,
+    resolve: (value: unknown) => void,
     start: number
   }> = new Map()
 
@@ -13,8 +13,8 @@ export const useDebounce = () => {
     maxDebounce: number,
   ) => {
     // default function to satisfy typescript
-    let newResolve: () => void = () => {}
-    const newPromise = new Promise<void>(resolve => {
+    let newResolve: (value: unknown) => void = () => {}
+    const newPromise = new Promise<unknown>(resolve => {
       newResolve = resolve
     })
     const old = timers.get(id)
