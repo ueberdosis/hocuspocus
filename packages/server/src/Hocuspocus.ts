@@ -298,8 +298,8 @@ export class Hocuspocus {
   /**
    * Destroy the server
    */
-  destroy(): Promise<any> {
-    return new Promise(async resolve => {
+  async destroy(): Promise<any> {
+    await new Promise(async resolve => {
 
       this.server?.httpServer?.close()
 
@@ -312,16 +312,19 @@ export class Hocuspocus {
         })
 
         this.server?.webSocketServer?.close()
+        if (this.getDocumentsCount() === 0) resolve('')
+
         this.closeConnections()
+
       } catch (error) {
         console.error(error)
       }
 
       this.debugger.flush()
 
-      await this.hooks('onDestroy', { instance: this })
     })
 
+    await this.hooks('onDestroy', { instance: this })
   }
 
   /**

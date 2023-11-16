@@ -16,6 +16,17 @@ test('executes the onDestroy hook and has the instance', async t => {
   })
 })
 
+test('destroy works if no document is open', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus()
+
+    await server.destroy()
+
+    t.pass()
+    resolve('')
+  })
+})
+
 test('executes the onDestroy hook from a custom extension', async t => {
   await new Promise(async resolve => {
     class CustomExtension {

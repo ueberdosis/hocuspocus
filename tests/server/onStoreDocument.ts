@@ -105,7 +105,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
     let executedOnStoreDocument = 0
 
     const server = await newHocuspocus({
-      debounce: 10,
+      debounce: 300,
       async onChange() {
         executedOnChange += 1
       },
