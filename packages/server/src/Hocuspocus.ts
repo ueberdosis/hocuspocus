@@ -312,9 +312,10 @@ export class Hocuspocus {
         })
 
         this.server?.webSocketServer?.close()
+        if (this.getDocumentsCount() === 0) resolve('')
+
         this.closeConnections()
 
-        if (this.getDocumentsCount() === 0) resolve('')
       } catch (error) {
         console.error(error)
       }
