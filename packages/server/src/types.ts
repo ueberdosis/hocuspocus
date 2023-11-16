@@ -303,7 +303,7 @@ export interface onAwarenessUpdatePayload {
   states: StatesArray,
 }
 
-export type StatesArray = { clientId: number, [key: string | number]: any }[],
+export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 // @todo Change 'connection' to 'connectionConfig' in next major release
 // see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
