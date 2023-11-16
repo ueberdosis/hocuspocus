@@ -47,7 +47,7 @@ export const useDebounce = () => {
       promise,
       resolve,
     })
-    return newPromise
+    return promise
   }
 
   return debounce
