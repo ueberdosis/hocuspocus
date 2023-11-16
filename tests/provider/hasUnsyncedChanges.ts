@@ -18,7 +18,7 @@ test("initially doesn't have unsynced changes", async t => {
       t.is(provider.synced, true)
 
       resolve()
-    }, 100)
+    }, 200)
   })
 })
 
@@ -181,7 +181,7 @@ test('has no unsynced changes when in readonly mode and initial document has not
 
   const provider = newHocuspocusProvider(server, { document, token: 'readonly' })
 
-  await sleep(100)
+  await sleep(200)
 
   t.is(provider.hasUnsyncedChanges, false)
 })

@@ -46,6 +46,7 @@ export const defaultConfiguration = {
   unloadImmediately: true,
   storageQueue: 'default',
   storageQueues: { default: {} },
+  stopOnSignals: true,
 }
 
 /**
@@ -124,6 +125,7 @@ export class Hocuspocus {
       connected: this.configuration.connected,
       onAuthenticate: this.configuration.onAuthenticate,
       onLoadDocument: this.configuration.onLoadDocument,
+      afterLoadDocument: this.configuration.afterLoadDocument,
       beforeHandleMessage: this.configuration.beforeHandleMessage,
       beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
       onStateless: this.configuration.onStateless,
@@ -132,6 +134,7 @@ export class Hocuspocus {
       afterStoreDocument: this.configuration.afterStoreDocument,
       onAwarenessUpdate: this.configuration.onAwarenessUpdate,
       onRequest: this.configuration.onRequest,
+      afterUnloadDocument: this.configuration.afterUnloadDocument,
       onDisconnect: this.configuration.onDisconnect,
       onDestroy: this.configuration.onDestroy,
       storageQueue: this.configuration.storageQueue,
@@ -183,6 +186,17 @@ export class Hocuspocus {
     }
 
     this.server = new HocuspocusServer(this)
+
+    if (this.configuration.stopOnSignals) {
+      const signalHandler = async () => {
+        await this.destroy()
+        process.exit(0)
+      }
+
+      process.on('SIGINT', signalHandler)
+      process.on('SIGQUIT', signalHandler)
+      process.on('SIGTERM', signalHandler)
+    }
 
     return new Promise((resolve: Function, reject: Function) => {
       this.server?.httpServer.listen({
@@ -300,21 +314,30 @@ export class Hocuspocus {
   /**
    * Destroy the server
    */
-  async destroy(): Promise<any> {
-    this.server?.httpServer?.close()
+  destroy(): Promise<any> {
+    return new Promise(async resolve => {
 
-    try {
-      this.server?.webSocketServer?.close()
-      this.server?.webSocketServer?.clients.forEach(client => {
-        client.terminate()
-      })
-    } catch (error) {
-      console.error(error)
-    }
+      this.server?.httpServer?.close()
 
-    this.debugger.flush()
+      try {
 
-    await this.hooks('onDestroy', { instance: this })
+        this.configuration.extensions.push({
+          async afterUnloadDocument({ instance }) {
+            if (instance.getDocumentsCount() === 0) resolve('')
+          },
+        })
+
+        this.server?.webSocketServer?.close()
+        this.closeConnections()
+      } catch (error) {
+        console.error(error)
+      }
+
+      this.debugger.flush()
+
+      await this.hooks('onDestroy', { instance: this })
+    })
+
   }
 
   /**
@@ -383,7 +406,8 @@ export class Hocuspocus {
     // If the update was received through other ways than the
     // WebSocket connection, we don’t need to feel responsible for
     // storing the content.
-    if (!connection) {
+    // also ignore changes incoming through redis connection, as this would be a breaking change (#730, #696, #606)
+    if (!connection || (connection as unknown as string) === '__hocuspocus__redis__origin__') {
       return
     }
 

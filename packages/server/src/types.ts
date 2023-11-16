@@ -148,6 +148,13 @@ export interface Configuration extends Extension {
   unloadImmediately: boolean;
 
   /**
+   * the server will gracefully stop if SIGINT, SIGQUIT or SIGTERM is received.
+   *
+   * Set this to false if you don't want that.
+   */
+  stopOnSignals: boolean,
+
+  /**
    * options to pass to the ydoc document
    */
   yDocOptions: {
@@ -172,13 +179,14 @@ export interface onStatelessPayload {
 // @todo Change 'connection' to 'connectionConfig' in next major release
 // see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
 export interface onAuthenticatePayload {
-  documentName: string;
-  instance: Hocuspocus;
-  requestHeaders: IncomingHttpHeaders;
-  requestParameters: URLSearchParams;
-  socketId: string;
-  token: string;
-  connection: ConnectionConfiguration;
+  context: any,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  token: string,
+  connection: ConnectionConfiguration
 }
 
 // @todo Change 'connection' to 'connectionConfig' in next major release

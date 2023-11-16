@@ -2,7 +2,6 @@ import {
   Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
-import * as mutex from 'lib0/mutex'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
 import type { MessageEvent } from 'ws'
@@ -14,6 +13,7 @@ import {
   onAwarenessChangeParameters, onAwarenessUpdateParameters,
   onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters,
 } from './types.js'
+import { IncomingMessage } from './IncomingMessage.js'
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
@@ -91,6 +91,11 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
    * Don’t output any warnings.
    */
   quiet: boolean,
+
+  /**
+   * Map of attached providers keyed by documentName.
+   */
+  providerMap: Map<string, HocuspocusProvider>,
 }
 
 export class HocuspocusProviderWebsocket extends EventEmitter {
@@ -134,9 +139,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
     quiet: false,
+    providerMap: new Map(),
   }
-
-  subscribedToBroadcastChannel = false
 
   webSocket: HocusPocusWebSocket | null = null
 
@@ -149,8 +153,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   lastMessageReceived = 0
 
   identifier = 0
-
-  mux = mutex.createMutex()
 
   intervals: any = {
     forceSync: null,
@@ -215,6 +217,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   attach(provider: HocuspocusProvider) {
+    this.configuration.providerMap.set(provider.configuration.name, provider)
+
     if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
       this.connect()
     }
@@ -229,7 +233,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   detach(provider: HocuspocusProvider) {
-    // tell the server to remove the listener
+    this.configuration.providerMap.delete(provider.configuration.name)
   }
 
   public setConfiguration(
@@ -237,8 +241,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   ): void {
     this.configuration = { ...this.configuration, ...configuration }
   }
-
-  boundConnect = this.connect.bind(this)
 
   cancelWebsocketRetry?: () => void
 
@@ -368,6 +370,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.resolveConnectionAttempt()
 
     this.lastMessageReceived = time.getUnixTime()
+
+    const message = new IncomingMessage(event.data)
+    const documentName = message.peekVarString()
+
+    this.configuration.providerMap.get(documentName)?.onMessage(event)
   }
 
   resolveConnectionAttempt() {
