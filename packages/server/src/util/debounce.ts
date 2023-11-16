@@ -6,6 +6,10 @@ export const useDebounce = () => {
     start: number
   }> = new Map()
 
+  /**
+   * Debounce returns a promise that resolves when the function is eventually called.
+   * All calls to the function within a given debounce window will recieve the same promise.
+   */
   const debounce = (
     id: string,
     func: Function,
