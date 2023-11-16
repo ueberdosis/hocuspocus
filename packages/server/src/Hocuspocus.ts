@@ -491,14 +491,11 @@ export class Hocuspocus {
     const promises = Object.entries(this.configuration.storageQueues).map(([queue, { debounce = this.configuration.debounce, maxDebounce = this.configuration.maxDebounce }]) => {
       return this.debounce(
         `onStoreDocument-${queue}-${document.name}`,
-        () => {
-          this.storeDocumentHooks(document, hookPayload, queue)
-        },
+        () => this.storeDocumentHooks(document, hookPayload, queue),
         unloadImmediately ? 0 : debounce,
         maxDebounce,
       )
     })
-
     return Promise.all(promises)
   }
 

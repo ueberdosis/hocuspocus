@@ -26,6 +26,7 @@ export const useDebounce = () => {
       timers.delete(id)
       const result = await func()
       resolve(result)
+      return result
     }
 
     if (old?.timeout) {
