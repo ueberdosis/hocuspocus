@@ -7,8 +7,8 @@ export const useDebounce = () => {
   }> = new Map()
 
   /**
-   * Debounce returns a promise that resolves when the function is eventually called.
-   * All calls to the function within a given debounce window will recieve the same promise.
+   * All calls to the function within a given debounce window will recieve the same promise that
+   * resolves when the debounced function has resolved.
    */
   const debounce = (
     id: string,
