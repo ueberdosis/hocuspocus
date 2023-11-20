@@ -28,16 +28,16 @@
     "dist"
   ],
   "dependencies": {
-    "@tiptap/core": "^2.0.3",
-    "@tiptap/starter-kit": "^2.0.3"
+    "@tiptap/core": "^2.1.12",
+    "@tiptap/starter-kit": "^2.1.12"
   },
   "peerDependencies": {
-    "@tiptap/pm": "^2.0.3",
-    "y-prosemirror": "^1.0.15",
-    "yjs": "^13.6.4"
+    "@tiptap/pm": "^2.1.12",
+    "y-prosemirror": "^1.2.1",
+    "yjs": "^13.6.8"
   },
   "devDependencies": {
-    "@tiptap/pm": "^2.0.3"
+    "@tiptap/pm": "^2.1.12"
   },
   "gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
 }

@@ -33,10 +33,10 @@
     "@hocuspocus/common": "^2.8.0",
     "@hocuspocus/server": "^2.8.0",
     "@hocuspocus/transformer": "^2.8.0",
-    "axios": "^1.2.2"
+    "axios": "^1.6.2"
   },
   "peerDependencies": {
-    "yjs": "^13.6.4"
+    "yjs": "^13.6.8"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

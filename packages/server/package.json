@@ -42,8 +42,8 @@
     "@types/ws": "^8.5.3"
   },
   "peerDependencies": {
-    "y-protocols": "^1.0.5",
-    "yjs": "^13.6.4"
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.8"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

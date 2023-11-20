@@ -31,12 +31,12 @@
   "dependencies": {
     "@hocuspocus/common": "^2.8.0",
     "@lifeomic/attempt": "^3.0.2",
-    "lib0": "^0.2.47",
+    "lib0": "^0.2.87",
     "ws": "^8.14.2"
   },
   "peerDependencies": {
-    "y-protocols": "^1.0.5",
-    "yjs": "^13.6.4"
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.8"
   },
   "gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
 }
