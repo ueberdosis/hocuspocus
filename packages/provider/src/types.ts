@@ -103,3 +103,66 @@ export type onStatelessParameters = {
 }
 
 export type StatesArray = { clientId: number, [key: string | number]: any }[]
+
+// hocuspocus-pro types
+
+export type THistoryVersion = {
+  name?: string;
+  version: number;
+  date: number;
+};
+
+export type THistoryConfiguration = {
+  autoVersioning: boolean;
+  currentVersion: number;
+  stateCaptured: number; // indicates whether changes have been made since the last version
+};
+
+export type THistoryAction =
+  | THistoryDocumentRevertAction
+  | THistoryVersionCreateAction
+  | THistoryVersionPreviewAction;
+
+export type THistoryDocumentRevertAction = {
+  action: 'document.revert';
+  /**
+   * if changes havent been persisted to a version yet, we'll create one with the specified name,
+   * expect when `false` is passed.
+   */
+  currentVersionName?: string | false;
+  /**
+   * Name of the version that is created after the revert. Pass `false` to avoid generating a new version.
+   */
+  newVersionName?: string | false;
+};
+
+export type THistoryVersionCreateAction = {
+  action: 'version.create';
+  name?: string;
+};
+
+export type THistoryVersionPreviewAction = {
+  action: 'version.preview';
+  version: number;
+};
+
+export type THistoryEvent =
+  | THistoryVersionPreviewEvent
+  | THistoryVersionCreatedEvent
+  | THistoryDocumentRevertedEvent;
+
+export type THistoryVersionCreatedEvent = {
+  event: 'version.created';
+  version: number;
+};
+
+export type THistoryVersionPreviewEvent = {
+  event: 'version.preview';
+  version: number;
+  ydoc: string; // base64-encoded Uint8Array
+};
+
+export type THistoryDocumentRevertedEvent = {
+  event: 'document.reverted';
+  version: number;
+};

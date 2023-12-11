@@ -89,6 +89,9 @@ export class ClientConnection {
     }, opts.timeout)
 
     websocket.on('message', this.messageHandler)
+    websocket.once('close', () => {
+      websocket.removeListener('message', this.messageHandler)
+    })
   }
 
   /**

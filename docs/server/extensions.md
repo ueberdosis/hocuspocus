@@ -9,10 +9,11 @@ We already created some very useful extensions you should check out for sure:
 | Extension                               | Description                                                                    |
 |-----------------------------------------| ------------------------------------------------------------------------------ |
 | [Database](/server/extensions#database) | A generic database driver that is easily adjustable to work with any database. |
-| [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
 | [Logger](/server/extensions#logger)     | Add logging to Hocuspocus.                                                     |
-| [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
+| [Redis](/server/extensions#redis)       | Scale Hocuspocus horizontally with Redis.                                      |
+| [SQLite](/server/extensions#sq-lite)    | Persist documents to SQLite.        |
 | [Throttle](/server/extensions#throttle) | Throttle connections by ips.                                                   |
+| [Webhook](/server/extensions#webhook)   | Send document changes via webhook to your API.                                 |
 
 ## Database
 
@@ -177,6 +178,8 @@ server.listen();
 Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a
 load balancer and sync changes and awareness states through Redis. Hocuspocus will propagate all received updates to all other instances
 using Redis and thus forward updates to all clients of all Hocuspocus instances.
+
+The Redis extension does not persist data; it only syncs data between instances. Use the [Database](/server/extensions#database) extension to store your documents.
 
 Please note that all messages will be handled on all instances of Hocuspocus, so if you are trying to reduce cpu load by spawning multiple
 servers, you should not connect them via Redis.

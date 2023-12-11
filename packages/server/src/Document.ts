@@ -33,6 +33,8 @@ export class Document extends Doc {
 
   isLoading: boolean
 
+  isDestroyed = false
+
   /**
    * Constructor.
    */
@@ -257,6 +259,11 @@ export class Document extends Doc {
       }
       connection.sendStateless(payload)
     })
+  }
+
+  destroy() {
+    super.destroy()
+    this.isDestroyed = true
   }
 }
 

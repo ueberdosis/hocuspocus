@@ -12,7 +12,7 @@ With the `onAuthenticate` hook you can check if a client is authenticated and au
 
 When throwing an error or rejecting the returned Promise, the connection to the client will be terminated (see [server hooks lifecycle](/server/hooks#lifecycle)). If the client is authorized and authenticated you can also return contextual data such as a user id which will be accessible in other hooks. But you don’t need to.
 
-For more information on the hook and it's payload checkout it's [section](/server/hooks#on-authenticate).
+For more information on the hook and its payload, check out its [section](/server/hooks#on-authenticate).
 
 ```js
 import { Server } from "@hocuspocus/server";
@@ -52,8 +52,8 @@ new HocuspocusProvider({
 
 ## Read only mode
 
-If you want to restrict the current user only to read the document and it's updates but not apply
-updates him- or herself, you can use the `connection` property in the `onAuthenticate` hooks payload:
+If you want to restrict the current user only to read the document and its updates but not apply
+updates themselves, you can use the `connection` property in the `onAuthenticate` hooks payload:
 
 ```js
 import { Server } from "@hocuspocus/server";

@@ -23,9 +23,12 @@ export class MessageReceiver {
 
   logger: Debugger
 
-  constructor(message: IncomingMessage, logger: Debugger) {
+  defaultTransactionOrigin?: string
+
+  constructor(message: IncomingMessage, logger: Debugger, defaultTransactionOrigin?: string) {
     this.message = message
     this.logger = logger
+    this.defaultTransactionOrigin = defaultTransactionOrigin
   }
 
   public apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
@@ -97,8 +100,13 @@ export class MessageReceiver {
         })
         break
       }
+
+      case MessageType.Auth:
+        console.error('Received an authentication message on a connection that is already fully authenticated. Probably your provider has been destroyed + recreated really fast.')
+        break
+
       default:
-        console.error(`Unable to handle message of type ${type}: no handler defined!`)
+        console.error(`Unable to handle message of type ${type}: no handler defined! Are your provider/server versions aligned?`)
         // Do nothing
     }
   }
@@ -179,7 +187,7 @@ export class MessageReceiver {
           break
         }
 
-        readSyncStep2(message.decoder, document, connection)
+        readSyncStep2(message.decoder, document, connection ?? this.defaultTransactionOrigin)
 
         if (connection) {
           connection.send(new OutgoingMessage(document.name)

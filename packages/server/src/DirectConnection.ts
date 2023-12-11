@@ -32,7 +32,7 @@ export class DirectConnection implements DirectConnectionInterface {
 
     transaction(this.document)
 
-    this.instance.storeDocumentHooks(this.document, {
+    await this.instance.storeDocumentHooks(this.document, {
       clientsCount: this.document.getConnectionsCount(),
       context: this.context,
       document: this.document,
@@ -45,8 +45,24 @@ export class DirectConnection implements DirectConnectionInterface {
     })
   }
 
-  disconnect() {
-    this.document?.removeDirectConnection()
-    this.document = null
+  async disconnect() {
+    if (this.document) {
+
+      this.document?.removeDirectConnection()
+
+      await this.instance.storeDocumentHooks(this.document, {
+        clientsCount: this.document.getConnectionsCount(),
+        context: this.context,
+        document: this.document,
+        documentName: this.document.name,
+        instance: this.instance,
+        requestHeaders: {},
+        requestParameters: new URLSearchParams(),
+        socketId: 'server',
+      })
+
+      this.document = null
+    }
   }
+
 }

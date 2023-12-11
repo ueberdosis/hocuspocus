@@ -192,8 +192,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.on('open', this.boundOnOpen)
     this.configuration.websocketProvider.on('open', this.forwardOpen)
 
-    this.configuration.websocketProvider.on('message', this.boundOnMessage)
-
     this.configuration.websocketProvider.on('close', this.boundOnClose)
     this.configuration.websocketProvider.on('close', this.configuration.onClose)
     this.configuration.websocketProvider.on('close', this.forwardClose)
@@ -233,8 +231,6 @@ export class HocuspocusProvider extends EventEmitter {
   boundPageUnload = this.pageUnload.bind(this)
 
   boundOnOpen = this.onOpen.bind(this)
-
-  boundOnMessage = this.onMessage.bind(this)
 
   boundOnClose = this.onClose.bind(this)
 
@@ -367,25 +363,41 @@ export class HocuspocusProvider extends EventEmitter {
 
   // not needed, but provides backward compatibility with e.g. lexicla/yjs
   async connect() {
+    if (this.configuration.broadcast) {
+      this.subscribeToBroadcastChannel()
+    }
+
     return this.configuration.websocketProvider.connect()
   }
 
   disconnect() {
     this.disconnectBroadcastChannel()
     this.configuration.websocketProvider.detach(this)
+    this.isConnected = false
+
     if (!this.configuration.preserveConnection) {
       this.configuration.websocketProvider.disconnect()
     }
+
   }
 
   async onOpen(event: Event) {
     this.isAuthenticated = false
+    this.isConnected = true
 
     this.emit('open', { event })
 
+    let token: string | null
+    try {
+      token = await this.getToken()
+    } catch (error) {
+      this.permissionDeniedHandler(`Failed to get token: ${error}`)
+      return
+    }
+
     if (this.isAuthenticationRequired) {
       this.send(AuthenticationMessage, {
-        token: await this.getToken(),
+        token,
         documentName: this.configuration.name,
       })
     }
@@ -435,10 +447,6 @@ export class HocuspocusProvider extends EventEmitter {
 
     const documentName = message.readVarString()
 
-    if (documentName !== this.configuration.name) {
-      return // message is meant for another provider
-    }
-
     message.writeVarString(documentName)
 
     this.emit('message', { event, message: new IncomingMessage(event.data) })
@@ -471,8 +479,6 @@ export class HocuspocusProvider extends EventEmitter {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
     }
 
-    this.disconnect()
-
     this.awareness?.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
 
@@ -482,7 +488,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('connect', this.forwardConnect)
     this.configuration.websocketProvider.off('open', this.boundOnOpen)
     this.configuration.websocketProvider.off('open', this.forwardOpen)
-    this.configuration.websocketProvider.off('message', this.boundOnMessage)
     this.configuration.websocketProvider.off('close', this.boundOnClose)
     this.configuration.websocketProvider.off('close', this.configuration.onClose)
     this.configuration.websocketProvider.off('close', this.forwardClose)
@@ -493,7 +498,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
 
     this.send(CloseMessage, { documentName: this.configuration.name })
-    this.isConnected = false
+    this.disconnect()
 
     if (typeof window === 'undefined') {
       return
@@ -542,11 +547,16 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.mux(() => {
-      this.broadcast(SyncStepOneMessage, { document: this.document })
-      this.broadcast(SyncStepTwoMessage, { document: this.document })
-      this.broadcast(QueryAwarenessMessage, { document: this.document })
+      this.broadcast(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
+      this.broadcast(SyncStepTwoMessage, { document: this.document, documentName: this.configuration.name })
+      this.broadcast(QueryAwarenessMessage, { document: this.document, documentName: this.configuration.name })
       if (this.awareness) {
-        this.broadcast(AwarenessMessage, { awareness: this.awareness, clients: [this.document.clientID], document: this.document })
+        this.broadcast(AwarenessMessage, {
+          awareness: this.awareness,
+          clients: [this.document.clientID],
+          document: this.document,
+          documentName: this.configuration.name,
+        })
       }
     })
   }
