@@ -246,10 +246,15 @@ export class Document extends Doc {
   /**
    * Broadcast stateless message to all connections
    */
-  public broadcastStateless(payload: string): void {
+  public broadcastStateless(payload: string, exclude?: Connection | Connection[]): void {
     this.callbacks.beforeBroadcastStateless(this, payload)
 
+    const toExclude = Array.isArray(exclude) ? exclude : [exclude]
+
     this.getConnections().forEach(connection => {
+      if (exclude && toExclude.includes(connection)) {
+        return
+      }
       connection.sendStateless(payload)
     })
   }
