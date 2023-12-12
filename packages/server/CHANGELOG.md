@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.8.1](https://github.com/ueberdosis/hocuspocus/compare/v2.8.0...v2.8.1) (2023-11-21)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [2.8.0](https://github.com/ueberdosis/hocuspocus/compare/v2.7.1...v2.8.0) (2023-11-15)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.7.1](https://github.com/ueberdosis/hocuspocus/compare/v2.7.0...v2.7.1) (2023-10-19)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [2.7.0](https://github.com/ueberdosis/hocuspocus/compare/v2.6.1...v2.7.0) (2023-10-16)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.6.1](https://github.com/ueberdosis/hocuspocus/compare/v2.6.0...v2.6.1) (2023-10-05)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [2.6.0](https://github.com/ueberdosis/hocuspocus/compare/v2.5.0...v2.6.0) (2023-10-04)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [2.5.0](https://github.com/ueberdosis/hocuspocus/compare/v2.5.0-rc.0...v2.5.0) (2023-09-06)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
 # [2.5.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.4.0...v2.5.0-rc.0) (2023-08-24)
 
 **Note:** Version bump only for package @hocuspocus/server

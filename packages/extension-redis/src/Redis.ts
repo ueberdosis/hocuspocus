@@ -84,6 +84,8 @@ export class Redis implements Extension {
     disconnectDelay: 1000,
   }
 
+  redisTransactionOrigin = '__hocuspocus__redis__origin__'
+
   pub: RedisInstance
 
   sub: RedisInstance
@@ -95,6 +97,8 @@ export class Redis implements Extension {
   locks = new Map<string, Redlock.Lock>()
 
   logger: Debugger
+
+  messagePrefix: Buffer
 
   public constructor(configuration: Partial<Configuration>) {
     this.configuration = {
@@ -128,9 +132,12 @@ export class Redis implements Extension {
       this.pub = new RedisClient(port, host, options)
       this.sub = new RedisClient(port, host, options)
     }
-    this.sub.on('pmessageBuffer', this.handleIncomingMessage)
+    this.sub.on('messageBuffer', this.handleIncomingMessage)
 
     this.redlock = new Redlock([this.pub])
+
+    const identifierBuffer = Buffer.from(this.configuration.identifier, 'utf-8')
+    this.messagePrefix = Buffer.concat([Buffer.from([identifierBuffer.length]), identifierBuffer])
   }
 
   async onConfigure({ instance }: onConfigurePayload) {
@@ -143,15 +150,26 @@ export class Redis implements Extension {
   }
 
   private pubKey(documentName: string) {
-    return `${this.getKey(documentName)}:${this.configuration.identifier.replace(/:/g, '')}`
+    return this.getKey(documentName)
   }
 
   private subKey(documentName: string) {
-    return `${this.getKey(documentName)}:*`
+    return this.getKey(documentName)
   }
 
   private lockKey(documentName: string) {
     return `${this.getKey(documentName)}:lock`
+  }
+
+  private encodeMessage(message: Uint8Array) {
+    return Buffer.concat([this.messagePrefix, Buffer.from(message)])
+  }
+
+  private decodeMessage(buffer: Buffer) {
+    const identifierLength = buffer[0]
+    const identifier = buffer.toString('utf-8', 1, identifierLength + 1)
+
+    return [identifier, buffer.slice(identifierLength + 1)]
   }
 
   /**
@@ -161,7 +179,7 @@ export class Redis implements Extension {
     return new Promise((resolve, reject) => {
       // On document creation the node will connect to pub and sub channels
       // for the document.
-      this.sub.psubscribe(this.subKey(documentName), async error => {
+      this.sub.subscribe(this.subKey(documentName), async error => {
         if (error) {
           reject(error)
           return
@@ -183,7 +201,7 @@ export class Redis implements Extension {
       .createSyncMessage()
       .writeFirstSyncStepFor(document)
 
-    return this.pub.publishBuffer(this.pubKey(documentName), Buffer.from(syncMessage.toUint8Array()))
+    return this.pub.publishBuffer(this.pubKey(documentName), this.encodeMessage(syncMessage.toUint8Array()))
   }
 
   /**
@@ -195,7 +213,7 @@ export class Redis implements Extension {
 
     return this.pub.publishBuffer(
       this.pubKey(documentName),
-      Buffer.from(awarenessMessage.toUint8Array()),
+      this.encodeMessage(awarenessMessage.toUint8Array()),
     )
   }
 
@@ -248,40 +266,42 @@ export class Redis implements Extension {
 
     return this.pub.publishBuffer(
       this.pubKey(documentName),
-      Buffer.from(message.toUint8Array()),
+      this.encodeMessage(message.toUint8Array()),
     )
   }
 
   /**
-   * Handle incoming messages published on all subscribed document channels.
+   * Handle incoming messages published on subscribed document channels.
    * Note that this will also include messages from ourselves as it is not possible
    * in Redis to filter these.
   */
-  private handleIncomingMessage = async (channel: Buffer, pattern: Buffer, data: Buffer) => {
-    const message = new IncomingMessage(data)
-    // we don't need the documentName from the message, we are just taking it from the redis channelName.
-    // we have to immediately write it back to the encoder though, to make sure the structure of the message is correct
-    message.writeVarString(message.readVarString())
-
-    const channelName = pattern.toString()
-    const [_, documentName, identifier] = channelName.split(':')
-    const document = this.instance.documents.get(documentName)
+  private handleIncomingMessage = async (channel: Buffer, data: Buffer) => {
+    const [identifier, messageBuffer] = this.decodeMessage(data)
 
     if (identifier === this.configuration.identifier) {
       return
     }
 
+    const message = new IncomingMessage(messageBuffer)
+    const documentName = message.readVarString()
+    message.writeVarString(documentName)
+
+    const document = this.instance.documents.get(documentName)
+
     if (!document) {
+      // What does this mean? Why are we subscribed to this document?
+      this.logger.log(`Received message for unknown document ${documentName}`)
       return
     }
 
     new MessageReceiver(
       message,
       this.logger,
+      this.redisTransactionOrigin,
     ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(
         this.pubKey(document.name),
-        Buffer.from(reply),
+        this.encodeMessage(reply),
       )
     })
   }
@@ -290,7 +310,9 @@ export class Redis implements Extension {
    * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
    */
   public async onChange(data: onChangePayload): Promise<any> {
-    return this.publishFirstSyncStep(data.documentName, data.document)
+    if (data.transactionOrigin !== this.redisTransactionOrigin) {
+      return this.publishFirstSyncStep(data.documentName, data.document)
+    }
   }
 
   /**
@@ -307,7 +329,7 @@ export class Redis implements Extension {
       }
 
       // Time to end the subscription on the document channel.
-      this.sub.punsubscribe(this.subKey(documentName), (error: any) => {
+      this.sub.unsubscribe(this.subKey(documentName), (error: any) => {
         if (error) {
           console.error(error)
         }
@@ -323,7 +345,7 @@ export class Redis implements Extension {
 
     return this.pub.publishBuffer(
       this.pubKey(data.documentName),
-      Buffer.from(message.toUint8Array()),
+      this.encodeMessage(message.toUint8Array()),
     )
   }
 

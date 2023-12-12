@@ -12,7 +12,7 @@ You can see the extensions we have already created [here](/server/extensions).
 
 Hocuspocus is written in TypeScript. You don't have to use TypeScript to write extensions, but it's highly recommended. We will only cover the TypeScript part in this documentation.
 
-First step: Create a new class that implements the `Extension` interface and add the method stubs the interface requires.
+First step: Create a new class that implements the [`Extension`](https://github.com/ueberdosis/hocuspocus/blob/14e5676ff685a1432d87fed780b6cbead12c8122/packages/server/src/types.ts#L35-L57) interface and add the desired hooks.
 
 As every hook needs to return a Promise, the easiest way is to mark them as `async`.
 
@@ -52,8 +52,6 @@ export class MyHocuspocusExtension implements Extension {
 Notice something? These look like the hooks we introduced in the previous chapters of the guide. And guess what: they work the same way as those hooks. So you should already know what they do and how you can use them. If you're still not sure, check out the [hooks](/server/hooks) section of this documentation which explains them in more detail.
 
 Now you can add a constructor that accepts your extension's configuration and merges the default one. It's good practise at this point to create an interface for your configuration too.
-
-You need to keep all those methods, even if you don't use them. If you want to get rid of those annoying TypeScript warnings about empty functions, you can add the `@typescript-eslint/no-empty-function` annotation.
 
 ```js
 import {

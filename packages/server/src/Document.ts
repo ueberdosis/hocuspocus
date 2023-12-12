@@ -33,6 +33,8 @@ export class Document extends Doc {
 
   isLoading: boolean
 
+  isDestroyed = false
+
   /**
    * Constructor.
    */
@@ -252,6 +254,11 @@ export class Document extends Doc {
     this.getConnections().forEach(connection => {
       connection.sendStateless(payload)
     })
+  }
+
+  destroy() {
+    super.destroy()
+    this.isDestroyed = true
   }
 }
 

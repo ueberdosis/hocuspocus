@@ -1,11 +1,13 @@
 # Extension Redis
 
 Hocuspocus can be scaled horizontally using the Redis extension. You can spawn multiple instances of the server behind a
-load balancer and sync changes and awareness states through Redis. Hocuspocus will propagate all received updates to all
-other instances using Redis and thus forward updates to all clients of all Hocuspocus instances.
+load balancer and sync changes and awareness states through Redis. Hocuspocus will propagate all received updates to all other instances
+using Redis and thus forward updates to all clients of all Hocuspocus instances.
 
-Please note that all messages will be handled on all instances of Hocuspocus, so if you are trying to reduce cpu load by
-spawning multiple servers, you should not connect them via Redis.
+The Redis extension does not persist data; it only syncs data between instances. Use the [Database](/server/extensions/database) extension to store your documents.
+
+Please note that all messages will be handled on all instances of Hocuspocus, so if you are trying to reduce cpu load by spawning multiple
+servers, you should not connect them via Redis.
 
 Thanks to [@tommoor](https://github.com/tommoor) for writing the initial implementation of that extension.
 

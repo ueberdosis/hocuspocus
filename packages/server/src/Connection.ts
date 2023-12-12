@@ -65,7 +65,7 @@ export class Connection {
 
     this.lock = new AsyncLock()
 
-    this.webSocket.binaryType = 'arraybuffer'
+    this.webSocket.binaryType = 'nodebuffer'
     this.document.addConnection(this)
 
     this.pingInterval = setInterval(this.check.bind(this), this.timeout)

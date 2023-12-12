@@ -42,7 +42,7 @@ export interface Extension {
   connected?(data: connectedPayload): Promise<any>;
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
-  afterLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
+  afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
   beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>;
   onStateless?(payload: onStatelessPayload): Promise<any>;
@@ -52,7 +52,7 @@ export interface Extension {
   onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
   onRequest?(data: onRequestPayload): Promise<any>;
   onDisconnect?(data: onDisconnectPayload): Promise<any>;
-  afterUnloadDocument?(data: onLoadDocumentPayload): Promise<any>;
+  afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
   onDestroy?(data: onDestroyPayload): Promise<any>;
 }
 
@@ -85,7 +85,7 @@ export type HookPayloadByName = {
   connected: connectedPayload,
   onAuthenticate: onAuthenticatePayload,
   onLoadDocument: onLoadDocumentPayload,
-  afterLoadDocument: onLoadDocumentPayload,
+  afterLoadDocument: afterLoadDocumentPayload,
   beforeHandleMessage: beforeHandleMessagePayload,
   beforeBroadcastStateless: beforeBroadcastStatelessPayload,
   onStateless: onStatelessPayload,
@@ -154,6 +154,7 @@ export interface onStatelessPayload {
 // @todo Change 'connection' to 'connectionConfig' in next major release
 // see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
 export interface onAuthenticatePayload {
+  context: any,
   documentName: string,
   instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
@@ -166,6 +167,7 @@ export interface onAuthenticatePayload {
 // @todo Change 'connection' to 'connectionConfig' in next major release
 // see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
 export interface onConnectPayload {
+  context: any,
   documentName: string,
   instance: Hocuspocus,
   request: IncomingMessage,

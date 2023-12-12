@@ -11,11 +11,13 @@ import { Configuration, onListenPayload } from './types'
 export interface ServerConfiguration extends Configuration {
   port?: number,
   address?: string,
+  stopOnSignals?: boolean,
 }
 
 export const defaultServerConfiguration = {
   port: 80,
   address: '0.0.0.0',
+  stopOnSignals: true,
 }
 
 export class Server {
@@ -125,6 +127,17 @@ export class Server {
       })
     }
 
+    if (this.configuration.stopOnSignals) {
+      const signalHandler = async () => {
+        await this.destroy()
+        process.exit(0)
+      }
+
+      process.on('SIGINT', signalHandler)
+      process.on('SIGQUIT', signalHandler)
+      process.on('SIGTERM', signalHandler)
+    }
+
     return new Promise((resolve: Function, reject: Function) => {
       this.httpServer.listen({
         port: this.configuration.port,
@@ -159,18 +172,30 @@ export class Server {
   }
 
   async destroy(): Promise<any> {
-    this.httpServer.close()
+    await new Promise(async resolve => {
 
-    try {
-      this.webSocketServer.close()
-      this.webSocketServer.clients.forEach(client => {
-        client.terminate()
-      })
-    } catch (error) {
-      console.error(error)
-    }
+      this.httpServer.close()
 
-    this.hocuspocus.debugger.flush()
+      try {
+
+        this.configuration.extensions.push({
+          async afterUnloadDocument({ instance }) {
+            if (instance.getDocumentsCount() === 0) resolve('')
+          },
+        })
+
+        this.webSocketServer.close()
+        if (this.hocuspocus.getDocumentsCount() === 0) resolve('')
+
+        this.hocuspocus.closeConnections()
+
+      } catch (error) {
+        console.error(error)
+      }
+
+      this.hocuspocus.debugger.flush()
+
+    })
 
     await this.hocuspocus.hooks('onDestroy', { instance: this.hocuspocus })
   }
