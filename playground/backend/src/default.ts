@@ -40,7 +40,7 @@ const server = Server.configure({
   // onRequest(data) {
   //   return new Promise((resolve, reject) => {
   //     const { response } = data
-  //     // Respond with your custum content
+  //     // Respond with your custom content
   //     response.writeHead(200, { 'Content-Type': 'text/plain' })
   //     response.end('This is my custom response, yay!')
 
