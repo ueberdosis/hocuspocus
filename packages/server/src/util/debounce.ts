@@ -34,7 +34,7 @@ export const useDebounce = () => {
     timers.set(id, {
       start,
       timeout: setTimeout(run, debounce),
-      func: run
+      func: run,
     })
   }
 

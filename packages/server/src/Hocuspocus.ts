@@ -352,7 +352,7 @@ export class Hocuspocus {
       }
 
       // If it’s the last connection, we need to make sure to store the
-      // document. Use the debouncer executeNow helper, to run scheduled 
+      // document. Use the debouncer executeNow helper, to run scheduled
       // onStoreDocument immediately and clear running timers.
       // If there is no scheduled run for this document there is no point in
       // triggering onStoreDocument hook, as everything seems to be stored already.
