@@ -684,7 +684,7 @@ server.listen();
 
 ### onStoreDocument
 
-The `onStoreDocument` hooks are called after the document has been changed (after the onChange hook) and can
+The `onStoreDocument` hooks are called after the document has been changed (after the onChange hook) or when connection destroyed and can
 be used to store the changed document to a persistent storage. Calls to `onStoreDocument` are debounced by default
 (see `debounce` and `maxDebounce` configuration options).
 
