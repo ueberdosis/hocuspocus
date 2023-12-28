@@ -77,7 +77,7 @@ export class Hocuspocus {
 
   debugger = new Debugger()
 
-  debounce = useDebounce()
+  debouncer = useDebounce()
 
   constructor(configuration?: Partial<Configuration>) {
     if (configuration) {
@@ -352,19 +352,14 @@ export class Hocuspocus {
       }
 
       // If it’s the last connection, we need to make sure to store the
-      // document. Use the debounce helper, to clear running timers,
-      // but make it run immediately if configured.
+      // document. Use the debouncer executeNow helper, to run scheduled 
+      // onStoreDocument immediately and clear running timers.
+      // If there is no scheduled run for this document there is no point in
+      // triggering onStoreDocument hook, as everything seems to be stored already.
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        this.debounce(
-          `onStoreDocument-${document.name}`,
-          () => {
-            this.storeDocumentHooks(document, hookPayload)
-          },
-          this.configuration.unloadImmediately ? 0 : this.configuration.debounce,
-          this.configuration.maxDebounce,
-        )
+        this.debouncer.executeNow(`onStoreDocument-${document.name}`)
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
@@ -405,7 +400,7 @@ export class Hocuspocus {
       return
     }
 
-    this.debounce(
+    this.debouncer.debounce(
       `onStoreDocument-${document.name}`,
       () => {
         this.storeDocumentHooks(document, hookPayload)
