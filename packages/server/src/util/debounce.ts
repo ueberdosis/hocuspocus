@@ -1,21 +1,36 @@
 export const useDebounce = () => {
   const timers: Map<string, {
     timeout: NodeJS.Timeout,
+    promise: Promise<unknown>,
+    resolve: (value: unknown) => void,
     start: number
   }> = new Map()
 
+  /**
+   * All calls to the function within a given debounce window will recieve the same promise that
+   * resolves when the debounced function has resolved.
+   */
   const debounce = (
     id: string,
     func: Function,
     debounce: number,
     maxDebounce: number,
   ) => {
+    // default function to satisfy typescript
+    let newResolve: (value: unknown) => void = () => {}
+    const newPromise = new Promise<unknown>(resolve => {
+      newResolve = resolve
+    })
     const old = timers.get(id)
     const start = old?.start || Date.now()
+    const promise = old?.promise || newPromise
+    const resolve = old?.resolve || newResolve
 
-    const run = () => {
+    const run = async () => {
       timers.delete(id)
-      return func()
+      const result = await func()
+      resolve(result)
+      return result
     }
 
     if (old?.timeout) {
@@ -33,7 +48,10 @@ export const useDebounce = () => {
     timers.set(id, {
       start,
       timeout: setTimeout(run, debounce),
+      promise,
+      resolve,
     })
+    return promise
   }
 
   return debounce

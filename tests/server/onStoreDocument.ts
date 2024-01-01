@@ -1,5 +1,6 @@
 import test from 'ava'
 import { onStoreDocumentPayload } from '@hocuspocus/server'
+import { assertThrottledCallback, createPromiseWithResolve, createStorageQueueExtension } from 'tests/utils/storeDocument.js'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
 } from '../utils/index.js'
@@ -413,4 +414,70 @@ test('waits before calling onStoreDocument after the last user disconnects when 
       },
     })
   })
+})
+
+test('storageQueues throttle individually of each other', async t => {
+  let startTime = 0
+  const [a1Promise, a1Resolve] = createPromiseWithResolve()
+  const [a2Promise, a2Resolve] = createPromiseWithResolve()
+  const [b1Promise, b1Resolve] = createPromiseWithResolve()
+  const [b2Promise, b2Resolve] = createPromiseWithResolve()
+  const [default1Promise, default1Resolve] = createPromiseWithResolve()
+  const [default2Promise, default2Resolve] = createPromiseWithResolve()
+
+  function assertOnStoreDocumentThrottled(minTime: number, maxTime: number, resolve: () => void, extensionName = 'default') {
+    assertThrottledCallback(t, startTime, minTime, maxTime, resolve, 'onStoreDocument', extensionName)
+  }
+
+  function createOnStoreDocumentExtension(extensionName: string, storageQueue: string, debounceMin: number, debounceMax: number, resolve: () => void) {
+    return createStorageQueueExtension(
+      extensionName,
+      storageQueue,
+      {
+        async onStoreDocument() {
+          assertOnStoreDocumentThrottled(debounceMin, debounceMax, resolve, extensionName)
+        },
+      },
+    )
+  }
+
+  const extensions = [
+    createOnStoreDocumentExtension('a1', 'a', 0, 500, a1Resolve),
+    createOnStoreDocumentExtension('a2', 'a', 0, 500, a2Resolve),
+    createOnStoreDocumentExtension('b1', 'b', 500, 1000, b1Resolve),
+    createOnStoreDocumentExtension('b2', 'b', 500, 1000, b2Resolve),
+    createOnStoreDocumentExtension('default1', 'default1', 1000, 1500, default1Resolve),
+  ]
+
+  const server = await newHocuspocus({
+    unloadImmediately: false,
+    debounce: 1000,
+    maxDebounce: 1500,
+    async onStoreDocument() {
+      assertOnStoreDocumentThrottled(1000, 1500, default2Resolve, 'default2')
+    },
+    extensions,
+    storageQueues: {
+      a: {
+        debounce: 0,
+        maxDebounce: 500,
+      },
+      b: {
+        debounce: 500,
+        maxDebounce: 100,
+      },
+    },
+  })
+
+  const socket = newHocuspocusProviderWebsocket(server)
+
+  newHocuspocusProvider(server, {
+    websocketProvider: socket,
+    onSynced() {
+      startTime = Date.now()
+      socket.destroy()
+    },
+  })
+
+  await Promise.all([a1Promise, a2Promise, b1Promise, b2Promise, default1Promise, default2Promise])
 })

@@ -19,6 +19,7 @@ import {
   AwarenessUpdate,
   Configuration,
   ConnectionConfiguration,
+  Extension,
   HookName,
   HookPayloadByName,
   beforeBroadcastStatelessPayload,
@@ -43,6 +44,8 @@ export const defaultConfiguration = {
     gcFilter: () => true,
   },
   unloadImmediately: true,
+  storageQueue: 'default',
+  storageQueues: { default: {} },
   stopOnSignals: true,
 }
 
@@ -92,6 +95,11 @@ export class Hocuspocus {
     this.configuration = {
       ...this.configuration,
       ...configuration,
+      storageQueues: {
+        default: {},
+        ...this.configuration.storageQueues,
+        ...configuration.storageQueues,
+      },
     }
 
     this.configuration.extensions.sort((a, b) => {
@@ -129,6 +137,14 @@ export class Hocuspocus {
       afterUnloadDocument: this.configuration.afterUnloadDocument,
       onDisconnect: this.configuration.onDisconnect,
       onDestroy: this.configuration.onDestroy,
+      storageQueue: this.configuration.storageQueue,
+    })
+
+    // create storage queues that are referenced by extensions but not pre-defined at the top level
+    this.configuration.extensions.forEach(extension => {
+      if (extension.storageQueue && !this.configuration.storageQueues[extension.storageQueue]) {
+        this.configuration.storageQueues[extension.storageQueue] = {}
+      }
     })
 
     this.hooks('onConfigure', {
@@ -357,14 +373,7 @@ export class Hocuspocus {
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        this.debounce(
-          `onStoreDocument-${document.name}`,
-          () => {
-            this.storeDocumentHooks(document, hookPayload)
-          },
-          this.configuration.unloadImmediately ? 0 : this.configuration.debounce,
-          this.configuration.maxDebounce,
-        )
+        this.onStoreDocument(document, hookPayload, this.configuration.unloadImmediately)
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
@@ -405,14 +414,7 @@ export class Hocuspocus {
       return
     }
 
-    this.debounce(
-      `onStoreDocument-${document.name}`,
-      () => {
-        this.storeDocumentHooks(document, hookPayload)
-      },
-      this.configuration.debounce,
-      this.configuration.maxDebounce,
-    )
+    this.onStoreDocument(document, hookPayload)
   }
 
   /**
@@ -488,10 +490,27 @@ export class Hocuspocus {
     return document
   }
 
-  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
-    return this.hooks('onStoreDocument', hookPayload)
+  onStoreDocument(document: Document, hookPayload: onStoreDocumentPayload, unloadImmediately = false) {
+    const promises = Object.entries(this.configuration.storageQueues).map(([queue, { debounce = this.configuration.debounce, maxDebounce = this.configuration.maxDebounce }]) => {
+      return this.debounce(
+        `onStoreDocument-${queue}-${document.name}`,
+        () => this.storeDocumentHooks(document, hookPayload, queue),
+        unloadImmediately ? 0 : debounce,
+        maxDebounce,
+      )
+    })
+    return Promise.all(promises)
+  }
+
+  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload, queue = 'default') {
+    const filter = (extension: Extension) => {
+      return (
+        extension.storageQueue === queue || (extension.storageQueue === undefined && queue === 'default')
+      )
+    }
+    return this.hooks('onStoreDocument', hookPayload, null, filter)
       .then(() => {
-        this.hooks('afterStoreDocument', hookPayload).then(() => {
+        this.hooks('afterStoreDocument', hookPayload, null, filter).then(() => {
           // Remove document from memory.
 
           if (document.getConnectionsCount() > 0) {
@@ -514,7 +533,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
-  hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
+  hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null, filter?: (extension: Extension) => boolean): Promise<any> {
     const { extensions } = this.configuration
 
     // create a new `thenable` chain
@@ -523,7 +542,7 @@ export class Hocuspocus {
 
     extensions
       // get me all extensions which have the given hook
-      .filter(extension => typeof extension[name] === 'function')
+      .filter(extension => typeof extension[name] === 'function' && (filter?.(extension) ?? true))
       // run through all the configured hooks
       .forEach(extension => {
         chain = chain

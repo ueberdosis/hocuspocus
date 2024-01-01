@@ -1,6 +1,4 @@
-import {
-  IncomingHttpHeaders, IncomingMessage, ServerResponse,
-} from 'http'
+import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'http'
 import { URLSearchParams } from 'url'
 import { Awareness } from 'y-protocols/awareness'
 import Connection from './Connection.js'
@@ -27,55 +25,56 @@ export interface AwarenessUpdate {
 }
 
 export interface ConnectionConfiguration {
-  readOnly: boolean
-  requiresAuthentication: boolean
-  isAuthenticated: boolean
+  readOnly: boolean,
+  requiresAuthentication: boolean,
+  isAuthenticated: boolean,
 }
 
 export interface Extension {
-  priority?: number;
-  extensionName?: string;
-  onConfigure?(data: onConfigurePayload): Promise<any>;
-  onListen?(data: onListenPayload): Promise<any>;
-  onUpgrade?(data: onUpgradePayload): Promise<any>;
-  onConnect?(data: onConnectPayload): Promise<any>;
-  connected?(data: connectedPayload): Promise<any>;
-  onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
-  onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
-  afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
-  beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
-  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>;
-  onStateless?(payload: onStatelessPayload): Promise<any>;
-  onChange?(data: onChangePayload): Promise<any>;
-  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>;
-  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>;
-  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
-  onRequest?(data: onRequestPayload): Promise<any>;
-  onDisconnect?(data: onDisconnectPayload): Promise<any>;
-  afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
-  onDestroy?(data: onDestroyPayload): Promise<any>;
+  priority?: number,
+  extensionName?: string,
+  storageQueue?: string,
+  onConfigure?(data: onConfigurePayload): Promise<any>,
+  onListen?(data: onListenPayload): Promise<any>,
+  onUpgrade?(data: onUpgradePayload): Promise<any>,
+  onConnect?(data: onConnectPayload): Promise<any>,
+  connected?(data: connectedPayload): Promise<any>,
+  onAuthenticate?(data: onAuthenticatePayload): Promise<any>,
+  onLoadDocument?(data: onLoadDocumentPayload): Promise<any>,
+  afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>,
+  beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>,
+  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>,
+  onStateless?(payload: onStatelessPayload): Promise<any>,
+  onChange?(data: onChangePayload): Promise<any>,
+  onStoreDocument?(data: onStoreDocumentPayload): Promise<any>,
+  afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>,
+  onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>,
+  onRequest?(data: onRequestPayload): Promise<any>,
+  onDisconnect?(data: onDisconnectPayload): Promise<any>,
+  afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>,
+  onDestroy?(data: onDestroyPayload): Promise<any>,
 }
 
 export type HookName =
-  'onConfigure' |
-  'onListen' |
-  'onUpgrade' |
-  'onConnect' |
-  'connected' |
-  'onAuthenticate' |
-  'onLoadDocument' |
-  'afterLoadDocument' |
-  'beforeHandleMessage' |
-  'beforeBroadcastStateless' |
-  'onStateless' |
-  'onChange' |
-  'onStoreDocument' |
-  'afterStoreDocument' |
-  'onAwarenessUpdate' |
-  'onRequest' |
-  'onDisconnect' |
-  'afterUnloadDocument' |
-  'onDestroy'
+  | 'onConfigure'
+  | 'onListen'
+  | 'onUpgrade'
+  | 'onConnect'
+  | 'connected'
+  | 'onAuthenticate'
+  | 'onLoadDocument'
+  | 'afterLoadDocument'
+  | 'beforeHandleMessage'
+  | 'beforeBroadcastStateless'
+  | 'onStateless'
+  | 'onChange'
+  | 'onStoreDocument'
+  | 'afterStoreDocument'
+  | 'onAwarenessUpdate'
+  | 'onRequest'
+  | 'onDisconnect'
+  | 'afterUnloadDocument'
+  | 'onDestroy'
 
 export type HookPayloadByName = {
   onConfigure: onConfigurePayload,
@@ -97,6 +96,13 @@ export type HookPayloadByName = {
   onDisconnect: onDisconnectPayload,
   afterUnloadDocument: afterUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
+}
+
+export type StorageQueueConfigs = {
+  [key: string]: {
+    debounce?: number,
+    maxDebounce?: number,
+  },
 }
 export interface Configuration extends Extension {
   /**
@@ -127,7 +133,7 @@ export interface Configuration extends Extension {
   /**
    * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
    */
-  maxDebounce: number
+  maxDebounce: number,
   /**
    * By default, the servers show a start screen. If passed false, the server will start quietly.
    */
@@ -153,9 +159,14 @@ export interface Configuration extends Extension {
    */
   yDocOptions: {
     gc: boolean, // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
-    gcFilter: () => boolean, // will be called before garbage collecting ; return false to keep it
+    gcFilter: () => boolean, // will be called before garbage collecting , return false to keep it
   },
 
+  /**
+   * Define specific debounce settings for each storage queue, allowing multiple extensions to store
+   * documents in different locations in parallel at different rates.
+   */
+  storageQueues: StorageQueueConfigs,
 }
 
 export interface onStatelessPayload {
@@ -188,7 +199,7 @@ export interface onConnectPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfiguration
+  connection: ConnectionConfiguration,
 }
 
 // @todo Change 'connection' to 'connectionConfig', and 'connectionInstance' to 'connection' in next major release
@@ -202,7 +213,7 @@ export interface connectedPayload {
   requestParameters: URLSearchParams,
   socketId: string,
   connection: ConnectionConfiguration,
-  connectionInstance: Connection
+  connectionInstance: Connection,
 }
 
 // @todo Change 'connection' to 'connectionConfig' in next major release
@@ -215,7 +226,7 @@ export interface onLoadDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfiguration
+  connection: ConnectionConfiguration,
 }
 
 // @todo Change 'connection' to 'connectionConfig' in next major release
@@ -228,7 +239,7 @@ export interface afterLoadDocumentPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfiguration
+  connection: ConnectionConfiguration,
 }
 
 export interface onChangePayload {
@@ -254,7 +265,7 @@ export interface beforeHandleMessagePayload {
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
-  connection: Connection
+  connection: Connection,
 }
 
 export interface beforeBroadcastStatelessPayload {
@@ -304,7 +315,7 @@ export interface fetchPayload {
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
   socketId: string,
-  connection: ConnectionConfiguration
+  connection: ConnectionConfiguration,
 }
 
 export interface storePayload extends onStoreDocumentPayload {
@@ -352,11 +363,11 @@ export interface onConfigurePayload {
 }
 
 export interface afterUnloadDocumentPayload {
-  instance: Hocuspocus;
-  documentName: string;
+  instance: Hocuspocus,
+  documentName: string,
 }
 
 export interface DirectConnection {
   transact(transaction: (document: Document) => void): Promise<void>,
-  disconnect(): void
+  disconnect(): void,
 }
