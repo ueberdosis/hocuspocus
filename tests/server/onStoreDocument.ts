@@ -19,7 +19,7 @@ test('calls the debouned onStoreDocument hook before the document is removed fro
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
 
         socket.destroy()
@@ -69,7 +69,7 @@ test('removes the document from memory when there’s no connection after onStor
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
@@ -264,7 +264,7 @@ test('runs hooks in the given order', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
@@ -327,7 +327,7 @@ test('allows to overwrite the order of extension with a priority', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
@@ -418,7 +418,7 @@ test('waits before calling onStoreDocument after the last user disconnects when 
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
         startTime = Date.now()
         socket.destroy()
@@ -451,7 +451,7 @@ test('calls debounced onStoreDocument immediately after the last user disconnect
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
-        //Dummy change to trigger onStoreDocument
+        // Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
         startTime = Date.now()
         socket.destroy()
