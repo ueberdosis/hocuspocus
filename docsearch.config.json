@@ -1,7 +1,7 @@
 {
   "index_name": "hocuspocus",
   "start_urls": [
-    "https://tiptap.dev/hocuspocus"
+    "https://tiptap.dev/docs/hocuspocus"
   ],
   "sitemap_alternate_links": true,
   "selectors": {
