@@ -22,9 +22,7 @@ test('calls the debouned onStoreDocument hook before the document is removed fro
         //Dummy change to trigger onStoreDocument
         provider.document.getArray('foo').push(['foo'])
 
-        setTimeout(() => {
-          server.destroy()
-        }, 200)
+        socket.destroy()
       },
     })
   })
@@ -475,9 +473,7 @@ test('does not call the onStoreDocument hook if document is not changed after th
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
-        setTimeout(() => {
-          server.destroy()
-        }, 200)
+        socket.destroy()
       },
     })
 
