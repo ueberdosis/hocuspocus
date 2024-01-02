@@ -359,7 +359,9 @@ export class Hocuspocus {
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
       if (!document.isLoading) {
-        this.debouncer.executeNow(`onStoreDocument-${document.name}`)
+        if (this.configuration.unloadImmediately) {
+          this.debouncer.executeNow(`onStoreDocument-${document.name}`)
+        }
       } else {
         // Remove document from memory immediately
         this.unloadDocument(document)
