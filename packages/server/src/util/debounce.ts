@@ -47,7 +47,7 @@ export const useDebounce = () => {
   }
 
   const isDebounced = (id: string): boolean => {
-    return timers.has(id);
+    return timers.has(id)
   }
 
   return { debounce, isDebounced, executeNow }

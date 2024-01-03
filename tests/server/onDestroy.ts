@@ -86,7 +86,6 @@ test('destroy does not call onStoreDocument if nothing debounced', async t => {
   })
 })
 
-
 test('destroy does not call onStoreDocument after debounced onStoreDocument executes', async t => {
   await new Promise(async resolve => {
     let called = 0
@@ -99,13 +98,12 @@ test('destroy does not call onStoreDocument after debounced onStoreDocument exec
       },
     })
 
-    const provider = newHocuspocusProvider(server,
-      {
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider.document.getArray('foo').push(['foo'])
-        },
-      })
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
@@ -130,13 +128,12 @@ test('destroy calls onStoreDocument before returning if debounced', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server,
-      {
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider.document.getArray('foo').push(['foo'])
-        },
-      })
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
@@ -159,15 +156,14 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(server,
-      {
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider1.document.getArray('foo').push(['foo'])
-        },
-      })
+    const provider = newHocuspocusProvider(server, {
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+      },
+    })
 
-    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
     t.is(called, false)
     await server.destroy()
@@ -188,30 +184,27 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(server,
-      {
-        name: 'test1',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider1.document.getArray('foo').push(['foo'])
-        },
-      })
-    const provider2 = newHocuspocusProvider(server,
-      {
-        name: 'test2',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider2.document.getArray('foo').push(['foo'])
-        },
-      })
-    const provider3 = newHocuspocusProvider(server,
-      {
-        name: 'test3',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider3.document.getArray('foo').push(['foo'])
-        },
-      })
+    const provider1 = newHocuspocusProvider(server, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider2 = newHocuspocusProvider(server, {
+      name: 'test2',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider2.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider3 = newHocuspocusProvider(server, {
+      name: 'test3',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider3.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
@@ -236,30 +229,27 @@ test('destroy calls onStoreDocument before returning, with multiple docs if debo
       unloadImmediately: true,
     })
 
-    const provider1 = newHocuspocusProvider(server,
-      {
-        name: 'test1',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider1.document.getArray('foo').push(['foo'])
-        },
-      })
-    const provider2 = newHocuspocusProvider(server,
-      {
-        name: 'test2',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider2.document.getArray('foo').push(['foo'])
-        },
-      })
-    const provider3 = newHocuspocusProvider(server,
-      {
-        name: 'test3',
-        onSynced() {
-          // Dummy change to trigger onStoreDocument
-          provider3.document.getArray('foo').push(['foo'])
-        },
-      })
+    const provider1 = newHocuspocusProvider(server, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider2 = newHocuspocusProvider(server, {
+      name: 'test2',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider2.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider3 = newHocuspocusProvider(server, {
+      name: 'test3',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider3.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
