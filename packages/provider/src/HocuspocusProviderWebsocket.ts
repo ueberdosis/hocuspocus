@@ -228,11 +228,9 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       provider.onOpen(this.receivedOnOpenPayload)
     }
 
-    if (this.receivedOnStatusPayload) {
-      provider.onStatus(this.receivedOnStatusPayload)
-    }
-
-    return connectPromise
+    // if (this.receivedOnStatusPayload) {
+    //   provider.onStatus(this.receivedOnStatusPayload)
+    // }
   }
 
   detach(provider: HocuspocusProvider) {
