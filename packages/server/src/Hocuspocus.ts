@@ -358,7 +358,7 @@ export class Hocuspocus {
       // triggering onStoreDocument hook, as everything seems to be stored already.
       // Only run this if the document has finished loading earlier (i.e. not to persist the empty
       // ydoc if the onLoadDocument hook returned an error)
-      if (!document.isLoading) {
+      if (!document.isLoading && this.debouncer.isDebounced(`onStoreDocument-${document.name}`)) {
         if (this.configuration.unloadImmediately) {
           this.debouncer.executeNow(`onStoreDocument-${document.name}`)
         }
@@ -404,9 +404,7 @@ export class Hocuspocus {
 
     this.debouncer.debounce(
       `onStoreDocument-${document.name}`,
-      () => {
-        this.storeDocumentHooks(document, hookPayload)
-      },
+      () => this.storeDocumentHooks(document, hookPayload),
       this.configuration.debounce,
       this.configuration.maxDebounce,
     )
