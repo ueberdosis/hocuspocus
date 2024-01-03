@@ -519,7 +519,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.authorizedScope = scope
 
     this.emit('authenticated')
-    this.startSync()
   }
 
   get broadcastChannel() {
