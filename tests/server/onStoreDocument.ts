@@ -377,6 +377,8 @@ test('if a connection connects while another disconnects onStoreDocument is stil
 
     const provider = newHocuspocusProvider(server)
     provider.on('synced', () => {
+      // Dummy change to trigger onStoreDocument
+      provider.document.getArray('foo').push(['foo'])
       provider.configuration.websocketProvider.disconnect()
 
       setTimeout(() => {

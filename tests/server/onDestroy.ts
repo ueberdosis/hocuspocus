@@ -108,7 +108,7 @@ test('destroy does not call onStoreDocument after debounced onStoreDocument exec
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
     // Wait for the debounced onStoreDocument to execute
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 400))
 
     await server.destroy()
 
