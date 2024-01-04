@@ -26,6 +26,30 @@ export class Debugger {
     this.output = false
   }
 
+  info(...args: any) {
+    if (this.output) {
+      console.info(...args);
+    }
+  }
+
+  warn(...args: any) {
+    if (this.output) {
+      console.warn(...args);
+    }
+  }
+
+  error(...args: any) {
+    if (this.output) {
+      console.error(...args);
+    }
+  }
+
+  debug(...args: any) {
+    if (this.output) {
+      console.debug(...args);
+    }
+  }
+
   log(message: any) {
     if (!this.listen) {
       return this
