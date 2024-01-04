@@ -4,9 +4,10 @@ import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
 } from '../utils/index.js'
 
-test('calls the onStoreDocument hook before the document is removed from memory', async t => {
+test('calls the debouned onStoreDocument hook before the document is removed from memory', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
+      debounce: 3000,
       async onStoreDocument() {
         t.pass()
         resolve('done')
@@ -18,6 +19,9 @@ test('calls the onStoreDocument hook before the document is removed from memory'
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+
         socket.destroy()
       },
     })
@@ -65,6 +69,8 @@ test('removes the document from memory when there’s no connection after onStor
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
       },
@@ -258,6 +264,8 @@ test('runs hooks in the given order', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
 
@@ -319,6 +327,8 @@ test('allows to overwrite the order of extension with a priority', async t => {
 
     const provider = newHocuspocusProvider(server, {
       onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
         provider.configuration.websocketProvider.destroy()
         provider.destroy()
 
@@ -367,6 +377,8 @@ test('if a connection connects while another disconnects onStoreDocument is stil
 
     const provider = newHocuspocusProvider(server)
     provider.on('synced', () => {
+      // Dummy change to trigger onStoreDocument
+      provider.document.getArray('foo').push(['foo'])
       provider.configuration.websocketProvider.disconnect()
 
       setTimeout(() => {
@@ -408,9 +420,68 @@ test('waits before calling onStoreDocument after the last user disconnects when 
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
         startTime = Date.now()
         socket.destroy()
       },
     })
   })
+})
+
+test('calls debounced onStoreDocument immediately after the last user disconnects when configured', async t => {
+  await new Promise(async resolve => {
+    let startTime = 0
+    const server = await newHocuspocus({
+      unloadImmediately: true,
+      debounce: 500,
+      async onStoreDocument() {
+        const endTime = Date.now()
+        if (startTime === 0) {
+          t.fail('startTime not set')
+        } else if (endTime - startTime < 500) {
+          t.pass()
+        } else {
+          t.fail('did not call onStoreDocument immediately when closing')
+        }
+        resolve('done')
+      },
+    })
+
+    const socket = newHocuspocusProviderWebsocket(server)
+
+    const provider = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+        startTime = Date.now()
+        socket.destroy()
+      },
+    })
+  })
+})
+
+test('does not call the onStoreDocument hook if document is not changed after the last user disconnects', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      async onStoreDocument() {
+        t.fail('no need to call onStoreDocument if the document is not changed')
+      },
+    })
+
+    const socket = newHocuspocusProviderWebsocket(server)
+
+    const provider = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      onSynced() {
+        socket.destroy()
+      },
+    })
+
+    setTimeout(() => {
+      resolve('done')
+    }, 200)
+  })
+  t.pass()
 })
