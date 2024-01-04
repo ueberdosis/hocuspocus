@@ -10,7 +10,7 @@ import { Events, Webhook } from '@hocuspocus/extension-webhook'
 /*
  * Setup server
  */
-const server = Server.configure({
+const server = new Server({
   port: 1234,
   extensions: [
     new Logger(),

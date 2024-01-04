@@ -9,7 +9,7 @@ export type TiptapCollabProviderWebsocketConfiguration =
 
 export interface AdditionalTiptapCollabProviderWebsocketConfiguration {
   /**
-   * A Hocuspocus Cloud App ID, get one here: https://collab.tiptap.dev
+   * A Hocuspocus Cloud App ID, get one here: https://cloud.tiptap.dev
    */
   appId: string,
 }

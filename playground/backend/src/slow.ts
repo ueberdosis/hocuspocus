@@ -2,7 +2,7 @@ import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 import { SQLite } from '@hocuspocus/extension-sqlite'
 
-const server = Server.configure({
+const server = new Server({
   port: 1234,
   extensions: [
     new Logger(),
