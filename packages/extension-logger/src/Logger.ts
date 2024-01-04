@@ -8,6 +8,8 @@ import {
   onDisconnectPayload,
   onRequestPayload,
   onUpgradePayload,
+  Debugger,
+  MessageType,
 } from '@hocuspocus/server'
 
 export interface LoggerConfiguration {
@@ -57,9 +59,25 @@ export interface LoggerConfiguration {
    * A log function, if none is provided output will go to console
    */
   log: (...args: any[]) => void,
+  /**
+   * A info function, if none is provided output will go to console
+   */
+  info: (...args: any[]) => void,
+  /**
+   * A warn function, if none is provided output will go to console
+   */
+  warn: (...args: any[]) => void,
+  /**
+   * A error function, if none is provided output will go to console
+   */
+  error: (...args: any[]) => void,
+  /**
+   * A debug function, if none is provided output will go to console
+   */
+  debug: (...args: any[]) => void,
 }
 
-export class Logger implements Extension {
+export class Logger extends Debugger implements Extension {
   name: string | null = null
 
   configuration: LoggerConfiguration = {
@@ -73,13 +91,18 @@ export class Logger implements Extension {
     onRequest: true,
     onDestroy: true,
     onConfigure: true,
-    log: console.log, // eslint-disable-line
+    log: console.log,     // eslint-disable-line
+    info: console.info,   // eslint-disable-line
+    warn: console.warn,   // eslint-disable-line
+    error: console.error, // eslint-disable-line
+    debug: console.debug, // eslint-disable-line
   }
 
   /**
    * Constructor
    */
   constructor(configuration?: Partial<LoggerConfiguration>) {
+    super();
     this.configuration = {
       ...this.configuration,
       ...configuration,
@@ -88,6 +111,7 @@ export class Logger implements Extension {
 
   async onConfigure(data: onConfigurePayload) {
     this.name = data.instance.configuration.name
+    data.instance.debugger = this;
 
     if (!this.configuration.onConfigure) {
       return
@@ -100,62 +124,97 @@ export class Logger implements Extension {
 
   async onLoadDocument(data: onLoadDocumentPayload) {
     if (this.configuration.onLoadDocument) {
-      this.log(`Loaded document "${data.documentName}".`)
+      this.info(`Loaded document "${data.documentName}".`)
     }
   }
 
   async onChange(data: onChangePayload) {
     if (this.configuration.onChange) {
-      this.log(`Document "${data.documentName}" changed.`)
+      this.info(`Document "${data.documentName}" changed.`)
     }
   }
 
   async onStoreDocument(data: onDisconnectPayload) {
     if (this.configuration.onStoreDocument) {
-      this.log(`Store "${data.documentName}".`)
+      this.info(`Store "${data.documentName}".`)
     }
   }
 
   async onConnect(data: onConnectPayload) {
     if (this.configuration.onConnect) {
-      this.log(`New connection to "${data.documentName}".`)
+      this.info(`New connection to "${data.documentName}".`)
     }
   }
 
   async onDisconnect(data: onDisconnectPayload) {
     if (this.configuration.onDisconnect) {
-      this.log(`Connection to "${data.documentName}" closed.`)
+      this.info(`Connection to "${data.documentName}" closed.`)
     }
   }
 
   async onUpgrade(data: onUpgradePayload) {
     if (this.configuration.onUpgrade) {
-      this.log('Upgrading connection …')
+      this.info('Upgrading connection …')
     }
   }
 
   async onRequest(data: onRequestPayload) {
     if (this.configuration.onRequest) {
-      this.log(`Incoming HTTP Request to ${data.request.url}`)
+      this.info(`Incoming HTTP Request to ${data.request.url}`)
     }
   }
 
   async onDestroy(data: onDestroyPayload) {
     if (this.configuration.onDestroy) {
-      this.log('Shut down.')
+      this.info('Shut down.')
     }
   }
 
-  private log(message: string) {
-    const date = (new Date()).toISOString()
-    let meta = `${date}`
+  info(...args: any) {
+    this.configuration.info(...args);
+  }
 
-    if (this.name) {
-      meta = `${this.name} ${meta}`
+  warn(...args: any) {
+    this.configuration.warn(...args);
+  }
+
+  error(...args: any) {
+    this.configuration.error(...args);
+  }
+
+  debug(...args: any) {
+    this.configuration.debug(...args);
+  }
+
+  /**
+   * Allows compatability with Debugger so Logger instance
+   * can be used as hocuspocus instance debugger. This
+   * means other extensions can re-use this logger, by
+   * referencing this.instance.debugger
+   */
+  log(message: any) {
+    if (!this.listen) {
+      return this
     }
 
-    message = `[${meta}] ${message}`
+    const item = {
+      ...message,
+      type: MessageType[message.type],
+      // time: time.getUnixTime(),
+    }
 
-    this.configuration.log(message)
+    this.logs.push(item)
+
+    if (this.output) {
+      const date = (new Date()).toISOString();
+      let meta = `${date}`;
+
+      if (this.name) {
+        meta = `${this.name} ${meta}`;
+      }
+      this.configuration.log(meta, item.direction === 'in' ? 'IN –>' : 'OUT <–', `${item.type}/${item.category}`);
+    }
+
+    return this
   }
 }
