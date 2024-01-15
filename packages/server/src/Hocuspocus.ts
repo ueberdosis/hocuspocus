@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 import WebSocket, { AddressInfo } from 'ws'
 import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' assert { type: 'json' }
-import { Server as HocuspocusServer } from './Server'
+import { Server as HocuspocusServer } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
 import Connection from './Connection.js'
@@ -28,7 +28,7 @@ import {
   onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
-import { useDebounce } from './util/debounce'
+import { useDebounce } from './util/debounce.js'
 
 export const defaultConfiguration = {
   name: null,
