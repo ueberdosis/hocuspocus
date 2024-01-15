@@ -2,7 +2,7 @@ import {
   createServer, IncomingMessage, Server as HTTPServer, ServerResponse,
 } from 'http'
 import WebSocket, { WebSocketServer } from 'ws'
-import { Hocuspocus } from './Hocuspocus'
+import { Hocuspocus } from './Hocuspocus.js'
 
 export class Server {
   httpServer: HTTPServer
