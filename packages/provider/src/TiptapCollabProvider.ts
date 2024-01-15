@@ -5,7 +5,7 @@ import {
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
-import type { THistoryVersion } from './types.js'
+import type { TCollabComment, TCollabThread, THistoryVersion } from './types.js'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -93,4 +93,35 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
+  get threads(): TCollabThread[] {
+    return this.configuration.document.getArray<TCollabThread>(`${this.tiptapCollabConfigurationPrefix}threads`).toArray()
+  }
+
+  set threads(threads: TCollabThread[]) {
+    this.sendStateless(JSON.stringify({ action: 'threads.set', threads }))
+  }
+
+  getThread(id: string) {
+    return this.threads.find(thread => thread.id === id)
+  }
+
+  createThread(thread: TCollabThread) {
+    this.sendStateless(JSON.stringify({ action: 'threads.create', thread }))
+  }
+
+  updateThread(id: TCollabThread['id'], data: Omit<Partial<TCollabThread>, 'id'>) {
+    this.sendStateless(JSON.stringify({ action: 'threads.update', id, data }))
+  }
+
+  deleteThread(id: TCollabThread['id']) {
+    this.sendStateless(JSON.stringify({ action: 'threads.delete', id }))
+  }
+
+  getThreadComments(threadId: TCollabThread['id']): TCollabComment[] {
+    return this.getThread(threadId)?.comments || []
+  }
+
+  getThreadComment(threadId: TCollabThread['id'], commentId: TCollabComment['id']): TCollabComment | undefined {
+    return this.getThreadComments(threadId).find(comment => comment.id === commentId)
+  }
 }

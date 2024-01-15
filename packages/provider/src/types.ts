@@ -106,6 +106,26 @@ export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 // hocuspocus-pro types
 
+export type TCollabThread<Data = any, CommentData = any> = {
+  id: string;
+  active: boolean;
+  createdAt: number;
+  updatedAt: number;
+  from: number;
+  to: number;
+  comments: TCollabComment<CommentData>[];
+  data: Data
+}
+
+export type TCollabComment<Data = any> = {
+  id: string;
+  active: boolean;
+  createdAt: number;
+  updatedAt: number;
+  data: Data
+  content: any
+}
+
 export type THistoryVersion = {
   name?: string;
   version: number;
