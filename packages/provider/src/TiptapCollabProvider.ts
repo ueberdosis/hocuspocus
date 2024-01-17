@@ -1,11 +1,12 @@
 import type { AbstractType, YArrayEvent } from 'yjs'
+import * as Y from 'yjs'
 import {
   HocuspocusProvider,
   HocuspocusProviderConfiguration,
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
-import type { TCollabComment, TCollabThread, THistoryVersion } from './types.js'
+import type { TCollabComment, TCollabThread, TCollabThreadMap, THistoryVersion } from './types.js'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -93,28 +94,57 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
-  get threads(): TCollabThread[] {
-    return this.configuration.document.getArray<TCollabThread>(`${this.tiptapCollabConfigurationPrefix}threads`).toArray()
+  get threads(): Y.Array<TCollabThread> {
+    return this.configuration.document.getArray<TCollabThread>(`${this.tiptapCollabConfigurationPrefix}threads`)
   }
 
-  set threads(threads: TCollabThread[]) {
-    this.sendStateless(JSON.stringify({ action: 'threads.set', threads }))
+  getThreadIndex(id: string) {
+    let index = -1
+
+    this.threads.forEach((thread, i) => {
+      if (thread.id === id) {
+        index = i
+      }
+    })
+
+    return index
   }
 
   getThread(id: string) {
-    return this.threads.find(thread => thread.id === id)
+    const index = this.getThreadIndex(id)
+
+    if (!index) {
+      return
+    }
+
+    return this.threads.get(index)
   }
 
   createThread(thread: TCollabThread) {
-    this.sendStateless(JSON.stringify({ action: 'threads.create', thread }))
+    this.threads.push([thread])
   }
 
   updateThread(id: TCollabThread['id'], data: Omit<Partial<TCollabThread>, 'id'>) {
-    this.sendStateless(JSON.stringify({ action: 'threads.update', id, data }))
+    const index = this.getThreadIndex(id)
+
+    if (index === -1) {
+      return
+    }
+
+    const newThread: TCollabThread = { ...this.threads.get(index), ...data }
+
+    this.threads.delete(index, 1)
+    this.threads.insert(index, [newThread])
   }
 
   deleteThread(id: TCollabThread['id']) {
-    this.sendStateless(JSON.stringify({ action: 'threads.delete', id }))
+    const index = this.getThreadIndex(id)
+
+    if (index === -1) {
+      return
+    }
+
+    this.threads.delete(index, 1)
   }
 
   getThreadComments(threadId: TCollabThread['id']): TCollabComment[] {

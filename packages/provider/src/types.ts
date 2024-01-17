@@ -117,6 +117,10 @@ export type TCollabThread<Data = any, CommentData = any> = {
   data: Data
 }
 
+export type TCollabThreadMap<Data = any, CommentData = any> = Y.Map<TCollabThread<Data, CommentData> & {
+  comments: Y.Array<TCollabCommentMap<CommentData>>
+}>
+
 export type TCollabComment<Data = any> = {
   id: string;
   active: boolean;
@@ -125,6 +129,8 @@ export type TCollabComment<Data = any> = {
   data: Data
   content: any
 }
+
+export type TCollabCommentMap<Data = any> = Y.Map<TCollabComment<Data>>
 
 export type THistoryVersion = {
   name?: string;
