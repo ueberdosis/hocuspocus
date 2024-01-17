@@ -32,6 +32,7 @@
     "@hocuspocus/common": "^2.9.1-rc.0",
     "@lifeomic/attempt": "^3.0.2",
     "lib0": "^0.2.87",
+    "uuid": "^9.0.0",
     "ws": "^8.14.2"
   },
   "peerDependencies": {

@@ -6,7 +6,10 @@ import {
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
-import type { TCollabComment, TCollabThread, TCollabThreadMap, THistoryVersion } from './types.js'
+import type {
+  TCollabComment, TCollabThread, THistoryVersion,
+} from './types.js'
+import { CollabThread, CollabThreadOptions } from './tiptapCollab/CollabThread.js'
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -94,14 +97,16 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.configuration.document.getMap<number>(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0)
   }
 
-  get threads(): Y.Array<TCollabThread> {
-    return this.configuration.document.getArray<TCollabThread>(`${this.tiptapCollabConfigurationPrefix}threads`)
+  get threads() {
+    return this.configuration.document.getArray<Y.Map<any>>(`${this.tiptapCollabConfigurationPrefix}threads`)
   }
 
   getThreadIndex(id: string) {
     let index = -1
 
-    this.threads.forEach((thread, i) => {
+    this.threads.forEach((threadMap, i) => {
+      const thread = CollabThread.fromMap(threadMap)
+
       if (thread.id === id) {
         index = i
       }
@@ -120,21 +125,22 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.threads.get(index)
   }
 
-  createThread(thread: TCollabThread) {
-    this.threads.push([thread])
+  createThread(thread: CollabThread) {
+    this.threads.push([thread.map])
   }
 
-  updateThread(id: TCollabThread['id'], data: Omit<Partial<TCollabThread>, 'id'>) {
+  updateThread(id: CollabThread['id'], data: Omit<Partial<CollabThreadOptions>, 'id'>) {
     const index = this.getThreadIndex(id)
 
     if (index === -1) {
       return
     }
 
-    const newThread: TCollabThread = { ...this.threads.get(index), ...data }
+    const thread = CollabThread.fromMap(this.threads.get(index))
+    thread.update(data)
 
     this.threads.delete(index, 1)
-    this.threads.insert(index, [newThread])
+    this.threads.insert(index, [thread.map])
   }
 
   deleteThread(id: TCollabThread['id']) {
@@ -147,11 +153,27 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     this.threads.delete(index, 1)
   }
 
-  getThreadComments(threadId: TCollabThread['id']): TCollabComment[] {
-    return this.getThread(threadId)?.comments || []
+  getThreadComments(threadId: TCollabThread['id']): TCollabComment[] | undefined {
+    const index = this.getThreadIndex(threadId)
+
+    if (index === -1) {
+      return
+    }
+
+    const thread = CollabThread.fromMap(this.threads.get(index))
+
+    return thread.comments
   }
 
   getThreadComment(threadId: TCollabThread['id'], commentId: TCollabComment['id']): TCollabComment | undefined {
-    return this.getThreadComments(threadId).find(comment => comment.id === commentId)
+    const index = this.getThreadIndex(threadId)
+
+    if (index === -1) {
+      return
+    }
+
+    const thread = CollabThread.fromMap(this.threads.get(index))
+
+    return thread.comments.find(comment => comment.id === commentId)
   }
 }
