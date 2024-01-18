@@ -11,13 +11,19 @@ export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
   Partial<HocuspocusProviderConfiguration> &
   (Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>> |
-  Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>)
+  Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>|
+  Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>)
 
 export interface AdditionalTiptapCollabProviderConfiguration {
   /**
    * A Hocuspocus Cloud App ID, get one here: https://cloud.tiptap.dev
    */
   appId?: string,
+
+  /**
+   * If you are using the on-premise version of TiptapCollab, put your baseUrl here (e.g. https://collab.yourdomain.com)
+   */
+  baseUrl?: string
 
   websocketProvider?: TiptapCollabProviderWebsocket
 }
@@ -27,7 +33,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
-      configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>).appId })
+      configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>).appId, baseUrl: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>).baseUrl })
     }
 
     if (!configuration.token) {
