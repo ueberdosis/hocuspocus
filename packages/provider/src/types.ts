@@ -108,29 +108,19 @@ export type StatesArray = { clientId: number, [key: string | number]: any }[]
 
 export type TCollabThread<Data = any, CommentData = any> = {
   id: string;
-  active: boolean;
   createdAt: number;
   updatedAt: number;
-  from: number;
-  to: number;
   comments: TCollabComment<CommentData>[];
   data: Data
 }
 
-export type TCollabThreadMap<Data = any, CommentData = any> = Y.Map<TCollabThread<Data, CommentData> & {
-  comments: Y.Array<TCollabCommentMap<CommentData>>
-}>
-
 export type TCollabComment<Data = any> = {
   id: string;
-  active: boolean;
   createdAt: number;
   updatedAt: number;
   data: Data
   content: any
 }
-
-export type TCollabCommentMap<Data = any> = Y.Map<TCollabComment<Data>>
 
 export type THistoryVersion = {
   name?: string;
