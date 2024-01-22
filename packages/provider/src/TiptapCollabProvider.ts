@@ -238,6 +238,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     if (thread === null) return null
 
     let commentIndex = 0
+    // eslint-disable-next-line no-restricted-syntax
     for (const c of thread.get('comments')) {
       if (c.get('id') === commentId) {
         break
