@@ -367,7 +367,7 @@ export class HocuspocusProvider extends EventEmitter {
       this.subscribeToBroadcastChannel()
     }
 
-    return this.configuration.websocketProvider.connect()
+    return this.configuration.websocketProvider.attach(this)
   }
 
   disconnect() {
