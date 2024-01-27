@@ -248,15 +248,12 @@ export class Document extends Doc {
   /**
    * Broadcast stateless message to all connections
    */
-  public broadcastStateless(payload: string, exclude?: Connection | Connection[]): void {
+  public broadcastStateless(payload: string, filter?: (conn: Connection) => boolean): void {
     this.callbacks.beforeBroadcastStateless(this, payload)
 
-    const toExclude = Array.isArray(exclude) ? exclude : [exclude]
+    const connections = filter ? this.getConnections().filter(filter) : this.getConnections()
 
-    this.getConnections().forEach(connection => {
-      if (exclude && toExclude.includes(connection)) {
-        return
-      }
+    connections.forEach(connection => {
       connection.sendStateless(payload)
     })
   }
