@@ -9,13 +9,18 @@ export type TiptapCollabProviderWebsocketConfiguration =
 
 export interface AdditionalTiptapCollabProviderWebsocketConfiguration {
   /**
-   * A Hocuspocus Cloud App ID, get one here: https://collab.tiptap.dev
+   * A Hocuspocus Cloud App ID, get one here: https://cloud.tiptap.dev
    */
-  appId: string,
+  appId?: string,
+
+  /**
+   * If you are using the on-premise version of TiptapCollab, put your baseUrl here (e.g. https://collab.yourdomain.com)
+   */
+  baseUrl?: string
 }
 
 export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
   constructor(configuration: TiptapCollabProviderWebsocketConfiguration) {
-    super({ ...configuration as HocuspocusProviderWebsocketConfiguration, url: `wss://${configuration.appId}.collab.tiptap.cloud` })
+    super({ ...configuration as HocuspocusProviderWebsocketConfiguration, url: configuration.baseUrl ?? `wss://${configuration.appId}.collab.tiptap.cloud` })
   }
 }

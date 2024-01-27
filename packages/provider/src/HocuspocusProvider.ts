@@ -477,9 +477,10 @@ export class HocuspocusProvider extends EventEmitter {
 
     if (this.awareness) {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
+      this.awareness.off('update', this.awarenessUpdateHandler)
+      this.awareness.destroy()
     }
 
-    this.awareness?.off('update', this.awarenessUpdateHandler)
     this.document.off('update', this.documentUpdateHandler)
 
     this.removeAllListeners()
@@ -519,7 +520,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.authorizedScope = scope
 
     this.emit('authenticated')
-    this.startSync()
   }
 
   get broadcastChannel() {
