@@ -217,10 +217,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   attach(provider: HocuspocusProvider) {
+    let connectPromise: Promise<any> | undefined
     this.configuration.providerMap.set(provider.configuration.name, provider)
 
     if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
-      this.connect()
+      connectPromise = this.connect()
     }
 
     if (this.receivedOnOpenPayload) {
@@ -230,6 +231,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     if (this.receivedOnStatusPayload) {
       provider.onStatus(this.receivedOnStatusPayload)
     }
+
+    return connectPromise
   }
 
   detach(provider: HocuspocusProvider) {
