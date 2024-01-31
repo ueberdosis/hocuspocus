@@ -141,7 +141,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.getYThreads().get(index)
   }
 
-  createThread(data: TCollabThread) {
+  createThread(data: Omit<TCollabThread, '_id' | 'createdAt' | 'updatedAt' | 'comments'>) {
     const thread = new Y.Map()
     thread.set('id', uuidv4())
     thread.set('createdAt', (new Date()).toISOString())
@@ -151,7 +151,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.updateThread(String(thread.get('id')), data)
   }
 
-  updateThread(id: TCollabThread['id'], data: Pick<TCollabThread, 'data'>) {
+  updateThread(id: TCollabThread['id'], data: Partial<Pick<TCollabThread, 'data' | 'resolvedAt'>>) {
     const thread = this.getYThread(id)
 
     if (thread === null) {
@@ -159,7 +159,14 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     }
 
     thread.set('updatedAt', (new Date()).toISOString())
-    thread.set('data', data.data)
+
+    if (data.data) {
+      thread.set('data', data.data)
+    }
+
+    if (data.resolvedAt || data.resolvedAt === null) {
+      thread.set('resolvedAt', data.resolvedAt)
+    }
 
     return thread.toJSON() as TCollabThread
   }
@@ -194,7 +201,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.getThread(threadId)?.comments.find(comment => comment.id === commentId) ?? null
   }
 
-  addComment(threadId: TCollabThread['id'], data: TCollabComment) {
+  addComment(threadId: TCollabThread['id'], data: Omit<TCollabComment, 'id' | 'updatedAt' | 'createdAt'>) {
     const thread = this.getYThread(threadId)
 
     if (thread === null) return null
@@ -209,7 +216,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return thread.toJSON() as TCollabThread
   }
 
-  updateComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], data: TCollabComment) {
+  updateComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], data: Partial<Pick<TCollabComment, 'data' | 'content'>>) {
     const thread = this.getYThread(threadId)
 
     if (thread === null) return null
@@ -226,8 +233,14 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     if (comment === null) return null
 
     comment.set('updatedAt', (new Date()).toISOString())
-    comment.set('data', data.data)
-    comment.set('content', data.content)
+
+    if (data.data) {
+      comment.set('data', data.data)
+    }
+
+    if (data.content) {
+      comment.set('content', data.content)
+    }
 
     return thread.toJSON() as TCollabThread
   }

@@ -110,6 +110,7 @@ export type TCollabThread<Data = any, CommentData = any> = {
   id: string;
   createdAt: number;
   updatedAt: number;
+  resolvedAt?: string; // (new Date()).toISOString()
   comments: TCollabComment<CommentData>[];
   data: Data
 }
