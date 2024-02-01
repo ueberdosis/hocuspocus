@@ -141,7 +141,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.getYThreads().get(index)
   }
 
-  createThread(data: Omit<TCollabThread, '_id' | 'createdAt' | 'updatedAt' | 'comments'>) {
+  createThread(data: Omit<TCollabThread, '_id' | 'id' | 'createdAt' | 'updatedAt' | 'comments'>) {
     const thread = new Y.Map()
     thread.set('id', uuidv4())
     thread.set('createdAt', (new Date()).toISOString())
