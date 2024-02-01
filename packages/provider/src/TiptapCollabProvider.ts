@@ -161,7 +161,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     thread.set('updatedAt', (new Date()).toISOString())
 
     if (data.data) {
-      thread.set('data', { ...thread.data, ...data.data })
+      thread.set('data', { ...(thread.get('data') || {}), ...data.data })
     }
 
     if (data.resolvedAt || data.resolvedAt === null) {
@@ -235,7 +235,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     comment.set('updatedAt', (new Date()).toISOString())
 
     if (data.data) {
-      comment.set('data', { ...comment.data, ...data.data })
+      comment.set('data', { ...(comment?.data || {}), ...data.data })
     }
 
     if (data.content) {
