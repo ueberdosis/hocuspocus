@@ -142,33 +142,45 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) {
-    const thread = new Y.Map()
-    thread.set('id', uuidv4())
-    thread.set('createdAt', (new Date()).toISOString())
-    thread.set('comments', new Y.Array())
+    let createdThread: TCollabThread = {} as TCollabThread
 
-    this.getYThreads().push([thread])
-    return this.updateThread(String(thread.get('id')), data)
+    this.document.transact(() => {
+      const thread = new Y.Map()
+      thread.set('id', uuidv4())
+      thread.set('createdAt', (new Date()).toISOString())
+      thread.set('comments', new Y.Array())
+
+      this.getYThreads().push([thread])
+      createdThread = this.updateThread(String(thread.get('id')), data)
+    })
+
+    return createdThread
   }
 
   updateThread(id: TCollabThread['id'], data: Partial<Pick<TCollabThread, 'data' | 'resolvedAt'>>) {
-    const thread = this.getYThread(id)
+    let updatedThread: TCollabThread = {} as TCollabThread
 
-    if (thread === null) {
-      return null
-    }
+    this.document.transact(() => {
+      const thread = this.getYThread(id)
 
-    thread.set('updatedAt', (new Date()).toISOString())
+      if (thread === null) {
+        return null
+      }
 
-    if (data.data) {
-      thread.set('data', data.data)
-    }
+      thread.set('updatedAt', (new Date()).toISOString())
 
-    if (data.resolvedAt || data.resolvedAt === null) {
-      thread.set('resolvedAt', data.resolvedAt)
-    }
+      if (data.data) {
+        thread.set('data', data.data)
+      }
 
-    return thread.toJSON() as TCollabThread
+      if (data.resolvedAt || data.resolvedAt === null) {
+        thread.set('resolvedAt', data.resolvedAt)
+      }
+
+      updatedThread = thread.toJSON() as TCollabThread
+    })
+
+    return updatedThread
   }
 
   deleteThread(id: TCollabThread['id']) {
@@ -202,47 +214,59 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   addComment(threadId: TCollabThread['id'], data: Omit<TCollabComment, 'id' | 'updatedAt' | 'createdAt'>) {
-    const thread = this.getYThread(threadId)
+    let updatedThread: TCollabThread = {} as TCollabThread
 
-    if (thread === null) return null
+    this.document.transact(() => {
+      const thread = this.getYThread(threadId)
 
-    const commentMap = new Y.Map()
-    commentMap.set('id', uuidv4())
-    commentMap.set('createdAt', (new Date()).toISOString())
-    thread.get('comments').push([commentMap])
+      if (thread === null) return null
 
-    this.updateComment(threadId, String(commentMap.get('id')), data)
+      const commentMap = new Y.Map()
+      commentMap.set('id', uuidv4())
+      commentMap.set('createdAt', (new Date()).toISOString())
+      thread.get('comments').push([commentMap])
 
-    return thread.toJSON() as TCollabThread
+      this.updateComment(threadId, String(commentMap.get('id')), data)
+
+      updatedThread = thread.toJSON() as TCollabThread
+    })
+
+    return updatedThread
   }
 
   updateComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], data: Partial<Pick<TCollabComment, 'data' | 'content'>>) {
-    const thread = this.getYThread(threadId)
+    let updatedThread: TCollabThread = {} as TCollabThread
 
-    if (thread === null) return null
+    this.document.transact(() => {
+      const thread = this.getYThread(threadId)
 
-    let comment = null
-    // eslint-disable-next-line no-restricted-syntax
-    for (const c of thread.get('comments')) {
-      if (c.get('id') === commentId) {
-        comment = c
-        break
+      if (thread === null) return null
+
+      let comment = null
+      // eslint-disable-next-line no-restricted-syntax
+      for (const c of thread.get('comments')) {
+        if (c.get('id') === commentId) {
+          comment = c
+          break
+        }
       }
-    }
 
-    if (comment === null) return null
+      if (comment === null) return null
 
-    comment.set('updatedAt', (new Date()).toISOString())
+      comment.set('updatedAt', (new Date()).toISOString())
 
-    if (data.data) {
-      comment.set('data', data.data)
-    }
+      if (data.data) {
+        comment.set('data', data.data)
+      }
 
-    if (data.content) {
-      comment.set('content', data.content)
-    }
+      if (data.content) {
+        comment.set('content', data.content)
+      }
 
-    return thread.toJSON() as TCollabThread
+      updatedThread = thread.toJSON() as TCollabThread
+    })
+
+    return updatedThread
   }
 
   deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id']) {
