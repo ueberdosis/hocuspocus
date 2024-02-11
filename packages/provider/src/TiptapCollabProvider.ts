@@ -283,7 +283,14 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       commentIndex += 1
     }
 
-    if (commentIndex >= 0) {
+    // if the first comment of a thread is deleted we also
+    // delete the thread itself as the source comment is gone
+    if (commentIndex === 0) {
+      this.deleteThread(threadId)
+      return
+    }
+
+    if (commentIndex > 0) {
       thread.get('comments').delete(commentIndex)
     }
 
