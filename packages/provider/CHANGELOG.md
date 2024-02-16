@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.11.2](https://github.com/ueberdosis/hocuspocus/compare/v2.11.1...v2.11.2) (2024-02-16)
+
+
+### Bug Fixes
+
+* allow resolvedAt to be null on updateThread ([eac0bf9](https://github.com/ueberdosis/hocuspocus/commit/eac0bf994d37b072549fe446557efa0c4b2f1568))
+
+
+
+
+
 ## [2.11.1](https://github.com/ueberdosis/hocuspocus/compare/v2.11.0...v2.11.1) (2024-02-11)
 
 **Note:** Version bump only for package @hocuspocus/provider
