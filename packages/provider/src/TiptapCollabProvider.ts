@@ -157,7 +157,9 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return createdThread
   }
 
-  updateThread(id: TCollabThread['id'], data: Partial<Pick<TCollabThread, 'data' | 'resolvedAt'>>) {
+  updateThread(id: TCollabThread['id'], data: Partial<Pick<TCollabThread, 'data'> & {
+    resolvedAt: TCollabThread['resolvedAt'] | null
+  }>) {
     let updatedThread: TCollabThread = {} as TCollabThread
 
     this.document.transact(() => {
