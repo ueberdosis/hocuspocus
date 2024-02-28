@@ -102,7 +102,7 @@ provider.off("onMessage", onMessage);
 | status               | When the connections status changes.                                      |
 | message              | When a message is incoming.                                               |
 | outgoingMessage      | When a message will be sent.                                              |
-| synced               | When the Y.js document is successfully synced (initially)!.               |
+| synced               | When the Y.js document is successfully synced (initially).               |
 | close                | When the WebSocket connection is closed.                                  |
 | disconnect           | When the provider disconnects.                                            |
 | destroy              | When the provider will be destroyed.                                      |
