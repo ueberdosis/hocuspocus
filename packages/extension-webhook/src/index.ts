@@ -110,9 +110,9 @@ export class Webhook implements Extension {
       return
     }
 
-    const save = () => {
+    const save = async () => {
       try {
-        this.sendRequest(Events.onChange, {
+        await this.sendRequest(Events.onChange, {
           document: this.configuration.transformer.fromYdoc(data.document),
           documentName: data.documentName,
           context: data.context,
