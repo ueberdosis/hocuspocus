@@ -104,7 +104,7 @@ test('creates a new document in the onLoadDocument callback', async t => {
   })
 })
 
-test('multiple simultanous connections do not create multiple documents', async t => {
+test('multiple simultaneous connections do not create multiple documents', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
       onLoadDocument({ document }) {

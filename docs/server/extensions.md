@@ -443,7 +443,7 @@ You can respond with a JSON payload that will be set as context throughout the r
 ```js
 // authorize the user by the request parameters or headers
 if (payload.requestParameters?.get("token") !== "secret-api-token") {
-  response.writeHead(403, "unathorized");
+  response.writeHead(403, "unauthorized");
   return response.end();
 }
 
