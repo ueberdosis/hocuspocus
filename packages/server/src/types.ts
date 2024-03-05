@@ -154,6 +154,7 @@ export interface Configuration extends Extension {
   yDocOptions: {
     gc: boolean, // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
     gcFilter: () => boolean, // will be called before garbage collecting ; return false to keep it
+    useNameAsGuid: boolean,
   },
 
 }

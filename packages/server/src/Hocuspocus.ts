@@ -41,6 +41,7 @@ export const defaultConfiguration = {
   yDocOptions: {
     gc: true,
     gcFilter: () => true,
+    useNameAsGuid: false,
   },
   unloadImmediately: true,
   stopOnSignals: true,
@@ -422,7 +423,12 @@ export class Hocuspocus {
       }
     }
 
-    const document = new Document(documentName, this.debugger, this.configuration.yDocOptions)
+    const yDocOptions = {
+      guid: this.configuration.yDocOptions.useNameAsGuid ? documentName : undefined,
+      ...this.configuration.yDocOptions,
+    }
+
+    const document = new Document(documentName, this.debugger, yDocOptions)
     this.documents.set(documentName, document)
 
     const hookPayload = {
