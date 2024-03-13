@@ -171,7 +171,7 @@ test('does not share awareness state with users in other documents', async t => 
     })
 
     const anotherProvider = newHocuspocusProvider(server, {
-      name: 'completly-different-and-unrelated-document',
+      name: 'completely-different-and-unrelated-document',
       onConnect() {
         anotherProvider.setAwarenessField('name', 'player2')
       },

@@ -104,7 +104,7 @@ export interface Configuration extends Extension {
    */
   name: string | null,
   /**
-   * A list of hocuspocus extenions.
+   * A list of hocuspocus extensions.
    */
   extensions: Array<Extension>,
   /**

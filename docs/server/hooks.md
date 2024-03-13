@@ -582,7 +582,7 @@ server.listen()
 
 **Fetch your Y.js documents (recommended)**
 
-There are multiple ways to store your Y.js documents (and their history) wherever you like. Basically, you should use the `onStoreDocument` hook, which is debounced and executed every few seconds for changed documents. It gives you the current Y.js document and it’s up to you to store that somewhere. No worries, we provide some convient ways for you.
+There are multiple ways to store your Y.js documents (and their history) wherever you like. Basically, you should use the `onStoreDocument` hook, which is debounced and executed every few seconds for changed documents. It gives you the current Y.js document and it’s up to you to store that somewhere. No worries, we provide some convenient ways for you.
 
 If you just want to to get it working, have a look at the [`SQLite`](/server/extensions#Sqlite) extension for local development, and the generic [`Database`](/server/extensions#Database) extension for a convenient way to fetch and store documents.
 

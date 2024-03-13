@@ -284,7 +284,7 @@ export class Hocuspocus {
     // and invoke their close method, which is a graceful
     // disconnect wrapper around the underlying websocket.close
     this.documents.forEach((document: Document) => {
-      // If a documentName was specified, bail if it doesnt match
+      // If a documentName was specified, bail if it doesn't match
       if (documentName && document.name !== documentName) {
         return
       }

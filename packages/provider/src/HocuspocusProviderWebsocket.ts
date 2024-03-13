@@ -50,7 +50,7 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
    */
   delay: number,
   /**
-   * The intialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately.
+   * The initialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately.
    */
   initialDelay: number,
   /**

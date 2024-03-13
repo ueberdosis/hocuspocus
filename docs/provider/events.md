@@ -63,7 +63,7 @@ const provider = new HocuspocusProvider({
 ```
 
 ## Option 2: Binding
-Sometimes you want to register an event listener after the intialization, even if it’s right after. Also, that’s a great way to bind and unbind event listeners.
+Sometimes you want to register an event listener after the initialization, even if it’s right after. Also, that’s a great way to bind and unbind event listeners.
 
 ### Bind event listeners
 
@@ -96,7 +96,7 @@ provider.off("onMessage", onMessage);
 | Name                 | Description                                                               |
 | -------------------- | ------------------------------------------------------------------------- |
 | open                 | When the WebSocket connection is created.                                 |
-| connect              | When the provider has succesfully connected to the server.                |
+| connect              | When the provider has successfully connected to the server.               |
 | authenticated        | When the client has successfully authenticated.                           |
 | authenticationFailed | When the client authentication was not successful.                        |
 | status               | When the connections status changes.                                      |

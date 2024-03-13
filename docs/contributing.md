@@ -12,7 +12,7 @@ Hocuspocus would be nothing without its lively community. Contributions have alw
 
 - Failing regression tests as bug reports
 - Documentation improvements, e. g. fix a typo, add a section
-- New features for existing extensions, e. g. a new configureable option
+- New features for existing extensions, e. g. a new configurable option
 - Well explained, non-breaking changes to the core
 
 ## Won’t merge
@@ -42,7 +42,7 @@ npm run build:watch
 
 ## How to include local hocuspocus packages in your development project
 
-If you want to include a local hocuspocus package in your project, you'll need to follow the following steps. I have tried using `npm link`, but havent managed to make it work reliably because of duplicated yjs imports. The following is the only way I made it work:
+If you want to include a local hocuspocus package in your project, you'll need to follow the following steps. I have tried using `npm link`, but haven't managed to make it work reliably because of duplicated yjs imports. The following is the only way I made it work:
 
 Execute the following command in this (hocupsocus) repo to compile the sources:
 
@@ -59,7 +59,7 @@ $ ln -s HOCUSPOCUS_LOCAL_REPO_PATH/packages/provider node_modules/@hocuspocus/pr
 $ ln -s HOCUSPOCUS_LOCAL_REPO_PATH/node_modules/yjs ./node_modules/yjs
 ```
 
-Still doesnt work? -> rm -Rf node_modules && npm install ; then try again
+Still doesn't work? -> rm -Rf node_modules && npm install ; then try again
 
 
 ## Our code style
