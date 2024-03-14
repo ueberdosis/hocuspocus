@@ -8,7 +8,7 @@ tableOfContents: true
 Real-time collaboration, syncing between different devices and working offline used to be hard. We provide everything you need to keep everything in sync with the power of [Y.js](https://github.com/yjs/yjs). The following guide helps you get started with collaborative editing in Tiptap with Hocuspocus. Don’t worry, a production-grade setup doesn’t require much code.
 
 ## Configure the editor
-The underyling schema Tiptap uses is an excellent foundation to sync documents. With the [`Collaboration`](/api/extensions/collaboration) extension you can tell Tiptap to track changes to the document with [Y.js](https://github.com/yjs/yjs).
+The underyling schema Tiptap uses is an excellent foundation to sync documents. With the [`Collaboration`](https://tiptap.dev/docs/editor/api/extensions/collaboration) extension you can tell Tiptap to track changes to the document with [Y.js](https://github.com/yjs/yjs).
 
 Y.js is a conflict-free replicated data types implementation, or in other words: It’s really good in merging changes. And to achieve that, changes don’t even have to come in order. It’s totally fine to change a document while being offline and merge it with other changes when the device is online again.
 
@@ -61,7 +61,7 @@ So how does this magic work? All clients need to connect with eachother, that’
 Anyway, if you want to dive deeper, head over to [the Y WebRTC repository](https://github.com/yjs/y-webrtc) on GitHub.
 
 ### WebSocket (Recommended)
-For most uses cases, a WebSocket provider is the recommended choice. It’s very flexible and can scale very well. To make it even easier, we  released [Hocuspocus](https://hocuspocus.dev) as an official backend for Tiptap.
+For most uses cases, a WebSocket provider is the recommended choice. It’s very flexible and can scale very well. To make it even easier, we  released [Hocuspocus](https://tiptap.dev/docs/hocuspocus/introduction) as an open source backend for Tiptap.
 
 For the client, the example is nearly the same, only the provider is different. First, let’s install the dependencies:
 
@@ -100,7 +100,7 @@ const editor = new Editor({
 This example doesn’t work out of the box. As you can see, it’s configured to talk to a WebSocket server which is available under `ws://127.0.0.1:1234` (WebSocket protocol `ws://`, your local IP `127.0.0.1` and the port `1234`). You need to set this up, too.
 
 #### The WebSocket backend
-To make the server part as easy as possible, we provide [an opinionated server package, called Hocuspocus](http://hocuspocus.dev/). It’s a flexible Node.js package, that you can use to build your custom backend.
+To make the server part as easy as possible, we provide an opinionated server package, called [Hocuspocus](https://tiptap.dev/docs/hocuspocus/introduction). It’s a flexible Node.js package, that you can use to build your custom backend.
 
 For the purpose of that guide, let’s just use the command-line interface which boots a minimal server literally in seconds:
 
@@ -141,7 +141,7 @@ Yes, that’s all.
 Keep in mind that WebRTC needs a signaling server to connect clients. This signaling server doesn’t receive the synced data, but helps to let clients find each other. You can [run your own signaling server](https://github.com/yjs/y-webrtc#signaling), if you like. Otherwise it’s using a default URL baked into the package.
 
 ### Show other cursors
-To enable users to see the cursor and text selections of each other, add the [`CollaborationCursor`](/api/extensions/collaboration-cursor) extension.
+To enable users to see the cursor and text selections of each other, add the [`CollaborationCursor`](https://tiptap.dev/docs/editor/api/extensions/collaboration-cursor) extension.
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -177,7 +177,7 @@ const editor = new Editor({
 })
 ```
 
-As you can see, you can pass a name and color for every user. Look at the [collaborative editing example](/examples/collaborative-editing), to see a more advanced example.
+As you can see, you can pass a name and color for every user. Look at the [collaborative editing example](https://tiptap.dev/docs/editor/examples/collaborative-editing), to see a more advanced example.
 
 ### Offline support
 Adding offline support to your collaborative editor is basically a one-liner, thanks to the fantastic [Y IndexedDB adapter](https://github.com/yjs/y-indexeddb). Install it:
@@ -214,7 +214,7 @@ All changes will be stored in the browser then, even if you close the tab, go of
 Yes, it’s magic. As already mentioned, that is all based on the fantastic Y.js framework. And if you’re using it, or our integration, you should definitely [sponsor Kevin Jahns on GitHub](https://github.com/dmonad), he is the brain behind Y.js.
 
 ## Our plug & play collaboration backend
-Our collaborative editing backend [Hocuspocus](https://hocuspocus.dev) handles the syncing, authorization, persistence and scaling. Let’s go through a few common use cases here!
+Our collaborative editing backend Hocuspocus handles the syncing, authorization, persistence and scaling. Let’s go through a few common use cases here!
 
 ### The document name
 The document name is `'example-document'` in all examples here, but it could be any string. In a real-world app you’d probably add the name of your entity and the ID of the entity. Here is how that could look like:
@@ -287,7 +287,7 @@ It’s just a click away, really.
 ## Pitfalls
 
 ### Schema updates
-Tiptap is very strict with the [schema](/api/schema), that means, if you add something that’s not allowed according to the configured schema it’ll be thrown away. That can lead to a strange behaviour when multiple clients with different schemas share changes to a document.
+Tiptap is very strict with the [schema](https://tiptap.dev/docs/editor/api/schema), that means, if you add something that’s not allowed according to the configured schema it’ll be thrown away. That can lead to a strange behaviour when multiple clients with different schemas share changes to a document.
 
 Let’s say you added an editor to your app and the first people use it already. They have all a loaded instance of Tiptap with all default extensions, and therefor a schema that only allows those. But you want to add task lists in the next update, so you add the extension and deploy again.
 
