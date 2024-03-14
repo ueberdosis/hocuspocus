@@ -39,6 +39,8 @@
 
 - title: Guides
   items:
+    - title: Collaborative editing
+      link: /guides/collaborative-editing
     - title: Auth
       link: /guides/auth
     - title: Persistence
