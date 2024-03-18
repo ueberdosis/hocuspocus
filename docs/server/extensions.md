@@ -563,7 +563,7 @@ Because Hocuspocus doesn't know how your data is structured, you need to pass a 
 ```js
 import { Server } from "@hocuspocus/server";
 import { Webhook } from "@hocuspocus/extension-webhook";
-import { TiptapTransformer } from "@hocuspocus/extension-transformer";
+import { TiptapTransformer } from "@hocuspocus/transformer";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
