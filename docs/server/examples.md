@@ -155,7 +155,7 @@ And then use the [database extension](https://tiptap.dev/hocuspocus/server/exten
 
 Use the [webhook extension](https://tiptap.dev/hocuspocus/server/extensions#webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
 
-##### Option 2: Retrieve the data on demand using a seperate nodejs daemon (advanced)
+##### Option 2: Retrieve the data on demand using a separate nodejs daemon (advanced)
 
 Create a nodejs server using the http module:
 ```
@@ -168,7 +168,7 @@ Use the dotenv package as above to retrieve the mysql login details and perform 
 
 #### Auth integration
 
-You can use the webhook extension for auth - rejecting the `onConnect` request will cause the Hocuspocus server to disconnect - however for security critical applications it is better to use a custom `onAuthenicate` hook as an attacker may be able to retrieve some data from the Hocuspocus server before The `onConnect` hooks are rejected.
+You can use the webhook extension for auth - rejecting the `onConnect` request will cause the Hocuspocus server to disconnect - however for security critical applications it is better to use a custom `onAuthenticate` hook as an attacker may be able to retrieve some data from the Hocuspocus server before The `onConnect` hooks are rejected.
 
 To authenticate with the Laravel server we can use Laravel's built in authentication system using the session cookie and a CSRF token. Add an onAuthenticate hook to your Hocuspocus server script which passes along the headers (and therefore the session cookie) and add the CSRF token to a request to the Laravel server:
 ```

@@ -124,7 +124,7 @@ test('onChange callback isn’t called for every new client', async t => {
 
 })
 
-test('onChange works propery for changes from direct connections', async t => {
+test('onChange works properly for changes from direct connections', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
       name: 'hocuspocus-test',

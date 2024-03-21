@@ -443,7 +443,7 @@ You can respond with a JSON payload that will be set as context throughout the r
 ```js
 // authorize the user by the request parameters or headers
 if (payload.requestParameters?.get("token") !== "secret-api-token") {
-  response.writeHead(403, "unathorized");
+  response.writeHead(403, "unauthorized");
   return response.end();
 }
 
@@ -563,7 +563,7 @@ Because Hocuspocus doesn't know how your data is structured, you need to pass a 
 ```js
 import { Server } from "@hocuspocus/server";
 import { Webhook } from "@hocuspocus/extension-webhook";
-import { TiptapTransformer } from "@hocuspocus/extension-transformer";
+import { TiptapTransformer } from "@hocuspocus/transformer";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";

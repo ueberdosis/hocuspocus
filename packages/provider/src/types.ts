@@ -143,7 +143,7 @@ export type THistoryAction =
 export type THistoryDocumentRevertAction = {
   action: 'document.revert';
   /**
-   * if changes havent been persisted to a version yet, we'll create one with the specified name,
+   * if changes haven't been persisted to a version yet, we'll create one with the specified name,
    * expect when `false` is passed.
    */
   currentVersionName?: string | false;

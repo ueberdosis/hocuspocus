@@ -317,7 +317,7 @@ export class Redis implements Extension {
 
   /**
    * Make sure to *not* listen for further changes, when there’s
-   * noone connected anymore.
+   * no one connected anymore.
    */
   public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
     const disconnect = () => {
