@@ -4,7 +4,8 @@ import {
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
-import { type MessageEvent, Event } from 'ws'
+import type { MessageEvent } from 'ws'
+import { Event } from 'ws'
 import EventEmitter from './EventEmitter.js'
 import { HocuspocusProvider } from './HocuspocusProvider.js'
 import {
@@ -348,7 +349,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       this.identifier += 1
 
       // Init the WebSocket connection
-      const ws = new this.configuration.WebSocketPolyfill(this.url, { followRedirects: true })
+      const ws = new this.configuration.WebSocketPolyfill(this.url)
       ws.binaryType = 'arraybuffer'
       ws.identifier = this.identifier
 
