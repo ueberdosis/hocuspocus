@@ -62,6 +62,7 @@ export class Hocuspocus {
     beforeBroadcastStateless: () => new Promise(r => r(null)),
     onStateless: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
+    onCreateDocument: () => new Promise(r => r(null)),
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
     afterStoreDocument: () => new Promise(r => r(null)),
