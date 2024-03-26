@@ -41,7 +41,6 @@ export const defaultConfiguration = {
   yDocOptions: {
     gc: true,
     gcFilter: () => true,
-    useNameAsGuid: false,
   },
   unloadImmediately: true,
   stopOnSignals: true,
@@ -423,12 +422,23 @@ export class Hocuspocus {
       }
     }
 
-    const yDocOptions = {
-      guid: this.configuration.yDocOptions.useNameAsGuid ? documentName : undefined,
-      ...this.configuration.yDocOptions,
-    }
+    const requestHeaders = request.headers ?? {}
+    const requestParameters = getParameters(request)
 
-    const document = new Document(documentName, this.debugger, yDocOptions)
+    const yDocOptions = await this.hooks('onCreateDocument', {
+      documentName,
+      requestHeaders,
+      requestParameters,
+      connection,
+      context,
+      socketId,
+      instance: this,
+    })
+
+    const document = new Document(documentName, this.debugger, {
+      ...this.configuration.yDocOptions,
+      ...yDocOptions,
+    })
     this.documents.set(documentName, document)
 
     const hookPayload = {
@@ -438,8 +448,8 @@ export class Hocuspocus {
       document,
       documentName,
       socketId,
-      requestHeaders: request.headers ?? {},
-      requestParameters: getParameters(request),
+      requestHeaders,
+      requestParameters,
     }
 
     try {
