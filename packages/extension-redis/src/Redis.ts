@@ -310,6 +310,17 @@ export class Redis implements Extension {
    * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
    */
   public async onChange(data: onChangePayload): Promise<any> {
+    // Check if there is only one client connected (`clientsCount <= 1`), the transaction
+    // originates from the system itself (no `transactionOrigin`), and there is no associated
+    // socket ID. This indicates that the change was triggered by the server itself.
+    if (data.clientsCount <= 1 && !data.transactionOrigin && !data.socketId) {
+      const { documentName } = data
+      const syncMessage = new OutgoingMessage(documentName)
+        .createSyncMessage()
+        .writeUpdate(data.update)
+
+      return this.pub.publishBuffer(this.pubKey(documentName), this.encodeMessage(syncMessage.toUint8Array()))
+    }
     if (data.transactionOrigin !== this.redisTransactionOrigin) {
       return this.publishFirstSyncStep(data.documentName, data.document)
     }
