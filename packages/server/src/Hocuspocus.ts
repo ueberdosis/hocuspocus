@@ -62,6 +62,7 @@ export class Hocuspocus {
     beforeBroadcastStateless: () => new Promise(r => r(null)),
     onStateless: () => new Promise(r => r(null)),
     onChange: () => new Promise(r => r(null)),
+    onCreateDocument: () => new Promise(r => r(null)),
     onLoadDocument: () => new Promise(r => r(null)),
     onStoreDocument: () => new Promise(r => r(null)),
     afterStoreDocument: () => new Promise(r => r(null)),
@@ -422,7 +423,23 @@ export class Hocuspocus {
       }
     }
 
-    const document = new Document(documentName, this.debugger, this.configuration.yDocOptions)
+    const requestHeaders = request.headers ?? {}
+    const requestParameters = getParameters(request)
+
+    const yDocOptions = await this.hooks('onCreateDocument', {
+      documentName,
+      requestHeaders,
+      requestParameters,
+      connection,
+      context,
+      socketId,
+      instance: this,
+    })
+
+    const document = new Document(documentName, this.debugger, {
+      ...this.configuration.yDocOptions,
+      ...yDocOptions,
+    })
     this.documents.set(documentName, document)
 
     const hookPayload = {
@@ -432,8 +449,8 @@ export class Hocuspocus {
       document,
       documentName,
       socketId,
-      requestHeaders: request.headers ?? {},
-      requestParameters: getParameters(request),
+      requestHeaders,
+      requestParameters,
     }
 
     try {

@@ -41,6 +41,7 @@ export interface Extension {
   onConnect?(data: onConnectPayload): Promise<any>;
   connected?(data: connectedPayload): Promise<any>;
   onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
+  onCreateDocument?(data: onCreateDocumentPayload): Promise<any>;
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
   afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
@@ -63,6 +64,7 @@ export type HookName =
   'onConnect' |
   'connected' |
   'onAuthenticate' |
+  'onCreateDocument' |
   'onLoadDocument' |
   'afterLoadDocument' |
   'beforeHandleMessage' |
@@ -84,6 +86,7 @@ export type HookPayloadByName = {
   onConnect: onConnectPayload,
   connected: connectedPayload,
   onAuthenticate: onAuthenticatePayload,
+  onCreateDocument: onCreateDocumentPayload
   onLoadDocument: onLoadDocumentPayload,
   afterLoadDocument: afterLoadDocumentPayload,
   beforeHandleMessage: beforeHandleMessagePayload,
@@ -176,6 +179,18 @@ export interface onAuthenticatePayload {
   request: IncomingMessage,
   socketId: string,
   token: string,
+  connection: ConnectionConfiguration
+}
+
+// @todo Change 'connection' to 'connectionConfig' in next major release
+// see https://github.com/ueberdosis/hocuspocus/pull/607#issuecomment-1553559805
+export interface onCreateDocumentPayload {
+  context: any
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: IncomingHttpHeaders
+  requestParameters: URLSearchParams
+  socketId: string
   connection: ConnectionConfiguration
 }
 
