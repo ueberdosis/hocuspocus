@@ -16,7 +16,8 @@ export type TiptapCollabProviderConfiguration =
   Partial<HocuspocusProviderConfiguration> &
   (Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>> |
   Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>|
-  Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>)
+  Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>) &
+  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'>
 
 export interface AdditionalTiptapCollabProviderConfiguration {
   /**
@@ -30,10 +31,14 @@ export interface AdditionalTiptapCollabProviderConfiguration {
   baseUrl?: string
 
   websocketProvider?: TiptapCollabProviderWebsocket
+
+  user?: string
 }
 
 export class TiptapCollabProvider extends HocuspocusProvider {
   tiptapCollabConfigurationPrefix = '__tiptapcollab__'
+
+  userData?: Y.PermanentUserData
 
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
@@ -45,6 +50,11 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     }
 
     super(configuration as HocuspocusProviderConfiguration)
+
+    if (configuration.user) {
+      this.userData = new Y.PermanentUserData(this.document, this.document.getMap('__tiptapcollab__users'))
+      this.userData.setUserMapping(this.document, this.document.clientID, configuration.user)
+    }
   }
 
   /**
