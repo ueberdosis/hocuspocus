@@ -173,6 +173,7 @@ export interface onAuthenticatePayload {
   instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
+  request: IncomingMessage,
   socketId: string,
   token: string,
   connection: ConnectionConfiguration

@@ -162,7 +162,7 @@ if there is no token provided to HocuspocusProvider.
 The `data` passed to the `onAuthenticate` hook has the following attributes:
 
 ```js
-import { IncomingHttpHeaders } from "http";
+import { IncomingHttpHeaders, IncomingMessage } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
 
@@ -171,6 +171,7 @@ const data = {
   instance: Hocuspocus,
   requestHeaders: IncomingHttpHeaders,
   requestParameters: URLSearchParams,
+  request: IncomingMessage,
   socketId: string,
   token: string,
   connection: {
