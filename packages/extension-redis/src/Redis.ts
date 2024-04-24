@@ -243,7 +243,7 @@ export class Redis implements Extension {
   /**
    * Release the Redis lock, so other instances can store documents.
    */
-  async afterStoreDocument({ documentName }: afterStoreDocumentPayload) {
+  async afterStoreDocument({ documentName, socketId }: afterStoreDocumentPayload) {
     this.locks.get(this.lockKey(documentName))?.unlock()
       .catch(() => {
         // Not able to unlock Redis. The lock will expire after ${lockTimeout} ms.
@@ -252,6 +252,14 @@ export class Redis implements Extension {
       .finally(() => {
         this.locks.delete(this.lockKey(documentName))
       })
+
+    // if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
+    // for provider connections, this usually happens in the onDisconnect hook
+    if (socketId === 'server') {
+      await new Promise(resolve => {
+        setTimeout(() => resolve(''), this.configuration.disconnectDelay)
+      })
+    }
   }
 
   /**
