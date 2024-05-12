@@ -216,7 +216,10 @@ export class HocuspocusProvider extends EventEmitter {
     this.awareness?.on('update', this.awarenessUpdateHandler.bind(this))
     this.registerEventListeners()
 
-    if (this.configuration.forceSyncInterval) {
+    if (
+      this.configuration.forceSyncInterval
+      && typeof this.configuration.forceSyncInterval === 'number'
+    ) {
       this.intervals.forceSync = setInterval(
         this.forceSync.bind(this),
         this.configuration.forceSyncInterval,
