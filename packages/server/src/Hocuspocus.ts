@@ -417,12 +417,9 @@ export class Hocuspocus {
    * Create a new document by the given request
    */
   public createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
-    if (this.loadingDocuments.has(documentName)) {
-      const documentPromise = this.loadingDocuments.get(documentName)
-
-      if (documentPromise) {
-        return documentPromise
-      }
+    const existingLoadingDoc = this.loadingDocuments.get(documentName)
+    if (existingLoadingDoc) {
+      return existingLoadingDoc
     }
 
     const loadDocPromise = this.loadDocument(documentName, request, socketId, connection, context)
