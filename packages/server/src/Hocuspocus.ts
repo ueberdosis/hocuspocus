@@ -572,6 +572,7 @@ export class Hocuspocus {
     if (!this.documents.has(documentName)) return
 
     this.documents.delete(documentName)
+    this.loadingDocuments.delete(documentName)
     document.destroy()
     this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
