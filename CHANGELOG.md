@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.12.3](https://github.com/ueberdosis/hocuspocus/compare/v2.12.2...v2.12.3) (2024-05-16)
+
+
+### Bug Fixes
+
+* improve global window checks to enable react native support ([#823](https://github.com/ueberdosis/hocuspocus/issues/823)) ([5dd53d5](https://github.com/ueberdosis/hocuspocus/commit/5dd53d554f5e54984a0743d25dfd16224a95a0d0))
+
+
+
+
+
 ## [2.12.2](https://github.com/ueberdosis/hocuspocus/compare/v2.12.2-rc.0...v2.12.2) (2024-04-25)
 
 **Note:** Version bump only for package hocuspocus
