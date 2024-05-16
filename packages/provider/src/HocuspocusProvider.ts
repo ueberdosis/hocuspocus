@@ -306,7 +306,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   registerEventListeners() {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || !('addEventListener' in window)) {
       return
     }
 
@@ -506,7 +506,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(CloseMessage, { documentName: this.configuration.name })
     this.disconnect()
 
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || !('removeEventListener' in window)) {
       return
     }
 
