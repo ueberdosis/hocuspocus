@@ -72,6 +72,8 @@ export class Hocuspocus {
     onDestroy: () => new Promise(r => r(null)),
   }
 
+  loadingDocuments: Map<string, Promise<Document>> = new Map()
+
   documents: Map<string, Document> = new Map()
 
   server?: HocuspocusServer
@@ -415,14 +417,33 @@ export class Hocuspocus {
    * Create a new document by the given request
    */
   public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
-    if (this.documents.has(documentName)) {
-      const document = this.documents.get(documentName)
+    const existingLoadingDoc = this.loadingDocuments.get(documentName)
 
-      if (document) {
-        return document
-      }
+    if (existingLoadingDoc) {
+      return existingLoadingDoc
     }
 
+    const existingDoc = this.documents.get(documentName)
+    if (existingDoc) {
+      return Promise.resolve(existingDoc)
+    }
+
+    const loadDocPromise = this.loadDocument(documentName, request, socketId, connection, context)
+
+    this.loadingDocuments.set(documentName, loadDocPromise)
+
+    try {
+      await loadDocPromise
+      this.loadingDocuments.delete(documentName)
+    } catch (e) {
+      this.loadingDocuments.delete(documentName)
+      throw e
+    }
+
+    return loadDocPromise
+  }
+
+  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     const requestHeaders = request.headers ?? {}
     const requestParameters = getParameters(request)
 
