@@ -289,6 +289,8 @@ test('disconnects all clients related to the document when an error is thrown in
 })
 
 test('if a new connection connects while the previous connection still fetches the document, it will just work properly', async t => {
+  t.plan(11)
+
   let callsToOnLoadDocument = 0
   const resolvesNeeded = 10
 
@@ -359,7 +361,7 @@ test('if a new connection connects while the previous connection still fetches t
 
           t.is(server.documents.size, 1)
 
-          const value = provider.document.getArray('foo').get(0)
+          const value = provider2.document.getArray('foo').get(0)
           t.is(value, 'bar-1')
 
           resolver()
@@ -368,21 +370,23 @@ test('if a new connection connects while the previous connection still fetches t
           if (!provider2.isSynced) return
           provider2MessagesReceived += 1
 
-          const value = provider.document.getArray('foo').get(0)
+          setTimeout(() => {
+            const value = provider2.document.getArray('foo').get(0)
 
-          if (provider2MessagesReceived === 1) {
+            if (provider2MessagesReceived === 1) {
             // initial state is now synced
-            t.is(value, 'bar-1')
-          } else if (provider2MessagesReceived === 2) {
-            t.is(value, 'bar-updatedAfterProvider1Synced')
-            setTimeout(() => {
-              provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
-            }, 100)
-          } else {
-            t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
-          }
+              t.is(value, 'bar-1')
+            } else if (provider2MessagesReceived === 2) {
+              t.is(value, 'bar-updatedAfterProvider1Synced')
+              setTimeout(() => {
+                provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
+              }, 100)
+            } else {
+              t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
+            }
+            resolver()
+          })
 
-          resolver()
         },
       })
 

@@ -416,7 +416,7 @@ export class Hocuspocus {
   /**
    * Create a new document by the given request
    */
-  public createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     const existingLoadingDoc = this.loadingDocuments.get(documentName)
 
     if (existingLoadingDoc) {
@@ -432,9 +432,13 @@ export class Hocuspocus {
 
     this.loadingDocuments.set(documentName, loadDocPromise)
 
-    loadDocPromise.finally(() => {
+    try {
+      await loadDocPromise
       this.loadingDocuments.delete(documentName)
-    })
+    } catch (e) {
+      this.loadingDocuments.delete(documentName)
+      throw e
+    }
 
     return loadDocPromise
   }
