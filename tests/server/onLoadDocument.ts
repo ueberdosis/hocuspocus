@@ -239,3 +239,153 @@ test('stops when an error is thrown in onLoadDocument, even when authenticated',
     })
   })
 })
+
+test('disconnects all clients related to the document when an error is thrown in onLoadDocument', async t => {
+  const resolvesNeeded = 2
+
+  await new Promise(async resolve => {
+
+    const server = await newHocuspocus({
+      async onLoadDocument() {
+        return new Promise((resolve, fail) => {
+          setTimeout(() => {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            fail('ERROR')
+          }, 250)
+        })
+      },
+      async onStoreDocument(data) {
+        t.fail('MUST NOT call onStoreDocument')
+      },
+    })
+
+    let resolvedNumber = 0
+    const resolver = () => {
+      resolvedNumber += 1
+
+      if (resolvedNumber >= resolvesNeeded) {
+        t.is(server.documents.size, 0)
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      }
+    }
+
+    const provider1 = newHocuspocusProvider(server, {
+      onClose(event) {
+        provider1.disconnect()
+        resolver()
+      },
+    })
+
+    const provider2 = newHocuspocusProvider(server, {
+      onClose() {
+        provider2.disconnect()
+        resolver()
+      },
+    })
+
+  })
+
+})
+
+test('if a new connection connects while the previous connection still fetches the document, it will just work properly', async t => {
+  let callsToOnLoadDocument = 0
+  const resolvesNeeded = 10
+
+  await new Promise(async resolve => {
+
+    let resolvedNumber = 0
+    const resolver = () => {
+      resolvedNumber += 1
+
+      if (resolvedNumber >= resolvesNeeded) {
+        t.is(callsToOnLoadDocument, 1)
+        resolve('done')
+      }
+    }
+
+    const server = await newHocuspocus({
+      onLoadDocument({ document }) {
+        return new Promise(async resolve => {
+          setTimeout(() => {
+            callsToOnLoadDocument += 1
+            document.getArray('foo').insert(0, [`bar-${callsToOnLoadDocument}`])
+            resolve(document)
+          }, 5000)
+        })
+      },
+    })
+
+    let provider1MessagesReceived = 0
+    const provider = newHocuspocusProvider(server, {
+      onSynced({ state }) {
+        // if (!state) return
+        t.is(server.documents.size, 1)
+
+        const value = provider.document.getArray('foo').get(0)
+        t.is(value, 'bar-1')
+
+        setTimeout(() => {
+          provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider1Synced'])
+        }, 100)
+
+        resolver()
+      },
+      onMessage() {
+        if (!provider.isSynced) return
+        provider1MessagesReceived += 1
+
+        const value = provider.document.getArray('foo').get(0)
+
+        if (provider1MessagesReceived === 1) {
+          // do nothing, this is just the ACK for the sync
+        } else if (provider1MessagesReceived === 2) {
+          // do nothing, this is just the ACK for the received update (set "bar-updatedAfterProvider1Synced")
+        } else if (provider1MessagesReceived === 3) {
+          t.is(value, 'bar-updatedAfterProvider1Synced')
+        } else {
+          t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
+        }
+
+        resolver()
+      },
+    })
+
+    let provider2MessagesReceived = 0
+    setTimeout(() => {
+      const provider2 = newHocuspocusProvider(server, {
+        onSynced({ state }) {
+          // if (!state) return
+
+          t.is(server.documents.size, 1)
+
+          const value = provider.document.getArray('foo').get(0)
+          t.is(value, 'bar-1')
+
+          resolver()
+        },
+        onMessage(data) {
+          if (!provider2.isSynced) return
+          provider2MessagesReceived += 1
+
+          const value = provider.document.getArray('foo').get(0)
+
+          if (provider2MessagesReceived === 1) {
+            // initial state is now synced
+            t.is(value, 'bar-1')
+          } else if (provider2MessagesReceived === 2) {
+            t.is(value, 'bar-updatedAfterProvider1Synced')
+            setTimeout(() => {
+              provider.document.getArray('foo').insert(0, ['bar-updatedAfterProvider2ReceivedMessageFrom1'])
+            }, 100)
+          } else {
+            t.is(value, 'bar-updatedAfterProvider2ReceivedMessageFrom1')
+          }
+
+          resolver()
+        },
+      })
+
+    }, 2000)
+  })
+})

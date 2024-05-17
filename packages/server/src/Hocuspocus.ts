@@ -418,13 +418,23 @@ export class Hocuspocus {
    */
   public createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     const existingLoadingDoc = this.loadingDocuments.get(documentName)
+
     if (existingLoadingDoc) {
       return existingLoadingDoc
+    }
+
+    const existingDoc = this.documents.get(documentName)
+    if (existingDoc) {
+      return Promise.resolve(existingDoc)
     }
 
     const loadDocPromise = this.loadDocument(documentName, request, socketId, connection, context)
 
     this.loadingDocuments.set(documentName, loadDocPromise)
+
+    loadDocPromise.finally(() => {
+      this.loadingDocuments.delete(documentName)
+    })
 
     return loadDocPromise
   }
@@ -569,7 +579,6 @@ export class Hocuspocus {
     if (!this.documents.has(documentName)) return
 
     this.documents.delete(documentName)
-    this.loadingDocuments.delete(documentName)
     document.destroy()
     this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
