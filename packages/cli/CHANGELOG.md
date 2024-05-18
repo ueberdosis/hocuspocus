@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.13.0](https://github.com/ueberdosis/hocuspocus/compare/v2.12.3...v2.13.0) (2024-05-18)
+
+**Note:** Version bump only for package @hocuspocus/cli
+
+
+
+
+
 ## [2.12.3](https://github.com/ueberdosis/hocuspocus/compare/v2.12.2...v2.12.3) (2024-05-16)
 
 **Note:** Version bump only for package @hocuspocus/cli
