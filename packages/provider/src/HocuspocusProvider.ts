@@ -231,7 +231,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
 
-  boundPageUnload = this.pageUnload.bind(this)
+  boundPageHide = this.pageHide.bind(this)
 
   boundOnOpen = this.onOpen.bind(this)
 
@@ -299,9 +299,9 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
 
-  pageUnload() {
+  pageHide() {
     if (this.awareness) {
-      removeAwarenessStates(this.awareness, [this.document.clientID], 'window unload')
+      removeAwarenessStates(this.awareness, [this.document.clientID], 'page hide')
     }
   }
 
@@ -310,7 +310,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.addEventListener('unload', this.boundPageUnload)
+    window.addEventListener('pagehide', this.boundPageHide)
   }
 
   sendStateless(payload: string) {
@@ -510,7 +510,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    window.removeEventListener('unload', this.boundPageUnload)
+    window.removeEventListener('pagehide', this.boundPageHide)
   }
 
   permissionDeniedHandler(reason: string) {
