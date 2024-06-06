@@ -296,6 +296,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   forceSync() {
+    this.unsyncedChanges = 1
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
 
@@ -364,7 +365,7 @@ export class HocuspocusProvider extends EventEmitter {
     return !!this.configuration.token && !this.isAuthenticated
   }
 
-  // not needed, but provides backward compatibility with e.g. lexicla/yjs
+  // not needed, but provides backward compatibility with e.g. lexical/yjs
   async connect() {
     if (this.configuration.broadcast) {
       this.subscribeToBroadcastChannel()
@@ -420,7 +421,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   startSync() {
-    this.incrementUnsyncedChanges()
+    this.unsyncedChanges = 1
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
     if (this.awareness && this.awareness.getLocalState() !== null) {
