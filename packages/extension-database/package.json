@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-database",
   "description": "a generic Hocuspocus persistence driver for the database",
-  "version": "2.13.0",
+  "version": "2.13.1",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -27,7 +27,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^2.13.0"
+    "@hocuspocus/server": "^2.13.1"
   },
   "peerDependencies": {
     "yjs": "^13.6.8"
