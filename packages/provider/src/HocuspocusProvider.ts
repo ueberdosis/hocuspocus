@@ -282,6 +282,11 @@ export class HocuspocusProvider extends EventEmitter {
     return this.unsyncedChanges > 0
   }
 
+  private resetUnsyncedChanges() {
+    this.unsyncedChanges = 1
+    this.emit('unsyncedChanges', this.unsyncedChanges)
+  }
+
   incrementUnsyncedChanges() {
     this.unsyncedChanges += 1
     this.emit('unsyncedChanges', this.unsyncedChanges)
@@ -296,7 +301,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   forceSync() {
-    this.unsyncedChanges = 1
+    this.resetUnsyncedChanges()
+
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
   }
 
@@ -421,7 +427,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   startSync() {
-    this.unsyncedChanges = 1
+    this.resetUnsyncedChanges()
+
     this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name })
 
     if (this.awareness && this.awareness.getLocalState() !== null) {
