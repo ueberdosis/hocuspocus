@@ -364,5 +364,6 @@ export class Redis implements Extension {
     await this.redlock.quit()
     this.pub.disconnect(false)
     this.sub.disconnect(false)
+    this.sub.off('messageBuffer', this.handleIncomingMessage)
   }
 }

@@ -260,6 +260,7 @@ export class Document extends Doc {
 
   destroy() {
     super.destroy()
+    this.awareness.destroy()
     this.isDestroyed = true
   }
 }
