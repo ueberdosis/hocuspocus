@@ -38,7 +38,7 @@
     "kleur": "^4.1.4",
     "lodash.debounce": "^4.0.8",
     "redlock": "^4.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "^10.0.0"
   },
   "peerDependencies": {
     "y-protocols": "^1.0.6",
