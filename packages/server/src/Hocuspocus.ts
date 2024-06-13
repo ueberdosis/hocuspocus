@@ -378,7 +378,7 @@ export class Hocuspocus {
    * "connection" is not necessarily type "Connection", it's the Yjs "origin" (which is "Connection" if
    * the update is incoming from the provider, but can be anything if the updates is originated from an extension.
    */
-  private handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage): void {
+  private async handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage) {
     const hookPayload: onChangePayload | onStoreDocumentPayload = {
       instance: this,
       clientsCount: document.getConnectionsCount(),
@@ -405,12 +405,7 @@ export class Hocuspocus {
       return
     }
 
-    this.debouncer.debounce(
-      `onStoreDocument-${document.name}`,
-      () => this.storeDocumentHooks(document, hookPayload),
-      this.configuration.debounce,
-      this.configuration.maxDebounce,
-    )
+    await this.storeDocumentHooks(document, hookPayload)
   }
 
   /**
@@ -521,26 +516,34 @@ export class Hocuspocus {
     return document
   }
 
-  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload) {
-    return this.hooks('onStoreDocument', hookPayload)
-      .then(() => {
-        this.hooks('afterStoreDocument', hookPayload).then(() => {
-          // Remove document from memory.
+  storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload, immediately?: boolean) {
+    return this.debouncer.debounce(
+      `onStoreDocument-${document.name}`,
+      () => {
+        return this.hooks('onStoreDocument', hookPayload)
+          .then(() => {
+            this.hooks('afterStoreDocument', hookPayload).then(() => {
+              // Remove document from memory.
 
-          if (document.getConnectionsCount() > 0) {
-            return
-          }
+              if (document.getConnectionsCount() > 0) {
+                return
+              }
 
-          this.unloadDocument(document)
-        })
-      })
-      .catch(error => {
-        console.error('Caught error during storeDocumentHooks', error)
+              this.unloadDocument(document)
+            })
+          })
+          .catch(error => {
+            console.error('Caught error during storeDocumentHooks', error)
 
-        if (error?.message) {
-          throw error
-        }
-      })
+            if (error?.message) {
+              throw error
+            }
+          })
+      },
+      immediately ? 0 : this.configuration.debounce,
+      this.configuration.maxDebounce,
+    )
+
   }
 
   /**
