@@ -218,3 +218,49 @@ test('direct connection transact awaits until onStoreDocument has finished, even
     resolve('done')
   })
 })
+
+test('creating a websocket connection after transact but before debounce interval doesnt create different docs', async t => {
+  let onStoreDocumentFinished = false
+  let disconnected = false
+
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      onStoreDocument: async () => {
+        onStoreDocumentFinished = false
+        await sleep(200)
+        onStoreDocumentFinished = true
+      },
+      async afterUnloadDocument(data) {
+        console.log('called')
+        if (disconnected) {
+          t.fail('must not be called')
+        }
+      },
+    })
+
+    const direct = await server.openDirectConnection('hocuspocus-test')
+    t.is(server.getDocumentsCount(), 1)
+    t.is(server.getConnectionsCount(), 1)
+
+    t.is(onStoreDocumentFinished, false)
+    await direct.transact(document => {
+      document.transact(() => {
+        document.getArray('test').insert(0, ['value'])
+      }, 'testOrigin')
+    })
+    t.is(onStoreDocumentFinished, true)
+
+    await direct.disconnect()
+    disconnected = true
+
+    t.is(server.getConnectionsCount(), 0)
+    t.is(server.getDocumentsCount(), 0)
+    t.is(onStoreDocumentFinished, true)
+
+    const provider = newHocuspocusProvider(server)
+
+    await sleep(server.configuration.debounce * 2)
+
+    resolve('done')
+  })
+})

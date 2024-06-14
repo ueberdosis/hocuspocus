@@ -42,7 +42,7 @@ export class DirectConnection implements DirectConnectionInterface {
       requestParameters: new URLSearchParams(),
       socketId: 'server',
       transactionOrigin,
-    })
+    }, true)
   }
 
   async disconnect() {
@@ -59,7 +59,7 @@ export class DirectConnection implements DirectConnectionInterface {
         requestHeaders: {},
         requestParameters: new URLSearchParams(),
         socketId: 'server',
-      })
+      }, true)
 
       this.document = null
     }
