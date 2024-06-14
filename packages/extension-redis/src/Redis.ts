@@ -229,7 +229,7 @@ export class Redis implements Extension {
         if (error || !lock) {
           // Expected behavior: Could not acquire lock, another instance locked it already.
           // No further `onStoreDocument` hooks will be executed.
-          reject()
+          reject(error)
           return
         }
 
@@ -332,7 +332,7 @@ export class Redis implements Extension {
       const document = this.instance.documents.get(documentName)
 
       // Do nothing, when other users are still connected to the document.
-      if (document && document.getConnectionsCount() > 0) {
+      if (!document || document.getConnectionsCount() > 0) {
         return
       }
 
@@ -342,6 +342,8 @@ export class Redis implements Extension {
           console.error(error)
         }
       })
+
+      this.instance.unloadDocument(document)
     }
     // Delay the disconnect procedure to allow last minute syncs to happen
     setTimeout(disconnect, this.configuration.disconnectDelay)
