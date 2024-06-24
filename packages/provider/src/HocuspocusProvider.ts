@@ -68,7 +68,7 @@ export interface CompleteHocuspocusProviderConfiguration {
   /**
    * A token that’s sent to the backend for authentication purposes.
    */
-  token: string | (() => string) | (() => Promise<string>) | null,
+  token: string | (() => string) | (() => Promise<string | null>) | null,
   /**
    * URL parameters that should be added.
    */
