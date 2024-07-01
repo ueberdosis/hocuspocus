@@ -32,7 +32,7 @@
     "@hocuspocus/common": "^2.13.2",
     "@lifeomic/attempt": "^3.0.2",
     "lib0": "^0.2.87",
-    "ws": "^8.14.2"
+    "ws": "^8.17.1"
   },
   "peerDependencies": {
     "y-protocols": "^1.0.6",

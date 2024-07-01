@@ -21,7 +21,11 @@ test('does not crash when invalid opcode is sent', async t => {
       },
       onClose({ event }) {
         t.is(event.code, 1002)
-        socket.destroy()
+        try {
+          socket.destroy()
+        } catch (e) {
+
+        }
       },
       onDestroy() {
         t.pass()
