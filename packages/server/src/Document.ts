@@ -29,7 +29,7 @@ export class Document extends Doc {
 
   mux: mutex
 
-  logger: Debugger
+  logger?: Debugger
 
   isLoading: boolean
 
@@ -38,7 +38,7 @@ export class Document extends Doc {
   /**
    * Constructor.
    */
-  constructor(name: string, logger: Debugger, yDocOptions: {}) {
+  constructor(name: string, logger?: Debugger, yDocOptions?: {}) {
     super(yDocOptions)
 
     this.name = name
@@ -206,7 +206,7 @@ export class Document extends Doc {
       const awarenessMessage = new OutgoingMessage(this.name)
         .createAwarenessUpdateMessage(this.awareness, changedClients)
 
-      this.logger.log({
+      this.logger?.log({
         direction: 'out',
         type: awarenessMessage.type,
         category: awarenessMessage.category,
@@ -231,7 +231,7 @@ export class Document extends Doc {
       .writeUpdate(update)
 
     this.getConnections().forEach(connection => {
-      this.logger.log({
+      this.logger?.log({
         direction: 'out',
         type: message.type,
         category: message.category,
