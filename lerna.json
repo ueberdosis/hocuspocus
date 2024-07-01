@@ -2,11 +2,10 @@
   "packages": [
     "packages/*"
   ],
-  "useWorkspaces": true,
   "command": {
     "publish": {
       "conventionalCommits": true
     }
   },
-  "version": "2.13.2"
+  "version": "2.13.3-rc.0"
 }
