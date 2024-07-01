@@ -134,7 +134,9 @@ export class Redis implements Extension {
     }
     this.sub.on('messageBuffer', this.handleIncomingMessage)
 
-    this.redlock = new Redlock([this.pub])
+    this.redlock = new Redlock([this.pub], {
+      retryCount: 0,
+    })
 
     const identifierBuffer = Buffer.from(this.configuration.identifier, 'utf-8')
     this.messagePrefix = Buffer.concat([Buffer.from([identifierBuffer.length]), identifierBuffer])
@@ -224,11 +226,13 @@ export class Redis implements Extension {
   async onStoreDocument({ documentName }: onStoreDocumentPayload) {
     // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
     // to avoid conflict with other instances storing the same document.
+
     return new Promise((resolve, reject) => {
       this.redlock.lock(this.lockKey(documentName), this.configuration.lockTimeout, async (error, lock) => {
         if (error || !lock) {
           // Expected behavior: Could not acquire lock, another instance locked it already.
           // No further `onStoreDocument` hooks will be executed.
+          console.log('unable to acquire lock')
           reject()
           return
         }
@@ -332,7 +336,7 @@ export class Redis implements Extension {
       const document = this.instance.documents.get(documentName)
 
       // Do nothing, when other users are still connected to the document.
-      if (document && document.getConnectionsCount() > 0) {
+      if (!document || document.getConnectionsCount() > 0) {
         return
       }
 
@@ -342,6 +346,8 @@ export class Redis implements Extension {
           console.error(error)
         }
       })
+
+      this.instance.unloadDocument(document)
     }
     // Delay the disconnect procedure to allow last minute syncs to happen
     setTimeout(disconnect, this.configuration.disconnectDelay)
