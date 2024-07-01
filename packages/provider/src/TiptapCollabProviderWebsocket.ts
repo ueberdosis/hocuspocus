@@ -17,10 +17,22 @@ export interface AdditionalTiptapCollabProviderWebsocketConfiguration {
    * If you are using the on-premise version of TiptapCollab, put your baseUrl here (e.g. https://collab.yourdomain.com)
    */
   baseUrl?: string
+
+  /**
+   * Only fill this if you are using Tiptap Collab HA.
+   */
+  shardKey?: string
 }
 
 export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
   constructor(configuration: TiptapCollabProviderWebsocketConfiguration) {
-    super({ ...configuration as HocuspocusProviderWebsocketConfiguration, url: configuration.baseUrl ?? `wss://${configuration.appId}.collab.tiptap.cloud` })
+    let url = configuration.baseUrl ?? `wss://${configuration.appId}.collab.tiptap.cloud`
+
+    if (configuration.shardKey) {
+      url += url.includes('?') ? '&' : '?'
+      url += `shard=${configuration.shardKey}`
+    }
+
+    super({ ...configuration as HocuspocusProviderWebsocketConfiguration, url })
   }
 }
