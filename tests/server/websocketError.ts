@@ -23,6 +23,7 @@ test('does not crash when invalid opcode is sent', async t => {
         t.is(event.code, 1002)
         try {
           socket.destroy()
+          // eslint-disable-next-line no-empty
         } catch (e) {
 
         }
