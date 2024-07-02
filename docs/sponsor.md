@@ -26,8 +26,6 @@ If you are thankful for Hocuspocus, you should say thank you to the lovely peopl
 
 AND you should definitely hire us if you want us to design and build an amazing digital product for you. Bonus points if it’s somehow text editing related.
 
-!!team-grid
-
 ## Frequently asked questions
 
 ### I can’t use GitHub. How can I support you?
