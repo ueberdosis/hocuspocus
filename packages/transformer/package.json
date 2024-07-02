@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/transformer",
-  "version": "2.13.5-rc.0",
+  "version": "2.13.5",
   "description": "hocuspocus transformation utilities",
   "homepage": "https://hocuspocus.dev",
   "keywords": [

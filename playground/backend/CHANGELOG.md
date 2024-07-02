@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.13.5](https://github.com/ueberdosis/hocuspocus/compare/v2.13.5-rc.0...v2.13.5) (2024-07-02)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
 ## [2.13.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.13.4-rc.0...v2.13.5-rc.0) (2024-07-01)
 
 **Note:** Version bump only for package @hocuspocus/server-demos
