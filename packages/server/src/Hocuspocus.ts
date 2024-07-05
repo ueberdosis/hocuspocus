@@ -49,7 +49,7 @@ export const defaultConfiguration = {
 /**
  * Hocuspocus Server
  */
-export class Hocuspocus {
+export class Hocuspocus <Ctx extends {} = {}> {
   configuration: Configuration = {
     ...defaultConfiguration,
     extensions: [],
@@ -340,7 +340,7 @@ export class Hocuspocus {
    * … and if nothing fails it’ll fully establish the connection and
    * load the Document then.
    */
-  handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
+  handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: Ctx = {} as Ctx): void {
     const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
       requiresAuthentication: this.requiresAuthentication,
       timeout: this.configuration.timeout,
@@ -411,7 +411,7 @@ export class Hocuspocus {
   /**
    * Create a new document by the given request
    */
-  public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: Ctx): Promise<Document> {
     const existingLoadingDoc = this.loadingDocuments.get(documentName)
 
     if (existingLoadingDoc) {
@@ -438,7 +438,7 @@ export class Hocuspocus {
     return loadDocPromise
   }
 
-  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: Ctx): Promise<Document> {
     const requestHeaders = request.headers ?? {}
     const requestParameters = getParameters(request)
 
@@ -617,7 +617,7 @@ export class Hocuspocus {
     return this.debugger.get()?.logs
   }
 
-  async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {
+  async openDirectConnection(documentName: string, context?: Ctx): Promise<DirectConnection> {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,
