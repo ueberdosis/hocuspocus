@@ -511,7 +511,9 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('destroy', this.configuration.onDestroy)
     this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
 
-    this.send(CloseMessage, { documentName: this.configuration.name })
+    if (!this.configuration.preserveConnection) {
+      this.send(CloseMessage, { documentName: this.configuration.name });
+    }
     this.disconnect()
 
     if (typeof window === 'undefined' || !('removeEventListener' in window)) {
