@@ -47,8 +47,6 @@ export class Database implements Extension {
     if (update) {
       Y.applyUpdate(data.document, update)
     }
-
-    return data.document
   }
 
   /**
