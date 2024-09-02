@@ -4,7 +4,7 @@ import {
   type HocuspocusProviderWebsocket,
   type HocuspocusProviderWebsocketConfiguration,
 } from '@hocuspocus/provider'
-import { Hocuspocus } from '@hocuspocus/server'
+import type { Hocuspocus } from '@hocuspocus/server'
 import { newHocuspocusProviderWebsocket } from './newHocuspocusProviderWebsocket.js'
 
 export const newHocuspocusProvider = (

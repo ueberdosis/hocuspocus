@@ -1,5 +1,5 @@
-import { IncomingHttpHeaders, IncomingMessage } from 'http'
-import { URLSearchParams } from 'url'
+import type { IncomingHttpHeaders, IncomingMessage } from 'http'
+import type { URLSearchParams } from 'url'
 import {
   CloseEvent,
   ConnectionTimeout,
@@ -7,18 +7,19 @@ import {
 } from '@hocuspocus/common'
 import * as decoding from 'lib0/decoding'
 import { v4 as uuid } from 'uuid'
-import WebSocket from 'ws'
+import type WebSocket from 'ws'
 import Connection from './Connection.js'
-import { Debugger } from './Debugger.js'
-import Document from './Document.js'
-import { Hocuspocus } from './Hocuspocus.js'
+import type { Debugger } from './Debugger.js'
+import type Document from './Document.js'
+import type { Hocuspocus } from './Hocuspocus.js'
 import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
-import {
+import type {
   ConnectionConfiguration,
-  MessageType,
   beforeHandleMessagePayload,
-  onDisconnectPayload,
+  onDisconnectPayload} from './types.js'
+import {
+  MessageType,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
 

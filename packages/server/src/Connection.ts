@@ -1,15 +1,15 @@
-import { IncomingMessage as HTTPIncomingMessage } from 'http'
+import type { IncomingMessage as HTTPIncomingMessage } from 'http'
 import AsyncLock from 'async-lock'
-import WebSocket from 'ws'
-import {
-  CloseEvent, Forbidden, WsReadyStates,
-} from '@hocuspocus/common'
-import Document from './Document.js'
+import type WebSocket from 'ws'
+import type {
+  CloseEvent} from '@hocuspocus/common'
+import {  Forbidden, WsReadyStates } from '@hocuspocus/common'
+import type Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
 import { MessageReceiver } from './MessageReceiver.js'
-import { Debugger } from './Debugger.js'
-import { onStatelessPayload } from './types.js'
+import type { Debugger } from './Debugger.js'
+import type { onStatelessPayload } from './types.js'
 
 export class Connection {
 
@@ -31,7 +31,7 @@ export class Connection {
 
   lock: AsyncLock
 
-  readOnly: Boolean
+  readOnly: boolean
 
   logger: Debugger
 

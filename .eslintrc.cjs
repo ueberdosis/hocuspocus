@@ -83,6 +83,7 @@ module.exports = {
         'lines-between-class-members': 'off',
         '@stylistic/js/lines-between-class-members': ['error'],
         '@typescript-eslint/no-explicit-any': 'off',
+        "@typescript-eslint/consistent-type-imports": "error",
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/explicit-module-boundary-type': 'off',
         '@typescript-eslint/no-var-requires': 'off',

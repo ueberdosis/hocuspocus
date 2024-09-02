@@ -4,14 +4,14 @@ import {
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
-import type { MessageEvent } from 'ws'
-import { Event } from 'ws'
+import type { MessageEvent , Event } from 'ws'
 import EventEmitter from './EventEmitter.js'
-import { HocuspocusProvider } from './HocuspocusProvider.js'
+import type { HocuspocusProvider } from './HocuspocusProvider.js'
+import type {
+  onAwarenessChangeParameters, onAwarenessUpdateParameters,
+  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters} from './types.js'
 import {
   WebSocketStatus,
-  onAwarenessChangeParameters, onAwarenessUpdateParameters,
-  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters,
 } from './types.js'
 import { IncomingMessage } from './IncomingMessage.js'
 

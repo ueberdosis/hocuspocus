@@ -1,4 +1,4 @@
-import { IncomingMessage } from 'http'
+import type { IncomingMessage } from 'http'
 import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -6,16 +6,17 @@ import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import { v4 as uuid } from 'uuid'
-import WebSocket from 'ws'
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
-import { Server } from './Server.js'
+import type WebSocket from 'ws'
+import type { Doc} from 'yjs'
+import { applyUpdate, encodeStateAsUpdate } from 'yjs'
+import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
-import Connection from './Connection.js'
+import type Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
-import {
+import type {
   AwarenessUpdate,
   Configuration,
   ConnectionConfiguration,

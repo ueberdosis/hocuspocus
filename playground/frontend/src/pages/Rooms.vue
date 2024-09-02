@@ -38,7 +38,8 @@
 <script lang="ts">
 import * as Y from 'yjs'
 import { ref } from 'vue'
-import { HocuspocusProvider, StatesArray } from '@hocuspocus/provider'
+import type { StatesArray } from '@hocuspocus/provider'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { awarenessStatesToArray } from '@hocuspocus/common'
 

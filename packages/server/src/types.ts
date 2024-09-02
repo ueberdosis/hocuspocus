@@ -1,11 +1,11 @@
-import {
+import type {
   IncomingHttpHeaders, IncomingMessage, ServerResponse,
 } from 'http'
-import { URLSearchParams } from 'url'
-import { Awareness } from 'y-protocols/awareness'
-import Connection from './Connection.js'
-import Document from './Document.js'
-import { Hocuspocus } from './Hocuspocus.js'
+import type { URLSearchParams } from 'url'
+import type { Awareness } from 'y-protocols/awareness'
+import type Connection from './Connection.js'
+import type Document from './Document.js'
+import type { Hocuspocus } from './Hocuspocus.js'
 
 export enum MessageType {
   Unknown = -1,

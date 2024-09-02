@@ -1,4 +1,4 @@
-import {
+import type {
   Extension,
   onConnectPayload,
 } from '@hocuspocus/server'
@@ -73,7 +73,7 @@ export class Throttle implements Extension {
    * Throttle requests
    * @private
    */
-  private throttle(ip: string): Boolean {
+  private throttle(ip: string): boolean {
     if (!this.configuration.throttle) {
       return false
     }

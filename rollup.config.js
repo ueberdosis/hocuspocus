@@ -1,4 +1,5 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 import minimist from 'minimist'
 import { getPackages } from '@lerna/project'
 import { filterPackages } from '@lerna/filter-packages'
@@ -12,10 +13,9 @@ import json from '@rollup/plugin-json'
 // import sizes from '@atomico/rollup-plugin-sizes'
 // import autoExternal from 'rollup-plugin-auto-external'
 // import importAssertions from 'rollup-plugin-import-assertions'
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url); 
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url) 
+const __dirname = path.dirname(__filename)
 
 async function getSortedPackages(scope, ignore) {
   const packages = await getPackages(__dirname)
