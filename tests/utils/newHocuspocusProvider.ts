@@ -1,6 +1,8 @@
 import {
   HocuspocusProvider,
-  HocuspocusProviderConfiguration, HocuspocusProviderWebsocket, HocuspocusProviderWebsocketConfiguration,
+  type HocuspocusProviderConfiguration,
+  type HocuspocusProviderWebsocket,
+  type HocuspocusProviderWebsocketConfiguration,
 } from '@hocuspocus/provider'
 import { Hocuspocus } from '@hocuspocus/server'
 import { newHocuspocusProviderWebsocket } from './newHocuspocusProviderWebsocket.js'
