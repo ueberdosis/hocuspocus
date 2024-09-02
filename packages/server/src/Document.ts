@@ -39,7 +39,7 @@ export class Document extends Doc {
   /**
    * Constructor.
    */
-  constructor(name: string, logger?: Debugger, yDocOptions?: {}) {
+  constructor(name: string, logger?: Debugger, yDocOptions?: object) {
     super(yDocOptions)
 
     this.name = name

@@ -277,6 +277,7 @@ export interface onStoreDocumentPayload {
   transactionOrigin?: any,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
 export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
 
 export interface onAwarenessUpdatePayload {

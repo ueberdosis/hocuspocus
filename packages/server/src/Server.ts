@@ -140,7 +140,7 @@ export class Server {
       process.on('SIGQUIT', signalHandler)
       process.on('SIGTERM', signalHandler)
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     return new Promise((resolve: Function, reject: Function) => {
       this.httpServer.listen({
         port: this.configuration.port,

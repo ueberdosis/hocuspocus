@@ -154,6 +154,7 @@ export class Connection {
    * Graceful wrapper around the WebSocket close method.
    */
   close(event?: CloseEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     this.lock.acquire('close', (done: Function) => {
       if (this.pingInterval) {
         clearInterval(this.pingInterval)

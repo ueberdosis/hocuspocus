@@ -299,6 +299,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     return retryPromise
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   attachWebSocketListeners(ws: HocusPocusWebSocket, reject: Function) {
     const { identifier } = ws
     const onMessageHandler = (payload: any) => this.emit('message', payload)

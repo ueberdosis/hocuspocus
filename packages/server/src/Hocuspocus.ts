@@ -397,6 +397,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
