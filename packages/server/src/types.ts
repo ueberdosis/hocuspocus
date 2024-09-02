@@ -104,6 +104,7 @@ export type HookPayloadByName = {
   beforeUnloadDocument: beforeUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
 }
+
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.
@@ -113,14 +114,6 @@ export interface Configuration extends Extension {
    * A list of hocuspocus extensions.
    */
   extensions: Array<Extension>,
-  /**
-   * The port which the server listens on.
-   */
-  port?: number,
-  /**
-   * The address which the server listens on.
-   */
-  address?: string,
   /**
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
@@ -146,13 +139,6 @@ export interface Configuration extends Extension {
    * your onStoreDocument is rate-limited.
    */
   unloadImmediately: boolean,
-
-  /**
-   * the server will gracefully stop if SIGINT, SIGQUIT or SIGTERM is received.
-   *
-   * Set this to false if you don't want that.
-   */
-  stopOnSignals: boolean,
 
   /**
    * options to pass to the ydoc document

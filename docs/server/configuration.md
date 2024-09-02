@@ -24,7 +24,7 @@ There are only a few settings to pass for now. Most things are controlled throug
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   name: "hocuspocus-fra1-01",
   port: 1234,
   timeout: 30000,

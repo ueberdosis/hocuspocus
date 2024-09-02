@@ -1,9 +1,9 @@
-import { Hocuspocus } from '@hocuspocus/server'
+import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 import { Redis } from '@hocuspocus/extension-redis'
 import { SQLite } from '@hocuspocus/extension-sqlite'
 
-const server = new Hocuspocus({
+const server = new Server({
   port: 1234,
   name: 'redis-1',
   extensions: [
@@ -18,7 +18,7 @@ const server = new Hocuspocus({
 
 server.listen()
 
-const anotherServer = new Hocuspocus({
+const anotherServer = new Server({
   port: 1235,
   name: 'redis-2',
   extensions: [
