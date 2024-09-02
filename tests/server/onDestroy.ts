@@ -4,23 +4,23 @@ import { retryableAssertion } from '../utils/retryableAssertion'
 
 test('executes the onDestroy hook and has the instance', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onDestroy({ instance }) {
-        t.is(instance, server)
+        t.is(instance, hocuspocus)
 
         resolve('done')
       },
     })
 
-    await server.destroy()
+    await hocuspocus.server!.destroy()
   })
 })
 
 test('destroy works if no document is open', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const hocuspocus = await newHocuspocus()
 
-    await server.destroy()
+    await hocuspocus.server!.destroy()
 
     t.pass()
     resolve('')
@@ -37,31 +37,31 @@ test('executes the onDestroy hook from a custom extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    await server.destroy()
+    await hocuspocus.server!.destroy()
   })
 })
 
 test('destroy closes all connections', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const hocuspocus = await newHocuspocus()
 
-    const provider1 = newHocuspocusProvider(server)
+    const provider1 = newHocuspocusProvider(hocuspocus)
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
 
-    t.is(server.getConnectionsCount(), 1)
-    t.is(server.getDocumentsCount(), 1)
+    t.is(hocuspocus.getConnectionsCount(), 1)
+    t.is(hocuspocus.getDocumentsCount(), 1)
 
-    await server.destroy()
+    await hocuspocus.server!.destroy()
 
-    t.is(server.getConnectionsCount(), 0)
-    t.is(server.getDocumentsCount(), 0)
+    t.is(hocuspocus.getConnectionsCount(), 0)
+    t.is(hocuspocus.getDocumentsCount(), 0)
 
     resolve('')
   })
@@ -122,23 +122,18 @@ test('destroy calls onStoreDocument before returning if debounced', async t => {
   await new Promise(async resolve => {
     let called = false
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onStoreDocument() {
         called = true
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider.document.getArray('foo').push(['foo'])
-      },
-    })
+    const provider1 = newHocuspocusProvider(hocuspocus)
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
     t.is(called, false)
-    await server.destroy()
+    await hocuspocus.server!.destroy()
     t.is(called, true)
 
     resolve('')
@@ -149,24 +144,19 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
   await new Promise(async resolve => {
     let called = false
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onStoreDocument() {
         called = true
       },
       unloadImmediately: false,
     })
 
-    const provider = newHocuspocusProvider(server, {
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider.document.getArray('foo').push(['foo'])
-      },
-    })
+    const provider1 = newHocuspocusProvider(hocuspocus)
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
     t.is(called, false)
-    await server.destroy()
+    await hocuspocus.server!.destroy()
     t.is(called, true)
 
     resolve('')
@@ -177,41 +167,23 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
   await new Promise(async resolve => {
     let called = 0
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onStoreDocument() {
         called += 1
       },
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(server, {
-      name: 'test1',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider1.document.getArray('foo').push(['foo'])
-      },
-    })
-    const provider2 = newHocuspocusProvider(server, {
-      name: 'test2',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider2.document.getArray('foo').push(['foo'])
-      },
-    })
-    const provider3 = newHocuspocusProvider(server, {
-      name: 'test3',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider3.document.getArray('foo').push(['foo'])
-      },
-    })
+    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
+    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
+    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider3.synced, true))
 
     t.is(called, 0)
-    await server.destroy()
+    await hocuspocus.server!.destroy()
     t.is(called, 3)
 
     resolve('')
@@ -222,41 +194,23 @@ test('destroy calls onStoreDocument before returning, with multiple docs if debo
   await new Promise(async resolve => {
     let called = 0
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       async onStoreDocument() {
         called += 1
       },
       unloadImmediately: true,
     })
 
-    const provider1 = newHocuspocusProvider(server, {
-      name: 'test1',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider1.document.getArray('foo').push(['foo'])
-      },
-    })
-    const provider2 = newHocuspocusProvider(server, {
-      name: 'test2',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider2.document.getArray('foo').push(['foo'])
-      },
-    })
-    const provider3 = newHocuspocusProvider(server, {
-      name: 'test3',
-      onSynced() {
-        // Dummy change to trigger onStoreDocument
-        provider3.document.getArray('foo').push(['foo'])
-      },
-    })
+    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
+    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
+    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider3.synced, true))
 
     t.is(called, 0)
-    await server.destroy()
+    await hocuspocus.server!.destroy()
     t.is(called, 3)
 
     resolve('')

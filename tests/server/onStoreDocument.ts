@@ -110,7 +110,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
     let executedOnChange = 0
     let executedOnStoreDocument = 0
 
-    const server = await newHocuspocus({
+    const hocuspocus = await newHocuspocus({
       debounce: 300,
       async onChange() {
         executedOnChange += 1
@@ -126,7 +126,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(hocuspocus, {
       onSynced() {
         provider.document.getArray('foo').push(['foo'])
         provider.document.getArray('foo').push(['bar'])
@@ -135,7 +135,7 @@ test('debounces document changes for onStoreDocument hooks', async t => {
         provider.document.getArray('foo').push(['foofoo'])
 
         setTimeout(() => {
-          server.destroy()
+          hocuspocus.server!.destroy()
         }, 200)
       },
     })
