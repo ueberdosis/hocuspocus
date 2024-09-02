@@ -6,7 +6,7 @@ import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
 import kleur from 'kleur'
 import meta from '../package.json' assert { type: 'json' }
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
-import { Configuration, onListenPayload } from './types.js'
+import { Configuration, onListenPayload } from './types'
 
 export interface ServerConfiguration extends Configuration {
   port?: number,

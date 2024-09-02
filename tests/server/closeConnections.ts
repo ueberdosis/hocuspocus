@@ -33,8 +33,8 @@ test('closes all connections', async t => {
   server.closeConnections()
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.status, WebSocketStatus.Disconnected)
-    tt.is(anotherProvider.status, WebSocketStatus.Disconnected)
+    tt.is(socket.status, WebSocketStatus.Disconnected)
+    tt.is(socket2.status, WebSocketStatus.Disconnected)
   })
 
 })
@@ -63,8 +63,8 @@ test('closes a specific connection when a documentName is passed', async t => {
   server.closeConnections('hocuspocus-test')
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.status, WebSocketStatus.Disconnected)
-    tt.is(anotherProvider.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Disconnected)
+    tt.is(socket2.status, WebSocketStatus.Connected)
   })
 })
 

@@ -80,7 +80,7 @@ test('destroy does not call onStoreDocument if nothing debounced', async t => {
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
-    await server.destroy()
+    await server.server!.destroy()
 
     resolve('')
   })
@@ -110,7 +110,7 @@ test('destroy does not call onStoreDocument after debounced onStoreDocument exec
     // Wait for the debounced onStoreDocument to execute
     await new Promise(r => setTimeout(r, 400))
 
-    await server.destroy()
+    await server.server!.destroy()
 
     t.is(called, 1)
 
@@ -130,7 +130,7 @@ test('destroy calls onStoreDocument before returning if debounced', async t => {
 
     const provider1 = newHocuspocusProvider(hocuspocus)
 
-    await retryableAssertion(t, t2 => t2.is(provider.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
 
     t.is(called, false)
     await hocuspocus.server!.destroy()
@@ -153,7 +153,7 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
 
     const provider1 = newHocuspocusProvider(hocuspocus)
 
-    await retryableAssertion(t, t2 => t2.is(provider.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
 
     t.is(called, false)
     await hocuspocus.server!.destroy()
