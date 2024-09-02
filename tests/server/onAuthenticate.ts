@@ -228,7 +228,7 @@ test('disconnects provider when the onAuthenticate hook throws an Error', async 
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.status, WebSocketStatus.Disconnected)
+    tt.is(provider.configuration.websocketProvider.status, WebSocketStatus.Disconnected)
     tt.is(server.getDocumentsCount(), 0)
     tt.is(server.getConnectionsCount(), 0)
   })
@@ -321,8 +321,8 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(providerOK.status, WebSocketStatus.Connected)
-    tt.is(providerFail.status, WebSocketStatus.Disconnected)
+    tt.is(socket.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Disconnected)
     tt.is(server.getDocumentsCount(), 1)
     tt.is(server.getConnectionsCount(), 1)
   })
@@ -359,8 +359,8 @@ test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', asyn
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(providerOK.status, WebSocketStatus.Connected)
-    tt.is(providerReadOnly.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 2)
     tt.is(server.getConnectionsCount(), 1)
     tt.is(socket.status, WebSocketStatus.Connected)

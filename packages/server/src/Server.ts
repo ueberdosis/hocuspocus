@@ -8,7 +8,7 @@ import fs from 'node:fs'
 import WebSocket, { AddressInfo, ServerOptions, WebSocketServer } from 'ws'
 import kleur from 'kleur'
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
-import { Configuration, onListenPayload } from './types.js'
+import { Configuration, onListenPayload } from './types'
 
 const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
 
