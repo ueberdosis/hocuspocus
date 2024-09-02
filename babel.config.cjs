@@ -3,6 +3,6 @@ module.exports = {
     '@babel/preset-env',
   ],
   plugins: [
-    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-transform-class-properties',
   ],
 }

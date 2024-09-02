@@ -4,7 +4,7 @@ import {
 import { ListenOptions } from 'net'
 import WebSocket, { AddressInfo, WebSocketServer } from 'ws'
 import kleur from 'kleur'
-import meta from '../package.json' assert { type: 'json' }
+import meta from '../package.json' with { type: 'json' }
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
 import { Configuration, onListenPayload } from './types'
 

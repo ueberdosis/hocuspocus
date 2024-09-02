@@ -23,7 +23,7 @@ export class Throttle implements Extension {
 
   bannedIps: Map<string, number> = new Map()
 
-  cleanupInterval?: NodeJS.Timer
+  cleanupInterval?: NodeJS.Timeout
 
   /**
    * Constructor
