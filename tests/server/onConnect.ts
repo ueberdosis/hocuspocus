@@ -249,6 +249,7 @@ test('defaults to readOnly = false', async t => {
 
 test('cleans up correctly when provider disconnects during onLoadDocument', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
     const server = await newHocuspocus({

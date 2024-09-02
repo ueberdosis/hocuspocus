@@ -2,11 +2,13 @@ export const useDebounce = () => {
   const timers: Map<string, {
     timeout: NodeJS.Timeout,
     start: number,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     func: Function
   }> = new Map()
 
   const debounce = (
     id: string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     func: Function,
     debounce: number,
     maxDebounce: number,

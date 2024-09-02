@@ -7,6 +7,7 @@ import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '.
 
 test('stores documents without conflicts', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let anotherProvider: HocuspocusProvider
 
     class CustomStorageExtension {
@@ -58,6 +59,7 @@ test('stores documents without conflicts', async t => {
 
 test('stores documents when the last client disconnects', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
     const server = await newHocuspocus({

@@ -72,6 +72,7 @@ export class Webhook implements Extension {
   /**
    * debounce the given function, using the given identifier
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   debounce(id: string, func: Function) {
     const old = this.debounced.get(id)
     const start = old?.start || Date.now()
