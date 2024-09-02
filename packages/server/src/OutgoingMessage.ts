@@ -1,16 +1,18 @@
+import type {
+  Encoder} from 'lib0/encoding'
 import {
   createEncoder,
-  Encoder,
   toUint8Array,
   writeVarString,
   writeVarUint,
   writeVarUint8Array,
 } from 'lib0/encoding'
-import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import type { Awareness} from 'y-protocols/awareness'
+import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 
 import { writeAuthenticated, writePermissionDenied } from '@hocuspocus/common'
-import Document from './Document.js'
+import type Document from './Document.js'
 import { MessageType } from './types.js'
 
 export class OutgoingMessage {

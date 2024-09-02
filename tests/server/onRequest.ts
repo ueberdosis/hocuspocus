@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onRequestPayload } from '@hocuspocus/server'
+import type { onRequestPayload } from '@hocuspocus/server'
 import fetch from 'node-fetch'
 import { newHocuspocus } from '../utils/index.js'
 

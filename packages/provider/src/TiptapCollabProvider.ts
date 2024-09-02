@@ -1,9 +1,10 @@
 import type { AbstractType, YArrayEvent } from 'yjs'
 import * as Y from 'yjs'
 import { uuidv4 } from 'lib0/random'
+import type {
+  HocuspocusProviderConfiguration} from './HocuspocusProvider.js'
 import {
   HocuspocusProvider,
-  HocuspocusProviderConfiguration,
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'

@@ -1,6 +1,7 @@
+import type {
+  CompleteHocuspocusProviderWebsocketConfiguration, HocuspocusProviderWebsocketConfiguration} from './HocuspocusProviderWebsocket.js'
 import {
-  CompleteHocuspocusProviderWebsocketConfiguration,
-  HocuspocusProviderWebsocket, HocuspocusProviderWebsocketConfiguration,
+  HocuspocusProviderWebsocket,
 } from './HocuspocusProviderWebsocket.js'
 
 export type TiptapCollabProviderWebsocketConfiguration =

@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
+import type { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,

@@ -1,4 +1,5 @@
-import { Database, DatabaseConfiguration } from '@hocuspocus/extension-database'
+import type { DatabaseConfiguration } from '@hocuspocus/extension-database'
+import { Database } from '@hocuspocus/extension-database'
 import sqlite3 from 'sqlite3'
 import kleur from 'kleur'
 

@@ -4,8 +4,9 @@ import type { CloseEvent, Event, MessageEvent } from 'ws'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 import EventEmitter from './EventEmitter.js'
+import type {
+  CompleteHocuspocusProviderWebsocketConfiguration} from './HocuspocusProviderWebsocket.js'
 import {
-  CompleteHocuspocusProviderWebsocketConfiguration,
   HocuspocusProviderWebsocket,
 } from './HocuspocusProviderWebsocket.js'
 import { IncomingMessage } from './IncomingMessage.js'
@@ -17,7 +18,7 @@ import { CloseMessage } from './OutgoingMessages/CloseMessage.js'
 import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
-import {
+import type {
   ConstructableOutgoingMessage,
   onAuthenticationFailedParameters,
   onAwarenessChangeParameters,

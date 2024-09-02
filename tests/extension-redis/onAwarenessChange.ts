@@ -1,6 +1,6 @@
 import test from 'ava'
 import { Redis } from '@hocuspocus/extension-redis'
-import { onAwarenessChangeParameters } from '@hocuspocus/provider'
+import type { onAwarenessChangeParameters } from '@hocuspocus/provider'
 import { v4 as uuidv4 } from 'uuid'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils/index.js'
 

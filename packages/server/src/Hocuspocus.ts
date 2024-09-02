@@ -1,19 +1,20 @@
-import { IncomingMessage } from 'http'
+import type { IncomingMessage } from 'http'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import { v4 as uuid } from 'uuid'
-import WebSocket from 'ws'
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
+import type WebSocket from 'ws'
+import type { Doc} from 'yjs'
+import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' with { type: 'json' }
-import { Server } from './Server.js'
+import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
-import Connection from './Connection.js'
+import type Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
-import {
+import type {
   AwarenessUpdate,
   Configuration,
   ConnectionConfiguration,

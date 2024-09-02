@@ -1,9 +1,8 @@
-import RedisClient, { ClusterNode, ClusterOptions, RedisOptions } from 'ioredis'
+import type { ClusterNode, ClusterOptions, RedisOptions } from 'ioredis'
+import RedisClient from 'ioredis'
 import Redlock from 'redlock'
 import { v4 as uuid } from 'uuid'
-import {
-  IncomingMessage,
-  OutgoingMessage,
+import type {
   Document,
   Extension,
   afterLoadDocumentPayload,
@@ -12,10 +11,13 @@ import {
   onStoreDocumentPayload,
   onAwarenessUpdatePayload,
   onChangePayload,
+  onConfigurePayload,
+  beforeBroadcastStatelessPayload, Hocuspocus} from '@hocuspocus/server'
+import {
+  IncomingMessage,
+  OutgoingMessage,
   MessageReceiver,
   Debugger,
-  onConfigurePayload,
-  beforeBroadcastStatelessPayload, Hocuspocus,
 } from '@hocuspocus/server'
 
 export type RedisInstance = RedisClient.Cluster | RedisClient.Redis

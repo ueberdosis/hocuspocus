@@ -1,13 +1,14 @@
 import { createHmac } from 'crypto'
-import {
+import type {
   Extension,
   onChangePayload,
   onConnectPayload,
   onLoadDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
-import { Doc } from 'yjs'
-import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
+import type { Doc } from 'yjs'
+import type { Transformer } from '@hocuspocus/transformer'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import axios from 'axios'
 import { Forbidden } from '@hocuspocus/common'
 

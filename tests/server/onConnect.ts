@@ -1,4 +1,4 @@
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
 
