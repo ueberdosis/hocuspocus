@@ -1,6 +1,5 @@
 import test from 'ava'
 import type { onRequestPayload } from '@hocuspocus/server'
-import fetch from 'node-fetch'
 import { newHocuspocus } from '../utils/index.js'
 
 test('executes the onRequest callback', async t => {
