@@ -128,6 +128,13 @@ test('destroy calls onStoreDocument before returning if debounced', async t => {
       },
     })
 
+    const provider = newHocuspocusProvider(hocuspocus, {
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+      },
+    })
+
     const provider1 = newHocuspocusProvider(hocuspocus)
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
@@ -149,6 +156,13 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
         called = true
       },
       unloadImmediately: false,
+    })
+
+    const provider = newHocuspocusProvider(hocuspocus, {
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider.document.getArray('foo').push(['foo'])
+      },
     })
 
     const provider1 = newHocuspocusProvider(hocuspocus)
@@ -174,9 +188,15 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
-    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
-    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
+    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1', onSynced() {
+      provider1.document.getArray('foo').push(['foo'])
+    } })
+    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2', onSynced() {
+      provider2.document.getArray('foo').push(['foo'])
+    } })
+    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3', onSynced() {
+      provider3.document.getArray('foo').push(['foo'])
+    } })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
@@ -201,9 +221,15 @@ test('destroy calls onStoreDocument before returning, with multiple docs if debo
       unloadImmediately: true,
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
-    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
-    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
+    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1', onSynced() {
+      provider1.document.getArray('foo').push(['foo'])
+    } })
+    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2', onSynced() {
+      provider2.document.getArray('foo').push(['foo'])
+    } })
+    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3', onSynced() {
+      provider3.document.getArray('foo').push(['foo'])
+    } })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
