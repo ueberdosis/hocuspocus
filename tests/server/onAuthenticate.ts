@@ -209,7 +209,7 @@ test('has the authentication token', async t => {
   })
 })
 
-test('disconnects provider when the onAuthenticate hook throws an Error', async t => {
+test('does not disconnect provider when the onAuthenticate hook throws an Error', async t => {
   const server = await newHocuspocus({
     async onAuthenticate() {
       throw new Error()
@@ -228,7 +228,7 @@ test('disconnects provider when the onAuthenticate hook throws an Error', async 
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.configuration.websocketProvider.status, WebSocketStatus.Disconnected)
+    tt.is(provider.configuration.websocketProvider.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 0)
     tt.is(server.getConnectionsCount(), 0)
   })
@@ -322,7 +322,6 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 
   await retryableAssertion(t, tt => {
     tt.is(socket.status, WebSocketStatus.Connected)
-    tt.is(socket.status, WebSocketStatus.Disconnected)
     tt.is(server.getDocumentsCount(), 1)
     tt.is(server.getConnectionsCount(), 1)
   })
