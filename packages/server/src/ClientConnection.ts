@@ -55,7 +55,7 @@ export class ClientConnection {
     onClose: [(document: Document, payload: onDisconnectPayload) => {}],
   }
 
-  private readonly closeIdleConnectionTimeout: NodeJS.Timeout
+  private closeIdleConnectionTimeout: NodeJS.Timeout
 
   // Every new connection gets a unique identifier.
   private readonly socketId = uuid()
@@ -231,7 +231,18 @@ export class ClientConnection {
       this.documentConnectionsEstablished.delete(documentName)
 
       if (Object.keys(this.documentConnections).length === 0) {
-        instance.webSocket.close(event?.code, event?.reason) // TODO: Move this to Hocuspocus connection handler
+        // start a timer to close the connection if no new connections are established
+
+        this.closeIdleConnectionTimeout = setTimeout(() => {
+
+          if (Object.keys(this.documentConnections).length === 0) {
+            // eslint-disable-next-line no-console
+            console.log(`Closing connection as last connection disappeared and ${this.opts.timeout}ms passed`)
+            instance.webSocket.close(event?.code, event?.reason)
+          }
+
+        }, this.opts.timeout)
+
       }
     })
 
