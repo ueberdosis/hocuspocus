@@ -163,6 +163,10 @@ export class Connection {
       if (this.document.hasConnection(this)) {
         this.document.removeConnection(this)
         this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) => callback(this.document, event))
+
+        const closeMessage = new OutgoingMessage(this.document.name)
+        closeMessage.writeCloseMessage(event?.reason ?? 'Server closed the connection')
+        this.send(closeMessage.toUint8Array())
       }
 
       this.webSocket.removeListener('close', this.boundClose)

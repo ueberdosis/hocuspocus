@@ -50,8 +50,7 @@ test('passes the context and connection to the onLoadDocument callback', async t
         t.deepEqual(context, mockContext)
         t.deepEqual(connection, {
           readOnly: true,
-          requiresAuthentication: false,
-          isAuthenticated: false,
+          isAuthenticated: true,
         })
 
         resolve('done')
@@ -208,7 +207,7 @@ test('stops when an error is thrown in onLoadDocument', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -271,14 +270,14 @@ test('disconnects all clients related to the document when an error is thrown in
     }
 
     const provider1 = newHocuspocusProvider(server, {
-      onClose(event) {
+      onAuthenticationFailed(event) {
         provider1.disconnect()
         resolver()
       },
     })
 
     const provider2 = newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         provider2.disconnect()
         resolver()
       },

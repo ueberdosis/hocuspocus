@@ -28,7 +28,6 @@ export interface AwarenessUpdate {
 
 export interface ConnectionConfiguration {
   readOnly: boolean
-  requiresAuthentication: boolean
   isAuthenticated: boolean
 }
 
