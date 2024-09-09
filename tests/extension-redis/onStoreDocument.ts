@@ -1,12 +1,13 @@
 import test from 'ava'
-import { onStoreDocumentPayload } from '@hocuspocus/server'
+import type { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 import { uuidv4 } from 'lib0/random'
 import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils/index.js'
 
 test('stores documents without conflicts', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let anotherProvider: HocuspocusProvider
 
     class CustomStorageExtension {
@@ -58,6 +59,7 @@ test('stores documents without conflicts', async t => {
 
 test('stores documents when the last client disconnects', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
     const server = await newHocuspocus({

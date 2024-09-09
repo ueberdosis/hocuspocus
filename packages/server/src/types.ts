@@ -1,11 +1,11 @@
-import {
+import type {
   IncomingHttpHeaders, IncomingMessage, ServerResponse,
 } from 'http'
-import { URLSearchParams } from 'url'
-import { Awareness } from 'y-protocols/awareness'
-import Connection from './Connection.js'
-import Document from './Document.js'
-import { Hocuspocus } from './Hocuspocus.js'
+import type { URLSearchParams } from 'url'
+import type { Awareness } from 'y-protocols/awareness'
+import type Connection from './Connection.js'
+import type Document from './Document.js'
+import type { Hocuspocus } from './Hocuspocus.js'
 
 export enum MessageType {
   Unknown = -1,
@@ -28,7 +28,6 @@ export interface AwarenessUpdate {
 
 export interface ConnectionConfiguration {
   readOnly: boolean
-  requiresAuthentication: boolean
   isAuthenticated: boolean
 }
 
@@ -101,6 +100,7 @@ export type HookPayloadByName = {
   afterUnloadDocument: afterUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
 }
+
 export interface Configuration extends Extension {
   /**
    * A name for the instance, used for logging.
@@ -110,14 +110,6 @@ export interface Configuration extends Extension {
    * A list of hocuspocus extensions.
    */
   extensions: Array<Extension>,
-  /**
-   * The port which the server listens on.
-   */
-  port?: number,
-  /**
-   * The address which the server listens on.
-   */
-  address?: string,
   /**
    * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
    */
@@ -143,13 +135,6 @@ export interface Configuration extends Extension {
    * your onStoreDocument is rate-limited.
    */
   unloadImmediately: boolean,
-
-  /**
-   * the server will gracefully stop if SIGINT, SIGQUIT or SIGTERM is received.
-   *
-   * Set this to false if you don't want that.
-   */
-  stopOnSignals: boolean,
 
   /**
    * options to pass to the ydoc document
@@ -291,6 +276,7 @@ export interface onStoreDocumentPayload {
   transactionOrigin?: any,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
 export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
 
 export interface onAwarenessUpdatePayload {

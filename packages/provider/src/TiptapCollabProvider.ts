@@ -1,9 +1,10 @@
 import type { AbstractType, YArrayEvent } from 'yjs'
 import * as Y from 'yjs'
 import { uuidv4 } from 'lib0/random'
+import type {
+  HocuspocusProviderConfiguration} from './HocuspocusProvider.js'
 import {
   HocuspocusProvider,
-  HocuspocusProviderConfiguration,
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
@@ -317,4 +318,13 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     this.getYThreads().unobserveDeep(callback)
   }
 
+  private getCollabConfig<T>() {
+    return this.configuration.document.getMap<T>('__tiptapcollab__config')
+  }
+
+  setAutoversioningInterval(seconds: number) {
+    if (this.getCollabConfig<number>().get('intervalSeconds') !== seconds) {
+      this.getCollabConfig<number>().set('intervalSeconds', seconds)
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onStatelessPayload } from '@hocuspocus/server'
+import type { onStatelessPayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
 test('broadcast stateless message to all connections', async t => {

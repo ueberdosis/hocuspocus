@@ -7,7 +7,6 @@ module.exports = {
     es6: true,
     node: true,
   },
-  plugins: ['unused-imports'],
   overrides: [
     {
       files: [
@@ -18,6 +17,8 @@ module.exports = {
       plugins: [
         'html',
         '@typescript-eslint',
+        'unused-imports',
+        '@stylistic/js'
       ],
       globals: {
         document: false,
@@ -27,7 +28,8 @@ module.exports = {
       extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:vue/strongly-recommended',
-        'airbnb-base',
+        'eslint:recommended',
+        'plugin:import/recommended',
       ],
       rules: {
         "unused-imports/no-unused-imports": "error",
@@ -79,14 +81,15 @@ module.exports = {
         'no-dupe-class-members': 'off',
         '@typescript-eslint/no-dupe-class-members': ['error'],
         'lines-between-class-members': 'off',
-        '@typescript-eslint/lines-between-class-members': ['error'],
+        '@stylistic/js/lines-between-class-members': ['error'],
         '@typescript-eslint/no-explicit-any': 'off',
+        "@typescript-eslint/consistent-type-imports": "error",
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/explicit-module-boundary-type': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/ban-types': 'off',
-        '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
+        '@stylistic/js/comma-dangle': ['error', 'always-multiline'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         'no-async-promise-executor': 'off'
       },

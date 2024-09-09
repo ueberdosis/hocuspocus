@@ -1,8 +1,9 @@
-import { Doc } from 'yjs'
+import type { Doc } from 'yjs'
 // @ts-ignore
-import { Extensions, getSchema } from '@tiptap/core'
+import type { Extensions} from '@tiptap/core'
+import { getSchema } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { Transformer } from './types.js'
+import type { Transformer } from './types.js'
 import { ProsemirrorTransformer } from './Prosemirror.js'
 
 export class Tiptap implements Transformer {

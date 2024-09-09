@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onConnectPayload } from '@hocuspocus/server'
+import type { onConnectPayload } from '@hocuspocus/server'
 import * as MockDate from 'mockdate'
 import { Throttle } from '@hocuspocus/extension-throttle'
 

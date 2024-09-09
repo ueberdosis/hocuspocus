@@ -1,15 +1,16 @@
-import { IncomingMessage as HTTPIncomingMessage } from 'http'
+import type { IncomingMessage as HTTPIncomingMessage } from 'http'
 import AsyncLock from 'async-lock'
-import WebSocket from 'ws'
-import {
-  CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
+import type WebSocket from 'ws'
+import type {
+  CloseEvent} from '@hocuspocus/common'
+import { ConnectionTimeout, Forbidden, WsReadyStates,
 } from '@hocuspocus/common'
-import Document from './Document.js'
+import type Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
 import { MessageReceiver } from './MessageReceiver.js'
-import { Debugger } from './Debugger.js'
-import { onStatelessPayload } from './types.js'
+import type { Debugger } from './Debugger.js'
+import type { onStatelessPayload } from './types.js'
 
 export class Connection {
 
@@ -37,7 +38,7 @@ export class Connection {
 
   lock: AsyncLock
 
-  readOnly: Boolean
+  readOnly: boolean
 
   logger: Debugger
 
@@ -153,6 +154,7 @@ export class Connection {
    * Graceful wrapper around the WebSocket close method.
    */
   close(event?: CloseEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     this.lock.acquire('close', (done: Function) => {
       if (this.pingInterval) {
         clearInterval(this.pingInterval)
@@ -161,6 +163,10 @@ export class Connection {
       if (this.document.hasConnection(this)) {
         this.document.removeConnection(this)
         this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) => callback(this.document, event))
+
+        const closeMessage = new OutgoingMessage(this.document.name)
+        closeMessage.writeCloseMessage(event?.reason ?? 'Server closed the connection')
+        this.send(closeMessage.toUint8Array())
       }
 
       this.webSocket.removeListener('close', this.boundClose)

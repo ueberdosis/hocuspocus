@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
+import type { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/server'
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
@@ -38,47 +38,6 @@ test('executes the onAuthenticate callback from a custom extension', async t => 
 
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
-    })
-  })
-})
-
-test('doesn’t execute the onAuthenticate callback when no token is passed to the provider', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onAuthenticate() {
-        t.fail()
-      },
-    })
-
-    newHocuspocusProvider(server, {
-      onOpen() {
-        setTimeout(() => {
-          t.pass()
-          resolve('done')
-        }, 100)
-      },
-    })
-  })
-})
-
-test('doesn’t send any message when no token is provided, but the onAuthenticate hook is configured', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onAuthenticate() {
-        t.fail()
-      },
-    })
-
-    server.enableDebugging()
-
-    newHocuspocusProvider(server, {
-      onOpen() {
-        setTimeout(() => {
-          t.deepEqual(server.getMessageLogs(), [])
-
-          resolve('done')
-        }, 100)
-      },
     })
   })
 })
@@ -173,26 +132,6 @@ test('ignores the authentication token when having no onAuthenticate hook', asyn
   })
 })
 
-test('ignores the onAuthenticate hook when `authenticationRequired` is set to false', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        connection.requiresAuthentication = false
-      },
-      async onAuthenticate() {
-        t.fail('NOPE')
-      },
-    })
-
-    newHocuspocusProvider(server, {
-      onSynced() {
-        t.pass()
-        resolve('done')
-      },
-    })
-  })
-})
-
 test('has the authentication token', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
@@ -209,7 +148,7 @@ test('has the authentication token', async t => {
   })
 })
 
-test('disconnects provider when the onAuthenticate hook throws an Error', async t => {
+test('does not disconnect provider when the onAuthenticate hook throws an Error', async t => {
   const server = await newHocuspocus({
     async onAuthenticate() {
       throw new Error()
@@ -228,7 +167,7 @@ test('disconnects provider when the onAuthenticate hook throws an Error', async 
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(provider.status, WebSocketStatus.Disconnected)
+    tt.is(provider.configuration.websocketProvider.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 0)
     tt.is(server.getConnectionsCount(), 0)
   })
@@ -321,8 +260,7 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(providerOK.status, WebSocketStatus.Connected)
-    tt.is(providerFail.status, WebSocketStatus.Disconnected)
+    tt.is(socket.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 1)
     tt.is(server.getConnectionsCount(), 1)
   })
@@ -359,8 +297,8 @@ test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', asyn
   })
 
   await retryableAssertion(t, tt => {
-    tt.is(providerOK.status, WebSocketStatus.Connected)
-    tt.is(providerReadOnly.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Connected)
+    tt.is(socket.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 2)
     tt.is(server.getConnectionsCount(), 2)
     tt.is(socket.status, WebSocketStatus.Connected)

@@ -260,6 +260,4 @@ const provider2 = new TiptapCollabProvider({
   name: 'document2',
   token: '',
 })
-
-
 ```

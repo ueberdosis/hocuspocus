@@ -71,6 +71,16 @@ test('gets the current awareness states from the server', async t => {
         setTimeout(() => {
 
           t.deepEqual(server.getMessageLogs(), [
+               {
+                 category: 'Token',
+                 direction: 'in',
+                 type: 'Auth',
+               },
+               {
+                 category: 'Authenticated',
+                 direction: 'out',
+                 type: 'Auth',
+               },
             {
               category: 'SyncStep1',
               direction: 'in',

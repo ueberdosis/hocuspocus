@@ -27,7 +27,7 @@ console.log(entityType); // prints "page"
 console.log(entityID); // prints "140
 ```
 
-This is a recommendation, of course you can name your documents however you want!
+This is a recommendation, of course you can name your documents whatever you want!
 
 ## Nested documents
 
@@ -70,6 +70,7 @@ import { TiptapTransformer } from "@hocuspocus/transformer";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
+
 const generateSampleProsemirrorJson = (text: string) => {
   return {
     type: "doc",
@@ -86,7 +87,8 @@ const generateSampleProsemirrorJson = (text: string) => {
     ],
   };
 };
-const server = Server.configure({
+
+const server = new Server({
   async onLoadDocument(data) {
     // only import things if they are not already set in the primary storage
     if (data.document.isEmpty("default")) {

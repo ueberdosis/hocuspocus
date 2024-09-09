@@ -1,5 +1,5 @@
 import test from 'ava'
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 
@@ -23,6 +23,7 @@ test('executes the afterUnloadDocument callback', async t => {
 
 test('executes the afterUnloadDocument callback when all clients disconnect after a document was loaded', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
     class CustomExtension {

@@ -1,5 +1,5 @@
 import { URLSearchParams } from 'url'
-import Document from './Document.js'
+import type Document from './Document.js'
 import type { Hocuspocus } from './Hocuspocus.js'
 import type { DirectConnection as DirectConnectionInterface } from './types.js'
 

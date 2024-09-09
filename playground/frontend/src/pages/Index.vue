@@ -118,7 +118,7 @@ const anotherEditor = new Editor({
 
 </script>
 
-<style >
+<style>
 .ProseMirror {
   border: 1px solid grey;
   padding: 1rem;
