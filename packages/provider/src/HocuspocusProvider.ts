@@ -123,7 +123,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   mux = mutex.createMutex()
 
-  private ownSocket = false
+  private manageSocket = false
 
   intervals: any = {
     forceSync: null,
@@ -212,8 +212,7 @@ export class HocuspocusProvider extends EventEmitter {
   public setConfiguration(configuration: Partial<HocuspocusProviderConfiguration> = {}): void {
     if (!configuration.websocketProvider) {
       const websocketProviderConfig = configuration as CompleteHocuspocusProviderWebsocketConfiguration
-
-      this.ownSocket = true
+      this.manageSocket = true
       this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
         url: websocketProviderConfig.url,
       })
@@ -441,7 +440,7 @@ export class HocuspocusProvider extends EventEmitter {
       return
     }
 
-    if( this.ownSocket ) {
+    if( this.manageSocket ) {
       this.configuration.websocketProvider.destroy()
     }
 
