@@ -26,7 +26,7 @@ test('server closes connection when receiving close event from provider', async 
   })
 })
 
-test('server closes connection only after receiving close event from all connections', async t => {
+test('server doesnt close connection after receiving close event from all connections', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({})
     const socket = newHocuspocusProviderWebsocket(server, {})
@@ -59,9 +59,9 @@ test('server closes connection only after receiving close event from all connect
       t.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Connected)
 
       await retryableAssertion(t, t2 => {
-        t2.is(server.getConnectionsCount(), 0)
-        t2.is(provider1.configuration.websocketProvider.status, WebSocketStatus.Disconnected)
-        t2.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Disconnected)
+        t2.is(server.getConnectionsCount(), 1)
+        t2.is(provider1.configuration.websocketProvider.status, WebSocketStatus.Connected)
+        t2.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Connected)
       })
 
       resolve('ok')

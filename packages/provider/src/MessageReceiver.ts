@@ -2,6 +2,7 @@ import { readAuthMessage } from '@hocuspocus/common'
 import { readVarInt, readVarString } from 'lib0/decoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { messageYjsSyncStep2, readSyncMessage } from 'y-protocols/sync'
+import type { CloseEvent } from 'ws'
 import type { HocuspocusProvider } from './HocuspocusProvider.js'
 import type { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
@@ -53,6 +54,22 @@ export class MessageReceiver {
       case MessageType.SyncStatus:
         this.applySyncStatusMessage(provider, readVarInt(message.decoder) === 1)
         break
+
+      case MessageType.CLOSE:
+        // eslint-disable-next-line no-case-declarations
+        const event: CloseEvent = {
+          code: 1000,
+          reason: readVarString(message.decoder),
+          // @ts-ignore
+          target: provider.configuration.websocketProvider.webSocket!,
+          type: 'close',
+          wasClean: true
+        }
+        provider.onClose(event)
+        provider.configuration.onClose({ event })
+        provider.forwardClose(event)
+      break
+
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }

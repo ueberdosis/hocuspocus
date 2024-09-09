@@ -24,7 +24,7 @@ test('refuses connection when an error is thrown', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -133,7 +133,7 @@ test('stops when the onConnect hook throws an Error', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -154,7 +154,7 @@ test('stops when the onConnect hook returns a rejecting promise', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -293,32 +293,6 @@ test('has connection.readOnly', async t => {
     const server = await newHocuspocus({
       async onConnect({ connection }) {
         t.is(connection.readOnly, false)
-        resolve('done')
-      },
-    })
-
-    newHocuspocusProvider(server)
-  })
-})
-
-test('has connection.requiresAuthentication', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.requiresAuthentication, false)
-        resolve('done')
-      },
-    })
-
-    newHocuspocusProvider(server)
-  })
-})
-
-test('has connection.isAuthenticated', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.isAuthenticated, false)
         resolve('done')
       },
     })

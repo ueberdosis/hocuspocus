@@ -92,6 +92,15 @@ test('send all messages according to the protocol', async t => {
 
         // Expected (according to the protocol)
         t.deepEqual(server.getMessageLogs(), [
+             { category: 'Token',
+               direction: 'in',
+               type: 'Auth',
+             },
+             {
+               category: 'Authenticated',
+               direction: 'out',
+               type: 'Auth',
+             },
           { direction: 'in', type: 'Sync', category: 'SyncStep1' },
           { direction: 'out', type: 'Sync', category: 'SyncStep2' },
           { direction: 'out', type: 'Sync', category: 'SyncStep1' },

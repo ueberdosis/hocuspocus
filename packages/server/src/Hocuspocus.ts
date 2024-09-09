@@ -139,12 +139,6 @@ export class Hocuspocus {
     return this
   }
 
-  get requiresAuthentication(): boolean {
-    return !!this.configuration.extensions.find(extension => {
-      return extension.onAuthenticate !== undefined
-    })
-  }
-
   /**
    * Get the total number of active documents
    */
@@ -200,7 +194,6 @@ export class Hocuspocus {
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
     const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
-      requiresAuthentication: this.requiresAuthentication,
       timeout: this.configuration.timeout,
     }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
@@ -483,7 +476,6 @@ export class Hocuspocus {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,
-      requiresAuthentication: true,
     }
 
     const document: Document = await this.createDocument(

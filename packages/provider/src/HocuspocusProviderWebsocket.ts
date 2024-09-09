@@ -1,5 +1,5 @@
 import {
-  Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
+  Forbidden, MessageTooBig, WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
@@ -227,10 +227,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     if (this.receivedOnOpenPayload) {
       provider.onOpen(this.receivedOnOpenPayload)
     }
-
-    // if (this.receivedOnStatusPayload) {
-    //   provider.onStatus(this.receivedOnStatusPayload)
-    // }
   }
 
   detach(provider: HocuspocusProvider) {
@@ -441,7 +437,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     }
   }
 
-  // Ensure that the URL always ends with /
+  // Ensure that the URL never ends with /
   get serverUrl() {
     while (this.configuration.url[this.configuration.url.length - 1] === '/') {
       return this.configuration.url.slice(0, this.configuration.url.length - 1)
@@ -466,8 +462,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     try {
       this.webSocket.close()
       this.messageQueue = []
-    } catch {
-      //
+    } catch(e) {
+      console.error(e)
     }
   }
 
@@ -489,26 +485,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       this.emit('disconnect', { event })
     }
 
-    if (event.code === Unauthorized.code) {
-      if (event.reason === Unauthorized.reason) {
-        console.warn(
-          '[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.',
-        )
-      } else {
-        console.warn(
-          `[HocuspocusProvider] Connection closed with status Unauthorized: ${event.reason}`,
-        )
-      }
-
-      this.shouldConnect = false
-    }
-
     if (event.code === Forbidden.code) {
       if (!this.configuration.quiet) {
         console.warn(
           '[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.',
         )
-        return // TODO REMOVE ME
       }
     }
 

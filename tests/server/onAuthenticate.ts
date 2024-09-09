@@ -42,47 +42,6 @@ test('executes the onAuthenticate callback from a custom extension', async t => 
   })
 })
 
-test('doesn’t execute the onAuthenticate callback when no token is passed to the provider', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onAuthenticate() {
-        t.fail()
-      },
-    })
-
-    newHocuspocusProvider(server, {
-      onOpen() {
-        setTimeout(() => {
-          t.pass()
-          resolve('done')
-        }, 100)
-      },
-    })
-  })
-})
-
-test('doesn’t send any message when no token is provided, but the onAuthenticate hook is configured', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onAuthenticate() {
-        t.fail()
-      },
-    })
-
-    server.enableDebugging()
-
-    newHocuspocusProvider(server, {
-      onOpen() {
-        setTimeout(() => {
-          t.deepEqual(server.getMessageLogs(), [])
-
-          resolve('done')
-        }, 100)
-      },
-    })
-  })
-})
-
 test('confirms the `Token` message with an `Authenticated` message', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
@@ -166,26 +125,6 @@ test('ignores the authentication token when having no onAuthenticate hook', asyn
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
       onOpen() {
-        t.pass()
-        resolve('done')
-      },
-    })
-  })
-})
-
-test('ignores the onAuthenticate hook when `authenticationRequired` is set to false', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        connection.requiresAuthentication = false
-      },
-      async onAuthenticate() {
-        t.fail('NOPE')
-      },
-    })
-
-    newHocuspocusProvider(server, {
-      onSynced() {
         t.pass()
         resolve('done')
       },

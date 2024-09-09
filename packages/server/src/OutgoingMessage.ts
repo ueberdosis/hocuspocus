@@ -132,6 +132,15 @@ export class OutgoingMessage {
 
     return this
   }
+  
+  writeCloseMessage(reason: string): OutgoingMessage {
+    this.type = MessageType.CLOSE
+
+    writeVarUint(this.encoder, MessageType.CLOSE)
+    writeVarString(this.encoder, reason)
+    
+    return this
+  }
 
   toUint8Array(): Uint8Array {
     return toUint8Array(this.encoder)
