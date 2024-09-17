@@ -100,6 +100,14 @@ export class Redis implements Extension {
 
   messagePrefix: Buffer
 
+  /**
+   * When we have a high frequency of updates to a document we don't need tons of setTimeouts
+   * piling up, so we'll track them to keep it to the most recent per document.
+   */
+  private pendingDisconnects = new Map<string, NodeJS.Timeout>()
+
+  private pendingAfterStoreDocumentResolves = new Map<string, { timeout: NodeJS.Timeout; resolve:() => void }>()
+
   public constructor(configuration: Partial<Configuration>) {
     this.configuration = {
       ...this.configuration,
@@ -260,9 +268,27 @@ export class Redis implements Extension {
     // if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
     // for provider connections, this usually happens in the onDisconnect hook
     if (socketId === 'server') {
-      await new Promise(resolve => {
-        setTimeout(() => resolve(''), this.configuration.disconnectDelay)
+      const pending = this.pendingAfterStoreDocumentResolves.get(documentName)
+
+      if (pending) {
+        clearTimeout(pending.timeout)
+        pending.resolve()
+        this.pendingAfterStoreDocumentResolves.delete(documentName)
+      }
+
+      let resolveFunction: () => void = () => {}
+      const delayedPromise = new Promise<void>(resolve => {
+        resolveFunction = resolve
       })
+
+      const timeout = setTimeout(() => {
+        this.pendingAfterStoreDocumentResolves.delete(documentName)
+        resolveFunction()
+      }, this.configuration.disconnectDelay)
+
+      this.pendingAfterStoreDocumentResolves.set(documentName, { timeout, resolve: resolveFunction })
+
+      await delayedPromise
     }
   }
 
@@ -332,8 +358,17 @@ export class Redis implements Extension {
    * no one connected anymore.
    */
   public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
+    const pending = this.pendingDisconnects.get(documentName)
+
+    if (pending) {
+      clearTimeout(pending)
+      this.pendingDisconnects.delete(documentName)
+    }
+
     const disconnect = () => {
       const document = this.instance.documents.get(documentName)
+
+      this.pendingDisconnects.delete(documentName)
 
       // Do nothing, when other users are still connected to the document.
       if (!document || document.getConnectionsCount() > 0) {
@@ -350,7 +385,8 @@ export class Redis implements Extension {
       this.instance.unloadDocument(document)
     }
     // Delay the disconnect procedure to allow last minute syncs to happen
-    setTimeout(disconnect, this.configuration.disconnectDelay)
+    const timeout = setTimeout(disconnect, this.configuration.disconnectDelay)
+    this.pendingDisconnects.set(documentName, timeout)
   }
 
   async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
