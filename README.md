@@ -100,6 +100,14 @@ For help, discussion about best practices, or any other conversation:
       </a>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <a href="https://poggio.io">
+        <img src="https://unavatar.io/github/poggiolabs" width="100"><br>
+        <strong>Poggio</strong>
+      </a>
+    </td>
+  </tr>
 </table>
 
 … and hundreds of awesome inviduals.
