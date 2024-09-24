@@ -83,7 +83,7 @@
     "eslint-plugin-vue": "^8.5.0",
     "lerna": "^6.6.1",
     "minimist": "^1.2.5",
-    "rollup": "^2.70.1",
+    "rollup": "^3.29.5",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-import-assertions": "^0.4.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
