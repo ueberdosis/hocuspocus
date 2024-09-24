@@ -155,6 +155,7 @@ export class Hocuspocus {
   async listen(
     portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
     callback: any = null,
+    websocketOptions: WebSocket.ServerOptions = {},
   ): Promise<Hocuspocus> {
     if (typeof portOrCallback === 'number') {
       this.configuration.port = portOrCallback
@@ -172,7 +173,7 @@ export class Hocuspocus {
       })
     }
 
-    this.server = new HocuspocusServer(this)
+    this.server = new HocuspocusServer(this, websocketOptions)
 
     if (this.configuration.stopOnSignals) {
       const signalHandler = async () => {
