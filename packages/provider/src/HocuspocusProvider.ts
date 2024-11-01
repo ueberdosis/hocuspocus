@@ -212,8 +212,8 @@ export class HocuspocusProvider extends EventEmitter {
       this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness!.getStates()) })
     })
 
-    this.document.on('update', this.documentUpdateHandler.bind(this))
-    this.awareness?.on('update', this.awarenessUpdateHandler.bind(this))
+    this.document.on('update', this.boundDocumentUpdateHandler)
+    this.awareness?.on('update', this.boundAwarenessUpdateHandler)
     this.registerEventListeners()
 
     if (
@@ -228,6 +228,10 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.configuration.websocketProvider.attach(this)
   }
+
+  boundDocumentUpdateHandler = this.documentUpdateHandler.bind(this)
+
+  boundAwarenessUpdateHandler = this.awarenessUpdateHandler.bind(this)
 
   boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
 
@@ -490,11 +494,11 @@ export class HocuspocusProvider extends EventEmitter {
 
     if (this.awareness) {
       removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy')
-      this.awareness.off('update', this.awarenessUpdateHandler)
+      this.awareness.off('update', this.boundAwarenessUpdateHandler)
       this.awareness.destroy()
     }
 
-    this.document.off('update', this.documentUpdateHandler)
+    this.document.off('update', this.boundDocumentUpdateHandler)
 
     this.removeAllListeners()
 
