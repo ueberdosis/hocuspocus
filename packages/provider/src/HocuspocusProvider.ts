@@ -230,6 +230,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   boundDocumentUpdateHandler = this.documentUpdateHandler.bind(this)
+
   boundAwarenessUpdateHandler = this.awarenessUpdateHandler.bind(this)
 
   boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this)
