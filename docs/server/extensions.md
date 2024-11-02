@@ -648,6 +648,7 @@ function verifySignature(Request $request) {
 **JavaScript**
 
 ```js
+import { createHmac, timingSafeEqual } from 'crypto'
 import { IncomingMessage } from 'http'
 
 const secret = '459824aaffa928e05f5b1caec411ae5f'
@@ -656,8 +657,8 @@ const verifySignature = (request: IncomingMessage): boolean => {
   const signature = Buffer.from(request.headers['x-hocuspocus-signature-256'] as string)
 
   const hmac = createHmac('sha256', secret)
-  const digest = Buffer.from(`sha256=${hmac.update(body).digest('hex')}`)
+  const digest = Buffer.from(`sha256=${hmac.update(request.body).digest('hex')}`)
 
-  return signature.length !== digest.length || timingSafeEqual(digest, signature)
+  return signature.length === digest.length && timingSafeEqual(digest, signature)
 }
 ```
