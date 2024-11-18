@@ -315,7 +315,15 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     if (commentIndex > 0) {
       const comment = thread.get('comments').get(commentIndex)
-      thread.get('deletedComments').push([comment])
+      const newComment = new Y.Map()
+
+      newComment.set('id', comment.get('id'))
+      newComment.set('createdAt', comment.get('createdAt'))
+      newComment.set('updatedAt', (new Date()).toISOString())
+      newComment.set('data', comment.get('data'))
+      newComment.set('content', null)
+
+      thread.get('deletedComments').push([newComment])
       thread.get('comments').delete(commentIndex)
     }
 
