@@ -151,7 +151,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return this.getYThreads().get(index)
   }
 
-  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) {
+  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'comments' | 'deletedComments'>) {
     let createdThread: TCollabThread = {} as TCollabThread
 
     this.document.transact(() => {
@@ -159,6 +159,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('id', uuidv4())
       thread.set('createdAt', (new Date()).toISOString())
       thread.set('comments', new Y.Array())
+      thread.set('deletedComments', new Y.Array())
 
       this.getYThreads().push([thread])
       createdThread = this.updateThread(String(thread.get('id')), data)
@@ -205,14 +206,24 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     this.getYThreads().delete(index, 1)
   }
 
-  getThreadComments(threadId: TCollabThread['id']): TCollabComment[] | null {
+  getThreadComments(threadId: TCollabThread['id'], deleted?: boolean): TCollabComment[] | null {
     const index = this.getThreadIndex(threadId)
 
     if (index === null) {
       return null
     }
 
-    return this.getThread(threadId)?.comments ?? []
+    return (!deleted ? this.getThread(threadId)?.comments : this.getThread(threadId)?.deletedComments) ?? []
+  }
+
+  getAllThreadComments(threadId: TCollabThread['id']): TCollabComment[] | null {
+    const index = this.getThreadIndex(threadId)
+
+    if (index === null) {
+      return null
+    }
+
+    return [...this.getThreadComments(threadId) ?? [], ...this.getThreadComments(threadId, true) ?? []].sort((a, b) => a.createdAt - b.createdAt)
   }
 
   getThreadComment(threadId: TCollabThread['id'], commentId: TCollabComment['id']): TCollabComment | null {
@@ -222,7 +233,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       return null
     }
 
-    return this.getThread(threadId)?.comments.find(comment => comment.id === commentId) ?? null
+    return this.getAllThreadComments(threadId)?.find(comment => comment.id === commentId) ?? null
   }
 
   addComment(threadId: TCollabThread['id'], data: Omit<TCollabComment, 'id' | 'updatedAt' | 'createdAt'>) {
@@ -281,7 +292,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return updatedThread
   }
 
-  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id']) {
+  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], deleteThread?: boolean) {
     const thread = this.getYThread(threadId)
 
     if (thread === null) return null
@@ -297,12 +308,14 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     // if the first comment of a thread is deleted we also
     // delete the thread itself as the source comment is gone
-    if (commentIndex === 0) {
+    if (commentIndex === 0 && deleteThread) {
       this.deleteThread(threadId)
       return
     }
 
     if (commentIndex > 0) {
+      const comment = thread.get('comments').get(commentIndex)
+      thread.get('deletedComments').push([comment])
       thread.get('comments').delete(commentIndex)
     }
 

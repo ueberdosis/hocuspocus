@@ -112,6 +112,7 @@ export type TCollabThread<Data = any, CommentData = any> = {
   updatedAt: number;
   resolvedAt?: string; // (new Date()).toISOString()
   comments: TCollabComment<CommentData>[];
+  deletedComments: TCollabComment<CommentData>[];
   data: Data
 }
 
