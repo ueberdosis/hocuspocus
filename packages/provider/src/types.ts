@@ -120,6 +120,7 @@ export type TCollabComment<Data = any> = {
   id: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string;
   data: Data
   content: any
 }

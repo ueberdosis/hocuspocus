@@ -406,6 +406,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       newComment.set('id', comment.get('id'))
       newComment.set('createdAt', comment.get('createdAt'))
       newComment.set('updatedAt', (new Date()).toISOString())
+      newComment.set('deletedAt', (new Date()).toISOString())
       newComment.set('data', comment.get('data'))
       newComment.set('content', null)
 
