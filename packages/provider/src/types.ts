@@ -118,8 +118,8 @@ export type TCollabThread<Data = any, CommentData = any> = {
 
 export type TCollabComment<Data = any> = {
   id: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: string;
+  updatedAt: string;
   data: Data
   content: any
 }
