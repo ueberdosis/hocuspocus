@@ -278,7 +278,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       return null
     }
 
-    return [...this.getThreadComments(threadId) ?? [], ...this.getThreadComments(threadId, true) ?? []].sort((a, b) => a.createdAt - b.createdAt)
+    return [...this.getThreadComments(threadId) ?? [], ...this.getThreadComments(threadId, true) ?? []].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   }
 
   /**
