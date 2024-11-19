@@ -17,7 +17,12 @@ export type TiptapCollabProviderConfiguration =
   (Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>> |
   Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>|
   Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>) &
-  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'>
+  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'> & {
+    /**
+     * Pass `true` if you want to delete a thread when the first comment is deleted.
+     */
+    deleteThreadOnFirstCommentDelete?: boolean,
+  }
 
 export interface AdditionalTiptapCollabProviderConfiguration {
   /**
@@ -308,7 +313,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     // if the first comment of a thread is deleted we also
     // delete the thread itself as the source comment is gone
-    if (commentIndex === 0 && deleteThread) {
+    if (commentIndex === 0 && (deleteThread || (this.configuration as TiptapCollabProviderConfiguration).deleteThreadOnFirstCommentDelete)) {
       this.deleteThread(threadId)
       return
     }
