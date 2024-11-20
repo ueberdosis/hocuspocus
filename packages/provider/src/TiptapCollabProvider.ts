@@ -399,20 +399,18 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       return
     }
 
-    if (commentIndex > 0) {
-      const comment = thread.get('comments').get(commentIndex)
-      const newComment = new Y.Map()
+    const comment = thread.get('comments').get(commentIndex)
+    const newComment = new Y.Map()
 
-      newComment.set('id', comment.get('id'))
-      newComment.set('createdAt', comment.get('createdAt'))
-      newComment.set('updatedAt', (new Date()).toISOString())
-      newComment.set('deletedAt', (new Date()).toISOString())
-      newComment.set('data', comment.get('data'))
-      newComment.set('content', null)
+    newComment.set('id', comment.get('id'))
+    newComment.set('createdAt', comment.get('createdAt'))
+    newComment.set('updatedAt', (new Date()).toISOString())
+    newComment.set('deletedAt', (new Date()).toISOString())
+    newComment.set('data', comment.get('data'))
+    newComment.set('content', comment.get('content'))
 
-      thread.get('deletedComments').push([newComment])
-      thread.get('comments').delete(commentIndex)
-    }
+    thread.get('deletedComments').push([newComment])
+    thread.get('comments').delete(commentIndex)
 
     return thread.toJSON() as TCollabThread
   }
