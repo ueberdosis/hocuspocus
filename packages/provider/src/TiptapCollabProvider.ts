@@ -8,8 +8,14 @@ import {
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
 import type {
+  DeleteCommentOptions,
   TCollabComment, TCollabThread, THistoryVersion,
 } from './types.js'
+
+const defaultDeleteCommentOptions: DeleteCommentOptions = {
+  deleteContent: false,
+  deleteThread: false,
+}
 
 export type TiptapCollabProviderConfiguration =
   Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
@@ -125,17 +131,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * @returns An array of threads as JSON objects
    */
   getThreads<Data, CommentData>(): TCollabThread<Data, CommentData>[] {
-    let threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
-
-    threads = threads.map(thread => ({
-      ...thread,
-      deletedComments: thread.deletedComments.map(c => ({
-        ...c,
-        content: null,
-      })),
-    }))
-
-    return threads
+    return this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
   }
 
   /**
@@ -263,58 +259,38 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * Returns comments from a thread, either deleted or not
    * @param threadId The thread id
-   * @param deleted If you want to query deleted comments, defaults to `false`
+   * @param includeDeleted If you want to include deleted comments, defaults to `false`
    * @returns The comments or null if the thread is not found
    */
-  getThreadComments(threadId: TCollabThread['id'], deleted?: boolean): TCollabComment[] | null {
+  getThreadComments(threadId: TCollabThread['id'], includeDeleted?: boolean): TCollabComment[] | null {
     const index = this.getThreadIndex(threadId)
 
     if (index === null) {
       return null
     }
 
-    let comments = !deleted ? this.getThread(threadId)?.comments : this.getThread(threadId)?.deletedComments
-
-    if (deleted) {
-      comments = comments?.map(c => ({
-        ...c,
-        content: null,
-      }))
-    }
+    const comments = !includeDeleted ? this.getThread(threadId)?.comments : [...(this.getThread(threadId)?.comments || []), ...(this.getThread(threadId)?.deletedComments || [])].sort((a, b) => {
+      return a.createdAt.localeCompare(b.createdAt)
+    })
 
     return comments ?? []
-  }
-
-  /**
-   * Returns all comments of a thread **including deleted ones**
-   * @param threadId The thread id
-   * @returns The comments or null if the thread is not found
-   */
-  getAllThreadComments(threadId: TCollabThread['id']): TCollabComment[] | null {
-    const index = this.getThreadIndex(threadId)
-
-    if (index === null) {
-      return null
-    }
-
-    return [...this.getThreadComments(threadId) ?? [], ...this.getThreadComments(threadId, true) ?? []].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   }
 
   /**
    * Get a single comment from a specific thread
    * @param threadId The thread id
    * @param commentId The comment id
-   * @param deleted If you want to include deleted comments in the search
+   * @param includeDeleted If you want to include deleted comments in the search
    * @returns The comment or null if not found
    */
-  getThreadComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], deleted?: boolean): TCollabComment | null {
+  getThreadComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], includeDeleted?: boolean): TCollabComment | null {
     const index = this.getThreadIndex(threadId)
 
     if (index === null) {
       return null
     }
 
-    const comments = deleted ? this.getAllThreadComments(threadId) : this.getThreadComments(threadId)
+    const comments = this.getThreadComments(threadId, includeDeleted)
 
     return comments?.find(comment => comment.id === commentId) ?? null
   }
@@ -394,10 +370,12 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * Deletes a comment from a thread
    * @param threadId The thread id
    * @param commentId The comment id
-   * @param deleteThread Set to `true` if you also want to delete the thread when the last comment is deleted
+   * @param options A set of options that control how the comment is deleted
    * @returns The updated thread or null if the thread or comment is not found
    */
-  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], deleteThread?: boolean) {
+  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], options: DeleteCommentOptions) {
+    const { deleteContent, deleteThread } = { ...defaultDeleteCommentOptions, ...options }
+
     const thread = this.getYThread(threadId)
 
     if (thread === null) return null
@@ -426,7 +404,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     newComment.set('updatedAt', (new Date()).toISOString())
     newComment.set('deletedAt', (new Date()).toISOString())
     newComment.set('data', comment.get('data'))
-    newComment.set('content', comment.get('content'))
+    newComment.set('content', deleteContent ? null : comment.get('content'))
 
     thread.get('deletedComments').push([newComment])
     thread.get('comments').delete(commentIndex)

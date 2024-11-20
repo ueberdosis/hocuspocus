@@ -185,3 +185,15 @@ export type THistoryDocumentRevertedEvent = {
   event: 'document.reverted';
   version: number;
 };
+
+export type DeleteCommentOptions = {
+  /**
+   * If `true`, the thread will also be deleted if the deleted comment was the first comment in the thread.
+   */
+  deleteThread?: boolean
+
+  /**
+   * If `true`, will remove the content of the deleted comment
+   */
+  deleteContent?: boolean
+}
