@@ -125,7 +125,17 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * @returns An array of threads as JSON objects
    */
   getThreads<Data, CommentData>(): TCollabThread<Data, CommentData>[] {
-    return this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+    let threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+
+    threads = threads.map(thread => ({
+      ...thread,
+      deletedComments: thread.deletedComments.map(c => ({
+        ...c,
+        content: null,
+      })),
+    }))
+
+    return threads
   }
 
   /**
@@ -263,7 +273,16 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       return null
     }
 
-    return (!deleted ? this.getThread(threadId)?.comments : this.getThread(threadId)?.deletedComments) ?? []
+    let comments = !deleted ? this.getThread(threadId)?.comments : this.getThread(threadId)?.deletedComments
+
+    if (deleted) {
+      comments = comments?.map(c => ({
+        ...c,
+        content: null,
+      }))
+    }
+
+    return comments ?? []
   }
 
   /**
