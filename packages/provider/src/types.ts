@@ -112,13 +112,15 @@ export type TCollabThread<Data = any, CommentData = any> = {
   updatedAt: number;
   resolvedAt?: string; // (new Date()).toISOString()
   comments: TCollabComment<CommentData>[];
+  deletedComments: TCollabComment<CommentData>[];
   data: Data
 }
 
 export type TCollabComment<Data = any> = {
   id: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
   data: Data
   content: any
 }
@@ -183,3 +185,15 @@ export type THistoryDocumentRevertedEvent = {
   event: 'document.reverted';
   version: number;
 };
+
+export type DeleteCommentOptions = {
+  /**
+   * If `true`, the thread will also be deleted if the deleted comment was the first comment in the thread.
+   */
+  deleteThread?: boolean
+
+  /**
+   * If `true`, will remove the content of the deleted comment
+   */
+  deleteContent?: boolean
+}
