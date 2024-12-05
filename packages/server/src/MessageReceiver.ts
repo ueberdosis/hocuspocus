@@ -65,7 +65,7 @@ export class MessageReceiver {
           category: 'Update',
         })
 
-        applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection)
+        applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection?.webSocket)
 
         break
       }
