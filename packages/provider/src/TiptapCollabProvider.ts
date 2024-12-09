@@ -408,10 +408,8 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     if (!thread.get('deletedComments')) {
       thread.set('deletedComments', new Y.Array())
-      thread.get('deletedComments').push([newComment])
-    } else {
-      thread.get('deletedComments').push([newComment])
     }
+    thread.get('deletedComments').push([newComment])
 
     thread.get('comments').delete(commentIndex)
 
