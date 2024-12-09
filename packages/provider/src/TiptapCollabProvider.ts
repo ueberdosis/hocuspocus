@@ -7,11 +7,12 @@ import {
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
-import type {
-  DeleteCommentOptions,
-  DeleteThreadOptions,
-  GetThreadsOptions,
-  TCollabComment, TCollabThread, THistoryVersion,
+import {
+  ThreadType,
+  type DeleteCommentOptions,
+  type DeleteThreadOptions,
+  type GetThreadsOptions,
+  type TCollabComment, type TCollabThread, type THistoryVersion,
 } from './types.js'
 
 const defaultDeleteCommentOptions: DeleteCommentOptions = {
@@ -20,7 +21,7 @@ const defaultDeleteCommentOptions: DeleteCommentOptions = {
 }
 
 const defaultGetThreadsOptions: GetThreadsOptions = {
-  types: ['undeleted'],
+  types: [ThreadType.Unarchived],
 }
 
 const defaultDeleteThreadOptions: DeleteThreadOptions = {
@@ -147,16 +148,16 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     const threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
 
-    if (types?.includes('deleted') && types?.includes('undeleted')) {
+    if (types?.includes(ThreadType.Archived) && types?.includes(ThreadType.Unarchived)) {
       return threads
     }
 
     return threads.filter(currentThead => {
-      if (types?.includes('deleted') && currentThead.deletedAt) {
+      if (types?.includes(ThreadType.Archived) && currentThead.deletedAt) {
         return true
       }
 
-      if (types?.includes('undeleted') && !currentThead.deletedAt) {
+      if (types?.includes(ThreadType.Unarchived) && !currentThead.deletedAt) {
         return true
       }
 
@@ -174,7 +175,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     let i = 0
     // eslint-disable-next-line no-restricted-syntax
-    for (const thread of this.getThreads({ types: ['deleted', 'undeleted'] })) {
+    for (const thread of this.getThreads({ types: [ThreadType.Archived, ThreadType.Unarchived] })) {
       if (thread.id === id) {
         index = i
         break
