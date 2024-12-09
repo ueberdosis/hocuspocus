@@ -10,12 +10,17 @@ import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.j
 import type {
   DeleteCommentOptions,
   DeleteThreadOptions,
+  GetThreadsOptions,
   TCollabComment, TCollabThread, THistoryVersion,
 } from './types.js'
 
 const defaultDeleteCommentOptions: DeleteCommentOptions = {
   deleteContent: false,
   deleteThread: false,
+}
+
+const defaultGetThreadsOptions: GetThreadsOptions = {
+  types: ['deleted', 'undeleted'],
 }
 
 const defaultDeleteThreadOptions: DeleteThreadOptions = {
@@ -134,10 +139,29 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
   /**
    * Finds all threads in the document and returns them as JSON objects
+   * @options Options to control the output of the threads (e.g. include deleted threads)
    * @returns An array of threads as JSON objects
    */
-  getThreads<Data, CommentData>(): TCollabThread<Data, CommentData>[] {
-    return this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+  getThreads<Data, CommentData>(options?: GetThreadsOptions): TCollabThread<Data, CommentData>[] {
+    const { types } = { ...defaultGetThreadsOptions, ...options } as GetThreadsOptions
+
+    const threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+
+    if (types?.includes('deleted') && types?.includes('undeleted')) {
+      return threads
+    }
+
+    return threads.filter(currentThead => {
+      if (types?.includes('deleted') && currentThead.deletedAt) {
+        return true
+      }
+
+      if (types?.includes('undeleted') && !currentThead.deletedAt) {
+        return true
+      }
+
+      return false
+    })
   }
 
   /**
@@ -196,7 +220,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * @param data The thread data
    * @returns The created thread
    */
-  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'comments' | 'deletedComments'>) {
+  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'comments' | 'deletedComments'>) {
     let createdThread: TCollabThread = {} as TCollabThread
 
     this.document.transact(() => {
@@ -279,6 +303,25 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('comments', new Y.Array())
       thread.set('deletedComments', new Y.Array())
     }
+
+    return thread.toJSON() as TCollabThread
+  }
+
+  /**
+   * Tries to restore a deleted thread
+   * @param id The thread id
+   * @returns The restored thread or null if the thread is not found
+   */
+  restoreThread(id: TCollabThread['id']) {
+    const index = this.getThreadIndex(id)
+
+    if (index === null) {
+      return null
+    }
+
+    const thread = this.getYThreads().get(index)
+
+    thread.set('deletedAt', null)
 
     return thread.toJSON() as TCollabThread
   }
