@@ -220,7 +220,7 @@ export type DeleteThreadOptions = {
 export type GetThreadsOptions = {
   /**
    * The types of threads to get
-   * @default `['deleted', 'undeleted']`
+   * @default ['undeleted']
    */
   types?: Array<'deleted' | 'undeleted'>
 }

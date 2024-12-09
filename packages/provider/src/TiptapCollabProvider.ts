@@ -20,7 +20,7 @@ const defaultDeleteCommentOptions: DeleteCommentOptions = {
 }
 
 const defaultGetThreadsOptions: GetThreadsOptions = {
-  types: ['deleted', 'undeleted'],
+  types: ['undeleted'],
 }
 
 const defaultDeleteThreadOptions: DeleteThreadOptions = {
@@ -174,7 +174,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     let i = 0
     // eslint-disable-next-line no-restricted-syntax
-    for (const thread of this.getThreads()) {
+    for (const thread of this.getThreads({ types: ['deleted', 'undeleted'] })) {
       if (thread.id === id) {
         index = i
         break
