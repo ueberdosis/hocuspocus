@@ -110,6 +110,7 @@ export type TCollabThread<Data = any, CommentData = any> = {
   id: string;
   createdAt: number;
   updatedAt: number;
+  deletedAt: number | null;
   resolvedAt?: string; // (new Date()).toISOString()
   comments: TCollabComment<CommentData>[];
   deletedComments: TCollabComment<CommentData>[];
@@ -196,4 +197,22 @@ export type DeleteCommentOptions = {
    * If `true`, will remove the content of the deleted comment
    */
   deleteContent?: boolean
+}
+
+export type DeleteThreadOptions = {
+  /**
+   * If `true`, will remove the comments on the thread,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  deleteComments?: boolean
+
+  /**
+   * If `true`, will forcefully remove the thread and all comments,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  force?: boolean,
 }

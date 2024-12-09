@@ -9,12 +9,18 @@ import {
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
 import type {
   DeleteCommentOptions,
+  DeleteThreadOptions,
   TCollabComment, TCollabThread, THistoryVersion,
 } from './types.js'
 
 const defaultDeleteCommentOptions: DeleteCommentOptions = {
   deleteContent: false,
   deleteThread: false,
+}
+
+const defaultDeleteThreadOptions: DeleteThreadOptions = {
+  deleteComments: false,
+  force: false,
 }
 
 export type TiptapCollabProviderConfiguration =
@@ -199,6 +205,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('createdAt', (new Date()).toISOString())
       thread.set('comments', new Y.Array())
       thread.set('deletedComments', new Y.Array())
+      thread.set('deletedAt', null)
 
       this.getYThreads().push([thread])
       createdThread = this.updateThread(String(thread.get('id')), data)
@@ -242,18 +249,38 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   /**
-   * Delete a specific thread and all its comments
+   * Handle the deletion of a thread. By default, the thread and it's comments are not deleted, but marked as deleted
+   * via the `deletedAt` property. Forceful deletion can be enabled by setting the `force` option to `true`.
+   *
+   * If you only want to delete the comments of a thread, you can set the `deleteComments` option to `true`.
    * @param id The thread id
-   * @returns void
+   * @param options A set of options that control how the thread is deleted
+   * @returns The deleted thread or null if the thread is not found
    */
-  deleteThread(id: TCollabThread['id']) {
+  deleteThread(id: TCollabThread['id'], options?: DeleteThreadOptions) {
+    const { deleteComments, force } = { ...defaultDeleteThreadOptions, ...options }
+
     const index = this.getThreadIndex(id)
 
     if (index === null) {
+      return null
+    }
+
+    if (force) {
+      this.getYThreads().delete(index, 1)
       return
     }
 
-    this.getYThreads().delete(index, 1)
+    const thread = this.getYThreads().get(index)
+
+    thread.set('deletedAt', (new Date()).toISOString())
+
+    if (deleteComments) {
+      thread.set('comments', new Y.Array())
+      thread.set('deletedComments', new Y.Array())
+    }
+
+    return thread.toJSON() as TCollabThread
   }
 
   /**
