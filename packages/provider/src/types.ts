@@ -217,17 +217,10 @@ export type DeleteThreadOptions = {
   force?: boolean,
 }
 
-export enum ThreadType {
-  /**
-   * A archived thread
-   */
-  Archived = 'archived',
-
-  /**
-   * A unarchived thread
-   */
-  Unarchived = 'unarchived',
-}
+/**
+ * The type of thread
+ */
+export type ThreadType = 'archived' | 'unarchived'
 
 export type GetThreadsOptions = {
   /**
