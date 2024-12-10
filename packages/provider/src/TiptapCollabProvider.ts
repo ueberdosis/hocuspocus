@@ -7,14 +7,25 @@ import {
 } from './HocuspocusProvider.js'
 
 import { TiptapCollabProviderWebsocket } from './TiptapCollabProviderWebsocket.js'
-import type {
-  DeleteCommentOptions,
-  TCollabComment, TCollabThread, THistoryVersion,
+import {
+  type DeleteCommentOptions,
+  type DeleteThreadOptions,
+  type GetThreadsOptions,
+  type TCollabComment, type TCollabThread, type THistoryVersion,
 } from './types.js'
 
 const defaultDeleteCommentOptions: DeleteCommentOptions = {
   deleteContent: false,
   deleteThread: false,
+}
+
+const defaultGetThreadsOptions: GetThreadsOptions = {
+  types: ['unarchived'],
+}
+
+const defaultDeleteThreadOptions: DeleteThreadOptions = {
+  deleteComments: false,
+  force: false,
 }
 
 export type TiptapCollabProviderConfiguration =
@@ -128,10 +139,29 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
   /**
    * Finds all threads in the document and returns them as JSON objects
+   * @options Options to control the output of the threads (e.g. include deleted threads)
    * @returns An array of threads as JSON objects
    */
-  getThreads<Data, CommentData>(): TCollabThread<Data, CommentData>[] {
-    return this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+  getThreads<Data, CommentData>(options?: GetThreadsOptions): TCollabThread<Data, CommentData>[] {
+    const { types } = { ...defaultGetThreadsOptions, ...options } as GetThreadsOptions
+
+    const threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[]
+
+    if (types?.includes('archived') && types?.includes('unarchived')) {
+      return threads
+    }
+
+    return threads.filter(currentThead => {
+      if (types?.includes('archived') && currentThead.deletedAt) {
+        return true
+      }
+
+      if (types?.includes('unarchived') && !currentThead.deletedAt) {
+        return true
+      }
+
+      return false
+    })
   }
 
   /**
@@ -144,7 +174,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     let i = 0
     // eslint-disable-next-line no-restricted-syntax
-    for (const thread of this.getThreads()) {
+    for (const thread of this.getThreads({ types: ['archived', 'unarchived'] })) {
       if (thread.id === id) {
         index = i
         break
@@ -190,7 +220,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * @param data The thread data
    * @returns The created thread
    */
-  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'comments' | 'deletedComments'>) {
+  createThread(data: Omit<TCollabThread, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'comments' | 'deletedComments'>) {
     let createdThread: TCollabThread = {} as TCollabThread
 
     this.document.transact(() => {
@@ -199,6 +229,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('createdAt', (new Date()).toISOString())
       thread.set('comments', new Y.Array())
       thread.set('deletedComments', new Y.Array())
+      thread.set('deletedAt', null)
 
       this.getYThreads().push([thread])
       createdThread = this.updateThread(String(thread.get('id')), data)
@@ -242,18 +273,57 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   /**
-   * Delete a specific thread and all its comments
+   * Handle the deletion of a thread. By default, the thread and it's comments are not deleted, but marked as deleted
+   * via the `deletedAt` property. Forceful deletion can be enabled by setting the `force` option to `true`.
+   *
+   * If you only want to delete the comments of a thread, you can set the `deleteComments` option to `true`.
    * @param id The thread id
-   * @returns void
+   * @param options A set of options that control how the thread is deleted
+   * @returns The deleted thread or null if the thread is not found
    */
-  deleteThread(id: TCollabThread['id']) {
+  deleteThread(id: TCollabThread['id'], options?: DeleteThreadOptions) {
+    const { deleteComments, force } = { ...defaultDeleteThreadOptions, ...options }
+
     const index = this.getThreadIndex(id)
 
     if (index === null) {
+      return null
+    }
+
+    if (force) {
+      this.getYThreads().delete(index, 1)
       return
     }
 
-    this.getYThreads().delete(index, 1)
+    const thread = this.getYThreads().get(index)
+
+    thread.set('deletedAt', (new Date()).toISOString())
+
+    if (deleteComments) {
+      thread.set('comments', new Y.Array())
+      thread.set('deletedComments', new Y.Array())
+    }
+
+    return thread.toJSON() as TCollabThread
+  }
+
+  /**
+   * Tries to restore a deleted thread
+   * @param id The thread id
+   * @returns The restored thread or null if the thread is not found
+   */
+  restoreThread(id: TCollabThread['id']) {
+    const index = this.getThreadIndex(id)
+
+    if (index === null) {
+      return null
+    }
+
+    const thread = this.getYThreads().get(index)
+
+    thread.set('deletedAt', null)
+
+    return thread.toJSON() as TCollabThread
   }
 
   /**
