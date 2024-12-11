@@ -3,7 +3,7 @@ import {
   createServer,
 } from 'http'
 import type { ListenOptions } from 'net'
-import type { AddressInfo} from 'ws'
+import type { AddressInfo, ServerOptions} from 'ws'
 import type WebSocket from 'ws'
 import { WebSocketServer } from 'ws'
 import kleur from 'kleur'
@@ -36,7 +36,7 @@ export class Server {
     extensions: [],
   }
 
-  constructor(configuration?: Partial<ServerConfiguration>) {
+  constructor(configuration?: Partial<ServerConfiguration>, websocketOptions: ServerOptions = {}) {
     if (configuration) {
       this.configuration = {
         ...this.configuration,
@@ -48,7 +48,7 @@ export class Server {
     this.hocuspocus.server = this
 
     this.httpServer = createServer(this.requestHandler)
-    this.webSocketServer = new WebSocketServer({ noServer: true })
+    this.webSocketServer = new WebSocketServer({ noServer: true, ...websocketOptions })
 
     this.setupWebsocketConnection()
     this.setupHttpUpgrade()

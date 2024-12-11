@@ -3,7 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [3.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.13.5...v3.0.0-rc.0) (2024-09-02)
+# [2.15.0](https://github.com/ueberdosis/hocuspocus/compare/v2.14.0...v2.15.0) (2024-12-10)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [2.14.0](https://github.com/ueberdosis/hocuspocus/compare/v2.13.7...v2.14.0) (2024-11-20)
+
+
+### Bug Fixes
+
+* **provider:** allow deletion of first item ([3fe0b91](https://github.com/ueberdosis/hocuspocus/commit/3fe0b91cd5e13b53c6b2ffa9fdf6af3962c26b0b))
+* **provider:** correct event handler binding for document updates and awareness ([e3c616c](https://github.com/ueberdosis/hocuspocus/commit/e3c616c2cd18a717cd3c36a093f4954a7cac39fc))
+* **provider:** fix comment sorting ([e706537](https://github.com/ueberdosis/hocuspocus/commit/e7065378846260ed4ec59c3528a509b8239162c3))
+
+
+
+
+
+## [2.13.7](https://github.com/ueberdosis/hocuspocus/compare/v2.13.6...v2.13.7) (2024-10-08)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [2.13.6](https://github.com/ueberdosis/hocuspocus/compare/v2.13.5...v2.13.6) (2024-09-19)
 
 **Note:** Version bump only for package @hocuspocus/provider
 
