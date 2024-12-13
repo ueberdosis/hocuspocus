@@ -11,7 +11,6 @@ import {
 } from 'y-protocols/sync'
 import * as Y from 'yjs'
 import type Connection from './Connection.js'
-import type { Debugger } from './Debugger.js'
 import type Document from './Document.js'
 import type { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
@@ -21,13 +20,10 @@ export class MessageReceiver {
 
   message: IncomingMessage
 
-  logger: Debugger
-
   defaultTransactionOrigin?: string
 
-  constructor(message: IncomingMessage, logger: Debugger, defaultTransactionOrigin?: string) {
+  constructor(message: IncomingMessage, defaultTransactionOrigin?: string) {
     this.message = message
-    this.logger = logger
     this.defaultTransactionOrigin = defaultTransactionOrigin
   }
 
@@ -59,12 +55,6 @@ export class MessageReceiver {
         break
       }
       case MessageType.Awareness: {
-        this.logger.log({
-          direction: 'in',
-          type: MessageType.Awareness,
-          category: 'Update',
-        })
-
         applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection)
 
         break
@@ -116,31 +106,13 @@ export class MessageReceiver {
 
     switch (type) {
       case messageYjsSyncStep1: {
-        this.logger.log({
-          direction: 'in',
-          type: MessageType.Sync,
-          category: 'SyncStep1',
-        })
-
         readSyncStep1(message.decoder, message.encoder, document)
 
         // When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
-        this.logger.log({
-          direction: 'out',
-          type: MessageType.Sync,
-          category: 'SyncStep2',
-        })
-
         if (reply && requestFirstSync) {
           const syncMessage = (new OutgoingMessage(document.name)
             .createSyncReplyMessage()
             .writeFirstSyncStepFor(document))
-
-          this.logger.log({
-            direction: 'out',
-            type: MessageType.Sync,
-            category: 'SyncStep1',
-          })
 
           reply(syncMessage.toUint8Array())
         } else if (connection) {
@@ -148,23 +120,11 @@ export class MessageReceiver {
             .createSyncMessage()
             .writeFirstSyncStepFor(document))
 
-          this.logger.log({
-            direction: 'out',
-            type: MessageType.Sync,
-            category: 'SyncStep1',
-          })
-
           connection.send(syncMessage.toUint8Array())
         }
         break
       }
       case messageYjsSyncStep2:
-        this.logger.log({
-          direction: 'in',
-          type: MessageType.Sync,
-          category: 'SyncStep2',
-        })
-
         if (connection?.readOnly) {
           // We're in read-only mode, so we can't apply the update.
           // Let's use snapshotContainsUpdate to see if the update actually contains changes.
@@ -195,12 +155,6 @@ export class MessageReceiver {
         }
         break
       case messageYjsUpdate:
-        this.logger.log({
-          direction: 'in',
-          type: MessageType.Sync,
-          category: 'Update',
-        })
-
         if (connection?.readOnly) {
           connection.send(new OutgoingMessage(document.name)
             .writeSyncStatus(false).toUint8Array())
@@ -227,14 +181,5 @@ export class MessageReceiver {
     if (reply) {
       reply(message.toUint8Array())
     }
-
-    // TODO: We should add support for WebSocket connections, too, right?
-    // this.logger.log({
-    //   direction: 'out',
-    //   type: MessageType.Sync,
-    //   category: 'SyncStep1',
-    // })
-
-    // connection.send(syncMessage.toUint8Array())
   }
 }

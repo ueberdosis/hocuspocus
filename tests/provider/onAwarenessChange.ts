@@ -64,62 +64,15 @@ test('gets the current awareness states from the server', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus()
 
-    server.enableDebugging()
+    const provider = newHocuspocusProvider(server)
+    const provider2 = newHocuspocusProvider(server, {
+      onAwarenessChange: ({ states }) => {
+        const state = states.find(state => state.foo === 'bar')
 
-    const provider = newHocuspocusProvider(server, {
-      onSynced() {
-        setTimeout(() => {
-
-          t.deepEqual(server.getMessageLogs(), [
-               {
-                 category: 'Token',
-                 direction: 'in',
-                 type: 'Auth',
-               },
-               {
-                 category: 'Authenticated',
-                 direction: 'out',
-                 type: 'Auth',
-               },
-            {
-              category: 'SyncStep1',
-              direction: 'in',
-              type: 'Sync',
-            },
-            {
-              category: 'SyncStep2',
-              direction: 'out',
-              type: 'Sync',
-            },
-            {
-              category: 'SyncStep1',
-              direction: 'out',
-              type: 'Sync',
-            },
-            {
-              category: 'Update',
-              direction: 'in',
-              type: 'Awareness',
-            },
-            {
-              category: 'Update',
-              direction: 'out',
-              type: 'Awareness',
-            },
-            {
-              category: 'Update',
-              direction: 'in',
-              type: 'Awareness',
-            },
-            {
-              category: 'SyncStep2',
-              direction: 'in',
-              type: 'Sync',
-            },
-          ])
-
+        if( state && state.foo === 'bar') {
+          t.pass()
           resolve('done')
-        }, 100)
+        }
       },
     })
 

@@ -50,20 +50,11 @@ test('confirms the `Token` message with an `Authenticated` message', async t => 
         return true
       },
     })
-    server.enableDebugging()
 
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
-        t.deepEqual(server.getMessageLogs(), [
-          { direction: 'in', type: 'Auth', category: 'Token' },
-          { direction: 'out', type: 'Auth', category: 'Authenticated' },
-          { direction: 'in', type: 'Sync', category: 'SyncStep1' },
-          { direction: 'out', type: 'Sync', category: 'SyncStep2' },
-          { direction: 'out', type: 'Sync', category: 'SyncStep1' },
-          { direction: 'in', type: 'Awareness', category: 'Update' },
-        ])
-
+        t.pass()
         resolve('done')
       },
     })
@@ -79,16 +70,10 @@ test('replies with a `PermissionDenied` message when authentication fails', asyn
       },
     })
 
-    server.enableDebugging()
-
     newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticationFailed() {
-        t.deepEqual(server.getMessageLogs(), [
-          { category: 'Token', direction: 'in', type: 'Auth' },
-          { category: 'PermissionDenied', direction: 'out', type: 'Auth' },
-        ])
-
+        t.pass()
         resolve('done')
       },
     })
@@ -269,9 +254,9 @@ test('onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', async t => {
 
   const server = await newHocuspocus({
-    async onAuthenticate({ token, documentName, connection }: onAuthenticatePayload) {
+    async onAuthenticate({ token, documentName, connectionConfig }: onAuthenticatePayload) {
       if (token === 'readonly') {
-        connection.readOnly = true
+        connectionConfig.readOnly = true
       }
     },
   })

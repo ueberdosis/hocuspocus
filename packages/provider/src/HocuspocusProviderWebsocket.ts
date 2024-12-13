@@ -1,5 +1,5 @@
 import {
-  Forbidden, MessageTooBig, WsReadyStates,
+  MessageTooBig, WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
@@ -155,7 +155,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   identifier = 0
 
   intervals: any = {
-    forceSync: null,
     connectionChecker: null,
   }
 
@@ -476,6 +475,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   onClose({ event }: onCloseParameters) {
+
+    if( !this.configuration.quiet ){
+      // eslint-disable-next-line no-console
+      console.log(`Provider closed with event`, event.code, event.reason)
+    }
+
     this.closeTries = 0
     this.cleanupWebSocket()
 
@@ -485,32 +490,15 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
       this.emit('disconnect', { event })
     }
 
-    if (event.code === Forbidden.code) {
-      if (!this.configuration.quiet) {
-        console.warn(
-          '[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.',
-        )
-      }
-    }
-
     if (event.code === MessageTooBig.code) {
       console.warn(
         `[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`,
       )
-      this.shouldConnect = false
     }
 
     if (this.connectionAttempt) {
       // That connection attempt failed.
       this.rejectConnectionAttempt()
-    } else if (this.shouldConnect) {
-      // The connection was closed by the server. Let’s just try again.
-      this.connect()
-    }
-
-    // If we’ll reconnect, we’re done for now.
-    if (this.shouldConnect) {
-      return
     }
 
     // The status is set correctly already.
@@ -526,10 +514,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
   destroy() {
     this.emit('destroy')
-
-    if (this.intervals.forceSync) {
-      clearInterval(this.intervals.forceSync)
-    }
 
     clearInterval(this.intervals.connectionChecker)
 

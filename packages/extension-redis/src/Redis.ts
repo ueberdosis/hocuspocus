@@ -17,7 +17,6 @@ import {
   IncomingMessage,
   OutgoingMessage,
   MessageReceiver,
-  Debugger,
 } from '@hocuspocus/server'
 
 export type RedisInstance = RedisClient.Cluster | RedisClient.Redis
@@ -98,8 +97,6 @@ export class Redis implements Extension {
 
   locks = new Map<string, Redlock.Lock>()
 
-  logger: Debugger
-
   messagePrefix: Buffer
 
   /**
@@ -115,9 +112,6 @@ export class Redis implements Extension {
       ...this.configuration,
       ...configuration,
     }
-
-    // We’ll replace that in the onConfigure hook with the global instance.
-    this.logger = new Debugger()
 
     // Create Redis instance
     const {
@@ -153,7 +147,6 @@ export class Redis implements Extension {
   }
 
   async onConfigure({ instance }: onConfigurePayload) {
-    this.logger = instance.debugger
     this.instance = instance
   }
 
@@ -329,14 +322,11 @@ export class Redis implements Extension {
     const document = this.instance.documents.get(documentName)
 
     if (!document) {
-      // What does this mean? Why are we subscribed to this document?
-      this.logger.log(`Received message for unknown document ${documentName}`)
       return
     }
 
     new MessageReceiver(
       message,
-      this.logger,
       this.redisTransactionOrigin,
     ).apply(document, undefined, reply => {
       return this.pub.publishBuffer(

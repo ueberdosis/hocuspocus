@@ -9,9 +9,7 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs'
 import meta from '../package.json' with { type: 'json' }
 import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
-// TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
 import type Connection from './Connection.js'
-import { Debugger } from './Debugger.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
 import type {
@@ -69,8 +67,6 @@ export class Hocuspocus {
   documents: Map<string, Document> = new Map()
 
   server?: Server
-
-  debugger = new Debugger()
 
   debouncer = useDebounce()
 
@@ -182,7 +178,7 @@ export class Hocuspocus {
    * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
-    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
+    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), {
       timeout: this.configuration.timeout,
     }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
@@ -278,7 +274,7 @@ export class Hocuspocus {
     return loadDocPromise
   }
 
-  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connectionConfig: ConnectionConfiguration, context?: any): Promise<Document> {
     const requestHeaders = request.headers ?? {}
     const requestParameters = getParameters(request)
 
@@ -286,13 +282,13 @@ export class Hocuspocus {
       documentName,
       requestHeaders,
       requestParameters,
-      connection,
+      connectionConfig,
       context,
       socketId,
       instance: this,
     })
 
-    const document = new Document(documentName, this.debugger, {
+    const document = new Document(documentName, {
       ...this.configuration.yDocOptions,
       ...yDocOptions,
     })
@@ -301,7 +297,7 @@ export class Hocuspocus {
     const hookPayload = {
       instance: this,
       context,
-      connection,
+      connectionConfig,
       document,
       documentName,
       socketId,
@@ -429,33 +425,6 @@ export class Hocuspocus {
     this.documents.delete(documentName)
     document.destroy()
     this.hooks('afterUnloadDocument', { instance: this, documentName })
-  }
-
-  enableDebugging() {
-    this.debugger.enable()
-  }
-
-  enableMessageLogging() {
-    this.debugger.enable()
-    this.debugger.verbose()
-  }
-
-  disableLogging() {
-    this.debugger.quiet()
-  }
-
-  disableDebugging() {
-    this.debugger.disable()
-  }
-
-  flushMessageLogs() {
-    this.debugger.flush()
-
-    return this
-  }
-
-  getMessageLogs() {
-    return this.debugger.get()?.logs
   }
 
   async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {

@@ -69,8 +69,8 @@ test('has the document name', async t => {
 test('sets the provider to readOnly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        connection.readOnly = true
+      async onConnect({ connectionConfig }) {
+        connectionConfig.readOnly = true
       },
     })
 
@@ -237,8 +237,8 @@ test('has the server instance', async t => {
 test('defaults to readOnly = false', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.readOnly, false)
+      async onConnect({ connectionConfig }) {
+        t.is(connectionConfig.readOnly, false)
         resolve('done')
       },
     })
@@ -291,8 +291,8 @@ test('the connections count is correct', async t => {
 test('has connection.readOnly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.readOnly, false)
+      async onConnect({ connectionConfig }) {
+        t.is(connectionConfig.readOnly, false)
         resolve('done')
       },
     })

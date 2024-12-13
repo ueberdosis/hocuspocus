@@ -64,8 +64,8 @@ export class Server {
          * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
          * @private
          */
-        this.hocuspocus.debugger.log('Error emitted from webSocket instance:')
-        this.hocuspocus.debugger.log(error)
+        console.error('Error emitted from webSocket instance:')
+        console.error(error)
       })
 
       this.hocuspocus.handleConnection(incoming, request)
@@ -195,8 +195,6 @@ export class Server {
       } catch (error) {
         console.error(error)
       }
-
-      this.hocuspocus.debugger.flush()
 
     })
 

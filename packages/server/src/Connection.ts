@@ -1,15 +1,13 @@
 import type { IncomingMessage as HTTPIncomingMessage } from 'http'
-import AsyncLock from 'async-lock'
 import type WebSocket from 'ws'
 import type {
   CloseEvent} from '@hocuspocus/common'
-import { ConnectionTimeout, Forbidden, WsReadyStates,
+import { ConnectionTimeout, ResetConnection, WsReadyStates,
 } from '@hocuspocus/common'
 import type Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
 import { MessageReceiver } from './MessageReceiver.js'
-import type { Debugger } from './Debugger.js'
 import type { onStatelessPayload } from './types.js'
 
 export class Connection {
@@ -36,11 +34,7 @@ export class Connection {
 
   socketId: string
 
-  lock: AsyncLock
-
   readOnly: boolean
-
-  logger: Debugger
 
   /**
    * Constructor.
@@ -53,7 +47,6 @@ export class Connection {
     socketId: string,
     context: any,
     readOnly = false,
-    logger: Debugger,
   ) {
     this.webSocket = connection
     this.context = context
@@ -62,9 +55,6 @@ export class Connection {
     this.timeout = timeout
     this.socketId = socketId
     this.readOnly = readOnly
-    this.logger = logger
-
-    this.lock = new AsyncLock()
 
     this.webSocket.binaryType = 'nodebuffer'
     this.document.addConnection(this)
@@ -139,12 +129,6 @@ export class Connection {
     const message = new OutgoingMessage(this.document.name)
       .writeStateless(payload)
 
-    this.logger.log({
-      direction: 'out',
-      type: message.type,
-      category: message.category,
-    })
-
     this.send(
       message.toUint8Array(),
     )
@@ -154,8 +138,6 @@ export class Connection {
    * Graceful wrapper around the WebSocket close method.
    */
   close(event?: CloseEvent): void {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    this.lock.acquire('close', (done: Function) => {
       if (this.pingInterval) {
         clearInterval(this.pingInterval)
       }
@@ -169,11 +151,8 @@ export class Connection {
         this.send(closeMessage.toUint8Array())
       }
 
-      this.webSocket.removeListener('close', this.boundClose)
-      this.webSocket.removeListener('pong', this.boundHandlePong)
-
-      done()
-    })
+    this.webSocket.removeListener('close', this.boundClose)
+    this.webSocket.removeListener('pong', this.boundHandlePong)
   }
 
   /**
@@ -208,12 +187,6 @@ export class Connection {
     const awarenessMessage = new OutgoingMessage(this.document.name)
       .createAwarenessUpdateMessage(this.document.awareness)
 
-    this.logger.log({
-      direction: 'out',
-      type: awarenessMessage.type,
-      category: awarenessMessage.category,
-    })
-
     this.send(awarenessMessage.toUint8Array())
   }
 
@@ -233,14 +206,13 @@ export class Connection {
       .then(() => {
         new MessageReceiver(
           message,
-          this.logger,
         ).apply(this.document, this)
       })
       .catch((e: any) => {
         console.log('closing connection because of exception', e)
         this.close({
-          code: 'code' in e ? e.code : Forbidden.code,
-          reason: 'reason' in e ? e.reason : Forbidden.reason,
+          code: 'code' in e ? e.code : ResetConnection.code,
+          reason: 'reason' in e ? e.reason : ResetConnection.reason,
         })
       })
   }
