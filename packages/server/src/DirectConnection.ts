@@ -1,5 +1,5 @@
 import { URLSearchParams } from 'url'
-import Document from './Document.js'
+import type Document from './Document.js'
 import type { Hocuspocus } from './Hocuspocus.js'
 import type { DirectConnection as DirectConnectionInterface } from './types.js'
 
@@ -25,7 +25,7 @@ export class DirectConnection implements DirectConnectionInterface {
     this.document.addDirectConnection()
   }
 
-  async transact(transaction: (document: Document) => void, transactionOrigin?: any) {
+  async transact(transaction: (document: Document) => void) {
     if (!this.document) {
       throw new Error('direct connection closed')
     }
@@ -41,13 +41,11 @@ export class DirectConnection implements DirectConnectionInterface {
       requestHeaders: {},
       requestParameters: new URLSearchParams(),
       socketId: 'server',
-      transactionOrigin,
     }, true)
   }
 
   async disconnect() {
     if (this.document) {
-
       this.document?.removeDirectConnection()
 
       await this.instance.storeDocumentHooks(this.document, {

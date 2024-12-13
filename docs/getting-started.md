@@ -23,10 +23,10 @@ yarn add @hocuspocus/server y-protocols yjs
 ### Usage
 
 ```js
-import { Hocuspocus } from "@hocuspocus/server";
+import { Server } from "@hocuspocus/server";
 
 // Configure the server …
-const server = new Hocuspocus({
+const server = new Server({
   port: 1234,
 });
 

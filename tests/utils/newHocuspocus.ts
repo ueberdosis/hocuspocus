@@ -1,7 +1,8 @@
-import { Hocuspocus, Configuration } from '@hocuspocus/server'
+import type { ServerConfiguration } from '@hocuspocus/server'
+import { Server } from '@hocuspocus/server'
 
-export const newHocuspocus = (options?: Partial<Configuration>) => {
-  const server = new Hocuspocus({
+export const newHocuspocus = (options?: Partial<ServerConfiguration>) => {
+  const server = new Server({
     // We don’t need the logging in testing.
     quiet: true,
     // Binding something port 0 will end up on a random free port.

@@ -1,7 +1,8 @@
 export default class EventEmitter {
-
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   public callbacks: { [key: string]: Function[] } = {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   public on(event: string, fn: Function): this {
     if (!this.callbacks[event]) {
       this.callbacks[event] = []
@@ -22,6 +23,7 @@ export default class EventEmitter {
     return this
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   public off(event: string, fn?: Function): this {
     const callbacks = this.callbacks[event]
 

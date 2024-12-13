@@ -70,11 +70,11 @@ test('executes the onAuthenticated callback when token is provided as a function
 test('sets correct scope for readonly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onAuthenticate({ token, connection }) {
+      async onAuthenticate({ token, connectionConfig }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
         }
-        connection.readOnly = true
+        connectionConfig.readOnly = true
       },
     })
 

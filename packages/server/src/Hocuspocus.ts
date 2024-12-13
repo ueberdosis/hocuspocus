@@ -1,21 +1,18 @@
-import { IncomingMessage } from 'http'
-import { ListenOptions } from 'net'
+import type { IncomingMessage } from 'http'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
-import kleur from 'kleur'
 import { v4 as uuid } from 'uuid'
-import WebSocket, { AddressInfo } from 'ws'
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
-import meta from '../package.json' assert { type: 'json' }
-import { Server as HocuspocusServer } from './Server.js'
+import type WebSocket from 'ws'
+import type { Doc} from 'yjs'
+import { applyUpdate, encodeStateAsUpdate } from 'yjs'
+import meta from '../package.json' with { type: 'json' }
+import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
-// TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
-import Connection from './Connection.js'
-import { Debugger } from './Debugger.js'
+import type Connection from './Connection.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
-import {
+import type {
   AwarenessUpdate,
   Configuration,
   ConnectionConfiguration,
@@ -24,7 +21,6 @@ import {
   beforeBroadcastStatelessPayload,
   onChangePayload,
   onDisconnectPayload,
-  onListenPayload,
   onStoreDocumentPayload,
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
@@ -32,8 +28,6 @@ import { useDebounce } from './util/debounce.js'
 
 export const defaultConfiguration = {
   name: null,
-  port: 80,
-  address: '0.0.0.0',
   timeout: 30000,
   debounce: 2000,
   maxDebounce: 10000,
@@ -43,12 +37,8 @@ export const defaultConfiguration = {
     gcFilter: () => true,
   },
   unloadImmediately: true,
-  stopOnSignals: true,
 }
 
-/**
- * Hocuspocus Server
- */
 export class Hocuspocus {
   configuration: Configuration = {
     ...defaultConfiguration,
@@ -76,9 +66,7 @@ export class Hocuspocus {
 
   documents: Map<string, Document> = new Map()
 
-  server?: HocuspocusServer
-
-  debugger = new Debugger()
+  server?: Server
 
   debouncer = useDebounce()
 
@@ -89,7 +77,7 @@ export class Hocuspocus {
   }
 
   /**
-   * Configure the server
+   * Configure Hocuspocus
    */
   configure(configuration: Partial<Configuration>): Hocuspocus {
     this.configuration = {
@@ -143,126 +131,6 @@ export class Hocuspocus {
     return this
   }
 
-  get requiresAuthentication(): boolean {
-    return !!this.configuration.extensions.find(extension => {
-      return extension.onAuthenticate !== undefined
-    })
-  }
-
-  /**
-   * Start the server
-   */
-  async listen(
-    portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
-    callback: any = null,
-    websocketOptions: WebSocket.ServerOptions = {},
-  ): Promise<Hocuspocus> {
-    if (typeof portOrCallback === 'number') {
-      this.configuration.port = portOrCallback
-    }
-
-    if (typeof portOrCallback === 'function') {
-      this.configuration.extensions.push({
-        onListen: portOrCallback,
-      })
-    }
-
-    if (typeof callback === 'function') {
-      this.configuration.extensions.push({
-        onListen: callback,
-      })
-    }
-
-    this.server = new HocuspocusServer(this, websocketOptions)
-
-    if (this.configuration.stopOnSignals) {
-      const signalHandler = async () => {
-        await this.destroy()
-        process.exit(0)
-      }
-
-      process.on('SIGINT', signalHandler)
-      process.on('SIGQUIT', signalHandler)
-      process.on('SIGTERM', signalHandler)
-    }
-
-    return new Promise((resolve: Function, reject: Function) => {
-      this.server?.httpServer.listen({
-        port: this.configuration.port,
-        host: this.configuration.address,
-      } as ListenOptions, async () => {
-        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
-          this.showStartScreen()
-        }
-
-        const onListenPayload = {
-          instance: this,
-          configuration: this.configuration,
-          port: this.address.port,
-        }
-
-        try {
-          await this.hooks('onListen', onListenPayload)
-          resolve(this)
-        } catch (e) {
-          reject(e)
-        }
-      })
-    })
-  }
-
-  get address(): AddressInfo {
-    return (this.server?.httpServer?.address() || {
-      port: this.configuration.port,
-      address: this.configuration.address,
-      family: 'IPv4',
-    }) as AddressInfo
-  }
-
-  get URL(): string {
-    return `${this.configuration.address}:${this.address.port}`
-  }
-
-  get webSocketURL(): string {
-    return `ws://${this.URL}`
-  }
-
-  get httpURL(): string {
-    return `http://${this.URL}`
-  }
-
-  private showStartScreen() {
-    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
-
-    console.log()
-    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
-    console.log()
-    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
-    console.log(`  > WebSocket: ${this.webSocketURL}`)
-
-    const extensions = this.configuration?.extensions.map(extension => {
-      return extension.extensionName ?? extension.constructor?.name
-    })
-      .filter(name => name)
-      .filter(name => name !== 'Object')
-
-    if (!extensions.length) {
-      return
-    }
-
-    console.log()
-    console.log('  Extensions:')
-
-    extensions
-      .forEach(name => {
-        console.log(`  - ${name}`)
-      })
-
-    console.log()
-    console.log(`  ${kleur.green('Ready.')}`)
-    console.log()
-  }
-
   /**
    * Get the total number of active documents
    */
@@ -300,38 +168,6 @@ export class Hocuspocus {
   }
 
   /**
-   * Destroy the server
-   */
-  async destroy(): Promise<any> {
-    await new Promise(async resolve => {
-
-      this.server?.httpServer?.close()
-
-      try {
-
-        this.configuration.extensions.push({
-          async afterUnloadDocument({ instance }) {
-            if (instance.getDocumentsCount() === 0) resolve('')
-          },
-        })
-
-        this.server?.webSocketServer?.close()
-        if (this.getDocumentsCount() === 0) resolve('')
-
-        this.closeConnections()
-
-      } catch (error) {
-        console.error(error)
-      }
-
-      this.debugger.flush()
-
-    })
-
-    await this.hooks('onDestroy', { instance: this })
-  }
-
-  /**
    * The `handleConnection` method receives incoming WebSocket connections,
    * runs all hooks:
    *
@@ -342,8 +178,7 @@ export class Hocuspocus {
    * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
-    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
-      requiresAuthentication: this.requiresAuthentication,
+    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), {
       timeout: this.configuration.timeout,
     }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
@@ -439,7 +274,7 @@ export class Hocuspocus {
     return loadDocPromise
   }
 
-  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connectionConfig: ConnectionConfiguration, context?: any): Promise<Document> {
     const requestHeaders = request.headers ?? {}
     const requestParameters = getParameters(request)
 
@@ -447,13 +282,13 @@ export class Hocuspocus {
       documentName,
       requestHeaders,
       requestParameters,
-      connection,
+      connectionConfig,
       context,
       socketId,
       instance: this,
     })
 
-    const document = new Document(documentName, this.debugger, {
+    const document = new Document(documentName, {
       ...this.configuration.yDocOptions,
       ...yDocOptions,
     })
@@ -462,7 +297,7 @@ export class Hocuspocus {
     const hookPayload = {
       instance: this,
       context,
-      connection,
+      connectionConfig,
       document,
       documentName,
       socketId,
@@ -551,6 +386,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
@@ -591,38 +427,10 @@ export class Hocuspocus {
     this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
 
-  enableDebugging() {
-    this.debugger.enable()
-  }
-
-  enableMessageLogging() {
-    this.debugger.enable()
-    this.debugger.verbose()
-  }
-
-  disableLogging() {
-    this.debugger.quiet()
-  }
-
-  disableDebugging() {
-    this.debugger.disable()
-  }
-
-  flushMessageLogs() {
-    this.debugger.flush()
-
-    return this
-  }
-
-  getMessageLogs() {
-    return this.debugger.get()?.logs
-  }
-
   async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,
-      requiresAuthentication: true,
     }
 
     const document: Document = await this.createDocument(
@@ -636,5 +444,3 @@ export class Hocuspocus {
     return new DirectConnection(document, this, context)
   }
 }
-
-export const Server = new Hocuspocus()

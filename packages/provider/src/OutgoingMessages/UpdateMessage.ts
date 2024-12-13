@@ -1,6 +1,7 @@
 import { writeVarString, writeVarUint } from 'lib0/encoding'
 import { writeUpdate } from 'y-protocols/sync'
-import { MessageType, OutgoingMessageArguments } from '../types.js'
+import type { OutgoingMessageArguments } from '../types.js'
+import { MessageType } from '../types.js'
 import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class UpdateMessage extends OutgoingMessage {

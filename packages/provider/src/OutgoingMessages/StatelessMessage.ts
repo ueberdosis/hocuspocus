@@ -1,5 +1,6 @@
 import { writeVarString, writeVarUint } from 'lib0/encoding'
-import { MessageType, OutgoingMessageArguments } from '../types.js'
+import type { OutgoingMessageArguments } from '../types.js'
+import { MessageType } from '../types.js'
 import { OutgoingMessage } from '../OutgoingMessage.js'
 
 export class StatelessMessage extends OutgoingMessage {

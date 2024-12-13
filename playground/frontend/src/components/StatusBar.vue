@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, onMounted } from 'vue'
-import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import type { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
 
 const status = ref('')
 const props = defineProps<{

@@ -1,5 +1,6 @@
+import type { IncomingMessage, ServerResponse, Server as HTTPServer} from 'http'
 import {
-  createServer, IncomingMessage, ServerResponse, Server as HTTPServer,
+  createServer,
 } from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { Server } from '@hocuspocus/server'
@@ -10,7 +11,7 @@ import { Events, Webhook } from '@hocuspocus/extension-webhook'
 /*
  * Setup server
  */
-const server = Server.configure({
+const server = new Server({
   port: 1234,
   extensions: [
     new Logger(),

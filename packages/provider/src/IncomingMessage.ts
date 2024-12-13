@@ -1,20 +1,22 @@
+import type {
+  Decoder} from 'lib0/decoding'
 import {
   createDecoder,
   peekVarString,
   readVarUint,
   readVarUint8Array,
   readVarString,
-  Decoder,
 } from 'lib0/decoding'
+import type {
+  Encoder} from 'lib0/encoding'
 import {
-  Encoder,
   createEncoder,
   writeVarUint,
   writeVarUint8Array,
   writeVarString,
   length,
 } from 'lib0/encoding'
-import { MessageType } from './types.js'
+import type { MessageType } from './types.js'
 
 export class IncomingMessage {
 
