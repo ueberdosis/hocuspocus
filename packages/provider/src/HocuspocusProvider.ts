@@ -244,10 +244,14 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   decrementUnsyncedChanges() {
-    this.unsyncedChanges -= 1
+    if( this.unsyncedChanges > 0 ) {
+      this.unsyncedChanges -= 1
+    }
+
     if (this.unsyncedChanges === 0) {
       this.synced = true
     }
+
     this.emit('unsyncedChanges', this.unsyncedChanges)
   }
 
@@ -310,8 +314,10 @@ export class HocuspocusProvider extends EventEmitter {
     }
 
     this.isSynced = state
-    this.emit('synced', { state })
-    this.emit('sync', { state })
+
+    if( state ) {
+      this.emit('synced', { state })
+    }
   }
 
   receiveStateless(payload: string) {
@@ -436,15 +442,23 @@ export class HocuspocusProvider extends EventEmitter {
     this.send(CloseMessage, { documentName: this.configuration.name })
     this.configuration.websocketProvider.detach(this)
 
-    if (typeof window === 'undefined' || !('removeEventListener' in window)) {
-      return
-    }
-
     if( this.manageSocket ) {
       this.configuration.websocketProvider.destroy()
     }
 
+    if (typeof window === 'undefined' || !('removeEventListener' in window)) {
+      return
+    }
+
     window.removeEventListener('pagehide', this.boundPageHide)
+  }
+
+  detach() {
+    this.configuration.websocketProvider.detach(this)
+  }
+
+  attach() {
+    this.configuration.websocketProvider.attach(this)
   }
 
   permissionDeniedHandler(reason: string) {

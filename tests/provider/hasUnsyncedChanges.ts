@@ -40,8 +40,8 @@ test('has unsynced changes when updating', async t => {
 
 test('has unsynced changes when in readonly mode', async t => {
   const server = await newHocuspocus({
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
+    async onAuthenticate({ connectionConfig }) {
+      connectionConfig.readOnly = true
     },
   })
 
@@ -61,8 +61,8 @@ test('has unsynced changes when in readonly mode', async t => {
 
 test('has no unsynced changes when in readonly mode and no changes', async t => {
   const server = await newHocuspocus({
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
+    async onAuthenticate({ connectionConfig }) {
+      connectionConfig.readOnly = true
     },
   })
 
@@ -88,9 +88,9 @@ test('has no unsynced changes when in readonly mode and no changes', async t => 
 
 test('has unsynced changes when in readonly mode and receiving external update', async t => {
   const server = await newHocuspocus({
-    async onAuthenticate({ connection, token }) {
+    async onAuthenticate({ connectionConfig, token }) {
       if (token === 'readonly') {
-        connection.readOnly = true
+        connectionConfig.readOnly = true
       }
     },
   })
@@ -124,8 +124,8 @@ test('has unsynced changes when in readonly mode and receiving external update',
 
 test('has unsynced changes when in readonly mode and initial document has changed', async t => {
   const server = await newHocuspocus({
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
+    async onAuthenticate({ connectionConfig }) {
+      connectionConfig.readOnly = true
     },
   })
 
@@ -152,8 +152,8 @@ test('has unsynced changes when in readonly mode and initial document has change
     async onLoadDocument() {
       return initialState
     },
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
+    async onAuthenticate({ connectionConfig }) {
+      connectionConfig.readOnly = true
     },
   })
 
@@ -172,8 +172,8 @@ test('has unsynced changes when in readonly mode and initial document has change
 
 test('has no unsynced changes when in readonly mode and initial document has not changed', async t => {
   const server = await newHocuspocus({
-    async onAuthenticate({ connection }) {
-      connection.readOnly = true
+    async onAuthenticate({ connectionConfig }) {
+      connectionConfig.readOnly = true
     },
   })
 

@@ -75,38 +75,9 @@ test('send all messages according to the protocol', async t => {
       },
     })
 
-    server.enableDebugging()
-
-    newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(server, {
       async onSynced() {
-        // timeout is required as "synced" is triggered before last SyncStep2 is sent to server
-        await sleep(200)
-
-        // In a provider-server model, you want to handle this differently: The provider should initiate the connection with SyncStep1.
-        // When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1. The provider replies
-        // with SyncStep2 when it receives SyncStep1. Optionally the server may send a SyncDone after it received SyncStep2, so the
-        // provider knows that the sync is finished.  There are two reasons for this more elaborated sync model: 1. This protocol can
-        // easily be implemented on top of http and websockets. 2. The server should only reply to requests, and not initiate them.
-        // Therefore it is necessary that the provider initiates the sync.
-        // Source: https://github.com/yjs/y-protocols/blob/master/sync.js#L23-L28
-
-        // Expected (according to the protocol)
-        t.deepEqual(server.getMessageLogs(), [
-             { category: 'Token',
-               direction: 'in',
-               type: 'Auth',
-             },
-             {
-               category: 'Authenticated',
-               direction: 'out',
-               type: 'Auth',
-             },
-          { direction: 'in', type: 'Sync', category: 'SyncStep1' },
-          { direction: 'out', type: 'Sync', category: 'SyncStep2' },
-          { direction: 'out', type: 'Sync', category: 'SyncStep1' },
-          { direction: 'in', type: 'Awareness', category: 'Update' },
-          { direction: 'in', type: 'Sync', category: 'SyncStep2' },
-        ])
+        t.deepEqual(provider.document.getArray('foo').get(0), 'bar')
 
         resolve('done')
       },

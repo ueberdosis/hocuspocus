@@ -42,13 +42,13 @@ test('passes the context and connection to the onLoadDocument callback', async t
     }
 
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        connection.readOnly = true
+      async onConnect({ connectionConfig }) {
+        connectionConfig.readOnly = true
         return mockContext
       },
-      async onLoadDocument({ context, connection }) {
+      async onLoadDocument({ context, connectionConfig }) {
         t.deepEqual(context, mockContext)
-        t.deepEqual(connection, {
+        t.deepEqual(connectionConfig, {
           readOnly: true,
           isAuthenticated: true,
         })
@@ -64,8 +64,8 @@ test('passes the context and connection to the onLoadDocument callback', async t
 test('sets the provider to readOnly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onLoadDocument({ connection }) {
-        connection.readOnly = true
+      async onLoadDocument({ connectionConfig }) {
+        connectionConfig.readOnly = true
       },
     })
 

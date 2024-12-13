@@ -11,7 +11,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
 // import sizes from '@atomico/rollup-plugin-sizes'
-// import autoExternal from 'rollup-plugin-auto-external'
+import autoExternal from 'rollup-plugin-auto-external'
 // import importAssertions from 'rollup-plugin-import-assertions'
 
 const __filename = fileURLToPath(import.meta.url) 
@@ -82,9 +82,9 @@ async function build(commandLineArgs) {
         },
       ],
       plugins: [
-        // autoExternal({
-          // packagePath: path.join(basePath, 'package.json'),
-        // }),
+        autoExternal({
+          packagePath: path.join(basePath, 'package.json'),
+        }),
         ...basePlugins,
         typescript({
           tsconfigOverride: {
