@@ -222,5 +222,5 @@ await docConnection.transact((doc) => {
   doc.getMap('test').set('a', 'b');
 });
 
-docConnection.disconnect()
+await docConnection.disconnect()
 ```
