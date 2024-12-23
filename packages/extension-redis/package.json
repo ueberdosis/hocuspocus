@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@hocuspocus/server": "^2.15.0",
-    "ioredis": "^4.28.2",
+    "ioredis": "^5.4.2",
     "kleur": "^4.1.4",
     "lodash.debounce": "^4.0.8",
     "redlock": "^4.2.0",
