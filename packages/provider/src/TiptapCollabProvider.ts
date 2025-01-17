@@ -476,7 +476,11 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     newComment.set('data', comment.get('data'))
     newComment.set('content', deleteContent ? null : comment.get('content'))
 
+    if (!thread.get('deletedComments')) {
+      thread.set('deletedComments', new Y.Array())
+    }
     thread.get('deletedComments').push([newComment])
+
     thread.get('comments').delete(commentIndex)
 
     return thread.toJSON() as TCollabThread
