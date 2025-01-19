@@ -274,10 +274,17 @@ export class Hocuspocus {
    * Get the total number of active connections
    */
   getConnectionsCount(): number {
-    return Array.from(this.documents.values()).reduce((acc, document) => {
-      acc += document.getConnectionsCount()
-      return acc
+    const uniqueSocketIds = new Set<string>()
+    const totalDirectConnections = Array.from(this.documents.values()).reduce((acc, document) => {
+      // Accumulate unique socket IDs
+      document.getConnections().forEach(({ socketId }) => {
+        uniqueSocketIds.add(socketId)
+      })
+      // Accumulate direct connections
+      return acc + document.directConnectionsCount
     }, 0)
+    // Return the sum of unique socket IDs and direct connections
+    return uniqueSocketIds.size + totalDirectConnections
   }
 
   /**

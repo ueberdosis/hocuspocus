@@ -42,7 +42,7 @@ test('server closes connection only after receiving close event from all connect
     })
 
     await retryableAssertion(t, t2 => {
-      t2.is(server.getConnectionsCount(), 2)
+      t2.is(server.getConnectionsCount(), 1)
     })
 
     socket.shouldConnect = false

@@ -362,7 +362,7 @@ test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', asyn
     tt.is(providerOK.status, WebSocketStatus.Connected)
     tt.is(providerReadOnly.status, WebSocketStatus.Connected)
     tt.is(server.getDocumentsCount(), 2)
-    tt.is(server.getConnectionsCount(), 2)
+    tt.is(server.getConnectionsCount(), 1)
     tt.is(socket.status, WebSocketStatus.Connected)
   })
 
