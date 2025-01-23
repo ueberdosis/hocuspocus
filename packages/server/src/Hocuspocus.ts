@@ -530,14 +530,14 @@ export class Hocuspocus {
       () => {
         return this.hooks('onStoreDocument', hookPayload)
           .then(() => {
-            this.hooks('afterStoreDocument', hookPayload).then(() => {
+            this.hooks('afterStoreDocument', hookPayload).then(async () => {
               // Remove document from memory.
 
               if (document.getConnectionsCount() > 0) {
                 return
               }
 
-              this.unloadDocument(document)
+              await this.unloadDocument(document)
             })
           })
           .catch(error => {
@@ -589,13 +589,13 @@ export class Hocuspocus {
     return chain
   }
 
-  unloadDocument(document: Document) {
+  async unloadDocument(document: Document): Promise<any> {
     const documentName = document.name
     if (!this.documents.has(documentName)) return
 
     this.documents.delete(documentName)
     document.destroy()
-    this.hooks('afterUnloadDocument', { instance: this, documentName })
+    await this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
 
   enableDebugging() {
