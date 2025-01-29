@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.1-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.0...v2.15.1-rc.0) (2025-01-29)
+
+**Note:** Version bump only for package tests
+
+
+
+
+
 # [2.15.0](https://github.com/ueberdosis/hocuspocus/compare/v2.14.0...v2.15.0) (2024-12-10)
 
 **Note:** Version bump only for package tests
