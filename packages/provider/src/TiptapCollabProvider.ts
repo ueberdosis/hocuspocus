@@ -443,7 +443,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
    * @param options A set of options that control how the comment is deleted
    * @returns The updated thread or null if the thread or comment is not found
    */
-  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], options: DeleteCommentOptions) {
+  deleteComment(threadId: TCollabThread['id'], commentId: TCollabComment['id'], options?: DeleteCommentOptions) {
     const { deleteContent, deleteThread } = { ...defaultDeleteCommentOptions, ...options }
 
     const thread = this.getYThread(threadId)
