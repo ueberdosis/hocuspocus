@@ -76,7 +76,7 @@ export class DirectConnection implements DirectConnectionInterface {
           requestParameters: new URLSearchParams(),
         })
 
-        await this.instance.unloadDocument(this.document);
+        await this.instance.unloadDocument(this.document)
       }
 
       this.document = null
