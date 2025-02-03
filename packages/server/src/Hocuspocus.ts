@@ -593,6 +593,8 @@ export class Hocuspocus {
     const documentName = document.name
     if (!this.documents.has(documentName)) return
 
+    await this.hooks('beforeUnloadDocument', { instance: this, documentName })
+
     this.documents.delete(documentName)
     document.destroy()
     await this.hooks('afterUnloadDocument', { instance: this, documentName })
