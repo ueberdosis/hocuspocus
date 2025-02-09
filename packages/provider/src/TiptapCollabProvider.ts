@@ -82,8 +82,8 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
    */
-  createVersion(name?: string) {
-    return this.sendStateless(JSON.stringify({ action: 'version.create', name }))
+  createVersion(name?: string, force = false) {
+    return this.sendStateless(JSON.stringify({ action: 'version.create', name, force }))
   }
 
   /**
