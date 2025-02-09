@@ -34,7 +34,8 @@ export type TiptapCollabProviderConfiguration =
   (Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>> |
   Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>|
   Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>) &
-  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'> & {
+  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'> &
+  Pick<AdditionalTiptapCollabProviderConfiguration, 'shard'> & {
     /**
      * Pass `true` if you want to delete a thread when the first comment is deleted.
      */
@@ -52,6 +53,8 @@ export interface AdditionalTiptapCollabProviderConfiguration {
    */
   baseUrl?: string
 
+  shard?: string
+
   websocketProvider?: TiptapCollabProviderWebsocket
 
   user?: string
@@ -64,7 +67,19 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
   constructor(configuration: TiptapCollabProviderConfiguration) {
     if (!configuration.websocketProvider) {
-      configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>).appId, baseUrl: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>).baseUrl })
+      let { baseUrl } = configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>
+      const { shard } = configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'shard'>>
+
+      if (shard) {
+        baseUrl += baseUrl.includes('?')
+          ? `&shard=${encodeURIComponent(shard)}`
+          : `?shard=${encodeURIComponent(shard)}`
+      }
+
+      configuration.websocketProvider = new TiptapCollabProviderWebsocket({
+        appId: (configuration as Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>).appId,
+        baseUrl,
+      })
     }
 
     if (!configuration.token) {
