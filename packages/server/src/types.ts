@@ -53,6 +53,7 @@ export interface Extension {
   onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
   onRequest?(data: onRequestPayload): Promise<any>;
   onDisconnect?(data: onDisconnectPayload): Promise<any>;
+  beforeUnloadDocument?(data: beforeUnloadDocumentPayload): Promise<any>;
   afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
   onDestroy?(data: onDestroyPayload): Promise<any>;
 }
@@ -76,6 +77,7 @@ export type HookName =
   'onAwarenessUpdate' |
   'onRequest' |
   'onDisconnect' |
+  'beforeUnloadDocument' |
   'afterUnloadDocument' |
   'onDestroy'
 
@@ -99,6 +101,7 @@ export type HookPayloadByName = {
   onRequest: onRequestPayload,
   onDisconnect: onDisconnectPayload,
   afterUnloadDocument: afterUnloadDocumentPayload,
+  beforeUnloadDocument: beforeUnloadDocumentPayload,
   onDestroy: onDestroyPayload,
 }
 export interface Configuration extends Extension {
@@ -368,6 +371,11 @@ export interface onConfigurePayload {
 }
 
 export interface afterUnloadDocumentPayload {
+  instance: Hocuspocus;
+  documentName: string;
+}
+
+export interface beforeUnloadDocumentPayload {
   instance: Hocuspocus;
   documentName: string;
 }

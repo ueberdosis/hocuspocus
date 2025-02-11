@@ -274,10 +274,17 @@ export class Hocuspocus {
    * Get the total number of active connections
    */
   getConnectionsCount(): number {
-    return Array.from(this.documents.values()).reduce((acc, document) => {
-      acc += document.getConnectionsCount()
-      return acc
+    const uniqueSocketIds = new Set<string>()
+    const totalDirectConnections = Array.from(this.documents.values()).reduce((acc, document) => {
+      // Accumulate unique socket IDs
+      document.getConnections().forEach(({ socketId }) => {
+        uniqueSocketIds.add(socketId)
+      })
+      // Accumulate direct connections
+      return acc + document.directConnectionsCount
     }, 0)
+    // Return the sum of unique socket IDs and direct connections
+    return uniqueSocketIds.size + totalDirectConnections
   }
 
   /**
@@ -523,14 +530,14 @@ export class Hocuspocus {
       () => {
         return this.hooks('onStoreDocument', hookPayload)
           .then(() => {
-            this.hooks('afterStoreDocument', hookPayload).then(() => {
+            this.hooks('afterStoreDocument', hookPayload).then(async () => {
               // Remove document from memory.
 
               if (document.getConnectionsCount() > 0) {
                 return
               }
 
-              this.unloadDocument(document)
+              await this.unloadDocument(document)
             })
           })
           .catch(error => {
@@ -582,13 +589,15 @@ export class Hocuspocus {
     return chain
   }
 
-  unloadDocument(document: Document) {
+  async unloadDocument(document: Document): Promise<any> {
     const documentName = document.name
     if (!this.documents.has(documentName)) return
 
+    await this.hooks('beforeUnloadDocument', { instance: this, documentName })
+
     this.documents.delete(documentName)
     document.destroy()
-    this.hooks('afterUnloadDocument', { instance: this, documentName })
+    await this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
 
   enableDebugging() {

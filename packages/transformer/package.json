@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/transformer",
-  "version": "2.14.0",
+  "version": "2.15.2",
   "description": "hocuspocus transformation utilities",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -28,16 +28,16 @@
     "dist"
   ],
   "dependencies": {
-    "@tiptap/core": "^2.1.12",
-    "@tiptap/starter-kit": "^2.1.12"
+    "@tiptap/starter-kit": "^2.6.4"
   },
   "peerDependencies": {
-    "@tiptap/pm": "^2.1.12",
+    "@tiptap/core": "^2.6.4",
+    "@tiptap/pm": "^2.6.4",
     "y-prosemirror": "^1.2.1",
     "yjs": "^13.6.8"
   },
   "devDependencies": {
-    "@tiptap/pm": "^2.1.12"
+    "@tiptap/pm": "^2.6.4"
   },
   "gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
 }
