@@ -41,6 +41,10 @@ export class Connection {
 
   logger: Debugger
 
+  private beforeHandleMessageQueue: Uint8Array[] = []
+
+  private beforeHandleMessageProcessing = false
+
   /**
    * Constructor.
    */
@@ -216,21 +220,40 @@ export class Connection {
    * @public
    */
   public handleMessage(data: Uint8Array): void {
+    if (this.beforeHandleMessageQueue.length > 0 || this.beforeHandleMessageProcessing) {
+      this.beforeHandleMessageQueue.push(data)
+      return
+    }
+
+    this.processBeforeHandleMessage(data)
+  }
+
+  /** Process an incoming message */
+  private processBeforeHandleMessage(data: Uint8Array): void {
+    this.beforeHandleMessageProcessing = true
+
     const message = new IncomingMessage(data)
     const documentName = message.readVarString()
 
-    if (documentName !== this.document.name) return
+    if (documentName !== this.document.name) {
+      this.nextProcessBeforeHandleMessage()
+      return
+    }
 
     message.writeVarString(documentName)
 
     this.callbacks.beforeHandleMessage(this, data)
       .then(() => {
+        this.nextProcessBeforeHandleMessage()
+
         new MessageReceiver(
           message,
           this.logger,
         ).apply(this.document, this)
       })
       .catch((e: any) => {
+        this.nextProcessBeforeHandleMessage()
+
         console.log('closing connection because of exception', e)
         this.close({
           code: 'code' in e ? e.code : Forbidden.code,
@@ -239,6 +262,14 @@ export class Connection {
       })
   }
 
+  /** Process next an incoming message */
+  private nextProcessBeforeHandleMessage(): void {
+    this.beforeHandleMessageProcessing = false
+
+    if (this.beforeHandleMessageQueue.length > 0) {
+      this.processBeforeHandleMessage(this.beforeHandleMessageQueue.shift()!)
+    }
+  }
 }
 
 export default Connection
