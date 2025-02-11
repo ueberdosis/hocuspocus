@@ -120,6 +120,7 @@ export class Connection {
       || this.webSocket.readyState === WsReadyStates.Closed
     ) {
       this.close()
+      return
     }
 
     try {
