@@ -163,15 +163,6 @@ export class ClientConnection {
       return this.hooks('beforeHandleMessage', beforeHandleMessagePayload)
     })
 
-    // If the WebSocket has already disconnected (wow, that was fast) – then
-    // immediately call close to cleanup the connection and document in memory.
-    if (
-      connection.readyState === WsReadyStates.Closing
-      || connection.readyState === WsReadyStates.Closed
-    ) {
-      instance.close()
-    }
-
     return instance
   }
 
@@ -198,13 +189,23 @@ export class ClientConnection {
 
     this.documentConnections[documentName] = instance
 
+    // If the WebSocket has already disconnected (wow, that was fast) – then
+    // immediately call close to cleanup the connection and document in memory.
+    if (
+      this.websocket.readyState === WsReadyStates.Closing
+      || this.websocket.readyState === WsReadyStates.Closed
+    ) {
+      instance.close()
+      return
+    }
+
     // There’s no need to queue messages anymore.
     // Let’s work through queued messages.
     this.incomingMessageQueue[documentName].forEach(input => {
       this.websocket.emit('message', input)
     })
 
-    this.hooks('connected', {
+    await this.hooks('connected', {
       ...hookPayload,
       documentName,
       context: hookPayload.context,
