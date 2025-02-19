@@ -35,7 +35,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/sqlite3": "^3.1.11"
+    "@types/sqlite3": "^5.1.0"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }
