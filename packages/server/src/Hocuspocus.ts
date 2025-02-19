@@ -527,31 +527,17 @@ export class Hocuspocus {
   storeDocumentHooks(document: Document, hookPayload: onStoreDocumentPayload, immediately?: boolean) {
     return this.debouncer.debounce(
       `onStoreDocument-${document.name}`,
-      () => {
-        return this.hooks('onStoreDocument', hookPayload)
-          .then(() => {
-            this.hooks('afterStoreDocument', hookPayload).then(async () => {
-              // Remove document from memory.
+      async () => {
+        await this.hooks('onStoreDocument', hookPayload)
+        await this.hooks('afterStoreDocument', hookPayload)
 
-              if (document.getConnectionsCount() > 0) {
-                return
-              }
-
-              await this.unloadDocument(document)
-            })
-          })
-          .catch(error => {
-            console.error('Caught error during storeDocumentHooks', error)
-
-            if (error?.message) {
-              throw error
-            }
-          })
+        if (document.getConnectionsCount() === 0) {
+          await this.unloadDocument(document)
+        }
       },
       immediately ? 0 : this.configuration.debounce,
       this.configuration.maxDebounce,
     )
-
   }
 
   /**

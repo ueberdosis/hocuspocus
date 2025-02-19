@@ -5,7 +5,7 @@ export const useDebounce = () => {
     func: Function
   }> = new Map()
 
-  const debounce = (
+  const debounce = async (
     id: string,
     func: Function,
     debounce: number,
@@ -31,14 +31,18 @@ export const useDebounce = () => {
       return run()
     }
 
-    timers.set(id, {
-      start,
-      timeout: setTimeout(run, debounce),
-      func: run,
+    return new Promise((resolve, reject) => {
+      const runResolveReject = () => run().then(resolve).catch(reject)
+
+      timers.set(id, {
+        start,
+        timeout: setTimeout(runResolveReject, debounce),
+        func: runResolveReject,
+      })
     })
   }
 
-  const executeNow = (id: string) => {
+  const executeNow = async (id: string) => {
     const old = timers.get(id)
     if (old) {
       clearTimeout(old.timeout)
