@@ -595,6 +595,10 @@ export class Hocuspocus {
 
     await this.hooks('beforeUnloadDocument', { instance: this, documentName })
 
+    if (document.getConnectionsCount() > 0) {
+      return
+    }
+
     this.documents.delete(documentName)
     document.destroy()
     await this.hooks('afterUnloadDocument', { instance: this, documentName })
