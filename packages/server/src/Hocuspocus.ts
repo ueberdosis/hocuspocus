@@ -400,10 +400,7 @@ export class Hocuspocus {
       transactionOrigin: connection,
     }
 
-    this.hooks('onChange', hookPayload).catch(error => {
-      // TODO: what's the intention of this catch -> throw?
-      throw error
-    })
+    this.hooks('onChange', hookPayload)
 
     // If the update was received through other ways than the
     // WebSocket connection, we don’t need to feel responsible for

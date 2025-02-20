@@ -58,8 +58,6 @@ export class Server {
         // this is only meant to prevent later hooks and the
         // default handler to do something. if a error is present
         // just rethrow it
-
-        // TODO: why?
         if (error) {
           throw error
         }
