@@ -1,5 +1,8 @@
 import { IncomingMessage } from 'http'
 import { ListenOptions } from 'net'
+import { fileURLToPath } from 'node:url'
+import fs from 'node:fs'
+import { dirname, join } from 'node:path'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
@@ -7,7 +10,6 @@ import kleur from 'kleur'
 import { v4 as uuid } from 'uuid'
 import WebSocket, { AddressInfo } from 'ws'
 import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
-import meta from '../package.json' assert { type: 'json' }
 import { Server as HocuspocusServer } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
 // TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
@@ -29,6 +31,8 @@ import {
 } from './types.js'
 import { getParameters } from './util/getParameters.js'
 import { useDebounce } from './util/debounce.js'
+
+const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
 
 export const defaultConfiguration = {
   name: null,
