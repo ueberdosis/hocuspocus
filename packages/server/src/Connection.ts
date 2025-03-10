@@ -2,7 +2,7 @@ import { IncomingMessage as HTTPIncomingMessage } from 'http'
 import AsyncLock from 'async-lock'
 import WebSocket from 'ws'
 import {
-  CloseEvent, ConnectionTimeout, Forbidden, WsReadyStates,
+  CloseEvent, Forbidden, WsReadyStates,
 } from '@hocuspocus/common'
 import Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
@@ -19,13 +19,7 @@ export class Connection {
 
   document: Document
 
-  pingInterval: NodeJS.Timeout
-
-  pongReceived = true
-
   request: HTTPIncomingMessage
-
-  timeout: number
 
   callbacks: any = {
     onClose: [(document: Document, event?: CloseEvent) => null],
@@ -48,7 +42,6 @@ export class Connection {
     connection: WebSocket,
     request: HTTPIncomingMessage,
     document: Document,
-    timeout: number,
     socketId: string,
     context: any,
     readOnly = false,
@@ -58,7 +51,6 @@ export class Connection {
     this.context = context
     this.document = document
     this.request = request
-    this.timeout = timeout
     this.socketId = socketId
     this.readOnly = readOnly
     this.logger = logger
@@ -68,20 +60,7 @@ export class Connection {
     this.webSocket.binaryType = 'nodebuffer'
     this.document.addConnection(this)
 
-    this.pingInterval = setInterval(this.check.bind(this), this.timeout)
-
-    this.webSocket.on('close', this.boundClose)
-    this.webSocket.on('pong', this.boundHandlePong)
-
     this.sendCurrentAwareness()
-  }
-
-  boundClose = this.close.bind(this)
-
-  boundHandlePong = this.handlePong.bind(this)
-
-  handlePong() {
-    this.pongReceived = true
   }
 
   /**
@@ -155,40 +134,13 @@ export class Connection {
    */
   close(event?: CloseEvent): void {
     this.lock.acquire('close', (done: Function) => {
-      if (this.pingInterval) {
-        clearInterval(this.pingInterval)
-      }
-
       if (this.document.hasConnection(this)) {
         this.document.removeConnection(this)
         this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) => callback(this.document, event))
       }
 
-      this.webSocket.removeListener('close', this.boundClose)
-      this.webSocket.removeListener('pong', this.boundHandlePong)
-
       done()
     })
-  }
-
-  /**
-   * Check if pong was received and close the connection otherwise
-   * @private
-   */
-  private check(): void {
-    if (!this.pongReceived) {
-      return this.close(ConnectionTimeout)
-    }
-
-    if (this.document.hasConnection(this)) {
-      this.pongReceived = false
-
-      try {
-        this.webSocket.ping()
-      } catch (error) {
-        this.close(ConnectionTimeout)
-      }
-    }
   }
 
   /**
