@@ -66,8 +66,6 @@ export class ClientConnection {
 
   pongReceived = true
 
-  boundHandlePong = this.handlePong.bind(this)
-
   /**
     * The `ClientConnection` class receives incoming WebSocket connections,
     * runs all hooks:
@@ -94,8 +92,8 @@ export class ClientConnection {
     private readonly defaultContext: any = {},
   ) {
     this.timeout = opts.timeout
-    this.pingInterval = setInterval(this.check.bind(this), this.timeout)
-    websocket.on('pong', this.boundHandlePong)
+    this.pingInterval = setInterval(this.check, this.timeout)
+    websocket.on('pong', this.handlePong)
 
     // Make sure to close an idle connection after a while.
     this.closeIdleConnectionTimeout = setTimeout(() => {
@@ -103,20 +101,22 @@ export class ClientConnection {
     }, opts.timeout)
 
     websocket.on('message', this.messageHandler)
-    websocket.once('close', this.handleWebsocketClose.bind(this))
+    websocket.once('close', this.handleWebsocketClose)
   }
 
-  private handleWebsocketClose(code: number, reason: Buffer) {
+  private handleWebsocketClose = (code: number, reason: Buffer) => {
     this.close({ code, reason: reason.toString() })
     this.websocket.removeListener('message', this.messageHandler)
-    this.websocket.removeListener('pong', this.boundHandlePong)
+    this.websocket.removeListener('pong', this.handlePong)
+    clearInterval(this.pingInterval)
+    clearTimeout(this.closeIdleConnectionTimeout)
   }
 
   close(event?: CloseEvent) {
     Object.values(this.documentConnections).forEach(connection => connection.close(event))
   }
 
-  handlePong() {
+  handlePong = () => {
     this.pongReceived = true
   }
 
@@ -124,7 +124,7 @@ export class ClientConnection {
    * Check if pong was received and close the connection otherwise
    * @private
    */
-  private check(): void {
+  private check = () => {
     if (!this.pongReceived) {
       return this.close(ConnectionTimeout)
     }
