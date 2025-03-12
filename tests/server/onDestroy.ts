@@ -80,7 +80,7 @@ test('destroy does not call onStoreDocument if nothing debounced', async t => {
 
     await retryableAssertion(t, t2 => t2.is(provider.synced, true))
 
-    await server.destroy()
+    await server.server!.destroy()
 
     resolve('')
   })
@@ -110,7 +110,7 @@ test('destroy does not call onStoreDocument after debounced onStoreDocument exec
     // Wait for the debounced onStoreDocument to execute
     await new Promise(r => setTimeout(r, 400))
 
-    await server.destroy()
+    await server.server!.destroy()
 
     t.is(called, 1)
 
@@ -128,9 +128,15 @@ test('destroy calls onStoreDocument before returning if debounced', async t => {
       },
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus)
+    const provider1 = newHocuspocusProvider(hocuspocus, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
 
-    await retryableAssertion(t, t2 => t2.is(provider.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
 
     t.is(called, false)
     await hocuspocus.server!.destroy()
@@ -151,9 +157,15 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus)
+    const provider1 = newHocuspocusProvider(hocuspocus, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
 
-    await retryableAssertion(t, t2 => t2.is(provider.synced, true))
+    await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
 
     t.is(called, false)
     await hocuspocus.server!.destroy()
@@ -174,9 +186,27 @@ test('destroy calls onStoreDocument before returning, even with unloadImmediatel
       unloadImmediately: false,
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
-    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
-    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
+    const provider1 = newHocuspocusProvider(hocuspocus, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider2 = newHocuspocusProvider(hocuspocus, {
+      name: 'test2',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider2.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider3 = newHocuspocusProvider(hocuspocus, {
+      name: 'test3',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider3.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
@@ -201,9 +231,27 @@ test('destroy calls onStoreDocument before returning, with multiple docs if debo
       unloadImmediately: true,
     })
 
-    const provider1 = newHocuspocusProvider(hocuspocus, { name: 'test1' })
-    const provider2 = newHocuspocusProvider(hocuspocus, { name: 'test2' })
-    const provider3 = newHocuspocusProvider(hocuspocus, { name: 'test3' })
+    const provider1 = newHocuspocusProvider(hocuspocus, {
+      name: 'test1',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider1.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider2 = newHocuspocusProvider(hocuspocus, {
+      name: 'test2',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider2.document.getArray('foo').push(['foo'])
+      },
+    })
+    const provider3 = newHocuspocusProvider(hocuspocus, {
+      name: 'test3',
+      onSynced() {
+        // Dummy change to trigger onStoreDocument
+        provider3.document.getArray('foo').push(['foo'])
+      },
+    })
 
     await retryableAssertion(t, t2 => t2.is(provider1.synced, true))
     await retryableAssertion(t, t2 => t2.is(provider2.synced, true))
