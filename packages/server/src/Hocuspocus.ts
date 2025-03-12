@@ -1,5 +1,4 @@
 import { IncomingMessage } from 'http'
-import { ListenOptions } from 'net'
 import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 import { dirname, join } from 'node:path'
