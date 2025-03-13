@@ -8,7 +8,6 @@ import {
 import * as decoding from 'lib0/decoding'
 import { v4 as uuid } from 'uuid'
 import WebSocket from 'ws'
-
 import Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
 import Document from './Document.js'
@@ -375,6 +374,7 @@ export class ClientConnection {
 
         this.hookPayloads[documentName] = hookPayload
       }
+
       this.handleQueueingMessage(data)
 
       if (isFirst) {

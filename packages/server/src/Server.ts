@@ -1,8 +1,28 @@
 import {
   createServer, IncomingMessage, Server as HTTPServer, ServerResponse,
 } from 'http'
-import WebSocket, { ServerOptions, WebSocketServer } from 'ws'
-import { Hocuspocus } from './Hocuspocus.js'
+import { ListenOptions } from 'net'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import fs from 'node:fs'
+import WebSocket, { AddressInfo, ServerOptions, WebSocketServer } from 'ws'
+import kleur from 'kleur'
+import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
+import { Configuration, onListenPayload } from './types.js'
+
+const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
+
+export interface ServerConfiguration extends Configuration {
+  port?: number,
+  address?: string,
+  stopOnSignals?: boolean,
+}
+
+export const defaultServerConfiguration = {
+  port: 80,
+  address: '0.0.0.0',
+  stopOnSignals: true,
+}
 
 export class Server {
   httpServer: HTTPServer
@@ -11,8 +31,23 @@ export class Server {
 
   hocuspocus: Hocuspocus
 
-  constructor(hocuspocus: Hocuspocus, websocketOptions: ServerOptions = {}) {
-    this.hocuspocus = hocuspocus
+  configuration: ServerConfiguration = {
+    ...defaultConfiguration,
+    ...defaultServerConfiguration,
+    extensions: [],
+  }
+
+  constructor(configuration?: Partial<ServerConfiguration>, websocketOptions: ServerOptions = {}) {
+    if (configuration) {
+      this.configuration = {
+        ...this.configuration,
+        ...configuration,
+      }
+    }
+
+    this.hocuspocus = new Hocuspocus(this.configuration)
+    this.hocuspocus.server = this
+
     this.httpServer = createServer(this.requestHandler)
     this.webSocketServer = new WebSocketServer({ noServer: true, ...websocketOptions })
 
@@ -81,5 +116,134 @@ export class Server {
         throw error
       }
     }
+  }
+
+  async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
+    if (port) {
+      this.configuration.port = port
+    }
+
+    if (typeof callback === 'function') {
+      this.hocuspocus.configuration.extensions.push({
+        onListen: callback,
+      })
+    }
+
+    if (this.configuration.stopOnSignals) {
+      const signalHandler = async () => {
+        await this.destroy()
+        process.exit(0)
+      }
+
+      process.on('SIGINT', signalHandler)
+      process.on('SIGQUIT', signalHandler)
+      process.on('SIGTERM', signalHandler)
+    }
+
+    return new Promise((resolve: Function, reject: Function) => {
+      this.httpServer.listen({
+        port: this.configuration.port,
+        address: this.configuration.address,
+      } as ListenOptions, async () => {
+        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
+          this.showStartScreen()
+        }
+
+        const onListenPayload = {
+          instance: this.hocuspocus,
+          configuration: this.configuration,
+          port: this.address.port,
+        } as onListenPayload
+
+        try {
+          await this.hocuspocus.hooks('onListen', onListenPayload)
+          resolve(this.hocuspocus)
+        } catch (e) {
+          reject(e)
+        }
+      })
+    })
+  }
+
+  get address(): AddressInfo {
+    return (this.httpServer.address() || {
+      port: this.configuration.port,
+      address: this.configuration.address,
+      family: 'IPv4',
+    }) as AddressInfo
+  }
+
+  async destroy(): Promise<any> {
+    await new Promise(async resolve => {
+
+      this.httpServer.close()
+
+      try {
+
+        this.configuration.extensions.push({
+          async afterUnloadDocument({ instance }) {
+            if (instance.getDocumentsCount() === 0) resolve('')
+          },
+        })
+
+        this.webSocketServer.close()
+        if (this.hocuspocus.getDocumentsCount() === 0) resolve('')
+
+        this.hocuspocus.closeConnections()
+
+      } catch (error) {
+        console.error(error)
+      }
+
+      this.hocuspocus.debugger.flush()
+
+    })
+
+    await this.hocuspocus.hooks('onDestroy', { instance: this.hocuspocus })
+  }
+
+  get URL(): string {
+    return `${this.configuration.address}:${this.address.port}`
+  }
+
+  get webSocketURL(): string {
+    return `ws://${this.URL}`
+  }
+
+  get httpURL(): string {
+    return `http://${this.URL}`
+  }
+
+  private showStartScreen() {
+    const name = this.configuration.name ? ` (${this.configuration.name})` : ''
+
+    console.log()
+    console.log(`  ${kleur.cyan(`Hocuspocus v${meta.version}${name}`)}${kleur.green(' running at:')}`)
+    console.log()
+
+    console.log(`  > HTTP: ${kleur.cyan(`${this.httpURL}`)}`)
+    console.log(`  > WebSocket: ${this.webSocketURL}`)
+
+    const extensions = this.configuration?.extensions.map(extension => {
+      return extension.extensionName ?? extension.constructor?.name
+    })
+      .filter(name => name)
+      .filter(name => name !== 'Object')
+
+    if (!extensions.length) {
+      return
+    }
+
+    console.log()
+    console.log('  Extensions:')
+
+    extensions
+      .forEach(name => {
+        console.log(`  - ${name}`)
+      })
+
+    console.log()
+    console.log(`  ${kleur.green('Ready.')}`)
+    console.log()
   }
 }

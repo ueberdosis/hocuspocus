@@ -1,10 +1,10 @@
 // @ts-nocheck
 import Koa from 'koa'
 import websocket from 'koa-easy-ws'
-import { Server } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 
-const server = Server.configure({
+const hocuspocus = new Hocuspocus({
   extensions: [
     new Logger(),
   ],
@@ -18,7 +18,7 @@ app.use(async (ctx, next) => {
   const ws = await ctx.ws()
   const documentName = ctx.request.path.substring(1)
 
-  server.handleConnection(
+  hocuspocus.handleConnection(
     ws,
     ctx.request,
     documentName,

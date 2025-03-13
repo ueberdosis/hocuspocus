@@ -20,7 +20,7 @@ const getProseMirrorJSON = (text: string) => {
   }
 }
 
-const server = Server.configure({
+const server = new Server({
   port: 1234,
   extensions: [
     new Logger(),
