@@ -1,7 +1,7 @@
 import type { IncomingMessage as HTTPIncomingMessage } from 'http'
 import type WebSocket from 'ws'
 import {
-  CloseEvent, ResetConnection
+  type CloseEvent, ResetConnection,
 } from '@hocuspocus/common'
 import { WsReadyStates} from '@hocuspocus/common'
 import type Document from './Document.js'

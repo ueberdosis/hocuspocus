@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/provider",
-  "version": "2.15.2",
+  "version": "3.0.0",
   "description": "hocuspocus provider",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
@@ -29,7 +29,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/common": "^2.15.2",
+    "@hocuspocus/common": "^3.0.0",
     "@lifeomic/attempt": "^3.0.2",
     "lib0": "^0.2.87",
     "ws": "^8.17.1"

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.2...v3.0.0) (2025-03-13)
+
+
+### Bug Fixes
+
+* Memory leak in Direct Connection ([#895](https://github.com/ueberdosis/hocuspocus/issues/895)) ([70ab0e2](https://github.com/ueberdosis/hocuspocus/commit/70ab0e20e645e2ddd358847569b7e670622bbcc9)), closes [#2](https://github.com/ueberdosis/hocuspocus/issues/2)
+* **server:** fast ws disconnect handling during conn setup ([#900](https://github.com/ueberdosis/hocuspocus/issues/900)) ([6817b53](https://github.com/ueberdosis/hocuspocus/commit/6817b535f63309c5ffbe59e3818c1ceb4749d0a7))
+
+
+
+
+
 ## [2.15.2](https://github.com/ueberdosis/hocuspocus/compare/v2.15.1...v2.15.2) (2025-02-03)
 
 **Note:** Version bump only for package @hocuspocus/server

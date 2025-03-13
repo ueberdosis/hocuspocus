@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders, IncomingMessage } from 'http'
 import type { URLSearchParams } from 'url'
 import {
-  CloseEvent,
+  type CloseEvent,
   ConnectionTimeout,
   Forbidden, ResetConnection, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
