@@ -27,7 +27,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/server": "^3.0.0"
+    "@hocuspocus/server": "^3.0.0-rc.0"
   },
   "peerDependencies": {
     "yjs": "^13.6.8"

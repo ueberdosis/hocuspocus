@@ -84,7 +84,7 @@
     "rollup": "^4",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-typescript2": "^0.36",
-    "typescript": "^5.0.4"
+    "typescript": "5.0.4"
   },
   "engines": {
     "node": ">=22"

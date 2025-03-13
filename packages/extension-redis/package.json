@@ -33,7 +33,7 @@
     "@types/redlock": "^4.0.3"
   },
   "dependencies": {
-    "@hocuspocus/server": "^3.0.0",
+    "@hocuspocus/server": "^3.0.0-rc.0",
     "ioredis": "^4.28.2",
     "kleur": "^4.1.4",
     "lodash.debounce": "^4.0.8",
