@@ -1,6 +1,6 @@
 {
   "name": "@hocuspocus/extension-redis",
-  "version": "3.0.0",
+  "version": "3.0.0-rc.0",
   "description": "Scale Hocuspocus horizontally with Redis",
   "homepage": "https://hocuspocus.dev",
   "keywords": [

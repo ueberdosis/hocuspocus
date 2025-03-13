@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-sqlite",
   "description": "a generic Hocuspocus persistence driver for the sqlite",
-  "version": "3.0.0",
+  "version": "3.0.0-rc.0",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
