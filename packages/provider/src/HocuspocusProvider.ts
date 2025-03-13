@@ -396,7 +396,7 @@ export class HocuspocusProvider extends EventEmitter {
     new MessageReceiver(message).apply(this, true)
   }
 
-  onClose(event: CloseEvent) {
+  onClose() {
     this.isAuthenticated = false
     this.synced = false
 

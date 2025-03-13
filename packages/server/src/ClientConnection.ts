@@ -179,7 +179,6 @@ export class ClientConnection {
       try {
         return await this.hooks('onStateless', payload)
       } catch (error: any) {
-        // TODO: weird pattern, what's the use of this?
         if (error?.message) {
         // if a hook rejects and the error is empty, do nothing
         // this is only meant to prevent later hooks and the

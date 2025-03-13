@@ -162,7 +162,7 @@ export class Connection {
         ).apply(this.document, this)
       })
       .catch((e: any) => {
-        console.log('closing connection because of exception', e)
+        console.error('closing connection because of exception', e)
         this.close({
           code: 'code' in e ? e.code : ResetConnection.code,
           reason: 'reason' in e ? e.reason : ResetConnection.reason,

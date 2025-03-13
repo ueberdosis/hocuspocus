@@ -63,7 +63,6 @@ export class MessageReceiver {
           // @ts-ignore
           target: provider.configuration.websocketProvider.webSocket!,
           type: 'close',
-          wasClean: true,
         }
         provider.onClose(event)
         provider.configuration.onClose({ event })
