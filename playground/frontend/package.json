@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/provider-demos",
   "private": true,
-  "version": "3.0.0",
+  "version": "3.0.2-rc.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@hocuspocus/provider": "^3.0.0-rc.0",
+    "@hocuspocus/provider": "^3.0.2-rc.0",
     "@tiptap-cloud/provider": "^2.17.5",
     "@tiptap/extension-collaboration": "^2.0.3",
     "@tiptap/starter-kit": "^2.0.3",
