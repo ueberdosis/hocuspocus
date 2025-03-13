@@ -64,7 +64,7 @@ export class MessageReceiver {
           target: provider.configuration.websocketProvider.webSocket!,
           type: 'close',
         }
-        provider.onClose(event)
+        provider.onClose()
         provider.configuration.onClose({ event })
         provider.forwardClose(event)
       break
