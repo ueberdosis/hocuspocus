@@ -86,6 +86,11 @@
     "rollup-plugin-typescript2": "^0.36",
     "typescript": "5.0.4"
   },
+  "overrides": {
+    "@tiptap-cloud/provider": {
+      "@hocuspocus/provider": "^3.0.2-rc.0"
+    }
+  },
   "engines": {
     "node": ">=22"
   },
