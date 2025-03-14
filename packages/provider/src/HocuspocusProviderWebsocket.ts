@@ -87,10 +87,6 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
   onDestroy: () => void,
   onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void,
   onAwarenessChange: (data: onAwarenessChangeParameters) => void,
-  /**
-   * Don’t output any warnings.
-   */
-  quiet: boolean,
 
   /**
    * Map of attached providers keyed by documentName.
@@ -138,7 +134,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     onDestroy: () => null,
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
-    quiet: false,
     providerMap: new Map(),
   }
 
@@ -475,11 +470,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   onClose({ event }: onCloseParameters) {
-
-    if( !this.configuration.quiet ){
-      // eslint-disable-next-line no-console
-      console.log(`Provider closed with event`, event.code, event.reason)
-    }
+    // eslint-disable-next-line no-console
+    console.log(`Provider closed with event`, event.code, event.reason)
 
     this.closeTries = 0
     this.cleanupWebSocket()

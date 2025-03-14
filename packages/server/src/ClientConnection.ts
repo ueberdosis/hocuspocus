@@ -61,8 +61,6 @@ export class ClientConnection {
 
   pingInterval: NodeJS.Timeout
 
-  closeIdleConnectionTimeout: NodeJS.Timeout
-
   pongReceived = true
 
   /**
@@ -92,11 +90,6 @@ export class ClientConnection {
     this.pingInterval = setInterval(this.check, this.timeout)
     websocket.on('pong', this.handlePong)
 
-    // Make sure to close an idle connection after a while.
-    this.closeIdleConnectionTimeout = setTimeout(() => {
-      websocket.close(Unauthorized.code, Unauthorized.reason)
-    }, opts.timeout)
-
     websocket.on('message', this.messageHandler)
     websocket.once('close', this.handleWebsocketClose)
   }
@@ -106,7 +99,6 @@ export class ClientConnection {
     this.websocket.removeListener('message', this.messageHandler)
     this.websocket.removeListener('pong', this.handlePong)
     clearInterval(this.pingInterval)
-    clearTimeout(this.closeIdleConnectionTimeout)
   }
 
   close(event?: CloseEvent) {

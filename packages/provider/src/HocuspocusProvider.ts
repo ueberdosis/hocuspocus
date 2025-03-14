@@ -1,5 +1,4 @@
 import { awarenessStatesToArray } from '@hocuspocus/common'
-import * as mutex from 'lib0/mutex'
 import type { Event, MessageEvent } from 'ws'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
@@ -57,14 +56,17 @@ export interface CompleteHocuspocusProviderConfiguration {
    * socket connection, or ensure that the Provider receives messages before running into `HocuspocusProviderWebsocket.messageReconnectTimeout`.
    */
   awareness: Awareness | null,
+
   /**
    * A token that’s sent to the backend for authentication purposes.
    */
   token: string | (() => string) | (() => Promise<string>) | null,
+
   /**
    * Hocuspocus websocket provider
    */
   websocketProvider: HocuspocusProviderWebsocket,
+
   /**
    * Force syncing the document in the defined interval.
    */
@@ -120,8 +122,6 @@ export class HocuspocusProvider extends EventEmitter {
   isAuthenticated = false
 
   authorizedScope: string | undefined = undefined
-
-  mux = mutex.createMutex()
 
   private manageSocket = false
 
