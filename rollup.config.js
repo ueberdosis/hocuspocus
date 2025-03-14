@@ -1,17 +1,21 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 import minimist from 'minimist'
 import { getPackages } from '@lerna/project'
 import { filterPackages } from '@lerna/filter-packages'
 import batchPackages from '@lerna/batch-packages'
-import sourcemaps from 'rollup-plugin-sourcemaps'
+// import sourcemaps from 'rollup-plugin-sourcemaps'
 import typescript from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
-import sizes from '@atomico/rollup-plugin-sizes'
+// import sizes from '@atomico/rollup-plugin-sizes'
 import autoExternal from 'rollup-plugin-auto-external'
-import importAssertions from 'rollup-plugin-import-assertions'
+// import importAssertions from 'rollup-plugin-import-assertions'
+
+const __filename = fileURLToPath(import.meta.url) 
+const __dirname = path.dirname(__filename)
 
 async function getSortedPackages(scope, ignore) {
   const packages = await getPackages(__dirname)
@@ -47,16 +51,16 @@ async function build(commandLineArgs) {
     }
 
     const basePlugins = [
-      sourcemaps(),
+      // sourcemaps(),
       resolve(),
       commonjs(),
       babel({
         babelHelpers: 'bundled',
         exclude: 'node_modules/**',
       }),
-      sizes(),
+      // sizes(),
       json(),
-      importAssertions(),
+      // importAssertions(),
     ]
 
     config.push({

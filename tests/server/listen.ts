@@ -1,6 +1,5 @@
 import test from 'ava'
 import { Server } from '@hocuspocus/server'
-import fetch from 'node-fetch'
 import { newHocuspocus } from '../utils/index.js'
 
 test('should respond with OK', async t => {

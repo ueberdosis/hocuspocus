@@ -1,5 +1,6 @@
+import type { IncomingMessage, ServerResponse, Server as HTTPServer} from 'http'
 import {
-  createServer, IncomingMessage, ServerResponse, Server as HTTPServer,
+  createServer,
 } from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { Server } from '@hocuspocus/server'

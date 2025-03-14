@@ -36,6 +36,11 @@ jobs:
           **/node_modules
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
+    - name: Set up npmrc
+      id: setup-npmrc
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
+
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
@@ -76,6 +81,11 @@ jobs:
           **/node_modules
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
+    - name: Set up npmrc
+      id: setup-npmrc
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
+
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
@@ -113,6 +123,11 @@ jobs:
         path: |
           **/node_modules
         key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Set up npmrc
+      id: setup-npmrc
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
 
     - name: Install dependencies
       id: install-dependencies

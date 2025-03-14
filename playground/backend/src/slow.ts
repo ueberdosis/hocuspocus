@@ -13,6 +13,7 @@ const server = new Server({
 
   async onConnect(data) {
     // simulate a very slow authentication process that takes 10 seconds (or more if you want to type more)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     await new Promise((resolve: Function) => {
       setTimeout(() => { resolve() }, 10000)
     })

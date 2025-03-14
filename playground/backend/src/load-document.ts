@@ -1,4 +1,5 @@
-import { Server, onLoadDocumentPayload } from '@hocuspocus/server'
+import type { onLoadDocumentPayload } from '@hocuspocus/server'
+import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 import { TiptapTransformer } from '@hocuspocus/transformer'
 import { SQLite } from '@hocuspocus/extension-sqlite'

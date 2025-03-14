@@ -12,7 +12,7 @@ test('returns 0 connections when there’s no one connected', async t => {
   })
 })
 
-test('returns 0 connections when the connection attempt fails', async t => {
+test('close connection open when it fails', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
       async onConnect() {
@@ -21,7 +21,24 @@ test('returns 0 connections when the connection attempt fails', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
+        t.is(server.getConnectionsCount(), 0)
+        resolve('done')
+      },
+    })
+  })
+})
+
+test('dont close connection open when it fails but socket is external', async t => {
+  await new Promise(async resolve => {
+    const server = await newHocuspocus({
+      async onConnect() {
+        throw new Error()
+      },
+    })
+
+    newHocuspocusProvider(server, {
+      onAuthenticationFailed() {
         t.is(server.getConnectionsCount(), 0)
         resolve('done')
       },

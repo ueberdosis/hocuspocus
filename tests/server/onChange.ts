@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onChangePayload } from '@hocuspocus/server'
+import type { onChangePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
 import { retryableAssertion } from '../utils/retryableAssertion.js'
 

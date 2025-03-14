@@ -69,7 +69,7 @@
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import { TiptapCollabProvider } from '@hocuspocus/provider'
+import { TiptapCollabProvider } from '@tiptap-cloud/provider'
 import axios from 'axios'
 import {
   nextTick, onMounted, ref, shallowRef, watch,

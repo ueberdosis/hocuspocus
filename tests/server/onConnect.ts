@@ -1,4 +1,4 @@
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
 
@@ -24,7 +24,7 @@ test('refuses connection when an error is thrown', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -69,8 +69,8 @@ test('has the document name', async t => {
 test('sets the provider to readOnly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        connection.readOnly = true
+      async onConnect({ connectionConfig }) {
+        connectionConfig.readOnly = true
       },
     })
 
@@ -133,7 +133,7 @@ test('stops when the onConnect hook throws an Error', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -154,7 +154,7 @@ test('stops when the onConnect hook returns a rejecting promise', async t => {
     })
 
     newHocuspocusProvider(server, {
-      onClose() {
+      onAuthenticationFailed() {
         t.pass()
         resolve('done')
       },
@@ -237,8 +237,8 @@ test('has the server instance', async t => {
 test('defaults to readOnly = false', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.readOnly, false)
+      async onConnect({ connectionConfig }) {
+        t.is(connectionConfig.readOnly, false)
         resolve('done')
       },
     })
@@ -249,6 +249,7 @@ test('defaults to readOnly = false', async t => {
 
 test('cleans up correctly when provider disconnects during onLoadDocument', async t => {
   await new Promise(async resolve => {
+    // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
     const server = await newHocuspocus({
@@ -290,34 +291,8 @@ test('the connections count is correct', async t => {
 test('has connection.readOnly', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.readOnly, false)
-        resolve('done')
-      },
-    })
-
-    newHocuspocusProvider(server)
-  })
-})
-
-test('has connection.requiresAuthentication', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.requiresAuthentication, false)
-        resolve('done')
-      },
-    })
-
-    newHocuspocusProvider(server)
-  })
-})
-
-test('has connection.isAuthenticated', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect({ connection }) {
-        t.is(connection.isAuthenticated, false)
+      async onConnect({ connectionConfig }) {
+        t.is(connectionConfig.readOnly, false)
         resolve('done')
       },
     })

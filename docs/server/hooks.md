@@ -214,23 +214,6 @@ const server = new Server({
 server.listen();
 ```
 
-**Disabling authentication for some users**
-
-Once The `onAuthenticate` hooks are configured, the server will wait for the authentication WebSocket message. If you want to override that behaviour (for some users), you can manually do that in the `onConnect` hook.
-
-```js
-import { Server } from "@hocuspocus/server";
-
-const server = new Server({
-  async onConnect({ connection }) {
-    connection.requiresAuthentication = false;
-  },
-  async onAuthenticate() {
-    // Danger! This won’t be called for that connection attempt.
-  },
-}).listen();
-```
-
 ### onAwarenessUpdate
 
 The `onAwarenessUpdate` hooks are called when awareness changed ([Provider Awareness API](/provider/events)).

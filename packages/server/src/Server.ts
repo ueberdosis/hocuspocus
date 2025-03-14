@@ -1,14 +1,17 @@
+import type { IncomingMessage, Server as HTTPServer, ServerResponse} from 'http'
 import {
-  createServer, IncomingMessage, Server as HTTPServer, ServerResponse,
+  createServer,
 } from 'http'
-import { ListenOptions } from 'net'
+import type { ListenOptions } from 'net'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import fs from 'node:fs'
-import WebSocket, { AddressInfo, ServerOptions, WebSocketServer } from 'ws'
+import type WebSocket from 'ws'
+import { WebSocketServer  } from 'ws'
+import type { AddressInfo, ServerOptions } from 'ws'
 import kleur from 'kleur'
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
-import { Configuration, onListenPayload } from './types.js'
+import type { Configuration, onListenPayload } from './types'
 
 const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
 
@@ -65,8 +68,8 @@ export class Server {
          * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
          * @private
          */
-        this.hocuspocus.debugger.log('Error emitted from webSocket instance:')
-        this.hocuspocus.debugger.log(error)
+        console.error('Error emitted from webSocket instance:')
+        console.error(error)
       })
 
       this.hocuspocus.handleConnection(incoming, request)
@@ -139,7 +142,7 @@ export class Server {
       process.on('SIGQUIT', signalHandler)
       process.on('SIGTERM', signalHandler)
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     return new Promise((resolve: Function, reject: Function) => {
       this.httpServer.listen({
         port: this.configuration.port,
@@ -194,8 +197,6 @@ export class Server {
       } catch (error) {
         console.error(error)
       }
-
-      this.hocuspocus.debugger.flush()
 
     })
 
