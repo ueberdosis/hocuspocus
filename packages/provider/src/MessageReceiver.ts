@@ -12,16 +12,8 @@ export class MessageReceiver {
 
   message: IncomingMessage
 
-  broadcasted = false
-
   constructor(message: IncomingMessage) {
     this.message = message
-  }
-
-  public setBroadcasted(value: boolean) {
-    this.broadcasted = value
-
-    return this
   }
 
   public apply(provider: HocuspocusProvider, emitSynced: boolean) {
@@ -75,15 +67,8 @@ export class MessageReceiver {
 
     // Reply
     if (message.length() > emptyMessageLength + 1) { // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
-      if (this.broadcasted) {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
-      } else {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.send(OutgoingMessage, { encoder: message.encoder })
-      }
+      // @ts-ignore
+      provider.send(OutgoingMessage, { encoder: message.encoder })
     }
   }
 
