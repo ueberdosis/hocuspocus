@@ -20,7 +20,7 @@ WebRTC uses a server only to connect clients with each other. The actual data is
 First, install the dependencies:
 
 ```bash
-npm install @tiptap/extension-collaboration yjs y-webrtc y-prosemirror
+npm install @tiptap/extension-collaboration yjs y-webrtc @tiptap/y-tiptap
 ```
 
 Now, create a new Y document, and register it with Tiptap:
@@ -66,7 +66,7 @@ For most uses cases, a WebSocket provider is the recommended choice. It’s very
 For the client, the example is nearly the same, only the provider is different. First, let’s install the dependencies:
 
 ```bash
-npm install @tiptap/extension-collaboration @hocuspocus/provider y-prosemirror
+npm install @tiptap/extension-collaboration @hocuspocus/provider @tiptap/y-tiptap
 ```
 
 And then register the WebSocket provider with Tiptap:
