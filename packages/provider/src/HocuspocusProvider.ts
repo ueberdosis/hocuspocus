@@ -13,7 +13,6 @@ import { MessageReceiver } from './MessageReceiver.js'
 import { MessageSender } from './MessageSender.js'
 import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.js'
 import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.js'
-import { CloseMessage } from './OutgoingMessages/CloseMessage.js'
 import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
 import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
@@ -125,6 +124,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   private manageSocket = false
 
+  private isAttached = false
+
   intervals: any = {
     forceSync: null,
   }
@@ -148,21 +149,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('authenticated', this.configuration.onAuthenticated)
     this.on('authenticationFailed', this.configuration.onAuthenticationFailed)
 
-    this.configuration.websocketProvider.on('connect', this.configuration.onConnect)
-    this.configuration.websocketProvider.on('connect', this.forwardConnect)
-
-    this.configuration.websocketProvider.on('open', this.boundOnOpen)
-
-    this.configuration.websocketProvider.on('close', this.boundOnClose)
-    this.configuration.websocketProvider.on('close', this.configuration.onClose)
-    this.configuration.websocketProvider.on('close', this.forwardClose)
-
-    this.configuration.websocketProvider.on('disconnect', this.configuration.onDisconnect)
-    this.configuration.websocketProvider.on('disconnect', this.forwardDisconnect)
-
-    this.configuration.websocketProvider.on('destroy', this.configuration.onDestroy)
-    this.configuration.websocketProvider.on('destroy', this.forwardDestroy)
-
     this.awareness?.on('update', () => {
       this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness!.getStates()) })
     })
@@ -173,6 +159,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.document.on('update', this.boundDocumentUpdateHandler)
     this.awareness?.on('update', this.boundAwarenessUpdateHandler)
+
     this.registerEventListeners()
 
     if (
@@ -185,7 +172,9 @@ export class HocuspocusProvider extends EventEmitter {
       )
     }
 
-    this.configuration.websocketProvider.attach(this)
+    if( this.manageSocket ) {
+      this.attach()
+    }
   }
 
   boundDocumentUpdateHandler = this.documentUpdateHandler.bind(this)
@@ -426,20 +415,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.removeAllListeners()
 
-    this.configuration.websocketProvider.off('connect', this.configuration.onConnect)
-    this.configuration.websocketProvider.off('connect', this.forwardConnect)
-    this.configuration.websocketProvider.off('open', this.boundOnOpen)
-    // this.configuration.websocketProvider.off('open', this.forwardOpen)
-    this.configuration.websocketProvider.off('close', this.boundOnClose)
-    this.configuration.websocketProvider.off('close', this.configuration.onClose)
-    this.configuration.websocketProvider.off('close', this.forwardClose)
-    this.configuration.websocketProvider.off('disconnect', this.configuration.onDisconnect)
-    this.configuration.websocketProvider.off('disconnect', this.forwardDisconnect)
-    this.configuration.websocketProvider.off('destroy', this.configuration.onDestroy)
-    this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
-
-    this.send(CloseMessage, { documentName: this.configuration.name })
-    this.configuration.websocketProvider.detach(this)
+    this.detach()
 
     if( this.manageSocket ) {
       this.configuration.websocketProvider.destroy()
@@ -453,11 +429,43 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   detach() {
+    this.configuration.websocketProvider.off('connect', this.configuration.onConnect)
+    this.configuration.websocketProvider.off('connect', this.forwardConnect)
+    this.configuration.websocketProvider.off('open', this.boundOnOpen)
+    this.configuration.websocketProvider.off('close', this.boundOnClose)
+    this.configuration.websocketProvider.off('close', this.configuration.onClose)
+    this.configuration.websocketProvider.off('close', this.forwardClose)
+    this.configuration.websocketProvider.off('disconnect', this.configuration.onDisconnect)
+    this.configuration.websocketProvider.off('disconnect', this.forwardDisconnect)
+    this.configuration.websocketProvider.off('destroy', this.configuration.onDestroy)
+    this.configuration.websocketProvider.off('destroy', this.forwardDestroy)
+
     this.configuration.websocketProvider.detach(this)
+
+    this.isAttached = false
   }
 
   attach() {
+    if( this.isAttached ) return
+
+    this.configuration.websocketProvider.on('connect', this.configuration.onConnect)
+    this.configuration.websocketProvider.on('connect', this.forwardConnect)
+
+    this.configuration.websocketProvider.on('open', this.boundOnOpen)
+
+    this.configuration.websocketProvider.on('close', this.boundOnClose)
+    this.configuration.websocketProvider.on('close', this.configuration.onClose)
+    this.configuration.websocketProvider.on('close', this.forwardClose)
+
+    this.configuration.websocketProvider.on('disconnect', this.configuration.onDisconnect)
+    this.configuration.websocketProvider.on('disconnect', this.forwardDisconnect)
+
+    this.configuration.websocketProvider.on('destroy', this.configuration.onDestroy)
+    this.configuration.websocketProvider.on('destroy', this.forwardDestroy)
+
     this.configuration.websocketProvider.attach(this)
+
+    this.isAttached = true
   }
 
   permissionDeniedHandler(reason: string) {

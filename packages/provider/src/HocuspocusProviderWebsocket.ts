@@ -14,6 +14,7 @@ import {
   WebSocketStatus,
 } from './types.js'
 import { IncomingMessage } from './IncomingMessage.js'
+import {CloseMessage} from "./OutgoingMessages/CloseMessage";
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
@@ -224,7 +225,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   detach(provider: HocuspocusProvider) {
-    this.configuration.providerMap.delete(provider.configuration.name)
+    if( this.configuration.providerMap.has(provider.configuration.name )) {
+      provider.send(CloseMessage, { documentName: provider.configuration.name })
+      this.configuration.providerMap.delete(provider.configuration.name)
+    }
   }
 
   public setConfiguration(
