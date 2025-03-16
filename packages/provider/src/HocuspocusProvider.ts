@@ -152,7 +152,6 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.on('connect', this.forwardConnect)
 
     this.configuration.websocketProvider.on('open', this.boundOnOpen)
-    this.configuration.websocketProvider.on('open', this.forwardOpen)
 
     this.configuration.websocketProvider.on('close', this.boundOnClose)
     this.configuration.websocketProvider.on('close', this.configuration.onClose)
@@ -201,7 +200,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   forwardConnect = (e: any) => this.emit('connect', e)
 
-  forwardOpen = (e: any) => this.emit('open', e)
+  // forwardOpen = (e: any) => this.emit('open', e)
 
   forwardClose = (e: any) => this.emit('close', e)
 
@@ -430,7 +429,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.configuration.websocketProvider.off('connect', this.configuration.onConnect)
     this.configuration.websocketProvider.off('connect', this.forwardConnect)
     this.configuration.websocketProvider.off('open', this.boundOnOpen)
-    this.configuration.websocketProvider.off('open', this.forwardOpen)
+    // this.configuration.websocketProvider.off('open', this.forwardOpen)
     this.configuration.websocketProvider.off('close', this.boundOnClose)
     this.configuration.websocketProvider.off('close', this.configuration.onClose)
     this.configuration.websocketProvider.off('close', this.forwardClose)
