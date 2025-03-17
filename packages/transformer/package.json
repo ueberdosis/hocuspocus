@@ -33,7 +33,7 @@
   "peerDependencies": {
     "@tiptap/core": "^2.6.4",
     "@tiptap/pm": "^2.6.4",
-    "@tiptap/y-tiptap": "^1.0.0",
+    "y-prosemirror": "^1.2.1",
     "yjs": "^13.6.8"
   },
   "devDependencies": {
