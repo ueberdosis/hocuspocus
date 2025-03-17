@@ -14,7 +14,7 @@ import {
   WebSocketStatus,
 } from './types.js'
 import { IncomingMessage } from './IncomingMessage.js'
-import {CloseMessage} from "./OutgoingMessages/CloseMessage"
+import {CloseMessage} from "./OutgoingMessages/CloseMessage.js"
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
