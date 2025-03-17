@@ -28,10 +28,10 @@ To use Hocuspocus with [Express](https://expressjs.com), you need to use the `ex
 ```js
 import express from "express";
 import expressWebsockets from "express-ws";
-import { Server } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server";
 
 // Configure Hocuspocus
-const server = Server.configure({
+const hocuspocus = new Hocuspocus({
   // ...
 });
 
@@ -54,7 +54,7 @@ app.ws("/collaboration", (websocket, request) => {
     },
   };
 
-  server.handleConnection(websocket, request, context);
+  hocuspocus.handleConnection(websocket, request, context);
 });
 
 // Start the server
@@ -68,11 +68,11 @@ IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks
 ```js
 import Koa from "koa";
 import websocket from "koa-easy-ws";
-import { Server } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server";
 import { Logger } from "@hocuspocus/extension-logger";
 
 // Configure Hocuspocus
-const server = Server.configure({
+const hocuspocus = new Hocuspocus({
   // …
 });
 
@@ -87,7 +87,7 @@ app.use(websocket());
 app.use(async (ctx, next) => {
   const ws = await ctx.ws();
 
-  server.handleConnection(
+  hocuspocus.handleConnection(
     ws,
     ctx.request,
     // additional data (optional)
@@ -149,11 +149,11 @@ const pool = mysql.createPool({
 });
 ```
 
-And then use the [database extension](https://tiptap.dev/hocuspocus/server/extensions#database) to store and retrieve the binary using `pool.query`.
+And then use the [database extension](/server/extensions/database) to store and retrieve the binary using `pool.query`.
 
 ##### Option 1: Additionally storing the data in another format
 
-Use the [webhook extension](https://tiptap.dev/hocuspocus/server/extensions#webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
+Use the [webhook extension](/server/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
 
 ##### Option 2: Retrieve the data on demand using a separate nodejs daemon (advanced)
 
@@ -170,9 +170,9 @@ Use the dotenv package as above to retrieve the mysql login details and perform 
 
 You can use the webhook extension for auth - rejecting the `onConnect` request will cause the Hocuspocus server to disconnect - however for security critical applications it is better to use a custom `onAuthenticate` hook as an attacker may be able to retrieve some data from the Hocuspocus server before The `onConnect` hooks are rejected.
 
-To authenticate with the Laravel server we can use Laravel's built in authentication system using the session cookie and a CSRF token. Add an onAuthenticate hook to your Hocuspocus server script which passes along the headers (and therefore the session cookie) and add the CSRF token to a request to the Laravel server:
+To authenticate with the Laravel server we can use Laravel's built-in authentication system using the session cookie and a CSRF token. Add an onAuthenticate hook to your Hocuspocus server script which passes along the headers (and therefore the session cookie) and add the CSRF token to a request to the Laravel server:
 ```
-const hocusServer = Server.configure({
+const hocusServer = new Server({
   ...
   onAuthenticate(data) {
         return new Promise((resolve, reject) => {
@@ -200,7 +200,7 @@ const provider = new HocuspocusProvider({
   token: '{{ csrf_token() }}',
 ```
 
-Finally, add a route in `api.php` to respond to the request. We can respond with an empty response and just use the request status to verify the authentication (i.e status code 200 or 403). This example uses the built-in Laravel middleware to verify the session cookie and csrf token. You can add any further middleware here as needed such as `verified` or any custom middleware:
+Finally, add a route in `api.php` to respond to the request. We can respond with an empty response and just use the request status to verify the authentication (i.e. status code 200 or 403). This example uses the built-in Laravel middleware to verify the session cookie and csrf token. You can add any further middleware here as needed such as `verified` or any custom middleware:
 ```
 Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
     return response('');
@@ -214,13 +214,13 @@ That's it!
 If you want to edit a document directly on the server (while keeping hooks and syncing running), the easiest way is to use Hocuspocus' `getDirectConnection` method.
 
 ```typescript
-const server = new Hocuspocus();
+const hocuspocus = new Hocuspocus();
 
-const docConnection = await server.openDirectConnection('my-document', {})
+const docConnection = await hocuspocus.openDirectConnection('my-document', {})
 
 await docConnection.transact((doc) => {
   doc.getMap('test').set('a', 'b');
 });
 
-docConnection.disconnect()
+await docConnection.disconnect()
 ```

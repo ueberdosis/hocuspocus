@@ -1,6 +1,6 @@
 import test from 'ava'
 import { retryableAssertion } from '../utils/retryableAssertion.js'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.js'
 
 test('returns 0 connections when there’s no one connected', async t => {
   await new Promise(async resolve => {
@@ -79,6 +79,30 @@ test('adds and removes connections properly', async t => {
 
   await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 5)
+  })
+
+  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
+
+  await retryableAssertion(t, tt => {
+    tt.is(server.getConnectionsCount(), 0)
+  })
+})
+
+test('multiplexed connections counts properly', async t => {
+  const server = await newHocuspocus()
+  const socket = newHocuspocusProviderWebsocket(server)
+
+  const providers = [
+    newHocuspocusProvider(server, { name: 'mux-1' }, {}, socket),
+    newHocuspocusProvider(server, { name: 'mux-2' }, {}, socket),
+    newHocuspocusProvider(server, { name: 'mux-3' }, {}, socket),
+    newHocuspocusProvider(server),
+    newHocuspocusProvider(server),
+
+  ]
+
+  await retryableAssertion(t, tt => {
+    tt.is(server.getConnectionsCount(), 3)
   })
 
   providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })

@@ -1,7 +1,7 @@
 {
   "name": "@hocuspocus/extension-sqlite",
   "description": "a generic Hocuspocus persistence driver for the sqlite",
-  "version": "2.13.5",
+  "version": "2.15.2",
   "homepage": "https://hocuspocus.dev",
   "keywords": [
     "hocuspocus",
@@ -27,15 +27,12 @@
     "dist"
   ],
   "dependencies": {
-    "@hocuspocus/extension-database": "^2.13.5",
+    "@hocuspocus/extension-database": "^2.15.2",
     "kleur": "^4.1.4",
-    "sqlite3": "^5.0.11"
+    "sqlite3": "^5.1.7"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@types/sqlite3": "^3.1.8"
   },
   "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

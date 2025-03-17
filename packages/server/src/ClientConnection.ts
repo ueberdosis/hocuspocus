@@ -1,12 +1,13 @@
 import { IncomingHttpHeaders, IncomingMessage } from 'http'
 import { URLSearchParams } from 'url'
 import {
+  CloseEvent,
+  ConnectionTimeout,
   Forbidden, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
 import * as decoding from 'lib0/decoding'
 import { v4 as uuid } from 'uuid'
 import WebSocket from 'ws'
-
 import Connection from './Connection.js'
 import { Debugger } from './Debugger.js'
 import Document from './Document.js'
@@ -58,6 +59,12 @@ export class ClientConnection {
   // Every new connection gets a unique identifier.
   private readonly socketId = uuid()
 
+  timeout: number
+
+  pingInterval: NodeJS.Timeout
+
+  pongReceived = true
+
   /**
     * The `ClientConnection` class receives incoming WebSocket connections,
     * runs all hooks:
@@ -83,15 +90,52 @@ export class ClientConnection {
     },
     private readonly defaultContext: any = {},
   ) {
+    this.timeout = opts.timeout
+    this.pingInterval = setInterval(this.check, this.timeout)
+    websocket.on('pong', this.handlePong)
+
     // Make sure to close an idle connection after a while.
     this.closeIdleConnectionTimeout = setTimeout(() => {
       websocket.close(Unauthorized.code, Unauthorized.reason)
     }, opts.timeout)
 
     websocket.on('message', this.messageHandler)
-    websocket.once('close', () => {
-      websocket.removeListener('message', this.messageHandler)
-    })
+    websocket.once('close', this.handleWebsocketClose)
+  }
+
+  private handleWebsocketClose = (code: number, reason: Buffer) => {
+    this.close({ code, reason: reason.toString() })
+    this.websocket.removeListener('message', this.messageHandler)
+    this.websocket.removeListener('pong', this.handlePong)
+    clearInterval(this.pingInterval)
+    clearTimeout(this.closeIdleConnectionTimeout)
+  }
+
+  close(event?: CloseEvent) {
+    Object.values(this.documentConnections).forEach(connection => connection.close(event))
+  }
+
+  handlePong = () => {
+    this.pongReceived = true
+  }
+
+  /**
+   * Check if pong was received and close the connection otherwise
+   * @private
+   */
+  private check = () => {
+    if (!this.pongReceived) {
+      return this.close(ConnectionTimeout)
+    }
+
+    this.pongReceived = false
+
+    try {
+      this.websocket.ping()
+    } catch (error) {
+      this.close(ConnectionTimeout)
+    }
+
   }
 
   /**
@@ -112,7 +156,6 @@ export class ClientConnection {
       connection,
       hookPayload.request,
       document,
-      this.opts.timeout,
       hookPayload.socketId,
       hookPayload.context,
       hookPayload.connection.readOnly,
@@ -141,6 +184,10 @@ export class ClientConnection {
       } catch (error: any) {
         // TODO: weird pattern, what's the use of this?
         if (error?.message) {
+        // if a hook rejects and the error is empty, do nothing
+        // this is only meant to prevent later hooks and the
+        // default handler to do something. if an error is present
+        // just rethrow it
           throw error
         }
       }
@@ -162,15 +209,6 @@ export class ClientConnection {
 
       return this.hooks('beforeHandleMessage', beforeHandleMessagePayload)
     })
-
-    // If the WebSocket has already disconnected (wow, that was fast) – then
-    // immediately call close to cleanup the connection and document in memory.
-    if (
-      connection.readyState === WsReadyStates.Closing
-      || connection.readyState === WsReadyStates.Closed
-    ) {
-      instance.close()
-    }
 
     return instance
   }
@@ -198,13 +236,23 @@ export class ClientConnection {
 
     this.documentConnections[documentName] = instance
 
+    // If the WebSocket has already disconnected (wow, that was fast) – then
+    // immediately call close to cleanup the connection and document in memory.
+    if (
+      this.websocket.readyState === WsReadyStates.Closing
+      || this.websocket.readyState === WsReadyStates.Closed
+    ) {
+      instance.close()
+      return
+    }
+
     // There’s no need to queue messages anymore.
     // Let’s work through queued messages.
     this.incomingMessageQueue[documentName].forEach(input => {
       this.websocket.emit('message', input)
     })
 
-    this.hooks('connected', {
+    await this.hooks('connected', {
       ...hookPayload,
       documentName,
       context: hookPayload.context,
@@ -326,6 +374,7 @@ export class ClientConnection {
 
         this.hookPayloads[documentName] = hookPayload
       }
+
       this.handleQueueingMessage(data)
 
       if (isFirst) {

@@ -3,6 +3,65 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.2](https://github.com/ueberdosis/hocuspocus/compare/v2.15.1...v2.15.2) (2025-02-03)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.15.1](https://github.com/ueberdosis/hocuspocus/compare/v2.15.1-rc.0...v2.15.1) (2025-01-29)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.15.1-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.0...v2.15.1-rc.0) (2025-01-29)
+
+
+### Bug Fixes
+
+* pass `WebSocket` instead of Connection to `applyAwarenessUpdate` ([#882](https://github.com/ueberdosis/hocuspocus/issues/882)) ([e359652](https://github.com/ueberdosis/hocuspocus/commit/e3596525072261a04f7c9e62888c06ea33f886dd))
+
+
+
+
+
+# [2.15.0](https://github.com/ueberdosis/hocuspocus/compare/v2.14.0...v2.15.0) (2024-12-10)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+# [2.14.0](https://github.com/ueberdosis/hocuspocus/compare/v2.13.7...v2.14.0) (2024-11-20)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.13.7](https://github.com/ueberdosis/hocuspocus/compare/v2.13.6...v2.13.7) (2024-10-08)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
+## [2.13.6](https://github.com/ueberdosis/hocuspocus/compare/v2.13.5...v2.13.6) (2024-09-19)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
 ## [2.13.5](https://github.com/ueberdosis/hocuspocus/compare/v2.13.5-rc.0...v2.13.5) (2024-07-02)
 
 **Note:** Version bump only for package @hocuspocus/server

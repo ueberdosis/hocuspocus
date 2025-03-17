@@ -55,7 +55,7 @@ By way of illustration, if a user isn’t allowed to connect: Just throw an erro
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onAuthenticate({ documentName, token }) {
     // Could be an API call, DB query or whatever …
     // The endpoint should return 200 OK in case the user is authenticated, and an http error
@@ -116,7 +116,7 @@ import { writeFile } from "fs";
 
 let debounced;
 
-const server = Server.configure({
+const server = new Server({
   beforeHandleMessage(data) {
     if (data.context.tokenExpiresAt <= new Date()) {
       const error: CloseEvent = {
@@ -140,7 +140,7 @@ The `connected` hooks are called after a new connection has been successfully es
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async connected() {
     console.log("connections:", server.getConnectionsCount());
   },
@@ -185,7 +185,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onAuthenticate(data) {
     const { token } = data;
 
@@ -221,7 +221,7 @@ Once The `onAuthenticate` hooks are configured, the server will wait for the aut
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onConnect({ connection }) {
     connection.requiresAuthentication = false;
   },
@@ -323,7 +323,7 @@ import { writeFile } from "fs";
 
 let debounced;
 
-const server = Server.configure({
+const server = new Server({
   async onChange(data) {
     const save = () => {
       // Convert the y-doc to something you can actually use in your views.
@@ -382,7 +382,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onConfigure(data) {
     // Output some information
     console.log(`Server was configured!`);
@@ -423,7 +423,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onConnect(data) {
     // Output some information
     console.log(`New websocket connection`);
@@ -452,7 +452,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onDestroy(data) {
     // Output some information
     console.log(`Server was shut down!`);
@@ -494,7 +494,7 @@ Context contains the data provided in former `onConnect` hooks.
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onDisconnect(data) {
     // Output some information
     console.log(`"${data.context.user.name}" has disconnected.`);
@@ -523,7 +523,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async onListen(data) {
     // Output some information
     console.log(`Server is listening on port "${data.port}"!`);
@@ -546,7 +546,6 @@ You can create a Y.js document from your existing data, for example JSON. You sh
 To do this, you can use the Transformer package. For Tiptap-compatible JSON it would look like this:
 
 ```js
-import { Server } from "@hocuspocus/server";
 import { TiptapTransformer } from "@hocuspocus/transformer";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
@@ -569,7 +568,7 @@ However, we expect you to return a Y.js document from the `onLoadDocument` hook,
 ```js
 import { Server } from '@hocuspocus/server'
 
-const server = Server.configure({
+const server = new Server({
   async onLoadDocument(data) {
     // fetch the Y.js document from somewhere
     const ydoc = …
@@ -583,9 +582,9 @@ server.listen()
 
 **Fetch your Y.js documents (recommended)**
 
-There are multiple ways to store your Y.js documents (and their history) wherever you like. Basically, you should use the `onStoreDocument` hook, which is debounced and executed every few seconds for changed documents. It gives you the current Y.js document and it’s up to you to store that somewhere. No worries, we provide some convenient ways for you.
+There are multiple ways to store your Y.js documents (and their history) wherever you like. Basically, you should use the `onStoreDocument` hook, which is debounced and executed every few seconds for changed documents. It gives you the current Y.js document, and it’s up to you to store that somewhere. No worries, we provide some convenient ways for you.
 
-If you just want to to get it working, have a look at the [`SQLite`](/server/extensions#Sqlite) extension for local development, and the generic [`Database`](/server/extensions#Database) extension for a convenient way to fetch and store documents.
+If you just want to get it working, have a look at the [`SQLite`](/server/extensions#Sqlite) extension for local development, and the generic [`Database`](/server/extensions#Database) extension for a convenient way to fetch and store documents.
 
 **Hook payload**
 
@@ -659,7 +658,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   onRequest(data) {
     return new Promise((resolve, reject) => {
       const { request, response } = data;
@@ -742,7 +741,7 @@ const data = {
 import { Server } from "@hocuspocus/server";
 import WebSocket, { WebSocketServer } from "ws";
 
-const server = Server.configure({
+const server = new Server({
   onUpgrade(data) {
     return new Promise((resolve, reject) => {
       const { request, socket, head } = data;
@@ -800,7 +799,7 @@ const data = {
 ```js
 import { Server } from '@hocuspocus/server'
 
-const server = Server.configure({
+const server = new Server({
   async onStateless({ payload, document, connection }) {
     // Output some information
     console.log(`Server has received a stateless message "${payload}"!`)
@@ -837,7 +836,7 @@ const data = {
 ```js
 import { Server } from '@hocuspocus/server'
 
-const server = Server.configure({
+const server = new Server({
   beforeBroadcastStateless({ payload }) {
     console.log(`Server will broadcast a stateless message: "${payload}"!`)
   },
@@ -849,7 +848,7 @@ server.listen()
 ### afterUnloadDocument
 
 The `afterUnloadDocument` hooks are called after a document was closed on the server. You can no
-longer access the document at this point as it has been destroyed but you may notify anything
+longer access the document at this point as it has been destroyed, but you may notify anything
 that was subscribed to the document.
 
 Note: `afterUnloadDocument` may be called even if `afterLoadDocument` never was for a given document
@@ -871,7 +870,7 @@ const data = {
 ```js
 import { Server } from "@hocuspocus/server";
 
-const server = Server.configure({
+const server = new Server({
   async afterUnloadDocument(data) {
     // Output some information
     console.log(`Document ${data.documentName} was closed`);

@@ -110,15 +110,18 @@ export type TCollabThread<Data = any, CommentData = any> = {
   id: string;
   createdAt: number;
   updatedAt: number;
+  deletedAt: number | null;
   resolvedAt?: string; // (new Date()).toISOString()
   comments: TCollabComment<CommentData>[];
+  deletedComments: TCollabComment<CommentData>[];
   data: Data
 }
 
 export type TCollabComment<Data = any> = {
   id: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
   data: Data
   content: any
 }
@@ -183,3 +186,46 @@ export type THistoryDocumentRevertedEvent = {
   event: 'document.reverted';
   version: number;
 };
+
+export type DeleteCommentOptions = {
+  /**
+   * If `true`, the thread will also be deleted if the deleted comment was the first comment in the thread.
+   */
+  deleteThread?: boolean
+
+  /**
+   * If `true`, will remove the content of the deleted comment
+   */
+  deleteContent?: boolean
+}
+
+export type DeleteThreadOptions = {
+  /**
+   * If `true`, will remove the comments on the thread,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  deleteComments?: boolean
+
+  /**
+   * If `true`, will forcefully remove the thread and all comments,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  force?: boolean,
+}
+
+/**
+ * The type of thread
+ */
+export type ThreadType = 'archived' | 'unarchived'
+
+export type GetThreadsOptions = {
+  /**
+   * The types of threads to get
+   * @default ['unarchived']
+   */
+  types?: Array<ThreadType>
+}

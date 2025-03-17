@@ -60,7 +60,7 @@ export const getConfiguredSQLiteExtension = () => {
   return undefined
 }
 
-const server = Server.configure({
+const server = new Server({
   port: parseInt(cli.flags.port, 10),
   extensions: [
     new Logger(),

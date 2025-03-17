@@ -2,7 +2,7 @@ import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
 import { SQLite } from '@hocuspocus/extension-sqlite'
 
-const server = Server.configure({
+const server = new Server({
   port: 1234,
   address: '127.0.0.1',
   name: 'hocuspocus-fra1-01',
