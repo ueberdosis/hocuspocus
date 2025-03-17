@@ -13,11 +13,14 @@ export const newHocuspocusProvider = (
   websocketOptions: Partial<HocuspocusProviderWebsocketConfiguration> = {},
   websocketProvider?: HocuspocusProviderWebsocket,
 ): HocuspocusProvider => {
-  return new HocuspocusProvider({
+  const provider = new HocuspocusProvider({
     websocketProvider: websocketProvider ?? newHocuspocusProviderWebsocket(server, websocketOptions),
     // Just use a generic document name for all tests.
     name: 'hocuspocus-test',
     // Add or overwrite settings, depending on the test case.
     ...options,
   })
+  provider.attach()
+
+  return provider
 }

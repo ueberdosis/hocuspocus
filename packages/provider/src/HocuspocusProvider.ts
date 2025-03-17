@@ -122,7 +122,8 @@ export class HocuspocusProvider extends EventEmitter {
 
   authorizedScope: string | undefined = undefined
 
-  private manageSocket = false
+  // @internal
+  manageSocket = false
 
   private isAttached = false
 

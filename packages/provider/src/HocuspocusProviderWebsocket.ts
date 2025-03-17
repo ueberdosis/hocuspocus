@@ -1,5 +1,5 @@
 import {
-  MessageTooBig, WsReadyStates,
+  WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
@@ -475,9 +475,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   }
 
   onClose({ event }: onCloseParameters) {
-    // eslint-disable-next-line no-console
-    console.log(`Provider closed with event`, event.code, event.reason)
-
     this.closeTries = 0
     this.cleanupWebSocket()
 
@@ -493,7 +490,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
     // trigger connect if no retry is running and we want to have a connection
     if( !this.cancelWebsocketRetry && this.shouldConnect ) {
-      this.connect()
+
+      setTimeout(() => {
+        this.connect()
+      }, this.configuration.delay)
     }
   }
 
