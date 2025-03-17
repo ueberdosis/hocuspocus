@@ -105,8 +105,10 @@ export class Server {
       await this.hocuspocus.hooks('onRequest', { request, response, instance: this.hocuspocus })
 
       // default response if all prior hooks don't interfere
-      response.writeHead(200, { 'Content-Type': 'text/plain' })
-      response.end('OK')
+      if (!response.writableEnded) {
+        response.writeHead(200, { 'Content-Type': 'text/plain' })
+        response.end('OK')
+      }
     } catch (error) {
       // if a hook rejects and the error is empty, do nothing
       // this is only meant to prevent later hooks and the
