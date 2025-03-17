@@ -204,6 +204,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   receivedOnStatusPayload?: onStatusParameters | undefined = undefined
 
   async onOpen(event: Event) {
+    this.cancelWebsocketRetry = undefined
     this.receivedOnOpenPayload = event
   }
 
@@ -480,32 +481,20 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.closeTries = 0
     this.cleanupWebSocket()
 
-    if (this.status === WebSocketStatus.Connected) {
-      this.status = WebSocketStatus.Disconnected
-      this.emit('status', { status: WebSocketStatus.Disconnected })
-      this.emit('disconnect', { event })
-    }
-
-    if (event.code === MessageTooBig.code) {
-      console.warn(
-        `[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`,
-      )
-    }
-
     if (this.connectionAttempt) {
       // That connection attempt failed.
       this.rejectConnectionAttempt()
-    }
-
-    // The status is set correctly already.
-    if (this.status === WebSocketStatus.Disconnected) {
-      return
     }
 
     // Let’s update the connection status.
     this.status = WebSocketStatus.Disconnected
     this.emit('status', { status: WebSocketStatus.Disconnected })
     this.emit('disconnect', { event })
+
+    // trigger connect if no retry is running and we want to have a connection
+    if( !this.cancelWebsocketRetry && this.shouldConnect ) {
+      this.connect()
+    }
   }
 
   destroy() {
