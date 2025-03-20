@@ -1,19 +1,20 @@
 import {
-  Forbidden, MessageTooBig, Unauthorized, WsReadyStates,
+  WsReadyStates,
 } from '@hocuspocus/common'
 import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
-import type { MessageEvent } from 'ws'
-import { Event } from 'ws'
+import type { MessageEvent , Event } from 'ws'
 import EventEmitter from './EventEmitter.js'
-import { HocuspocusProvider } from './HocuspocusProvider.js'
+import type { HocuspocusProvider } from './HocuspocusProvider.js'
+import type {
+  onAwarenessChangeParameters, onAwarenessUpdateParameters,
+  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters} from './types.js'
 import {
   WebSocketStatus,
-  onAwarenessChangeParameters, onAwarenessUpdateParameters,
-  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters,
 } from './types.js'
 import { IncomingMessage } from './IncomingMessage.js'
+import {CloseMessage} from "./OutgoingMessages/CloseMessage.js"
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
@@ -87,10 +88,6 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
   onDestroy: () => void,
   onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void,
   onAwarenessChange: (data: onAwarenessChangeParameters) => void,
-  /**
-   * Don’t output any warnings.
-   */
-  quiet: boolean,
 
   /**
    * Map of attached providers keyed by documentName.
@@ -138,7 +135,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     onDestroy: () => null,
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
-    quiet: false,
     providerMap: new Map(),
   }
 
@@ -155,7 +151,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   identifier = 0
 
   intervals: any = {
-    forceSync: null,
     connectionChecker: null,
   }
 
@@ -209,6 +204,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
   receivedOnStatusPayload?: onStatusParameters | undefined = undefined
 
   async onOpen(event: Event) {
+    this.cancelWebsocketRetry = undefined
     this.receivedOnOpenPayload = event
   }
 
@@ -227,16 +223,13 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     if (this.receivedOnOpenPayload) {
       provider.onOpen(this.receivedOnOpenPayload)
     }
-
-    if (this.receivedOnStatusPayload) {
-      provider.onStatus(this.receivedOnStatusPayload)
-    }
-
-    return connectPromise
   }
 
   detach(provider: HocuspocusProvider) {
-    this.configuration.providerMap.delete(provider.configuration.name)
+    if( this.configuration.providerMap.has(provider.configuration.name )) {
+      provider.send(CloseMessage, { documentName: provider.configuration.name })
+      this.configuration.providerMap.delete(provider.configuration.name)
+    }
   }
 
   public setConfiguration(
@@ -301,6 +294,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     return retryPromise
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   attachWebSocketListeners(ws: HocusPocusWebSocket, reject: Function) {
     const { identifier } = ws
     const onMessageHandler = (payload: any) => this.emit('message', payload)
@@ -442,7 +436,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     }
   }
 
-  // Ensure that the URL always ends with /
+  // Ensure that the URL never ends with /
   get serverUrl() {
     while (this.configuration.url[this.configuration.url.length - 1] === '/') {
       return this.configuration.url.slice(0, this.configuration.url.length - 1)
@@ -467,8 +461,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     try {
       this.webSocket.close()
       this.messageQueue = []
-    } catch {
-      //
+    } catch(e) {
+      console.error(e)
     }
   }
 
@@ -484,72 +478,27 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
     this.closeTries = 0
     this.cleanupWebSocket()
 
-    if (this.status === WebSocketStatus.Connected) {
-      this.status = WebSocketStatus.Disconnected
-      this.emit('status', { status: WebSocketStatus.Disconnected })
-      this.emit('disconnect', { event })
-    }
-
-    if (event.code === Unauthorized.code) {
-      if (event.reason === Unauthorized.reason) {
-        console.warn(
-          '[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.',
-        )
-      } else {
-        console.warn(
-          `[HocuspocusProvider] Connection closed with status Unauthorized: ${event.reason}`,
-        )
-      }
-
-      this.shouldConnect = false
-    }
-
-    if (event.code === Forbidden.code) {
-      if (!this.configuration.quiet) {
-        console.warn(
-          '[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.',
-        )
-        return // TODO REMOVE ME
-      }
-    }
-
-    if (event.code === MessageTooBig.code) {
-      console.warn(
-        `[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`,
-      )
-      this.shouldConnect = false
-    }
-
     if (this.connectionAttempt) {
       // That connection attempt failed.
       this.rejectConnectionAttempt()
-    } else if (this.shouldConnect) {
-      // The connection was closed by the server. Let’s just try again.
-      this.connect()
-    }
-
-    // If we’ll reconnect, we’re done for now.
-    if (this.shouldConnect) {
-      return
-    }
-
-    // The status is set correctly already.
-    if (this.status === WebSocketStatus.Disconnected) {
-      return
     }
 
     // Let’s update the connection status.
     this.status = WebSocketStatus.Disconnected
     this.emit('status', { status: WebSocketStatus.Disconnected })
     this.emit('disconnect', { event })
+
+    // trigger connect if no retry is running and we want to have a connection
+    if( !this.cancelWebsocketRetry && this.shouldConnect ) {
+
+      setTimeout(() => {
+        this.connect()
+      }, this.configuration.delay)
+    }
   }
 
   destroy() {
     this.emit('destroy')
-
-    if (this.intervals.forceSync) {
-      clearInterval(this.intervals.forceSync)
-    }
 
     clearInterval(this.intervals.connectionChecker)
 

@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.2-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.2...v3.0.2-rc.0) (2025-03-13)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+## [3.0.1-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.2...v3.0.1-rc.0) (2025-03-13)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
+# [3.0.0](https://github.com/ueberdosis/hocuspocus/compare/v2.15.2...v3.0.0) (2025-03-13)
+
+**Note:** Version bump only for package @hocuspocus/extension-logger
+
+
+
+
+
 ## [2.15.2](https://github.com/ueberdosis/hocuspocus/compare/v2.15.1...v2.15.2) (2025-02-03)
 
 **Note:** Version bump only for package @hocuspocus/extension-logger

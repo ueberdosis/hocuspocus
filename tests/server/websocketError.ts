@@ -1,5 +1,5 @@
 import test from 'ava'
-import { onAuthenticatePayload } from '@hocuspocus/server'
+import type { onAuthenticatePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.js'
 
 test('does not crash when invalid opcode is sent', async t => {
@@ -11,6 +11,8 @@ test('does not crash when invalid opcode is sent', async t => {
     const provider = newHocuspocusProvider(server, {
       websocketProvider: socket,
       onSynced({ state }) {
+        socket.shouldConnect = false
+
         // Send a bad opcode via the low level internal _socket
         // Inspired by https://github.com/websockets/ws/blob/975382178f8a9355a5a564bb29cb1566889da9ba/test/websocket.test.js#L553-L589
 
@@ -20,6 +22,7 @@ test('does not crash when invalid opcode is sent', async t => {
         }
       },
       onClose({ event }) {
+
         t.is(event.code, 1002)
         try {
           socket.destroy()

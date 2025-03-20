@@ -1,4 +1,4 @@
-import { IncomingMessage } from 'http'
+import type { IncomingMessage } from 'http'
 import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -6,16 +6,15 @@ import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import { v4 as uuid } from 'uuid'
-import WebSocket from 'ws'
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
-import { Server } from './Server.js'
+import type WebSocket from 'ws'
+import type { Doc} from 'yjs'
+import { applyUpdate, encodeStateAsUpdate } from 'yjs'
+import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
-// TODO: would be nice to only have a dependency on ClientConnection, and not on Connection
-import Connection from './Connection.js'
-import { Debugger } from './Debugger.js'
+import type Connection from './Connection.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
-import {
+import type {
   AwarenessUpdate,
   Configuration,
   ConnectionConfiguration,
@@ -72,8 +71,6 @@ export class Hocuspocus {
   documents: Map<string, Document> = new Map()
 
   server?: Server
-
-  debugger = new Debugger()
 
   debouncer = useDebounce()
 
@@ -138,12 +135,6 @@ export class Hocuspocus {
     return this
   }
 
-  get requiresAuthentication(): boolean {
-    return !!this.configuration.extensions.find(extension => {
-      return extension.onAuthenticate !== undefined
-    })
-  }
-
   /**
    * Get the total number of active documents
    */
@@ -198,8 +189,7 @@ export class Hocuspocus {
    * load the Document then.
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
-    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), this.debugger, {
-      requiresAuthentication: this.requiresAuthentication,
+    const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), {
       timeout: this.configuration.timeout,
     }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
@@ -292,7 +282,7 @@ export class Hocuspocus {
     return loadDocPromise
   }
 
-  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
+  async loadDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connectionConfig: ConnectionConfiguration, context?: any): Promise<Document> {
     const requestHeaders = request.headers ?? {}
     const requestParameters = getParameters(request)
 
@@ -300,13 +290,13 @@ export class Hocuspocus {
       documentName,
       requestHeaders,
       requestParameters,
-      connection,
+      connectionConfig,
       context,
       socketId,
       instance: this,
     })
 
-    const document = new Document(documentName, this.debugger, {
+    const document = new Document(documentName, {
       ...this.configuration.yDocOptions,
       ...yDocOptions,
     })
@@ -315,7 +305,7 @@ export class Hocuspocus {
     const hookPayload = {
       instance: this,
       context,
-      connection,
+      connectionConfig,
       document,
       documentName,
       socketId,
@@ -404,6 +394,7 @@ export class Hocuspocus {
    * Run the given hook on all configured extensions.
    * Runs the given callback after each hook.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
@@ -450,38 +441,10 @@ export class Hocuspocus {
     await this.hooks('afterUnloadDocument', { instance: this, documentName })
   }
 
-  enableDebugging() {
-    this.debugger.enable()
-  }
-
-  enableMessageLogging() {
-    this.debugger.enable()
-    this.debugger.verbose()
-  }
-
-  disableLogging() {
-    this.debugger.quiet()
-  }
-
-  disableDebugging() {
-    this.debugger.disable()
-  }
-
-  flushMessageLogs() {
-    this.debugger.flush()
-
-    return this
-  }
-
-  getMessageLogs() {
-    return this.debugger.get()?.logs
-  }
-
   async openDirectConnection(documentName: string, context?: any): Promise<DirectConnection> {
     const connectionConfig: ConnectionConfiguration = {
       isAuthenticated: true,
       readOnly: false,
-      requiresAuthentication: true,
     }
 
     const document: Document = await this.createDocument(

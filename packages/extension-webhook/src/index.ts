@@ -1,13 +1,14 @@
 import { createHmac } from 'crypto'
-import {
+import type {
   Extension,
   onChangePayload,
   onConnectPayload,
   onLoadDocumentPayload,
   onDisconnectPayload,
 } from '@hocuspocus/server'
-import { Doc } from 'yjs'
-import { TiptapTransformer, Transformer } from '@hocuspocus/transformer'
+import type { Doc } from 'yjs'
+import type { Transformer } from '@hocuspocus/transformer'
+import { TiptapTransformer } from '@hocuspocus/transformer'
 import axios from 'axios'
 import { Forbidden } from '@hocuspocus/common'
 
@@ -71,6 +72,7 @@ export class Webhook implements Extension {
   /**
    * debounce the given function, using the given identifier
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   debounce(id: string, func: Function) {
     const old = this.debounced.get(id)
     const start = old?.start || Date.now()

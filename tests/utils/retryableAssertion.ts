@@ -1,4 +1,4 @@
-import { ExecutionContext } from 'ava'
+import type { ExecutionContext } from 'ava'
 import { sleep } from './sleep.js'
 
 /* eslint-disable no-await-in-loop */

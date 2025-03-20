@@ -1,11 +1,9 @@
-import WebSocket from 'ws'
+import type WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
-import { mutex, createMutex } from 'lib0/mutex.js'
-import { AwarenessUpdate } from './types.js'
-import Connection from './Connection.js'
+import type { AwarenessUpdate } from './types.js'
+import type Connection from './Connection.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
-import { Debugger } from './Debugger.js'
 
 export class Document extends Doc {
 
@@ -27,10 +25,6 @@ export class Document extends Doc {
 
   name: string
 
-  mux: mutex
-
-  logger?: Debugger
-
   isLoading: boolean
 
   isDestroyed = false
@@ -38,11 +32,10 @@ export class Document extends Doc {
   /**
    * Constructor.
    */
-  constructor(name: string, logger?: Debugger, yDocOptions?: {}) {
+  constructor(name: string, yDocOptions?: object) {
     super(yDocOptions)
 
     this.name = name
-    this.mux = createMutex()
 
     this.awareness = new Awareness(this)
     this.awareness.setLocalState(null)
@@ -50,7 +43,6 @@ export class Document extends Doc {
     this.awareness.on('update', this.handleAwarenessUpdate.bind(this))
     this.on('update', this.handleUpdate.bind(this))
 
-    this.logger = logger
     this.isLoading = true
   }
 
@@ -206,12 +198,6 @@ export class Document extends Doc {
       const awarenessMessage = new OutgoingMessage(this.name)
         .createAwarenessUpdateMessage(this.awareness, changedClients)
 
-      this.logger?.log({
-        direction: 'out',
-        type: awarenessMessage.type,
-        category: awarenessMessage.category,
-      })
-
       connection.send(
         awarenessMessage.toUint8Array(),
       )
@@ -231,12 +217,6 @@ export class Document extends Doc {
       .writeUpdate(update)
 
     this.getConnections().forEach(connection => {
-      this.logger?.log({
-        direction: 'out',
-        type: message.type,
-        category: message.category,
-      })
-
       connection.send(
         message.toUint8Array(),
       )

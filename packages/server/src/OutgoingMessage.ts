@@ -1,16 +1,18 @@
+import type {
+  Encoder} from 'lib0/encoding'
 import {
   createEncoder,
-  Encoder,
   toUint8Array,
   writeVarString,
   writeVarUint,
   writeVarUint8Array,
 } from 'lib0/encoding'
-import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import type { Awareness} from 'y-protocols/awareness'
+import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 
 import { writeAuthenticated, writePermissionDenied } from '@hocuspocus/common'
-import Document from './Document.js'
+import type Document from './Document.js'
 import { MessageType } from './types.js'
 
 export class OutgoingMessage {
@@ -127,6 +129,15 @@ export class OutgoingMessage {
 
     writeVarUint(this.encoder, MessageType.SyncStatus)
     writeVarUint(this.encoder, updateSaved ? 1 : 0)
+
+    return this
+  }
+
+  writeCloseMessage(reason: string): OutgoingMessage {
+    this.type = MessageType.CLOSE
+
+    writeVarUint(this.encoder, MessageType.CLOSE)
+    writeVarString(this.encoder, reason)
 
     return this
   }

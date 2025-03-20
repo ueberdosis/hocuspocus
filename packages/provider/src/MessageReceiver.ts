@@ -2,8 +2,9 @@ import { readAuthMessage } from '@hocuspocus/common'
 import { readVarInt, readVarString } from 'lib0/decoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { messageYjsSyncStep2, readSyncMessage } from 'y-protocols/sync'
-import { HocuspocusProvider } from './HocuspocusProvider.js'
-import { IncomingMessage } from './IncomingMessage.js'
+import type { CloseEvent } from 'ws'
+import type { HocuspocusProvider } from './HocuspocusProvider.js'
+import type { IncomingMessage } from './IncomingMessage.js'
 import { OutgoingMessage } from './OutgoingMessage.js'
 import { MessageType } from './types.js'
 
@@ -11,16 +12,8 @@ export class MessageReceiver {
 
   message: IncomingMessage
 
-  broadcasted = false
-
   constructor(message: IncomingMessage) {
     this.message = message
-  }
-
-  public setBroadcasted(value: boolean) {
-    this.broadcasted = value
-
-    return this
   }
 
   public apply(provider: HocuspocusProvider, emitSynced: boolean) {
@@ -53,21 +46,29 @@ export class MessageReceiver {
       case MessageType.SyncStatus:
         this.applySyncStatusMessage(provider, readVarInt(message.decoder) === 1)
         break
+
+      case MessageType.CLOSE:
+        // eslint-disable-next-line no-case-declarations
+        const event: CloseEvent = {
+          code: 1000,
+          reason: readVarString(message.decoder),
+          // @ts-ignore
+          target: provider.configuration.websocketProvider.webSocket!,
+          type: 'close',
+        }
+        provider.onClose()
+        provider.configuration.onClose({ event })
+        provider.forwardClose(event)
+      break
+
       default:
         throw new Error(`Can’t apply message of unknown type: ${type}`)
     }
 
     // Reply
     if (message.length() > emptyMessageLength + 1) { // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
-      if (this.broadcasted) {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.broadcast(OutgoingMessage, { encoder: message.encoder })
-      } else {
-        // TODO: Some weird TypeScript error
-        // @ts-ignore
-        provider.send(OutgoingMessage, { encoder: message.encoder })
-      }
+      // @ts-ignore
+      provider.send(OutgoingMessage, { encoder: message.encoder })
     }
   }
 

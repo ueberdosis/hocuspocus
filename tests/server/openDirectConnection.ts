@@ -32,7 +32,7 @@ test('direct connection works even if provider is connected', async t => {
       },
     })
 
-    await sleep(100)
+    await sleep(150)
 
     const directConnection = await server.openDirectConnection('hocuspocus-test')
     await directConnection.transact(doc => {
@@ -119,7 +119,7 @@ test('if a direct connection closes, the document should be unloaded if there is
   await new Promise(async resolve => {
     const server = await newHocuspocus()
 
-    const direct = await server.openDirectConnection('hocuspocus-test')
+    const direct = await server.openDirectConnection('hocuspocus-test1')
     t.is(server.getDocumentsCount(), 1)
     t.is(server.getConnectionsCount(), 1)
 
@@ -147,7 +147,7 @@ test('direct connection transact awaits until onStoreDocument has finished', asy
       },
     })
 
-    const direct = await server.openDirectConnection('hocuspocus-test')
+    const direct = await server.openDirectConnection('hocuspocus-test2')
     t.is(server.getDocumentsCount(), 1)
     t.is(server.getConnectionsCount(), 1)
 
@@ -155,9 +155,9 @@ test('direct connection transact awaits until onStoreDocument has finished', asy
     await direct.transact(document => {
       document.getArray('test').insert(0, ['value'])
     })
-    t.is(onStoreDocumentFinished, true)
-
+    
     await direct.disconnect()
+    t.is(onStoreDocumentFinished, true)
 
     t.is(server.getConnectionsCount(), 0)
     t.is(server.getDocumentsCount(), 0)
@@ -199,7 +199,6 @@ test('direct connection transact awaits until onStoreDocument has finished, even
     await direct.transact(document => {
       document.getArray('test').insert(0, ['value'])
     })
-    t.is(onStoreDocumentFinished, true)
 
     const provider = newHocuspocusProvider(server)
     provider.document.getMap('aaa').set('bb', 'b')
@@ -210,6 +209,7 @@ test('direct connection transact awaits until onStoreDocument has finished, even
 
     directConnDisconnecting = true
     await direct.disconnect()
+    t.is(onStoreDocumentFinished, true)
 
     t.is(server.getConnectionsCount(), 0)
 
@@ -248,9 +248,9 @@ test('creating a websocket connection after transact but before debounce interva
         document.getArray('test').insert(0, ['value'])
       }, 'testOrigin')
     })
-    t.is(onStoreDocumentFinished, true)
-
+    
     await direct.disconnect()
+    t.is(onStoreDocumentFinished, true)
     disconnected = true
 
     t.is(server.getConnectionsCount(), 0)

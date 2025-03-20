@@ -26,23 +26,3 @@ test("executes the on('connect') callback", async t => {
     })
   })
 })
-
-test('resolves the connection attempt when onConnect throws an error', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus({
-      async onConnect() {
-        throw new Error()
-      },
-    })
-
-    newHocuspocusProvider(server, {
-      onConnect() {
-        t.fail('must not be called when onConnect fails')
-      },
-      onClose() {
-        t.pass()
-        resolve('done')
-      },
-    })
-  })
-})
