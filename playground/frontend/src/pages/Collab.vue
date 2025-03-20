@@ -69,7 +69,7 @@
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import { TiptapCollabProvider } from '@tiptap-cloud/provider'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 import axios from 'axios'
 import {
   nextTick, onMounted, ref, shallowRef, watch,
@@ -79,8 +79,8 @@ import StatusBar from '../components/StatusBar.vue'
 const appId = ref('')
 const secret = ref('')
 const jwt = ref('')
-const provider = shallowRef<TiptapCollabProvider>()
-const provider2 = shallowRef<TiptapCollabProvider>()
+const provider = shallowRef<HocuspocusProvider>()
+const provider2 = shallowRef<HocuspocusProvider>()
 const editor = shallowRef<Editor>()
 const editor2 = shallowRef<Editor>()
 
@@ -90,14 +90,14 @@ watch([jwt, appId, secret], () => {
   if (provider.value) provider.value.destroy()
   if (provider2.value) provider2.value.destroy()
 
-  provider.value = new TiptapCollabProvider({
-    appId: appId.value,
+  provider.value = new HocuspocusProvider({
+    url: `https://${appId.value}.collab.tiptap.cloud`,
     name: 'test1',
     token: jwt.value,
   })
 
-  provider2.value = new TiptapCollabProvider({
-    appId: appId.value,
+  provider2.value = new HocuspocusProvider({
+    url: `https://${appId.value}.collab.tiptap.cloud`,
     name: 'test2',
     token: jwt.value,
   })
