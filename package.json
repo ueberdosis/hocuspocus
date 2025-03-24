@@ -1,98 +1,74 @@
 {
-  "private": true,
-  "workspaces": [
-    "playground/*",
-    "packages/*",
-    "tests"
-  ],
-  "browserslist": [
-    "defaults",
-    "not IE 11",
-    "maintained node versions"
-  ],
-  "type": "module",
-  "ava": {
-    "files": [
-      "tests/**/*",
-      "!tests/utils/**/*",
-      "!database/**/*"
-    ],
-    "extensions": {
-      "ts": "module"
-    },
-    "nodeArguments": [
-      "--no-warnings",
-      "--conditions=source",
-      "--experimental-transform-types",
-      "--experimental-specifier-resolution=node"
-    ],
-    "workerThreads": false
-  },
-  "scripts": {
-    "start": "npm run playground",
-    "playground": "npm run playground:default",
-    "playground:load-document": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/load-document.ts\"",
-    "playground:express": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/express.ts\"",
-    "playground:koa": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/koa.ts\"",
-    "playground:default": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/default.ts\"",
-    "playground:slow": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/slow.ts\"",
-    "playground:redis": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/redis.ts\"",
-    "playground:webhook": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/webhook.ts\"",
-    "lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
-    "lint": "eslint --quiet --no-error-on-unmatched-pattern ./ && npm run lint:ts",
-    "lint:fix": "eslint --fix --quiet --no-error-on-unmatched-pattern ./",
-    "test": "ava",
-    "test:watch": "ava --watch",
-    "build:packages": "npm run clean:packages && rollup -c",
-    "build:watch": "npm run clean:packages && rollup -wc",
-    "clean:packages": "rm -Rf ./packages/*/dist",
-    "release:major": "lerna version major --force-publish",
-    "release:major:pre": "lerna version premajor --force-publish --preid rc",
-    "release:minor": "lerna version minor --force-publish",
-    "release:minor:pre": "lerna version preminor --force-publish --preid rc",
-    "release:patch": "lerna version patch --force-publish",
-    "release:patch:pre": "lerna version prepatch --force-publish --preid rc",
-    "release:pre": "lerna version prerelease --force-publish --preid rc",
-    "publish": "npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
-    "publish:pre": "npm run build:packages && lerna exec --since --no-private -- npm publish --tag next --access public",
-    "reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
-    "ncu": "ncu -i --deep && npm install"
-  },
-  "devDependencies": {
-    "@ava/typescript": "^3.0.1",
-    "@babel/core": "7.18.6",
-    "@babel/preset-env": "^7.16.11",
-    "@lerna/batch-packages": "^3.16.0",
-    "@lerna/filter-packages": "^4.0.0",
-    "@lerna/project": "^5.5.1",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@stylistic/eslint-plugin-js": "^2.7.2",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
-    "ava": "^4.3.3",
-    "concurrently": "^6.4.0",
-    "eslint": "^8.36.0",
-    "eslint-plugin-html": "^8.1.1",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-unused-imports": "^4.0.0",
-    "eslint-plugin-vue": "^9.27.0",
-    "lerna": "^6.6.1",
-    "minimist": "^1.2.5",
-    "rollup": "^4",
-    "rollup-plugin-auto-external": "^2.0.0",
-    "rollup-plugin-typescript2": "^0.36",
-    "typescript": "5.8.2"
-  },
-  "overrides": {
-    "@tiptap-cloud/provider": {
-      "@hocuspocus/provider": "^3.0.2-rc.0"
-    }
-  },
-  "engines": {
-    "node": ">=22"
-  },
-  "name": "hocuspocus"
+	"private": true,
+	"workspaces": ["playground/*", "packages/*", "tests"],
+	"browserslist": ["defaults", "not IE 11", "maintained node versions"],
+	"type": "module",
+	"ava": {
+		"files": ["tests/**/*", "!tests/utils/**/*", "!database/**/*"],
+		"extensions": {
+			"ts": "module"
+		},
+		"nodeArguments": [
+			"--no-warnings",
+			"--conditions=source",
+			"--experimental-transform-types",
+			"--experimental-specifier-resolution=node"
+		],
+		"workerThreads": false
+	},
+	"scripts": {
+		"start": "npm run playground",
+		"playground": "npm run playground:default",
+		"playground:load-document": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/load-document.ts\"",
+		"playground:express": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/express.ts\"",
+		"playground:koa": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/koa.ts\"",
+		"playground:default": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/default.ts\"",
+		"playground:slow": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/slow.ts\"",
+		"playground:redis": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/redis.ts\"",
+		"playground:webhook": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/webhook.ts\"",
+		"lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
+		"lint": "biome --quiet --no-error-on-unmatched-pattern ./ && npm run lint:ts",
+		"lint:fix": "biome --fix --quiet --no-error-on-unmatched-pattern ./",
+		"test": "ava",
+		"test:watch": "ava --watch",
+		"build:packages": "npm run clean:packages && rollup -c",
+		"build:watch": "npm run clean:packages && rollup -wc",
+		"clean:packages": "rm -Rf ./packages/*/dist",
+		"release:major": "lerna version major --force-publish",
+		"release:major:pre": "lerna version premajor --force-publish --preid rc",
+		"release:minor": "lerna version minor --force-publish",
+		"release:minor:pre": "lerna version preminor --force-publish --preid rc",
+		"release:patch": "lerna version patch --force-publish",
+		"release:patch:pre": "lerna version prepatch --force-publish --preid rc",
+		"release:pre": "lerna version prerelease --force-publish --preid rc",
+		"publish": "npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
+		"publish:pre": "npm run build:packages && lerna exec --since --no-private -- npm publish --tag next --access public",
+		"reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
+		"ncu": "ncu -i --deep && npm install"
+	},
+	"devDependencies": {
+		"@ava/typescript": "^3.0.1",
+		"@babel/core": "7.18.6",
+		"@babel/preset-env": "^7.16.11",
+		"@biomejs/biome": "1.9.4",
+		"@lerna/batch-packages": "^3.16.0",
+		"@lerna/filter-packages": "^4.0.0",
+		"@lerna/project": "^5.5.1",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-commonjs": "^26.0.1",
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"ava": "^4.3.3",
+		"concurrently": "^6.4.0",
+		"lerna": "^6.6.1",
+		"minimist": "^1.2.5",
+		"rollup": "^4.37.0",
+		"rollup-plugin-auto-external": "^2.0.0",
+		"@rollup/plugin-typescript": "^12.1.2",
+		"typescript": "5.8.2"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"name": "hocuspocus"
 }

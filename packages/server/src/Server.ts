@@ -144,7 +144,7 @@ export class Server {
         port: this.configuration.port,
         address: this.configuration.address,
       } as ListenOptions, async () => {
-        if (!this.configuration.quiet && process.env.NODE_ENV !== 'testing') {
+        if (!this.configuration.quiet && String(process.env.NODE_ENV) !== 'testing') {
           this.showStartScreen()
         }
 
