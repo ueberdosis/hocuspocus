@@ -6,11 +6,11 @@ You can see [our guide to custom extensions](/guides/custom-extensions) to find 
 
 We already created some very useful extensions you should check out for sure:
 
-| Extension                               | Description                                                                    |
-|-----------------------------------------| ------------------------------------------------------------------------------ |
-| [Database](/server/extensions/database) | A generic database driver that is easily adjustable to work with any database. |
-| [Logger](/server/extensions/logger)     | Add logging to Hocuspocus.                                                     |
-| [Redis](/server/extensions/redis)       | Scale Hocuspocus horizontally with Redis.                                      |
-| [SQLite](/server/extensions/sqlite)     | Persist documents to SQLite.                                                   |
-| [Throttle](/server/extensions/throttle) | Throttle connections by ips.                                                   |
-| [Webhook](/server/extensions/webhook)   | Send document changes via webhook to your API.                                 |
+| Extension                                    | Description                                                                    |
+|----------------------------------------------|--------------------------------------------------------------------------------|
+| [Database](/docs/server/extensions/database) | A generic database driver that is easily adjustable to work with any database. |
+| [Logger](/docs/server/extensions/logger)     | Add logging to Hocuspocus.                                                     |
+| [Redis](/docs/server/extensions/redis)       | Scale Hocuspocus horizontally with Redis.                                      |
+| [SQLite](/docs/server/extensions/sqlite)     | Persist documents to SQLite.                                                   |
+| [Throttle](/docs/server/extensions/throttle) | Throttle connections by ips.                                                   |
+| [Webhook](/docs/server/extensions/webhook)   | Send document changes via webhook to your API.                                 |
