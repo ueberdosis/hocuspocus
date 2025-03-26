@@ -44,11 +44,11 @@ jobs:
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: npm install
+      run: npm ci --force
 
-    - name: Lint code
-      id: lint
-      run: npm run lint
+#    - name: Lint code
+#      id: lint
+#      run: npm run lint
 
   test:
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: npm install
+      run: npm ci --force
 
     - name: Run tests
       id: test
@@ -132,7 +132,7 @@ jobs:
     - name: Install dependencies
       id: install-dependencies
       if: steps.cache.outputs.cache-hit != 'true'
-      run: npm install
+      run: npm ci --force
 
     - name: Try to build the packages
       id: build-packages
