@@ -22,6 +22,7 @@
     },
     "nodeArguments": [
       "--no-warnings",
+      "--conditions=source",
       "--experimental-transform-types",
       "--experimental-specifier-resolution=node"
     ],

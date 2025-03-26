@@ -16,7 +16,7 @@
   "types": "dist/packages/provider/src/index.d.ts",
   "exports": {
     "source": {
-      "import": "./src"
+      "import": "./src/index.ts"
     },
     "default": {
       "import": "./dist/hocuspocus-provider.esm.js",

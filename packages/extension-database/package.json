@@ -14,7 +14,7 @@
   "types": "dist/packages/extension-database/src/index.d.ts",
   "exports": {
     "source": {
-      "import": "./src"
+      "import": "./src/index.ts"
     },
     "default": {
       "import": "./dist/hocuspocus-database.esm.js",
