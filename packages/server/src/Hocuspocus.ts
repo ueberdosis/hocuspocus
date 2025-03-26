@@ -2,9 +2,6 @@ import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import type { IncomingMessage } from 'http'
-import fs from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
 import type { Doc } from 'yjs'
@@ -27,8 +24,7 @@ import type {
 } from './types.js'
 import { useDebounce } from './util/debounce.js'
 import { getParameters } from './util/getParameters.js'
-
-const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
+import meta from '../package.json' assert { type: 'json' }
 
 export const defaultConfiguration = {
   name: null,
