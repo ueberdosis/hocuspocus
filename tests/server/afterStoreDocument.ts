@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('calls the afterStoreDocument hook', async t => {
   await new Promise(async resolve => {

@@ -1,7 +1,7 @@
 import test from 'ava'
 import * as Y from 'yjs'
 import { TiptapTransformer } from '@hocuspocus/transformer'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('direct connection prevents document from being removed from memory', async t => {
   await new Promise(async resolve => {
@@ -155,7 +155,7 @@ test('direct connection transact awaits until onStoreDocument has finished', asy
     await direct.transact(document => {
       document.getArray('test').insert(0, ['value'])
     })
-    
+
     await direct.disconnect()
     t.is(onStoreDocumentFinished, true)
 
@@ -248,7 +248,7 @@ test('creating a websocket connection after transact but before debounce interva
         document.getArray('test').insert(0, ['value'])
       }, 'testOrigin')
     })
-    
+
     await direct.disconnect()
     t.is(onStoreDocumentFinished, true)
     disconnected = true

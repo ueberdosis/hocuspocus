@@ -3,7 +3,7 @@ import type { onStoreDocumentPayload } from '@hocuspocus/server'
 import { Redis } from '@hocuspocus/extension-redis'
 import type { HocuspocusProvider } from '@hocuspocus/provider'
 import { uuidv4 } from 'lib0/random'
-import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils/index.ts'
 
 test('stores documents without conflicts', async t => {
   await new Promise(async resolve => {

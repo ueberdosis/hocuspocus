@@ -21,9 +21,8 @@
       "ts": "module"
     },
     "nodeArguments": [
-      "--conditions=source",
       "--no-warnings",
-      "--loader=ts-node/esm/transpile-only",
+      "--experimental-transform-types",
       "--experimental-specifier-resolution=node"
     ],
     "workerThreads": false
@@ -84,7 +83,7 @@
     "rollup": "^4",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-typescript2": "^0.36",
-    "typescript": "5.0.4"
+    "typescript": "5.8.2"
   },
   "overrides": {
     "@tiptap-cloud/provider": {

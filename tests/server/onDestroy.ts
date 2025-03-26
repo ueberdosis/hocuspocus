@@ -1,6 +1,6 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
-import { retryableAssertion } from '../utils/retryableAssertion'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('executes the onDestroy hook and has the instance', async t => {
   await new Promise(async resolve => {

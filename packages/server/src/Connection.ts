@@ -4,11 +4,11 @@ import {
   WsReadyStates,
 } from '@hocuspocus/common'
 import type WebSocket from 'ws'
-import type Document from './Document.js'
-import { IncomingMessage } from './IncomingMessage.js'
-import { MessageReceiver } from './MessageReceiver.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
-import type { onStatelessPayload } from './types.js'
+import type Document from './Document.ts'
+import { IncomingMessage } from './IncomingMessage.ts'
+import { MessageReceiver } from './MessageReceiver.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
+import type { onStatelessPayload } from './types.ts'
 
 export class Connection {
 

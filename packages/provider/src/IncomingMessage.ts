@@ -16,7 +16,7 @@ import {
   writeVarString,
   length,
 } from 'lib0/encoding'
-import type { MessageType } from './types.js'
+import type { MessageType } from './types.ts'
 
 export class IncomingMessage {
 

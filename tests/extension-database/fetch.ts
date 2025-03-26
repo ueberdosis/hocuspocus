@@ -1,7 +1,7 @@
 import test from 'ava'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Database } from '@hocuspocus/extension-database'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('fetch has the document name', async t => {
   await new Promise(async resolve => {

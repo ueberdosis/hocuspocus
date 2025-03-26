@@ -1,6 +1,6 @@
 import test from 'ava'
 import type { onRequestPayload } from '@hocuspocus/server'
-import { newHocuspocus } from '../utils/index.js'
+import { newHocuspocus } from '../utils/index.ts'
 
 test('executes the onRequest callback', async t => {
   await new Promise(async resolve => {

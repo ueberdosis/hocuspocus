@@ -10,11 +10,11 @@ import {
   readUpdate,
 } from 'y-protocols/sync'
 import * as Y from 'yjs'
-import type Connection from './Connection.js'
-import type Document from './Document.js'
-import type { IncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
-import { MessageType } from './types.js'
+import type Connection from './Connection.ts'
+import type Document from './Document.ts'
+import type { IncomingMessage } from './IncomingMessage.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
+import { MessageType } from './types.ts'
 
 export class MessageReceiver {
 

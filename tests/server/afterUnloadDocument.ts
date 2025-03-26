@@ -1,7 +1,7 @@
 import test from 'ava'
 import type { HocuspocusProvider } from '@hocuspocus/provider'
 
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the afterUnloadDocument callback', async t => {
   await new Promise(async resolve => {

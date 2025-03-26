@@ -2,8 +2,8 @@ import test from 'ava'
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
-} from '../utils/index.js'
-import { retryableAssertion } from '../utils/retryableAssertion.js'
+} from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 // test('closes all connections', async t => {
 //   const server = await newHocuspocus()

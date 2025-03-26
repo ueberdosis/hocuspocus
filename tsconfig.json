@@ -9,6 +9,9 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
     "experimentalDecorators": true,
     "sourceMap": true,
     "baseUrl": ".",
@@ -17,7 +20,7 @@
     "checkJs": false,
     "paths": {
       "@hocuspocus/*": [
-        "packages/*/src",
+        "packages/*/src/index.ts",
       ]
     },
     "lib": [

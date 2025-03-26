@@ -12,8 +12,8 @@ import { encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { writeSyncStep1, writeUpdate } from 'y-protocols/sync'
 
 import { writeAuthenticated, writePermissionDenied } from '@hocuspocus/common'
-import type Document from './Document.js'
-import { MessageType } from './types.js'
+import type Document from './Document.ts'
+import { MessageType } from './types.ts'
 
 export class OutgoingMessage {
 

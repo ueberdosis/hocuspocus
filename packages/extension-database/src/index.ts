@@ -1,1 +1,1 @@
-export * from './Database.js'
+export * from './Database.ts'
