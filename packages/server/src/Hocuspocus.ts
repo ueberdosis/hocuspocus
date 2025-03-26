@@ -1,19 +1,19 @@
-import type { IncomingMessage } from 'http'
-import { fileURLToPath } from 'node:url'
-import fs from 'node:fs'
-import { dirname, join } from 'node:path'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
+import type { IncomingMessage } from 'http'
+import fs from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
-import type { Doc} from 'yjs'
+import type { Doc } from 'yjs'
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
-import type { Server } from './Server.js'
 import { ClientConnection } from './ClientConnection.js'
 import type Connection from './Connection.js'
 import { DirectConnection } from './DirectConnection.js'
 import Document from './Document.js'
+import type { Server } from './Server.js'
 import type {
   AwarenessUpdate,
   Configuration,
@@ -25,8 +25,8 @@ import type {
   onDisconnectPayload,
   onStoreDocumentPayload,
 } from './types.js'
-import { getParameters } from './util/getParameters.js'
 import { useDebounce } from './util/debounce.js'
+import { getParameters } from './util/getParameters.js'
 
 const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
 

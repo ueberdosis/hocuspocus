@@ -1,13 +1,13 @@
-import type { IncomingMessage as HTTPIncomingMessage } from 'http'
-import type WebSocket from 'ws'
 import {
   type CloseEvent, ResetConnection,
+  WsReadyStates,
 } from '@hocuspocus/common'
-import { WsReadyStates} from '@hocuspocus/common'
+import type { IncomingMessage as HTTPIncomingMessage } from 'http'
+import type WebSocket from 'ws'
 import type Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
 import { MessageReceiver } from './MessageReceiver.js'
+import { OutgoingMessage } from './OutgoingMessage.js'
 import type { onStatelessPayload } from './types.js'
 
 export class Connection {
@@ -20,10 +20,10 @@ export class Connection {
 
   request: HTTPIncomingMessage
 
-  callbacks: any = {
-    onClose: [(document: Document, event?: CloseEvent) => null],
-    beforeHandleMessage: (connection: Connection, update: Uint8Array) => Promise,
-    statelessCallback: () => Promise,
+  callbacks = {
+    onClose: [(document: Document, event?: CloseEvent) => {}],
+    beforeHandleMessage: (connection: Connection, update: Uint8Array) => Promise.resolve(),
+    statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
   }
 
   socketId: string
