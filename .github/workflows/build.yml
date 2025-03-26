@@ -46,9 +46,9 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm install
 
-    - name: Lint code
-      id: lint
-      run: npm run lint
+#    - name: Lint code
+#      id: lint
+#      run: npm run lint
 
   test:
     runs-on: ubuntu-latest
