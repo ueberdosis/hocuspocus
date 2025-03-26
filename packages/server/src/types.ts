@@ -44,6 +44,7 @@ export interface Extension {
   onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
   afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
   beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
+  beforeSync?(data: beforeSyncPayload): Promise<any>;
   beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>;
   onStateless?(payload: onStatelessPayload): Promise<any>;
   onChange?(data: onChangePayload): Promise<any>;
@@ -69,6 +70,7 @@ export type HookName =
   'afterLoadDocument' |
   'beforeHandleMessage' |
   'beforeBroadcastStateless' |
+  'beforeSync' |
   'onStateless' |
   'onChange' |
   'onStoreDocument' |
@@ -92,6 +94,7 @@ export type HookPayloadByName = {
   afterLoadDocument: afterLoadDocumentPayload,
   beforeHandleMessage: beforeHandleMessagePayload,
   beforeBroadcastStateless: beforeBroadcastStatelessPayload,
+  beforeSync: beforeSyncPayload,
   onStateless: onStatelessPayload,
   onChange: onChangePayload,
   onStoreDocument: onStoreDocumentPayload,
@@ -248,6 +251,28 @@ export interface beforeHandleMessagePayload {
   update: Uint8Array,
   socketId: string,
   connection: Connection
+}
+
+export interface beforeSyncPayload {
+  clientsCount: number,
+  context: any,
+  document: Document,
+  documentName: string,
+  connection: Connection,
+  /**
+   * The y-protocols/sync message type
+   * @example
+   * 0: SyncStep1
+   * 1: SyncStep2
+   * 2: YjsUpdate
+   *
+   * @see https://github.com/yjs/y-protocols/blob/master/sync.js#L13-L40
+   */
+  type: number,
+  /**
+   * The payload of the y-sync message.
+   */
+  payload: Uint8Array,
 }
 
 export interface beforeBroadcastStatelessPayload {

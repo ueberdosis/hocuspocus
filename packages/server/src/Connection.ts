@@ -8,7 +8,7 @@ import type Document from './Document.ts'
 import { IncomingMessage } from './IncomingMessage.ts'
 import { MessageReceiver } from './MessageReceiver.ts'
 import { OutgoingMessage } from './OutgoingMessage.ts'
-import type { onStatelessPayload } from './types.ts'
+import type { beforeSyncPayload, onStatelessPayload } from './types.ts'
 
 export class Connection {
 
@@ -23,6 +23,7 @@ export class Connection {
   callbacks = {
     onClose: [(document: Document, event?: CloseEvent) => {}],
     beforeHandleMessage: (connection: Connection, update: Uint8Array) => Promise.resolve(),
+    beforeSync: (connection: Connection, payload: Pick<beforeSyncPayload, 'type' | 'payload'>) => Promise.resolve(),
     statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
   }
 
@@ -77,6 +78,15 @@ export class Connection {
    */
   beforeHandleMessage(callback: (connection: Connection, update: Uint8Array) => Promise<any>): Connection {
     this.callbacks.beforeHandleMessage = callback
+
+    return this
+  }
+
+  /**
+   * Set a callback that will be triggered before a sync message is handled
+   */
+  beforeSync(callback: (connection: Connection, payload: Pick<beforeSyncPayload, 'type' | 'payload'>) => Promise<any>): Connection {
+    this.callbacks.beforeSync = callback
 
     return this
   }

@@ -49,6 +49,13 @@ export class IncomingMessage {
     return readVarUint8Array(this.decoder)
   }
 
+  peekVarUint8Array() {
+    const { pos } = this.decoder
+    const result = readVarUint8Array(this.decoder)
+    this.decoder.pos = pos
+    return result
+  }
+
   readVarUint() {
     return readVarUint(this.decoder)
   }
