@@ -1,3 +1,3 @@
-export * from './Prosemirror.js'
-export * from './Tiptap.js'
-export * from './types.js'
+export * from './Prosemirror.ts'
+export * from './Tiptap.ts'
+export * from './types.ts'

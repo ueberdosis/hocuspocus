@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 

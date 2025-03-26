@@ -3,8 +3,8 @@ import type { onAuthenticatePayload, onLoadDocumentPayload } from '@hocuspocus/s
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
-} from '../utils'
-import { retryableAssertion } from '../utils/retryableAssertion.js'
+} from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('executes the onAuthenticate callback', async t => {
   await new Promise(async resolve => {
@@ -290,7 +290,7 @@ test('onAuthenticate readonly auth only affects 1 doc (when multiplexing)', asyn
   })
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  t.is(server.documents.get('doc1')!.connections.values().next().value.connection.readOnly, true)
+  t.is(server.documents.get('doc1')!.connections.values().next().value!.connection.readOnly, true)
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  t.is(server.documents.get('doc2')!.connections.values().next().value.connection.readOnly, false)
+  t.is(server.documents.get('doc2')!.connections.values().next().value!.connection.readOnly, false)
 })

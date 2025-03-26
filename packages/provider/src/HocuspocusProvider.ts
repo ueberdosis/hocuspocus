@@ -2,20 +2,20 @@ import { awarenessStatesToArray } from '@hocuspocus/common'
 import type { Event, MessageEvent } from 'ws'
 import { Awareness, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
-import EventEmitter from './EventEmitter.js'
+import EventEmitter from './EventEmitter.ts'
 import type {
-  CompleteHocuspocusProviderWebsocketConfiguration} from './HocuspocusProviderWebsocket.js'
+  CompleteHocuspocusProviderWebsocketConfiguration} from './HocuspocusProviderWebsocket.ts'
 import {
   HocuspocusProviderWebsocket,
-} from './HocuspocusProviderWebsocket.js'
-import { IncomingMessage } from './IncomingMessage.js'
-import { MessageReceiver } from './MessageReceiver.js'
-import { MessageSender } from './MessageSender.js'
-import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.js'
-import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.js'
-import { StatelessMessage } from './OutgoingMessages/StatelessMessage.js'
-import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.js'
-import { UpdateMessage } from './OutgoingMessages/UpdateMessage.js'
+} from './HocuspocusProviderWebsocket.ts'
+import { IncomingMessage } from './IncomingMessage.ts'
+import { MessageReceiver } from './MessageReceiver.ts'
+import { MessageSender } from './MessageSender.ts'
+import { AuthenticationMessage } from './OutgoingMessages/AuthenticationMessage.ts'
+import { AwarenessMessage } from './OutgoingMessages/AwarenessMessage.ts'
+import { StatelessMessage } from './OutgoingMessages/StatelessMessage.ts'
+import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.ts'
+import { UpdateMessage } from './OutgoingMessages/UpdateMessage.ts'
 import type {
   ConstructableOutgoingMessage,
   onAuthenticationFailedParameters,
@@ -27,7 +27,7 @@ import type {
   onOpenParameters,
   onOutgoingMessageParameters, onStatelessParameters,
   onSyncedParameters,
-} from './types.js'
+} from './types.ts'
 
 export type HocuspocusProviderConfiguration =
   Required<Pick<CompleteHocuspocusProviderConfiguration, 'name'>>

@@ -8,19 +8,20 @@ import {
 import * as decoding from 'lib0/decoding'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
-import Connection from './Connection.js'
-import type Document from './Document.js'
-import type { Hocuspocus } from './Hocuspocus.js'
-import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
+import Connection from './Connection.ts'
+import type Document from './Document.ts'
+import type { Hocuspocus } from './Hocuspocus.ts'
+import { IncomingMessage as SocketIncomingMessage } from './IncomingMessage.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
 import type {
   ConnectionConfiguration,
   beforeHandleMessagePayload,
-  onDisconnectPayload} from './types.js'
+  onDisconnectPayload,
+} from './types.ts'
 import {
   MessageType,
-} from './types.js'
-import { getParameters } from './util/getParameters.js'
+} from './types.ts'
+import { getParameters } from './util/getParameters.ts'
 
 /**
  * The `ClientConnection` class is responsible for handling an incoming WebSocket

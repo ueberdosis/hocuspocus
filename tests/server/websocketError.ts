@@ -1,6 +1,6 @@
 import test from 'ava'
 import type { onAuthenticatePayload } from '@hocuspocus/server'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.ts'
 
 test('does not crash when invalid opcode is sent', async t => {
   await new Promise(async resolve => {

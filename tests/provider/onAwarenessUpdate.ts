@@ -1,6 +1,6 @@
 import test from 'ava'
 import { AwarenessError } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('onAwarenessUpdate callback is executed', async t => {
   await new Promise(async resolve => {

@@ -13,7 +13,7 @@
   "types": "dist/packages/common/src/index.d.ts",
   "exports": {
     "source": {
-      "import": "./src"
+      "import": "./src/index.ts"
     },
     "default": {
       "import": "./dist/hocuspocus-common.esm.js",

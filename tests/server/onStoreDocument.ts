@@ -2,7 +2,7 @@ import test from 'ava'
 import type { onStoreDocumentPayload } from '@hocuspocus/server'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
-} from '../utils/index.js'
+} from '../utils/index.ts'
 
 test('calls the debouned onStoreDocument hook before the document is removed from memory', async t => {
   await new Promise(async resolve => {

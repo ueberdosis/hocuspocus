@@ -1,3 +1,3 @@
-export * from './HocuspocusProvider.js'
-export * from './HocuspocusProviderWebsocket.js'
-export * from './types.js'
+export * from './HocuspocusProvider.ts'
+export * from './HocuspocusProviderWebsocket.ts'
+export * from './types.ts'

@@ -1,6 +1,6 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.js'
-import { retryableAssertion } from '../utils/retryableAssertion.js'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('beforeHandleMessage gets called in proper order', async t => {
   await new Promise(async resolve => {

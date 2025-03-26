@@ -5,16 +5,16 @@ import { retry } from '@lifeomic/attempt'
 import * as time from 'lib0/time'
 import * as url from 'lib0/url'
 import type { MessageEvent , Event } from 'ws'
-import EventEmitter from './EventEmitter.js'
-import type { HocuspocusProvider } from './HocuspocusProvider.js'
+import EventEmitter from './EventEmitter.ts'
+import type { HocuspocusProvider } from './HocuspocusProvider.ts'
 import type {
   onAwarenessChangeParameters, onAwarenessUpdateParameters,
-  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters} from './types.js'
+  onCloseParameters, onDisconnectParameters, onMessageParameters, onOpenParameters, onOutgoingMessageParameters, onStatusParameters} from './types.ts'
 import {
   WebSocketStatus,
-} from './types.js'
-import { IncomingMessage } from './IncomingMessage.js'
-import {CloseMessage} from "./OutgoingMessages/CloseMessage.js"
+} from './types.ts'
+import { IncomingMessage } from './IncomingMessage.ts'
+import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts"
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 

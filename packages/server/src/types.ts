@@ -3,9 +3,9 @@ import type {
 } from 'http'
 import type { URLSearchParams } from 'url'
 import type { Awareness } from 'y-protocols/awareness'
-import type Connection from './Connection.js'
-import type Document from './Document.js'
-import type { Hocuspocus } from './Hocuspocus.js'
+import type Connection from './Connection.ts'
+import type Document from './Document.ts'
+import type { Hocuspocus } from './Hocuspocus.ts'
 
 export enum MessageType {
   Unknown = -1,

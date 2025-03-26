@@ -1,7 +1,7 @@
 import test from 'ava'
-import { retryableAssertion } from 'tests/utils/retryableAssertion'
 import * as Y from 'yjs'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test("initially doesn't have unsynced changes", async t => {
   return new Promise(async resolve => {

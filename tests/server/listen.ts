@@ -1,6 +1,6 @@
 import test from 'ava'
 import { Server } from '@hocuspocus/server'
-import { newHocuspocus } from '../utils/index.js'
+import { newHocuspocus } from '../utils/index.ts'
 
 test('should respond with OK', async t => {
   const hocuspocus = await newHocuspocus()

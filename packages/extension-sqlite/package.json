@@ -14,7 +14,7 @@
   "types": "dist/packages/extension-sqlite/src/index.d.ts",
   "exports": {
     "source": {
-      "import": "./src"
+      "import": "./src/index.ts"
     },
     "default": {
       "import": "./dist/hocuspocus-sqlite.esm.js",

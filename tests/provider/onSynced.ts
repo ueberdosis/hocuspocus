@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('onSynced callback is executed', async t => {
   await new Promise(async resolve => {

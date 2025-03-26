@@ -3,10 +3,10 @@ import { readVarInt, readVarString } from 'lib0/decoding'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { messageYjsSyncStep2, readSyncMessage } from 'y-protocols/sync'
 import type { CloseEvent } from 'ws'
-import type { HocuspocusProvider } from './HocuspocusProvider.js'
-import type { IncomingMessage } from './IncomingMessage.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
-import { MessageType } from './types.js'
+import type { HocuspocusProvider } from './HocuspocusProvider.ts'
+import type { IncomingMessage } from './IncomingMessage.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
+import { MessageType } from './types.ts'
 
 export class MessageReceiver {
 

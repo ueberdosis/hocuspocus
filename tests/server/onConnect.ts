@@ -1,6 +1,6 @@
 import type { HocuspocusProvider } from '@hocuspocus/provider'
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.js'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('executes the onConnect callback', async t => {
   await new Promise(async resolve => {

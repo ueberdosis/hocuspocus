@@ -1,9 +1,9 @@
 import type WebSocket from 'ws'
 import { Awareness, removeAwarenessStates, applyAwarenessUpdate } from 'y-protocols/awareness'
 import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs'
-import type { AwarenessUpdate } from './types.js'
-import type Connection from './Connection.js'
-import { OutgoingMessage } from './OutgoingMessage.js'
+import type { AwarenessUpdate } from './types.ts'
+import type Connection from './Connection.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
 
 export class Document extends Doc {
 

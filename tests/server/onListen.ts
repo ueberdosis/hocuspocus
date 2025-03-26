@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus } from '../utils/index.js'
+import { newHocuspocus } from '../utils/index.ts'
 
 test('executes the onListen callback', async t => {
   await new Promise(async resolve => {

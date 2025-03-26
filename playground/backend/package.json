@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node",
+    "start": "node --experimental-transform-types",
     "dev": "nodemon --inspect -e ts --watch ./ --watch ../../packages --exec npm start"
   },
   "dependencies": {
@@ -31,7 +31,6 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
     "@types/koa": "^2.13.5",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2"
+    "nodemon": "^3.1.7"
   }
 }

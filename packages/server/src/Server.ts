@@ -3,17 +3,13 @@ import {
   createServer,
 } from 'http'
 import type { ListenOptions } from 'net'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
-import fs from 'node:fs'
 import type WebSocket from 'ws'
 import { WebSocketServer  } from 'ws'
 import type { AddressInfo, ServerOptions } from 'ws'
 import kleur from 'kleur'
-import { defaultConfiguration, Hocuspocus } from './Hocuspocus.js'
+import meta from '../package.json' assert { type: 'json' }
+import { defaultConfiguration, Hocuspocus } from './Hocuspocus.ts'
 import type { Configuration, onListenPayload } from './types'
-
-const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
 
 export interface ServerConfiguration extends Configuration {
   port?: number,

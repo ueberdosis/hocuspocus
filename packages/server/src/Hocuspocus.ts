@@ -1,19 +1,17 @@
 import type { IncomingMessage } from 'http'
-import { fileURLToPath } from 'node:url'
-import fs from 'node:fs'
-import { dirname, join } from 'node:path'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
-import type { Doc} from 'yjs'
+import type { Doc } from 'yjs'
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
-import type { Server } from './Server.js'
-import { ClientConnection } from './ClientConnection.js'
-import type Connection from './Connection.js'
-import { DirectConnection } from './DirectConnection.js'
-import Document from './Document.js'
+import meta from '../package.json' assert { type: 'json' }
+import { ClientConnection } from './ClientConnection.ts'
+import type Connection from './Connection.ts'
+import { DirectConnection } from './DirectConnection.ts'
+import Document from './Document.ts'
+import type { Server } from './Server.ts'
 import type {
   AwarenessUpdate,
   Configuration,
@@ -24,11 +22,9 @@ import type {
   onChangePayload,
   onDisconnectPayload,
   onStoreDocumentPayload,
-} from './types.js'
-import { getParameters } from './util/getParameters.js'
-import { useDebounce } from './util/debounce.js'
-
-const meta = JSON.parse(fs.readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf-8'))
+} from './types.ts'
+import { useDebounce } from './util/debounce.ts'
+import { getParameters } from './util/getParameters.ts'
 
 export const defaultConfiguration = {
   name: null,
