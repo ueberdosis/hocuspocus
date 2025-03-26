@@ -1,11 +1,12 @@
+import type { IncomingMessage } from 'http'
 import {
   ResetConnection, awarenessStatesToArray,
 } from '@hocuspocus/common'
-import type { IncomingMessage } from 'http'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
 import type { Doc } from 'yjs'
 import { applyUpdate, encodeStateAsUpdate } from 'yjs'
+import meta from '../package.json' assert { type: 'json' }
 import { ClientConnection } from './ClientConnection.js'
 import type Connection from './Connection.js'
 import { DirectConnection } from './DirectConnection.js'
@@ -24,7 +25,6 @@ import type {
 } from './types.js'
 import { useDebounce } from './util/debounce.js'
 import { getParameters } from './util/getParameters.js'
-import meta from '../package.json' assert { type: 'json' }
 
 export const defaultConfiguration = {
   name: null,

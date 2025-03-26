@@ -1,11 +1,11 @@
+import type { IncomingHttpHeaders, IncomingMessage } from 'http'
+import type { URLSearchParams } from 'url'
 import {
   type CloseEvent,
   ConnectionTimeout,
   Forbidden, ResetConnection, Unauthorized, WsReadyStates,
 } from '@hocuspocus/common'
-import type { IncomingHttpHeaders, IncomingMessage } from 'http'
 import * as decoding from 'lib0/decoding'
-import type { URLSearchParams } from 'url'
 import { v4 as uuid } from 'uuid'
 import type WebSocket from 'ws'
 import Connection from './Connection.js'
@@ -16,7 +16,7 @@ import { OutgoingMessage } from './OutgoingMessage.js'
 import type {
   ConnectionConfiguration,
   beforeHandleMessagePayload,
-  onDisconnectPayload
+  onDisconnectPayload,
 } from './types.js'
 import {
   MessageType,

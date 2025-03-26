@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --conditions=source --no-warnings --loader ts-node/esm --experimental-specifier-resolution=node",
+    "start": "node --experimental-strip-types",
     "dev": "nodemon --inspect -e ts --watch ./ --watch ../../packages --exec npm start"
   },
   "dependencies": {

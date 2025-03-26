@@ -1,8 +1,8 @@
+import type { IncomingMessage as HTTPIncomingMessage } from 'http'
 import {
   type CloseEvent, ResetConnection,
   WsReadyStates,
 } from '@hocuspocus/common'
-import type { IncomingMessage as HTTPIncomingMessage } from 'http'
 import type WebSocket from 'ws'
 import type Document from './Document.js'
 import { IncomingMessage } from './IncomingMessage.js'
