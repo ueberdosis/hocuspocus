@@ -61,7 +61,58 @@ app.ws("/collaboration", (websocket, request) => {
 app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
 ```
 
-IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
+IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, which will not be fired in this scenario.
+
+### Hono
+
+Hono is a modern web framework for multiple runtimes. It's a great fit for Hocuspocus as it supports the WebSocket protocol out of the box. Only when running in Node.js, does the Hono implementation requires a bit of extra code to support the WebSocket protocol.
+
+```ts
+import { Hono } from "hono";
+import { Hocuspocus } from "@hocuspocus/server";
+
+// Node.js specific
+import { serve } from "@hono/node-server";
+import { createNodeWebSocket } from "@hono/node-ws";
+
+// Configure Hocuspocus
+const hocuspocus = new Hocuspocus({
+  // …
+});
+
+// Setup Hono server
+const app = new Hono();
+
+// Node.js specific
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
+
+// We mount HocusPocus in the Hono server
+app.get(
+  "/hocuspocus",
+  upgradeWebSocket((c) => ({
+    onOpen(_evt, ws) {
+      hocuspocus.handleConnection(ws.raw, c.req.raw as any);
+    },
+  }))
+);
+
+// Start server
+const server = serve({
+  fetch: app.fetch,
+  port: 8787,
+}, (info) => {
+  hocuspocus.hooks('onListen', {
+    instance: hocuspocus,
+    configuration: hocuspocus.configuration,
+    port: info.port
+  })
+});
+
+// Setup WebSocket support (Node.js specific)
+injectWebSocket(server);
+```
+
+IMPORTANT! Some extensions use the `onUpgrade` and `onRequest` hooks, which will not be fired in this scenario.
 
 ### Koa
 
@@ -101,14 +152,13 @@ app.use(async (ctx, next) => {
 app.listen(1234);
 ```
 
-IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, that will not be fired in this scenario.
+IMPORTANT! Some extensions use the `onRequest`, `onUpgrade` and `onListen` hooks, which will not be fired in this scenario.
 
 ### PHP / Laravel (Draft)
 
 We've created a Laravel package to make integrating Laravel and Hocuspocus seamless.
 
 You can find details about it here: [ueberdosis/hocuspocus-laravel](https://github.com/ueberdosis/hocuspocus-laravel)
-
 
 The primary storage for Hocuspocus must be as a Y.Doc Uint8Array binary. At the moment, there are no compatible PHP libraries to read the YJS format therefore we have two options to access the data: save the data in a Laravel compatible format such as JSON _in addition_ to the primary storage, or create a separate nodejs server with an API to read the primary storage, parse the YJS format and return it to Laravel.
 
@@ -117,6 +167,7 @@ _Note: Do not be tempted to store the Y.Doc as JSON and recreate it as YJS binar
 #### Saving the data in primary storage
 
 Use Laravels migration system to create a table to store the YJS binaries:
+
 ```
 return new class extends Migration
 {
@@ -135,6 +186,7 @@ return new class extends Migration
 ```
 
 In the Hocuspocus server, you can use the dotenv library to retrieve the DB login details from `.env`:
+
 ```
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
@@ -153,11 +205,12 @@ And then use the [database extension](/server/extensions/database) to store and 
 
 ##### Option 1: Additionally storing the data in another format
 
-Use the [webhook extension](/server/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see https://tiptap.dev/hocuspocus/guide/transformations#tiptap).
+Use the [webhook extension](/server/extensions/webhook) to send requests to Laravel when the document is updated, with the document in JSON format (see <https://tiptap.dev/hocuspocus/guide/transformations#tiptap>).
 
 ##### Option 2: Retrieve the data on demand using a separate nodejs daemon (advanced)
 
 Create a nodejs server using the http module:
+
 ```
 const server = http.createServer(
 ...
@@ -171,6 +224,7 @@ Use the dotenv package as above to retrieve the mysql login details and perform 
 You can use the webhook extension for auth - rejecting the `onConnect` request will cause the Hocuspocus server to disconnect - however for security critical applications it is better to use a custom `onAuthenticate` hook as an attacker may be able to retrieve some data from the Hocuspocus server before The `onConnect` hooks are rejected.
 
 To authenticate with the Laravel server we can use Laravel's built-in authentication system using the session cookie and a CSRF token. Add an onAuthenticate hook to your Hocuspocus server script which passes along the headers (and therefore the session cookie) and add the CSRF token to a request to the Laravel server:
+
 ```
 const hocusServer = new Server({
   ...
@@ -194,6 +248,7 @@ const hocusServer = new Server({
 ```
 
 And add a CSRF token to the request in the provider:
+
 ```
 const provider = new HocuspocusProvider({
   ...
@@ -201,6 +256,7 @@ const provider = new HocuspocusProvider({
 ```
 
 Finally, add a route in `api.php` to respond to the request. We can respond with an empty response and just use the request status to verify the authentication (i.e. status code 200 or 403). This example uses the built-in Laravel middleware to verify the session cookie and csrf token. You can add any further middleware here as needed such as `verified` or any custom middleware:
+
 ```
 Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
     return response('');
