@@ -49,7 +49,6 @@ By way of illustration, if a user isn’t allowed to connect: Just throw an erro
 | `beforeBroadcastStateless` | Before broadcast a stateless message      | [Read more](/server/hooks#before-broadcast-stateless) |
 | `afterUnloadDocument`      | When a document is closed                 | [Read more](/server/hooks#after-unload-document)      |
 
-
 ## Usage
 
 ```js
@@ -759,7 +758,6 @@ const server = new Server({
 server.listen();
 ```
 
-
 ### onStateless
 
 The `onStateless` hooks are called after the server has received a stateless message. It should return a Promise.
@@ -790,6 +788,37 @@ const server = new Server({
     document.broadcastStateless('This is a broadcast message.')
     // Send a stateless message to a specific connection
     connection.sendStateless('This is a specific message.')
+  },
+})
+
+server.listen()
+```
+
+### beforeSync
+
+The `beforeSync` hooks are called before a sync message is handled. This is useful if you want to inspect the sync message that will be applied to the document.
+
+**Hook payload**
+
+```js
+const data = {
+  documentName: string,
+  document: Document,
+  // The y-protocols/sync message type
+  type: number,
+  // The payload of the y-protocols/sync message
+  payload: Uint8Array,
+}
+```
+
+**Example**
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = new Server({
+  async beforeSync({ payload, document, documentName, type }) {
+    console.log(`Server will handle a sync message: "${payload}"!`)
   },
 })
 

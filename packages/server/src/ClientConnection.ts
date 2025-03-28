@@ -16,6 +16,7 @@ import { OutgoingMessage } from './OutgoingMessage.ts'
 import type {
   ConnectionConfiguration,
   beforeHandleMessagePayload,
+  beforeSyncPayload,
   onDisconnectPayload,
 } from './types.ts'
 import {
@@ -197,6 +198,20 @@ export class ClientConnection {
       }
 
       return this.hooks('beforeHandleMessage', beforeHandleMessagePayload)
+    })
+
+    instance.beforeSync((connection, payload) => {
+      const beforeSyncPayload: beforeSyncPayload = {
+        clientsCount: document.getConnectionsCount(),
+        context: hookPayload.context,
+        document,
+        documentName: document.name,
+        connection,
+        type: payload.type,
+        payload: payload.payload,
+      }
+
+      return this.hooks('beforeSync', beforeSyncPayload)
     })
 
     return instance

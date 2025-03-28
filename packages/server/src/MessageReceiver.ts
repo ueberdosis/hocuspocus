@@ -27,7 +27,7 @@ export class MessageReceiver {
     this.defaultTransactionOrigin = defaultTransactionOrigin
   }
 
-  public apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
+  public async apply(document: Document, connection?: Connection, reply?: (message: Uint8Array) => void) {
     const { message } = this
     const type = message.readVarUint()
     const emptyMessageLength = message.length
@@ -36,7 +36,7 @@ export class MessageReceiver {
       case MessageType.Sync:
       case MessageType.SyncReply: {
         message.writeVarUint(MessageType.Sync)
-        this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
+        await this.readSyncMessage(message, document, connection, reply, type !== MessageType.SyncReply)
 
         if (message.length > emptyMessageLength + 1) {
           if (reply) {
@@ -55,7 +55,7 @@ export class MessageReceiver {
         break
       }
       case MessageType.Awareness: {
-        applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection?.webSocket)
+        await applyAwarenessUpdate(document.awareness, message.readVarUint8Array(), connection?.webSocket)
 
         break
       }
@@ -101,8 +101,15 @@ export class MessageReceiver {
     }
   }
 
-  readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void, requestFirstSync = true) {
+  async readSyncMessage(message: IncomingMessage, document: Document, connection?: Connection, reply?: (message: Uint8Array) => void, requestFirstSync = true) {
     const type = message.readVarUint()
+
+    if (connection) {
+      await connection.callbacks.beforeSync(connection, {
+        type,
+        payload: message.peekVarUint8Array(),
+      })
+    }
 
     switch (type) {
       case messageYjsSyncStep1: {
