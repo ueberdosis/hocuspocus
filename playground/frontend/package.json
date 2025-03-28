@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/frontend-demo",
-	"version": "0.1.0",
+	"version": "3.0.5-rc.0",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
@@ -9,7 +9,7 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@hocuspocus/provider": "^3.0.4-rc.0",
+		"@hocuspocus/provider": "^3.0.5-rc.0",
 		"@tiptap-cloud/provider": "^2.18.0-beta.0",
 		"@tiptap/extension-collaboration": "^2.11.5",
 		"@tiptap/extension-collaboration-cursor": "^2.11.5",

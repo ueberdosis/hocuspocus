@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.0.4-rc.0...v3.0.5-rc.0) (2025-03-28)
+
+
+### Features
+
+* add beforeSync hook ([#919](https://github.com/ueberdosis/hocuspocus/issues/919)) ([a6a7bcd](https://github.com/ueberdosis/hocuspocus/commit/a6a7bcd0768378908ffb5d32096183280115631b))
+
+
+
+
+
 ## [3.0.4-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.0.3-rc.0...v3.0.4-rc.0) (2025-03-20)
 
 **Note:** Version bump only for package hocuspocus
