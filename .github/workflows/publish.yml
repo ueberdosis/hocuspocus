@@ -17,11 +17,18 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
+
+      - name: Set up npmrc
+        id: setup-npmrc
+        run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
+
       - run: npm ci
+
       - run: npm run publish
         if: "!contains(github.ref, '-rc.')"
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
       - run: npm run publish:pre
         if: "contains(github.ref, '-rc.')"
         env:
