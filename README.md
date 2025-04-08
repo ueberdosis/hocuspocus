@@ -26,8 +26,8 @@ The following example is a example setup you need to start a WebSocket server. B
 import { Server } from '@hocuspocus/server'
 import { SQLite } from '@hocuspocus/extension-sqlite'
 
-const server = Server.configure({
-  port: 80,
+const server = new Server({
+  port: 1234,
 
   async onConnect() {
     console.log('🔮')
@@ -38,9 +38,9 @@ const server = Server.configure({
       database: 'db.sqlite',
     }),
   ],
-})
+});
 
-server.listen()
+server.listen();
 ```
 
 ## Community
