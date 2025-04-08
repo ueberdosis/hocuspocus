@@ -130,7 +130,7 @@ export class HocuspocusProvider extends EventEmitter {
   // @internal
   manageSocket = false
 
-  private isAttached = false
+  private _isAttached = false
 
   intervals: any = {
     forceSync: null,
@@ -216,6 +216,10 @@ export class HocuspocusProvider extends EventEmitter {
 
   get document() {
     return this.configuration.document
+  }
+
+  public get isAttached() {
+    return this._isAttached
   }
 
   get awareness() {
@@ -379,7 +383,7 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   send(message: ConstructableOutgoingMessage, args: any) {
-    if( !this.isAttached ) return;
+    if( !this._isAttached ) return;
 
     const messageSender = new MessageSender(message, args)
 
@@ -457,11 +461,11 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.configuration.websocketProvider.detach(this)
 
-    this.isAttached = false
+    this._isAttached = false
   }
 
   attach() {
-    if( this.isAttached ) return
+    if( this._isAttached ) return
 
     this.configuration.websocketProvider.on('connect', this.configuration.onConnect)
     this.configuration.websocketProvider.on('connect', this.forwardConnect)
@@ -480,7 +484,7 @@ export class HocuspocusProvider extends EventEmitter {
 
     this.configuration.websocketProvider.attach(this)
 
-    this.isAttached = true
+    this._isAttached = true
   }
 
   permissionDeniedHandler(reason: string) {
