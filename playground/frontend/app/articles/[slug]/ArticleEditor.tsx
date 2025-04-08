@@ -5,6 +5,7 @@ import CollaborativeEditor from "@/app/articles/[slug]/CollaborativeEditor";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 // import { TiptapCollabProvider } from "@tiptap-cloud/provider";
 import { useContext, useEffect, useState } from "react";
+import CollaborationStatus from "@/app/articles/[slug]/CollaborationStatus";
 
 export default function ArticleEditor({ slug }: { slug: string }) {
 	const socket = useContext(SocketContext);
@@ -18,11 +19,13 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 		const _p = new HocuspocusProvider({
 			websocketProvider: socket,
 			name: slug,
-			onOpen: () => console.log("onOpen!"),
-			onClose: () => console.log("onClose!"),
-			onAuthenticated: () => console.log("onAuthenticated!"),
+			onOpen: (data) => console.log("onOpen!", data),
+			onClose: (data) => console.log("onClose!", data),
+			onAuthenticated: (data) => console.log("onAuthenticated!", data),
 			onAuthenticationFailed: (data) =>
 				console.log("onAuthenticationFailed", data),
+      onUnsyncedChanges: (data) =>
+        console.log("onUnsyncedChanges", data)
 		});
 
 		setProvider(_p);
@@ -41,7 +44,9 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 
 	return (
 		<div>
-			<h1>Article editor!</h1>
+			<h1>Editor for article #{slug}</h1>
+
+      <CollaborationStatus provider={provider}/>
 
 			<CollaborativeEditor slug={slug} provider={provider} />
 		</div>

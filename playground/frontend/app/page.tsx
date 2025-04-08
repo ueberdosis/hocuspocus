@@ -13,6 +13,7 @@ export default function Home() {
 				The websocket is opened once you enter the articles/ routes and closed
 				when you leave them.
 			</p>
+      <p>You should open your browsers' console to see more information.</p>
 			<p>
 				Documents are fetched as needed (article 1 - 4) via the shared
 				connection.
