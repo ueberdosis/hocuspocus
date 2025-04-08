@@ -105,7 +105,7 @@ export class Server {
 
       // default response if all prior hooks don't interfere
       response.writeHead(200, { 'Content-Type': 'text/plain' })
-      response.end('OK')
+      response.end('Welcome to Hocuspocus!')
     } catch (error) {
       // if a hook rejects and the error is empty, do nothing
       // this is only meant to prevent later hooks and the
