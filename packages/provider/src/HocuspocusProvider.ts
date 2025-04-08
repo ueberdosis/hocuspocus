@@ -18,6 +18,7 @@ import { SyncStepOneMessage } from './OutgoingMessages/SyncStepOneMessage.ts'
 import { UpdateMessage } from './OutgoingMessages/UpdateMessage.ts'
 import type {
   ConstructableOutgoingMessage,
+  onAuthenticatedParameters,
   onAuthenticationFailedParameters,
   onAwarenessChangeParameters,
   onAwarenessUpdateParameters,
@@ -25,8 +26,10 @@ import type {
   onDisconnectParameters,
   onMessageParameters,
   onOpenParameters,
-  onOutgoingMessageParameters, onStatelessParameters,
+  onOutgoingMessageParameters,
+  onStatelessParameters,
   onSyncedParameters,
+  onUnsyncedChangesParameters,
 } from './types.ts'
 
 export type HocuspocusProviderConfiguration =
@@ -71,7 +74,7 @@ export interface CompleteHocuspocusProviderConfiguration {
    */
   forceSyncInterval: false | number,
 
-  onAuthenticated: () => void,
+  onAuthenticated: (data: onAuthenticatedParameters) => void,
   onAuthenticationFailed: (data: onAuthenticationFailedParameters) => void,
   onOpen: (data: onOpenParameters) => void,
   onConnect: () => void,
@@ -84,6 +87,7 @@ export interface CompleteHocuspocusProviderConfiguration {
   onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void,
   onAwarenessChange: (data: onAwarenessChangeParameters) => void,
   onStateless: (data: onStatelessParameters) => void
+  onUnsyncedChanges: (data: onUnsyncedChangesParameters) => void
 }
 
 export class AwarenessError extends Error {
@@ -112,6 +116,7 @@ export class HocuspocusProvider extends EventEmitter {
     onAwarenessUpdate: () => null,
     onAwarenessChange: () => null,
     onStateless: () => null,
+    onUnsyncedChanges: () => null,
   }
 
   isSynced = false
@@ -146,6 +151,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.on('awarenessUpdate', this.configuration.onAwarenessUpdate)
     this.on('awarenessChange', this.configuration.onAwarenessChange)
     this.on('stateless', this.configuration.onStateless)
+    this.on('unsyncedChanges', this.configuration.onUnsyncedChanges)
 
     this.on('authenticated', this.configuration.onAuthenticated)
     this.on('authenticationFailed', this.configuration.onAuthenticationFailed)
@@ -190,8 +196,6 @@ export class HocuspocusProvider extends EventEmitter {
 
   forwardConnect = (e: any) => this.emit('connect', e)
 
-  // forwardOpen = (e: any) => this.emit('open', e)
-
   forwardClose = (e: any) => this.emit('close', e)
 
   forwardDisconnect = (e: any) => this.emit('disconnect', e)
@@ -224,12 +228,12 @@ export class HocuspocusProvider extends EventEmitter {
 
   private resetUnsyncedChanges() {
     this.unsyncedChanges = 1
-    this.emit('unsyncedChanges', this.unsyncedChanges)
+    this.emit('unsyncedChanges', { number: this.unsyncedChanges })
   }
 
   incrementUnsyncedChanges() {
     this.unsyncedChanges += 1
-    this.emit('unsyncedChanges', this.unsyncedChanges)
+    this.emit('unsyncedChanges', { number: this.unsyncedChanges })
   }
 
   decrementUnsyncedChanges() {
@@ -241,7 +245,7 @@ export class HocuspocusProvider extends EventEmitter {
       this.synced = true
     }
 
-    this.emit('unsyncedChanges', this.unsyncedChanges)
+    this.emit('unsyncedChanges', { number: this.unsyncedChanges })
   }
 
   forceSync() {
@@ -315,10 +319,18 @@ export class HocuspocusProvider extends EventEmitter {
 
   // not needed, but provides backward compatibility with e.g. lexical/yjs
   async connect() {
+    if( this.manageSocket ) {
+      return this.configuration.websocketProvider.connect()
+    }
+
     console.warn('HocuspocusProvider::connect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.')
   }
 
   disconnect() {
+    if( this.manageSocket ) {
+      return this.configuration.websocketProvider.disconnect()
+    }
+
     console.warn('HocuspocusProvider::disconnect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.')
   }
 
@@ -367,6 +379,8 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   send(message: ConstructableOutgoingMessage, args: any) {
+    if( !this.isAttached ) return;
+
     const messageSender = new MessageSender(message, args)
 
     this.emit('outgoingMessage', { message: messageSender.message })
@@ -478,7 +492,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.isAuthenticated = true
     this.authorizedScope = scope
 
-    this.emit('authenticated')
+    this.emit('authenticated', { scope })
   }
 
   setAwarenessField(key: string, value: any) {

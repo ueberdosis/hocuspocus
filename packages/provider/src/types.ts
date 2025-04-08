@@ -61,6 +61,10 @@ export type onAuthenticationFailedParameters = {
   reason: string,
 }
 
+export type onAuthenticatedParameters = {
+  scope: 'read-write' | 'readonly',
+}
+
 export type onOpenParameters = {
   event: Event,
 }
@@ -80,6 +84,10 @@ export type onStatusParameters = {
 
 export type onSyncedParameters = {
   state: boolean,
+}
+
+export type onUnsyncedChangesParameters = {
+  number: number,
 }
 
 export type onDisconnectParameters = {
