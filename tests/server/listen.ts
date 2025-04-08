@@ -7,7 +7,7 @@ test('should respond with OK', async t => {
 
   const response = await fetch(hocuspocus.server!.httpURL)
 
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })
 
 test('should respond with status 200', async t => {
@@ -26,7 +26,7 @@ test('should respond with OK on a custom port', async t => {
   const response = await fetch(hocuspocus.server!.httpURL)
 
   t.is(hocuspocus.server!.address.port, 4000)
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })
 
 test('should respond with OK on a custom port passed to listen()', async t => {
@@ -39,7 +39,7 @@ test('should respond with OK on a custom port passed to listen()', async t => {
   const response = await fetch(server.httpURL)
 
   t.is(server.address.port, 4001)
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })
 
 test('should take a custom port and a callback', async t => {
@@ -56,7 +56,7 @@ test('should take a custom port and a callback', async t => {
   const response = await fetch(server.httpURL)
 
   t.is(server.address.port, 4002)
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })
 
 test('should execute a callback', async t => {
@@ -72,7 +72,7 @@ test('should execute a callback', async t => {
 
   const response = await fetch(server.httpURL)
 
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })
 
 test('should have the custom port as a parameter in the callback', async t => {
@@ -89,5 +89,5 @@ test('should have the custom port as a parameter in the callback', async t => {
 
   const response = await fetch(server.httpURL)
 
-  t.is(await response.text(), 'OK')
+  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })

@@ -62,7 +62,7 @@ test('can intercept specific URLs', async t => {
     t.is(await interceptedResponse.text(), 'I like cats.')
 
     const regularResponse = await fetch(hocuspocus.server!.httpURL)
-    t.is(await regularResponse.text(), 'OK')
+    t.is(await regularResponse.text(), 'Welcome to Hocuspocus!')
     resolve('done')
   })
 })
