@@ -28,7 +28,6 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/ioredis": "^4.28.7",
     "@types/lodash.debounce": "^4.0.6",
     "@types/redlock": "^4.0.3"
   },
