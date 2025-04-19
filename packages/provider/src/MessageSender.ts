@@ -1,28 +1,22 @@
-import type { Encoder} from 'lib0/encoding'
-import { toUint8Array } from 'lib0/encoding'
-import * as bc from 'lib0/broadcastchannel'
-import type { ConstructableOutgoingMessage } from './types.ts'
+import type { Encoder } from "lib0/encoding";
+import { toUint8Array } from "lib0/encoding";
+import type { ConstructableOutgoingMessage } from "./types.ts";
 
 export class MessageSender {
+	encoder: Encoder;
 
-  encoder: Encoder
+	message: any;
 
-  message: any
+	constructor(Message: ConstructableOutgoingMessage, args: any = {}) {
+		this.message = new Message();
+		this.encoder = this.message.get(args);
+	}
 
-  constructor(Message: ConstructableOutgoingMessage, args: any = {}) {
-    this.message = new Message()
-    this.encoder = this.message.get(args)
-  }
+	create() {
+		return toUint8Array(this.encoder);
+	}
 
-  create() {
-    return toUint8Array(this.encoder)
-  }
-
-  send(webSocket: any) {
-    webSocket?.send(this.create())
-  }
-
-  broadcast(channel: string) {
-    bc.publish(channel, this.create())
-  }
+	send(webSocket: any) {
+		webSocket?.send(this.create());
+	}
 }
