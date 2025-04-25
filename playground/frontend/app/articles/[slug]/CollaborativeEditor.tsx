@@ -36,7 +36,10 @@ const CollaborativeEditor = (props: {
 	const editor = useEditor(
 		{
 			extensions: [
-				StarterKit,
+				// make sure to turn off the undo-redo extension when using collaboration
+				StarterKit.configure({
+          undoRedo: false,
+        }),
 				Collaboration.configure({
 					document: props.provider.document,
 				}),
