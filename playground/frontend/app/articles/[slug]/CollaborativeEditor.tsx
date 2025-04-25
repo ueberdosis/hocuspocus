@@ -36,7 +36,6 @@ const CollaborativeEditor = (props: {
 	const editor = useEditor(
 		{
 			extensions: [
-				// make sure to turn off the history extension when using collaboration
 				StarterKit,
 				Collaboration.configure({
 					document: props.provider.document,
