@@ -2,7 +2,7 @@
 
 import type { HocuspocusProvider } from "@hocuspocus/provider";
 import { Collaboration } from "@tiptap/extension-collaboration";
-import { CollaborationCursor } from "@tiptap/extension-collaboration-caret";
+import { CollaborationCaret } from "@tiptap/extension-collaboration-caret";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import * as Y from "yjs";
@@ -37,13 +37,11 @@ const CollaborativeEditor = (props: {
 		{
 			extensions: [
 				// make sure to turn off the history extension when using collaboration
-				StarterKit.configure({
-					history: false,
-				}),
+				StarterKit,
 				Collaboration.configure({
 					document: props.provider.document,
 				}),
-				CollaborationCursor.configure({
+				CollaborationCaret.configure({
 					provider: props.provider,
 				}),
 			],
