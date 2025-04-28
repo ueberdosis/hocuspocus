@@ -1,9 +1,8 @@
 {
-  "useWorkspaces": true,
   "command": {
     "publish": {
       "conventionalCommits": true
     }
   },
-  "version": "3.0.8-rc.0"
+  "version": "3.1.0-rc.0"
 }
