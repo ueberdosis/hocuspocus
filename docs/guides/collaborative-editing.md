@@ -140,14 +140,14 @@ Yes, that’s all.
 
 Keep in mind that WebRTC needs a signaling server to connect clients. This signaling server doesn’t receive the synced data, but helps to let clients find each other. You can [run your own signaling server](https://github.com/yjs/y-webrtc#signaling), if you like. Otherwise it’s using a default URL baked into the package.
 
-### Show other cursors
-To enable users to see the cursor and text selections of each other, add the [`CollaborationCursor`](https://tiptap.dev/docs/editor/api/extensions/collaboration-cursor) extension.
+### Show other carets
+To enable users to see the caret and text selections of each other, add the [`CollaborationCaret`](https://tiptap.dev/docs/editor/api/extensions/collaboration-caret) extension.
 
 ```js
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
 // Set up the Hocuspocus WebSocket provider
@@ -166,7 +166,7 @@ const editor = new Editor({
       document: provider.document,
     }),
     // Register the collaboration cursor extension
-    CollaborationCursor.configure({
+    CollaborationCaret.configure({
       provider: provider,
       user: {
         name: 'Cyndi Lauper',

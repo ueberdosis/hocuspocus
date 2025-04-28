@@ -19,7 +19,7 @@ Add an element to your HTML document where Tiptap should be initialized:
 Install the required extensions:
 
 ```bash
-npm install @hocuspocus/provider @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor yjs y-prosemirror
+npm install @hocuspocus/provider @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-caret yjs y-prosemirror
 ```
 
 And create your Tiptap instance:
@@ -28,7 +28,7 @@ And create your Tiptap instance:
 import { Editor } from '@tiptap/core'
 import { StarterKit } from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 import * as Y from 'yjs'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 
@@ -49,7 +49,7 @@ new Editor({
     Collaboration.configure({
       document: ydoc,
     }),
-    CollaborationCursor.configure({
+    CollaborationCaret.configure({
       provider,
       user: { name: "John Doe", color: "#ffcc00" },
     }),
