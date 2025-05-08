@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.1-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.1.1-rc.0...v3.1.1-rc.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* fixes express/koa backend demo, fixes [#939](https://github.com/ueberdosis/hocuspocus/issues/939) ([ddec715](https://github.com/ueberdosis/hocuspocus/commit/ddec7153e7d40725d6551d7dfbc61aac1b2b042e))
+
+
+
+
+
 ## [3.1.1-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.1.0...v3.1.1-rc.0) (2025-04-30)
 
 **Note:** Version bump only for package @hocuspocus/server-demos
