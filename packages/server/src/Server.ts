@@ -9,7 +9,7 @@ import type { AddressInfo, ServerOptions } from 'ws'
 import kleur from 'kleur'
 import meta from '../package.json' assert { type: 'json' }
 import { defaultConfiguration, Hocuspocus } from './Hocuspocus.ts'
-import type { Configuration, onListenPayload } from './types'
+import type { Configuration, onListenPayload } from './types.ts'
 
 export interface ServerConfiguration extends Configuration {
   port?: number,
