@@ -17,7 +17,7 @@ app.use(async (ctx, next) => {
 
 	hocuspocus.handleConnection(
 		ws,
-		ctx.request,
+		ctx.req,
 		// additional data (optional)
 		{
 			user_id: 1234,
