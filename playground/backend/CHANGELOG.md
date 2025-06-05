@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.2](https://github.com/ueberdosis/hocuspocus/compare/v3.1.1...v3.1.2) (2025-06-05)
+
+
+### Bug Fixes
+
+* fixes koa example in playground ([1a73d14](https://github.com/ueberdosis/hocuspocus/commit/1a73d14221a006f38d07063d7001ae8f1e14deaf))
+
+
+
+
+
 ## [3.1.1](https://github.com/ueberdosis/hocuspocus/compare/v3.1.1-rc.1...v3.1.1) (2025-05-10)
 
 **Note:** Version bump only for package @hocuspocus/server-demos
