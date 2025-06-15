@@ -1,66 +1,63 @@
-import type {
-  Decoder} from 'lib0/decoding'
+import type { Decoder } from "lib0/decoding";
 import {
-  createDecoder,
-  peekVarString,
-  readVarUint,
-  readVarUint8Array,
-  readVarString,
-} from 'lib0/decoding'
-import type {
-  Encoder} from 'lib0/encoding'
+	createDecoder,
+	peekVarString,
+	readVarUint,
+	readVarUint8Array,
+	readVarString,
+} from "lib0/decoding";
+import type { Encoder } from "lib0/encoding";
 import {
-  createEncoder,
-  writeVarUint,
-  writeVarUint8Array,
-  writeVarString,
-  length,
-} from 'lib0/encoding'
-import type { MessageType } from './types.ts'
+	createEncoder,
+	writeVarUint,
+	writeVarUint8Array,
+	writeVarString,
+	length,
+} from "lib0/encoding";
+import type { MessageType } from "./types.ts";
 
 export class IncomingMessage {
+	data: any;
 
-  data: any
+	encoder: Encoder;
 
-  encoder: Encoder
+	decoder: Decoder;
 
-  decoder: Decoder
+	constructor(data: any) {
+		this.data = data;
+		this.encoder = createEncoder();
+		this.decoder = createDecoder(new Uint8Array(this.data));
+	}
 
-  constructor(data: any) {
-    this.data = data
-    this.encoder = createEncoder()
-    this.decoder = createDecoder(new Uint8Array(this.data))
-  }
+	peekVarString(): string {
+		return peekVarString(this.decoder);
+	}
 
-  peekVarString(): string {
-    return peekVarString(this.decoder)
-  }
+	readVarUint(): MessageType {
+		return readVarUint(this.decoder);
+	}
 
-  readVarUint(): MessageType {
-    return readVarUint(this.decoder)
-  }
+	readVarString(): string {
+		return readVarString(this.decoder);
+	}
 
-  readVarString(): string {
-    return readVarString(this.decoder)
-  }
+	readVarUint8Array() {
+		return readVarUint8Array(this.decoder);
+	}
 
-  readVarUint8Array() {
-    return readVarUint8Array(this.decoder)
-  }
+	writeVarUint(type: MessageType) {
+		return writeVarUint(this.encoder, type);
+	}
 
-  writeVarUint(type: MessageType) {
-    return writeVarUint(this.encoder, type)
-  }
+	writeVarString(string: string) {
+		return writeVarString(this.encoder, string);
+	}
 
-  writeVarString(string: string) {
-    return writeVarString(this.encoder, string)
-  }
+	writeVarUint8Array(data: Uint8Array) {
+		return writeVarUint8Array(this.encoder, data);
+	}
 
-  writeVarUint8Array(data: Uint8Array) {
-    return writeVarUint8Array(this.encoder, data)
-  }
-
-  length() {
-    return length(this.encoder)
-  }
+	length() {
+		return length(this.encoder);
+	}
 }

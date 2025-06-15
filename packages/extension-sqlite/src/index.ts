@@ -1,1 +1,1 @@
-export * from './SQLite.ts'
+export * from "./SQLite.ts";

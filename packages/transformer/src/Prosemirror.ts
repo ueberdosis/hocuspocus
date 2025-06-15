@@ -1,68 +1,76 @@
-import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
+import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 // @ts-ignore
-import { yDocToProsemirrorJSON, prosemirrorJSONToYDoc } from 'y-prosemirror'
-import { Schema } from '@tiptap/pm/model'
-import type { Transformer } from './types.ts'
+import { yDocToProsemirrorJSON, prosemirrorJSONToYDoc } from "y-prosemirror";
+import { Schema } from "@tiptap/pm/model";
+import type { Transformer } from "./types.ts";
 
 class Prosemirror implements Transformer {
+	defaultSchema: Schema = new Schema({
+		nodes: {
+			text: {},
+			doc: { content: "text*" },
+		},
+	});
 
-  defaultSchema: Schema = new Schema({
-    nodes: {
-      text: {},
-      doc: { content: 'text*' },
-    },
-  })
+	schema(schema: Schema): Prosemirror {
+		this.defaultSchema = schema;
 
-  schema(schema: Schema): Prosemirror {
-    this.defaultSchema = schema
+		return this;
+	}
 
-    return this
-  }
+	fromYdoc(document: Doc, fieldName?: string | Array<string>): any {
+		const data = {};
 
-  fromYdoc(document: Doc, fieldName?: string | Array<string>): any {
-    const data = {}
+		// allow a single field name
+		if (typeof fieldName === "string") {
+			return yDocToProsemirrorJSON(document, fieldName);
+		}
 
-    // allow a single field name
-    if (typeof fieldName === 'string') {
-      return yDocToProsemirrorJSON(document, fieldName)
-    }
+		// default to all available fields if the given field name is empty
+		if (fieldName === undefined || fieldName.length === 0) {
+			fieldName = Array.from(document.share.keys());
+		}
 
-    // default to all available fields if the given field name is empty
-    if (fieldName === undefined || fieldName.length === 0) {
-      fieldName = Array.from(document.share.keys())
-    }
+		fieldName.forEach((field) => {
+			// @ts-ignore
+			data[field] = yDocToProsemirrorJSON(document, field);
+		});
 
-    fieldName.forEach(field => {
-      // @ts-ignore
-      data[field] = yDocToProsemirrorJSON(document, field)
-    })
+		return data;
+	}
 
-    return data
-  }
+	toYdoc(
+		document: any,
+		fieldName: string | Array<string> = "prosemirror",
+		schema?: Schema,
+	): Doc {
+		if (!document) {
+			throw new Error(
+				`You’ve passed an empty or invalid document to the Transformer. Make sure to pass ProseMirror-compatible JSON. Actually passed JSON: ${document}`,
+			);
+		}
 
-  toYdoc(document: any, fieldName: string | Array<string> = 'prosemirror', schema?: Schema): Doc {
-    if (!document) {
-      throw new Error(`You’ve passed an empty or invalid document to the Transformer. Make sure to pass ProseMirror-compatible JSON. Actually passed JSON: ${document}`)
-    }
+		// allow a single field name
+		if (typeof fieldName === "string") {
+			return prosemirrorJSONToYDoc(
+				schema || this.defaultSchema,
+				document,
+				fieldName,
+			);
+		}
 
-    // allow a single field name
-    if (typeof fieldName === 'string') {
-      return prosemirrorJSONToYDoc(schema || this.defaultSchema, document, fieldName)
-    }
+		const ydoc = new Doc();
 
-    const ydoc = new Doc()
+		fieldName.forEach((field) => {
+			const update = encodeStateAsUpdate(
+				prosemirrorJSONToYDoc(schema || this.defaultSchema, document, field),
+			);
 
-    fieldName.forEach(field => {
-      const update = encodeStateAsUpdate(
-        prosemirrorJSONToYDoc(schema || this.defaultSchema, document, field),
-      )
+			applyUpdate(ydoc, update);
+		});
 
-      applyUpdate(ydoc, update)
-    })
-
-    return ydoc
-  }
-
+		return ydoc;
+	}
 }
 
-export const ProsemirrorTransformer = new Prosemirror()
+export const ProsemirrorTransformer = new Prosemirror();
