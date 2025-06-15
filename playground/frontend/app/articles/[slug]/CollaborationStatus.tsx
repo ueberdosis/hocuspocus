@@ -12,9 +12,11 @@ const CollaborationStatus = (props: {
 
 	const [unsyncedChanges, setUnsyncedChanges] = useState(0);
 	const [socketStatus, setSocketStatus] = useState<string | null>(null);
+	const [isAttached, _setAttached] = useState<boolean | null>(null);
 
 	useEffect(() => {
 		setSocketStatus(provider.configuration.websocketProvider.status);
+		_setAttached(provider.isAttached);
 
 		const handleUnsyncedChanges = (changes: onUnsyncedChangesParameters) => {
 			setUnsyncedChanges(changes.number);
@@ -35,6 +37,16 @@ const CollaborationStatus = (props: {
 			);
 		};
 	}, [provider]);
+
+	const updateAttached = (attach: boolean) => {
+		if (attach) {
+			provider.attach();
+		} else {
+			provider.detach();
+		}
+
+		_setAttached(provider.isAttached);
+	};
 
 	const getStatusColor = (status: string | null) => {
 		switch (status) {
@@ -74,7 +86,7 @@ const CollaborationStatus = (props: {
 						<span
 							className={`px-2 py-1 rounded-full text-xs font-medium ${provider.isAttached ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}
 						>
-							{provider.isAttached ? "Attached" : "Detached"}
+							{isAttached ? "Attached" : "Detached"}
 						</span>
 					</div>
 					<div className="flex items-center space-x-2">
@@ -119,15 +131,15 @@ const CollaborationStatus = (props: {
 					<div className="flex space-x-2">
 						<button
 							className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							onClick={() => provider.detach()}
-							disabled={!provider.isAttached}
+							onClick={() => updateAttached(false)}
+							disabled={!isAttached}
 						>
 							Detach
 						</button>
 						<button
 							className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							onClick={() => provider.attach()}
-							disabled={provider.isAttached}
+							onClick={() => updateAttached(true)}
+							disabled={isAttached}
 						>
 							Attach
 						</button>

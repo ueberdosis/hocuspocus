@@ -1,6 +1,7 @@
 "use client";
 
-import { SocketContext } from "@/app/SocketContext";
+import { SocketContext1 } from "@/app/SocketContext1";
+import { SocketContext2 } from "@/app/SocketContext2";
 import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 // import {
 // 	TiptapCollabProvider,
@@ -13,26 +14,40 @@ export default function Layout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const [socket, setSocket] = useState<HocuspocusProviderWebsocket | null>(
+	const [socket1, setSocket1] = useState<HocuspocusProviderWebsocket | null>(
+		null,
+	);
+	const [socket2, setSocket2] = useState<HocuspocusProviderWebsocket | null>(
 		null,
 	);
 
 	useEffect(() => {
-		const newlyCreatedSocket = new HocuspocusProviderWebsocket({
+		const newlyCreatedSocket1 = new HocuspocusProviderWebsocket({
+			url: "ws://localhost:1234",
+		});
+		const newlyCreatedSocket2 = new HocuspocusProviderWebsocket({
 			url: "ws://localhost:1234",
 		});
 		// const newlyCreatedSocket = new TiptapCollabProviderWebsocket({
 		// 	appId: "",
 		// });
 
-		setSocket(newlyCreatedSocket);
+		setSocket1(newlyCreatedSocket1);
+		setSocket2(newlyCreatedSocket2);
 
 		return () => {
-			newlyCreatedSocket?.destroy();
+			newlyCreatedSocket1?.destroy();
+			newlyCreatedSocket2?.destroy();
 		};
 	}, []);
 
-	if (socket) {
-		return <SocketContext value={socket}>{children}</SocketContext>;
+	if (socket1 && socket2) {
+		return (
+			<>
+				<SocketContext1 value={socket1}>
+					<SocketContext2 value={socket2}>{children}</SocketContext2>
+				</SocketContext1>
+			</>
+		);
 	}
 }
