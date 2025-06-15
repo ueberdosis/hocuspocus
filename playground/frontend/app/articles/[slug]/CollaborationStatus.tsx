@@ -1,5 +1,5 @@
 import type {HocuspocusProvider, onUnsyncedChangesParameters} from "@hocuspocus/provider";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 const CollaborationStatus = (props: {
 	provider: HocuspocusProvider;
@@ -8,7 +8,17 @@ const CollaborationStatus = (props: {
 
   const [unsyncedChanges, setUnsyncedChanges] = useState(0);
 
-  provider.on('unsyncedChanges', (changes: onUnsyncedChangesParameters) => setUnsyncedChanges(changes.number))
+  useEffect(() => {
+    const handleUnsyncedChanges = (changes: onUnsyncedChangesParameters) => {
+      setUnsyncedChanges(changes.number);
+    };
+
+    provider.on('unsyncedChanges', handleUnsyncedChanges);
+
+    return () => {
+      provider.off('unsyncedChanges', handleUnsyncedChanges);
+    };
+  }, [provider]);
 
 	return <div className="my-10">
     <p>Socket status: {provider.configuration.websocketProvider.status}
