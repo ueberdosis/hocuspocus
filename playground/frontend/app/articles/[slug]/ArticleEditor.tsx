@@ -50,8 +50,8 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 		setProvider2(_p2);
 
 		return () => {
-			_p1.detach();
-			_p2.detach();
+			_p1.destroy();
+			_p2.destroy();
 		};
 	}, [socket1, socket2, slug]);
 
