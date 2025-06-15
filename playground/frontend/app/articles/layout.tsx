@@ -19,7 +19,7 @@ export default function Layout({
 
 	useEffect(() => {
 		const newlyCreatedSocket = new HocuspocusProviderWebsocket({
-			url: "ws://localhost:1234",
+			url: "ws://localhost:1235",
 		});
 		// const newlyCreatedSocket = new TiptapCollabProviderWebsocket({
 		// 	appId: "",
