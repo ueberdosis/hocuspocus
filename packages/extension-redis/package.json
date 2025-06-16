@@ -1,47 +1,40 @@
 {
-  "name": "@hocuspocus/extension-redis",
-  "version": "3.1.3",
-  "description": "Scale Hocuspocus horizontally with Redis",
-  "homepage": "https://hocuspocus.dev",
-  "keywords": [
-    "hocuspocus",
-    "redis",
-    "yjs"
-  ],
-  "license": "MIT",
-  "type": "module",
-  "main": "dist/hocuspocus-redis.cjs",
-  "module": "dist/hocuspocus-redis.esm.js",
-  "types": "dist/packages/extension-redis/src/index.d.ts",
-  "exports": {
-    "source": {
-      "import": "./src/index.ts"
-    },
-    "default": {
-      "import": "./dist/hocuspocus-redis.esm.js",
-      "require": "./dist/hocuspocus-redis.cjs",
-      "types": "./dist/packages/extension-redis/src/index.d.ts"
-    }
-  },
-  "files": [
-    "src",
-    "dist"
-  ],
-  "devDependencies": {
-    "@types/lodash.debounce": "^4.0.6",
-    "@types/redlock": "^4.0.3"
-  },
-  "dependencies": {
-    "@hocuspocus/server": "^3.1.3",
-    "ioredis": "^5.6.1",
-    "kleur": "^4.1.4",
-    "lodash.debounce": "^4.0.8",
-    "redlock": "^4.2.0",
-    "uuid": "^11.0.3"
-  },
-  "peerDependencies": {
-    "y-protocols": "^1.0.6",
-    "yjs": "^13.6.8"
-  },
-  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"name": "@hocuspocus/extension-redis",
+	"version": "3.1.3",
+	"description": "Scale Hocuspocus horizontally with Redis",
+	"homepage": "https://hocuspocus.dev",
+	"keywords": ["hocuspocus", "redis", "yjs"],
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/hocuspocus-redis.cjs",
+	"module": "dist/hocuspocus-redis.esm.js",
+	"types": "dist/packages/extension-redis/src/index.d.ts",
+	"exports": {
+		"source": {
+			"import": "./src/index.ts"
+		},
+		"default": {
+			"import": "./dist/hocuspocus-redis.esm.js",
+			"require": "./dist/hocuspocus-redis.cjs",
+			"types": "./dist/packages/extension-redis/src/index.d.ts"
+		}
+	},
+	"files": ["src", "dist"],
+	"devDependencies": {
+		"@types/lodash.debounce": "^4.0.6",
+		"@types/redlock": "^4.0.3"
+	},
+	"dependencies": {
+		"@hocuspocus/server": "^3.1.3",
+		"ioredis": "^5.6.1",
+		"kleur": "^4.1.4",
+		"lodash.debounce": "^4.0.8",
+		"redlock": "^4.2.0",
+		"uuid": "^11.0.3"
+	},
+	"peerDependencies": {
+		"y-protocols": "^1.0.6",
+		"yjs": "^13.6.8"
+	},
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
 }

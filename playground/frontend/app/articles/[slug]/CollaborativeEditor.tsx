@@ -52,7 +52,7 @@ const CollaborativeEditor = (props: {
 			editorProps: {
 				attributes: {
 					class:
-						"prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none border border-gray p-3",
+						"prose prose-lg max-w-none focus:outline-none min-h-[500px] p-8 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm",
 				},
 			},
 		},

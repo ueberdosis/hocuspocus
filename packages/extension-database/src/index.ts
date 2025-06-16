@@ -1,1 +1,1 @@
-export * from './Database.ts'
+export * from "./Database.ts";
