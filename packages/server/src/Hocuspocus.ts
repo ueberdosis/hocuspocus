@@ -440,6 +440,12 @@ export class Hocuspocus {
 						if (error?.message) {
 							throw error;
 						}
+
+            if (document.getConnectionsCount() > 0) {
+              return
+            }
+
+            this.unloadDocument(document)
 					});
 			},
 			immediately ? 0 : this.configuration.debounce,
