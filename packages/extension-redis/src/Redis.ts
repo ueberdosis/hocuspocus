@@ -16,13 +16,11 @@ import {
 	MessageReceiver,
 	OutgoingMessage,
 } from "@hocuspocus/server";
-import type { ClusterNode, ClusterOptions, RedisOptions } from "ioredis";
+import {Redlock, type ExecutionResult, type Lock} from '@sesamecare-oss/redlock';
+import type {Cluster, ClusterNode, ClusterOptions, RedisOptions} from "ioredis";
 import RedisClient from "ioredis";
-import Redlock from "redlock";
-import { v4 as uuid } from "uuid";
-
-export type RedisInstance = RedisClient.Cluster | RedisClient.Redis;
-
+import {v4 as uuid} from "uuid";
+export type RedisInstance = RedisClient | Cluster
 export interface Configuration {
 	/**
 	 * Redis port
@@ -97,7 +95,7 @@ export class Redis implements Extension {
 
 	redlock: Redlock;
 
-	locks = new Map<string, Redlock.Lock>();
+	locks = new Map<string, {lock: Lock; release?: Promise<ExecutionResult>}>();
 
 	messagePrefix: Buffer;
 
@@ -214,7 +212,7 @@ export class Redis implements Extension {
 			.createSyncMessage()
 			.writeFirstSyncStepFor(document);
 
-		return this.pub.publishBuffer(
+		return this.pub.publish(
 			this.pubKey(documentName),
 			this.encodeMessage(syncMessage.toUint8Array()),
 		);
@@ -228,7 +226,7 @@ export class Redis implements Extension {
 			documentName,
 		).writeQueryAwareness();
 
-		return this.pub.publishBuffer(
+		return this.pub.publish(
 			this.pubKey(documentName),
 			this.encodeMessage(awarenessMessage.toUint8Array()),
 		);
@@ -238,49 +236,37 @@ export class Redis implements Extension {
 	 * Before the document is stored, make sure to set a lock in Redis.
 	 * That’s meant to avoid conflicts with other instances trying to store the document.
 	 */
-	async onStoreDocument({ documentName }: onStoreDocumentPayload) {
-		// Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-		// to avoid conflict with other instances storing the same document.
-
-		return new Promise((resolve, reject) => {
-			this.redlock.lock(
-				this.lockKey(documentName),
-				this.configuration.lockTimeout,
-				async (error, lock) => {
-					if (error || !lock) {
-						// Expected behavior: Could not acquire lock, another instance locked it already.
-						// No further `onStoreDocument` hooks will be executed.
-						console.log("unable to acquire lock");
-						reject();
-						return;
-					}
-
-					this.locks.set(this.lockKey(documentName), lock);
-
-					resolve(undefined);
-				},
-			);
-		});
-	}
+  async onStoreDocument({documentName}: onStoreDocumentPayload) {
+    // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
+    // to avoid conflict with other instances storing the same document.
+    const resource = this.lockKey(documentName)
+    const ttl = this.configuration.lockTimeout
+    const lock = await this.redlock.acquire([resource], ttl)
+    const oldLock = this.locks.get(resource)
+    if (oldLock) {
+      await oldLock.release
+    }
+    this.locks.set(resource, {lock})
+  }
 
 	/**
 	 * Release the Redis lock, so other instances can store documents.
 	 */
-	async afterStoreDocument({
-		documentName,
-		socketId,
-	}: afterStoreDocumentPayload) {
-		this.locks
-			.get(this.lockKey(documentName))
-			?.unlock()
-			.catch(() => {
-				// Not able to unlock Redis. The lock will expire after ${lockTimeout} ms.
-				// console.error(`Not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
-			})
-			.finally(() => {
-				this.locks.delete(this.lockKey(documentName));
-			});
-
+  async afterStoreDocument({documentName, socketId}: afterStoreDocumentPayload) {
+    const lockKey = this.lockKey(documentName)
+    const lock = this.locks.get(lockKey)
+    if (!lock) {
+      throw new Error(`Lock created in onStoreDocument not found in afterStoreDocument: ${lockKey}`)
+    }
+    try {
+      // Always try to unlock and clean up the lock
+      lock.release = lock.lock.release()
+      await lock.release
+    } catch {
+      // Lock will expire on its own after timeout
+    } finally {
+      this.locks.delete(lockKey)
+    }
 		// if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
 		// for provider connections, this usually happens in the onDisconnect hook
 		if (socketId === "server") {
@@ -326,7 +312,7 @@ export class Redis implements Extension {
 			documentName,
 		).createAwarenessUpdateMessage(awareness, changedClients);
 
-		return this.pub.publishBuffer(
+		return this.pub.publish(
 			this.pubKey(documentName),
 			this.encodeMessage(message.toUint8Array()),
 		);
@@ -358,7 +344,7 @@ export class Redis implements Extension {
 			document,
 			undefined,
 			(reply) => {
-				return this.pub.publishBuffer(
+				return this.pub.publish(
 					this.pubKey(document.name),
 					this.encodeMessage(reply),
 				);
@@ -416,7 +402,7 @@ export class Redis implements Extension {
 			data.documentName,
 		).writeBroadcastStateless(data.payload);
 
-		return this.pub.publishBuffer(
+		return this.pub.publish(
 			this.pubKey(data.documentName),
 			this.encodeMessage(message.toUint8Array()),
 		);
