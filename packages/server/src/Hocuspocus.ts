@@ -491,7 +491,11 @@ export class Hocuspocus {
 		const documentName = document.name;
 		if (!this.documents.has(documentName)) return;
 
-		await this.hooks("beforeUnloadDocument", { instance: this, documentName });
+		await this.hooks("beforeUnloadDocument", {
+			instance: this,
+			documentName,
+			document,
+		});
 
 		if (document.getConnectionsCount() > 0) {
 			return;

@@ -378,6 +378,7 @@ export interface afterUnloadDocumentPayload {
 export interface beforeUnloadDocumentPayload {
 	instance: Hocuspocus;
 	documentName: string;
+	document: Document;
 }
 
 export interface DirectConnection {
