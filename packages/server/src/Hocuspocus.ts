@@ -117,6 +117,7 @@ export class Hocuspocus {
 			afterStoreDocument: this.configuration.afterStoreDocument,
 			onAwarenessUpdate: this.configuration.onAwarenessUpdate,
 			onRequest: this.configuration.onRequest,
+			beforeUnloadDocument: this.configuration.beforeUnloadDocument,
 			afterUnloadDocument: this.configuration.afterUnloadDocument,
 			onDisconnect: this.configuration.onDisconnect,
 			onDestroy: this.configuration.onDestroy,
@@ -491,11 +492,15 @@ export class Hocuspocus {
 		const documentName = document.name;
 		if (!this.documents.has(documentName)) return;
 
-		await this.hooks("beforeUnloadDocument", {
-			instance: this,
-			documentName,
-			document,
-		});
+		try {
+			await this.hooks("beforeUnloadDocument", {
+				instance: this,
+				documentName,
+				document,
+			});
+		} catch (e) {
+			return;
+		}
 
 		if (document.getConnectionsCount() > 0) {
 			return;
