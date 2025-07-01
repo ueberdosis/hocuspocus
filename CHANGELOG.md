@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.8](https://github.com/ueberdosis/hocuspocus/compare/v3.1.7...v3.1.8) (2025-07-01)
+
+
+### Features
+
+* adds `document` to `beforeUnloadDocumentPayload` ([f7d1e64](https://github.com/ueberdosis/hocuspocus/commit/f7d1e646342746b9228fe1a8df8a80ee35e2aea5))
+* beforeUnloadDocument: allow passing in Hocuspocus constructor ; allow preventing unload by throwing an error in beforeUnloadDocument ([63b298e](https://github.com/ueberdosis/hocuspocus/commit/63b298eddf23b8f472a066dc8274b22d790176ea))
+
+
+
+
+
 ## [3.1.7](https://github.com/ueberdosis/hocuspocus/compare/v3.1.6...v3.1.7) (2025-06-22)
 
 **Note:** Version bump only for package hocuspocus
