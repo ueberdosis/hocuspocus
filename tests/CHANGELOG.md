@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.10](https://github.com/ueberdosis/hocuspocus/compare/v3.1.9...v3.1.10) (2025-07-08)
+
+**Note:** Version bump only for package tests
+
+
+
+
+
 ## [3.1.8](https://github.com/ueberdosis/hocuspocus/compare/v3.1.7...v3.1.8) (2025-07-01)
 
 
