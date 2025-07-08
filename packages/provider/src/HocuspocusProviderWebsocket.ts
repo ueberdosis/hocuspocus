@@ -72,6 +72,7 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	 * A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.
 	 */
 	timeout: number;
+	handleTimeout: (() => Promise<unknown>) | null;
 	onOpen: (data: onOpenParameters) => void;
 	onConnect: () => void;
 	onMessage: (data: onMessageParameters) => void;
@@ -125,6 +126,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		onDestroy: () => null,
 		onAwarenessUpdate: () => null,
 		onAwarenessChange: () => null,
+		handleTimeout: null,
 		providerMap: new Map(),
 	};
 
@@ -249,6 +251,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 				maxDelay: this.configuration.maxDelay,
 				jitter: this.configuration.jitter,
 				timeout: this.configuration.timeout,
+				handleTimeout: this.configuration.handleTimeout,
 				beforeAttempt: (context) => {
 					if (!this.shouldConnect || cancelAttempt) {
 						context.abort();
