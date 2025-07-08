@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.11](https://github.com/ueberdosis/hocuspocus/compare/v3.1.9...v3.1.11) (2025-07-08)
+
+
+### Features
+
+* HocuspocusProviderWebsocket: adds handleTimeout callback that is called when the connection doesnt establish within the given timeout ([509e31b](https://github.com/ueberdosis/hocuspocus/commit/509e31bdcc23b625f8245c8c2d2ea320729dd8e7))
+
+
+
+
+
 ## [3.1.10](https://github.com/ueberdosis/hocuspocus/compare/v3.1.9...v3.1.10) (2025-07-08)
 
 **Note:** Version bump only for package @hocuspocus/provider
