@@ -18,9 +18,10 @@ const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 // We mount HocusPocus in the Hono server
 app.get(
-	"/hocuspocus",
+	"/",
 	upgradeWebSocket((c) => ({
 		onOpen(_evt, ws) {
+			// @ts-ignore
 			hocuspocus.handleConnection(ws.raw, c.req.raw as any, {});
 		},
 	})),
@@ -30,7 +31,7 @@ app.get(
 const server = serve(
 	{
 		fetch: app.fetch,
-		port: 8787,
+		port: 8000,
 	},
 	(info) => {
 		hocuspocus.hooks("onListen", {
