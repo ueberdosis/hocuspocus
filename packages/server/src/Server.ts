@@ -2,9 +2,9 @@ import type {
 	Server as HTTPServer,
 	IncomingMessage,
 	ServerResponse,
-} from "http";
-import { createServer } from "http";
-import type { ListenOptions } from "net";
+} from "node:http";
+import { createServer } from "node:http";
+import type { ListenOptions } from "node:net";
 import kleur from "kleur";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";

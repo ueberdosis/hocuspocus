@@ -1,4 +1,4 @@
-import type { IncomingMessage } from "http";
+import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import { v4 as uuid } from "uuid";
 import type WebSocket from "ws";

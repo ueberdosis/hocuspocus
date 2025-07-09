@@ -1,4 +1,4 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "http";
+import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
