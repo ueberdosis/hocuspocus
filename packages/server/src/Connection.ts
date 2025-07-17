@@ -188,7 +188,13 @@ export class Connection {
 		this.callbacks
 			.beforeHandleMessage(this, data)
 			.then(() => {
-				new MessageReceiver(message).apply(this.document, this);
+				new MessageReceiver(message).apply(this.document, this).catch((e: any) => {
+					console.error("closing connection because of exception", e);
+					this.close({
+						code: "code" in e ? e.code : ResetConnection.code,
+						reason: "reason" in e ? e.reason : ResetConnection.reason,
+					});
+				})
 			})
 			.catch((e: any) => {
 				console.error("closing connection because of exception", e);
