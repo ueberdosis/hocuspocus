@@ -136,7 +136,7 @@ export class Redis implements Extension {
 		this.sub.on("messageBuffer", this.handleIncomingMessage);
 
 		this.redlock = new Redlock([this.pub], {
-			retryCount: 0,
+			driftFactor: 0.1
 		});
 
 		const identifierBuffer = Buffer.from(
