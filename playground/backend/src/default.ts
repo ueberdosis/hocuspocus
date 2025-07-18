@@ -3,7 +3,7 @@ import { SQLite } from "@hocuspocus/extension-sqlite";
 import { Server } from "@hocuspocus/server";
 
 const server = new Server({
-	port: 1234,
+	port: 8000,
 	address: "127.0.0.1",
 	name: "hocuspocus-fra1-01",
 	extensions: [

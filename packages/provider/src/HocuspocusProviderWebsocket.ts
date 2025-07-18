@@ -6,17 +6,17 @@ import EventEmitter from "./EventEmitter.ts";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
-import type {
-	onAwarenessChangeParameters,
-	onAwarenessUpdateParameters,
-	onCloseParameters,
-	onDisconnectParameters,
-	onMessageParameters,
-	onOpenParameters,
-	onOutgoingMessageParameters,
-	onStatusParameters,
+import {
+	WebSocketStatus,
+	type onAwarenessChangeParameters,
+	type onAwarenessUpdateParameters,
+	type onCloseParameters,
+	type onDisconnectParameters,
+	type onMessageParameters,
+	type onOpenParameters,
+	type onOutgoingMessageParameters,
+	type onStatusParameters,
 } from "./types.ts";
-import { WebSocketStatus } from "./types.ts";
 
 export type HocusPocusWebSocket = WebSocket & { identifier: string };
 
@@ -72,6 +72,7 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	 * A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.
 	 */
 	timeout: number;
+	handleTimeout: (() => Promise<unknown>) | null;
 	onOpen: (data: onOpenParameters) => void;
 	onConnect: () => void;
 	onMessage: (data: onMessageParameters) => void;
@@ -125,6 +126,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		onDestroy: () => null,
 		onAwarenessUpdate: () => null,
 		onAwarenessChange: () => null,
+		handleTimeout: null,
 		providerMap: new Map(),
 	};
 
@@ -187,6 +189,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	receivedOnOpenPayload?: Event | undefined = undefined;
 
 	async onOpen(event: Event) {
+		this.status = WebSocketStatus.Connected;
 		this.cancelWebsocketRetry = undefined;
 		this.receivedOnOpenPayload = event;
 	}
@@ -249,6 +252,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 				maxDelay: this.configuration.maxDelay,
 				jitter: this.configuration.jitter,
 				timeout: this.configuration.timeout,
+				handleTimeout: this.configuration.handleTimeout,
 				beforeAttempt: (context) => {
 					if (!this.shouldConnect || cancelAttempt) {
 						context.abort();

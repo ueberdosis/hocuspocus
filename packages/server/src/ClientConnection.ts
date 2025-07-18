@@ -1,5 +1,5 @@
-import type { IncomingHttpHeaders, IncomingMessage } from "http";
-import type { URLSearchParams } from "url";
+import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
+import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,

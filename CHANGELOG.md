@@ -3,6 +3,65 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.2.0](https://github.com/ueberdosis/hocuspocus/compare/v3.1.12...v3.2.0) (2025-07-12)
+
+
+### Features
+
+* adds hono example to backend playground ([bb2d390](https://github.com/ueberdosis/hocuspocus/commit/bb2d3902fc406e2964f422eda52b4fcc035f734e))
+* playground ([ea54455](https://github.com/ueberdosis/hocuspocus/commit/ea544550b4b76f519a547008e3b77b76388996f2))
+
+
+
+
+
+## [3.1.12](https://github.com/ueberdosis/hocuspocus/compare/v3.1.11...v3.1.12) (2025-07-09)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.1.11](https://github.com/ueberdosis/hocuspocus/compare/v3.1.9...v3.1.11) (2025-07-08)
+
+
+### Features
+
+* HocuspocusProviderWebsocket: adds handleTimeout callback that is called when the connection doesnt establish within the given timeout ([509e31b](https://github.com/ueberdosis/hocuspocus/commit/509e31bdcc23b625f8245c8c2d2ea320729dd8e7))
+
+
+
+
+
+## [3.1.10](https://github.com/ueberdosis/hocuspocus/compare/v3.1.9...v3.1.10) (2025-07-08)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.1.9](https://github.com/ueberdosis/hocuspocus/compare/v3.1.8...v3.1.9) (2025-07-01)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.1.8](https://github.com/ueberdosis/hocuspocus/compare/v3.1.7...v3.1.8) (2025-07-01)
+
+
+### Features
+
+* adds `document` to `beforeUnloadDocumentPayload` ([f7d1e64](https://github.com/ueberdosis/hocuspocus/commit/f7d1e646342746b9228fe1a8df8a80ee35e2aea5))
+* beforeUnloadDocument: allow passing in Hocuspocus constructor ; allow preventing unload by throwing an error in beforeUnloadDocument ([63b298e](https://github.com/ueberdosis/hocuspocus/commit/63b298eddf23b8f472a066dc8274b22d790176ea))
+
+
+
+
+
 ## [3.1.7](https://github.com/ueberdosis/hocuspocus/compare/v3.1.6...v3.1.7) (2025-06-22)
 
 **Note:** Version bump only for package hocuspocus

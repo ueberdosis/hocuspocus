@@ -2,8 +2,8 @@ import type {
 	IncomingHttpHeaders,
 	IncomingMessage,
 	ServerResponse,
-} from "http";
-import type { URLSearchParams } from "url";
+} from "node:http";
+import type { URLSearchParams } from "node:url";
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
@@ -378,6 +378,7 @@ export interface afterUnloadDocumentPayload {
 export interface beforeUnloadDocumentPayload {
 	instance: Hocuspocus;
 	documentName: string;
+	document: Document;
 }
 
 export interface DirectConnection {

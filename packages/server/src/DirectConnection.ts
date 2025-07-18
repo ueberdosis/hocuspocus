@@ -1,4 +1,4 @@
-import { URLSearchParams } from "url";
+import { URLSearchParams } from "node:url";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import type { DirectConnection as DirectConnectionInterface } from "./types.ts";
