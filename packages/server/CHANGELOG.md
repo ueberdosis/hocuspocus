@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.1](https://github.com/ueberdosis/hocuspocus/compare/v3.2.0...v3.2.1) (2025-07-20)
+
+
+### Bug Fixes
+
+* add catch on message receiver when handling message ([#967](https://github.com/ueberdosis/hocuspocus/issues/967)) ([f9ceb26](https://github.com/ueberdosis/hocuspocus/commit/f9ceb2626674d173037be8f8bf25179719ddf977))
+
+
+
+
+
 # [3.2.0](https://github.com/ueberdosis/hocuspocus/compare/v3.1.12...v3.2.0) (2025-07-12)
 
 **Note:** Version bump only for package @hocuspocus/server
