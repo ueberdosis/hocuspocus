@@ -260,4 +260,7 @@ const provider2 = new TiptapCollabProvider({
   name: 'document2',
   token: '',
 })
+
+provider1.attach() // when passing a socket manually, you need to call attach explicitly
+provider2.attach() // when passing a socket manually, you need to call attach explicitly
 ```

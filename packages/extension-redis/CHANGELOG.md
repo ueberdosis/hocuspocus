@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.1](https://github.com/ueberdosis/hocuspocus/compare/v3.2.0...v3.2.1) (2025-07-20)
+
+
+### Bug Fixes
+
+* **extension-redis:** unsubscribe from pubsub ([#945](https://github.com/ueberdosis/hocuspocus/issues/945)) ([0812d48](https://github.com/ueberdosis/hocuspocus/commit/0812d4810c80ae6118c9376cced1d03c8f1f95dc))
+
+
+
+
+
 # [3.2.0](https://github.com/ueberdosis/hocuspocus/compare/v3.1.12...v3.2.0) (2025-07-12)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

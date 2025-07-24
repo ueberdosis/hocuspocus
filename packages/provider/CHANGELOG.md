@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.1](https://github.com/ueberdosis/hocuspocus/compare/v3.2.0...v3.2.1) (2025-07-20)
+
+
+### Bug Fixes
+
+* race condition when multiple providers connect to the same socket ; fixes [#964](https://github.com/ueberdosis/hocuspocus/issues/964) ([#966](https://github.com/ueberdosis/hocuspocus/issues/966)) ([4868bae](https://github.com/ueberdosis/hocuspocus/commit/4868bae54f7a82c5b0601edc325d42fd1f9420fd))
+
+
+
+
+
 # [3.2.0](https://github.com/ueberdosis/hocuspocus/compare/v3.1.12...v3.2.0) (2025-07-12)
 
 **Note:** Version bump only for package @hocuspocus/provider

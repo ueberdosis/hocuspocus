@@ -379,7 +379,7 @@ export class Redis implements Extension {
 			this.pendingDisconnects.delete(documentName);
 
 			// Do nothing, when other users are still connected to the document.
-			if (!document || document.getConnectionsCount() > 0) {
+			if (document && document.getConnectionsCount() > 0) {
 				return;
 			}
 
@@ -390,7 +390,9 @@ export class Redis implements Extension {
 				}
 			});
 
-			this.instance.unloadDocument(document);
+			if(document) {
+				this.instance.unloadDocument(document);
+			}
 		};
 		// Delay the disconnect procedure to allow last minute syncs to happen
 		const timeout = setTimeout(disconnect, this.configuration.disconnectDelay);
