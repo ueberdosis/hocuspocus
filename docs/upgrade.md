@@ -1,6 +1,33 @@
 # Upgrade Guide
 
-## Upgrading to 3.0 from 2.x
+## Upgrading to 3.0 from 2.x (Provider)
+
+The TiptapCollabProvider has been moved to `@tiptap-pro/provider`.
+
+When using multiplexing, the providers now need to explicitly call `attach` to attach to the websocket.
+
+```typescript
+import {
+  TiptapCollabProvider,
+  TiptapCollabProviderWebsocket
+} from "@tiptap-pro/provider";
+
+const socket = new TiptapCollabProviderWebsocket({
+  appId: '', // or `url` if using `HocuspocusProviderWebsocket`
+})
+
+const provider1 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document1',
+  token: '',
+})
+
+provider1.attach() // when passing a socket manually, you need to call attach explicitly
+```
+
+More information can be found here: https://github.com/ueberdosis/hocuspocus/releases/tag/v3.1.0
+
+## Upgrading to 3.0 from 2.x (Server)
 
 With the upgrade to the new version, the initialization of hocuspocus has changed. As described on the [usage](/server/usage)
 side, there are two ways on how you can use hocuspocus. With the built-in server. Or like a library with other
