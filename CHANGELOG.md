@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.2](https://github.com/ueberdosis/hocuspocus/compare/v3.2.1...v3.2.2) (2025-07-28)
+
+
+### Bug Fixes
+
+* **extension-redis:** redlock release race condition ([#958](https://github.com/ueberdosis/hocuspocus/issues/958)) ([5666a65](https://github.com/ueberdosis/hocuspocus/commit/5666a656f9bd2419fb8565c99a812698d1ff9dcf))
+
+
+
+
+
 ## [3.2.1](https://github.com/ueberdosis/hocuspocus/compare/v3.2.0...v3.2.1) (2025-07-20)
 
 
