@@ -308,14 +308,14 @@ export class Hocuspocus {
 		this.loadingDocuments.set(documentName, loadDocPromise);
 
 		try {
-			await loadDocPromise;
+			const doc = await loadDocPromise;
+			this.documents.set(documentName, doc);
 			this.loadingDocuments.delete(documentName);
+      return doc;
 		} catch (e) {
 			this.loadingDocuments.delete(documentName);
 			throw e;
 		}
-
-		return loadDocPromise;
 	}
 
 	async loadDocument(
@@ -342,7 +342,6 @@ export class Hocuspocus {
 			...this.configuration.yDocOptions,
 			...yDocOptions,
 		});
-		this.documents.set(documentName, document);
 
 		const hookPayload = {
 			instance: this,
