@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.3](https://github.com/ueberdosis/hocuspocus/compare/v3.2.2...v3.2.3) (2025-08-06)
+
+
+### Features
+
+* adds configuration option autoConnect (default=true) which allows creating the provider without triggering a connection attempt (fixes [#938](https://github.com/ueberdosis/hocuspocus/issues/938)) ([adc315f](https://github.com/ueberdosis/hocuspocus/commit/adc315f0633f6fdad310384b5217fbe25e29108a))
+
+
+
+
+
 ## [3.2.2](https://github.com/ueberdosis/hocuspocus/compare/v3.2.1...v3.2.2) (2025-07-28)
 
 **Note:** Version bump only for package @hocuspocus/provider
