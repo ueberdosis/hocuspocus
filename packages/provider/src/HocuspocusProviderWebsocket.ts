@@ -18,7 +18,8 @@ import {
 	type onStatusParameters,
 } from "./types.ts";
 
-export type HocusPocusWebSocket = WebSocket & { identifier: string };
+export type HocuspocusWebSocket = WebSocket & { identifier: string };
+export type HocusPocusWebSocket = HocuspocusWebSocket;
 
 export type HocuspocusProviderWebsocketConfiguration = Required<
 	Pick<CompleteHocuspocusProviderWebsocketConfiguration, "url">
@@ -26,6 +27,11 @@ export type HocuspocusProviderWebsocketConfiguration = Required<
 	Partial<CompleteHocuspocusProviderWebsocketConfiguration>;
 
 export interface CompleteHocuspocusProviderWebsocketConfiguration {
+	/**
+	 * Whether to connect automatically when creating the provider instance. Default=true
+	 */
+	autoConnect: boolean;
+
 	/**
 	 * URL of your @hocuspocus/server instance
 	 */
@@ -95,6 +101,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	public configuration: CompleteHocuspocusProviderWebsocketConfiguration = {
 		url: "",
+		autoConnect: true,
 		// @ts-ignore
 		document: undefined,
 		WebSocketPolyfill: undefined,
@@ -179,11 +186,9 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			this.configuration.messageReconnectTimeout / 10,
 		);
 
-		if (!this.shouldConnect) {
-			return;
+		if (this.shouldConnect) {
+			this.connect();
 		}
-
-		this.connect();
 	}
 
 	receivedOnOpenPayload?: Event | undefined = undefined;
@@ -222,6 +227,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {},
 	): void {
 		this.configuration = { ...this.configuration, ...configuration };
+
+		if (!this.configuration.autoConnect) {
+			this.shouldConnect = false;
+		}
 	}
 
 	cancelWebsocketRetry?: () => void;
