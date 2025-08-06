@@ -2,7 +2,7 @@ import type { Doc } from "yjs";
 // @ts-ignore
 import type { Extensions } from "@tiptap/core";
 import { getSchema } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
+import { StarterKit } from "@tiptap/starter-kit";
 import type { Transformer } from "./types.ts";
 import { ProsemirrorTransformer } from "./Prosemirror.ts";
 
