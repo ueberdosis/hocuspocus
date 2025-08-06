@@ -52,9 +52,9 @@ For help, discussion about best practices, or any other conversation:
 <table>
   <tr>
     <td align="center">
-      <a href="https://ueberdosis.io/">
+      <a href="https://tiptap.dev/">
         <img src="https://unavatar.io/github/ueberdosis" width="100"><br>
-        <strong>überdosis</strong>
+        <strong>Tiptap</strong>
       </a>
     </td>
     <td align="center">
