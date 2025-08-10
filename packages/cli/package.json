@@ -19,6 +19,7 @@
 	],
 	"dependencies": {
 		"@hocuspocus/extension-logger": "^3.2.3",
+		"@hocuspocus/extension-s3": "^3.2.3",
 		"@hocuspocus/extension-sqlite": "^3.2.3",
 		"@hocuspocus/extension-webhook": "^3.2.3",
 		"@hocuspocus/server": "^3.2.3",

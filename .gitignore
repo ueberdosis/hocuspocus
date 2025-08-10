@@ -13,3 +13,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /database
+!.env.example
+
+# Development scripts (keep tracked)
+start-dev.sh
+test-s3.sh
