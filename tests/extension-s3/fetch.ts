@@ -9,9 +9,7 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
-import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
-import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
 import * as Y from 'yjs'
 
 const testConfig = {
@@ -36,7 +34,7 @@ test.beforeEach(() => {
       return Promise.resolve();
     }
     if (command instanceof GetObjectCommand) {
-      const key = command.input.Key;
+      const key = command.input.Key as string; // 确保 key 是 string 类型
       if (storage.has(key)) {
         const buffer = storage.get(key)!;
         return {
@@ -59,9 +57,13 @@ test.beforeEach(() => {
       throw err;
     }
     if (command instanceof PutObjectCommand) {
-      const key = command.input.Key;
+      const key = command.input.Key as string; // 确保 key 是 string 类型
       const body = command.input.Body;
-      storage.set(key, body);
+      if (body instanceof Buffer) {
+        storage.set(key, body);
+      } else {
+        throw new Error("Body must be a Buffer");
+      }
       return Promise.resolve();
     }
   });
