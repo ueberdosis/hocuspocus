@@ -1,124 +1,150 @@
 import test from "ava";
+import sinon from "sinon";
 import { S3 } from "@hocuspocus/extension-s3";
-import { S3Client, CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
-import { newHocuspocus } from '../utils/index.ts';
+import {
+  S3Client,
+  CreateBucketCommand,
+  HeadBucketCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
+import { Readable } from "stream";
+import { ReadableStream } from "stream/web";
+import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
+import * as Y from 'yjs'
 
-// Test configuration for MinIO
 const testConfig = {
-  endpoint: "http://localhost:9000",
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: "minioadmin",
-    secretAccessKey: "minioadmin"
-  },
   bucket: "hocuspocus-test",
-  forcePathStyle: true,
-  prefix: "test-documents/"
+  prefix: "test-documents/",
 };
 
-test.before(async () => {
-  // Create test bucket if it doesn't exist
-  const s3Client = new S3Client({
-    endpoint: testConfig.endpoint,
-    region: testConfig.region,
-    credentials: testConfig.credentials,
-    forcePathStyle: true,
-  });
+const storage = new Map<string, Buffer>();
+const sandbox = sinon.createSandbox();
+// Create a single dummy client to be used in all tests
+const dummyS3Client = new S3Client({});
 
-  try {
-    await s3Client.send(new HeadBucketCommand({ Bucket: testConfig.bucket }));
-  } catch (error: any) {
-    if (error.name === "NotFound") {
-      await s3Client.send(new CreateBucketCommand({ Bucket: testConfig.bucket }));
+test.beforeEach(() => {
+  sandbox.restore();
+  storage.clear();
+
+  sandbox.stub(S3Client.prototype, "send").callsFake(async (command: any) => {
+    if (command instanceof HeadBucketCommand || command instanceof HeadObjectCommand) {
+      return Promise.resolve();
     }
-  }
+    if (command instanceof CreateBucketCommand) {
+      return Promise.resolve();
+    }
+    if (command instanceof GetObjectCommand) {
+      const key = command.input.Key;
+      if (storage.has(key)) {
+        const buffer = storage.get(key)!;
+        return {
+          Body: {
+            // Mimic AWS SDK v3 GetObjectCommand Body interface used in the extension
+            transformToWebStream: () =>
+              new ReadableStream<Uint8Array>({
+                start(controller) {
+                  controller.enqueue(new Uint8Array(buffer));
+                  controller.close();
+                },
+              }),
+          },
+        };
+      }
+      const err = new Error("NoSuchKey");
+      err.name = "NoSuchKey";
+      // @ts-ignore
+      err.$metadata = { httpStatusCode: 404 };
+      throw err;
+    }
+    if (command instanceof PutObjectCommand) {
+      const key = command.input.Key;
+      const body = command.input.Body;
+      storage.set(key, body);
+      return Promise.resolve();
+    }
+  });
 });
 
-test("should throw an error without bucket name", async t => {
-  t.throws(() => {
-    new S3({});
-  }, { message: "S3 bucket name is required" });
+test.afterEach.always(() => {
+  sandbox.restore();
+  storage.clear();
 });
 
-test("should create extension with valid configuration", async t => {
-  const extension = new S3(testConfig);
+test("should throw an error without bucket name", async (t) => {
+  t.throws(
+    () => {
+      new S3({});
+    },
+    { message: "S3 bucket name is required" }
+  );
+});
+
+test("should create extension with valid configuration", async (t) => {
+  const extension = new S3({ ...testConfig, s3Client: dummyS3Client });
   t.truthy(extension);
   t.is(extension.configuration.bucket, testConfig.bucket);
 });
 
-test("should store and retrieve documents", async t => {
-  const extension = new S3(testConfig);
-  const hocuspocus = await newHocuspocus({
-    extensions: [extension],
-  });
+test("should store and retrieve documents", async (t) => {
+  const extension = new S3({ ...testConfig, s3Client: dummyS3Client });
+  await (extension as any).onConfigure();
 
-  const docConnection = await hocuspocus.openDirectConnection("test-document", {});
-  
-  // Add some data to the document
-  await docConnection.transact((doc: any) => {
-    doc.getMap("test").set("key", "value");
-  });
+  const documentName = "test-document";
 
-  await docConnection.disconnect();
+  const doc = new Y.Doc();
+  doc.getMap('test').set('key', 'value');
 
-  // Create a new connection to test loading
-  const docConnection2 = await hocuspocus.openDirectConnection("test-document", {});
-  
-  const testMap = docConnection2.document.getMap("test");
-  t.is(testMap.get("key"), "value");
-  
-  await docConnection2.disconnect();
-  await hocuspocus.server.destroy();
+  await extension.configuration.store({
+    documentName,
+    state: Buffer.from(Y.encodeStateAsUpdate(doc)),
+  } as any);
+
+  const fetched = await extension.configuration.fetch({ documentName } as any);
+  t.truthy(fetched);
+  t.true(fetched instanceof Uint8Array);
+  t.true((fetched as Uint8Array).length > 0);
+
+  const doc2 = new Y.Doc();
+  Y.applyUpdate(doc2, fetched!);
+  t.is(doc2.getMap('test').get('key'), 'value');
 });
 
-test("should handle non-existent documents", async t => {
-  const extension = new S3(testConfig);
-  const hocuspocus = await newHocuspocus({
-    extensions: [extension],
-  });
+test("should handle non-existent documents", async (t) => {
+  const extension = new S3({ ...testConfig, s3Client: dummyS3Client });
+  await (extension as any).onConfigure();
 
-  const docConnection = await hocuspocus.openDirectConnection("non-existent-document", {});
-  
-  // Document should be empty for new documents
-  const testMap = docConnection.document.getMap("test");
-  t.is(testMap.size, 0);
-  
-  await docConnection.disconnect();
-  await hocuspocus.server.destroy();
+  const result = await extension.configuration.fetch({
+    documentName: "non-existent-document",
+  } as any);
+
+  t.is(result, null);
 });
 
-test("should work with custom S3 client", async t => {
-  const customS3Client = new S3Client({
-    endpoint: testConfig.endpoint,
-    region: testConfig.region,
-    credentials: testConfig.credentials,
-    forcePathStyle: true,
-  });
-
+test("should work with custom S3 client", async (t) => {
   const extension = new S3({
     bucket: testConfig.bucket,
-    s3Client: customS3Client,
+    s3Client: dummyS3Client,
   });
 
   t.truthy(extension);
   t.is(extension.configuration.bucket, testConfig.bucket);
 });
 
-test("should use correct object key format", async t => {
-  const extension = new S3(testConfig);
-  
-  // Test private method through configuration
-  const documentName = "test-document";
-  
-  // Since getObjectKey is private, we verify through the fetch method
-  const hocuspocus = await newHocuspocus({
-    extensions: [extension],
-  });
+test("should use correct object key format", async (t) => {
+  const documentName = "test-document-key-format";
+  const extension = new S3({ ...testConfig, s3Client: dummyS3Client });
+  await (extension as any).onConfigure();
 
-  const docConnection = await hocuspocus.openDirectConnection(documentName, {});
-  await docConnection.disconnect();
-  await hocuspocus.server.destroy();
+  const doc = new Y.Doc();
+  doc.getMap('test').set('key', 'value');
 
-  // Key format is verified implicitly through successful operations
-  t.is(extension.configuration.prefix, testConfig.prefix);
+  await extension.configuration.store({
+    documentName,
+    state: Buffer.from(Y.encodeStateAsUpdate(doc)),
+  } as any);
+
+  const expectedKey = `${testConfig.prefix}${documentName}.bin`;
+  t.true(storage.has(expectedKey), `Storage should have key: ${expectedKey}`);
 });
