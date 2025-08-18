@@ -44,7 +44,7 @@ new Editor({
   element: document.querySelector(".element"),
   extensions: [
     StarterKit.configure({
-      history: false,
+      undoRedo: false,
     }),
     Collaboration.configure({
       document: ydoc,
