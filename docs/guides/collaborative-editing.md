@@ -41,7 +41,7 @@ const editor = new Editor({
   extensions: [
     StarterKit.configure({
       // The Collaboration extension comes with its own history handling
-      history: false,
+      undoRedo: false,
     }),
     // Register the document with Tiptap
     Collaboration.configure({
@@ -87,7 +87,7 @@ const editor = new Editor({
   extensions: [
     StarterKit.configure({
       // The Collaboration extension comes with its own history handling
-      history: false,
+      undoRedo: false,
     }),
     // Register the document with Tiptap
     Collaboration.configure({
@@ -159,8 +159,8 @@ const provider = new HocuspocusProvider({
 const editor = new Editor({
   extensions: [
     StarterKit.configure({
-      // The Collaboration extension comes with its own history handling
-      history: false,
+      // The Collaboration extension comes with its own undoRedo handling
+      undoRedo: false,
     }),
     Collaboration.configure({
       document: provider.document,
