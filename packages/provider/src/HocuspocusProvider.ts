@@ -207,15 +207,15 @@ export class HocuspocusProvider extends EventEmitter {
 
 	boundOnClose = this.onClose.bind(this);
 
-	forwardConnect = (e: any) => this.emit("connect", e);
+	forwardConnect = () => this.emit("connect");
 
-	forwardStatus = (e: any) => this.emit("status", e);
+	forwardStatus = (e: onStatusParameters) => this.emit("status", e);
 
-	forwardClose = (e: any) => this.emit("close", e);
+	forwardClose = (e: onCloseParameters) => this.emit("close", e);
 
-	forwardDisconnect = (e: any) => this.emit("disconnect", e);
+	forwardDisconnect = (e: onDisconnectParameters) => this.emit("disconnect", e);
 
-	forwardDestroy = (e: any) => this.emit("destroy", e);
+	forwardDestroy = () => this.emit("destroy");
 
 	public setConfiguration(
 		configuration: Partial<HocuspocusProviderConfiguration> = {},
