@@ -5,3 +5,40 @@ services:
     image: "redis:6-alpine"
     ports:
       - "6379:6379"
+
+  minio:
+    image: "minio/minio:latest"
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # MinIO API
+      - "9001:9001"   # MinIO Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_DEFAULT_BUCKETS: hocuspocus-documents,hocuspocus-test
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MinIO Client for bucket initialization
+  minio-init:
+    image: "minio/mc:latest"
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin; do echo 'Waiting for MinIO...' && sleep 1; done;
+      /usr/bin/mc mb myminio/hocuspocus-documents --ignore-existing;
+      /usr/bin/mc mb myminio/hocuspocus-test --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/hocuspocus-documents;
+      /usr/bin/mc anonymous set public myminio/hocuspocus-test;
+      echo 'MinIO buckets initialized successfully';
+      exit 0;
+      "
+
+volumes:
+  minio_data:
