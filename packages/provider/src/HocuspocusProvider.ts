@@ -25,6 +25,7 @@ import type {
 	onOpenParameters,
 	onOutgoingMessageParameters,
 	onStatelessParameters,
+	onStatusParameters,
 	onSyncedParameters,
 	onUnsyncedChangesParameters,
 } from "./types.ts";
@@ -79,6 +80,7 @@ export interface CompleteHocuspocusProviderConfiguration {
 	onAuthenticationFailed: (data: onAuthenticationFailedParameters) => void;
 	onOpen: (data: onOpenParameters) => void;
 	onConnect: () => void;
+	onStatus: (data: onStatusParameters) => void;
 	onMessage: (data: onMessageParameters) => void;
 	onOutgoingMessage: (data: onOutgoingMessageParameters) => void;
 	onSynced: (data: onSyncedParameters) => void;
@@ -111,6 +113,7 @@ export class HocuspocusProvider extends EventEmitter {
 		onMessage: () => null,
 		onOutgoingMessage: () => null,
 		onSynced: () => null,
+		onStatus: () => null,
 		onDisconnect: () => null,
 		onClose: () => null,
 		onDestroy: () => null,
@@ -205,6 +208,8 @@ export class HocuspocusProvider extends EventEmitter {
 	boundOnClose = this.onClose.bind(this);
 
 	forwardConnect = (e: any) => this.emit("connect", e);
+
+	forwardStatus = (e: any) => this.emit("status", e);
 
 	forwardClose = (e: any) => this.emit("close", e);
 
@@ -489,6 +494,13 @@ export class HocuspocusProvider extends EventEmitter {
 			this.configuration.onConnect,
 		);
 		this.configuration.websocketProvider.off("connect", this.forwardConnect);
+
+		this.configuration.websocketProvider.off("status", this.forwardStatus);
+		this.configuration.websocketProvider.off(
+			"status",
+			this.configuration.onStatus,
+		);
+
 		this.configuration.websocketProvider.off("open", this.boundOnOpen);
 		this.configuration.websocketProvider.off("close", this.boundOnClose);
 		this.configuration.websocketProvider.off(
@@ -523,6 +535,12 @@ export class HocuspocusProvider extends EventEmitter {
 			this.configuration.onConnect,
 		);
 		this.configuration.websocketProvider.on("connect", this.forwardConnect);
+
+		this.configuration.websocketProvider.on(
+			"status",
+			this.configuration.onStatus,
+		);
+		this.configuration.websocketProvider.on("status", this.forwardStatus);
 
 		this.configuration.websocketProvider.on("open", this.boundOnOpen);
 
