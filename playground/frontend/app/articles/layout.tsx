@@ -27,7 +27,6 @@ export default function Layout({
 		});
 		const newlyCreatedSocket2 = new HocuspocusProviderWebsocket({
 			url: "ws://localhost:8000",
-			// url: "ws://localhost:8003", // s3-redis server2
 		});
 		// const newlyCreatedSocket = new TiptapCollabProviderWebsocket({
 		// 	appId: "",

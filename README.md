@@ -27,7 +27,7 @@ import { Server } from '@hocuspocus/server'
 import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const server = new Server({
-  port: 8000,
+  port: 1234,
 
   async onConnect() {
     console.log('🔮')
@@ -41,43 +41,6 @@ const server = new Server({
 });
 
 server.listen();
-```
-
-## Development
-
-### Quick Start with S3 Extension
-
-To quickly set up a development environment with S3 persistence:
-
-```bash
-# Set up development environment (Docker services + .env file)
-npm run dev:setup
-
-# Test S3 configuration
-npm run dev:test-s3
-
-# Start S3 playground
-npm run playground:s3
-```
-
-### Available Development Scripts
-
-```bash
-# Environment setup
-npm run dev:setup         # Complete setup (.env + Docker services)
-npm run dev:env           # Create .env file from template
-npm run dev:services      # Start Docker services (Redis + MinIO)
-npm run dev:services:down # Stop Docker services  
-npm run dev:services:reset # Reset services and data
-
-# S3 testing
-npm run dev:test-s3        # Test complete S3 configuration
-npm run dev:test-s3:minio  # Test MinIO connection only
-npm run dev:test-s3:nodejs # Test Node.js S3 client only
-
-# Playground examples
-npm run playground:s3      # S3 extension examples
-npm run playground:s3-redis # S3 + Redis scaling examples
 ```
 
 ## Community
@@ -150,36 +113,6 @@ For help, discussion about best practices, or any other conversation:
 … and hundreds of awesome inviduals.
 
 Using Hocuspocus in production? Invest in the future of Hocuspocus and [become a sponsor!](https://github.com/sponsors/ueberdosis)
-
-## Development Environment
-
-For local development and testing, we provide a Docker Compose setup with Redis and MinIO (S3-compatible storage):
-
-```bash
-# Start development services
-./start-dev.sh
-
-# Test S3/MinIO configuration
-./test-s3.sh
-
-# Start Hocuspocus with S3 extension
-cd packages/cli
-node src/index.js --s3 --s3-bucket hocuspocus-documents --s3-endpoint http://localhost:9000
-```
-
-### Available Services
-
-- **Redis**: `localhost:6379`
-- **MinIO API**: `http://localhost:9000`
-- **MinIO Console**: `http://localhost:9001` (minioadmin/minioadmin)
-
-### Environment Configuration
-
-Copy `.env.example` to `.env` and customize as needed:
-
-```bash
-cp .env.example .env
-```
 
 ## Contributing
 Please see [CONTRIBUTING](docs/contributing.md) for details.
