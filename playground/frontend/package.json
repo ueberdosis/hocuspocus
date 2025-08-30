@@ -15,7 +15,7 @@
 		"@tiptap/react": "^3.0.1",
 		"@tiptap/starter-kit": "^3.0.1",
 		"jwt-encode": "^1.0.1",
-		"next": "15.2.4",
+		"next": "15.4.7",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0"
 	},
