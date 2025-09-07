@@ -1,0 +1,50 @@
+{
+	"name": "@hocuspocus/extension-permission",
+	"description": "Enterprise-grade Y.js operation-level permission control extension for Hocuspocus",
+	"version": "3.2.3",
+	"homepage": "https://hocuspocus.dev",
+	"keywords": [
+		"hocuspocus",
+		"yjs",
+		"permission",
+		"access-control",
+		"enterprise",
+		"fine-grained",
+		"operation-level",
+		"crdt",
+		"security",
+		"audit",
+		"rbac"
+	],
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/hocuspocus-extension-permission.cjs",
+	"module": "dist/hocuspocus-extension-permission.esm.js",
+	"types": "dist/packages/extension-permission/src/index.d.ts",
+	"exports": {
+		"source": {
+			"import": "./src/index.ts"
+		},
+		"default": {
+			"import": "./dist/hocuspocus-extension-permission.esm.js",
+			"require": "./dist/hocuspocus-extension-permission.cjs",
+			"types": "./dist/packages/extension-permission/src/index.d.ts"
+		}
+	},
+	"files": [
+		"src",
+		"dist"
+	],
+	"dependencies": {
+		"@hocuspocus/server": "^3.2.3"
+	},
+	"devDependencies": {
+		"yjs": "^13.6.8",
+		"y-protocols": "^1.0.6"
+	},
+	"peerDependencies": {
+		"yjs": "^13.6.8",
+		"y-protocols": "^1.0.6"
+	},
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+}
