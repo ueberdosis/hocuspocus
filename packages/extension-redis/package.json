@@ -36,7 +36,7 @@
 		"ioredis": "^5.6.1",
 		"kleur": "^4.1.4",
 		"lodash.debounce": "^4.0.8",
-		"uuid": "^11.0.3"
+		"uuid": "^13.0.0"
 	},
 	"peerDependencies": {
 		"y-protocols": "^1.0.6",
