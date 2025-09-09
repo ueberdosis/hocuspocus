@@ -1,0 +1,46 @@
+{
+  "name": "@hocuspocus/extension-smartroute",
+  "description": "Smart routing extension for Hocuspocus with consistent hashing",
+  "version": "3.2.3",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "routing",
+    "consistent-hashing",
+    "load-balancing",
+    "clustering"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-extension-smartroute.cjs",
+  "module": "dist/hocuspocus-extension-smartroute.esm.js",
+  "types": "dist/packages/extension-smartroute/src/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-extension-smartroute.esm.js",
+      "require": "./dist/hocuspocus-extension-smartroute.cjs",
+      "types": "./dist/packages/extension-smartroute/src/index.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0"
+  },
+  "peerDependencies": {
+    "@hocuspocus/server": "^3.2.3"
+  },
+  "peerDependenciesMeta": {
+    "@hocuspocus/extension-redis": {
+      "optional": true
+    }
+  }
+}
