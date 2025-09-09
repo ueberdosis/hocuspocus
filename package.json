@@ -40,7 +40,7 @@
 		"lint:fix": "biome lint --fix",
 		"test": "ava",
 		"test:watch": "ava --watch",
-    "test:benchmark": "npx ava tests/extension-smartroute/SmartRoute-vs-Redlock.test.ts tests/extension-smartroute/Performance.test.ts --verbose",
+    "test:benchmark": "npx ava tests/extension-smartroute/SmartRoute-vs-Redlock.test.ts tests/extension-smartroute/Performance.test.ts --verbose --timeout=30m",
 		"build:packages": "npm run clean:packages && rollup -c",
 		"build:watch": "npm run clean:packages && rollup -wc",
 		"clean:packages": "rm -Rf ./packages/*/dist",
