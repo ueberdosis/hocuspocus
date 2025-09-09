@@ -357,7 +357,16 @@ test('should handle Redis sync operations correctly', async t => {
     }),
     hdel: async () => 1,
     del: async () => 1,
-    keys: async () => ['route:node-1'] // Add missing keys method
+    keys: async () => ['route:node-1'], // Add missing keys method
+    setex: async () => 'OK',
+    get: async () => JSON.stringify({
+      id: 'node-1',
+      address: '127.0.0.1',
+      port: 8001,
+      weight: 1,
+      isHealthy: true,
+      lastHealthCheck: Date.now()
+    })
   };
 
   const manager = new RouteManager({
@@ -384,7 +393,9 @@ test('should handle Redis connection failures gracefully', async t => {
     hgetall: async () => { throw new Error('Redis connection failed'); },
     hdel: async () => { throw new Error('Redis connection failed'); },
     del: async () => { throw new Error('Redis connection failed'); },
-    keys: async () => { throw new Error('Redis connection failed'); }
+    keys: async () => { throw new Error('Redis connection failed'); },
+    setex: async () => { throw new Error('Redis connection failed'); },
+    get: async () => { throw new Error('Redis connection failed'); }
   };
 
   const manager = new RouteManager({
@@ -532,12 +543,13 @@ test('should handle split-brain scenarios during network partition', async t => 
   
   // Simulate network partition - each manager adds different nodes
   await manager1.addNode(createTestNode('node-3', 8003));
+  await manager1.addNode(createTestNode('node-5', 8005)); // Add extra node to manager1
   await manager2.addNode(createTestNode('node-4', 8004));
   
   const stats1 = manager1.getStats();
   const stats2 = manager2.getStats();
   
-  // Each manager has different view of cluster
+  // Each manager has different view of cluster (manager1 has 4 nodes, manager2 has 3)
   t.not(stats1.totalNodes, stats2.totalNodes);
   
   manager1.shutdown();

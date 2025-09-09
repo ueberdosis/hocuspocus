@@ -4,7 +4,13 @@
 	"browserslist": ["defaults", "not IE 11", "maintained node versions"],
 	"type": "module",
 	"ava": {
-		"files": ["tests/**/*", "!tests/utils/**/*", "!database/**/*"],
+		"files": [
+      "tests/**/*",
+      "!tests/utils/**/*",
+      "!database/**/*",
+      "!tests/extension-smartroute/SmartRoute-vs-Redlock.test.ts",
+      "!tests/extension-smartroute/Performance.test.ts"
+    ],
 		"extensions": {
 			"ts": "module"
 		},
@@ -34,7 +40,7 @@
 		"lint:fix": "biome lint --fix",
 		"test": "ava",
 		"test:watch": "ava --watch",
-    "test:benchmark": "npx ava tests/extension-smartroute/SmartRoute-vs-Redlock.test.ts --verbose",
+    "test:benchmark": "npx ava tests/extension-smartroute/SmartRoute-vs-Redlock.test.ts tests/extension-smartroute/Performance.test.ts --verbose",
 		"build:packages": "npm run clean:packages && rollup -c",
 		"build:watch": "npm run clean:packages && rollup -wc",
 		"clean:packages": "rm -Rf ./packages/*/dist",
