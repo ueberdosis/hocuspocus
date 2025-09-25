@@ -438,10 +438,10 @@ export class Hocuspocus {
 					.catch((error) => {
 						console.error("Caught error during storeDocumentHooks", error);
 
-						if (error?.message) {
-							throw error;
-						}
-
+						// Don't rethrow the error to prevent uncaught exception
+						// The error has been logged and handled appropriately
+						
+            // Continue with document cleanup regardless of hook errors
             if (document.getConnectionsCount() > 0) {
               return
             }
