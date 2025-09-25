@@ -39,6 +39,8 @@ export class Document extends Doc {
 
 	isDestroyed = false;
 
+	saving = 0;
+
 	/**
 	 * Constructor.
 	 */
