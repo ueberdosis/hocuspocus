@@ -468,6 +468,56 @@ test("does not call the onStoreDocument hook if document is not changed after th
 	t.pass();
 });
 
+test("does not start a new onStoreDocument if there is already one running (should wait for the first one to finish)", async (t) => {
+	/*
+	If our storage backend takes more time than the debounce time to store the document, 
+	we might end up in a situation where multiple onStoreDocument calls are running at the same time.
+
+	Rough timeline:
+
+  1.  ~0ms     Client 1 connects
+  2.  ~10ms    Client 1 makes change 1 (triggers debounced save)
+  3.  ~100ms  Server starts saving change 1 (debounced)
+  4.  ~200ms  Client 1 makes change 2 (triggers debounced save)
+  6.  ~510ms  Server finishes saving change 1.
+  6.  ~511ms  Server starts saving change 2 (debounced)
+  7.  ~1111ms  Server finishes saving change 2.
+  */
+
+	await new Promise(async (resolve) => {
+		let started = 0
+		let finished = 0
+		const server = await newHocuspocus({
+			debounce: 100,
+			async onStoreDocument() {
+				if (started === 1) {
+					// This is the second call
+					t.is(finished, 1, "the first call must have finished before starting the second");
+					resolve("done");
+				} else {
+					started++
+					await sleep(500) // Simulate long save
+					finished++
+				}
+			},
+		});
+
+		const socket1 = newHocuspocusProviderWebsocket(server);
+		const provider1 = newHocuspocusProvider(server, {
+			websocketProvider: socket1,
+			async onSynced() {
+				// Change 1
+				provider1.document.getArray("foo").push(["foo"]);
+        setTimeout(() => {
+					// Change 2
+          provider1.document.getArray("foo").push(["bar"]);
+          socket1.destroy();
+        }, 200)
+			},
+		});
+	});
+})
+
 test("does not trigger unload prematurely when a save is in progress (unloadImmediately=true)", async (t) => {
   /*
 	Rough timeline:
