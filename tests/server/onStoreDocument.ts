@@ -468,20 +468,23 @@ test("does not call the onStoreDocument hook if document is not changed after th
 	t.pass();
 });
 
-test.only("does not start a new onStoreDocument if there is already one running (should wait for the first one to finish)", async (t) => {
+test("delays onStoreDocument processing in case the previous one is still running", async (t) => {
 	/*
 	If our storage backend takes more time than the debounce time to store the document, 
 	we might end up in a situation where multiple onStoreDocument calls are running at the same time.
+
+	In this test, the server is configured with 100ms debounce time, and the onStoreDocument hook takes 500ms to complete.
 
 	Rough timeline:
 
   1.  ~0ms     Client 1 connects
   2.  ~10ms    Client 1 makes change 1 (triggers debounced save)
-  3.  ~100ms  Server starts saving change 1 (debounced)
-  4.  ~200ms  Client 1 makes change 2 (triggers debounced save)
-  6.  ~510ms  Server finishes saving change 1.
-  6.  ~511ms  Server starts saving change 2 (debounced)
-  7.  ~1111ms  Server finishes saving change 2.
+  3.  ~100ms   Server starts saving change 1 (debounced)
+  4.  ~200ms   Client 1 makes change 2 (triggers debounced save)
+  6.  ~510ms   Server finishes saving change 1.
+  7.  ~511ms   Server starts saving change 2 (debounced) but aborts, as save 1 is still running.
+	8.  ~1511ms  Server starts saving change 2 (postponed)
+  9.  ~1511ms  Server finishes saving change 2.
   */
 
 	await new Promise(async (resolve) => {
@@ -493,11 +496,13 @@ test.only("does not start a new onStoreDocument if there is already one running 
 				if (started === 1) {
 					// This is the second call
 					t.is(finished, 1, "the first call must have finished before starting the second");
-					resolve("done");
-				} else {
-					started++
-					await sleep(500) // Simulate long save
-					finished++
+				}
+				started++
+				await sleep(500) // Simulate long save
+				finished++
+				if (finished === 2) {
+					t.pass()
+					resolve("done")
 				}
 			},
 		});

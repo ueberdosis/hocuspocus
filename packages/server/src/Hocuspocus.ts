@@ -424,6 +424,11 @@ export class Hocuspocus {
 		return this.debouncer.debounce(
 			debounceId,
 			async () => {
+				if (document.saving) {
+					// storeDocumentHooks is already running -> postpone this call for later
+					this.storeDocumentHooks(document, hookPayload)
+					return
+				}
 				document.saving++
 				try {
 					await this.hooks("onStoreDocument", hookPayload);
