@@ -32,6 +32,8 @@
           link: /server/extensions/database
         - title: SQLite
           link: /server/extensions/sqlite
+        - title: S3
+          link: /server/extensions/s3
         - title: Redis
           link: /server/extensions/redis
         - title: Logger

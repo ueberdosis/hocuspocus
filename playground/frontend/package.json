@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/frontend-demo",
-	"version": "3.2.1",
+	"version": "3.2.3",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
@@ -9,13 +9,13 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@hocuspocus/provider": "^3.2.1",
+		"@hocuspocus/provider": "^3.2.3",
 		"@tiptap/extension-collaboration": "^3.0.1",
 		"@tiptap/extension-collaboration-caret": "^3.0.1",
 		"@tiptap/react": "^3.0.1",
 		"@tiptap/starter-kit": "^3.0.1",
 		"jwt-encode": "^1.0.1",
-		"next": "15.2.4",
+		"next": "15.4.7",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0"
 	},

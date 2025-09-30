@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.3](https://github.com/ueberdosis/hocuspocus/compare/v3.2.2...v3.2.3) (2025-08-06)
+
+
+### Bug Fixes
+
+* fixes playground plug and play confg ([f9dff84](https://github.com/ueberdosis/hocuspocus/commit/f9dff843e5132fd858ce410e1774089e6b4c9692))
+* unload document in catch block of storeDocumentHooks ([#955](https://github.com/ueberdosis/hocuspocus/issues/955)) ([1a3b5b8](https://github.com/ueberdosis/hocuspocus/commit/1a3b5b8b2057e11ea16068f17efadd5c93437276))
+
+
+### Features
+
+* adds configuration option autoConnect (default=true) which allows creating the provider without triggering a connection attempt (fixes [#938](https://github.com/ueberdosis/hocuspocus/issues/938)) ([adc315f](https://github.com/ueberdosis/hocuspocus/commit/adc315f0633f6fdad310384b5217fbe25e29108a))
+* adds more error logging when a connection is closed due to an exception ([1c4090c](https://github.com/ueberdosis/hocuspocus/commit/1c4090cc464d724e74143296b6e05bde87f5f5bf))
+
+
+
+
+
+## [3.2.2](https://github.com/ueberdosis/hocuspocus/compare/v3.2.1...v3.2.2) (2025-07-28)
+
+
+### Bug Fixes
+
+* **extension-redis:** redlock release race condition ([#958](https://github.com/ueberdosis/hocuspocus/issues/958)) ([5666a65](https://github.com/ueberdosis/hocuspocus/commit/5666a656f9bd2419fb8565c99a812698d1ff9dcf))
+
+
+
+
+
 ## [3.2.1](https://github.com/ueberdosis/hocuspocus/compare/v3.2.0...v3.2.1) (2025-07-20)
 
 

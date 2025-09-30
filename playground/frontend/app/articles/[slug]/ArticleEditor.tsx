@@ -32,6 +32,9 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 				console.log("Editor 1 onAuthenticationFailed", data),
 			onUnsyncedChanges: (data) =>
 				console.log("Editor 1 onUnsyncedChanges", data),
+			onStatus(data) {
+				console.log("editor 1 onStatus", data);
+			},
 		});
 
 		const _p2 = new HocuspocusProvider({
@@ -44,6 +47,9 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 				console.log("Editor 2 onAuthenticationFailed", data),
 			onUnsyncedChanges: (data) =>
 				console.log("Editor 2 onUnsyncedChanges", data),
+			onStatus(data) {
+				console.log("editor 2 onStatus", data);
+			},
 		});
 
 		setProvider1(_p1);

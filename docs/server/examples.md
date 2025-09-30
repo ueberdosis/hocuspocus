@@ -17,6 +17,7 @@ npx @hocuspocus/cli
 npx @hocuspocus/cli --port 8080
 npx @hocuspocus/cli --webhook http://localhost/webhooks/hocuspocus
 npx @hocuspocus/cli --sqlite
+npx @hocuspocus/cli --s3 --s3-bucket my-documents
 ```
 
 ### Express
