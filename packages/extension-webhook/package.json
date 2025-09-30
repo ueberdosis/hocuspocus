@@ -1,9 +1,15 @@
 {
 	"name": "@hocuspocus/extension-webhook",
-	"version": "3.2.3",
+	"version": "3.2.4",
 	"description": "hocuspocus webhook extension",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": ["hocuspocus", "webhook", "api", "rest", "yjs"],
+	"keywords": [
+		"hocuspocus",
+		"webhook",
+		"api",
+		"rest",
+		"yjs"
+	],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-webhook.cjs",
@@ -19,11 +25,14 @@
 			"types": "./dist/packages/extension-webhook/src/index.d.ts"
 		}
 	},
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"dependencies": {
-		"@hocuspocus/common": "^3.2.3",
-		"@hocuspocus/server": "^3.2.3",
-		"@hocuspocus/transformer": "^3.2.3",
+		"@hocuspocus/common": "^3.2.4",
+		"@hocuspocus/server": "^3.2.4",
+		"@hocuspocus/transformer": "^3.2.4",
 		"axios": "^1.12.2"
 	},
 	"peerDependencies": {
