@@ -311,7 +311,7 @@ export class Hocuspocus {
 			const doc = await loadDocPromise;
 			this.documents.set(documentName, doc);
 			this.loadingDocuments.delete(documentName);
-      return doc;
+            return doc;
 		} catch (e) {
 			this.loadingDocuments.delete(documentName);
 			throw e;

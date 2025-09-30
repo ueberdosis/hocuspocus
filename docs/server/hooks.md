@@ -863,9 +863,6 @@ The `afterUnloadDocument` hooks are called after a document was closed on the se
 longer access the document at this point as it has been destroyed, but you may notify anything
 that was subscribed to the document.
 
-Note: `afterUnloadDocument` may be called even if `afterLoadDocument` never was for a given document
-as an extension may have aborted the loading of the document during the `onLoadDocument` phase.
-
 **Hook payload**
 
 The `data` passed to the `onDestroy` hook has the following attributes:
