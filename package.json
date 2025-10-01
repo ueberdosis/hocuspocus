@@ -26,6 +26,7 @@
 		"playground:slow": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/slow.ts\"",
 		"playground:redis": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/redis.ts\"",
 		"playground:webhook": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/webhook.ts\"",
+		"playground:permission": "concurrently --kill-others \"npm --prefix ./playground/frontend run dev\" \"npm --prefix ./playground/backend run dev src/permission.ts\"",
 		"lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
 		"lint": "biome lint && npm run lint:ts",
 		"lint:fix": "biome lint --fix",
