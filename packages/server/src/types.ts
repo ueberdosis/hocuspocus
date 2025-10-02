@@ -20,6 +20,7 @@ export enum MessageType {
 	BroadcastStateless = 6,
 	CLOSE = 7,
 	SyncStatus = 8,
+	TokenSync = 9,
 }
 
 export interface AwarenessUpdate {
@@ -42,6 +43,7 @@ export interface Extension {
 	onConnect?(data: onConnectPayload): Promise<any>;
 	connected?(data: connectedPayload): Promise<any>;
 	onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
+	onTokenSync?(data: onTokenSyncPayload): Promise<any>;
 	onCreateDocument?(data: onCreateDocumentPayload): Promise<any>;
 	onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
 	afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
@@ -69,6 +71,7 @@ export type HookName =
 	| "onConnect"
 	| "connected"
 	| "onAuthenticate"
+	| "onTokenSync"
 	| "onCreateDocument"
 	| "onLoadDocument"
 	| "afterLoadDocument"
@@ -93,6 +96,7 @@ export type HookPayloadByName = {
 	onConnect: onConnectPayload;
 	connected: connectedPayload;
 	onAuthenticate: onAuthenticatePayload;
+	onTokenSync: onTokenSyncPayload;
 	onCreateDocument: onCreateDocumentPayload;
 	onLoadDocument: onLoadDocumentPayload;
 	afterLoadDocument: afterLoadDocumentPayload;
@@ -172,6 +176,19 @@ export interface onAuthenticatePayload {
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
+}
+
+export interface onTokenSyncPayload {
+	context: any;
+  document: Document;
+	documentName: string;
+	instance: Hocuspocus;
+	requestHeaders: IncomingHttpHeaders;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	token: string;
+	connectionConfig: ConnectionConfiguration;
+  connection: Connection;
 }
 
 export interface onCreateDocumentPayload {

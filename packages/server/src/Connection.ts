@@ -9,7 +9,7 @@ import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type { beforeSyncPayload, onStatelessPayload } from "./types.ts";
+import type { beforeSyncPayload, onTokenSyncPayload, onStatelessPayload } from "./types.ts";
 
 export class Connection {
 	webSocket: WebSocket;
@@ -29,6 +29,7 @@ export class Connection {
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
 		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
+		onTokenSyncCallback: (payload: Partial<onTokenSyncPayload>) => Promise.resolve(),
 	};
 
 	socketId: string;
@@ -106,6 +107,17 @@ export class Connection {
 		return this;
 	}
 
+  /**
+	 * Set a callback that will be triggered when on token sync message is received
+	 */
+	onTokenSyncCallback(
+		callback: (payload: onTokenSyncPayload) => Promise<void>,
+	): Connection {
+		this.callbacks.onTokenSyncCallback = callback;
+
+		return this;
+	}
+
 	/**
 	 * Send the given message
 	 */
@@ -134,6 +146,15 @@ export class Connection {
 		const message = new OutgoingMessage(this.document.name).writeStateless(
 			payload,
 		);
+
+		this.send(message.toUint8Array());
+	}
+
+	/**
+	 * Request current token from the client
+	 */
+	public requestToken(): void {
+		const message = new OutgoingMessage(this.document.name).writeTokenSync();
 
 		this.send(message.toUint8Array());
 	}
