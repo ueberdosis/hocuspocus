@@ -8,6 +8,7 @@ import type { OutgoingMessage } from "./OutgoingMessage.ts";
 import type { AuthenticationMessage } from "./OutgoingMessages/AuthenticationMessage.ts";
 import type { AwarenessMessage } from "./OutgoingMessages/AwarenessMessage.ts";
 import type { QueryAwarenessMessage } from "./OutgoingMessages/QueryAwarenessMessage.ts";
+import type { TokenSyncMessage } from "./OutgoingMessages/TokenSyncMessage.ts";
 import type { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import type { SyncStepTwoMessage } from "./OutgoingMessages/SyncStepTwoMessage.ts";
 import type { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
@@ -20,6 +21,7 @@ export enum MessageType {
 	Stateless = 5,
 	CLOSE = 7,
 	SyncStatus = 8,
+	TokenSync = 9,
 }
 
 export enum WebSocketStatus {
@@ -53,6 +55,7 @@ export type ConstructableOutgoingMessage =
 	| Constructable<AuthenticationMessage>
 	| Constructable<AwarenessMessage>
 	| Constructable<QueryAwarenessMessage>
+	| Constructable<TokenSyncMessage>
 	| Constructable<SyncStepOneMessage>
 	| Constructable<SyncStepTwoMessage>
 	| Constructable<UpdateMessage>;

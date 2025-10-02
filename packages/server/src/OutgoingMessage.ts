@@ -70,6 +70,15 @@ export class OutgoingMessage {
 		return this;
 	}
 
+	writeTokenSync(): OutgoingMessage {
+		this.type = MessageType.TokenSync;
+		this.category = "TokenSync";
+
+		writeVarUint(this.encoder, MessageType.TokenSync);
+
+		return this;
+	}
+
 	writeAuthenticated(readonly: boolean): OutgoingMessage {
 		this.type = MessageType.Auth;
 		this.category = "Authenticated";
