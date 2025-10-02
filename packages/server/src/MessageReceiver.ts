@@ -77,6 +77,12 @@ export class MessageReceiver {
 
 				break;
 			}
+			case MessageType.TokenSync: {
+        connection?.callbacks.onTokenSyncCallback({
+					token: message.readVarString(),
+				});
+				break;
+			}
 			case MessageType.Stateless: {
 				connection?.callbacks.statelessCallback({
 					connection,

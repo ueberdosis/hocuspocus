@@ -249,6 +249,28 @@ export class ClientConnection {
 			this.documentConnectionsEstablished.delete(documentName);
 		});
 
+		connection.onTokenSyncCallback(async (payload) => {
+			try {
+				return await this.hooks("onTokenSync", {
+          ...hookPayload,
+          ...payload,
+          connection,
+          documentName,
+        }, (contextAdditions: any) => {
+          hookPayload.context = {
+            ...hookPayload.context,
+            ...contextAdditions,
+          };
+        });
+			} catch (err: any) {
+				const error = err || Forbidden;
+				const message = new OutgoingMessage(documentName).writePermissionDenied(
+					error.reason ?? "permission-denied",
+				);
+				this.websocket.send(message.toUint8Array());
+			}
+		});
+
 		this.documentConnections[documentName] = connection;
 
 		// If the WebSocket has already disconnected (wow, that was fast) – then
