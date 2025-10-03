@@ -219,7 +219,7 @@ test('direct connection transact awaits until onStoreDocument has finished, even
   })
 })
 
-test.only('does not unload document if an earlierly started onStoreDocument is still running', async t => {
+test('does not unload document if an earlierly started onStoreDocument is still running', async t => {
   let onStoreDocumentStarted = false
   let onStoreDocumentFinished = false
 
