@@ -219,6 +219,70 @@ test('direct connection transact awaits until onStoreDocument has finished, even
   })
 })
 
+test('does not unload document if an earlierly started onStoreDocument is still running', async t => {
+  let onStoreDocumentStarted = 0
+  let onStoreDocumentFinished = 0
+
+  const server = await newHocuspocus({
+    unloadImmediately: false,
+    debounce: 100,
+    onStoreDocument: async () => {
+      onStoreDocumentStarted ++
+      if (onStoreDocumentStarted === 1) {
+        // Simulate a long running onStoreDocument for the first debounced save
+        await sleep(200)
+      }
+      onStoreDocumentFinished++
+    },
+    afterUnloadDocument: async data => {
+    },
+  })
+
+  // Trigger a change, which will start a debounced onStoreDocument after 100ms
+  const provider = newHocuspocusProvider(server)
+  provider.document.getMap('aaa').set('bb', 'b')
+  await sleep(20)
+  t.is(server.getDocumentsCount(), 1)
+  t.is(server.getConnectionsCount(), 1)
+
+  // Wait for the debounced onStoreDocument to start
+  await sleep(110)
+  t.is(onStoreDocumentStarted, 1)
+  t.is(onStoreDocumentFinished, 0)
+
+  // Open direct connection to prevent document from being unloaded
+  const direct = await server.openDirectConnection('hocuspocus-test')
+  t.is(server.getDocumentsCount(), 1)
+  t.is(server.getConnectionsCount(), 2)
+
+  // Close the websocket client
+  provider.disconnect()
+  provider.configuration.websocketProvider.disconnect()
+  await sleep(10)
+  t.is(server.getDocumentsCount(), 1)
+  t.is(server.getConnectionsCount(), 1)
+  t.is(onStoreDocumentStarted, 1)
+  t.is(onStoreDocumentFinished, 0)
+
+  direct.disconnect()
+  await sleep(10)
+  // Another save must not start before the first one has finished
+  t.is(onStoreDocumentStarted, 1)
+  t.is(onStoreDocumentFinished, 0)
+  // Document must not be unloaded yet, because the first onStoreDocument is still running
+  t.is(server.getDocumentsCount(), 1)
+  t.is(server.getConnectionsCount(), 0)
+
+  // Wait enough time to be sure the onStoreDocument has finished and ensure that the document was eventually unloaded
+  await sleep(200)
+
+  // The second onStoreDocument triggered by direct.disconnect must have started and finished now
+  t.is(onStoreDocumentStarted, 2)
+  t.is(onStoreDocumentFinished, 2)
+  // The document must have been unloaded now as well
+  t.is(server.getDocumentsCount(), 0)
+})
+
 test('creating a websocket connection after transact but before debounce interval doesnt create different docs', async t => {
   let onStoreDocumentFinished = false
   let disconnected = false

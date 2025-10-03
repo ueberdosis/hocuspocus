@@ -8,6 +8,7 @@ import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 import type { AwarenessUpdate } from "./types.ts";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
+import { Mutex } from "async-mutex";
 
 export class Document extends Doc {
 	awareness: Awareness;
@@ -38,6 +39,8 @@ export class Document extends Doc {
 	isLoading: boolean;
 
 	isDestroyed = false;
+
+	saveMutex = new Mutex();
 
 	/**
 	 * Constructor.
