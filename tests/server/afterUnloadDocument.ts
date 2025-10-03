@@ -46,8 +46,8 @@ test('executes the afterUnloadDocument callback when all clients disconnect afte
   })
 })
 
-test('executes the afterUnloadDocument callback when document fails to load', async t => {
-  await new Promise(async resolve => {
+test('does not execute the afterUnloadDocument callback when document fails to load', async t => {
+  await new Promise(async (resolve, reject) => {
     const server = await newHocuspocus()
 
     class CustomExtension {
@@ -56,8 +56,8 @@ test('executes the afterUnloadDocument callback when document fails to load', as
       }
 
       async afterUnloadDocument() {
-        t.pass()
-        resolve('done')
+        t.fail()
+        reject('should not be called')
       }
     }
 
@@ -68,5 +68,10 @@ test('executes the afterUnloadDocument callback when document fails to load', as
     })
 
     newHocuspocusProvider(server)
+
+    setTimeout(() => {
+      t.pass()
+      resolve('done')
+    }, 500)
   })
 })
