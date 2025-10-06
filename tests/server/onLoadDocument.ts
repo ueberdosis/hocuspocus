@@ -163,14 +163,14 @@ test("multiple simultaneous connections wait for the document to be loaded", asy
 			t.is(value, "bar");
 		});
 
-		await sleep(100);
+		await sleep(200);
 
 		t.false(provider1Synced, "provider1Synced");
 		t.false(provider2Synced, "provider2Synced");
 
 		resolveOnLoadDocument();
 
-		await sleep(100);
+		await sleep(200);
 
 		t.true(provider1Synced, "provider1Synced");
 		t.true(provider2Synced, "provider2Synced");
