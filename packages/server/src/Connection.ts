@@ -154,7 +154,7 @@ export class Connection {
 	 * Request current token from the client
 	 */
 	public requestToken(): void {
-		const message = new OutgoingMessage(this.document.name).writeTokenSync();
+		const message = new OutgoingMessage(this.document.name).writeTokenSyncRequest();
 
 		this.send(message.toUint8Array());
 	}

@@ -38,10 +38,6 @@ export class MessageReceiver {
 				this.applyQueryAwarenessMessage(provider);
 				break;
 
-			case MessageType.TokenSync:
-				this.applyTokenSyncMessage(provider);
-				break;
-
 			case MessageType.Stateless:
 				provider.receiveStateless(readVarString(message.decoder));
 				break;
@@ -121,6 +117,7 @@ export class MessageReceiver {
 
 		readAuthMessage(
 			message.decoder,
+			provider.sendToken.bind(provider),
 			provider.permissionDeniedHandler.bind(provider),
 			provider.authenticatedHandler.bind(provider),
 		);
@@ -138,10 +135,5 @@ export class MessageReceiver {
 				Array.from(provider.awareness.getStates().keys()),
 			),
 		);
-	}
-
-	private applyTokenSyncMessage(provider: HocuspocusProvider) {
-		// Server is requesting the current token, send it back
-		provider.sendToken();
 	}
 }

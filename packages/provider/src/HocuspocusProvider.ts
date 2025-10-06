@@ -10,7 +10,6 @@ import { MessageReceiver } from "./MessageReceiver.ts";
 import { MessageSender } from "./MessageSender.ts";
 import { AuthenticationMessage } from "./OutgoingMessages/AuthenticationMessage.ts";
 import { AwarenessMessage } from "./OutgoingMessages/AwarenessMessage.ts";
-import { TokenSyncMessage } from "./OutgoingMessages/TokenSyncMessage.ts";
 import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
@@ -306,16 +305,18 @@ export class HocuspocusProvider extends EventEmitter {
 	}
 
 	async sendToken() {
+		let token: string | null;
 		try {
-			const token = await this.getToken();
-
-			this.send(TokenSyncMessage, {
-				token: token ?? "",
-				documentName: this.configuration.name,
-			});
+			token = await this.getToken();
 		} catch (error) {
-			console.error("Failed to getToken() during sendToken():", error);
+			this.permissionDeniedHandler(`Failed to get token during sendToken(): ${error}`);
+			return;
 		}
+
+		this.send(AuthenticationMessage, {
+			token: token ?? "",
+			documentName: this.configuration.name,
+		});
 	}
 
 	documentUpdateHandler(update: Uint8Array, origin: any) {

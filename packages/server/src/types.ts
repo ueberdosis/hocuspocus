@@ -20,7 +20,6 @@ export enum MessageType {
 	BroadcastStateless = 6,
 	CLOSE = 7,
 	SyncStatus = 8,
-	TokenSync = 9,
 }
 
 export interface AwarenessUpdate {
@@ -180,7 +179,7 @@ export interface onAuthenticatePayload {
 
 export interface onTokenSyncPayload {
 	context: any;
-  document: Document;
+	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
 	requestHeaders: IncomingHttpHeaders;
@@ -188,7 +187,7 @@ export interface onTokenSyncPayload {
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
-  connection: Connection;
+	connection: Connection;
 }
 
 export interface onCreateDocumentPayload {

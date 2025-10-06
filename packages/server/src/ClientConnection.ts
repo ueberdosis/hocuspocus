@@ -252,16 +252,16 @@ export class ClientConnection {
 		connection.onTokenSyncCallback(async (payload) => {
 			try {
 				return await this.hooks("onTokenSync", {
-          ...hookPayload,
-          ...payload,
-          connection,
-          documentName,
-        }, (contextAdditions: any) => {
-          hookPayload.context = {
-            ...hookPayload.context,
-            ...contextAdditions,
-          };
-        });
+					...hookPayload,
+					...payload,
+					connection,
+					documentName,
+				}, (contextAdditions: any) => {
+					hookPayload.context = {
+						...hookPayload.context,
+						...contextAdditions,
+					};
+				});
 			} catch (err: any) {
 				const error = err || Forbidden;
 				const message = new OutgoingMessage(documentName).writePermissionDenied(

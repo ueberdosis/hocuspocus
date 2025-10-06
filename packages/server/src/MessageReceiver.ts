@@ -15,6 +15,7 @@ import type Document from "./Document.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import { MessageType } from "./types.ts";
+import { AuthMessageType } from "@hocuspocus/common";
 
 export class MessageReceiver {
 	message: IncomingMessage;
@@ -77,12 +78,6 @@ export class MessageReceiver {
 
 				break;
 			}
-			case MessageType.TokenSync: {
-        connection?.callbacks.onTokenSyncCallback({
-					token: message.readVarString(),
-				});
-				break;
-			}
 			case MessageType.Stateless: {
 				connection?.callbacks.statelessCallback({
 					connection,
@@ -109,11 +104,19 @@ export class MessageReceiver {
 				break;
 			}
 
-			case MessageType.Auth:
+			case MessageType.Auth: {
+				const authType = message.readVarUint();
+				if (authType === AuthMessageType.Token) {
+					connection?.callbacks.onTokenSyncCallback({
+						token: message.readVarString(),
+					});
+					break;
+  				}
 				console.error(
 					"Received an authentication message on a connection that is already fully authenticated. Probably your provider has been destroyed + recreated really fast.",
 				);
 				break;
+			}
 
 			default:
 				console.error(
