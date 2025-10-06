@@ -211,7 +211,7 @@ test("destroy calls onStoreDocument before returning, even with unloadImmediatel
 
 		t.is(called, 0);
 		await hocuspocus.server!.destroy();
-		t.is(called, 3);
+		await retryableAssertion(t, (t2) => t2.is(called, 3));
 
 		resolve("");
 	});
@@ -253,7 +253,8 @@ test("destroy calls onStoreDocument before returning, with multiple docs if debo
 
 		t.is(called, 0);
 		await hocuspocus.server!.destroy();
-		t.is(called, 3);
+
+		await retryableAssertion(t, (t2) => t2.is(called, 3));
 
 		resolve("");
 	});

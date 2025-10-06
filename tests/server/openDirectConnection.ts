@@ -254,7 +254,13 @@ test("does not unload document if an earlierly started onStoreDocument is still 
 	// Trigger a change, which will start a debounced onStoreDocument after 100ms
 	const provider = newHocuspocusProvider(server);
 	provider.document.getMap("aaa").set("bb", "b");
-	await sleep(50);
+
+	await new Promise(async (resolve) => {
+		provider.on("synced", resolve);
+
+		if (!provider.unsyncedChanges) resolve("");
+	});
+
 	t.is(server.getDocumentsCount(), 1);
 	t.is(server.getConnectionsCount(), 1);
 
