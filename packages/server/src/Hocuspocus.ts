@@ -419,34 +419,27 @@ export class Hocuspocus {
 		hookPayload: onStoreDocumentPayload,
 		immediately?: boolean,
 	) {
+		const debounceId = `onStoreDocument-${document.name}`
 		return this.debouncer.debounce(
-			`onStoreDocument-${document.name}`,
-			() => {
-				return this.hooks("onStoreDocument", hookPayload)
-					.then(() => {
-						this.hooks("afterStoreDocument", hookPayload).then(async () => {
-							// Remove document from memory.
-
-							if (document.getConnectionsCount() > 0) {
-								return;
-							}
-
-							await this.unloadDocument(document);
-						});
+			debounceId,
+			async () => {
+				try {
+					await document.saveMutex.runExclusive(async () => {
+						await this.hooks("onStoreDocument", hookPayload);
+						await this.hooks("afterStoreDocument", hookPayload);
 					})
-					.catch((error) => {
-						console.error("Caught error during storeDocumentHooks", error);
-
-						if (error?.message) {
-							throw error;
-						}
-
-            if (document.getConnectionsCount() > 0) {
-              return
-            }
-
-            this.unloadDocument(document)
-					});
+				} catch (error: any) {
+					console.error("Caught error during storeDocumentHooks", error);
+					if (error?.message) {
+						throw error;
+					}
+				} finally {
+					const hasPendingWork = this.debouncer.isDebounced(debounceId) || document.saveMutex.isLocked()
+					const shouldUnload = (document.getConnectionsCount() == 0 && !hasPendingWork)
+					if (shouldUnload) {
+						this.unloadDocument(document);
+					}
+				}
 			},
 			immediately ? 0 : this.configuration.debounce,
 			this.configuration.maxDebounce,

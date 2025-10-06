@@ -1,4 +1,4 @@
-import type { onStoreDocumentPayload } from "@hocuspocus/server";
+import type { Extension, onLoadDocumentPayload, onStoreDocumentPayload } from "@hocuspocus/server";
 import test from "ava";
 import {
 	newHocuspocus,
@@ -6,6 +6,7 @@ import {
 	newHocuspocusProviderWebsocket,
 	sleep,
 } from "../utils/index.ts";
+import * as Y from "yjs";
 
 test("calls the debouned onStoreDocument hook before the document is removed from memory", async (t) => {
 	await new Promise(async (resolve) => {
@@ -466,3 +467,180 @@ test("does not call the onStoreDocument hook if document is not changed after th
 	});
 	t.pass();
 });
+
+test("does not start a new onStoreDocument if there is already one running (should wait for the first one to finish)", async (t) => {
+	/*
+	If our storage backend takes more time than the debounce time to store the document, 
+	we might end up in a situation where multiple onStoreDocument calls are running at the same time.
+
+	Rough timeline:
+
+  1.  ~0ms     Client 1 connects
+  2.  ~10ms    Client 1 makes change 1 (triggers debounced save)
+  3.  ~100ms  Server starts saving change 1 (debounced)
+  4.  ~200ms  Client 1 makes change 2 (triggers debounced save)
+  6.  ~510ms  Server finishes saving change 1.
+  6.  ~511ms  Server starts saving change 2 (debounced)
+  7.  ~1111ms  Server finishes saving change 2.
+  */
+
+	await new Promise(async (resolve) => {
+		let started = 0
+		let finished = 0
+		const server = await newHocuspocus({
+			debounce: 100,
+			async onStoreDocument() {
+				if (started === 1) {
+					// This is the second call
+					t.is(finished, 1, "the first call must have finished before starting the second");
+					resolve("done");
+				} else {
+					started++
+					await sleep(500) // Simulate long save
+					finished++
+				}
+			},
+		});
+
+		const socket1 = newHocuspocusProviderWebsocket(server);
+		const provider1 = newHocuspocusProvider(server, {
+			websocketProvider: socket1,
+			async onSynced() {
+				// Change 1
+				provider1.document.getArray("foo").push(["foo"]);
+        setTimeout(() => {
+					// Change 2
+          provider1.document.getArray("foo").push(["bar"]);
+          socket1.destroy();
+        }, 200)
+			},
+		});
+	});
+})
+
+test("does not trigger unload prematurely when a save is in progress (unloadImmediately=true)", async (t) => {
+  /*
+	Rough timeline:
+
+  1.  ~0ms     Client 1 connects
+  2.  ~10ms    Client 1 makes change 1 (triggers debounced save)
+  3.  ~1000ms  Server starts saving change 1 (debounced)
+  4.  ~1100ms  Client 1 makes change 2 (triggers debounced save)
+  5.  ~1300ms  Client 1 disconnects, triggering immediate save of change 2
+  6.  ~1500ms  Server finishes saving change 1. Does not unload the document, because change 2 is still being saved.
+  7.  ~1600ms  Client 2 connects, loads document
+  9.  ~1800ms  Server finishes saving change 2.
+  10. ~2100ms  We verify that Client 2 sees both changes.
+  */
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus({
+			debounce: 1000,
+      extensions: [new SlowInMemoryStorage()],			
+		});
+
+		const socket1 = newHocuspocusProviderWebsocket(server);
+		const provider1 = newHocuspocusProvider(server, {
+			websocketProvider: socket1,
+      
+			async onSynced() {
+				provider1.document.getArray("foo").push(["foo"]);
+        setTimeout(() => {
+          provider1.document.getArray("foo").push(["bar"]);
+          setTimeout(() => { // Wait for sending changes
+            socket1.destroy();
+          }, 200)
+        }, 1100)        
+			},
+		});
+
+    setTimeout(() => {
+      const socket2 = newHocuspocusProviderWebsocket(server);
+      const provider2 = newHocuspocusProvider(server, {
+        websocketProvider: socket2,
+        
+        async onSynced() {
+          setTimeout(() => {
+            const value = provider2.document.getArray("foo").toArray()
+            t.deepEqual(value, ["foo", "bar"], "Client 2 should see both changes");
+            t.pass()
+            resolve("done");
+          }, 500)				
+        },
+      });      
+    }, 1600)
+	});
+});
+
+test("Does not unload prematurely when a debounced save is pending (unloadImmediately=false)", async (t) => {
+  /*
+
+  Rough timeline:
+
+  1.  ~0ms     Client 1 connects
+  2.  ~10ms    Client 1 makes a change 1 (triggers debounced save)
+  3.  ~1000ms  Server starts saving change 1 (debounced)
+  4.  ~1100ms  Client 1 makes change 2 (triggers debounced save)
+  5.  ~1300ms  Client 1 disconnects, while change 2 is still being debounced
+  6.  ~1500ms  Server finishes saving change 1. Does not unload the document, because change 2 is still being debounced.
+  7.  ~1600ms  Client 2 connects
+  8.  ~2000ms  Server starts saving change 2 (debounced)
+  9.  ~2500ms  Server finishes saving change 2
+  10. ~3000ms  We verify that Client 2 sees both changes.
+
+  */
+
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus({
+			debounce: 1000,
+      unloadImmediately: false,
+      extensions: [new SlowInMemoryStorage()],			
+		});
+
+		const socket1 = newHocuspocusProviderWebsocket(server);
+		const provider1 = newHocuspocusProvider(server, {
+			websocketProvider: socket1,
+      
+			async onSynced() {
+				provider1.document.getArray("foo").push(["foo"]);
+			},
+		});
+    setTimeout(() => {
+        provider1.document.getArray("foo").push(["bar"]);
+        setTimeout(() => { // Wait for sending changes
+          socket1.destroy();
+        }, 200)        
+    }, 1100)
+
+    setTimeout(() => {
+      const socket2 = newHocuspocusProviderWebsocket(server);
+      const provider2 = newHocuspocusProvider(server, {
+        websocketProvider: socket2,        
+        async onSynced() {
+          setTimeout(() => {
+            t.deepEqual(getCurrentValue(provider2.document), ["foo", "bar"], "Client 2 should see both changes");
+            t.pass()
+            resolve("done");
+          }, 1500)				
+        },
+      });
+    }, 1600)
+		
+
+	});
+});
+
+const getCurrentValue = (doc: Y.Doc) => doc.getArray("foo").toArray()
+
+class SlowInMemoryStorage implements Extension {
+  state: Uint8Array<ArrayBufferLike> | null = null
+  async onStoreDocument(data: onStoreDocumentPayload) {
+    const stateToSave = Y.encodeStateAsUpdate(data.document) // Capture state to save immediately
+    await sleep(500) // Add pause to simulate long save
+    this.state = stateToSave
+  }
+  async onLoadDocument(data: onLoadDocumentPayload) {
+    if (this.state) {
+      Y.applyUpdate(data.document, this.state)
+    }
+  }
+}
