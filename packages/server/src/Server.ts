@@ -66,6 +66,8 @@ export class Server {
 		this.webSocketServer.on(
 			"connection",
 			async (incoming: WebSocket, request: IncomingMessage) => {
+				incoming.setMaxListeners(Number.POSITIVE_INFINITY);
+
 				incoming.on("error", (error) => {
 					/**
 					 * Handle a ws instance error, which is required to prevent
