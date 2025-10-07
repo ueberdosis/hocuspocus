@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
 import type { URLSearchParams } from "node:url";
 import {
@@ -9,7 +10,6 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import { v4 as uuid } from "uuid";
 import type WebSocket from "ws";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
@@ -61,7 +61,7 @@ export class ClientConnection {
 	};
 
 	// Every new connection gets a unique identifier.
-	private readonly socketId = uuid();
+	private readonly socketId = crypto.randomUUID();
 
 	timeout: number;
 
