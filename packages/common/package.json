@@ -1,9 +1,11 @@
 {
 	"name": "@hocuspocus/common",
 	"description": "shared code for multiple Hocuspocus packages",
-	"version": "3.2.4",
+	"version": "3.2.5",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": ["hocuspocus"],
+	"keywords": [
+		"hocuspocus"
+	],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-common.cjs",
@@ -19,7 +21,10 @@
 			"types": "./dist/packages/common/src/index.d.ts"
 		}
 	},
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
 	"dependencies": {
 		"lib0": "^0.2.87"

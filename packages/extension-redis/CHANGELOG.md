@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
+
+
+### Bug Fixes
+
+* **extension-redis:** avoid hard crashes of expected errors when acquiring a lock ([#983](https://github.com/ueberdosis/hocuspocus/issues/983)) ([38e58a4](https://github.com/ueberdosis/hocuspocus/commit/38e58a4d099cf0f5fba0f51cbd7be169de94b0bd))
+
+
+### Features
+
+* remove uuid dependency and replace usages by crypto.randomUUID ([#1005](https://github.com/ueberdosis/hocuspocus/issues/1005)) ([393189f](https://github.com/ueberdosis/hocuspocus/commit/393189fe448c68cbd741642866be4b4b23546f17))
+
+
+
+
+
 ## [3.2.4](https://github.com/ueberdosis/hocuspocus/compare/v3.2.3...v3.2.4) (2025-09-30)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

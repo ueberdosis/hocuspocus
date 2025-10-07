@@ -1,9 +1,14 @@
 {
 	"name": "@hocuspocus/extension-s3",
 	"description": "a S3-compatible persistence driver for Hocuspocus",
-	"version": "3.2.4",
+	"version": "3.2.5",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": ["hocuspocus", "yjs", "s3", "persistence"],
+	"keywords": [
+		"hocuspocus",
+		"yjs",
+		"s3",
+		"persistence"
+	],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-s3.cjs",
@@ -19,10 +24,13 @@
 			"types": "./dist/packages/extension-s3/src/index.d.ts"
 		}
 	},
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.0.0",
-		"@hocuspocus/extension-database": "^3.2.4",
+		"@hocuspocus/extension-database": "^3.2.5",
 		"kleur": "^4.1.4"
 	},
 	"publishConfig": {

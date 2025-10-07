@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
+
+
+### Bug Fixes
+
+* delay adding document to instance until connection is about to be established ([#972](https://github.com/ueberdosis/hocuspocus/issues/972)) ([1e2917a](https://github.com/ueberdosis/hocuspocus/commit/1e2917aacb342c035645bb3c01af4910d699eaad))
+* set max listeners to infinity to avoid warnings when using multiplexing ([21412aa](https://github.com/ueberdosis/hocuspocus/commit/21412aa3f4bc861fa4ece46c2e57d5a0a48be8af))
+
+
+### Features
+
+* remove uuid dependency and replace usages by crypto.randomUUID ([#1005](https://github.com/ueberdosis/hocuspocus/issues/1005)) ([393189f](https://github.com/ueberdosis/hocuspocus/commit/393189fe448c68cbd741642866be4b4b23546f17))
+
+
+
+
+
 ## [3.2.4](https://github.com/ueberdosis/hocuspocus/compare/v3.2.3...v3.2.4) (2025-09-30)
 
 **Note:** Version bump only for package @hocuspocus/server

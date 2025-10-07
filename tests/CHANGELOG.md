@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
+
+
+### Bug Fixes
+
+* delay adding document to instance until connection is about to be established ([#972](https://github.com/ueberdosis/hocuspocus/issues/972)) ([1e2917a](https://github.com/ueberdosis/hocuspocus/commit/1e2917aacb342c035645bb3c01af4910d699eaad))
+
+
+
+
+
 ## [3.2.4](https://github.com/ueberdosis/hocuspocus/compare/v3.2.3...v3.2.4) (2025-09-30)
 
 **Note:** Version bump only for package tests
