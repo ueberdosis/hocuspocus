@@ -1,16 +1,16 @@
-import { createHmac } from "crypto";
+import { createHmac } from "node:crypto";
+import { Forbidden } from "@hocuspocus/common";
 import type {
 	Extension,
 	onChangePayload,
 	onConnectPayload,
-	onLoadDocumentPayload,
 	onDisconnectPayload,
+	onLoadDocumentPayload,
 } from "@hocuspocus/server";
-import type { Doc } from "yjs";
 import type { Transformer } from "@hocuspocus/transformer";
 import { TiptapTransformer } from "@hocuspocus/transformer";
 import axios from "axios";
-import { Forbidden } from "@hocuspocus/common";
+import type { Doc } from "yjs";
 
 export enum Events {
 	onChange = "change",

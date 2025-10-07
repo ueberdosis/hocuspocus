@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import type {
 	Document,
 	Extension,
@@ -17,9 +18,9 @@ import {
 	OutgoingMessage,
 } from "@hocuspocus/server";
 import {
-	Redlock,
 	type ExecutionResult,
 	type Lock,
+	Redlock,
 } from "@sesamecare-oss/redlock";
 import type {
 	Cluster,
@@ -28,7 +29,6 @@ import type {
 	RedisOptions,
 } from "ioredis";
 import RedisClient from "ioredis";
-import { v4 as uuid } from "uuid";
 export type RedisInstance = RedisClient | Cluster;
 export interface Configuration {
 	/**
@@ -89,7 +89,7 @@ export class Redis implements Extension {
 		port: 6379,
 		host: "127.0.0.1",
 		prefix: "hocuspocus",
-		identifier: `host-${uuid()}`,
+		identifier: `host-${crypto.randomUUID()}`,
 		lockTimeout: 1000,
 		disconnectDelay: 1000,
 	};
