@@ -195,6 +195,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	async onOpen(event: Event) {
 		this.status = WebSocketStatus.Connected;
+		this.emit("status", { status: WebSocketStatus.Connected });
+
 		this.cancelWebsocketRetry = undefined;
 		this.receivedOnOpenPayload = event;
 	}
