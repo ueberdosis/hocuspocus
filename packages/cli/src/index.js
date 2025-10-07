@@ -107,7 +107,9 @@ export const getConfiguredS3Extension = () => {
 
 	const bucket = cli.flags.s3Bucket || process.env.S3_BUCKET;
 	if (!bucket) {
-		console.error("❌ S3 bucket is required. Use --s3-bucket or set S3_BUCKET environment variable.");
+		console.error(
+			"❌ S3 bucket is required. Use --s3-bucket or set S3_BUCKET environment variable.",
+		);
 		process.exit(1);
 	}
 

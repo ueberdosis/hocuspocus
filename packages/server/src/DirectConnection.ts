@@ -66,7 +66,10 @@ export class DirectConnection implements DirectConnectionInterface {
 			// If the direct connection was the only connection to the document
 			// then we should trigger the onDisconnect hook for
 			// this doc and unload the document
-			if (this.document.getConnectionsCount() === 0 && !this.document.saveMutex.isLocked()) {
+			if (
+				this.document.getConnectionsCount() === 0 &&
+				!this.document.saveMutex.isLocked()
+			) {
 				await this.instance.hooks("onDisconnect", {
 					instance: this.instance,
 					clientsCount: this.document.getConnectionsCount(),

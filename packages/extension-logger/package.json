@@ -3,12 +3,7 @@
 	"version": "3.2.4",
 	"description": "hocuspocus logging extension",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"logging",
-		"logger",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "logging", "logger", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-logger.cjs",
@@ -24,10 +19,7 @@
 			"types": "./dist/packages/extension-logger/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@hocuspocus/server": "^3.2.4"
 	},

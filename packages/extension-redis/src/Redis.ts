@@ -16,11 +16,20 @@ import {
 	MessageReceiver,
 	OutgoingMessage,
 } from "@hocuspocus/server";
-import {Redlock, type ExecutionResult, type Lock} from '@sesamecare-oss/redlock';
-import type {Cluster, ClusterNode, ClusterOptions, RedisOptions} from "ioredis";
+import {
+	Redlock,
+	type ExecutionResult,
+	type Lock,
+} from "@sesamecare-oss/redlock";
+import type {
+	Cluster,
+	ClusterNode,
+	ClusterOptions,
+	RedisOptions,
+} from "ioredis";
 import RedisClient from "ioredis";
-import {v4 as uuid} from "uuid";
-export type RedisInstance = RedisClient | Cluster
+import { v4 as uuid } from "uuid";
+export type RedisInstance = RedisClient | Cluster;
 export interface Configuration {
 	/**
 	 * Redis port
@@ -95,7 +104,7 @@ export class Redis implements Extension {
 
 	redlock: Redlock;
 
-	locks = new Map<string, {lock: Lock; release?: Promise<ExecutionResult>}>();
+	locks = new Map<string, { lock: Lock; release?: Promise<ExecutionResult> }>();
 
 	messagePrefix: Buffer;
 
@@ -236,47 +245,55 @@ export class Redis implements Extension {
 	 * Before the document is stored, make sure to set a lock in Redis.
 	 * That’s meant to avoid conflicts with other instances trying to store the document.
 	 */
-  async onStoreDocument({documentName}: onStoreDocumentPayload) {
-    // Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-    // to avoid conflict with other instances storing the same document.
-    const resource = this.lockKey(documentName)
-    const ttl = this.configuration.lockTimeout
-	try {
-    	await this.redlock.acquire([resource], ttl)
-    	const oldLock = this.locks.get(resource)
-      if (oldLock) {
-        await oldLock.release;
-      }
-	}  catch (error) {
-      //based on: https://github.com/sesamecare/redlock/blob/508e00dcd1e4d2bc6373ce455f4fe847e98a9aab/src/index.ts#L347-L349
-      if(error == 'ExecutionError: The operation was unable to achieve a quorum during its retry window.') {
-        // Expected behavior: Could not acquire lock, another instance locked it already.
-        // No further `onStoreDocument` hooks will be executed; should throw a silent error with no message.
-        throw new Error('', { cause: 'Could not acquire lock, another instance locked it already.' });
-      }
-      //unexpected error
-      console.error("unexpected error:", error);
-      throw error
+	async onStoreDocument({ documentName }: onStoreDocumentPayload) {
+		// Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
+		// to avoid conflict with other instances storing the same document.
+		const resource = this.lockKey(documentName);
+		const ttl = this.configuration.lockTimeout;
+		try {
+			await this.redlock.acquire([resource], ttl);
+			const oldLock = this.locks.get(resource);
+			if (oldLock) {
+				await oldLock.release;
+			}
+		} catch (error) {
+			//based on: https://github.com/sesamecare/redlock/blob/508e00dcd1e4d2bc6373ce455f4fe847e98a9aab/src/index.ts#L347-L349
+			if (
+				error ==
+				"ExecutionError: The operation was unable to achieve a quorum during its retry window."
+			) {
+				// Expected behavior: Could not acquire lock, another instance locked it already.
+				// No further `onStoreDocument` hooks will be executed; should throw a silent error with no message.
+				throw new Error("", {
+					cause: "Could not acquire lock, another instance locked it already.",
+				});
+			}
+			//unexpected error
+			console.error("unexpected error:", error);
+			throw error;
 		}
-  }
+	}
 
 	/**
 	 * Release the Redis lock, so other instances can store documents.
 	 */
-  async afterStoreDocument({documentName, socketId}: afterStoreDocumentPayload) {
-    const lockKey = this.lockKey(documentName)
-    const lock = this.locks.get(lockKey)
-    if (lock) {
-      try {
-        // Always try to unlock and clean up the lock
-        lock.release = lock.lock.release()
-        await lock.release
-      } catch {
-        // Lock will expire on its own after timeout
-      } finally {
-        this.locks.delete(lockKey)
-      }
-    }
+	async afterStoreDocument({
+		documentName,
+		socketId,
+	}: afterStoreDocumentPayload) {
+		const lockKey = this.lockKey(documentName);
+		const lock = this.locks.get(lockKey);
+		if (lock) {
+			try {
+				// Always try to unlock and clean up the lock
+				lock.release = lock.lock.release();
+				await lock.release;
+			} catch {
+				// Lock will expire on its own after timeout
+			} finally {
+				this.locks.delete(lockKey);
+			}
+		}
 		// if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
 		// for provider connections, this usually happens in the onDisconnect hook
 		if (socketId === "server") {
@@ -400,7 +417,7 @@ export class Redis implements Extension {
 				}
 			});
 
-			if(document) {
+			if (document) {
 				this.instance.unloadDocument(document);
 			}
 		};

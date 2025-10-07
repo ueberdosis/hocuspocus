@@ -311,7 +311,7 @@ export class Hocuspocus {
 			const doc = await loadDocPromise;
 			this.documents.set(documentName, doc);
 			this.loadingDocuments.delete(documentName);
-            return doc;
+			return doc;
 		} catch (e) {
 			this.loadingDocuments.delete(documentName);
 			throw e;
@@ -419,7 +419,7 @@ export class Hocuspocus {
 		hookPayload: onStoreDocumentPayload,
 		immediately?: boolean,
 	) {
-		const debounceId = `onStoreDocument-${document.name}`
+		const debounceId = `onStoreDocument-${document.name}`;
 		return this.debouncer.debounce(
 			debounceId,
 			async () => {
@@ -427,15 +427,18 @@ export class Hocuspocus {
 					await document.saveMutex.runExclusive(async () => {
 						await this.hooks("onStoreDocument", hookPayload);
 						await this.hooks("afterStoreDocument", hookPayload);
-					})
+					});
 				} catch (error: any) {
 					console.error("Caught error during storeDocumentHooks", error);
 					if (error?.message) {
 						throw error;
 					}
 				} finally {
-					const hasPendingWork = this.debouncer.isDebounced(debounceId) || document.saveMutex.isLocked()
-					const shouldUnload = (document.getConnectionsCount() == 0 && !hasPendingWork)
+					const hasPendingWork =
+						this.debouncer.isDebounced(debounceId) ||
+						document.saveMutex.isLocked();
+					const shouldUnload =
+						document.getConnectionsCount() == 0 && !hasPendingWork;
 					if (shouldUnload) {
 						this.unloadDocument(document);
 					}

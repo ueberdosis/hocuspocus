@@ -3,12 +3,7 @@
 	"description": "plug & play collaboration backend",
 	"version": "3.2.4",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"yjs",
-		"yjs-websocket",
-		"prosemirror"
-	],
+	"keywords": ["hocuspocus", "yjs", "yjs-websocket", "prosemirror"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-server.cjs",
@@ -24,10 +19,7 @@
 			"types": "./dist/packages/server/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@hocuspocus/common": "^3.2.4",
 		"async-lock": "^1.3.1",

@@ -1,6 +1,11 @@
 import type { DatabaseConfiguration } from "@hocuspocus/extension-database";
 import { Database } from "@hocuspocus/extension-database";
-import { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import {
+	S3Client,
+	GetObjectCommand,
+	PutObjectCommand,
+	HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 import kleur from "kleur";
 
 export interface S3Configuration extends DatabaseConfiguration {
@@ -47,7 +52,7 @@ export class S3 extends Database {
 		forcePathStyle: false,
 		fetch: async ({ documentName }) => {
 			const key = this.getObjectKey(documentName);
-			
+
 			try {
 				const command = new GetObjectCommand({
 					Bucket: this.configuration.bucket,
@@ -55,34 +60,40 @@ export class S3 extends Database {
 				});
 
 				const response = await this.s3Client!.send(command);
-				
+
 				if (response.Body) {
 					// Convert stream to Uint8Array
 					const chunks: Uint8Array[] = [];
 					const reader = response.Body.transformToWebStream().getReader();
-					
+
 					while (true) {
 						const { done, value } = await reader.read();
 						if (done) break;
 						chunks.push(value);
 					}
-					
+
 					// Combine all chunks into a single Uint8Array
-					const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+					const totalLength = chunks.reduce(
+						(acc, chunk) => acc + chunk.length,
+						0,
+					);
 					const result = new Uint8Array(totalLength);
 					let offset = 0;
-					
+
 					for (const chunk of chunks) {
 						result.set(chunk, offset);
 						offset += chunk.length;
 					}
-					
+
 					return result;
 				}
-				
+
 				return null;
 			} catch (error: any) {
-				if (error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
+				if (
+					error.name === "NoSuchKey" ||
+					error.$metadata?.httpStatusCode === 404
+				) {
 					// Document doesn't exist yet, return null
 					return null;
 				}
@@ -91,7 +102,7 @@ export class S3 extends Database {
 		},
 		store: async ({ documentName, state }) => {
 			const key = this.getObjectKey(documentName);
-			
+
 			const command = new PutObjectCommand({
 				Bucket: this.configuration.bucket,
 				Key: key,
@@ -149,30 +160,38 @@ export class S3 extends Database {
 				Bucket: this.configuration.bucket,
 				Key: "test-connection", // This will likely return 404, but that's fine
 			});
-			
+
 			await this.s3Client.send(command);
 		} catch (error: any) {
 			// 404 is expected for the test key, any other error indicates connection issues
 			if (error.$metadata?.httpStatusCode !== 404) {
 				// Don't show credential errors as connection failures in development
-				if (error.message?.includes('Could not load credentials')) {
+				if (error.message?.includes("Could not load credentials")) {
 					console.warn(`  ${kleur.yellow("S3 warning:")} ${error.message}`);
-					console.warn(`  ${kleur.yellow("Note:")} Ensure AWS credentials are properly configured for production use`);
+					console.warn(
+						`  ${kleur.yellow("Note:")} Ensure AWS credentials are properly configured for production use`,
+					);
 				} else {
-					console.error(`  ${kleur.red("S3 connection failed:")} ${error.message}`);
+					console.error(
+						`  ${kleur.red("S3 connection failed:")} ${error.message}`,
+					);
 				}
 			}
 		}
 	}
 
 	async onListen() {
-		const endpoint = this.configuration.endpoint || `https://s3.${this.configuration.region}.amazonaws.com`;
+		const endpoint =
+			this.configuration.endpoint ||
+			`https://s3.${this.configuration.region}.amazonaws.com`;
 		console.log(
 			`  ${kleur.green("S3 extension configured:")} bucket=${this.configuration.bucket}, endpoint=${endpoint}`,
 		);
-		
+
 		if (this.configuration.prefix) {
-			console.log(`  ${kleur.blue("S3 key prefix:")} ${this.configuration.prefix}`);
+			console.log(
+				`  ${kleur.blue("S3 key prefix:")} ${this.configuration.prefix}`,
+			);
 		}
 	}
 }
