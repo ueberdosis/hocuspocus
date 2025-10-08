@@ -117,6 +117,7 @@ export class MessageReceiver {
 
 		readAuthMessage(
 			message.decoder,
+			provider.sendToken.bind(provider),
 			provider.permissionDeniedHandler.bind(provider),
 			provider.authenticatedHandler.bind(provider),
 		);
