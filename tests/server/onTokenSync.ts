@@ -28,15 +28,12 @@ test('provider sendToken: onTokenSync receives correct token from provider after
     const provider = newHocuspocusProvider(server, {
       token: 'INITIAL-TOKEN', // Initial token for auth
       onAuthenticated() {
+        // Update the provider's token before sending
+        provider.configuration.token = expectedToken
         // Provider sends updated token after authentication
         provider.sendToken() // This will send the current token
       },
     })
-
-    // Update the provider's token before sending
-    provider.configuration.token = expectedToken
-
-    await sleep(100)
   })
 })
 
@@ -66,12 +63,8 @@ test('provider sendToken: executes onTokenSync from custom extension when provid
         provider.sendToken()
       },
     })
-
-    await sleep(100)
   })
 })
-
-
 
 test('provider sendToken: onTokenSync has access to full payload when provider sends token', async t => {
   const mockContext = { user: 123 }
@@ -96,8 +89,6 @@ test('provider sendToken: onTokenSync has access to full payload when provider s
         provider.sendToken()
       },
     })
-
-    await sleep(100)
   })
 })
 
@@ -148,8 +139,6 @@ test('provider sendToken: onTokenSync works with multiple providers sending toke
         provider2.sendToken()
       },
     })
-
-    await sleep(100)
   })
 })
 
@@ -175,6 +164,7 @@ test('server requestToken: executes onTokenSync when server requests token after
       token: 'SUPER-SECRET-TOKEN',
     })
 
+    // Wait for provider to be authenticated to be able to find the connection
     await sleep(100)
 
     const document = server.documents.get('hocuspocus-test')
@@ -239,10 +229,11 @@ test('server requestToken: onTokenSync receives correct token when server reques
 
     const provider = newHocuspocusProvider(server, {
       token: 'INITIAL-TOKEN',
+      onAuthenticated() {
+        // Update the provider's token after connection
+        provider.configuration.token = expectedToken
+      },
     })
-
-    // Update the provider's token after connection
-    provider.configuration.token = expectedToken
 
     await sleep(100)
 
