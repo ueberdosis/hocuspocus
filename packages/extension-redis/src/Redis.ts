@@ -5,11 +5,12 @@ import type {
 	Hocuspocus,
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
+	afterUnloadDocumentPayload,
 	beforeBroadcastStatelessPayload,
+	beforeUnloadDocumentPayload,
 	onAwarenessUpdatePayload,
 	onChangePayload,
 	onConfigurePayload,
-	onDisconnectPayload,
 	onStoreDocumentPayload,
 } from "@hocuspocus/server";
 import {
@@ -107,12 +108,6 @@ export class Redis implements Extension {
 	locks = new Map<string, { lock: Lock; release?: Promise<ExecutionResult> }>();
 
 	messagePrefix: Buffer;
-
-	/**
-	 * When we have a high frequency of updates to a document we don't need tons of setTimeouts
-	 * piling up, so we'll track them to keep it to the most recent per document.
-	 */
-	private pendingDisconnects = new Map<string, NodeJS.Timeout>();
 
 	private pendingAfterStoreDocumentResolves = new Map<
 		string,
@@ -389,42 +384,25 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Make sure to *not* listen for further changes, when there’s
-	 * no one connected anymore.
+	 * Delay unloading to allow syncs to finish
 	 */
-	public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
-		const pending = this.pendingDisconnects.get(documentName);
+	async beforeUnloadDocument(data: beforeUnloadDocumentPayload) {
+		return new Promise<void>((resolve) => {
+			setTimeout(() => {
+				resolve();
+			}, this.configuration.disconnectDelay);
+		});
+	}
 
-		if (pending) {
-			clearTimeout(pending);
-			this.pendingDisconnects.delete(documentName);
-		}
+	async afterUnloadDocument(data: afterUnloadDocumentPayload) {
+		if (data.instance.documents.has(data.documentName)) return; // skip unsubscribe if the document is already loaded again (maybe fast reconnect)
 
-		const disconnect = () => {
-			const document = this.instance.documents.get(documentName);
-
-			this.pendingDisconnects.delete(documentName);
-
-			// Do nothing, when other users are still connected to the document.
-			if (document && document.getConnectionsCount() > 0) {
-				return;
+		this.sub.unsubscribe(this.subKey(data.documentName), (error: any) => {
+			if (error) {
+				console.error(error);
 			}
-
-			// Time to end the subscription on the document channel.
-			this.sub.unsubscribe(this.subKey(documentName), (error: any) => {
-				if (error) {
-					console.error(error);
-				}
-			});
-
-			if (document) {
-				this.instance.unloadDocument(document);
-			}
-		};
-		// Delay the disconnect procedure to allow last minute syncs to happen
-		const timeout = setTimeout(disconnect, this.configuration.disconnectDelay);
-		this.pendingDisconnects.set(documentName, timeout);
-	};
+		});
+	}
 
 	async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
 		const message = new OutgoingMessage(
