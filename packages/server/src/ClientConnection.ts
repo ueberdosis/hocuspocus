@@ -263,11 +263,9 @@ export class ClientConnection {
 					};
 				});
 			} catch (err: any) {
-				const error = err || Forbidden;
-				const message = new OutgoingMessage(documentName).writePermissionDenied(
-					error.reason ?? "permission-denied",
-				);
-				this.websocket.send(message.toUint8Array());
+				console.error(err);
+				const error = { ...Unauthorized, ...err };
+				this.websocket.close(error.code, error.reason);
 			}
 		});
 

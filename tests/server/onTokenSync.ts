@@ -1,10 +1,9 @@
 import test from 'ava'
 import type { onAuthenticatePayload, onTokenSyncPayload } from '@hocuspocus/server'
-import { WebSocketStatus } from '@hocuspocus/provider'
+import { Unauthorized } from '@hocuspocus/common'
 import {
   newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
 } from '../utils/index.ts'
-import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 // ============================================================================
 // PROVIDER SEND TOKEN TESTS
@@ -333,20 +332,22 @@ test('server requestToken: onTokenSync works with readonly connections when serv
   })
 })
 
-test('server requestToken: failure of onTokenSync should trigger onAuthenticationFailed hook on provider side', async t => {
+test('server requestToken: failure of onTokenSync should close the connection', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus({
       async onAuthenticate() {
         return true // Allow initial auth
       },
       async onTokenSync() {
-        throw new Error('Token sync failed')
+        throw new Error()
       },
     })
 
     const provider = newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
-      onAuthenticationFailed() {
+      onClose({ event }) {
+        t.is(event.code, Unauthorized.code)
+        t.is(event.reason, Unauthorized.reason)
         t.pass()
         resolve('done')
       },
