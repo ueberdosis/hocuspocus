@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+
+### Features
+
+* rewrite of redis unloading logic to utilize before/after-unloadDocument ([#1007](https://github.com/ueberdosis/hocuspocus/issues/1007)) ([8f86caf](https://github.com/ueberdosis/hocuspocus/commit/8f86caff4e74601ecc98fff293fc58584af27176))
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 
