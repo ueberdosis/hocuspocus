@@ -377,7 +377,6 @@ export class Hocuspocus {
 		}
 
 		document.isLoading = false;
-		await this.hooks("afterLoadDocument", hookPayload);
 
 		document.onUpdate(
 			(document: Document, connection: Connection, update: Uint8Array) => {
@@ -389,6 +388,8 @@ export class Hocuspocus {
 				);
 			},
 		);
+
+		await this.hooks("afterLoadDocument", hookPayload);
 
 		document.beforeBroadcastStateless(
 			(document: Document, stateless: string) => {
