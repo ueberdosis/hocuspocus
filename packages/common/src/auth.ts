@@ -1,7 +1,7 @@
 import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
 
-enum AuthMessageType {
+export enum AuthMessageType {
 	Token = 0,
 	PermissionDenied = 1,
 	Authenticated = 2,
@@ -31,12 +31,23 @@ export const writeAuthenticated = (
 	encoding.writeVarString(encoder, scope);
 };
 
+export const writeTokenSyncRequest = (
+	encoder: encoding.Encoder,
+) => {
+	encoding.writeVarUint(encoder, AuthMessageType.Token);
+};
+
 export const readAuthMessage = (
 	decoder: decoding.Decoder,
+	sendToken: () => void,
 	permissionDeniedHandler: (reason: string) => void,
 	authenticatedHandler: (scope: string) => void,
 ) => {
 	switch (decoding.readVarUint(decoder)) {
+		case AuthMessageType.Token: {
+			sendToken();
+			break;
+		}
 		case AuthMessageType.PermissionDenied: {
 			permissionDeniedHandler(decoding.readVarString(decoder));
 			break;

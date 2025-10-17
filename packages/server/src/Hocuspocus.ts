@@ -106,6 +106,7 @@ export class Hocuspocus {
 			onConnect: this.configuration.onConnect,
 			connected: this.configuration.connected,
 			onAuthenticate: this.configuration.onAuthenticate,
+			onTokenSync: this.configuration.onTokenSync,
 			onLoadDocument: this.configuration.onLoadDocument,
 			afterLoadDocument: this.configuration.afterLoadDocument,
 			beforeHandleMessage: this.configuration.beforeHandleMessage,

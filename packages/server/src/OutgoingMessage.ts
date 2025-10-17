@@ -10,7 +10,7 @@ import type { Awareness } from "y-protocols/awareness";
 import { encodeAwarenessUpdate } from "y-protocols/awareness";
 import { writeSyncStep1, writeUpdate } from "y-protocols/sync";
 
-import { writeAuthenticated, writePermissionDenied } from "@hocuspocus/common";
+import { writeAuthenticated, writePermissionDenied, writeTokenSyncRequest } from "@hocuspocus/common";
 import type Document from "./Document.ts";
 import { MessageType } from "./types.ts";
 
@@ -66,6 +66,16 @@ export class OutgoingMessage {
 		this.category = "Update";
 
 		writeVarUint(this.encoder, MessageType.QueryAwareness);
+
+		return this;
+	}
+
+	writeTokenSyncRequest(): OutgoingMessage {
+		this.type = MessageType.Auth;
+		this.category = "TokenSync";
+
+		writeVarUint(this.encoder, MessageType.Auth);
+		writeTokenSyncRequest(this.encoder);
 
 		return this;
 	}

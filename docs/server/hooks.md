@@ -34,6 +34,7 @@ By way of illustration, if a user isn’t allowed to connect: Just throw an erro
 | `onConnect`                | When a connection is established          | [Read more](/server/hooks#on-connect)                 |
 | `connected`                | After a connection has been establied     | [Read more](/server/hooks#connected)                  |
 | `onAuthenticate`           | When authentication is required           | [Read more](/server/hooks#on-authenticate)            |
+| `onTokenSync`              | When token synchronization occurs         | [Read more](/server/hooks#on-token-sync)              |
 | `onAwarenessUpdate`        | When awareness changed                    | [Read more](/server/hooks#on-awareness-update)        |
 | `onLoadDocument`           | During the creation of a new document     | [Read more](/server/hooks#on-load-document)           |
 | `afterLoadDocument`        | After a document is created               | [Read more](/server/hooks#after-load-document)        |
@@ -211,6 +212,73 @@ const server = new Server({
 });
 
 server.listen();
+```
+
+### onTokenSync
+
+The `onTokenSync` hook is called when the server receives a token synchronization request from a connected provider. This enables the server to validate user tokens during active sessions without requiring a full reconnection.
+
+**Hook payload**
+
+The `data` passed to the `onTokenSync` hook has the following attributes:
+
+```js
+const data = {
+  context: any,
+  document: Doc,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: IncomingHttpHeaders,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  token: string,
+  connectionConfig: {
+    readOnly: boolean,
+  },
+  connection: Connection,
+};
+```
+
+**Example**
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  async onTokenSync({ token, context, connection }) {
+    // Validate the current token
+    const isValid = await validateToken(token);
+    
+    if (!isValid) {
+      throw new Error("Token has expired or is invalid");
+    }
+    
+    // Update permissions if changed
+    const permissions = await getUserPermissions(context.userId);
+    if (permissions.readOnly !== connection.readOnly) {
+      connection.readOnly = permissions.readOnly;
+    }
+    
+    return { lastTokenSync: new Date() };
+  },
+});
+
+server.listen();
+```
+
+**Provider Usage**
+
+```js
+// Provider sends token to server
+provider.sendToken();
+```
+
+**Server Usage**
+
+```js
+// Server requests token from provider
+const connection = document.connections.values().next().value?.connection;
+connection.requestToken();
 ```
 
 ### onAwarenessUpdate
