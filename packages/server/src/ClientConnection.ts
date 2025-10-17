@@ -265,7 +265,7 @@ export class ClientConnection {
 			} catch (err: any) {
 				console.error(err);
 				const error = { ...Unauthorized, ...err };
-				this.websocket.close(error.code, error.reason);
+				connection.close({ code: error.code, reason: error.reason });
 			}
 		});
 

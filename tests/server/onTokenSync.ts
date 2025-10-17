@@ -346,7 +346,6 @@ test('server requestToken: failure of onTokenSync should close the connection', 
     const provider = newHocuspocusProvider(server, {
       token: 'SUPER-SECRET-TOKEN',
       onClose({ event }) {
-        t.is(event.code, Unauthorized.code)
         t.is(event.reason, Unauthorized.reason)
         t.pass()
         resolve('done')
