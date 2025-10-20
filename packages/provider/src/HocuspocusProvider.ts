@@ -304,6 +304,21 @@ export class HocuspocusProvider extends EventEmitter {
 		});
 	}
 
+	async sendToken() {
+		let token: string | null;
+		try {
+			token = await this.getToken();
+		} catch (error) {
+			this.permissionDeniedHandler(`Failed to get token during sendToken(): ${error}`);
+			return;
+		}
+
+		this.send(AuthenticationMessage, {
+			token: token ?? "",
+			documentName: this.configuration.name,
+		});
+	}
+
 	documentUpdateHandler(update: Uint8Array, origin: any) {
 		if (origin === this) {
 			return;
@@ -374,20 +389,7 @@ export class HocuspocusProvider extends EventEmitter {
 		this.isAuthenticated = false;
 
 		this.emit("open", { event });
-
-		let token: string | null;
-		try {
-			token = await this.getToken();
-		} catch (error) {
-			this.permissionDeniedHandler(`Failed to get token: ${error}`);
-			return;
-		}
-
-		this.send(AuthenticationMessage, {
-			token: token ?? "",
-			documentName: this.configuration.name,
-		});
-
+		await this.sendToken();
 		this.startSync();
 	}
 

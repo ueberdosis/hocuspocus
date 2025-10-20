@@ -249,6 +249,26 @@ export class ClientConnection {
 			this.documentConnectionsEstablished.delete(documentName);
 		});
 
+		connection.onTokenSyncCallback(async (payload) => {
+			try {
+				return await this.hooks("onTokenSync", {
+					...hookPayload,
+					...payload,
+					connection,
+					documentName,
+				}, (contextAdditions: any) => {
+					hookPayload.context = {
+						...hookPayload.context,
+						...contextAdditions,
+					};
+				});
+			} catch (err: any) {
+				console.error(err);
+				const error = { ...Unauthorized, ...err };
+				connection.close({ code: error.code, reason: error.reason });
+			}
+		});
+
 		this.documentConnections[documentName] = connection;
 
 		// If the WebSocket has already disconnected (wow, that was fast) – then
