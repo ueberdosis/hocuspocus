@@ -1,6 +1,5 @@
 import { Redis } from "@hocuspocus/extension-redis";
 import test from "ava";
-import { v4 as uuidv4 } from "uuid";
 import {
 	newHocuspocus,
 	newHocuspocusProvider,
@@ -8,7 +7,7 @@ import {
 } from "../utils/index.ts";
 
 test("syncs broadcast stateless message between servers and clients", async (t) => {
-	const redisPrefix = uuidv4();
+	const redisPrefix = crypto.randomUUID();
 
 	await new Promise(async (resolve) => {
 		const payloadToSend = "STATELESS-MESSAGE";
@@ -16,7 +15,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `server${uuidv4()}`,
+					identifier: `server${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
@@ -26,7 +25,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `anotherServer${uuidv4()}`,
+					identifier: `anotherServer${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
@@ -58,7 +57,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 });
 
 test("client stateless messages shouldnt propagate to other server", async (t) => {
-	const redisPrefix = uuidv4();
+	const redisPrefix = crypto.randomUUID();
 
 	await new Promise(async (resolve) => {
 		const payloadToSend = "STATELESS-MESSAGE";
@@ -66,7 +65,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `server${uuidv4()}`,
+					identifier: `server${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
@@ -81,7 +80,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `anotherServer${uuidv4()}`,
+					identifier: `anotherServer${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
@@ -101,13 +100,13 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 
 test("server client stateless messages shouldnt propagate to other client", async (t) => {
 	await new Promise(async (resolve) => {
-		const redisPrefix = uuidv4();
+		const redisPrefix = crypto.randomUUID();
 
 		const server = await newHocuspocus({
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `server${uuidv4()}`,
+					identifier: `server${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
@@ -120,7 +119,7 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
-					identifier: `anotherServer${uuidv4()}`,
+					identifier: `anotherServer${crypto.randomUUID()}`,
 					prefix: redisPrefix,
 				}),
 			],
