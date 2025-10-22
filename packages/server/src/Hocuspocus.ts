@@ -62,6 +62,7 @@ export class Hocuspocus {
 	};
 
 	loadingDocuments: Map<string, Promise<Document>> = new Map();
+	unloadingDocuments: Map<string, Promise<void>> = new Map();
 
 	documents: Map<string, Document> = new Map();
 
@@ -440,7 +441,7 @@ export class Hocuspocus {
 						this.debouncer.isDebounced(debounceId) ||
 						document.saveMutex.isLocked();
 					const shouldUnload =
-						document.getConnectionsCount() == 0 && !hasPendingWork;
+						document.getConnectionsCount() === 0 && !hasPendingWork;
 					if (shouldUnload) {
 						this.unloadDocument(document);
 					}
@@ -493,25 +494,41 @@ export class Hocuspocus {
 
 	async unloadDocument(document: Document): Promise<any> {
 		const documentName = document.name;
-		if (!this.documents.has(documentName)) return;
 
-		try {
-			await this.hooks("beforeUnloadDocument", {
-				instance: this,
-				documentName,
-				document,
-			});
-		} catch (e) {
+		if (!this.documents.has(documentName) || document.saveMutex.isLocked())
 			return;
-		}
 
-		if (document.getConnectionsCount() > 0) {
-			return;
-		}
+		if (this.unloadingDocuments.has(documentName))
+			return this.unloadingDocuments.get(documentName);
 
-		this.documents.delete(documentName);
-		document.destroy();
-		await this.hooks("afterUnloadDocument", { instance: this, documentName });
+		// we need to make sure that the logic runs just once, even if multiple clients disconnect together
+		const actualUnloadingLogic = async () => {
+			try {
+				await this.hooks("beforeUnloadDocument", {
+					instance: this,
+					documentName,
+					document,
+				});
+			} catch (e) {
+				return;
+			}
+
+			if (document.getConnectionsCount() > 0) {
+				return;
+			}
+
+			this.documents.delete(documentName);
+			document.destroy();
+			await this.hooks("afterUnloadDocument", { instance: this, documentName });
+		};
+
+		const unloading = actualUnloadingLogic();
+
+		this.unloadingDocuments.set(documentName, Promise.resolve(unloading));
+
+		await unloading;
+
+		this.unloadingDocuments.delete(documentName);
 	}
 
 	async openDirectConnection(
