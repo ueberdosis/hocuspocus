@@ -38,3 +38,7 @@ tableOfContents: true
 ## Usage
 
 There is not much required to set up the provider, a simple example can be found in [Getting started](/getting-started#frontend)
+
+### Sharing a websocket between providers
+
+You can share a `HocuspocusProviderWebsocket` instance between several `HocuspocusProviders` by passing `websocketProvider` instead of `url` when configuring the provider. If you do that, you need to call `.attach()` manually on the provider once you want it to attach and start syncing.
