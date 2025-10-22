@@ -251,17 +251,21 @@ export class ClientConnection {
 
 		connection.onTokenSyncCallback(async (payload) => {
 			try {
-				return await this.hooks("onTokenSync", {
-					...hookPayload,
-					...payload,
-					connection,
-					documentName,
-				}, (contextAdditions: any) => {
-					hookPayload.context = {
-						...hookPayload.context,
-						...contextAdditions,
-					};
-				});
+				return await this.hooks(
+					"onTokenSync",
+					{
+						...hookPayload,
+						...payload,
+						connection,
+						documentName,
+					},
+					(contextAdditions: any) => {
+						hookPayload.context = {
+							...hookPayload.context,
+							...contextAdditions,
+						};
+					},
+				);
 			} catch (err: any) {
 				console.error(err);
 				const error = { ...Unauthorized, ...err };
