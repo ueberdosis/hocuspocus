@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/cli",
 	"description": "a CLI tool to start a local Hocuspocus server",
-	"version": "3.2.6",
+	"version": "3.3.0",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
@@ -18,11 +18,11 @@
 		"src"
 	],
 	"dependencies": {
-		"@hocuspocus/extension-logger": "^3.2.6",
-		"@hocuspocus/extension-s3": "^3.2.6",
-		"@hocuspocus/extension-sqlite": "^3.2.6",
-		"@hocuspocus/extension-webhook": "^3.2.6",
-		"@hocuspocus/server": "^3.2.6",
+		"@hocuspocus/extension-logger": "^3.3.0",
+		"@hocuspocus/extension-s3": "^3.3.0",
+		"@hocuspocus/extension-sqlite": "^3.3.0",
+		"@hocuspocus/extension-webhook": "^3.3.0",
+		"@hocuspocus/server": "^3.3.0",
 		"meow": "^14.0.0"
 	},
 	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"

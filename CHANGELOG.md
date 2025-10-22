@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+
+### Bug Fixes
+
+* fixes timing issues when multiple users leave the same document together ([70e5955](https://github.com/ueberdosis/hocuspocus/commit/70e59553e95acbeaf170e0e5a13ea14cfd4ff152))
+
+
+### Features
+
+* add onTokenSync hook for auth token re-sync ([#1001](https://github.com/ueberdosis/hocuspocus/issues/1001)) ([ee252fb](https://github.com/ueberdosis/hocuspocus/commit/ee252fb99ea6faf80cc71d2e1ce51726e698b76b))
+
+
+
+
+
 ## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
 
 

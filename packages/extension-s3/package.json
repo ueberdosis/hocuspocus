@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/extension-s3",
 	"description": "a S3-compatible persistence driver for Hocuspocus",
-	"version": "3.2.6",
+	"version": "3.3.0",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
@@ -30,7 +30,7 @@
 	],
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.0.0",
-		"@hocuspocus/extension-database": "^3.2.6",
+		"@hocuspocus/extension-database": "^3.3.0",
 		"kleur": "^4.1.4"
 	},
 	"publishConfig": {
