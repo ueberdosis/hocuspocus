@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+
+### Reverts
+
+* Revert "fix: temporarily removes beforeSync callback (#919, partially reverts a6a7bcd0768378908ffb5d32096183280115631b). Making applySync async causes timing issues that leads to issues when using PermanentUserData. This can be reproduced by using the playground server with sqlite and a sleep(1000). Additionally, use Y.PermanentUserData, or try to read data from the ydoc in the onSynced event." ([e33dbe2](https://github.com/ueberdosis/hocuspocus/commit/e33dbe22d6ec98279699e11ef6d5bb224299e2d3)), closes [#919](https://github.com/ueberdosis/hocuspocus/issues/919)
+
+
+
+
+
 ## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
 
 
