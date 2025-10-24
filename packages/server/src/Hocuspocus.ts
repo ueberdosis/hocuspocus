@@ -243,7 +243,7 @@ export class Hocuspocus {
 	 * "connection" is not necessarily type "Connection", it's the Yjs "origin" (which is "Connection" if
 	 * the update is incoming from the provider, but can be anything if the updates is originated from an extension.
 	 */
-	private async handleDocumentUpdate(
+	private handleDocumentUpdate(
 		document: Document,
 		connection: Connection | undefined,
 		update: Uint8Array,
@@ -275,7 +275,7 @@ export class Hocuspocus {
 			return;
 		}
 
-		await this.storeDocumentHooks(document, hookPayload);
+		this.storeDocumentHooks(document, hookPayload);
 	}
 
 	/**
