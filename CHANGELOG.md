@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+
+### Bug Fixes
+
+* fixes timing issues with debouncer: new debounced functions may start before the previous had finished ([708bfdb](https://github.com/ueberdosis/hocuspocus/commit/708bfdb0197833d5d6371b4f2c930fe815a66d15))
+* make beforeSync not async, as this may break message processing order (see https://github.com/yjs/yjs/issues/591) ([abeb298](https://github.com/ueberdosis/hocuspocus/commit/abeb2985d522539d30ea96217417a300569f77fd))
+* make beforeSync not async, as this may break message processing order (see issue 591 of yjs) ([1d11bea](https://github.com/ueberdosis/hocuspocus/commit/1d11bea8f78572a4138442ee063b6fa02890248d))
+* make handleUpdate sync to avoid timing issues ([9a6485b](https://github.com/ueberdosis/hocuspocus/commit/9a6485b9c0ee2f193e9ba68b39a8c93196a796bf))
+
+
+### Features
+
+* adds Document.lastChangeTime, which is set to Date.now() whenever a change on the documment has been detected ([9092efd](https://github.com/ueberdosis/hocuspocus/commit/9092efd604f20e1ec5228a93dd8b1ee9b48d5e98))
+
+
+
+
+
 ## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
 
 

@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/extension-redis",
-	"version": "3.3.2",
+	"version": "3.4.0",
 	"description": "Scale Hocuspocus horizontally with Redis",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -31,7 +31,7 @@
 		"@types/lodash.debounce": "^4.0.6"
 	},
 	"dependencies": {
-		"@hocuspocus/server": "^3.3.2",
+		"@hocuspocus/server": "^3.4.0",
 		"@sesamecare-oss/redlock": "^1.4.0",
 		"ioredis": "^5.6.1",
 		"kleur": "^4.1.4",
