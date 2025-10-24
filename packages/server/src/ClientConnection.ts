@@ -384,7 +384,7 @@ export class ClientConnection {
 		}
 	};
 
-	private messageHandler = async (data: Uint8Array) => {
+	private messageHandler = (data: Uint8Array) => {
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 

@@ -1,3 +1,4 @@
+import { AuthMessageType } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
 import { readVarString } from "lib0/decoding";
 import { applyAwarenessUpdate } from "y-protocols/awareness";
@@ -15,7 +16,6 @@ import type Document from "./Document.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import { MessageType } from "./types.ts";
-import { AuthMessageType } from "@hocuspocus/common";
 
 export class MessageReceiver {
 	message: IncomingMessage;
@@ -27,7 +27,7 @@ export class MessageReceiver {
 		this.defaultTransactionOrigin = defaultTransactionOrigin;
 	}
 
-	public async apply(
+	public apply(
 		document: Document,
 		connection?: Connection,
 		reply?: (message: Uint8Array) => void,
@@ -40,7 +40,7 @@ export class MessageReceiver {
 			case MessageType.Sync:
 			case MessageType.SyncReply: {
 				message.writeVarUint(MessageType.Sync);
-				await this.readSyncMessage(
+				this.readSyncMessage(
 					message,
 					document,
 					connection,
@@ -65,7 +65,7 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.Awareness: {
-				await applyAwarenessUpdate(
+				applyAwarenessUpdate(
 					document.awareness,
 					message.readVarUint8Array(),
 					connection?.webSocket,
@@ -111,7 +111,7 @@ export class MessageReceiver {
 						token: message.readVarString(),
 					});
 					break;
-  				}
+				}
 				console.error(
 					"Received an authentication message on a connection that is already fully authenticated. Probably your provider has been destroyed + recreated really fast.",
 				);
@@ -126,7 +126,7 @@ export class MessageReceiver {
 		}
 	}
 
-	async readSyncMessage(
+	readSyncMessage(
 		message: IncomingMessage,
 		document: Document,
 		connection?: Connection,
@@ -136,7 +136,7 @@ export class MessageReceiver {
 		const type = message.readVarUint();
 
 		if (connection) {
-			await connection.callbacks.beforeSync(connection, {
+			connection.callbacks.beforeSync(connection, {
 				type,
 				payload: message.peekVarUint8Array(),
 			});
