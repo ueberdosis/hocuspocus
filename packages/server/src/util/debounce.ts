@@ -5,23 +5,37 @@ export const useDebounce = () => {
 			timeout: NodeJS.Timeout;
 			start: number;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-			func: Function;
+			func: () => any | Promise<() => any>;
 		}
 	> = new Map();
 
-	const debounce = (
+	const runningExecutions: Map<string, Promise<any>> = new Map();
+
+	const debounce = async (
 		id: string,
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-		func: Function,
+		func: () => any | Promise<() => any>,
 		debounce: number,
 		maxDebounce: number,
 	) => {
 		const old = timers.get(id);
 		const start = old?.start || Date.now();
 
-		const run = () => {
+		const run = async () => {
+			if (runningExecutions.has(id)) {
+				// wait for previous execution to finish
+				await runningExecutions.get(id);
+			}
+
 			timers.delete(id);
-			return func();
+
+			const execution = func();
+
+			runningExecutions.set(id, execution);
+			const executionResult = await execution;
+			runningExecutions.delete(id);
+
+			return executionResult;
 		};
 
 		if (old?.timeout) {
@@ -55,5 +69,9 @@ export const useDebounce = () => {
 		return timers.has(id);
 	};
 
-	return { debounce, isDebounced, executeNow };
+	const isCurrentlyExecuting = (id: string): boolean => {
+		return runningExecutions.has(id);
+	};
+
+	return { debounce, isDebounced, isCurrentlyExecuting, executeNow };
 };

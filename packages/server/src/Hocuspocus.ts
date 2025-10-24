@@ -439,14 +439,11 @@ export class Hocuspocus {
 						throw error;
 					}
 				} finally {
-					const hasPendingWork =
-						this.debouncer.isDebounced(debounceId) ||
-						document.saveMutex.isLocked();
-					const shouldUnload =
-						document.getConnectionsCount() === 0 && !hasPendingWork;
-					if (shouldUnload) {
-						this.unloadDocument(document);
-					}
+					process.nextTick(() => {
+						if (this.shouldUnloadDocument(document)) {
+							this.unloadDocument(document);
+						}
+					});
 				}
 			},
 			immediately ? 0 : this.configuration.debounce,
@@ -494,11 +491,21 @@ export class Hocuspocus {
 		return chain;
 	}
 
+	shouldUnloadDocument(document: Document): boolean {
+		const hasPendingWork =
+			this.debouncer.isDebounced(`onStoreDocument-${document.name}`) ||
+			this.debouncer.isCurrentlyExecuting(`onStoreDocument-${document.name}`) ||
+			document.saveMutex.isLocked();
+
+		return hasPendingWork === false && document.getConnectionsCount() === 0;
+	}
+
 	async unloadDocument(document: Document): Promise<any> {
 		const documentName = document.name;
 
-		if (!this.documents.has(documentName) || document.saveMutex.isLocked())
-			return;
+		if (!this.shouldUnloadDocument(document)) return;
+
+		if (!this.documents.has(documentName)) return;
 
 		if (this.unloadingDocuments.has(documentName))
 			return this.unloadingDocuments.get(documentName);
@@ -515,9 +522,8 @@ export class Hocuspocus {
 				return;
 			}
 
-			if (document.getConnectionsCount() > 0) {
-				return;
-			}
+			// need sync check here as well, to avoid timing problems
+			if (!this.shouldUnloadDocument(document)) return;
 
 			this.documents.delete(documentName);
 			document.destroy();
