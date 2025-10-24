@@ -1,14 +1,14 @@
+import { Mutex } from "async-mutex";
 import type WebSocket from "ws";
 import {
 	Awareness,
-	removeAwarenessStates,
 	applyAwarenessUpdate,
+	removeAwarenessStates,
 } from "y-protocols/awareness";
-import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
-import type { AwarenessUpdate } from "./types.ts";
+import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { Mutex } from "async-mutex";
+import type { AwarenessUpdate } from "./types.ts";
 
 export class Document extends Doc {
 	awareness: Awareness;
@@ -41,6 +41,8 @@ export class Document extends Doc {
 	isDestroyed = false;
 
 	saveMutex = new Mutex();
+
+	lastChangeTime = 0;
 
 	/**
 	 * Constructor.

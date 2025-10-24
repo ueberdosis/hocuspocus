@@ -382,6 +382,8 @@ export class Hocuspocus {
 
 		document.onUpdate(
 			(document: Document, connection: Connection, update: Uint8Array) => {
+				document.lastChangeTime = Date.now();
+
 				this.handleDocumentUpdate(
 					document,
 					connection,
