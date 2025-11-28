@@ -518,6 +518,48 @@ test("does not start a new onStoreDocument if there is already one running (shou
 	});
 })
 
+test("triggers unload only after finishing with a save in progress", async (t) => {
+	/*
+	Rough timeline:
+
+  1.  ~0ms     Client 1 connects
+  2.  ~10ms    Client 1 makes change 1 (triggers debounced save)
+  3.  ~1000ms  Server starts saving change 1 (debounced)
+	4.  ~1100ms	 Client 1 disconnects. Document is not unloaded because save is in progress.
+  5.  ~1500ms  Server finishes saving change 1. Document is unloaded
+	*/
+		await new Promise(async (resolve) => {
+			const start = Date.now()
+			let saveStarted = false
+			let saveFinished = false
+			const server = await newHocuspocus({
+				debounce: 1000,
+				extensions: [{
+					async onStoreDocument() {
+						saveStarted = true
+						await sleep(500) // Add pause to simulate long save
+						saveFinished = true
+					},
+					async afterUnloadDocument(data) {
+						t.deepEqual(saveFinished, true, "Unload should occur only after save was finished");
+						t.pass()
+						resolve("done");
+					},
+				}],
+			});
+			const socket1 = newHocuspocusProviderWebsocket(server);
+			const provider1 = newHocuspocusProvider(server, {
+				websocketProvider: socket1,
+				async onSynced() {
+					provider1.document.getArray("foo").push(["foo"]);
+					setTimeout(() => { // Wait for sending changes
+						socket1.destroy();
+					}, 1100)
+				},
+			});
+		})
+})
+
 test("does not trigger unload prematurely when a save is in progress (unloadImmediately=true)", async (t) => {
   /*
 	Rough timeline:
