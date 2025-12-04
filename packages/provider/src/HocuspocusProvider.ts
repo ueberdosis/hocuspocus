@@ -14,6 +14,7 @@ import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
 import type {
+	AuthorizedScope,
 	ConstructableOutgoingMessage,
 	onAuthenticatedParameters,
 	onAuthenticationFailedParameters,
@@ -129,7 +130,7 @@ export class HocuspocusProvider extends EventEmitter {
 
 	isAuthenticated = false;
 
-	authorizedScope: string | undefined = undefined;
+	authorizedScope: AuthorizedScope | undefined = undefined;
 
 	// @internal
 	manageSocket = false;
@@ -580,7 +581,7 @@ export class HocuspocusProvider extends EventEmitter {
 
 	authenticatedHandler(scope: string) {
 		this.isAuthenticated = true;
-		this.authorizedScope = scope;
+		this.authorizedScope = scope as AuthorizedScope;
 
 		this.emit("authenticated", { scope });
 	}
