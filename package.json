@@ -60,7 +60,7 @@
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"ava": "^4.3.3",
 		"concurrently": "^6.4.0",
-		"lerna": "^8.2.1",
+		"lerna": "^9.0.3",
 		"minimist": "^1.2.5",
 		"rollup": "^4.37.0",
 		"rollup-plugin-auto-external": "^2.0.0",
