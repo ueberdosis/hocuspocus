@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* on awareness craah prevention and memory leak onStoreDocument ([#1032](https://github.com/ueberdosis/hocuspocus/issues/1032)) ([67957ae](https://github.com/ueberdosis/hocuspocus/commit/67957ae4d114c07b8b63cf2900a7ae07f1300f72)), closes [#1](https://github.com/ueberdosis/hocuspocus/issues/1) [#3](https://github.com/ueberdosis/hocuspocus/issues/3) [#1027](https://github.com/ueberdosis/hocuspocus/issues/1027)
+
+
+
+
+
 # [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
 
 
