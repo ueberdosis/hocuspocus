@@ -246,11 +246,12 @@ export class Redis implements Extension {
 		const resource = this.lockKey(documentName);
 		const ttl = this.configuration.lockTimeout;
 		try {
-			await this.redlock.acquire([resource], ttl);
+			const lock = await this.redlock.acquire([resource], ttl);
 			const oldLock = this.locks.get(resource);
-			if (oldLock) {
+			if (oldLock?.release) {
 				await oldLock.release;
 			}
+			this.locks.set(resource, { lock });
 		} catch (error) {
 			//based on: https://github.com/sesamecare/redlock/blob/508e00dcd1e4d2bc6373ce455f4fe847e98a9aab/src/index.ts#L347-L349
 			if (
@@ -328,7 +329,13 @@ export class Redis implements Extension {
 		added,
 		updated,
 		removed,
+		document,
 	}: onAwarenessUpdatePayload) {
+		// Do not publish if there is no connection: it fixes this issue: "https://github.com/ueberdosis/hocuspocus/issues/1027"
+		const connections = document?.connections.size || 0;
+		if (connections === 0) {
+			return; // avoids exception
+		}
 		const changedClients = added.concat(updated, removed);
 		const message = new OutgoingMessage(
 			documentName,
