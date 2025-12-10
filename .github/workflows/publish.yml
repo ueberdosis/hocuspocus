@@ -8,6 +8,10 @@ on:
     tags:
       - '*'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
