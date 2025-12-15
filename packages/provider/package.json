@@ -1,9 +1,14 @@
 {
 	"name": "@hocuspocus/provider",
-	"version": "3.4.2",
+	"version": "3.4.3",
 	"description": "hocuspocus provider",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": ["hocuspocus", "websocket", "provider", "yjs"],
+	"keywords": [
+		"hocuspocus",
+		"websocket",
+		"provider",
+		"yjs"
+	],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-provider.cjs",
@@ -19,9 +24,12 @@
 			"types": "./dist/packages/provider/src/index.d.ts"
 		}
 	},
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"dependencies": {
-		"@hocuspocus/common": "^3.4.2",
+		"@hocuspocus/common": "^3.4.3",
 		"@lifeomic/attempt": "^3.0.2",
 		"lib0": "^0.2.87",
 		"ws": "^8.17.1"
