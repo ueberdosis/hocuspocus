@@ -439,11 +439,11 @@ export class Hocuspocus {
 						throw error;
 					}
 				} finally {
-					process.nextTick(() => {
+					setTimeout(() => {
 						if (this.shouldUnloadDocument(document)) {
 							this.unloadDocument(document);
 						}
-					});
+					}, 0);
 				}
 			},
 			immediately ? 0 : this.configuration.debounce,
