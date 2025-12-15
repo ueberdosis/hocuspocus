@@ -3,12 +3,7 @@
 	"version": "3.4.2",
 	"description": "hocuspocus provider",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"websocket",
-		"provider",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "websocket", "provider", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-provider.cjs",
@@ -24,10 +19,7 @@
 			"types": "./dist/packages/provider/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@hocuspocus/common": "^3.4.2",
 		"@lifeomic/attempt": "^3.0.2",
@@ -38,5 +30,8 @@
 		"y-protocols": "^1.0.6",
 		"yjs": "^13.6.8"
 	},
-	"gitHead": "cd788b6a315f608ef531524409abdce1e6790726"
+	"gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }

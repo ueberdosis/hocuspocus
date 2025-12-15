@@ -3,10 +3,7 @@
 	"description": "a generic Hocuspocus persistence driver for the sqlite",
 	"version": "3.4.2",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-sqlite.cjs",
@@ -22,10 +19,7 @@
 			"types": "./dist/packages/extension-sqlite/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@hocuspocus/extension-database": "^3.4.2",
 		"kleur": "^4.1.4",
@@ -34,5 +28,8 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }

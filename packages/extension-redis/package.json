@@ -3,11 +3,7 @@
 	"version": "3.4.2",
 	"description": "Scale Hocuspocus horizontally with Redis",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"redis",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "redis", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-redis.cjs",
@@ -23,10 +19,7 @@
 			"types": "./dist/packages/extension-redis/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"devDependencies": {
 		"@types/lodash.debounce": "^4.0.6"
 	},
@@ -41,5 +34,8 @@
 		"y-protocols": "^1.0.6",
 		"yjs": "^13.6.8"
 	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }

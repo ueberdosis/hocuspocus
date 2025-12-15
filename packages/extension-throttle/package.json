@@ -3,11 +3,7 @@
 	"version": "3.4.2",
 	"description": "hocuspocus throttle extension",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"throttle",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "throttle", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-throttle.cjs",
@@ -23,12 +19,12 @@
 			"types": "./dist/packages/extension-throttle/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@hocuspocus/server": "^3.4.2"
 	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }

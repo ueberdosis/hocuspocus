@@ -3,11 +3,7 @@
 	"version": "3.4.2",
 	"description": "hocuspocus transformation utilities",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"transformer",
-		"yjs"
-	],
+	"keywords": ["hocuspocus", "transformer", "yjs"],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-transformer.cjs",
@@ -23,10 +19,7 @@
 			"types": "./dist/packages/transformer/src/index.d.ts"
 		}
 	},
-	"files": [
-		"src",
-		"dist"
-	],
+	"files": ["src", "dist"],
 	"dependencies": {
 		"@tiptap/starter-kit": "^3.0.1"
 	},
@@ -39,5 +32,8 @@
 	"devDependencies": {
 		"@tiptap/pm": "^3.0.1"
 	},
-	"gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
+	"gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }

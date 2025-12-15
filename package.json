@@ -70,5 +70,8 @@
 	"engines": {
 		"node": ">=22"
 	},
-	"name": "hocuspocus"
+	"name": "hocuspocus",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
 }
