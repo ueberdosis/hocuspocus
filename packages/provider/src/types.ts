@@ -28,6 +28,8 @@ export enum WebSocketStatus {
 	Disconnected = "disconnected",
 }
 
+export type AuthorizedScope = "read-write" | "readonly";
+
 export interface OutgoingMessageInterface {
 	encoder: Encoder;
 	type?: MessageType;
@@ -62,7 +64,7 @@ export type onAuthenticationFailedParameters = {
 };
 
 export type onAuthenticatedParameters = {
-	scope: "read-write" | "readonly";
+	scope: AuthorizedScope;
 };
 
 export type onOpenParameters = {
