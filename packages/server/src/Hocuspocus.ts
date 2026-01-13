@@ -1,7 +1,5 @@
 import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import type { Doc } from "yjs";
 import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" assert { type: "json" };
@@ -187,12 +185,12 @@ export class Hocuspocus {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothing fails it’ll fully establish the connection and
+	 * … and if nothing fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	handleConnection(
 		incoming: WebSocket,
-		request: IncomingMessage,
+		request: Request,
 		defaultContext: any = {},
 	): void {
 		const clientConnection = new ClientConnection(
@@ -247,7 +245,7 @@ export class Hocuspocus {
 		document: Document,
 		connection: Connection | undefined,
 		update: Uint8Array,
-		request?: IncomingMessage,
+		request?: Request,
 	) {
 		const hookPayload: onChangePayload | onStoreDocumentPayload = {
 			instance: this,
@@ -255,7 +253,7 @@ export class Hocuspocus {
 			context: connection?.context || {},
 			document,
 			documentName: document.name,
-			requestHeaders: request?.headers ?? {},
+			requestHeaders: request?.headers ?? new Headers(),
 			requestParameters: getParameters(request),
 			socketId: connection?.socketId ?? "",
 			update,
@@ -283,7 +281,7 @@ export class Hocuspocus {
 	 */
 	public async createDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connection: ConnectionConfiguration,
 		context?: any,
@@ -322,12 +320,12 @@ export class Hocuspocus {
 
 	async loadDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
 		context?: any,
 	): Promise<Document> {
-		const requestHeaders = request.headers ?? {};
+		const requestHeaders = request.headers;
 		const requestParameters = getParameters(request);
 
 		const yDocOptions = await this.hooks("onCreateDocument", {
@@ -550,7 +548,7 @@ export class Hocuspocus {
 
 		const document: Document = await this.createDocument(
 			documentName,
-			{}, // direct connection has no request params
+			new Request("http://localhost"), // direct connection has no request params
 			crypto.randomUUID(),
 			connectionConfig,
 			context,

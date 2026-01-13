@@ -1,5 +1,4 @@
 import { Mutex } from "async-mutex";
-import type WebSocket from "ws";
 import {
 	Awareness,
 	applyAwarenessUpdate,

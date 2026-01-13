@@ -20,6 +20,8 @@ export enum MessageType {
 	Stateless = 5,
 	CLOSE = 7,
 	SyncStatus = 8,
+	Ping = 9,
+	Pong = 10,
 }
 
 export enum WebSocketStatus {

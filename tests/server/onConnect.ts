@@ -168,7 +168,7 @@ test("has the request headers", async (t) => {
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus({
 			async onConnect({ requestHeaders }) {
-				t.is(requestHeaders.connection !== undefined, true);
+				t.is(requestHeaders.get("connection") !== null, true);
 				resolve("done");
 			},
 		});
@@ -290,7 +290,7 @@ test("has the request", async (t) => {
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus({
 			async onConnect({ request }) {
-				t.is(request.complete, true);
+				t.truthy(request.url);
 				resolve("done");
 			},
 		});

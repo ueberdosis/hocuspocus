@@ -1,5 +1,6 @@
 import { WsReadyStates } from "@hocuspocus/common";
 import { retry } from "@lifeomic/attempt";
+import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
 import type { Event, MessageEvent } from "ws";
 import EventEmitter from "./EventEmitter.ts";
@@ -7,6 +8,7 @@ import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
 import {
+	MessageType,
 	WebSocketStatus,
 	type onAwarenessChangeParameters,
 	type onAwarenessUpdateParameters,
@@ -373,10 +375,30 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		this.lastMessageReceived = time.getUnixTime();
 
-		const message = new IncomingMessage(event.data);
+		const data = new Uint8Array(event.data as ArrayBuffer);
+
+		// Check for connection-level Ping message (no document name prefix)
+		// Ping messages are sent as just the message type byte (length 1)
+		// We check length to avoid confusing with regular messages that happen to have
+		// a document name length of 9 as the first byte
+		if (data.length === 1 && data[0] === MessageType.Ping) {
+			this.sendPong();
+			return;
+		}
+
+		const message = new IncomingMessage(data);
 		const documentName = message.peekVarString();
 
 		this.configuration.providerMap.get(documentName)?.onMessage(event);
+	}
+
+	/**
+	 * Send application-level Pong response to server Ping
+	 */
+	private sendPong() {
+		const encoder = encoding.createEncoder();
+		encoding.writeVarUint(encoder, MessageType.Pong);
+		this.send(encoding.toUint8Array(encoder));
 	}
 
 	resolveConnectionAttempt() {
