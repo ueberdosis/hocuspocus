@@ -1,10 +1,8 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
 	WsReadyStates,
 } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
@@ -18,7 +16,7 @@ export class Connection<Context = any> {
 
 	document: Document;
 
-	request: HTTPIncomingMessage;
+	request: Request;
 
 	callbacks = {
 		onClose: [(document: Document, event?: CloseEvent) => {}],
@@ -45,7 +43,7 @@ export class Connection<Context = any> {
 	 */
 	constructor(
 		connection: WebSocket,
-		request: HTTPIncomingMessage,
+		request: Request,
 		document: Document,
 		socketId: string,
 		context: Context,
@@ -58,7 +56,6 @@ export class Connection<Context = any> {
 		this.socketId = socketId;
 		this.readOnly = readOnly;
 
-		this.webSocket.binaryType = "nodebuffer";
 		this.document.addConnection(this);
 
 		this.sendCurrentAwareness();
@@ -132,7 +129,7 @@ export class Connection<Context = any> {
 	/**
 	 * Send the given message
 	 */
-	send(message: any): void {
+	send(message: Uint8Array): void {
 		if (
 			this.webSocket.readyState === WsReadyStates.Closing ||
 			this.webSocket.readyState === WsReadyStates.Closed
@@ -142,9 +139,7 @@ export class Connection<Context = any> {
 		}
 
 		try {
-			this.webSocket.send(message, (error: any) => {
-				if (error != null) this.close();
-			});
+			this.webSocket.send(message);
 		} catch (exception) {
 			this.close();
 		}

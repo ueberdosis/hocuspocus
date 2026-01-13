@@ -77,7 +77,7 @@ export class DirectConnection<Context = any>
 					document: this.document,
 					socketId: "server",
 					documentName: this.document.name,
-					requestHeaders: {},
+					requestHeaders: new Headers(),
 					requestParameters: new URLSearchParams(),
 				});
 

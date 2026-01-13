@@ -1,7 +1,5 @@
 import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import { Doc } from "yjs";
 import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" assert { type: "json" };
@@ -190,12 +188,12 @@ export class Hocuspocus<Context = any> {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothing fails it’ll fully establish the connection and
+	 * … and if nothing fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	handleConnection(
 		incoming: WebSocket,
-		request: IncomingMessage,
+		request: Request,
 		defaultContext: Context = {} as Context,
 	): void {
 		const clientConnection = new ClientConnection(
@@ -269,7 +267,7 @@ export class Hocuspocus<Context = any> {
 			clientsCount: document.getConnectionsCount(),
 			document,
 			documentName: document.name,
-			requestHeaders: request?.headers ?? {},
+			requestHeaders: request?.headers ?? new Headers(),
 			requestParameters: getParameters(request),
 			socketId: connection?.socketId ?? "",
 			update,
@@ -301,7 +299,7 @@ export class Hocuspocus<Context = any> {
 	 */
 	public async createDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connection: ConnectionConfiguration,
 		context?: Context,
@@ -340,12 +338,12 @@ export class Hocuspocus<Context = any> {
 
 	async loadDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
 		context?: Context,
 	): Promise<Document> {
-		const requestHeaders = request.headers ?? {};
+		const requestHeaders = request.headers;
 		const requestParameters = getParameters(request);
 
 		const resolvedContext = (context ?? {}) as Context;
@@ -572,7 +570,7 @@ export class Hocuspocus<Context = any> {
 
 		const document: Document = await this.createDocument(
 			documentName,
-			{}, // direct connection has no request params
+			new Request("http://localhost"), // direct connection has no request params
 			crypto.randomUUID(),
 			connectionConfig,
 			context,

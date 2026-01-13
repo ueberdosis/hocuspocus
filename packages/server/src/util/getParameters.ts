@@ -1,12 +1,14 @@
-import type { IncomingMessage } from "node:http";
-import { URLSearchParams } from "node:url";
-
 /**
  * Get parameters by the given request
  */
-export function getParameters(
-	request?: Pick<IncomingMessage, "url">,
-): URLSearchParams {
-	const query = request?.url?.split("?") || [];
-	return new URLSearchParams(query[1] ? query[1] : "");
+export function getParameters(request?: { url?: string }): URLSearchParams {
+	const url = request?.url;
+	if (!url) {
+		return new URLSearchParams();
+	}
+	// Handle both full URLs (web Request) and path-only URLs (Node.js IncomingMessage)
+	const query = url.includes("://")
+		? new URL(url).searchParams
+		: new URLSearchParams(url.split("?")[1] || "");
+	return query;
 }
