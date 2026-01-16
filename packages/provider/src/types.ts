@@ -1,5 +1,4 @@
 import type { Encoder } from "lib0/encoding";
-import type { Event, MessageEvent } from "ws";
 import type { Awareness } from "y-protocols/awareness";
 import type * as Y from "yjs";
 import type { CloseEvent } from "@hocuspocus/common";

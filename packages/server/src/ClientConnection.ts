@@ -69,7 +69,8 @@ export class ClientConnection {
 
 	// Store bound handlers for cleanup
 	private boundMessageHandler: ((event: MessageEvent) => void) | null = null;
-	private boundCloseHandler: ((event: globalThis.CloseEvent) => void) | null = null;
+	private boundCloseHandler: ((event: globalThis.CloseEvent) => void) | null =
+		null;
 
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
@@ -298,7 +299,6 @@ export class ClientConnection {
 						...payload,
 						document,
 						connection,
-						document,
 						documentName,
 					},
 					(contextAdditions: any) => {

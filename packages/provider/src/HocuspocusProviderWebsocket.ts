@@ -2,7 +2,6 @@ import { WsReadyStates } from "@hocuspocus/common";
 import { retry } from "@lifeomic/attempt";
 import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
-import type { Event, MessageEvent } from "ws";
 import EventEmitter from "./EventEmitter.ts";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";

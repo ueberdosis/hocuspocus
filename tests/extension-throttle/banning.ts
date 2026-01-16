@@ -6,9 +6,9 @@ import { Throttle } from '@hocuspocus/extension-throttle'
 const getOnConnectPayload = (ip: string) => {
   return {
     request: {
-      headers: {
+      headers: new Headers({
         'x-real-ip': ip,
-      },
+      }),
     },
   } as unknown as onConnectPayload
 }
