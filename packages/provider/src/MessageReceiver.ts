@@ -1,6 +1,5 @@
-import { readAuthMessage } from "@hocuspocus/common";
+import { type CloseEvent, readAuthMessage } from "@hocuspocus/common";
 import { readVarInt, readVarString } from "lib0/decoding";
-import type { CloseEvent } from "ws";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { messageYjsSyncStep2, readSyncMessage } from "y-protocols/sync";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
@@ -54,9 +53,6 @@ export class MessageReceiver {
 				const event: CloseEvent = {
 					code: 1000,
 					reason: readVarString(message.decoder),
-					// @ts-ignore
-					target: provider.configuration.websocketProvider.webSocket!,
-					type: "close",
 				};
 				provider.onClose();
 				provider.configuration.onClose({ event });

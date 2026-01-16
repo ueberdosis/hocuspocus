@@ -1,6 +1,5 @@
 import { awarenessStatesToArray } from "@hocuspocus/common";
 import * as encoding from "lib0/encoding";
-import type { Event, MessageEvent } from "ws";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";

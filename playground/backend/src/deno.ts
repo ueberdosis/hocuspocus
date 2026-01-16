@@ -1,3 +1,4 @@
+// @ts-nocheck - Deno types not installed
 import { Hocuspocus } from "@hocuspocus/server";
 const hocuspocus = new Hocuspocus({
 	name: "collaboration",

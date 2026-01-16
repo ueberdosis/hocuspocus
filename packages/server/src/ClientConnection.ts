@@ -306,7 +306,6 @@ export class ClientConnection<Context = any> {
 						...payload,
 						document,
 						connection,
-						document,
 						documentName,
 					},
 					(contextAdditions: Partial<Context>) => {
