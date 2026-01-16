@@ -1,5 +1,6 @@
 import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
+import type {AuthorizedScope} from "../../provider/src"
 
 export enum AuthMessageType {
 	Token = 0,
@@ -25,7 +26,7 @@ export const writePermissionDenied = (
 
 export const writeAuthenticated = (
 	encoder: encoding.Encoder,
-	scope: "readonly" | "read-write",
+	scope: AuthorizedScope,
 ) => {
 	encoding.writeVarUint(encoder, AuthMessageType.Authenticated);
 	encoding.writeVarString(encoder, scope);
