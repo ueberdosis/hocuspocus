@@ -269,6 +269,11 @@ export class ClientConnection {
 			} catch (err: any) {
 				console.error(err);
 				const error = { ...Unauthorized, ...err };
+				// Also send permission denied event so provider calls onAuthenticationFailed hook
+				const message = new OutgoingMessage(documentName).writePermissionDenied(
+					error.reason ?? "permission-denied",
+				);
+				this.websocket.send(message.toUint8Array());
 				connection.close({ code: error.code, reason: error.reason });
 			}
 		});
