@@ -1,8 +1,8 @@
 import { readAuthMessage } from "@hocuspocus/common";
 import { readVarInt, readVarString } from "lib0/decoding";
+import type { CloseEvent } from "ws";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { messageYjsSyncStep2, readSyncMessage } from "y-protocols/sync";
-import type { CloseEvent } from "ws";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
@@ -60,7 +60,7 @@ export class MessageReceiver {
 				};
 				provider.onClose();
 				provider.configuration.onClose({ event });
-				provider.forwardClose(event);
+				provider.forwardClose({ event });
 				break;
 
 			default:
