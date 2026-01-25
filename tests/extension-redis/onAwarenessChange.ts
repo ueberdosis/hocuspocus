@@ -8,6 +8,8 @@ import {
 } from "../utils/index.ts";
 
 test("syncs existing awareness state", async (t) => {
+	const documentName = `test-${crypto.randomUUID()}`;
+
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus({
 			extensions: [
@@ -28,8 +30,9 @@ test("syncs existing awareness state", async (t) => {
 		});
 
 		const provider = newHocuspocusProvider(server, {
+			name: documentName,
 			onSynced() {
-				// Once we’re set up, change the local Awareness state.
+				// Once we're set up, change the local Awareness state.
 				// The updated state then needs to go through Redis:
 				// provider -> server -> Redis -> anotherServer -> anotherProvider
 				provider.setAwarenessField("name", "first");
@@ -37,15 +40,16 @@ test("syncs existing awareness state", async (t) => {
 				// Time to initialize a second provider, and connect to `anotherServer`
 				// to check whether existing Awareness states are synced through Redis.
 				newHocuspocusProvider(anotherServer, {
+					name: documentName,
 					onAwarenessChange({ states }: onAwarenessChangeParameters) {
-						t.is(states.length, 2);
-
+						// Wait until we have exactly 2 states with the expected data
 						const state = states.find(
 							(state) => state.clientId === provider.document.clientID,
 						);
-						t.is(state?.name, "first");
-
-						resolve("done");
+						if (states.length === 2 && state?.name === "first") {
+							t.pass();
+							resolve("done");
+						}
 					},
 				});
 			},
@@ -54,6 +58,8 @@ test("syncs existing awareness state", async (t) => {
 });
 
 test("syncs awareness between servers and clients", async (t) => {
+	const documentName = `test-${crypto.randomUUID()}`;
+
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus({
 			extensions: [
@@ -74,7 +80,7 @@ test("syncs awareness between servers and clients", async (t) => {
 		});
 
 		const provider = newHocuspocusProvider(anotherServer, {
-			name: "another-document",
+			name: documentName,
 			onSynced() {
 				// once we're setup change awareness on provider, to get to client it will
 				// need to pass through the pubsub extension:
@@ -84,16 +90,16 @@ test("syncs awareness between servers and clients", async (t) => {
 		});
 
 		newHocuspocusProvider(server, {
-			name: "another-document",
+			name: documentName,
 			onAwarenessChange: ({ states }: onAwarenessChangeParameters) => {
-				t.is(states.length, 2);
-
+				// Wait until we have exactly 2 states with the expected data
 				const state = states.find(
 					(state) => state.clientId === provider.document.clientID,
 				);
-				t.is(state?.name, "second");
-
-				resolve("done");
+				if (states.length === 2 && state?.name === "second") {
+					t.pass();
+					resolve("done");
+				}
 			},
 		});
 	});
