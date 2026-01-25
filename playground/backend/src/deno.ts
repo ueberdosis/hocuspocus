@@ -1,6 +1,4 @@
 import { Hocuspocus } from "@hocuspocus/server";
-import { upgradeWebSocket } from "hono/deno";
-
 const hocuspocus = new Hocuspocus({
 	name: "collaboration",
 });
@@ -11,6 +9,7 @@ Deno.serve((req) => {
 		return new Response(null, { status: 501 });
 	}
 
+	// @ts-ignore
 	const { socket, response } = Deno.upgradeWebSocket(req);
 
 	// @ts-ignore
