@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/common",
 	"description": "shared code for multiple Hocuspocus packages",
-	"version": "3.4.3",
+	"version": "3.4.4",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus"

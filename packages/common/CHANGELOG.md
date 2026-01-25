@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* strict types for authorizedScope ([#1029](https://github.com/ueberdosis/hocuspocus/issues/1029)) ([44e1b5d](https://github.com/ueberdosis/hocuspocus/commit/44e1b5d19f632bf646b654efd2c2ba70587adf62))
+
+
+
+
+
 ## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
 
 **Note:** Version bump only for package @hocuspocus/common

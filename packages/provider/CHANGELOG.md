@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* fixes [#1041](https://github.com/ueberdosis/hocuspocus/issues/1041): websocket URL ending with / wont work ([#1046](https://github.com/ueberdosis/hocuspocus/issues/1046)) ([0df9b09](https://github.com/ueberdosis/hocuspocus/commit/0df9b095d47e7953a9dff090942e937894d8f7fc))
+* fixes provider.forwardClose type error ([5438500](https://github.com/ueberdosis/hocuspocus/commit/543850064ba1cb18c13cb4211cec76a3ad05ddb4))
+* strict types for authorizedScope ([#1029](https://github.com/ueberdosis/hocuspocus/issues/1029)) ([44e1b5d](https://github.com/ueberdosis/hocuspocus/commit/44e1b5d19f632bf646b654efd2c2ba70587adf62))
+
+
+
+
+
 ## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
 
 **Note:** Version bump only for package @hocuspocus/provider

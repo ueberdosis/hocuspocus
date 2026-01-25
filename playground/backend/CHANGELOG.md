@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* fixes hono types in playground ([#1045](https://github.com/ueberdosis/hocuspocus/issues/1045)) ([163fbed](https://github.com/ueberdosis/hocuspocus/commit/163fbed167222eac8e89095cca09074bb7ddf6e2))
+
+
+
+
+
 ## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
 
 **Note:** Version bump only for package @hocuspocus/server-demos

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+**Note:** Version bump only for package @hocuspocus/extension-database
+
+
+
+
+
 ## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
 
 **Note:** Version bump only for package @hocuspocus/extension-database
