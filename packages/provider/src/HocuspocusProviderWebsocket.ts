@@ -38,6 +38,12 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	url: string;
 
 	/**
+	 * By default, trailing slashes are removed from the URL. Set this to true
+	 * to preserve trailing slashes if your server configuration requires them.
+	 */
+	preserveTrailingSlash: boolean;
+
+	/**
 	 * An optional WebSocket polyfill, for example for Node.js
 	 */
 	WebSocketPolyfill: any;
@@ -102,6 +108,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	public configuration: CompleteHocuspocusProviderWebsocketConfiguration = {
 		url: "",
 		autoConnect: true,
+		preserveTrailingSlash: false,
 		// @ts-ignore
 		document: undefined,
 		WebSocketPolyfill: undefined,
@@ -434,13 +441,18 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 	}
 
-	// Ensure that the URL never ends with /
 	get serverUrl() {
-		while (this.configuration.url[this.configuration.url.length - 1] === "/") {
-			return this.configuration.url.slice(0, this.configuration.url.length - 1);
+		if (this.configuration.preserveTrailingSlash) {
+			return this.configuration.url;
 		}
 
-		return this.configuration.url;
+		// By default, ensure that the URL never ends with /
+		let url = this.configuration.url;
+		while (url[url.length - 1] === "/") {
+			url = url.slice(0, url.length - 1);
+		}
+
+		return url;
 	}
 
 	get url() {

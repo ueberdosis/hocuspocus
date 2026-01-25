@@ -36,7 +36,13 @@ export type HocuspocusProviderConfiguration = Required<
 > &
 	Partial<CompleteHocuspocusProviderConfiguration> &
 	(
-		| Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, "url">>
+		| (Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, "url">> &
+				Partial<
+					Pick<
+						CompleteHocuspocusProviderWebsocketConfiguration,
+						"preserveTrailingSlash"
+					>
+				>)
 		| Required<
 				Pick<CompleteHocuspocusProviderConfiguration, "websocketProvider">
 		  >
@@ -222,12 +228,10 @@ export class HocuspocusProvider extends EventEmitter {
 		configuration: Partial<HocuspocusProviderConfiguration> = {},
 	): void {
 		if (!configuration.websocketProvider) {
-			const websocketProviderConfig =
-				configuration as CompleteHocuspocusProviderWebsocketConfiguration;
 			this.manageSocket = true;
-			this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
-				url: websocketProviderConfig.url,
-			});
+			this.configuration.websocketProvider = new HocuspocusProviderWebsocket(
+				configuration as CompleteHocuspocusProviderWebsocketConfiguration,
+			);
 		}
 
 		this.configuration = { ...this.configuration, ...configuration };
@@ -310,7 +314,9 @@ export class HocuspocusProvider extends EventEmitter {
 		try {
 			token = await this.getToken();
 		} catch (error) {
-			this.permissionDeniedHandler(`Failed to get token during sendToken(): ${error}`);
+			this.permissionDeniedHandler(
+				`Failed to get token during sendToken(): ${error}`,
+			);
 			return;
 		}
 
