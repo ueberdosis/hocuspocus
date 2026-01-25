@@ -257,6 +257,7 @@ export class ClientConnection {
 						...hookPayload,
 						...payload,
 						connection,
+						document,
 						documentName,
 					},
 					(contextAdditions: any) => {

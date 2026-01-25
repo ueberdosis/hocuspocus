@@ -12,7 +12,6 @@ import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	beforeSyncPayload,
 	onStatelessPayload,
-	onTokenSyncPayload,
 } from "./types.ts";
 
 export class Connection {
@@ -33,8 +32,7 @@ export class Connection {
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
 		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
-		onTokenSyncCallback: (payload: Partial<onTokenSyncPayload>) =>
-			Promise.resolve(),
+		onTokenSyncCallback: (payload: { token: string }) => Promise.resolve(),
 	};
 
 	socketId: string;
@@ -116,7 +114,7 @@ export class Connection {
 	 * Set a callback that will be triggered when on token sync message is received
 	 */
 	onTokenSyncCallback(
-		callback: (payload: onTokenSyncPayload) => Promise<void>,
+		callback: (payload: { token: string }) => Promise<void>,
 	): Connection {
 		this.callbacks.onTokenSyncCallback = callback;
 
