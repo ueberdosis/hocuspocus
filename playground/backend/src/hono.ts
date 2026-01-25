@@ -22,7 +22,7 @@ app.get(
 	upgradeWebSocket((c) => ({
 		onOpen(_evt, ws) {
 			// @ts-ignore
-			hocuspocus.handleConnection(ws.raw, c.req.raw as any, {});
+			hocuspocus.handleConnection(ws.raw, c.req.raw, {});
 		},
 	})),
 );
