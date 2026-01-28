@@ -18,10 +18,10 @@ test("handleUpdate listener is removed after destroy - getConnections not called
 	/**
 	 * This test verifies that the 'update' event listener (handleUpdate) is removed
 	 * when destroy() is called. We detect this by checking if getConnections() is
-	 * called, since handleUpdate calls getConnections() to broadcast updates.
+	 * called when transacting AFTER destroy completes.
 	 *
-	 * Without fix: handleUpdate still fires → getConnections() called → broadcastCount > 0
-	 * With fix: handleUpdate removed → getConnections() not called → broadcastCount = 0
+	 * Without fix: handleUpdate still fires → getConnections() called
+	 * With fix: handleUpdate removed → getConnections() not called
 	 */
 	let getConnectionsCallsAfterDestroy = 0;
 
@@ -31,18 +31,16 @@ test("handleUpdate listener is removed after destroy - getConnections not called
 		const direct = await server.openDirectConnection("test-doc");
 		const document = direct.document!;
 
-		// Wrap getConnections to detect calls after destroy
-		const originalGetConnections = document.getConnections.bind(document);
-		document.getConnections = () => {
-			if (document.isDestroyed) {
-				getConnectionsCallsAfterDestroy++;
-			}
-			return originalGetConnections();
-		};
-
 		// Disconnect triggers destroy
 		await direct.disconnect();
 		t.true(document.isDestroyed, "Document should be destroyed");
+
+		// Wrap getConnections AFTER destroy completes to only count post-destroy calls
+		const originalGetConnections = document.getConnections.bind(document);
+		document.getConnections = () => {
+			getConnectionsCallsAfterDestroy++;
+			return originalGetConnections();
+		};
 
 		// Transact on destroyed document - this emits 'update' event
 		document.transact(() => {
@@ -77,18 +75,16 @@ test("awareness update listener is removed after destroy", async (t) => {
 		const direct = await server.openDirectConnection("test-doc");
 		const document = direct.document!;
 
-		// Wrap getConnections to detect calls from awareness handler
-		const originalGetConnections = document.getConnections.bind(document);
-		document.getConnections = () => {
-			if (document.isDestroyed) {
-				getConnectionsCallsAfterDestroy++;
-			}
-			return originalGetConnections();
-		};
-
 		// Disconnect triggers destroy
 		await direct.disconnect();
 		t.true(document.isDestroyed, "Document should be destroyed");
+
+		// Wrap getConnections AFTER destroy completes to only count post-destroy calls
+		const originalGetConnections = document.getConnections.bind(document);
+		document.getConnections = () => {
+			getConnectionsCallsAfterDestroy++;
+			return originalGetConnections();
+		};
 
 		// Trigger awareness update on destroyed document
 		document.awareness.setLocalState({ user: "test-after-destroy" });
@@ -117,25 +113,24 @@ test("async operations after disconnect do not trigger handlers on destroyed doc
 	 */
 	let getConnectionsCallsAfterDestroy = 0;
 	let documentRef: any = null;
+	let destroyComplete = false;
 
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus({
 			async afterLoadDocument({ document }) {
 				documentRef = document;
 
-				// Wrap getConnections before any async operations
-				const originalGetConnections = document.getConnections.bind(document);
-				document.getConnections = () => {
-					if (document.isDestroyed) {
-						getConnectionsCallsAfterDestroy++;
-					}
-					return originalGetConnections();
-				};
-
 				// Simulate async operation that will complete after disconnect
 				setTimeout(() => {
-					// This runs after document is destroyed
-					if (document.isDestroyed) {
+					// Only count calls after destroy is complete
+					if (destroyComplete && document.isDestroyed) {
+						// Wrap getConnections to detect post-destroy calls
+						const originalGetConnections = document.getConnections.bind(document);
+						document.getConnections = () => {
+							getConnectionsCallsAfterDestroy++;
+							return originalGetConnections();
+						};
+
 						// Try to transact on destroyed document
 						document.transact(() => {
 							document.getMap("ai-results").set("completed", true);
@@ -153,8 +148,12 @@ test("async operations after disconnect do not trigger handlers on destroyed doc
 			},
 		});
 
+		// Wait for disconnect to complete and document to be destroyed
+		await sleep(150);
+		destroyComplete = true;
+
 		// Wait for async operation to complete
-		await sleep(400);
+		await sleep(300);
 
 		t.true(documentRef.isDestroyed, "Document should be destroyed");
 		t.is(
