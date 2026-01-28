@@ -44,6 +44,14 @@ export class Document extends Doc {
 
 	lastChangeTime = 0;
 
+	// Bound handlers stored for proper cleanup in destroy()
+	private boundHandleUpdate: (update: Uint8Array, connection: Connection) => Document;
+
+	private boundHandleAwarenessUpdate: (
+		awarenessUpdate: AwarenessUpdate,
+		connectionInstance: WebSocket,
+	) => Document;
+
 	/**
 	 * Constructor.
 	 */
@@ -55,8 +63,11 @@ export class Document extends Doc {
 		this.awareness = new Awareness(this);
 		this.awareness.setLocalState(null);
 
-		this.awareness.on("update", this.handleAwarenessUpdate.bind(this));
-		this.on("update", this.handleUpdate.bind(this));
+		this.boundHandleUpdate = this.handleUpdate.bind(this);
+		this.boundHandleAwarenessUpdate = this.handleAwarenessUpdate.bind(this);
+
+		this.awareness.on("update", this.boundHandleAwarenessUpdate);
+		this.on("update", this.boundHandleUpdate);
 
 		this.isLoading = true;
 	}
@@ -260,8 +271,14 @@ export class Document extends Doc {
 	}
 
 	destroy() {
-		super.destroy();
 		this.isDestroyed = true;
+
+		// Remove event listeners to allow garbage collection
+		this.off("update", this.boundHandleUpdate);
+		this.awareness.off("update", this.boundHandleAwarenessUpdate);
+
+		this.awareness.destroy();
+		super.destroy();
 	}
 }
 
