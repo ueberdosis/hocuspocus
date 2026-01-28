@@ -44,7 +44,7 @@ export class Document extends Doc {
 
 	lastChangeTime = 0;
 
-	// Bound handlers stored for proper cleanup in destroy()
+	// Bound handlers stored for cleanup in destroy()
 	private boundHandleUpdate: (update: Uint8Array, connection: Connection) => Document;
 
 	private boundHandleAwarenessUpdate: (
@@ -273,7 +273,9 @@ export class Document extends Doc {
 	destroy() {
 		this.isDestroyed = true;
 
-		// Remove event listeners to allow garbage collection
+		// Remove listeners BEFORE awareness.destroy() because
+		// awareness.destroy() calls setLocalState(null) which emits
+		// an 'update' event before clearing observers
 		this.off("update", this.boundHandleUpdate);
 		this.awareness.off("update", this.boundHandleAwarenessUpdate);
 
