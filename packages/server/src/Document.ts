@@ -213,12 +213,13 @@ export class Document extends Doc {
 			}
 		}
 
-		this.getConnections().forEach((connection) => {
-			const awarenessMessage = new OutgoingMessage(
-				this.name,
-			).createAwarenessUpdateMessage(this.awareness, changedClients);
+		const awarenessMessage = new OutgoingMessage(
+			this.name,
+		).createAwarenessUpdateMessage(this.awareness, changedClients);
+		const encodedAwarenessMessage = awarenessMessage.toUint8Array();
 
-			connection.send(awarenessMessage.toUint8Array());
+		this.getConnections().forEach((connection) => {
+			connection.send(encodedAwarenessMessage);
 		});
 
 		return this;
@@ -233,9 +234,10 @@ export class Document extends Doc {
 		const message = new OutgoingMessage(this.name)
 			.createSyncMessage()
 			.writeUpdate(update);
+		const encodedMessage = message.toUint8Array();
 
 		this.getConnections().forEach((connection) => {
-			connection.send(message.toUint8Array());
+			connection.send(encodedMessage);
 		});
 
 		return this;
