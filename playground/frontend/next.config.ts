@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    serverExternalPackages: ["yjs"],
+	serverExternalPackages: ["yjs"],
+	turbopack: {
+		root: "../../",
+	},
 };
 
 export default nextConfig;
