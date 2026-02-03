@@ -78,7 +78,7 @@ const configs = packages.flatMap((pkg) => {
 			...external,
 			/^node:/,
 		],
-		plugins: [dts()],
+		plugins: [dts({ emitDtsOnly: true })],
 		output: {
 			dir: path.join(basePath, "dist"),
 			format: "esm",
