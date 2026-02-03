@@ -71,6 +71,7 @@ const configs = packages.flatMap((pkg) => {
 	});
 
 	// DTS config for type declarations
+	// Don't use aliases here - we want to reference external package types, not inline them
 	const dtsConfig = defineConfig({
 		input,
 		external: [
@@ -81,9 +82,6 @@ const configs = packages.flatMap((pkg) => {
 		output: {
 			dir: path.join(basePath, "dist"),
 			format: "esm",
-		},
-		resolve: {
-			alias: aliases,
 		},
 	});
 
