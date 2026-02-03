@@ -1,8 +1,8 @@
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import getPackages from "get-monorepo-packages";
 import { defineConfig } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
-import getPackages from "get-monorepo-packages";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,10 +32,7 @@ const packages = getWorkspacePackages();
 
 // Build aliases dynamically from all packages
 const aliases = Object.fromEntries(
-	packages.map((pkg) => [
-		pkg.package.name,
-		path.join(pkg.location, "src"),
-	]),
+	packages.map((pkg) => [pkg.package.name, path.join(pkg.location, "src")]),
 );
 
 const configs = packages.flatMap((pkg) => {
@@ -74,10 +71,7 @@ const configs = packages.flatMap((pkg) => {
 	// Don't use aliases here - we want to reference external package types, not inline them
 	const dtsConfig = defineConfig({
 		input,
-		external: [
-			...external,
-			/^node:/,
-		],
+		external: [...external, /^node:/],
 		plugins: [dts({ emitDtsOnly: true })],
 		output: {
 			dir: path.join(basePath, "dist"),

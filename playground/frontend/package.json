@@ -9,7 +9,7 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@hocuspocus/provider": "^3.4.6-rc.1",
+		"@hocuspocus/provider": "*",
 		"@tiptap/extension-collaboration": "^3.18.0",
 		"@tiptap/extension-collaboration-caret": "^3.18.0",
 		"@tiptap/extension-floating-menu": "^3.18.0",
@@ -19,9 +19,6 @@
 		"next": "16.1.5",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4"
-	},
-	"overrides": {
-		"@hocuspocus/provider": "$@hocuspocus/provider"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4",
