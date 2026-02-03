@@ -11,7 +11,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-database.cjs",
 	"module": "dist/hocuspocus-database.esm.js",
-	"types": "dist/packages/extension-database/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -19,7 +19,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-database.esm.js",
 			"require": "./dist/hocuspocus-database.cjs",
-			"types": "./dist/packages/extension-database/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [

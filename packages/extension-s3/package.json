@@ -8,7 +8,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-s3.cjs",
 	"module": "dist/hocuspocus-s3.esm.js",
-	"types": "dist/packages/extension-s3/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -16,7 +16,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-s3.esm.js",
 			"require": "./dist/hocuspocus-s3.cjs",
-			"types": "./dist/packages/extension-s3/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": ["src", "dist"],

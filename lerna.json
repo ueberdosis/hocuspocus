@@ -4,5 +4,6 @@
       "conventionalCommits": true
     }
   },
-  "version": "3.4.4"
+  "version": "3.4.4",
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

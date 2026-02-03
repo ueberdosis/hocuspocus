@@ -10,7 +10,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-common.cjs",
 	"module": "dist/hocuspocus-common.esm.js",
-	"types": "dist/packages/common/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -18,7 +18,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-common.esm.js",
 			"require": "./dist/hocuspocus-common.cjs",
-			"types": "./dist/packages/common/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
