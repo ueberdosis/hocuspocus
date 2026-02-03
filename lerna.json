@@ -1,10 +1,12 @@
 {
-  "packages": ["packages/*"],
+  "packages": [
+    "packages/*"
+  ],
   "command": {
     "publish": {
       "conventionalCommits": true
     }
   },
-  "version": "3.4.6-rc.1",
+  "version": "3.4.6-rc.2",
   "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

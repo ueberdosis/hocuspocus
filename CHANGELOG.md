@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* dev setup (use local packages instead of the released ones) ([0137da0](https://github.com/ueberdosis/hocuspocus/commit/0137da0a32d45002f37ed933f886e0fc737997bc))
+* dont release demos ([148e12f](https://github.com/ueberdosis/hocuspocus/commit/148e12f6fdbd4982076b726afdc8d6c77edfb9a0))
+
+
+
+
+
 ## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
 
 **Note:** Version bump only for package hocuspocus
