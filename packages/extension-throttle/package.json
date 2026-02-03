@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/extension-throttle",
-	"version": "3.4.6-rc.0",
+	"version": "3.4.6-rc.1",
 	"description": "hocuspocus throttle extension",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -28,7 +28,7 @@
 		"dist"
 	],
 	"dependencies": {
-		"@hocuspocus/server": "^3.4.6-rc.0"
+		"@hocuspocus/server": "^3.4.6-rc.1"
 	},
 	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
 	"repository": {
