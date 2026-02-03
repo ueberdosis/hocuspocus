@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/extension-sqlite",
 	"description": "a generic Hocuspocus persistence driver for the sqlite",
-	"version": "3.4.4",
+	"version": "3.4.6-rc.2",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
@@ -11,7 +11,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-sqlite.cjs",
 	"module": "dist/hocuspocus-sqlite.esm.js",
-	"types": "dist/packages/extension-sqlite/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -19,7 +19,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-sqlite.esm.js",
 			"require": "./dist/hocuspocus-sqlite.cjs",
-			"types": "./dist/packages/extension-sqlite/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
@@ -27,7 +27,7 @@
 		"dist"
 	],
 	"dependencies": {
-		"@hocuspocus/extension-database": "^3.4.4",
+		"@hocuspocus/extension-database": "^3.4.6-rc.2",
 		"kleur": "^4.1.4",
 		"sqlite3": "^5.1.7"
 	},

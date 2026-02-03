@@ -1,20 +1,20 @@
 {
 	"name": "@hocuspocus/server-demos",
 	"packageManager": "npm@22.7.0",
-	"version": "3.4.4",
+	"version": "3.4.6-rc.1",
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"start": "node --experimental-transform-types",
-		"dev": "nodemon --inspect -e ts --watch ./ --watch ../../packages --exec npm start"
+		"start": "node --conditions=source --experimental-transform-types",
+		"dev": "nodemon -e ts --watch ./ --watch ../../packages --exec npm start"
 	},
 	"dependencies": {
-		"@hocuspocus/extension-logger": "^3.4.4",
-		"@hocuspocus/extension-redis": "^3.4.4",
-		"@hocuspocus/extension-sqlite": "^3.4.4",
-		"@hocuspocus/extension-webhook": "^3.4.4",
-		"@hocuspocus/server": "^3.4.4",
-		"@hocuspocus/transformer": "^3.4.4",
+		"@hocuspocus/extension-logger": "*",
+		"@hocuspocus/extension-redis": "*",
+		"@hocuspocus/extension-sqlite": "*",
+		"@hocuspocus/extension-webhook": "*",
+		"@hocuspocus/server": "*",
+		"@hocuspocus/transformer": "*",
 		"@hono/node-server": "^1.19.9",
 		"@hono/node-ws": "^1.3.0",
 		"@tiptap/core": "^3.0.1",

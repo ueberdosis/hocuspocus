@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/transformer",
-	"version": "3.4.4",
+	"version": "3.4.6-rc.2",
 	"description": "hocuspocus transformation utilities",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -12,7 +12,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-transformer.cjs",
 	"module": "dist/hocuspocus-transformer.esm.js",
-	"types": "dist/packages/transformer/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -20,7 +20,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-transformer.esm.js",
 			"require": "./dist/hocuspocus-transformer.cjs",
-			"types": "./dist/packages/transformer/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [

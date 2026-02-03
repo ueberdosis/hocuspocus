@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/provider",
-	"version": "3.4.4",
+	"version": "3.4.6-rc.2",
 	"description": "hocuspocus provider",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -13,7 +13,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-provider.cjs",
 	"module": "dist/hocuspocus-provider.esm.js",
-	"types": "dist/packages/provider/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -21,7 +21,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-provider.esm.js",
 			"require": "./dist/hocuspocus-provider.cjs",
-			"types": "./dist/packages/provider/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
@@ -29,7 +29,7 @@
 		"dist"
 	],
 	"dependencies": {
-		"@hocuspocus/common": "^3.4.4",
+		"@hocuspocus/common": "^3.4.6-rc.2",
 		"@lifeomic/attempt": "^3.0.2",
 		"lib0": "^0.2.87",
 		"ws": "^8.17.1"
