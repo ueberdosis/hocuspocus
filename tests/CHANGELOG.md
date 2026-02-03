@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package tests
+
+
+
+
+
 ## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
 
 **Note:** Version bump only for package tests
