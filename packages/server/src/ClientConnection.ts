@@ -31,9 +31,9 @@ import { getParameters } from "./util/getParameters.ts";
  * TODO-refactor:
  * - use event handlers instead of calling hooks directly, hooks should probably be called from Hocuspocus.ts
  */
-export class ClientConnection {
+export class ClientConnection<Context = any> {
 	// this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
-	private readonly documentConnections: Record<string, Connection> = {};
+	private readonly documentConnections: Record<string, Connection<Context>> = {};
 
 	// While the connection will be establishing messages will
 	// be queued and handled later.
@@ -52,7 +52,7 @@ export class ClientConnection {
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
-			context: any;
+			context: Context;
 		}
 	> = {};
 
@@ -90,7 +90,7 @@ export class ClientConnection {
 		private readonly opts: {
 			timeout: number;
 		},
-		private readonly defaultContext: any = {},
+		private readonly defaultContext: Context = {} as Context,
 	) {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
@@ -260,7 +260,7 @@ export class ClientConnection {
 						document,
 						documentName,
 					},
-					(contextAdditions: any) => {
+					(contextAdditions: Partial<Context>) => {
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -332,7 +332,7 @@ export class ClientConnection {
 				await this.hooks(
 					"onConnect",
 					{ ...hookPayload, documentName },
-					(contextAdditions: any) => {
+					(contextAdditions: Partial<Context>) => {
 						// merge context from all hooks
 						hookPayload.context = {
 							...hookPayload.context,
@@ -348,9 +348,9 @@ export class ClientConnection {
 						...hookPayload,
 						documentName,
 					},
-					(contextAdditions: any) => {
-						// Hooks are allowed to give us even more context and we’ll merge everything together.
-						// We’ll pass the context to other hooks then.
+					(contextAdditions: Partial<Context>) => {
+						// Hooks are allowed to give us even more context and we'll merge everything together.
+						// We'll pass the context to other hooks then.
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
