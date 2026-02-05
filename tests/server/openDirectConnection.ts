@@ -347,3 +347,25 @@ test("creating a websocket connection after transact but before debounce interva
 		resolve("done");
 	});
 });
+
+test("direct connection passes context", async (t) => {
+	return new Promise(async (resolve) => {
+		const server = await newHocuspocus({
+			async onChange(x) {
+				t.is(x.context.x, 123);
+				t.pass();
+				resolve();
+			},
+		});
+
+		const direct = await server.openDirectConnection("hocuspocus-test", {
+			x: 123,
+		});
+
+		await direct.transact((document) => {
+			document.getArray("test").insert(0, ["value"]);
+		});
+
+		t.is(direct.document?.getArray("test").toJSON()[0], "value");
+	});
+});

@@ -3,7 +3,9 @@ import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import type { DirectConnection as DirectConnectionInterface } from "./types.ts";
 
-export class DirectConnection<Context = any> implements DirectConnectionInterface {
+export class DirectConnection<Context = any>
+	implements DirectConnectionInterface
+{
 	document: Document | null = null;
 
 	instance!: Hocuspocus;
@@ -26,21 +28,12 @@ export class DirectConnection<Context = any> implements DirectConnectionInterfac
 			throw new Error("direct connection closed");
 		}
 
-		transaction(this.document);
-
-		await this.instance.storeDocumentHooks(
-			this.document,
-			{
-				clientsCount: this.document.getConnectionsCount(),
-				context: this.context,
-				document: this.document,
-				documentName: this.document.name,
-				instance: this.instance,
-				requestHeaders: {},
-				requestParameters: new URLSearchParams(),
-				socketId: "server",
+		this.document.transact(
+			(x) => {
+				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				transaction(this.document!);
 			},
-			true,
+			{ context: this.context },
 		);
 	}
 
