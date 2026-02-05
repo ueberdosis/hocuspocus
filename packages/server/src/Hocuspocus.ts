@@ -266,14 +266,8 @@ export class Hocuspocus<Context = any> {
 
 		this.hooks("onChange", hookPayload);
 
-		// If the update was received through other ways than the
-		// WebSocket connection, we don’t need to feel responsible for
-		// storing the content.
-		// also ignore changes incoming through redis connection, as this would be a breaking change (#730, #696, #606)
-		if (
-			!connection ||
-			(connection as unknown as string) === "__hocuspocus__redis__origin__"
-		) {
+		// Ignore changes incoming through redis connection, as they are already saved by other instance
+		if ((connection as unknown as string) === "__hocuspocus__redis__origin__") {
 			return;
 		}
 
