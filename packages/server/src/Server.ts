@@ -13,7 +13,8 @@ import meta from "../package.json" assert { type: "json" };
 import { Hocuspocus, defaultConfiguration } from "./Hocuspocus.ts";
 import type { Configuration, onListenPayload } from "./types.ts";
 
-export interface ServerConfiguration extends Configuration {
+export interface ServerConfiguration<Context = any>
+	extends Configuration<Context> {
 	port?: number;
 	address?: string;
 	stopOnSignals?: boolean;
@@ -25,21 +26,21 @@ export const defaultServerConfiguration = {
 	stopOnSignals: true,
 };
 
-export class Server {
+export class Server<Context = any> {
 	httpServer: HTTPServer;
 
 	webSocketServer: WebSocketServer;
 
-	hocuspocus: Hocuspocus;
+	hocuspocus: Hocuspocus<Context>;
 
-	configuration: ServerConfiguration = {
+	configuration: ServerConfiguration<Context> = {
 		...defaultConfiguration,
 		...defaultServerConfiguration,
 		extensions: [],
 	};
 
 	constructor(
-		configuration?: Partial<ServerConfiguration>,
+		configuration?: Partial<ServerConfiguration<Context>>,
 		websocketOptions: ServerOptions = {},
 	) {
 		if (configuration) {
@@ -136,7 +137,10 @@ export class Server {
 		}
 	};
 
-	async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
+	async listen(
+		port?: number,
+		callback: any = null,
+	): Promise<Hocuspocus<Context>> {
 		if (port) {
 			this.configuration.port = port;
 		}

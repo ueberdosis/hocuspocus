@@ -3,20 +3,20 @@ import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import type { DirectConnection as DirectConnectionInterface } from "./types.ts";
 
-export class DirectConnection implements DirectConnectionInterface {
+export class DirectConnection<Context = any> implements DirectConnectionInterface {
 	document: Document | null = null;
 
 	instance!: Hocuspocus;
 
-	context: any;
+	context: Context;
 
 	/**
 	 * Constructor.
 	 */
-	constructor(document: Document, instance: Hocuspocus, context?: any) {
+	constructor(document: Document, instance: Hocuspocus, context?: Context) {
 		this.document = document;
 		this.instance = instance;
-		this.context = context;
+		this.context = (context ?? {}) as Context;
 
 		this.document.addDirectConnection();
 	}

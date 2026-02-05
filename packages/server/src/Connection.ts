@@ -14,10 +14,10 @@ import type {
 	onStatelessPayload,
 } from "./types.ts";
 
-export class Connection {
+export class Connection<Context = any> {
 	webSocket: WebSocket;
 
-	context: any;
+	context: Context;
 
 	document: Document;
 
@@ -47,7 +47,7 @@ export class Connection {
 		request: HTTPIncomingMessage,
 		document: Document,
 		socketId: string,
-		context: any,
+		context: Context,
 		readOnly = false,
 	) {
 		this.webSocket = connection;

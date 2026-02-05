@@ -37,8 +37,8 @@ export const defaultConfiguration = {
 	unloadImmediately: true,
 };
 
-export class Hocuspocus {
-	configuration: Configuration = {
+export class Hocuspocus<Context = any> {
+	configuration: Configuration<Context> = {
 		...defaultConfiguration,
 		extensions: [],
 		onConfigure: () => new Promise((r) => r(null)),
@@ -70,7 +70,7 @@ export class Hocuspocus {
 
 	debouncer = useDebounce();
 
-	constructor(configuration?: Partial<Configuration>) {
+	constructor(configuration?: Partial<Configuration<Context>>) {
 		if (configuration) {
 			this.configure(configuration);
 		}
@@ -79,7 +79,9 @@ export class Hocuspocus {
 	/**
 	 * Configure Hocuspocus
 	 */
-	configure(configuration: Partial<Configuration>): Hocuspocus {
+	configure(
+		configuration: Partial<Configuration<Context>>,
+	): Hocuspocus<Context> {
 		this.configuration = {
 			...this.configuration,
 			...configuration,
@@ -193,7 +195,7 @@ export class Hocuspocus {
 	handleConnection(
 		incoming: WebSocket,
 		request: IncomingMessage,
-		defaultContext: any = {},
+		defaultContext: Context = {} as Context,
 	): void {
 		const clientConnection = new ClientConnection(
 			incoming,
@@ -286,7 +288,7 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connection: ConnectionConfiguration,
-		context?: any,
+		context?: Context,
 	): Promise<Document> {
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
 
@@ -325,17 +327,19 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
-		context?: any,
+		context?: Context,
 	): Promise<Document> {
 		const requestHeaders = request.headers ?? {};
 		const requestParameters = getParameters(request);
+
+		const resolvedContext = (context ?? {}) as Context;
 
 		const yDocOptions = await this.hooks("onCreateDocument", {
 			documentName,
 			requestHeaders,
 			requestParameters,
 			connectionConfig,
-			context,
+			context: resolvedContext,
 			socketId,
 			instance: this,
 		});
@@ -347,7 +351,7 @@ export class Hocuspocus {
 
 		const hookPayload = {
 			instance: this,
-			context,
+			context: resolvedContext,
 			connectionConfig,
 			document,
 			documentName,
@@ -458,7 +462,7 @@ export class Hocuspocus {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	hooks<T extends HookName>(
 		name: T,
-		payload: HookPayloadByName[T],
+		payload: HookPayloadByName<Context>[T],
 		callback: Function | null = null,
 	): Promise<any> {
 		const { extensions } = this.configuration;
@@ -541,8 +545,8 @@ export class Hocuspocus {
 
 	async openDirectConnection(
 		documentName: string,
-		context?: any,
-	): Promise<DirectConnection> {
+		context?: Context,
+	): Promise<DirectConnection<Context>> {
 		const connectionConfig: ConnectionConfiguration = {
 			isAuthenticated: true,
 			readOnly: false,
@@ -556,6 +560,6 @@ export class Hocuspocus {
 			context,
 		);
 
-		return new DirectConnection(document, this, context);
+		return new DirectConnection<Context>(document, this, context);
 	}
 }

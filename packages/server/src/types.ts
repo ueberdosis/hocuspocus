@@ -33,31 +33,31 @@ export interface ConnectionConfiguration {
 	isAuthenticated: boolean;
 }
 
-export interface Extension {
+export interface Extension<Context = any> {
 	priority?: number;
 	extensionName?: string;
 	onConfigure?(data: onConfigurePayload): Promise<any>;
 	onListen?(data: onListenPayload): Promise<any>;
 	onUpgrade?(data: onUpgradePayload): Promise<any>;
-	onConnect?(data: onConnectPayload): Promise<any>;
-	connected?(data: connectedPayload): Promise<any>;
-	onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
-	onTokenSync?(data: onTokenSyncPayload): Promise<any>;
-	onCreateDocument?(data: onCreateDocumentPayload): Promise<any>;
-	onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
-	afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
-	beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
-	beforeSync?(data: beforeSyncPayload): Promise<any>;
+	onConnect?(data: onConnectPayload<Context>): Promise<any>;
+	connected?(data: connectedPayload<Context>): Promise<any>;
+	onAuthenticate?(data: onAuthenticatePayload<Context>): Promise<any>;
+	onTokenSync?(data: onTokenSyncPayload<Context>): Promise<any>;
+	onCreateDocument?(data: onCreateDocumentPayload<Context>): Promise<any>;
+	onLoadDocument?(data: onLoadDocumentPayload<Context>): Promise<any>;
+	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
+	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
+	beforeSync?(data: beforeSyncPayload<Context>): Promise<any>;
 	beforeBroadcastStateless?(
 		data: beforeBroadcastStatelessPayload,
 	): Promise<any>;
 	onStateless?(payload: onStatelessPayload): Promise<any>;
-	onChange?(data: onChangePayload): Promise<any>;
-	onStoreDocument?(data: onStoreDocumentPayload): Promise<any>;
-	afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>;
-	onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
+	onChange?(data: onChangePayload<Context>): Promise<any>;
+	onStoreDocument?(data: onStoreDocumentPayload<Context>): Promise<any>;
+	afterStoreDocument?(data: afterStoreDocumentPayload<Context>): Promise<any>;
+	onAwarenessUpdate?(data: onAwarenessUpdatePayload<Context>): Promise<any>;
 	onRequest?(data: onRequestPayload): Promise<any>;
-	onDisconnect?(data: onDisconnectPayload): Promise<any>;
+	onDisconnect?(data: onDisconnectPayload<Context>): Promise<any>;
 	beforeUnloadDocument?(data: beforeUnloadDocumentPayload): Promise<any>;
 	afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
 	onDestroy?(data: onDestroyPayload): Promise<any>;
@@ -88,33 +88,33 @@ export type HookName =
 	| "afterUnloadDocument"
 	| "onDestroy";
 
-export type HookPayloadByName = {
+export type HookPayloadByName<Context = any> = {
 	onConfigure: onConfigurePayload;
 	onListen: onListenPayload;
 	onUpgrade: onUpgradePayload;
-	onConnect: onConnectPayload;
-	connected: connectedPayload;
-	onAuthenticate: onAuthenticatePayload;
-	onTokenSync: onTokenSyncPayload;
-	onCreateDocument: onCreateDocumentPayload;
-	onLoadDocument: onLoadDocumentPayload;
-	afterLoadDocument: afterLoadDocumentPayload;
-	beforeHandleMessage: beforeHandleMessagePayload;
+	onConnect: onConnectPayload<Context>;
+	connected: connectedPayload<Context>;
+	onAuthenticate: onAuthenticatePayload<Context>;
+	onTokenSync: onTokenSyncPayload<Context>;
+	onCreateDocument: onCreateDocumentPayload<Context>;
+	onLoadDocument: onLoadDocumentPayload<Context>;
+	afterLoadDocument: afterLoadDocumentPayload<Context>;
+	beforeHandleMessage: beforeHandleMessagePayload<Context>;
 	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
-	beforeSync: beforeSyncPayload;
+	beforeSync: beforeSyncPayload<Context>;
 	onStateless: onStatelessPayload;
-	onChange: onChangePayload;
-	onStoreDocument: onStoreDocumentPayload;
-	afterStoreDocument: afterStoreDocumentPayload;
-	onAwarenessUpdate: onAwarenessUpdatePayload;
+	onChange: onChangePayload<Context>;
+	onStoreDocument: onStoreDocumentPayload<Context>;
+	afterStoreDocument: afterStoreDocumentPayload<Context>;
+	onAwarenessUpdate: onAwarenessUpdatePayload<Context>;
 	onRequest: onRequestPayload;
-	onDisconnect: onDisconnectPayload;
+	onDisconnect: onDisconnectPayload<Context>;
 	afterUnloadDocument: afterUnloadDocumentPayload;
 	beforeUnloadDocument: beforeUnloadDocumentPayload;
 	onDestroy: onDestroyPayload;
 };
 
-export interface Configuration extends Extension {
+export interface Configuration<Context = any> extends Extension<Context> {
 	/**
 	 * A name for the instance, used for logging.
 	 */
@@ -165,8 +165,8 @@ export interface onStatelessPayload {
 	payload: string;
 }
 
-export interface onAuthenticatePayload {
-	context: any;
+export interface onAuthenticatePayload<Context = any> {
+	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
 	requestHeaders: IncomingHttpHeaders;
@@ -177,8 +177,8 @@ export interface onAuthenticatePayload {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface onTokenSyncPayload {
-	context: any;
+export interface onTokenSyncPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -187,11 +187,11 @@ export interface onTokenSyncPayload {
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
-	connection: Connection;
+	connection: Connection<Context>;
 }
 
-export interface onCreateDocumentPayload {
-	context: any;
+export interface onCreateDocumentPayload<Context = any> {
+	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
 	requestHeaders: IncomingHttpHeaders;
@@ -200,19 +200,8 @@ export interface onCreateDocumentPayload {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface onConnectPayload {
-	context: any;
-	documentName: string;
-	instance: Hocuspocus;
-	request: IncomingMessage;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-}
-
-export interface connectedPayload {
-	context: any;
+export interface onConnectPayload<Context = any> {
+	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
 	request: IncomingMessage;
@@ -220,11 +209,22 @@ export interface connectedPayload {
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
-	connection: Connection;
 }
 
-export interface onLoadDocumentPayload {
-	context: any;
+export interface connectedPayload<Context = any> {
+	context: Context;
+	documentName: string;
+	instance: Hocuspocus;
+	request: IncomingMessage;
+	requestHeaders: IncomingHttpHeaders;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	connectionConfig: ConnectionConfiguration;
+	connection: Connection<Context>;
+}
+
+export interface onLoadDocumentPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -234,8 +234,8 @@ export interface onLoadDocumentPayload {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface afterLoadDocumentPayload {
-	context: any;
+export interface afterLoadDocumentPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -245,9 +245,9 @@ export interface afterLoadDocumentPayload {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface onChangePayload {
+export interface onChangePayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -258,9 +258,9 @@ export interface onChangePayload {
 	transactionOrigin: any;
 }
 
-export interface beforeHandleMessagePayload {
+export interface beforeHandleMessagePayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -268,15 +268,15 @@ export interface beforeHandleMessagePayload {
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
-	connection: Connection;
+	connection: Connection<Context>;
 }
 
-export interface beforeSyncPayload {
+export interface beforeSyncPayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
-	connection: Connection;
+	connection: Connection<Context>;
 	/**
 	 * The y-protocols/sync message type
 	 * @example
@@ -299,9 +299,9 @@ export interface beforeBroadcastStatelessPayload {
 	payload: string;
 }
 
-export interface onStoreDocumentPayload {
+export interface onStoreDocumentPayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -312,10 +312,10 @@ export interface onStoreDocumentPayload {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
-export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
+export interface afterStoreDocumentPayload<Context = any> extends onStoreDocumentPayload<Context> {}
 
-export interface onAwarenessUpdatePayload {
-	context: any;
+export interface onAwarenessUpdatePayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -331,8 +331,8 @@ export interface onAwarenessUpdatePayload {
 
 export type StatesArray = { clientId: number; [key: string | number]: any }[];
 
-export interface fetchPayload {
-	context: any;
+export interface fetchPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
@@ -342,13 +342,13 @@ export interface fetchPayload {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface storePayload extends onStoreDocumentPayload {
+export interface storePayload<Context = any> extends onStoreDocumentPayload<Context> {
 	state: Buffer;
 }
 
-export interface onDisconnectPayload {
+export interface onDisconnectPayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
