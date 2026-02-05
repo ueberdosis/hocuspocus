@@ -36,7 +36,7 @@ export class DirectConnection implements DirectConnectionInterface {
 				document: this.document,
 				documentName: this.document.name,
 				instance: this.instance,
-				requestHeaders: {},
+				requestHeaders: new Headers(),
 				requestParameters: new URLSearchParams(),
 				socketId: "server",
 			},
@@ -56,7 +56,7 @@ export class DirectConnection implements DirectConnectionInterface {
 					document: this.document,
 					documentName: this.document.name,
 					instance: this.instance,
-					requestHeaders: {},
+					requestHeaders: new Headers(),
 					requestParameters: new URLSearchParams(),
 					socketId: "server",
 				},
@@ -77,7 +77,7 @@ export class DirectConnection implements DirectConnectionInterface {
 					document: this.document,
 					socketId: "server",
 					documentName: this.document.name,
-					requestHeaders: {},
+					requestHeaders: new Headers(),
 					requestParameters: new URLSearchParams(),
 				});
 

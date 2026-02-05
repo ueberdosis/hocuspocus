@@ -114,11 +114,10 @@ export class Throttle implements Extension {
 	onConnect(data: onConnectPayload): Promise<any> {
 		const { request } = data;
 
-		// get the remote ip address
+		// get the remote ip address from headers (web standard Request doesn't have socket)
 		const ip =
-			request.headers["x-real-ip"] ||
-			request.headers["x-forwarded-for"] ||
-			request.socket.remoteAddress ||
+			request.headers.get("x-real-ip") ||
+			request.headers.get("x-forwarded-for") ||
 			"";
 
 		// throttle the connection

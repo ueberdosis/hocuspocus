@@ -1,6 +1,4 @@
 import crypto from "node:crypto";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -10,7 +8,7 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import type WebSocket from "ws";
+import * as encoding from "lib0/encoding";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
@@ -47,8 +45,8 @@ export class ClientConnection {
 		string,
 		{
 			instance: Hocuspocus;
-			request: IncomingMessage;
-			requestHeaders: IncomingHttpHeaders;
+			request: Request;
+			requestHeaders: Headers;
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
@@ -69,6 +67,11 @@ export class ClientConnection {
 
 	pongReceived = true;
 
+	// Store bound handlers for cleanup
+	private boundMessageHandler: ((event: MessageEvent) => void) | null = null;
+	private boundCloseHandler: ((event: globalThis.CloseEvent) => void) | null =
+		null;
+
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
 	 * runs all hooks:
@@ -76,12 +79,12 @@ export class ClientConnection {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothings fails it’ll fully establish the connection and
+	 * … and if nothings fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	constructor(
 		private readonly websocket: WebSocket,
-		private readonly request: IncomingMessage,
+		private readonly request: Request,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
 		},
@@ -93,19 +96,39 @@ export class ClientConnection {
 		private readonly defaultContext: any = {},
 	) {
 		this.timeout = opts.timeout;
+		this.setupHandlers();
 		this.pingInterval = setInterval(this.check, this.timeout);
-		websocket.on("pong", this.handlePong);
-
-		websocket.on("message", this.messageHandler);
-		websocket.once("close", this.handleWebsocketClose);
 	}
 
-	private handleWebsocketClose = (code: number, reason: Buffer) => {
-		this.close({ code, reason: reason.toString() });
-		this.websocket.removeListener("message", this.messageHandler);
-		this.websocket.removeListener("pong", this.handlePong);
-		clearInterval(this.pingInterval);
-	};
+	/**
+	 * Set up WebSocket event handlers
+	 */
+	private setupHandlers(): void {
+		this.boundMessageHandler = (event: MessageEvent) => {
+			this.messageHandler(new Uint8Array(event.data));
+		};
+
+		this.boundCloseHandler = (event: globalThis.CloseEvent) => {
+			this.close({ code: event.code, reason: event.reason });
+			this.cleanupHandlers();
+			clearInterval(this.pingInterval);
+		};
+
+		this.websocket.addEventListener("message", this.boundMessageHandler);
+		this.websocket.addEventListener("close", this.boundCloseHandler);
+	}
+
+	/**
+	 * Clean up WebSocket handlers
+	 */
+	private cleanupHandlers(): void {
+		if (this.boundMessageHandler) {
+			this.websocket.removeEventListener("message", this.boundMessageHandler);
+		}
+		if (this.boundCloseHandler) {
+			this.websocket.removeEventListener("close", this.boundCloseHandler);
+		}
+	}
 
 	close(event?: CloseEvent) {
 		Object.values(this.documentConnections).forEach((connection) =>
@@ -113,8 +136,31 @@ export class ClientConnection {
 		);
 	}
 
+	/**
+	 * Handle pong response
+	 */
 	handlePong = () => {
 		this.pongReceived = true;
+	};
+
+	/**
+	 * Send ping message (application-level)
+	 */
+	private sendPing = () => {
+		if (
+			this.websocket.readyState === WsReadyStates.Closing ||
+			this.websocket.readyState === WsReadyStates.Closed
+		) {
+			return;
+		}
+
+		try {
+			const encoder = encoding.createEncoder();
+			encoding.writeVarUint(encoder, MessageType.Ping);
+			this.websocket.send(encoding.toUint8Array(encoder));
+		} catch (error) {
+			this.close(ConnectionTimeout);
+		}
 	};
 
 	/**
@@ -127,12 +173,7 @@ export class ClientConnection {
 		}
 
 		this.pongReceived = false;
-
-		try {
-			this.websocket.ping();
-		} catch (error) {
-			this.close(ConnectionTimeout);
-		}
+		this.sendPing();
 	};
 
 	/**
@@ -229,7 +270,7 @@ export class ClientConnection {
 		return instance;
 	}
 
-	// Once all hooks are run, we’ll fully establish the connection:
+	// Once all hooks are run, we'll fully establish the connection:
 	private setUpNewConnection = async (documentName: string) => {
 		const hookPayload = this.hookPayloads[documentName];
 		// If no hook interrupts, create a document and connection
@@ -256,8 +297,8 @@ export class ClientConnection {
 					{
 						...hookPayload,
 						...payload,
-						connection,
 						document,
+						connection,
 						documentName,
 					},
 					(contextAdditions: any) => {
@@ -286,10 +327,10 @@ export class ClientConnection {
 			return;
 		}
 
-		// There’s no need to queue messages anymore.
-		// Let’s work through queued messages.
+		// There's no need to queue messages anymore.
+		// Let's work through queued messages.
 		this.incomingMessageQueue[documentName].forEach((input) => {
-			this.websocket.emit("message", input);
+			this.messageHandler(input);
 		});
 
 		await this.hooks("connected", {
@@ -318,7 +359,7 @@ export class ClientConnection {
 				return;
 			}
 
-			// Okay, we’ve got the authentication message we’re waiting for:
+			// Okay, we've got the authentication message we're waiting for:
 			this.documentConnectionsEstablished.add(documentName);
 
 			// The 2nd integer contains the submessage type
@@ -349,8 +390,8 @@ export class ClientConnection {
 						documentName,
 					},
 					(contextAdditions: any) => {
-						// Hooks are allowed to give us even more context and we’ll merge everything together.
-						// We’ll pass the context to other hooks then.
+						// Hooks are allowed to give us even more context and we'll merge everything together.
+						// We'll pass the context to other hooks then.
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -387,6 +428,14 @@ export class ClientConnection {
 
 	private messageHandler = (data: Uint8Array) => {
 		try {
+			// Check for connection-level Pong message
+			// Pong messages are just 1 byte (the message type)
+			// We check length to avoid confusing with regular messages
+			if (data.length === 1 && data[0] === MessageType.Pong) {
+				this.handlePong();
+				return;
+			}
+
 			const tmpMsg = new SocketIncomingMessage(data);
 
 			const documentName = decoding.readVarString(tmpMsg.decoder);
