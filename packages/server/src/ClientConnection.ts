@@ -33,7 +33,7 @@ import { getParameters } from "./util/getParameters.ts";
  */
 export class ClientConnection<Context = any> {
 	// this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
-	private readonly documentConnections: Record<string, Connection> = {};
+	private readonly documentConnections: Record<string, Connection<Context>> = {};
 
 	// While the connection will be establishing messages will
 	// be queued and handled later.
