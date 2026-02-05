@@ -235,7 +235,9 @@ export class Connection<Context = any> {
 
 			try {
 				await this.callbacks.beforeHandleMessage(this, rawUpdate);
-				new MessageReceiver(message).apply(this.document, this);
+				const receiver = new MessageReceiver(message);
+
+				await receiver.apply(this.document, this);
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			} catch (e: any) {
 				console.error(
