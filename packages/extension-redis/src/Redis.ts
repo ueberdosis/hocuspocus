@@ -369,16 +369,13 @@ export class Redis implements Extension {
 			return;
 		}
 
-		new MessageReceiver(message, this.redisTransactionOrigin).apply(
-			document,
-			undefined,
-			(reply) => {
-				return this.pub.publish(
-					this.pubKey(document.name),
-					this.encodeMessage(reply),
-				);
-			},
-		);
+		const receiver = new MessageReceiver(message, this.redisTransactionOrigin);
+		await receiver.apply(document, undefined, (reply) => {
+			return this.pub.publish(
+				this.pubKey(document.name),
+				this.encodeMessage(reply),
+			);
+		});
 	};
 
 	/**

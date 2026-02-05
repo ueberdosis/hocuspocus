@@ -9,10 +9,7 @@ import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type {
-	beforeSyncPayload,
-	onStatelessPayload,
-} from "./types.ts";
+import type { beforeSyncPayload, onStatelessPayload } from "./types.ts";
 
 export class Connection<Context = any> {
 	webSocket: WebSocket;
@@ -38,6 +35,10 @@ export class Connection<Context = any> {
 	socketId: string;
 
 	readOnly: boolean;
+
+	private messageQueue: Uint8Array[] = [];
+
+	private processingPromise: Promise<void> = Promise.resolve();
 
 	/**
 	 * Constructor.
@@ -119,6 +120,13 @@ export class Connection<Context = any> {
 		this.callbacks.onTokenSyncCallback = callback;
 
 		return this;
+	}
+
+	/**
+	 * Returns a promise that resolves when all queued messages have been processed.
+	 */
+	waitForPendingMessages(): Promise<void> {
+		return this.processingPromise;
 	}
 
 	/**
@@ -204,30 +212,34 @@ export class Connection<Context = any> {
 	 * @public
 	 */
 	public handleMessage(data: Uint8Array): void {
-		const message = new IncomingMessage(data);
-		const documentName = message.readVarString();
+		this.messageQueue.push(data);
 
-		if (documentName !== this.document.name) return;
+		if (this.messageQueue.length === 1) {
+			this.processingPromise = this.processMessages();
+		}
+	}
 
-		message.writeVarString(documentName);
+	private async processMessages() {
+		while (this.messageQueue.length > 0) {
+			const rawUpdate = this.messageQueue.at(0) as Uint8Array;
 
-		this.callbacks
-			.beforeHandleMessage(this, data)
-			.then(() => {
-				try {
-					new MessageReceiver(message).apply(this.document, this);
-				} catch (e: any) {
-					console.error(
-						`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
-						e,
-					);
-					this.close({
-						code: "code" in e ? e.code : ResetConnection.code,
-						reason: "reason" in e ? e.reason : ResetConnection.reason,
-					});
-				}
-			})
-			.catch((e: any) => {
+			const message = new IncomingMessage(rawUpdate);
+			const documentName = message.readVarString();
+
+			if (documentName !== this.document.name) {
+				this.messageQueue.shift();
+				continue;
+			}
+
+			message.writeVarString(documentName);
+
+			try {
+				await this.callbacks.beforeHandleMessage(this, rawUpdate);
+				const receiver = new MessageReceiver(message);
+
+				await receiver.apply(this.document, this);
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			} catch (e: any) {
 				console.error(
 					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 					e,
@@ -236,7 +248,10 @@ export class Connection<Context = any> {
 					code: "code" in e ? e.code : ResetConnection.code,
 					reason: "reason" in e ? e.reason : ResetConnection.reason,
 				});
-			});
+			}
+
+			this.messageQueue.shift();
+		}
 	}
 }
 

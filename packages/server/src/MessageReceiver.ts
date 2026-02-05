@@ -27,7 +27,7 @@ export class MessageReceiver {
 		this.defaultTransactionOrigin = defaultTransactionOrigin;
 	}
 
-	public apply(
+	public async apply(
 		document: Document,
 		connection?: Connection,
 		reply?: (message: Uint8Array) => void,
@@ -40,7 +40,7 @@ export class MessageReceiver {
 			case MessageType.Sync:
 			case MessageType.SyncReply: {
 				message.writeVarUint(MessageType.Sync);
-				this.readSyncMessage(
+				await this.readSyncMessage(
 					message,
 					document,
 					connection,
@@ -126,7 +126,7 @@ export class MessageReceiver {
 		}
 	}
 
-	readSyncMessage(
+	async readSyncMessage(
 		message: IncomingMessage,
 		document: Document,
 		connection?: Connection,
@@ -136,7 +136,7 @@ export class MessageReceiver {
 		const type = message.readVarUint();
 
 		if (connection) {
-			connection.callbacks.beforeSync(connection, {
+			await connection.callbacks.beforeSync(connection, {
 				type,
 				payload: message.peekVarUint8Array(),
 			});

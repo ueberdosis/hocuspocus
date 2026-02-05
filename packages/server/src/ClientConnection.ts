@@ -164,6 +164,12 @@ export class ClientConnection<Context = any> {
 		);
 
 		instance.onClose(async (document, event) => {
+			// Wait for any pending message processing to complete before running
+			// disconnect hooks. This ensures that document updates from queued messages
+			// are applied (and their debounced onStoreDocument scheduled) before the
+			// disconnect handler checks whether to call executeNow.
+			await instance.waitForPendingMessages();
+
 			const disconnectHookPayload: onDisconnectPayload = {
 				instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
 				clientsCount: document.getConnectionsCount(),
