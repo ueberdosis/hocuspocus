@@ -181,15 +181,21 @@ export class ClientConnection<Context = any> {
 			);
 		});
 
-		instance.onStatelessCallback(async (payload) => {
+		instance.onCommandCallback(async (payload) => {
 			try {
-				return await this.hooks("onStateless", payload);
+				return await this.hooks("onCommand", payload);
 			} catch (error: any) {
 				if (error?.message) {
-					// if a hook rejects and the error is empty, do nothing
-					// this is only meant to prevent later hooks and the
-					// default handler to do something. if an error is present
-					// just rethrow it
+					throw error;
+				}
+			}
+		});
+
+		instance.onEventCallback(async (payload) => {
+			try {
+				return await this.hooks("onEvent", payload);
+			} catch (error: any) {
+				if (error?.message) {
 					throw error;
 				}
 			}

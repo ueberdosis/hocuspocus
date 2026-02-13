@@ -6,11 +6,12 @@ import {
 	redisConnectionSettings,
 } from "../utils/index.ts";
 
-test("syncs broadcast stateless message between servers and clients", async (t) => {
+test("syncs broadcast event between servers and clients", async (t) => {
 	const redisPrefix = crypto.randomUUID();
 
 	await new Promise(async (resolve) => {
-		const payloadToSend = "STATELESS-MESSAGE";
+		const eventType = "test-event";
+		const eventPayload = { message: "hello" };
 		const server = await newHocuspocus({
 			extensions: [
 				new Redis({
@@ -31,24 +32,25 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 			],
 		});
 
-		// Once we’re setup make an edit on anotherProvider. To get to the provider it will need
+		// Once we're setup make an edit on anotherProvider. To get to the provider it will need
 		// to pass through Redis:
 		// provider -> server -> Redis -> anotherServer -> anotherProvider
 
-		// Wait for a stateless message to confirm whether another provider has the same payload.
+		// Wait for an event to confirm whether another provider has the same payload.
 		newHocuspocusProvider(anotherServer, {
-			onStateless: ({ payload }) => {
-				t.is(payload, payloadToSend);
+			onEvent: ({ type, payload }) => {
+				t.is(type, eventType);
+				t.deepEqual(payload, eventPayload);
 				t.pass();
 				resolve("done");
 			},
 			onSynced() {
-				// Once the initial data is synced, send a stateless message
+				// Once the initial data is synced, send an event
 				newHocuspocusProvider(server, {
 					onSynced() {
 						server.documents
 							.get("hocuspocus-test")
-							?.broadcastStateless(payloadToSend);
+							?.broadcastEvent(eventType, eventPayload);
 					},
 				});
 			},
@@ -56,11 +58,12 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 	});
 });
 
-test("client stateless messages shouldnt propagate to other server", async (t) => {
+test("client command messages shouldnt propagate to other server", async (t) => {
 	const redisPrefix = crypto.randomUUID();
 
 	await new Promise(async (resolve) => {
-		const payloadToSend = "STATELESS-MESSAGE";
+		const commandType = "test-command";
+		const commandPayload = { data: "test" };
 		const server = await newHocuspocus({
 			extensions: [
 				new Redis({
@@ -69,8 +72,9 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 					prefix: redisPrefix,
 				}),
 			],
-			async onStateless({ payload }) {
-				t.is(payloadToSend, payload);
+			async onCommand({ type, payload }) {
+				t.is(commandType, type);
+				t.deepEqual(commandPayload, payload);
 				t.pass();
 				resolve("done");
 			},
@@ -84,7 +88,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 					prefix: redisPrefix,
 				}),
 			],
-			async onStateless() {
+			async onCommand() {
 				console.log("failed");
 				t.fail();
 			},
@@ -92,13 +96,13 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 
 		const provider = newHocuspocusProvider(server, {
 			onSynced() {
-				provider.sendStateless(payloadToSend);
+				provider.sendCommand(commandType, commandPayload);
 			},
 		});
 	});
 });
 
-test("server client stateless messages shouldnt propagate to other client", async (t) => {
+test("server client event messages shouldnt propagate to other client", async (t) => {
 	await new Promise(async (resolve) => {
 		const redisPrefix = crypto.randomUUID();
 
@@ -110,8 +114,8 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 					prefix: redisPrefix,
 				}),
 			],
-			async onStateless({ connection, document }) {
-				connection.sendStateless("test123");
+			async onCommand({ connection, document }) {
+				connection.sendEvent("response", { text: "test123" });
 			},
 		});
 
@@ -123,22 +127,22 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 					prefix: redisPrefix,
 				}),
 			],
-			async onStateless() {
+			async onCommand() {
 				t.fail();
 			},
 		});
 
 		const provider2 = newHocuspocusProvider(anotherServer, {
-			onStateless() {
+			onEvent() {
 				t.fail();
 			},
 		});
 
 		const provider = newHocuspocusProvider(server, {
 			onSynced() {
-				provider.sendStateless("ok");
+				provider.sendCommand("request", { data: "ok" });
 			},
-			onStateless() {
+			onEvent() {
 				t.pass();
 			},
 		});

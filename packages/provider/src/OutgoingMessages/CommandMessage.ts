@@ -1,17 +1,18 @@
-import { writeVarString, writeVarUint } from "lib0/encoding";
+import { writeAny, writeVarString, writeVarUint } from "lib0/encoding";
 import type { OutgoingMessageArguments } from "../types.ts";
 import { MessageType } from "../types.ts";
 import { OutgoingMessage } from "../OutgoingMessage.ts";
 
-export class StatelessMessage extends OutgoingMessage {
-	type = MessageType.Stateless;
+export class CommandMessage extends OutgoingMessage {
+	type = MessageType.Command;
 
-	description = "A stateless message";
+	description = "A command message";
 
 	get(args: Partial<OutgoingMessageArguments>) {
 		writeVarString(this.encoder, args.documentName!);
 		writeVarUint(this.encoder, this.type);
-		writeVarString(this.encoder, args.payload ?? "");
+		writeVarString(this.encoder, args.type ?? "");
+		writeAny(this.encoder, args.payload ?? null);
 
 		return this.encoder;
 	}

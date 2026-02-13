@@ -16,7 +16,8 @@ import type {
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
-	beforeBroadcastStatelessPayload,
+	beforeBroadcastCommandPayload,
+	beforeBroadcastEventPayload,
 	onChangePayload,
 	onDisconnectPayload,
 	onStoreDocumentPayload,
@@ -48,8 +49,10 @@ export class Hocuspocus<Context = any> {
 		connected: () => new Promise((r) => r(null)),
 		beforeHandleMessage: () => new Promise((r) => r(null)),
 		beforeSync: () => new Promise((r) => r(null)),
-		beforeBroadcastStateless: () => new Promise((r) => r(null)),
-		onStateless: () => new Promise((r) => r(null)),
+		beforeBroadcastCommand: () => new Promise((r) => r(null)),
+		beforeBroadcastEvent: () => new Promise((r) => r(null)),
+		onCommand: () => new Promise((r) => r(null)),
+		onEvent: () => new Promise((r) => r(null)),
 		onChange: () => new Promise((r) => r(null)),
 		onCreateDocument: () => new Promise((r) => r(null)),
 		onLoadDocument: () => new Promise((r) => r(null)),
@@ -113,9 +116,11 @@ export class Hocuspocus<Context = any> {
 			onLoadDocument: this.configuration.onLoadDocument,
 			afterLoadDocument: this.configuration.afterLoadDocument,
 			beforeHandleMessage: this.configuration.beforeHandleMessage,
-			beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
+			beforeBroadcastCommand: this.configuration.beforeBroadcastCommand,
+			beforeBroadcastEvent: this.configuration.beforeBroadcastEvent,
 			beforeSync: this.configuration.beforeSync,
-			onStateless: this.configuration.onStateless,
+			onCommand: this.configuration.onCommand,
+			onEvent: this.configuration.onEvent,
 			onChange: this.configuration.onChange,
 			onStoreDocument: this.configuration.onStoreDocument,
 			afterStoreDocument: this.configuration.afterStoreDocument,
@@ -393,15 +398,29 @@ export class Hocuspocus<Context = any> {
 
 		await this.hooks("afterLoadDocument", hookPayload);
 
-		document.beforeBroadcastStateless(
-			(document: Document, stateless: string) => {
-				const hookPayload: beforeBroadcastStatelessPayload = {
+		document.beforeBroadcastCommand(
+			(document: Document, type: string, payload: any) => {
+				const hookPayload: beforeBroadcastCommandPayload = {
 					document,
 					documentName: document.name,
-					payload: stateless,
+					type,
+					payload,
 				};
 
-				this.hooks("beforeBroadcastStateless", hookPayload);
+				this.hooks("beforeBroadcastCommand", hookPayload);
+			},
+		);
+
+		document.beforeBroadcastEvent(
+			(document: Document, type: string, payload: any) => {
+				const hookPayload: beforeBroadcastEventPayload = {
+					document,
+					documentName: document.name,
+					type,
+					payload,
+				};
+
+				this.hooks("beforeBroadcastEvent", hookPayload);
 			},
 		);
 

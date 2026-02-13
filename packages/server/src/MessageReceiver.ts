@@ -1,6 +1,6 @@
 import { AuthMessageType } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import { readVarString } from "lib0/decoding";
+import { readAny, readVarString } from "lib0/decoding";
 import { applyAwarenessUpdate } from "y-protocols/awareness";
 import {
 	messageYjsSyncStep1,
@@ -78,20 +78,45 @@ export class MessageReceiver {
 
 				break;
 			}
-			case MessageType.Stateless: {
-				connection?.callbacks.statelessCallback({
+			case MessageType.Command: {
+				const commandType = readVarString(message.decoder);
+				const commandPayload = readAny(message.decoder);
+				connection?.callbacks.commandCallback({
 					connection,
 					documentName: document.name,
 					document,
-					payload: readVarString(message.decoder),
+					type: commandType,
+					payload: commandPayload,
 				});
 
 				break;
 			}
-			case MessageType.BroadcastStateless: {
-				const msg = message.readVarString();
+			case MessageType.Event: {
+				const eventType = readVarString(message.decoder);
+				const eventPayload = readAny(message.decoder);
+				connection?.callbacks.eventCallback({
+					connection,
+					documentName: document.name,
+					document,
+					type: eventType,
+					payload: eventPayload,
+				});
+
+				break;
+			}
+			case MessageType.BroadcastCommand: {
+				const bcType = readVarString(message.decoder);
+				const bcPayload = readAny(message.decoder);
 				document.getConnections().forEach((connection) => {
-					connection.sendStateless(msg);
+					connection.sendCommand(bcType, bcPayload);
+				});
+				break;
+			}
+			case MessageType.BroadcastEvent: {
+				const beType = readVarString(message.decoder);
+				const bePayload = readAny(message.decoder);
+				document.getConnections().forEach((connection) => {
+					connection.sendEvent(beType, bePayload);
 				});
 				break;
 			}

@@ -6,7 +6,8 @@ import type {
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
 	afterUnloadDocumentPayload,
-	beforeBroadcastStatelessPayload,
+	beforeBroadcastCommandPayload,
+	beforeBroadcastEventPayload,
 	beforeUnloadDocumentPayload,
 	onAwarenessUpdatePayload,
 	onChangePayload,
@@ -411,10 +412,21 @@ export class Redis implements Extension {
 		});
 	}
 
-	async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
+	async beforeBroadcastCommand(data: beforeBroadcastCommandPayload) {
 		const message = new OutgoingMessage(
 			data.documentName,
-		).writeBroadcastStateless(data.payload);
+		).writeBroadcastCommand(data.type, data.payload);
+
+		return this.pub.publish(
+			this.pubKey(data.documentName),
+			this.encodeMessage(message.toUint8Array()),
+		);
+	}
+
+	async beforeBroadcastEvent(data: beforeBroadcastEventPayload) {
+		const message = new OutgoingMessage(
+			data.documentName,
+		).writeBroadcastEvent(data.type, data.payload);
 
 		return this.pub.publish(
 			this.pubKey(data.documentName),

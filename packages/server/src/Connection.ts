@@ -11,7 +11,8 @@ import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	beforeSyncPayload,
-	onStatelessPayload,
+	onCommandPayload,
+	onEventPayload,
 } from "./types.ts";
 
 export class Connection<Context = any> {
@@ -31,7 +32,8 @@ export class Connection<Context = any> {
 			connection: Connection,
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
-		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
+		commandCallback: (payload: onCommandPayload) => Promise.resolve(),
+		eventCallback: (payload: onEventPayload) => Promise.resolve(),
 		onTokenSyncCallback: (payload: { token: string }) => Promise.resolve(),
 	};
 
@@ -75,12 +77,23 @@ export class Connection<Context = any> {
 	}
 
 	/**
-	 * Set a callback that will be triggered when an stateless message is received
+	 * Set a callback that will be triggered when a command message is received
 	 */
-	onStatelessCallback(
-		callback: (payload: onStatelessPayload) => Promise<void>,
+	onCommandCallback(
+		callback: (payload: onCommandPayload) => Promise<void>,
 	): Connection {
-		this.callbacks.statelessCallback = callback;
+		this.callbacks.commandCallback = callback;
+
+		return this;
+	}
+
+	/**
+	 * Set a callback that will be triggered when an event message is received
+	 */
+	onEventCallback(
+		callback: (payload: onEventPayload) => Promise<void>,
+	): Connection {
+		this.callbacks.eventCallback = callback;
 
 		return this;
 	}
@@ -143,10 +156,23 @@ export class Connection<Context = any> {
 	}
 
 	/**
-	 * Send a stateless message with payload
+	 * Send a command message
 	 */
-	public sendStateless(payload: string): void {
-		const message = new OutgoingMessage(this.document.name).writeStateless(
+	public sendCommand(type: string, payload: any): void {
+		const message = new OutgoingMessage(this.document.name).writeCommand(
+			type,
+			payload,
+		);
+
+		this.send(message.toUint8Array());
+	}
+
+	/**
+	 * Send an event message
+	 */
+	public sendEvent(type: string, payload: any): void {
+		const message = new OutgoingMessage(this.document.name).writeEvent(
+			type,
 			payload,
 		);
 

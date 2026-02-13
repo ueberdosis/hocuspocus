@@ -10,7 +10,8 @@ import { MessageReceiver } from "./MessageReceiver.ts";
 import { MessageSender } from "./MessageSender.ts";
 import { AuthenticationMessage } from "./OutgoingMessages/AuthenticationMessage.ts";
 import { AwarenessMessage } from "./OutgoingMessages/AwarenessMessage.ts";
-import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
+import { CommandMessage } from "./OutgoingMessages/CommandMessage.ts";
+import { EventMessage } from "./OutgoingMessages/EventMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
 import type {
@@ -21,11 +22,12 @@ import type {
 	onAwarenessChangeParameters,
 	onAwarenessUpdateParameters,
 	onCloseParameters,
+	onCommandParameters,
 	onDisconnectParameters,
+	onEventParameters,
 	onMessageParameters,
 	onOpenParameters,
 	onOutgoingMessageParameters,
-	onStatelessParameters,
 	onStatusParameters,
 	onSyncedParameters,
 	onUnsyncedChangesParameters,
@@ -96,7 +98,8 @@ export interface CompleteHocuspocusProviderConfiguration {
 	onDestroy: () => void;
 	onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void;
 	onAwarenessChange: (data: onAwarenessChangeParameters) => void;
-	onStateless: (data: onStatelessParameters) => void;
+	onCommand: (data: onCommandParameters) => void;
+	onEvent: (data: onEventParameters) => void;
 	onUnsyncedChanges: (data: onUnsyncedChangesParameters) => void;
 }
 
@@ -126,7 +129,8 @@ export class HocuspocusProvider extends EventEmitter {
 		onDestroy: () => null,
 		onAwarenessUpdate: () => null,
 		onAwarenessChange: () => null,
-		onStateless: () => null,
+		onCommand: () => null,
+		onEvent: () => null,
 		onUnsyncedChanges: () => null,
 	};
 
@@ -166,7 +170,8 @@ export class HocuspocusProvider extends EventEmitter {
 		this.on("destroy", this.configuration.onDestroy);
 		this.on("awarenessUpdate", this.configuration.onAwarenessUpdate);
 		this.on("awarenessChange", this.configuration.onAwarenessChange);
-		this.on("stateless", this.configuration.onStateless);
+		this.on("command", this.configuration.onCommand);
+		this.on("event", this.configuration.onEvent);
 		this.on("unsyncedChanges", this.configuration.onUnsyncedChanges);
 
 		this.on("authenticated", this.configuration.onAuthenticated);
@@ -302,9 +307,18 @@ export class HocuspocusProvider extends EventEmitter {
 		window.addEventListener("pagehide", this.boundPageHide);
 	}
 
-	sendStateless(payload: string) {
-		this.send(StatelessMessage, {
+	sendCommand(type: string, payload: any) {
+		this.send(CommandMessage, {
 			documentName: this.configuration.name,
+			type,
+			payload,
+		});
+	}
+
+	sendEvent(type: string, payload: any) {
+		this.send(EventMessage, {
+			documentName: this.configuration.name,
+			type,
 			payload,
 		});
 	}
@@ -367,8 +381,12 @@ export class HocuspocusProvider extends EventEmitter {
 		}
 	}
 
-	receiveStateless(payload: string) {
-		this.emit("stateless", { payload });
+	receiveCommand(type: string, payload: any) {
+		this.emit("command", { type, payload });
+	}
+
+	receiveEvent(type: string, payload: any) {
+		this.emit("event", { type, payload });
 	}
 
 	// not needed, but provides backward compatibility with e.g. lexical/yjs

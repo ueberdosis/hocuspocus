@@ -1,5 +1,5 @@
 import { readAuthMessage } from "@hocuspocus/common";
-import { readVarInt, readVarString } from "lib0/decoding";
+import { readAny, readVarInt, readVarString } from "lib0/decoding";
 import type { CloseEvent } from "ws";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { messageYjsSyncStep2, readSyncMessage } from "y-protocols/sync";
@@ -38,9 +38,19 @@ export class MessageReceiver {
 				this.applyQueryAwarenessMessage(provider);
 				break;
 
-			case MessageType.Stateless:
-				provider.receiveStateless(readVarString(message.decoder));
+			case MessageType.Command: {
+				const commandType = readVarString(message.decoder);
+				const commandPayload = readAny(message.decoder);
+				provider.receiveCommand(commandType, commandPayload);
 				break;
+			}
+
+			case MessageType.Event: {
+				const eventType = readVarString(message.decoder);
+				const eventPayload = readAny(message.decoder);
+				provider.receiveEvent(eventType, eventPayload);
+				break;
+			}
 
 			case MessageType.SyncStatus:
 				this.applySyncStatusMessage(

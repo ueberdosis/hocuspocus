@@ -20,7 +20,8 @@ export class Document extends Doc {
 			connection: Connection,
 			update: Uint8Array,
 		) => {},
-		beforeBroadcastStateless: (document: Document, stateless: string) => {},
+		beforeBroadcastCommand: (document: Document, type: string, payload: any) => {},
+		beforeBroadcastEvent: (document: Document, type: string, payload: any) => {},
 	};
 
 	connections: Map<
@@ -96,12 +97,23 @@ export class Document extends Doc {
 	}
 
 	/**
-	 * Set a callback that will be triggered before a stateless message is broadcasted
+	 * Set a callback that will be triggered before a command is broadcasted
 	 */
-	beforeBroadcastStateless(
-		callback: (document: Document, stateless: string) => void,
+	beforeBroadcastCommand(
+		callback: (document: Document, type: string, payload: any) => void,
 	): Document {
-		this.callbacks.beforeBroadcastStateless = callback;
+		this.callbacks.beforeBroadcastCommand = callback;
+
+		return this;
+	}
+
+	/**
+	 * Set a callback that will be triggered before an event is broadcasted
+	 */
+	beforeBroadcastEvent(
+		callback: (document: Document, type: string, payload: any) => void,
+	): Document {
+		this.callbacks.beforeBroadcastEvent = callback;
 
 		return this;
 	}
@@ -244,20 +256,40 @@ export class Document extends Doc {
 	}
 
 	/**
-	 * Broadcast stateless message to all connections
+	 * Broadcast a command to all connections
 	 */
-	public broadcastStateless(
-		payload: string,
+	public broadcastCommand(
+		type: string,
+		payload: any,
 		filter?: (conn: Connection) => boolean,
 	): void {
-		this.callbacks.beforeBroadcastStateless(this, payload);
+		this.callbacks.beforeBroadcastCommand(this, type, payload);
 
 		const connections = filter
 			? this.getConnections().filter(filter)
 			: this.getConnections();
 
 		connections.forEach((connection) => {
-			connection.sendStateless(payload);
+			connection.sendCommand(type, payload);
+		});
+	}
+
+	/**
+	 * Broadcast an event to all connections
+	 */
+	public broadcastEvent(
+		type: string,
+		payload: any,
+		filter?: (conn: Connection) => boolean,
+	): void {
+		this.callbacks.beforeBroadcastEvent(this, type, payload);
+
+		const connections = filter
+			? this.getConnections().filter(filter)
+			: this.getConnections();
+
+		connections.forEach((connection) => {
+			connection.sendEvent(type, payload);
 		});
 	}
 

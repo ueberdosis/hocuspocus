@@ -16,10 +16,12 @@ export enum MessageType {
 	Auth = 2,
 	QueryAwareness = 3,
 	SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
-	Stateless = 5,
-	BroadcastStateless = 6,
 	CLOSE = 7,
 	SyncStatus = 8,
+	Command = 9,
+	Event = 10,
+	BroadcastCommand = 11,
+	BroadcastEvent = 12,
 }
 
 export interface AwarenessUpdate {
@@ -33,7 +35,23 @@ export interface ConnectionConfiguration {
 	isAuthenticated: boolean;
 }
 
-export interface Extension<Context = any> {
+export type StatelessMessagePayload<T extends Record<string, any>> = {
+	[K in keyof T & string]: { type: K; payload: T[K] }
+}[keyof T & string];
+
+export type onCommandPayload<Context = any, Commands extends Record<string, any> = Record<string, any>> = StatelessMessagePayload<Commands> & {
+	connection: Connection<Context>;
+	documentName: string;
+	document: Document;
+};
+
+export type onEventPayload<Context = any, Events extends Record<string, any> = Record<string, any>> = StatelessMessagePayload<Events> & {
+	connection: Connection<Context>;
+	documentName: string;
+	document: Document;
+};
+
+export interface Extension<Context = any, Commands extends Record<string, any> = Record<string, any>, Events extends Record<string, any> = Record<string, any>> {
 	priority?: number;
 	extensionName?: string;
 	onConfigure?(data: onConfigurePayload): Promise<any>;
@@ -48,10 +66,14 @@ export interface Extension<Context = any> {
 	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
 	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
 	beforeSync?(data: beforeSyncPayload<Context>): Promise<any>;
-	beforeBroadcastStateless?(
-		data: beforeBroadcastStatelessPayload,
+	beforeBroadcastCommand?(
+		data: beforeBroadcastCommandPayload,
 	): Promise<any>;
-	onStateless?(payload: onStatelessPayload): Promise<any>;
+	beforeBroadcastEvent?(
+		data: beforeBroadcastEventPayload,
+	): Promise<any>;
+	onCommand?(data: onCommandPayload<Context, Commands>): Promise<any>;
+	onEvent?(data: onEventPayload<Context, Events>): Promise<any>;
 	onChange?(data: onChangePayload<Context>): Promise<any>;
 	onStoreDocument?(data: onStoreDocumentPayload<Context>): Promise<any>;
 	afterStoreDocument?(data: afterStoreDocumentPayload<Context>): Promise<any>;
@@ -75,9 +97,11 @@ export type HookName =
 	| "onLoadDocument"
 	| "afterLoadDocument"
 	| "beforeHandleMessage"
-	| "beforeBroadcastStateless"
+	| "beforeBroadcastCommand"
+	| "beforeBroadcastEvent"
 	| "beforeSync"
-	| "onStateless"
+	| "onCommand"
+	| "onEvent"
 	| "onChange"
 	| "onStoreDocument"
 	| "afterStoreDocument"
@@ -88,7 +112,7 @@ export type HookName =
 	| "afterUnloadDocument"
 	| "onDestroy";
 
-export type HookPayloadByName<Context = any> = {
+export type HookPayloadByName<Context = any, Commands extends Record<string, any> = Record<string, any>, Events extends Record<string, any> = Record<string, any>> = {
 	onConfigure: onConfigurePayload;
 	onListen: onListenPayload;
 	onUpgrade: onUpgradePayload;
@@ -100,9 +124,11 @@ export type HookPayloadByName<Context = any> = {
 	onLoadDocument: onLoadDocumentPayload<Context>;
 	afterLoadDocument: afterLoadDocumentPayload<Context>;
 	beforeHandleMessage: beforeHandleMessagePayload<Context>;
-	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
+	beforeBroadcastCommand: beforeBroadcastCommandPayload;
+	beforeBroadcastEvent: beforeBroadcastEventPayload;
 	beforeSync: beforeSyncPayload<Context>;
-	onStateless: onStatelessPayload;
+	onCommand: onCommandPayload<Context, Commands>;
+	onEvent: onEventPayload<Context, Events>;
 	onChange: onChangePayload<Context>;
 	onStoreDocument: onStoreDocumentPayload<Context>;
 	afterStoreDocument: afterStoreDocumentPayload<Context>;
@@ -114,7 +140,7 @@ export type HookPayloadByName<Context = any> = {
 	onDestroy: onDestroyPayload;
 };
 
-export interface Configuration<Context = any> extends Extension<Context> {
+export interface Configuration<Context = any, Commands extends Record<string, any> = Record<string, any>, Events extends Record<string, any> = Record<string, any>> extends Extension<Context, Commands, Events> {
 	/**
 	 * A name for the instance, used for logging.
 	 */
@@ -156,13 +182,6 @@ export interface Configuration<Context = any> extends Extension<Context> {
 		gc: boolean; // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
 		gcFilter: () => boolean; // will be called before garbage collecting ; return false to keep it
 	};
-}
-
-export interface onStatelessPayload {
-	connection: Connection;
-	documentName: string;
-	document: Document;
-	payload: string;
 }
 
 export interface onAuthenticatePayload<Context = any> {
@@ -293,10 +312,18 @@ export interface beforeSyncPayload<Context = any> {
 	payload: Uint8Array;
 }
 
-export interface beforeBroadcastStatelessPayload {
+export interface beforeBroadcastCommandPayload {
 	document: Document;
 	documentName: string;
-	payload: string;
+	type: string;
+	payload: any;
+}
+
+export interface beforeBroadcastEventPayload {
+	document: Document;
+	documentName: string;
+	type: string;
+	payload: any;
 }
 
 export interface onStoreDocumentPayload<Context = any> {

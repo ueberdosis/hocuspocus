@@ -1,19 +1,21 @@
 import test from 'ava'
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
-test('executes the onStateless callback', async t => {
-  const payloadToSend = 'STATELESS-MESSAGE'
+test('executes the onCommand callback', async t => {
+  const commandType = 'test-command'
+  const commandPayload = { key: 'value' }
   await new Promise(async resolve => {
     newHocuspocus({
-      async onStateless({ payload }) {
-        t.is(payload, payloadToSend)
+      async onCommand({ type, payload }) {
+        t.is(type, commandType)
+        t.deepEqual(payload, commandPayload)
         t.pass()
         resolve('done')
       },
     }).then(server => {
       const provider = newHocuspocusProvider(server, {
         onSynced: () => {
-          provider.sendStateless(payloadToSend)
+          provider.sendCommand(commandType, commandPayload)
         },
       })
     })

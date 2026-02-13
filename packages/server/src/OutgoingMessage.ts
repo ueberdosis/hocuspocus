@@ -2,6 +2,7 @@ import type { Encoder } from "lib0/encoding";
 import {
 	createEncoder,
 	toUint8Array,
+	writeAny,
 	writeVarString,
 	writeVarUint,
 	writeVarUint8Array,
@@ -116,20 +117,42 @@ export class OutgoingMessage {
 		return this;
 	}
 
-	writeStateless(payload: string): OutgoingMessage {
-		this.category = "Stateless";
+	writeCommand(type: string, payload: any): OutgoingMessage {
+		this.category = "Command";
 
-		writeVarUint(this.encoder, MessageType.Stateless);
-		writeVarString(this.encoder, payload);
+		writeVarUint(this.encoder, MessageType.Command);
+		writeVarString(this.encoder, type);
+		writeAny(this.encoder, payload);
 
 		return this;
 	}
 
-	writeBroadcastStateless(payload: string): OutgoingMessage {
-		this.category = "Stateless";
+	writeEvent(type: string, payload: any): OutgoingMessage {
+		this.category = "Event";
 
-		writeVarUint(this.encoder, MessageType.BroadcastStateless);
-		writeVarString(this.encoder, payload);
+		writeVarUint(this.encoder, MessageType.Event);
+		writeVarString(this.encoder, type);
+		writeAny(this.encoder, payload);
+
+		return this;
+	}
+
+	writeBroadcastCommand(type: string, payload: any): OutgoingMessage {
+		this.category = "Command";
+
+		writeVarUint(this.encoder, MessageType.BroadcastCommand);
+		writeVarString(this.encoder, type);
+		writeAny(this.encoder, payload);
+
+		return this;
+	}
+
+	writeBroadcastEvent(type: string, payload: any): OutgoingMessage {
+		this.category = "Event";
+
+		writeVarUint(this.encoder, MessageType.BroadcastEvent);
+		writeVarString(this.encoder, type);
+		writeAny(this.encoder, payload);
 
 		return this;
 	}
