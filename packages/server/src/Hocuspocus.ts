@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import type WebSocket from "ws";
-import type { Doc } from "yjs";
+import { Doc } from "yjs";
 import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" assert { type: "json" };
 import { ClientConnection } from "./ClientConnection.ts";
@@ -21,6 +21,7 @@ import type {
 	onDisconnectPayload,
 	onStoreDocumentPayload,
 } from "./types.ts";
+import { isTransactionOrigin, shouldSkipStoreHooks } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
 
@@ -247,27 +248,38 @@ export class Hocuspocus<Context = any> {
 	 */
 	private handleDocumentUpdate(
 		document: Document,
-		connection: Connection | undefined,
+		origin: unknown,
 		update: Uint8Array,
-		request?: IncomingMessage,
 	) {
+		const connection =
+			isTransactionOrigin(origin) && origin.source === "connection"
+				? origin.connection
+				: undefined;
+		const request = connection?.request;
+		const context = isTransactionOrigin(origin)
+			? origin.source === "connection"
+				? origin.connection.context
+				: origin.source === "local"
+					? (origin.context ?? {})
+					: {}
+			: {};
+
 		const hookPayload: onChangePayload | onStoreDocumentPayload = {
 			instance: this,
 			clientsCount: document.getConnectionsCount(),
-			context: connection?.context || {},
+			context,
 			document,
 			documentName: document.name,
 			requestHeaders: request?.headers ?? {},
 			requestParameters: getParameters(request),
 			socketId: connection?.socketId ?? "",
 			update,
-			transactionOrigin: connection,
+			transactionOrigin: origin,
 		};
 
 		this.hooks("onChange", hookPayload);
 
-		// Ignore changes incoming through redis connection, as they are already saved by other instance
-		if ((connection as unknown as string) === "__hocuspocus__redis__origin__") {
+		if (shouldSkipStoreHooks(origin)) {
 			return;
 		}
 
@@ -358,15 +370,11 @@ export class Hocuspocus<Context = any> {
 			await this.hooks(
 				"onLoadDocument",
 				hookPayload,
-				(loadedDocument: Doc | undefined) => {
-					// if a hook returns a Y-Doc, encode the document state as update
-					// and apply it to the newly created document
-					// Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-					if (
-						loadedDocument?.constructor.name === "Document" ||
-						loadedDocument?.constructor.name === "Doc"
-					) {
+				(loadedDocument: Doc | Uint8Array | undefined) => {
+					if (loadedDocument instanceof Doc) {
 						applyUpdate(document, encodeStateAsUpdate(loadedDocument));
+					} else if (Array.isArray(loadedDocument)) {
+						applyUpdate(document, loadedDocument);
 					}
 				},
 			);
@@ -379,15 +387,10 @@ export class Hocuspocus<Context = any> {
 		document.isLoading = false;
 
 		document.onUpdate(
-			(document: Document, connection: Connection, update: Uint8Array) => {
+			(document: Document, origin: unknown, update: Uint8Array) => {
 				document.lastChangeTime = Date.now();
 
-				this.handleDocumentUpdate(
-					document,
-					connection,
-					update,
-					connection?.request,
-				);
+				this.handleDocumentUpdate(document, origin, update);
 			},
 		);
 

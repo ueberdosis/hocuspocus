@@ -9,6 +9,51 @@ import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 
+export interface ConnectionTransactionOrigin {
+	source: "connection";
+	connection: Connection;
+}
+
+export interface RedisTransactionOrigin {
+	source: "redis";
+}
+
+export interface LocalTransactionOrigin {
+	source: "local";
+	skipStoreHooks?: boolean;
+	context?: any;
+}
+
+export type TransactionOrigin =
+	| ConnectionTransactionOrigin
+	| RedisTransactionOrigin
+	| LocalTransactionOrigin;
+
+export function isTransactionOrigin(
+	origin: unknown,
+): origin is TransactionOrigin {
+	return (
+		typeof origin === "object" &&
+		origin !== null &&
+		"source" in origin &&
+		((origin as any).source === "connection" ||
+			(origin as any).source === "redis" ||
+			(origin as any).source === "local")
+	);
+}
+
+export function shouldSkipStoreHooks(origin: unknown): boolean {
+	if (!isTransactionOrigin(origin)) return false;
+	switch (origin.source) {
+		case "connection":
+			return false;
+		case "redis":
+			return true;
+		case "local":
+			return origin.skipStoreHooks ?? false;
+	}
+}
+
 export enum MessageType {
 	Unknown = -1,
 	Sync = 0,
@@ -255,7 +300,7 @@ export interface onChangePayload<Context = any> {
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
-	transactionOrigin: any;
+	transactionOrigin: unknown;
 }
 
 export interface beforeHandleMessagePayload<Context = any> {
@@ -308,7 +353,7 @@ export interface onStoreDocumentPayload<Context = any> {
 	requestHeaders: IncomingHttpHeaders;
 	requestParameters: URLSearchParams;
 	socketId: string;
-	transactionOrigin?: any;
+	transactionOrigin?: unknown;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type

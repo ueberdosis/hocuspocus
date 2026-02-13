@@ -1,7 +1,10 @@
 import { URLSearchParams } from "node:url";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
-import type { DirectConnection as DirectConnectionInterface } from "./types.ts";
+import type {
+	DirectConnection as DirectConnectionInterface,
+	LocalTransactionOrigin,
+} from "./types.ts";
 
 export class DirectConnection<Context = any>
 	implements DirectConnectionInterface
@@ -33,7 +36,10 @@ export class DirectConnection<Context = any>
 				// biome-ignore lint/style/noNonNullAssertion: <explanation>
 				transaction(this.document!);
 			},
-			{ context: this.context },
+			{
+				source: "local",
+				context: this.context,
+			} satisfies LocalTransactionOrigin,
 		);
 	}
 

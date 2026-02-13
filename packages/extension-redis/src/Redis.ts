@@ -3,6 +3,7 @@ import type {
 	Document,
 	Extension,
 	Hocuspocus,
+	RedisTransactionOrigin,
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
 	afterUnloadDocumentPayload,
@@ -17,6 +18,7 @@ import {
 	IncomingMessage,
 	MessageReceiver,
 	OutgoingMessage,
+	isTransactionOrigin,
 } from "@hocuspocus/server";
 import {
 	type ExecutionResult,
@@ -95,7 +97,9 @@ export class Redis implements Extension {
 		disconnectDelay: 1000,
 	};
 
-	redisTransactionOrigin = "__hocuspocus__redis__origin__";
+	redisTransactionOrigin: RedisTransactionOrigin = {
+		source: "redis",
+	};
 
 	pub: RedisInstance;
 
@@ -382,9 +386,14 @@ export class Redis implements Extension {
 	 * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
 	 */
 	public async onChange(data: onChangePayload): Promise<any> {
-		if (data.transactionOrigin !== this.redisTransactionOrigin) {
-			return this.publishFirstSyncStep(data.documentName, data.document);
+		if (
+			isTransactionOrigin(data.transactionOrigin) &&
+			data.transactionOrigin.source === "redis"
+		) {
+			return;
 		}
+
+		return this.publishFirstSyncStep(data.documentName, data.document);
 	}
 
 	/**

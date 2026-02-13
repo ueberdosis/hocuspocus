@@ -15,11 +15,7 @@ export class Document extends Doc {
 
 	callbacks = {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
-		onUpdate: (
-			document: Document,
-			connection: Connection,
-			update: Uint8Array,
-		) => {},
+		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => {},
 		beforeBroadcastStateless: (document: Document, stateless: string) => {},
 	};
 
@@ -65,7 +61,6 @@ export class Document extends Doc {
 	 * Check if the Document (XMLFragment or Map) is empty
 	 */
 	isEmpty(fieldName: string): boolean {
-		// eslint-disable-next-line no-underscore-dangle
 		return !this.get(fieldName)._start && !this.get(fieldName)._map.size;
 	}
 
@@ -84,11 +79,7 @@ export class Document extends Doc {
 	 * Set a callback that will be triggered when the document is updated
 	 */
 	onUpdate(
-		callback: (
-			document: Document,
-			connection: Connection,
-			update: Uint8Array,
-		) => void,
+		callback: (document: Document, origin: unknown, update: Uint8Array) => void,
 	): Document {
 		this.callbacks.onUpdate = callback;
 
@@ -172,6 +163,7 @@ export class Document extends Doc {
 	/**
 	 * Get the client ids for the given connection instance
 	 */
+
 	getClients(connectionInstance: WebSocket): Set<any> {
 		const connection = this.connections.get(connectionInstance);
 
@@ -228,8 +220,8 @@ export class Document extends Doc {
 	/**
 	 * Handle an updated document and sync changes to clients
 	 */
-	private handleUpdate(update: Uint8Array, connection: Connection): Document {
-		this.callbacks.onUpdate(this, connection, update);
+	private handleUpdate(update: Uint8Array, origin: unknown): Document {
+		this.callbacks.onUpdate(this, origin, update);
 
 		const message = new OutgoingMessage(this.name)
 			.createSyncMessage()

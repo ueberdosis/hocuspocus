@@ -15,14 +15,14 @@ import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { MessageType } from "./types.ts";
+import { MessageType, type TransactionOrigin } from "./types.ts";
 
 export class MessageReceiver {
 	message: IncomingMessage;
 
-	defaultTransactionOrigin?: string;
+	defaultTransactionOrigin?: TransactionOrigin;
 
-	constructor(message: IncomingMessage, defaultTransactionOrigin?: string) {
+	constructor(message: IncomingMessage, defaultTransactionOrigin?: TransactionOrigin) {
 		this.message = message;
 		this.defaultTransactionOrigin = defaultTransactionOrigin;
 	}
@@ -190,7 +190,9 @@ export class MessageReceiver {
 				readSyncStep2(
 					message.decoder,
 					document,
-					connection ?? this.defaultTransactionOrigin,
+					connection
+						? { source: "connection" as const, connection }
+						: this.defaultTransactionOrigin ?? { source: "local" as const },
 				);
 
 				if (connection) {
@@ -211,7 +213,13 @@ export class MessageReceiver {
 					break;
 				}
 
-				readUpdate(message.decoder, document, connection);
+				readUpdate(
+					message.decoder,
+					document,
+					connection
+						? { source: "connection" as const, connection }
+						: this.defaultTransactionOrigin ?? { source: "local" as const },
+				);
 				if (connection) {
 					connection.send(
 						new OutgoingMessage(document.name)
