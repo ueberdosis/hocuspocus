@@ -3,10 +3,11 @@ import type {
 	onChangePayload,
 	onConfigurePayload,
 	onConnectPayload,
-	onLoadDocumentPayload,
 	onDestroyPayload,
 	onDisconnectPayload,
+	onLoadDocumentPayload,
 	onRequestPayload,
+	onStoreDocumentPayload,
 	onUpgradePayload,
 } from "@hocuspocus/server";
 
@@ -112,7 +113,7 @@ export class Logger implements Extension {
 		}
 	}
 
-	async onStoreDocument(data: onDisconnectPayload) {
+	async onStoreDocument(data: onStoreDocumentPayload) {
 		if (this.configuration.onStoreDocument) {
 			this.log(`Store "${data.documentName}".`);
 		}

@@ -264,10 +264,9 @@ export class Hocuspocus<Context = any> {
 					: {}
 			: {};
 
-		const hookPayload: onChangePayload | onStoreDocumentPayload = {
+		const changePayload: onChangePayload = {
 			instance: this,
 			clientsCount: document.getConnectionsCount(),
-			context,
 			document,
 			documentName: document.name,
 			requestHeaders: request?.headers ?? {},
@@ -275,15 +274,26 @@ export class Hocuspocus<Context = any> {
 			socketId: connection?.socketId ?? "",
 			update,
 			transactionOrigin: origin,
+			connection: connection,
+			context,
 		};
 
-		this.hooks("onChange", hookPayload);
+		this.hooks("onChange", changePayload);
 
 		if (shouldSkipStoreHooks(origin)) {
 			return;
 		}
 
-		this.storeDocumentHooks(document, hookPayload);
+		const storePayload: onStoreDocumentPayload = {
+			instance: this,
+			clientsCount: document.getConnectionsCount(),
+			document,
+			lastContext: context,
+			lastTransactionOrigin: origin,
+			documentName: document.name,
+		};
+
+		this.storeDocumentHooks(document, storePayload);
 	}
 
 	/**
@@ -408,14 +418,24 @@ export class Hocuspocus<Context = any> {
 			},
 		);
 
-		document.awareness.on("update", (update: AwarenessUpdate) => {
-			this.hooks("onAwarenessUpdate", {
-				...hookPayload,
-				...update,
-				awareness: document.awareness,
-				states: awarenessStatesToArray(document.awareness.getStates()),
-			});
-		});
+		document.awareness.on(
+			"update",
+			(update: AwarenessUpdate, origin: unknown) => {
+				this.hooks("onAwarenessUpdate", {
+					document,
+					documentName,
+					instance: this,
+					...update,
+					transactionOrigin: origin,
+					connection:
+						isTransactionOrigin(origin) && origin.source === "connection"
+							? origin.connection
+							: undefined,
+					awareness: document.awareness,
+					states: awarenessStatesToArray(document.awareness.getStates()),
+				});
+			},
+		);
 
 		return document;
 	}
@@ -460,6 +480,7 @@ export class Hocuspocus<Context = any> {
 	hooks<T extends HookName>(
 		name: T,
 		payload: HookPayloadByName<Context>[T],
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		callback: Function | null = null,
 	): Promise<any> {
 		const { extensions } = this.configuration;

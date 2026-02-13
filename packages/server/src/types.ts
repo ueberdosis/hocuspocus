@@ -301,6 +301,7 @@ export interface onChangePayload<Context = any> {
 	update: Uint8Array;
 	socketId: string;
 	transactionOrigin: unknown;
+	connection?: Connection<Context>;
 }
 
 export interface beforeHandleMessagePayload<Context = any> {
@@ -346,27 +347,23 @@ export interface beforeBroadcastStatelessPayload {
 
 export interface onStoreDocumentPayload<Context = any> {
 	clientsCount: number;
-	context: Context;
 	document: Document;
+	lastContext: Context;
+	lastTransactionOrigin: unknown;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	transactionOrigin?: unknown;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
-export interface afterStoreDocumentPayload<Context = any> extends onStoreDocumentPayload<Context> {}
+export interface afterStoreDocumentPayload<Context = any>
+	extends onStoreDocumentPayload<Context> {}
 
 export interface onAwarenessUpdatePayload<Context = any> {
-	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
+	transactionOrigin: unknown;
+	connection?: Connection<Context>;
 	added: number[];
 	updated: number[];
 	removed: number[];
@@ -387,7 +384,8 @@ export interface fetchPayload<Context = any> {
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface storePayload<Context = any> extends onStoreDocumentPayload<Context> {
+export interface storePayload<Context = any>
+	extends onStoreDocumentPayload<Context> {
 	state: Buffer;
 }
 

@@ -51,13 +51,14 @@ export class DirectConnection<Context = any>
 				this.document,
 				{
 					clientsCount: this.document.getConnectionsCount(),
-					context: this.context,
+					lastContext: this.context,
+					lastTransactionOrigin: {
+						source: "local",
+						context: this.context,
+					} satisfies LocalTransactionOrigin,
 					document: this.document,
 					documentName: this.document.name,
 					instance: this.instance,
-					requestHeaders: {},
-					requestParameters: new URLSearchParams(),
-					socketId: "server",
 				},
 				true,
 			);

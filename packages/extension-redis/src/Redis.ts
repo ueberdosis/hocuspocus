@@ -281,7 +281,7 @@ export class Redis implements Extension {
 	 */
 	async afterStoreDocument({
 		documentName,
-		socketId,
+		lastTransactionOrigin,
 	}: afterStoreDocumentPayload) {
 		const lockKey = this.lockKey(documentName);
 		const lock = this.locks.get(lockKey);
@@ -296,9 +296,13 @@ export class Redis implements Extension {
 				this.locks.delete(lockKey);
 			}
 		}
-		// if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
+
+		// if the change was initiated by a directConnection (or otherwise local source), we need to delay this hook to make sure sync can finish first.
 		// for provider connections, this usually happens in the onDisconnect hook
-		if (socketId === "server") {
+		if (
+			isTransactionOrigin(lastTransactionOrigin) &&
+			lastTransactionOrigin.source === "local"
+		) {
 			const pending = this.pendingAfterStoreDocumentResolves.get(documentName);
 
 			if (pending) {
