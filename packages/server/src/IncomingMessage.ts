@@ -1,17 +1,17 @@
 import type { Decoder } from "lib0/decoding";
 import {
 	createDecoder,
+	readVarString,
 	readVarUint,
 	readVarUint8Array,
-	readVarString,
 } from "lib0/decoding";
 import type { Encoder } from "lib0/encoding";
 import {
 	createEncoder,
-	toUint8Array,
-	writeVarUint,
-	writeVarString,
 	length,
+	toUint8Array,
+	writeVarString,
+	writeVarUint,
 } from "lib0/encoding";
 import type { MessageType } from "./types.ts";
 
