@@ -21,6 +21,7 @@ import {
 	isTransactionOrigin,
 } from "@hocuspocus/server";
 import {
+	ExecutionError,
 	type ExecutionResult,
 	type Lock,
 	Redlock,
@@ -256,11 +257,12 @@ export class Redis implements Extension {
 				await oldLock.release;
 			}
 			this.locks.set(resource, { lock });
-		} catch (error) {
+		} catch (error: any) {
 			//based on: https://github.com/sesamecare/redlock/blob/508e00dcd1e4d2bc6373ce455f4fe847e98a9aab/src/index.ts#L347-L349
 			if (
-				error ==
-				"ExecutionError: The operation was unable to achieve a quorum during its retry window."
+				error instanceof ExecutionError &&
+				error.message ===
+					"The operation was unable to achieve a quorum during its retry window."
 			) {
 				// Expected behavior: Could not acquire lock, another instance locked it already.
 				// No further `onStoreDocument` hooks will be executed; should throw a silent error with no message.
