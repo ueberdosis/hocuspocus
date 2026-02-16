@@ -7,7 +7,7 @@ import {
 import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type { AwarenessUpdate } from "./types.ts";
+import type { AwarenessUpdate, WebSocketLike } from "./types.ts";
 
 export class Document extends Doc {
 	awareness: Awareness;
@@ -19,7 +19,7 @@ export class Document extends Doc {
 	};
 
 	connections: Map<
-		WebSocket,
+		WebSocketLike,
 		{
 			clients: Set<any>;
 			connection: Connection;
@@ -162,8 +162,7 @@ export class Document extends Doc {
 	/**
 	 * Get the client ids for the given connection instance
 	 */
-
-	getClients(connectionInstance: WebSocket): Set<any> {
+	getClients(connectionInstance: WebSocketLike): Set<any> {
 		const connection = this.connections.get(connectionInstance);
 
 		return connection?.clients === undefined ? new Set() : connection.clients;
@@ -191,7 +190,7 @@ export class Document extends Doc {
 	 */
 	private handleAwarenessUpdate(
 		{ added, updated, removed }: AwarenessUpdate,
-		connectionInstance: WebSocket,
+		connectionInstance: WebSocketLike,
 	): Document {
 		const changedClients = added.concat(updated, removed);
 

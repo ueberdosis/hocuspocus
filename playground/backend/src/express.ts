@@ -1,5 +1,5 @@
 import { Logger } from "@hocuspocus/extension-logger";
-import { Hocuspocus } from "@hocuspocus/server";
+import { Hocuspocus, type WebSocketLike } from "@hocuspocus/server";
 import { createServer } from "node:http";
 import crossws from "crossws/adapters/node";
 import express from "express";
@@ -19,13 +19,21 @@ const server = createServer(app);
 const ws = crossws({
 	hooks: {
 		open(peer) {
-			peer.websocket.binaryType = "arraybuffer";
-			const context = { user_id: 1234 };
-			hocuspocus.handleConnection(
-				peer.websocket as WebSocket,
+			const clientConnection = hocuspocus.handleConnection(
+				peer.websocket as unknown as WebSocketLike,
 				peer.request as Request,
-				context,
+				{ user_id: 1234 },
 			);
+			(peer as any)._hocuspocus = clientConnection;
+		},
+		message(peer, message) {
+			(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+		},
+		close(peer, event) {
+			(peer as any)._hocuspocus?.handleClose({
+				code: event.code,
+				reason: event.reason,
+			});
 		},
 		error(peer, error) {
 			console.error("WebSocket error for peer:", peer.id);

@@ -14,6 +14,7 @@ import type {
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
+	WebSocketLike,
 	beforeBroadcastStatelessPayload,
 	onChangePayload,
 	onDisconnectPayload,
@@ -192,10 +193,10 @@ export class Hocuspocus<Context = any> {
 	 * load the Document then.
 	 */
 	handleConnection(
-		incoming: WebSocket,
+		incoming: WebSocket | WebSocketLike,
 		request: Request,
 		defaultContext: Context = {} as Context,
-	): void {
+	): ClientConnection {
 		const clientConnection = new ClientConnection(
 			incoming,
 			request,
@@ -236,6 +237,8 @@ export class Hocuspocus<Context = any> {
 				}
 			},
 		);
+
+		return clientConnection;
 	}
 
 	/**

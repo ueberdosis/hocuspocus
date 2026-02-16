@@ -10,7 +10,7 @@ import crossws from "crossws/adapters/node";
 import kleur from "kleur";
 import meta from "../package.json" assert { type: "json" };
 import { Hocuspocus, defaultConfiguration } from "./Hocuspocus.ts";
-import type { Configuration, onListenPayload } from "./types.ts";
+import type { Configuration, WebSocketLike, onListenPayload } from "./types.ts";
 
 export interface ServerConfiguration<Context = any>
 	extends Configuration<Context> {
@@ -59,11 +59,20 @@ export class Server<Context = any> {
 			serverOptions: this.configuration.websocketOptions,
 			hooks: {
 				open: (peer) => {
-					peer.websocket.binaryType = "arraybuffer";
-					this.hocuspocus.handleConnection(
-						peer.websocket as WebSocket,
+					const clientConnection = this.hocuspocus.handleConnection(
+						peer.websocket as unknown as WebSocketLike,
 						peer.request as Request,
 					);
+					(peer as any)._hocuspocus = clientConnection;
+				},
+				message: (peer, message) => {
+					(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+				},
+				close: (peer, event) => {
+					(peer as any)._hocuspocus?.handleClose({
+						code: event.code,
+						reason: event.reason,
+					});
 				},
 				error: (peer, error) => {
 					console.error("WebSocket error for peer:", peer.id);

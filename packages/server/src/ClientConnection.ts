@@ -16,6 +16,7 @@ import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
+	WebSocketLike,
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
@@ -68,11 +69,6 @@ export class ClientConnection<Context = any> {
 
 	pongReceived = true;
 
-	// Store bound handlers for cleanup
-	private boundMessageHandler: ((event: MessageEvent) => void) | null = null;
-	private boundCloseHandler: ((event: globalThis.CloseEvent) => void) | null =
-		null;
-
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
 	 * runs all hooks:
@@ -84,7 +80,7 @@ export class ClientConnection<Context = any> {
 	 * load the Document then.
 	 */
 	constructor(
-		private readonly websocket: WebSocket,
+		private readonly websocket: WebSocketLike,
 		private readonly request: Request,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
@@ -97,41 +93,19 @@ export class ClientConnection<Context = any> {
 		private readonly defaultContext: Context = {} as Context,
 	) {
 		this.timeout = opts.timeout;
-		this.setupHandlers();
 		this.pingInterval = setInterval(this.check, this.timeout);
 	}
 
 	/**
-	 * Set up WebSocket event handlers
+	 * Handle WebSocket close event. Call this from your integration
+	 * when the WebSocket connection closes.
 	 */
-	private setupHandlers(): void {
-		this.boundMessageHandler = (event: MessageEvent) => {
-			this.messageHandler(new Uint8Array(event.data));
-		};
-
-		this.boundCloseHandler = (event: globalThis.CloseEvent) => {
-			this.close({ code: event.code, reason: event.reason });
-			this.cleanupHandlers();
-			clearInterval(this.pingInterval);
-		};
-
-		this.websocket.addEventListener("message", this.boundMessageHandler);
-		this.websocket.addEventListener("close", this.boundCloseHandler);
+	handleClose(event?: CloseEvent) {
+		this.close(event);
+		clearInterval(this.pingInterval);
 	}
 
-	/**
-	 * Clean up WebSocket handlers
-	 */
-	private cleanupHandlers(): void {
-		if (this.boundMessageHandler) {
-			this.websocket.removeEventListener("message", this.boundMessageHandler);
-		}
-		if (this.boundCloseHandler) {
-			this.websocket.removeEventListener("close", this.boundCloseHandler);
-		}
-	}
-
-	close(event?: CloseEvent) {
+	private close(event?: CloseEvent) {
 		Object.values(this.documentConnections).forEach((connection) =>
 			connection.close(event),
 		);
@@ -192,7 +166,7 @@ export class ClientConnection<Context = any> {
 	 * Create a new connection by the given request and document
 	 */
 	private createConnection(
-		connection: WebSocket,
+		connection: WebSocketLike,
 		document: Document,
 	): Connection {
 		const hookPayload = this.hookPayloads[document.name];
@@ -337,7 +311,7 @@ export class ClientConnection<Context = any> {
 		// There's no need to queue messages anymore.
 		// Let's work through queued messages.
 		this.incomingMessageQueue[documentName].forEach((input) => {
-			this.messageHandler(input);
+			this.handleMessage(input);
 		});
 
 		await this.hooks("connected", {
@@ -433,7 +407,11 @@ export class ClientConnection<Context = any> {
 		}
 	};
 
-	private messageHandler = (data: Uint8Array) => {
+	/**
+	 * Handle an incoming WebSocket message. Call this from your integration
+	 * when the WebSocket receives a binary message.
+	 */
+	handleMessage = (data: Uint8Array) => {
 		try {
 			// Check for connection-level Pong message
 			// Pong messages are just 1 byte (the message type)

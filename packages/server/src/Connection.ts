@@ -7,10 +7,14 @@ import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type { beforeSyncPayload, onStatelessPayload } from "./types.ts";
+import type {
+	WebSocketLike,
+	beforeSyncPayload,
+	onStatelessPayload,
+} from "./types.ts";
 
 export class Connection<Context = any> {
-	webSocket: WebSocket;
+	webSocket: WebSocketLike;
 
 	context: Context;
 
@@ -42,7 +46,7 @@ export class Connection<Context = any> {
 	 * Constructor.
 	 */
 	constructor(
-		connection: WebSocket,
+		connection: WebSocketLike,
 		request: Request,
 		document: Document,
 		socketId: string,

@@ -49,6 +49,15 @@ export function shouldSkipStoreHooks(origin: unknown): boolean {
 	}
 }
 
+/**
+ * Minimal interface for any WebSocket-like object for WebSocket, Bun's ServerWebSocket, ws, Deno, etc.
+ */
+export interface WebSocketLike {
+	send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
+	close(code?: number, reason?: string): void;
+	readyState: number;
+}
+
 export enum MessageType {
 	Unknown = -1,
 	Sync = 0,

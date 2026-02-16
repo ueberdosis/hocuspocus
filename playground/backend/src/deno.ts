@@ -4,20 +4,23 @@ const hocuspocus = new Hocuspocus({
 	name: "collaboration",
 });
 
-// @ts-ignore
 Deno.serve((req) => {
 	if (req.headers.get("upgrade") !== "websocket") {
 		return new Response(null, { status: 501 });
 	}
 
-	// @ts-ignore
 	const { socket, response } = Deno.upgradeWebSocket(req);
 
 	socket.binaryType = "arraybuffer";
 
-	// @ts-ignore
-	socket.addEventListener("open", (_event) => {
-		hocuspocus.handleConnection(socket, req);
+	const clientConnection = hocuspocus.handleConnection(socket, req);
+
+	socket.addEventListener("message", (event) => {
+		clientConnection.handleMessage(new Uint8Array(event.data));
+	});
+
+	socket.addEventListener("close", (event) => {
+		clientConnection.handleClose({ code: event.code, reason: event.reason });
 	});
 
 	return response;

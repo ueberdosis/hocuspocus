@@ -9,11 +9,33 @@ const hocuspocus = new Hocuspocus({
 const ws = crossws({
 	hooks: {
 		open(peer) {
-			peer.websocket.binaryType = "arraybuffer";
-			hocuspocus.handleConnection(
-				peer.websocket as WebSocket,
+			// Use peer methods instead of peer.websocket to avoid
+			// Bun's Proxy `this` binding issue with ServerWebSocket
+			const wsLike = {
+				get readyState() {
+					return peer.readyState;
+				},
+				send(data: any) {
+					peer.send(data);
+				},
+				close(code?: number, reason?: string) {
+					peer.close(code, reason);
+				},
+			};
+			const clientConnection = hocuspocus.handleConnection(
+				wsLike,
 				peer.request as Request,
 			);
+			(peer as any)._hocuspocus = clientConnection;
+		},
+		message(peer, message) {
+			(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+		},
+		close(peer, event) {
+			(peer as any)._hocuspocus?.handleClose({
+				code: event.code,
+				reason: event.reason,
+			});
 		},
 		error(peer, error) {
 			console.error("WebSocket error for peer:", peer.id);
