@@ -2,6 +2,7 @@
   "packages": [
     "packages/*"
   ],
+  "npmClient": "pnpm",
   "command": {
     "publish": {
       "conventionalCommits": true

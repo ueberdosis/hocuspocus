@@ -1,6 +1,6 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import getPackages from "get-monorepo-packages";
 import { defineConfig } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
 
@@ -8,16 +8,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function getWorkspacePackages() {
-	const packages = getPackages(__dirname);
-
-	// Filter to only include packages with exports (buildable packages)
-	return packages.filter((pkg) => {
-		const pkgJson = pkg.package;
-		return (
-			pkgJson.exports &&
-			!["@hocuspocus/docs", "@hocuspocus/demo"].includes(pkgJson.name)
-		);
-	});
+	const packagePaths = fs.globSync("packages/*/package.json", { cwd: __dirname });
+	return packagePaths
+		.map((pkgPath) => {
+			const fullPath = path.join(__dirname, pkgPath);
+			const pkgJson = JSON.parse(fs.readFileSync(fullPath, "utf-8"));
+			return { location: path.dirname(fullPath), package: pkgJson };
+		})
+		.filter((pkg) => pkg.package.exports && !["@hocuspocus/docs", "@hocuspocus/demo"].includes(pkg.package.name));
 }
 
 function getExternalDependencies(pkgJson) {
