@@ -13,7 +13,7 @@ const ws = crossws({
 			// Bun's Proxy `this` binding issue with ServerWebSocket
 			const wsLike = {
 				get readyState() {
-					return peer.websocket.readyState;
+					return peer.websocket.readyState ?? 3; // 3 = CLOSED
 				},
 				send(data: any) {
 					peer.send(data);
