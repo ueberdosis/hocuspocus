@@ -59,8 +59,7 @@ export class Server<Context = any> {
 			serverOptions: this.configuration.websocketOptions,
 			hooks: {
 				open: (peer) => {
-					// peer.request provides access to the upgrade request (web standard Request)
-					// peer.websocket provides access to the underlying WebSocket
+					peer.websocket.binaryType = "arraybuffer";
 					this.hocuspocus.handleConnection(
 						peer.websocket as WebSocket,
 						peer.request as Request,

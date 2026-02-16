@@ -22,7 +22,7 @@ app.get(
 	"/",
 	upgradeWebSocket((c) => ({
 		onOpen(_evt, ws) {
-			// @ts-ignore
+			ws.raw.binaryType = "arraybuffer";
 			hocuspocus.handleConnection(ws.raw, c.req.raw, {});
 		},
 	})),

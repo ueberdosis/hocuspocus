@@ -13,6 +13,8 @@ Deno.serve((req) => {
 	// @ts-ignore
 	const { socket, response } = Deno.upgradeWebSocket(req);
 
+	socket.binaryType = "arraybuffer";
+
 	// @ts-ignore
 	socket.addEventListener("open", (_event) => {
 		hocuspocus.handleConnection(socket, req);

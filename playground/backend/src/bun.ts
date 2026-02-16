@@ -1,30 +1,18 @@
 import { Logger } from "@hocuspocus/extension-logger";
 import { Hocuspocus } from "@hocuspocus/server";
-import { createServer } from "node:http";
-import crossws from "crossws/adapters/node";
-import express from "express";
+import crossws from "crossws/adapters/bun";
 
 const hocuspocus = new Hocuspocus({
 	extensions: [new Logger()],
 });
 
-const app = express();
-
-app.get("/", (request, response) => {
-	response.send("Hello World!");
-});
-
-const server = createServer(app);
-
 const ws = crossws({
 	hooks: {
 		open(peer) {
 			peer.websocket.binaryType = "arraybuffer";
-			const context = { user_id: 1234 };
 			hocuspocus.handleConnection(
 				peer.websocket as WebSocket,
 				peer.request as Request,
-				context,
 			);
 		},
 		error(peer, error) {
@@ -34,8 +22,16 @@ const ws = crossws({
 	},
 });
 
-server.on("upgrade", (request, socket, head) => {
-	ws.handleUpgrade(request, socket, head);
+Bun.serve({
+	port: 8000,
+	websocket: ws.websocket,
+	fetch(request, server) {
+		if (request.headers.get("upgrade") === "websocket") {
+			return ws.handleUpgrade(request, server);
+		}
+
+		return new Response("Welcome to Hocuspocus!");
+	},
 });
 
-server.listen(1234, () => console.log("Listening on http://127.0.0.1:1234…"));
+console.log("Listening on ws://127.0.0.1:8000");
