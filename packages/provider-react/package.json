@@ -1,0 +1,35 @@
+{
+	"name": "@hocuspocus/provider-react",
+	"version": "3.4.6-rc.2",
+	"description": "React bindings for Hocuspocus provider",
+	"homepage": "https://hocuspocus.dev",
+	"keywords": ["hocuspocus", "websocket", "provider", "react", "yjs"],
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/hocuspocus-provider-react.cjs",
+	"module": "dist/hocuspocus-provider-react.esm.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		"source": {
+			"import": "./src/index.ts"
+		},
+		"default": {
+			"import": "./dist/hocuspocus-provider-react.esm.js",
+			"require": "./dist/hocuspocus-provider-react.cjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": ["src", "dist"],
+	"peerDependencies": {
+		"@hocuspocus/provider": "^3.4.6-rc.2",
+		"react": "^18.0.0 || ^19.0.0",
+		"yjs": "^13.6.8"
+	},
+	"devDependencies": {
+		"@types/react": "^19.0.0",
+		"react": "^19.0.0"
+	},
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
+}

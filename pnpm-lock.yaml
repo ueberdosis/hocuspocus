@@ -175,6 +175,22 @@ importers:
         specifier: ^13.6.8
         version: 13.6.29
 
+  packages/provider-react:
+    dependencies:
+      '@hocuspocus/provider':
+        specifier: ^3.4.6-rc.2
+        version: 3.4.6-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)
+      yjs:
+        specifier: ^13.6.8
+        version: 13.6.29
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+
   packages/server:
     dependencies:
       '@hocuspocus/common':
@@ -312,6 +328,9 @@ importers:
       '@hocuspocus/provider':
         specifier: workspace:*
         version: link:../../packages/provider
+      '@hocuspocus/provider-react':
+        specifier: workspace:*
+        version: link:../../packages/provider-react
       '@tiptap/extension-collaboration':
         specifier: ^3.18.0
         version: 3.19.0(@tiptap/core@3.19.0(@tiptap/pm@3.19.0))(@tiptap/pm@3.19.0)(@tiptap/y-tiptap@3.0.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.6)(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29))(yjs@13.6.29)
@@ -700,6 +719,15 @@ packages:
 
   '@gar/promisify@1.1.3':
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
+
+  '@hocuspocus/common@3.4.6-rc.2':
+    resolution: {integrity: sha512-iuQyE00zGGtS7jmedIbYPPjRuf9BNRSkTWY9QWmmV+o2AFdYzmFA9pmJwHCZeguEYyVbl+AR1Xgz8hpUdT16JA==}
+
+  '@hocuspocus/provider@3.4.6-rc.2':
+    resolution: {integrity: sha512-IyOOZG58EpQ0UG0KH3VnGzCtXkLsq8vbS0X5gQnEtaUeIpUk9iCJBoVAH01XlaBC/BQhE42tW3C8DrxUueN37A==}
+    peerDependencies:
+      y-protocols: ^1.0.6
+      yjs: ^13.6.8
 
   '@hono/node-server@1.19.9':
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
@@ -5985,6 +6013,22 @@ snapshots:
 
   '@gar/promisify@1.1.3':
     optional: true
+
+  '@hocuspocus/common@3.4.6-rc.2':
+    dependencies:
+      lib0: 0.2.117
+
+  '@hocuspocus/provider@3.4.6-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)':
+    dependencies:
+      '@hocuspocus/common': 3.4.6-rc.2
+      '@lifeomic/attempt': 3.1.0
+      lib0: 0.2.117
+      ws: 8.19.0
+      y-protocols: 1.0.7(yjs@13.6.29)
+      yjs: 13.6.29
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@hono/node-server@1.19.9(hono@4.11.9)':
     dependencies:
