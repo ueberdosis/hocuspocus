@@ -17,22 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
-
-      - name: Update npm for Trusted Publishing
-        run: npm install -g npm@11.6.2
+          cache: 'pnpm'
 
       - name: Set up npmrc
         id: setup-npmrc
         run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
-      - run: npm run publish
+      - run: pnpm publish
         if: "!contains(github.ref, '-rc.')"
 
-      - run: npm run publish:pre
+      - run: pnpm publish:pre
         if: "contains(github.ref, '-rc.')"

@@ -30,9 +30,9 @@
 		"dist"
 	],
 	"dependencies": {
-		"@hocuspocus/common": "^3.4.6-rc.2",
-		"@hocuspocus/server": "^3.4.6-rc.2",
-		"@hocuspocus/transformer": "^3.4.6-rc.2",
+		"@hocuspocus/common": "workspace:^",
+		"@hocuspocus/server": "workspace:^",
+		"@hocuspocus/transformer": "workspace:^",
 		"axios": "^1.12.2"
 	},
 	"peerDependencies": {
