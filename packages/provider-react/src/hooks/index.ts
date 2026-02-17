@@ -1,4 +1,4 @@
-export { useCollabUsers } from "./useCollabUsers.ts";
-export { useConnectionStatus } from "./useConnectionStatus.ts";
-export { useHocuspocus } from "./useHocuspocus.ts";
-export { useSyncStatus } from "./useSyncStatus.ts";
+export { useHocuspocusAwareness } from "./useHocuspocusAwareness.ts";
+export { useHocuspocusConnectionStatus } from "./useHocuspocusConnectionStatus.ts";
+export { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
+export { useHocuspocusSyncStatus } from "./useHocuspocusSyncStatus.ts";

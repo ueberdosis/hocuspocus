@@ -1,3 +1,5 @@
+"use client";
+
 import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -25,6 +27,7 @@ export function HocuspocusProviderComponent({
 	websocketProvider: externalWebsocketProvider,
 }: HocuspocusProviderComponentProps) {
 	const websocketRef = useRef<HocuspocusProviderWebsocket | null>(null);
+	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	// Create WebSocket provider once on mount
 	if (!websocketRef.current && !externalWebsocketProvider) {
@@ -37,13 +40,22 @@ export function HocuspocusProviderComponent({
 		externalWebsocketProvider ??
 		(websocketRef.current as HocuspocusProviderWebsocket);
 
-	// Cleanup on unmount
+	// Cleanup on unmount with deferred destruction to handle StrictMode double-mount
 	useEffect(() => {
+		if (destroyTimeoutRef.current) {
+			clearTimeout(destroyTimeoutRef.current);
+			destroyTimeoutRef.current = null;
+		}
+
 		return () => {
 			// Only destroy if we created the websocket (not externally provided)
-			if (!externalWebsocketProvider && websocketRef.current) {
-				websocketRef.current.destroy();
-				websocketRef.current = null;
+			if (!externalWebsocketProvider) {
+				destroyTimeoutRef.current = setTimeout(() => {
+					if (websocketRef.current) {
+						websocketRef.current.destroy();
+						websocketRef.current = null;
+					}
+				}, 0);
 			}
 		};
 	}, [externalWebsocketProvider]);
