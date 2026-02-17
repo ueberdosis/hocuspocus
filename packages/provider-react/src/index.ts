@@ -1,3 +1,5 @@
+"use client";
+
 // Contexts
 export { HocuspocusContext, HocuspocusRoomContext } from "./context.ts";
 
@@ -7,10 +9,10 @@ export { HocuspocusRoom } from "./HocuspocusRoom.tsx";
 
 // Hooks
 export {
-	useCollabUsers,
-	useConnectionStatus,
-	useHocuspocus,
-	useSyncStatus,
+	useHocuspocusAwareness,
+	useHocuspocusConnectionStatus,
+	useHocuspocusProvider,
+	useHocuspocusSyncStatus,
 } from "./hooks/index.ts";
 
 // Utils

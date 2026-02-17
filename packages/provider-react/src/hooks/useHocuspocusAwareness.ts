@@ -1,7 +1,7 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
 
 import type { CollabUser } from "../types.ts";
-import { useHocuspocus } from "./useHocuspocus.ts";
+import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
 
 /**
  * Subscribe to the list of connected users in the document.
@@ -14,7 +14,7 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * @example
  * ```tsx
  * function UserList() {
- *   const users = useCollabUsers()
+ *   const users = useHocuspocusAwareness()
  *
  *   return (
  *     <div className="avatars">
@@ -32,8 +32,8 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * }
  * ```
  */
-export function useCollabUsers(): CollabUser[] {
-	const provider = useHocuspocus();
+export function useHocuspocusAwareness(): CollabUser[] {
+	const provider = useHocuspocusProvider();
 
 	// Cache the last snapshot to avoid unnecessary array allocations
 	const cacheRef = useRef<{

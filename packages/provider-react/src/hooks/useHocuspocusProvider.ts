@@ -13,7 +13,7 @@ import { HocuspocusRoomContext } from "../context.ts";
  * @example
  * ```tsx
  * function Editor() {
- *   const provider = useHocuspocus()
+ *   const provider = useHocuspocusProvider()
  *
  *   const editor = useEditor({
  *     extensions: [
@@ -26,11 +26,11 @@ import { HocuspocusRoomContext } from "../context.ts";
  * }
  * ```
  */
-export function useHocuspocus() {
+export function useHocuspocusProvider() {
 	const context = useContext(HocuspocusRoomContext);
 
 	if (!context) {
-		throw new Error("useHocuspocus must be used within a HocuspocusRoom");
+		throw new Error("useHocuspocusProvider must be used within a HocuspocusRoom");
 	}
 
 	return context.provider;

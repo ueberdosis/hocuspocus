@@ -1,7 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 import type { SyncStatus } from "../types.ts";
-import { useHocuspocus } from "./useHocuspocus.ts";
+import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
 
 /**
  * Subscribe to the sync status of local changes.
@@ -13,7 +13,7 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * @example
  * ```tsx
  * function SaveIndicator() {
- *   const syncStatus = useSyncStatus()
+ *   const syncStatus = useHocuspocusSyncStatus()
  *
  *   return (
  *     <div>
@@ -23,8 +23,8 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * }
  * ```
  */
-export function useSyncStatus(): SyncStatus {
-	const provider = useHocuspocus();
+export function useHocuspocusSyncStatus(): SyncStatus {
+	const provider = useHocuspocusProvider();
 
 	const subscribe = useCallback(
 		(onStoreChange: () => void) => {

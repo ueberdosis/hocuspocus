@@ -1,7 +1,7 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
 
 import type { ConnectionStatus } from "../types.ts";
-import { useHocuspocus } from "./useHocuspocus.ts";
+import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
 
 /**
  * Subscribe to the connection status of the collaboration provider.
@@ -14,7 +14,7 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * @example
  * ```tsx
  * function ConnectionIndicator() {
- *   const status = useConnectionStatus()
+ *   const status = useHocuspocusConnectionStatus()
  *
  *   return (
  *     <div className={`status-${status}`}>
@@ -24,34 +24,31 @@ import { useHocuspocus } from "./useHocuspocus.ts";
  * }
  * ```
  */
-export function useConnectionStatus(): ConnectionStatus {
-	const provider = useHocuspocus();
-	// Track connection status via events since the provider doesn't expose a status property
-	const statusRef = useRef<ConnectionStatus>("connecting");
+export function useHocuspocusConnectionStatus(): ConnectionStatus {
+	const provider = useHocuspocusProvider();
+	const statusRef = useRef<ConnectionStatus>(
+		provider.configuration.websocketProvider.status as ConnectionStatus,
+	);
 
 	const subscribe = useCallback(
 		(onStoreChange: () => void) => {
-			const handleConnect = () => {
-				statusRef.current = "connected";
+			const handleStatus = (data: { status: ConnectionStatus }) => {
+				statusRef.current = data.status;
 				onStoreChange();
 			};
 
-			const handleDisconnect = () => {
-				statusRef.current = "disconnected";
+			provider.on("status", handleStatus);
+
+			// Sync initial status in case it changed between render and subscribe
+			const currentStatus = provider.configuration.websocketProvider
+				.status as ConnectionStatus;
+			if (statusRef.current !== currentStatus) {
+				statusRef.current = currentStatus;
 				onStoreChange();
-			};
-
-			provider.on("connect", handleConnect);
-			provider.on("disconnect", handleDisconnect);
-
-			// Set initial status based on current state
-			if (provider.isSynced) {
-				statusRef.current = "connected";
 			}
 
 			return () => {
-				provider.off("connect", handleConnect);
-				provider.off("disconnect", handleDisconnect);
+				provider.off("status", handleStatus);
 			};
 		},
 		[provider],
