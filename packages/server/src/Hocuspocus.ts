@@ -380,10 +380,10 @@ export class Hocuspocus<Context = any> {
 			await this.hooks(
 				"onLoadDocument",
 				hookPayload,
-				(loadedDocument: Doc | Uint8Array | undefined) => {
+				(loadedDocument: Doc | Uint8ArrayConstructor | undefined) => {
 					if (loadedDocument instanceof Doc) {
 						applyUpdate(document, encodeStateAsUpdate(loadedDocument));
-					} else if (Array.isArray(loadedDocument)) {
+					} else if (loadedDocument instanceof Uint8Array) {
 						applyUpdate(document, loadedDocument);
 					}
 				},
