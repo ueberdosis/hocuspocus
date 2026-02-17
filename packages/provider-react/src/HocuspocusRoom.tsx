@@ -1,3 +1,5 @@
+"use client";
+
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useContext, useEffect, useMemo, useRef } from "react";
 
@@ -65,6 +67,9 @@ export function HocuspocusRoom({
 			destroyTimeoutRef.current = null;
 		}
 
+		// Attach the provider to the websocket so it starts syncing
+		provider.attach();
+
 		return () => {
 			// Deferred destruction - wait for potential remount in StrictMode
 			// Using setTimeout(0) allows React to remount before we destroy
@@ -92,6 +97,7 @@ export function HocuspocusRoom({
 				document: propsRef.current.document,
 				token: propsRef.current.token,
 			});
+			providerRef.current.attach();
 		}
 	}, [name, websocketProvider]);
 
