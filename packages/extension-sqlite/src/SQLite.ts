@@ -1,6 +1,6 @@
 import type { DatabaseConfiguration } from "@hocuspocus/extension-database";
 import { Database } from "@hocuspocus/extension-database";
-import sqlite3 from "sqlite3";
+import BetterSqlite3 from "better-sqlite3";
 import kleur from "kleur";
 
 export const schema = `CREATE TABLE IF NOT EXISTS "documents" (
@@ -26,7 +26,7 @@ export interface SQLiteConfiguration extends DatabaseConfiguration {
 	 * string for an anonymous disk-based database. Anonymous databases are not persisted and
 	 * when closing the database handle, their contents are lost.
 	 *
-	 * https://github.com/mapbox/node-sqlite3/wiki/API#new-sqlite3databasefilename-mode-callback
+	 * https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md#new-daboratabasepath-options
 	 */
 	database: string;
 	/**
@@ -36,32 +36,22 @@ export interface SQLiteConfiguration extends DatabaseConfiguration {
 }
 
 export class SQLite extends Database {
-	db?: sqlite3.Database;
+	db?: BetterSqlite3.Database;
 
 	configuration: SQLiteConfiguration = {
 		database: SQLITE_INMEMORY,
 		schema,
 		fetch: async ({ documentName }) => {
-			return new Promise((resolve, reject) => {
-				this.db?.get(
-					selectQuery,
-					{
-						$name: documentName,
-					},
-					(error, row) => {
-						if (error) {
-							reject(error);
-						}
+			const row = this.db
+				?.prepare(selectQuery)
+				.get({ name: documentName }) as { data: Buffer } | undefined;
 
-						resolve((row as any)?.data);
-					},
-				);
-			});
+			return row?.data ?? null;
 		},
 		store: async ({ documentName, state }) => {
-			this.db?.run(upsertQuery, {
-				$name: documentName,
-				$data: state,
+			this.db?.prepare(upsertQuery).run({
+				name: documentName,
+				data: state,
 			});
 		},
 	};
@@ -76,8 +66,8 @@ export class SQLite extends Database {
 	}
 
 	async onConfigure() {
-		this.db = new sqlite3.Database(this.configuration.database);
-		this.db.run(this.configuration.schema);
+		this.db = new BetterSqlite3(this.configuration.database);
+		this.db.exec(this.configuration.schema);
 	}
 
 	async onListen() {
