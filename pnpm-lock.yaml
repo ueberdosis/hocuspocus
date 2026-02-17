@@ -361,12 +361,21 @@ importers:
 
   tests:
     dependencies:
+      '@hocuspocus/common':
+        specifier: workspace:^
+        version: link:../packages/common
+      '@hocuspocus/extension-database':
+        specifier: workspace:^
+        version: link:../packages/extension-database
       '@hocuspocus/extension-logger':
         specifier: workspace:^
         version: link:../packages/extension-logger
       '@hocuspocus/extension-redis':
         specifier: workspace:^
         version: link:../packages/extension-redis
+      '@hocuspocus/extension-s3':
+        specifier: workspace:^
+        version: link:../packages/extension-s3
       '@hocuspocus/extension-throttle':
         specifier: workspace:^
         version: link:../packages/extension-throttle

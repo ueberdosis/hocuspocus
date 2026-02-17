@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@hocuspocus/common": "workspace:^",
+    "@hocuspocus/extension-database": "workspace:^",
     "@hocuspocus/extension-logger": "workspace:^",
     "@hocuspocus/extension-redis": "workspace:^",
+    "@hocuspocus/extension-s3": "workspace:^",
     "@hocuspocus/extension-throttle": "workspace:^",
     "@hocuspocus/provider": "workspace:^",
     "@hocuspocus/server": "workspace:^",
