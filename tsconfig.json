@@ -1,40 +1,29 @@
 {
-  "compilerOptions": {
-    "target": "es2019",
-    "module": "esnext",
-    "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "rewriteRelativeImportExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
-    "experimentalDecorators": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "rootDir": ".",
-    "allowJs": false,
-    "checkJs": false,
-    "paths": {
-      "@hocuspocus/*": [
-        "packages/*/src/index.ts",
-      ]
-    },
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "skipLibCheck": true
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/dist"
-  ]
+	"compilerOptions": {
+		"target": "es2019",
+		"module": "esnext",
+		"strict": true,
+		"jsx": "react",
+		"importHelpers": true,
+		"resolveJsonModule": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noEmit": true,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"baseUrl": ".",
+		"rootDir": ".",
+		"allowJs": false,
+		"checkJs": false,
+		"paths": {
+			"@hocuspocus/*": ["packages/*/src/index.ts"]
+		},
+		"lib": ["esnext", "dom"],
+		"skipLibCheck": true
+	},
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["**/node_modules", "**/dist"]
 }
