@@ -245,7 +245,7 @@ export class Connection<Context = any> {
 					e,
 				);
 				this.close({
-					code: "code" in e ? e.code : ResetConnection.code,
+					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
 					reason: "reason" in e ? e.reason : ResetConnection.reason,
 				});
 			}
