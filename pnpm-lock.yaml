@@ -85,10 +85,10 @@ importers:
         version: link:../server
       '@sesamecare-oss/redlock':
         specifier: ^1.4.0
-        version: 1.4.0(ioredis@5.9.3)
+        version: 1.4.0(ioredis@5.6.1)
       ioredis:
-        specifier: ^5.6.1
-        version: 5.9.3
+        specifier: ~5.6.1
+        version: 5.6.1
       kleur:
         specifier: ^4.1.4
         version: 4.1.5
@@ -3346,8 +3346,8 @@ packages:
       '@types/node':
         optional: true
 
-  ioredis@5.9.3:
-    resolution: {integrity: sha512-VI5tMCdeoxZWU5vjHWsiE/Su76JGhBvWF1MJnV9ZtGltHk9BmD48oDq8Tj8haZ85aceXZMxLNDQZRVo5QKNgXA==}
+  ioredis@5.6.1:
+    resolution: {integrity: sha512-UxC0Yv1Y4WRJiGQxQkP0hfdL0/5/6YvdfOOClRgJ0qppSarkhneSa6UvkMkms0AkdGimSH3Ikqm+6mkMmX7vGA==}
     engines: {node: '>=12.22.0'}
 
   ip-address@10.1.0:
@@ -6736,9 +6736,9 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.0-rc.4': {}
 
-  '@sesamecare-oss/redlock@1.4.0(ioredis@5.9.3)':
+  '@sesamecare-oss/redlock@1.4.0(ioredis@5.6.1)':
     dependencies:
-      ioredis: 5.9.3
+      ioredis: 5.6.1
 
   '@sigstore/bundle@4.0.0':
     dependencies:
@@ -8865,7 +8865,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.19.11
 
-  ioredis@5.9.3:
+  ioredis@5.6.1:
     dependencies:
       '@ioredis/commands': 1.5.0
       cluster-key-slot: 1.1.2
