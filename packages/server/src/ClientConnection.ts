@@ -382,6 +382,12 @@ export class ClientConnection<Context = any> {
 				);
 
 				this.websocket.send(message.toUint8Array());
+
+				// Clean up all state for this document so a retry is treated
+				// as a fresh first connection attempt.
+				this.documentConnectionsEstablished.delete(documentName);
+				delete this.hookPayloads[documentName];
+				delete this.incomingMessageQueue[documentName];
 			}
 
 			// Catch errors due to failed decoding of data
