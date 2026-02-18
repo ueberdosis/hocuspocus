@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/extension-throttle",
-	"version": "3.4.6-rc.2",
+	"version": "4.0.0-rc.0",
 	"description": "hocuspocus throttle extension",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [

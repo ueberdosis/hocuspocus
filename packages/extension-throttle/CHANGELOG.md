@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+
+
+
+
+
 ## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
 
 **Note:** Version bump only for package @hocuspocus/extension-throttle

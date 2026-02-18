@@ -1,9 +1,13 @@
 {
 	"name": "@hocuspocus/extension-redis",
-	"version": "3.4.6-rc.2",
+	"version": "4.0.0-rc.0",
 	"description": "Scale Hocuspocus horizontally with Redis",
 	"homepage": "https://hocuspocus.dev",
-	"keywords": ["hocuspocus", "redis", "yjs"],
+	"keywords": [
+		"hocuspocus",
+		"redis",
+		"yjs"
+	],
 	"license": "MIT",
 	"type": "module",
 	"main": "dist/hocuspocus-redis.cjs",
@@ -19,7 +23,10 @@
 			"types": "./dist/index.d.ts"
 		}
 	},
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"devDependencies": {
 		"@types/lodash.debounce": "^4.0.6"
 	},

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+**Note:** Version bump only for package @hocuspocus/transformer
+
+
+
+
+
 ## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
 
 **Note:** Version bump only for package @hocuspocus/transformer

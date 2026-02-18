@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* better type safety for yjs origin. Improve type safety and allow any yjs operation to skip store document hooks. ([5f480cd](https://github.com/ueberdosis/hocuspocus/commit/5f480cd07de378704a8b13780460e43ab7917655))
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* process update message in the order that they are received ([#1058](https://github.com/ueberdosis/hocuspocus/issues/1058)) ([b6162ac](https://github.com/ueberdosis/hocuspocus/commit/b6162ac9154d0e56bca748917e4ebe1e3fb071cf))
+
+
+
+
+
 ## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

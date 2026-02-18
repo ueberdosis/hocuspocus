@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* migrate from sqlite3 to better-sqlite3, as sqlite3 is now unmaintained. ([a247146](https://github.com/ueberdosis/hocuspocus/commit/a24714624c6effdb521e84352f0623d24be5d3f0))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+
+
+
+
+
 ## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
 
 **Note:** Version bump only for package @hocuspocus/extension-sqlite
