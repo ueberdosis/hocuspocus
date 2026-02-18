@@ -4,7 +4,6 @@ import { Doc } from "yjs";
 import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" assert { type: "json" };
 import { ClientConnection } from "./ClientConnection.ts";
-import type Connection from "./Connection.ts";
 import { DirectConnection } from "./DirectConnection.ts";
 import Document from "./Document.ts";
 import type { Server } from "./Server.ts";
@@ -26,9 +25,9 @@ import { getParameters } from "./util/getParameters.ts";
 
 export const defaultConfiguration = {
 	name: null,
-	timeout: 30000,
-	debounce: 2000,
-	maxDebounce: 10000,
+	timeout: 60_000,
+	debounce: 2_000,
+	maxDebounce: 10_000,
 	quiet: false,
 	yDocOptions: {
 		gc: true,

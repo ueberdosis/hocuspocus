@@ -8,7 +8,6 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import * as encoding from "lib0/encoding";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
@@ -67,7 +66,7 @@ export class ClientConnection<Context = any> {
 
 	pingInterval: NodeJS.Timeout;
 
-	pongReceived = true;
+	lastMessageReceivedAt = Date.now();
 
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
@@ -112,43 +111,15 @@ export class ClientConnection<Context = any> {
 	}
 
 	/**
-	 * Handle pong response
-	 */
-	handlePong = () => {
-		this.pongReceived = true;
-	};
-
-	/**
-	 * Send ping message (application-level)
-	 */
-	private sendPing = () => {
-		if (
-			this.websocket.readyState === WsReadyStates.Closing ||
-			this.websocket.readyState === WsReadyStates.Closed
-		) {
-			return;
-		}
-
-		try {
-			const encoder = encoding.createEncoder();
-			encoding.writeVarUint(encoder, MessageType.Ping);
-			this.websocket.send(encoding.toUint8Array(encoder));
-		} catch (error) {
-			this.close(ConnectionTimeout);
-		}
-	};
-
-	/**
-	 * Check if pong was received and close the connection otherwise
-	 * @private
+	 * Close the connection if no messages have been received within the timeout period.
+	 * This replaces application-level ping/pong to maintain backward compatibility
+	 * with older provider versions that don't understand Ping/Pong message types.
+	 * Awareness updates (~every 30s) keep active connections alive.
 	 */
 	private check = () => {
-		if (!this.pongReceived) {
-			return this.close(ConnectionTimeout);
+		if (Date.now() - this.lastMessageReceivedAt > this.timeout) {
+			this.close(ConnectionTimeout);
 		}
-
-		this.pongReceived = false;
-		this.sendPing();
 	};
 
 	/**
@@ -412,15 +383,9 @@ export class ClientConnection<Context = any> {
 	 * when the WebSocket receives a binary message.
 	 */
 	handleMessage = (data: Uint8Array) => {
-		try {
-			// Check for connection-level Pong message
-			// Pong messages are just 1 byte (the message type)
-			// We check length to avoid confusing with regular messages
-			if (data.length === 1 && data[0] === MessageType.Pong) {
-				this.handlePong();
-				return;
-			}
+		this.lastMessageReceivedAt = Date.now();
 
+		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 
 			const documentName = decoding.readVarString(tmpMsg.decoder);
