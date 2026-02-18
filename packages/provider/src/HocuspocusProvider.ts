@@ -1,5 +1,4 @@
 import { awarenessStatesToArray } from "@hocuspocus/common";
-import type { Event, MessageEvent } from "ws";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";
@@ -13,22 +12,22 @@ import { AwarenessMessage } from "./OutgoingMessages/AwarenessMessage.ts";
 import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
-import type {
-	AuthorizedScope,
-	ConstructableOutgoingMessage,
-	onAuthenticatedParameters,
-	onAuthenticationFailedParameters,
-	onAwarenessChangeParameters,
-	onAwarenessUpdateParameters,
-	onCloseParameters,
-	onDisconnectParameters,
-	onMessageParameters,
-	onOpenParameters,
-	onOutgoingMessageParameters,
-	onStatelessParameters,
-	onStatusParameters,
-	onSyncedParameters,
-	onUnsyncedChangesParameters,
+import {
+	type AuthorizedScope,
+	type ConstructableOutgoingMessage,
+	type onAuthenticatedParameters,
+	type onAuthenticationFailedParameters,
+	type onAwarenessChangeParameters,
+	type onAwarenessUpdateParameters,
+	type onCloseParameters,
+	type onDisconnectParameters,
+	type onMessageParameters,
+	type onOpenParameters,
+	type onOutgoingMessageParameters,
+	type onStatelessParameters,
+	type onStatusParameters,
+	type onSyncedParameters,
+	type onUnsyncedChangesParameters,
 } from "./types.ts";
 
 export type HocuspocusProviderConfiguration = Required<

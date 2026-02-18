@@ -1,8 +1,22 @@
+import { builtinModules } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
+
+const nodeBuiltins = new Set(builtinModules);
+
+function nodeProtocolPlugin() {
+	return {
+		name: "node-protocol",
+		resolveId(source) {
+			if (nodeBuiltins.has(source)) {
+				return { id: `node:${source}`, external: true };
+			}
+		},
+	};
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,6 +61,7 @@ const configs = packages.flatMap((pkg) => {
 			// Also externalize Node built-ins
 			/^node:/,
 		],
+		plugins: [nodeProtocolPlugin()],
 		output: [
 			{
 				file: path.join(basePath, exports.default.require),
@@ -70,7 +85,7 @@ const configs = packages.flatMap((pkg) => {
 	const dtsConfig = defineConfig({
 		input,
 		external: [...external, /^node:/],
-		plugins: [dts({ emitDtsOnly: true })],
+		plugins: [nodeProtocolPlugin(), dts({ emitDtsOnly: true })],
 		output: {
 			dir: path.join(basePath, "dist"),
 			format: "esm",

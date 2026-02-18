@@ -1,5 +1,4 @@
 import type { Encoder } from "lib0/encoding";
-import type { Event, MessageEvent } from "ws";
 import type { Awareness } from "y-protocols/awareness";
 import type * as Y from "yjs";
 import type { CloseEvent } from "@hocuspocus/common";
@@ -20,6 +19,8 @@ export enum MessageType {
 	Stateless = 5,
 	CLOSE = 7,
 	SyncStatus = 8,
+	Ping = 9,
+	Pong = 10,
 }
 
 export enum WebSocketStatus {

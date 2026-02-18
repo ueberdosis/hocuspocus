@@ -1,6 +1,4 @@
 import crypto from "node:crypto";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -10,7 +8,6 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import type WebSocket from "ws";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
@@ -18,6 +15,7 @@ import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
+	WebSocketLike,
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
@@ -33,7 +31,8 @@ import { getParameters } from "./util/getParameters.ts";
  */
 export class ClientConnection<Context = any> {
 	// this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
-	private readonly documentConnections: Record<string, Connection<Context>> = {};
+	private readonly documentConnections: Record<string, Connection<Context>> =
+		{};
 
 	// While the connection will be establishing messages will
 	// be queued and handled later.
@@ -47,8 +46,8 @@ export class ClientConnection<Context = any> {
 		string,
 		{
 			instance: Hocuspocus;
-			request: IncomingMessage;
-			requestHeaders: IncomingHttpHeaders;
+			request: Request;
+			requestHeaders: Headers;
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
@@ -67,7 +66,7 @@ export class ClientConnection<Context = any> {
 
 	pingInterval: NodeJS.Timeout;
 
-	pongReceived = true;
+	lastMessageReceivedAt = Date.now();
 
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
@@ -76,12 +75,12 @@ export class ClientConnection<Context = any> {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothings fails it’ll fully establish the connection and
+	 * … and if nothings fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	constructor(
-		private readonly websocket: WebSocket,
-		private readonly request: IncomingMessage,
+		private readonly websocket: WebSocketLike,
+		private readonly request: Request,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
 		},
@@ -94,43 +93,31 @@ export class ClientConnection<Context = any> {
 	) {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
-		websocket.on("pong", this.handlePong);
-
-		websocket.on("message", this.messageHandler);
-		websocket.once("close", this.handleWebsocketClose);
 	}
 
-	private handleWebsocketClose = (code: number, reason: Buffer) => {
-		this.close({ code, reason: reason.toString() });
-		this.websocket.removeListener("message", this.messageHandler);
-		this.websocket.removeListener("pong", this.handlePong);
+	/**
+	 * Handle WebSocket close event. Call this from your integration
+	 * when the WebSocket connection closes.
+	 */
+	handleClose(event?: CloseEvent) {
+		this.close(event);
 		clearInterval(this.pingInterval);
-	};
+	}
 
-	close(event?: CloseEvent) {
+	private close(event?: CloseEvent) {
 		Object.values(this.documentConnections).forEach((connection) =>
 			connection.close(event),
 		);
 	}
 
-	handlePong = () => {
-		this.pongReceived = true;
-	};
-
 	/**
-	 * Check if pong was received and close the connection otherwise
-	 * @private
+	 * Close the connection if no messages have been received within the timeout period.
+	 * This replaces application-level ping/pong to maintain backward compatibility
+	 * with older provider versions that don't understand Ping/Pong message types.
+	 * Awareness updates (~every 30s) keep active connections alive.
 	 */
 	private check = () => {
-		if (!this.pongReceived) {
-			return this.close(ConnectionTimeout);
-		}
-
-		this.pongReceived = false;
-
-		try {
-			this.websocket.ping();
-		} catch (error) {
+		if (Date.now() - this.lastMessageReceivedAt > this.timeout) {
 			this.close(ConnectionTimeout);
 		}
 	};
@@ -150,7 +137,7 @@ export class ClientConnection<Context = any> {
 	 * Create a new connection by the given request and document
 	 */
 	private createConnection(
-		connection: WebSocket,
+		connection: WebSocketLike,
 		document: Document,
 	): Connection {
 		const hookPayload = this.hookPayloads[document.name];
@@ -235,7 +222,7 @@ export class ClientConnection<Context = any> {
 		return instance;
 	}
 
-	// Once all hooks are run, we’ll fully establish the connection:
+	// Once all hooks are run, we'll fully establish the connection:
 	private setUpNewConnection = async (documentName: string) => {
 		const hookPayload = this.hookPayloads[documentName];
 		// If no hook interrupts, create a document and connection
@@ -262,8 +249,8 @@ export class ClientConnection<Context = any> {
 					{
 						...hookPayload,
 						...payload,
-						connection,
 						document,
+						connection,
 						documentName,
 					},
 					(contextAdditions: Partial<Context>) => {
@@ -292,10 +279,10 @@ export class ClientConnection<Context = any> {
 			return;
 		}
 
-		// There’s no need to queue messages anymore.
-		// Let’s work through queued messages.
+		// There's no need to queue messages anymore.
+		// Let's work through queued messages.
 		this.incomingMessageQueue[documentName].forEach((input) => {
-			this.websocket.emit("message", input);
+			this.handleMessage(input);
 		});
 
 		await this.hooks("connected", {
@@ -324,7 +311,7 @@ export class ClientConnection<Context = any> {
 				return;
 			}
 
-			// Okay, we’ve got the authentication message we’re waiting for:
+			// Okay, we've got the authentication message we're waiting for:
 			this.documentConnectionsEstablished.add(documentName);
 
 			// The 2nd integer contains the submessage type
@@ -397,7 +384,13 @@ export class ClientConnection<Context = any> {
 		}
 	};
 
-	private messageHandler = (data: Uint8Array) => {
+	/**
+	 * Handle an incoming WebSocket message. Call this from your integration
+	 * when the WebSocket receives a binary message.
+	 */
+	handleMessage = (data: Uint8Array) => {
+		this.lastMessageReceivedAt = Date.now();
+
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 

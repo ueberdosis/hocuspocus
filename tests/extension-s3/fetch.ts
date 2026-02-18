@@ -1,3 +1,4 @@
+// @ts-nocheck - AWS SDK types resolved through extension package
 import test from "ava";
 import sinon from "sinon";
 import { S3 } from "@hocuspocus/extension-s3";

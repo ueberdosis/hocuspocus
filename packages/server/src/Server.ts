@@ -4,20 +4,24 @@ import type {
 	ServerResponse,
 } from "node:http";
 import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import type { ListenOptions } from "node:net";
+import crossws from "crossws/adapters/node";
 import kleur from "kleur";
-import type WebSocket from "ws";
-import { WebSocketServer } from "ws";
-import type { AddressInfo, ServerOptions } from "ws";
 import meta from "../package.json" assert { type: "json" };
 import { Hocuspocus, defaultConfiguration } from "./Hocuspocus.ts";
-import type { Configuration, onListenPayload } from "./types.ts";
+import type { Configuration, WebSocketLike, onListenPayload } from "./types.ts";
 
 export interface ServerConfiguration<Context = any>
 	extends Configuration<Context> {
 	port?: number;
 	address?: string;
 	stopOnSignals?: boolean;
+	/**
+	 * Options passed to the underlying WebSocket server (ws).
+	 * Supports all ws ServerOptions, e.g. { maxPayload: 1024 * 1024 }
+	 */
+	websocketOptions?: Record<string, any>;
 }
 
 export const defaultServerConfiguration = {
@@ -29,7 +33,7 @@ export const defaultServerConfiguration = {
 export class Server<Context = any> {
 	httpServer: HTTPServer;
 
-	webSocketServer: WebSocketServer;
+	private crossws: ReturnType<typeof crossws>;
 
 	hocuspocus: Hocuspocus<Context>;
 
@@ -39,10 +43,7 @@ export class Server<Context = any> {
 		extensions: [],
 	};
 
-	constructor(
-		configuration?: Partial<ServerConfiguration<Context>>,
-		websocketOptions: ServerOptions = {},
-	) {
+	constructor(configuration?: Partial<ServerConfiguration<Context>>) {
 		if (configuration) {
 			this.configuration = {
 				...this.configuration,
@@ -54,38 +55,36 @@ export class Server<Context = any> {
 		this.hocuspocus.server = this;
 
 		this.httpServer = createServer(this.requestHandler);
-		this.webSocketServer = new WebSocketServer({
-			noServer: true,
-			...websocketOptions,
+		this.crossws = crossws({
+			serverOptions: this.configuration.websocketOptions,
+			hooks: {
+				open: (peer) => {
+					const clientConnection = this.hocuspocus.handleConnection(
+						peer.websocket as unknown as WebSocketLike,
+						peer.request as Request,
+					);
+					(peer as any)._hocuspocus = clientConnection;
+				},
+				message: (peer, message) => {
+					(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+				},
+				close: (peer, event) => {
+					(peer as any)._hocuspocus?.handleClose({
+						code: event.code,
+						reason: event.reason,
+					});
+				},
+				error: (peer, error) => {
+					console.error("WebSocket error for peer:", peer.id);
+					console.error(error);
+				},
+			},
 		});
 
-		this.setupWebsocketConnection();
 		this.setupHttpUpgrade();
 	}
 
-	setupWebsocketConnection = () => {
-		this.webSocketServer.on(
-			"connection",
-			async (incoming: WebSocket, request: IncomingMessage) => {
-				incoming.setMaxListeners(Number.POSITIVE_INFINITY);
-
-				incoming.on("error", (error) => {
-					/**
-					 * Handle a ws instance error, which is required to prevent
-					 * the server from crashing when one happens
-					 * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
-					 * @private
-					 */
-					console.error("Error emitted from webSocket instance:");
-					console.error(error);
-				});
-
-				this.hocuspocus.handleConnection(incoming, request);
-			},
-		);
-	};
-
-	setupHttpUpgrade = () => {
+	private setupHttpUpgrade = () => {
 		this.httpServer.on("upgrade", async (request, socket, head) => {
 			try {
 				await this.hocuspocus.hooks("onUpgrade", {
@@ -95,11 +94,8 @@ export class Server<Context = any> {
 					instance: this.hocuspocus,
 				});
 
-				// let the default websocket server handle the connection if
-				// prior hooks don't interfere
-				this.webSocketServer.handleUpgrade(request, socket, head, (ws) => {
-					this.webSocketServer.emit("connection", ws, request);
-				});
+				// Let crossws handle the WebSocket upgrade
+				this.crossws.handleUpgrade(request, socket, head);
 			} catch (error) {
 				// if a hook rejects and the error is empty, do nothing
 				// this is only meant to prevent later hooks and the
@@ -201,19 +197,19 @@ export class Server<Context = any> {
 		}) as AddressInfo;
 	}
 
-	async destroy(): Promise<any> {
-		await new Promise(async (resolve) => {
+	async destroy(): Promise<void> {
+		await new Promise<void>((resolve) => {
 			this.httpServer.close();
 
 			try {
 				this.configuration.extensions.push({
 					async afterUnloadDocument({ instance }) {
-						if (instance.getDocumentsCount() === 0) resolve("");
+						if (instance.getDocumentsCount() === 0) resolve();
 					},
 				});
 
-				this.webSocketServer.close();
-				if (this.hocuspocus.getDocumentsCount() === 0) resolve("");
+				// Close all existing connections - this will trigger the close hook
+				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
 
 				this.hocuspocus.closeConnections();
 			} catch (error) {

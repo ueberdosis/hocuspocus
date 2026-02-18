@@ -1,9 +1,4 @@
-import type {
-	IncomingHttpHeaders,
-	IncomingMessage,
-	ServerResponse,
-} from "node:http";
-import type { URLSearchParams } from "node:url";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
@@ -54,6 +49,15 @@ export function shouldSkipStoreHooks(origin: unknown): boolean {
 	}
 }
 
+/**
+ * Minimal interface for any WebSocket-like object for WebSocket, Bun's ServerWebSocket, ws, Deno, etc.
+ */
+export interface WebSocketLike {
+	send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
+	close(code?: number, reason?: string): void;
+	readyState: number;
+}
+
 export enum MessageType {
 	Unknown = -1,
 	Sync = 0,
@@ -65,6 +69,8 @@ export enum MessageType {
 	BroadcastStateless = 6,
 	CLOSE = 7,
 	SyncStatus = 8,
+	Ping = 9,
+	Pong = 10,
 }
 
 export interface AwarenessUpdate {
@@ -214,9 +220,9 @@ export interface onAuthenticatePayload<Context = any> {
 	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
-	request: IncomingMessage;
+	request: Request;
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
@@ -227,7 +233,7 @@ export interface onTokenSyncPayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	token: string;
@@ -239,7 +245,7 @@ export interface onCreateDocumentPayload<Context = any> {
 	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -249,8 +255,8 @@ export interface onConnectPayload<Context = any> {
 	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
-	request: IncomingMessage;
-	requestHeaders: IncomingHttpHeaders;
+	request: Request;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -260,8 +266,8 @@ export interface connectedPayload<Context = any> {
 	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
-	request: IncomingMessage;
-	requestHeaders: IncomingHttpHeaders;
+	request: Request;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -273,7 +279,7 @@ export interface onLoadDocumentPayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -284,7 +290,7 @@ export interface afterLoadDocumentPayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -296,7 +302,7 @@ export interface onChangePayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
@@ -310,7 +316,7 @@ export interface beforeHandleMessagePayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
@@ -378,7 +384,7 @@ export interface fetchPayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
@@ -395,7 +401,7 @@ export interface onDisconnectPayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 }
