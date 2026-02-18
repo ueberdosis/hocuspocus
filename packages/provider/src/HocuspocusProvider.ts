@@ -1,5 +1,4 @@
 import { awarenessStatesToArray } from "@hocuspocus/common";
-import * as encoding from "lib0/encoding";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";
@@ -14,7 +13,6 @@ import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
 import {
-	MessageType,
 	type AuthorizedScope,
 	type ConstructableOutgoingMessage,
 	type onAuthenticatedParameters,
@@ -437,17 +435,6 @@ export class HocuspocusProvider extends EventEmitter {
 	}
 
 	onMessage(event: MessageEvent) {
-		const data = new Uint8Array(event.data as ArrayBuffer);
-
-		// Check for connection-level Ping message (no document name prefix)
-		// Ping messages are sent as just the message type byte (length 1)
-		// We check length to avoid confusing with regular messages that happen to have
-		// a document name length of 9 as the first byte
-		if (data.length === 1 && data[0] === MessageType.Ping) {
-			this.sendPong();
-			return;
-		}
-
 		const message = new IncomingMessage(event.data);
 
 		const documentName = message.readVarString();
@@ -457,15 +444,6 @@ export class HocuspocusProvider extends EventEmitter {
 		this.emit("message", { event, message: new IncomingMessage(event.data) });
 
 		new MessageReceiver(message).apply(this, true);
-	}
-
-	/**
-	 * Send application-level Pong response to server Ping
-	 */
-	private sendPong() {
-		const encoder = encoding.createEncoder();
-		encoding.writeVarUint(encoder, MessageType.Pong);
-		this.configuration.websocketProvider.send(encoding.toUint8Array(encoder));
 	}
 
 	onClose() {
