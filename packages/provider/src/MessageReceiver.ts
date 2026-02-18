@@ -60,7 +60,7 @@ export class MessageReceiver {
 				break;
 
 			default:
-				throw new Error(`Can’t apply message of unknown type: ${type}`);
+				console.error(`Can’t apply message of unknown type: ${type}`);
 		}
 
 		// Reply
