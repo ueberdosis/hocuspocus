@@ -8,6 +8,7 @@
     "@hocuspocus/extension-database": "workspace:^",
     "@hocuspocus/extension-logger": "workspace:^",
     "@hocuspocus/extension-redis": "workspace:^",
+    "@aws-sdk/client-s3": "^3.981.0",
     "@hocuspocus/extension-s3": "workspace:^",
     "@hocuspocus/extension-throttle": "workspace:^",
     "@hocuspocus/provider": "workspace:^",
