@@ -365,6 +365,9 @@ importers:
 
   tests:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.981.0
+        version: 3.990.0
       '@hocuspocus/common':
         specifier: workspace:^
         version: link:../packages/common
