@@ -69,9 +69,9 @@ test("sets the provider to readOnly", async (t) => {
 
 		newHocuspocusProvider(server, {
 			onSynced() {
-				server.documents.get("hocuspocus-test")?.connections.forEach((conn) => {
-					t.is(conn.connection.readOnly, true);
-				});
+				for (const connection of server.documents.get("hocuspocus-test")?.connections.keys() ?? []) {
+					t.is(connection.readOnly, true);
+				}
 				resolve("done");
 			},
 		});

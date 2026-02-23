@@ -38,7 +38,19 @@ export class Connection<Context = any> {
 
 	readOnly: boolean;
 
+	sessionId: string | null;
+
 	providerVersion: string | null;
+
+	/**
+	 * The address string prefixed to outgoing messages.
+	 * Session-aware clients get `documentName\0sessionId`; legacy clients get plain `documentName`.
+	 */
+	get messageAddress(): string {
+		return this.sessionId
+			? `${this.document.name}\0${this.sessionId}`
+			: this.document.name;
+	}
 
 	private messageQueue: Uint8Array[] = [];
 
@@ -54,6 +66,7 @@ export class Connection<Context = any> {
 		socketId: string,
 		context: Context,
 		readOnly = false,
+		sessionId?: string | null,
 		providerVersion?: string | null,
 	) {
 		this.webSocket = connection;
@@ -62,6 +75,7 @@ export class Connection<Context = any> {
 		this.request = request;
 		this.socketId = socketId;
 		this.readOnly = readOnly;
+		this.sessionId = sessionId ?? null;
 		this.providerVersion = providerVersion ?? null;
 
 		this.document.addConnection(this);
@@ -157,7 +171,7 @@ export class Connection<Context = any> {
 	 * Send a stateless message with payload
 	 */
 	public sendStateless(payload: string): void {
-		const message = new OutgoingMessage(this.document.name).writeStateless(
+		const message = new OutgoingMessage(this.messageAddress).writeStateless(
 			payload,
 		);
 
@@ -169,7 +183,7 @@ export class Connection<Context = any> {
 	 */
 	public requestToken(): void {
 		const message = new OutgoingMessage(
-			this.document.name,
+			this.messageAddress,
 		).writeTokenSyncRequest();
 
 		this.send(message.toUint8Array());
@@ -186,7 +200,7 @@ export class Connection<Context = any> {
 					callback(this.document, event),
 			);
 
-			const closeMessage = new OutgoingMessage(this.document.name);
+			const closeMessage = new OutgoingMessage(this.messageAddress);
 			closeMessage.writeCloseMessage(
 				event?.reason ?? "Server closed the connection",
 			);
@@ -204,7 +218,7 @@ export class Connection<Context = any> {
 		}
 
 		const awarenessMessage = new OutgoingMessage(
-			this.document.name,
+			this.messageAddress,
 		).createAwarenessUpdateMessage(this.document.awareness);
 
 		this.send(awarenessMessage.toUint8Array());
@@ -227,14 +241,18 @@ export class Connection<Context = any> {
 			const rawUpdate = this.messageQueue.at(0) as Uint8Array;
 
 			const message = new IncomingMessage(rawUpdate);
-			const documentName = message.readVarString();
+			const rawKey = message.readVarString();
 
+			// Accept messages addressed with either the plain documentName or documentName\0sessionId
+			const sepIdx = rawKey.indexOf('\0');
+			const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx);
 			if (documentName !== this.document.name) {
 				this.messageQueue.shift();
 				continue;
 			}
 
-			message.writeVarString(documentName);
+			// Write the correct address so replies reach the right provider
+			message.writeVarString(this.messageAddress);
 
 			try {
 				await this.callbacks.beforeHandleMessage(this, rawUpdate);

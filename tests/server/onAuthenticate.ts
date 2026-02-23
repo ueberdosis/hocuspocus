@@ -303,13 +303,13 @@ test("onAuthenticate readonly auth only affects 1 doc (when multiplexing)", asyn
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	t.is(
-		server.documents.get("doc1")!.connections.values().next().value!.connection
+		server.documents.get("doc1")!.connections.keys().next().value!
 			.readOnly,
 		true,
 	);
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	t.is(
-		server.documents.get("doc2")!.connections.values().next().value!.connection
+		server.documents.get("doc2")!.connections.keys().next().value!
 			.readOnly,
 		false,
 	);

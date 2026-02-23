@@ -168,7 +168,7 @@ test('server requestToken: executes onTokenSync when server requests token after
 
     const document = server.documents.get('hocuspocus-test')
     if (document) {
-      const connection = document.connections.values().next().value?.connection
+      const connection = document.connections.keys().next().value
       if (connection) {
         connection.requestToken()
       }
@@ -204,7 +204,7 @@ test('server requestToken: executes onTokenSync from custom extension when serve
 
     const document = server.documents.get('hocuspocus-test')
     if (document) {
-      const connection = document.connections.values().next().value?.connection
+      const connection = document.connections.keys().next().value
       if (connection) {
         connection.requestToken()
       }
@@ -239,7 +239,7 @@ test('server requestToken: onTokenSync receives correct token when server reques
     // Now trigger token sync request from server
     const document = server.documents.get('hocuspocus-test')
     if (document) {
-      const connection = document.connections.values().next().value?.connection
+      const connection = document.connections.keys().next().value
       if (connection) {
         connection.requestToken()
       }
@@ -293,8 +293,8 @@ test('server requestToken: onTokenSync works with multiple documents when server
     await sleep(100)
 
     // Now trigger token sync requests from server for both documents
-    const doc1Connection = server.documents.get(doc1)?.connections.values().next().value?.connection
-    const doc2Connection = server.documents.get(doc2)?.connections.values().next().value?.connection
+    const doc1Connection = server.documents.get(doc1)?.connections.keys().next().value
+    const doc2Connection = server.documents.get(doc2)?.connections.keys().next().value
 
     if (doc1Connection) doc1Connection.requestToken()
     if (doc2Connection) doc2Connection.requestToken()
@@ -324,7 +324,7 @@ test('server requestToken: onTokenSync works with readonly connections when serv
     // Now trigger token sync request from server
     const document = server.documents.get('hocuspocus-test')
     if (document) {
-      const connection = document.connections.values().next().value?.connection
+      const connection = document.connections.keys().next().value
       if (connection) {
         connection.requestToken()
       }
@@ -356,7 +356,7 @@ test('server requestToken: failure of onTokenSync should close the connection', 
 
     const document = server.documents.get('hocuspocus-test')
     if (document) {
-      const connection = document.connections.values().next().value?.connection
+      const connection = document.connections.keys().next().value
       if (connection) {
         connection.requestToken()
       }
