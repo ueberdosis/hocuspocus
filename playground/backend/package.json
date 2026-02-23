@@ -34,6 +34,6 @@
 	"devDependencies": {
 		"@types/jsonwebtoken": "^9.0.1",
 		"@types/koa": "^2.13.5",
-		"nodemon": "^3.1.7"
+		"nodemon": "^3.1.14"
 	}
 }

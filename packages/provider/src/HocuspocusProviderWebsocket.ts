@@ -210,7 +210,20 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	}
 
 	attach(provider: HocuspocusProvider) {
-		this.configuration.providerMap.set(provider.configuration.name, provider);
+		const key = provider.effectiveName;
+		const existing = this.configuration.providerMap.get(key);
+
+		if (existing && existing !== provider) {
+			// Allow replacing a provider that hasn't authenticated (e.g., after auth failure retry)
+			if (existing.isAuthenticated) {
+				throw new Error(
+					`Cannot attach two providers with the same effective name "${key}". ` +
+					"Use sessionAwareness: true to multiplex providers with the same document name.",
+				);
+			}
+		}
+
+		this.configuration.providerMap.set(key, provider);
 
 		if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
 			this.connect();
@@ -225,11 +238,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	}
 
 	detach(provider: HocuspocusProvider) {
-		if (this.configuration.providerMap.has(provider.configuration.name)) {
+		const key = provider.effectiveName;
+		if (this.configuration.providerMap.has(key)) {
 			provider.send(CloseMessage, {
-				documentName: provider.configuration.name,
+				documentName: key,
 			});
-			this.configuration.providerMap.delete(provider.configuration.name);
+			this.configuration.providerMap.delete(key);
 		}
 	}
 
@@ -386,9 +400,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 
 		const message = new IncomingMessage(data);
-		const documentName = message.peekVarString();
+		const rawKey = message.peekVarString();
 
-		this.configuration.providerMap.get(documentName)?.onMessage(event);
+		const provider = this.configuration.providerMap.get(rawKey);
+		provider?.onMessage(event);
 	}
 
 	/**
