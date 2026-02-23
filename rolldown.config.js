@@ -18,6 +18,18 @@ function nodeProtocolPlugin() {
 	};
 }
 
+function defineVersionPlugin(version) {
+	const replacement = JSON.stringify(version);
+	return {
+		name: "define-version",
+		transform(code, id) {
+			if (code.includes("__HOCUSPOCUS_VERSION__")) {
+				return { code: code.replaceAll("__HOCUSPOCUS_VERSION__", replacement) };
+			}
+		},
+	};
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -61,7 +73,7 @@ const configs = packages.flatMap((pkg) => {
 			// Also externalize Node built-ins
 			/^node:/,
 		],
-		plugins: [nodeProtocolPlugin()],
+		plugins: [nodeProtocolPlugin(), defineVersionPlugin(pkg.package.version)],
 		output: [
 			{
 				file: path.join(basePath, exports.default.require),

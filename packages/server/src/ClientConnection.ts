@@ -52,6 +52,7 @@ export class ClientConnection<Context = any> {
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
 			context: Context;
+			providerVersion: string | null;
 		}
 	> = {};
 
@@ -148,6 +149,7 @@ export class ClientConnection<Context = any> {
 			hookPayload.socketId,
 			hookPayload.context,
 			hookPayload.connectionConfig.readOnly,
+			hookPayload.providerVersion,
 		);
 
 		instance.onClose(async (document, event) => {
@@ -319,8 +321,15 @@ export class ClientConnection<Context = any> {
 			decoding.readVarUint(tmpMsg.decoder);
 			const token = decoding.readVarString(tmpMsg.decoder);
 
+			// Try to read providerVersion (new protocol field, sent by v4+ providers)
+			let providerVersion: string | null = null;
+			if (decoding.hasContent(tmpMsg.decoder)) {
+				providerVersion = decoding.readVarString(tmpMsg.decoder);
+			}
+
 			try {
 				const hookPayload = this.hookPayloads[documentName];
+				hookPayload.providerVersion = providerVersion;
 
 				await this.hooks(
 					"onConnect",
@@ -412,7 +421,7 @@ export class ClientConnection<Context = any> {
 					throw new Error("first message, but hookPayloads exists");
 				}
 
-				const hookPayload = {
+				this.hookPayloads[documentName] = {
 					instance: this.documentProvider as Hocuspocus,
 					request: this.request,
 					connectionConfig: {
@@ -425,9 +434,8 @@ export class ClientConnection<Context = any> {
 					context: {
 						...this.defaultContext,
 					},
+					providerVersion: null as string | null,
 				};
-
-				this.hookPayloads[documentName] = hookPayload;
 			}
 
 			this.handleQueueingMessage(data);

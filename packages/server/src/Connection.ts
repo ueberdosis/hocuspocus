@@ -38,6 +38,8 @@ export class Connection<Context = any> {
 
 	readOnly: boolean;
 
+	providerVersion: string | null;
+
 	private messageQueue: Uint8Array[] = [];
 
 	private processingPromise: Promise<void> = Promise.resolve();
@@ -52,6 +54,7 @@ export class Connection<Context = any> {
 		socketId: string,
 		context: Context,
 		readOnly = false,
+		providerVersion?: string | null,
 	) {
 		this.webSocket = connection;
 		this.context = context;
@@ -59,6 +62,7 @@ export class Connection<Context = any> {
 		this.request = request;
 		this.socketId = socketId;
 		this.readOnly = readOnly;
+		this.providerVersion = providerVersion ?? null;
 
 		this.document.addConnection(this);
 

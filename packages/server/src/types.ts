@@ -226,6 +226,7 @@ export interface onAuthenticatePayload<Context = any> {
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
+	providerVersion: string | null;
 }
 
 export interface onTokenSyncPayload<Context = any> {
@@ -260,6 +261,7 @@ export interface onConnectPayload<Context = any> {
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
+	providerVersion: string | null;
 }
 
 export interface connectedPayload<Context = any> {
@@ -272,6 +274,7 @@ export interface connectedPayload<Context = any> {
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
 	connection: Connection<Context>;
+	providerVersion: string | null;
 }
 
 export interface onLoadDocumentPayload<Context = any> {

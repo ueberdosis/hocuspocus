@@ -3,6 +3,7 @@ import { writeAuthentication } from "@hocuspocus/common";
 import type { OutgoingMessageArguments } from "../types.ts";
 import { MessageType } from "../types.ts";
 import { OutgoingMessage } from "../OutgoingMessage.ts";
+import { version } from "../version.ts";
 
 export class AuthenticationMessage extends OutgoingMessage {
 	type = MessageType.Auth;
@@ -19,6 +20,7 @@ export class AuthenticationMessage extends OutgoingMessage {
 		writeVarString(this.encoder, args.documentName!);
 		writeVarUint(this.encoder, this.type);
 		writeAuthentication(this.encoder, args.token);
+		writeVarString(this.encoder, version);
 
 		return this.encoder;
 	}
