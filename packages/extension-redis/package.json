@@ -33,7 +33,7 @@
 	"dependencies": {
 		"@hocuspocus/server": "workspace:^",
 		"@sesamecare-oss/redlock": "^1.4.0",
-		"ioredis": "~5.6.1",
+		"ioredis": "~5.9.3",
 		"kleur": "^4.1.4",
 		"lodash.debounce": "^4.0.8"
 	},
