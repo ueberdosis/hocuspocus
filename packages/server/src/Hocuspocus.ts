@@ -175,7 +175,7 @@ export class Hocuspocus<Context = any> {
 				return;
 			}
 
-			document.connections.forEach(({ connection }) => {
+			document.connections.forEach((_clients, connection) => {
 				connection.close(ResetConnection);
 			});
 		});

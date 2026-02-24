@@ -22,7 +22,10 @@ export class MessageReceiver {
 
 	defaultTransactionOrigin?: TransactionOrigin;
 
-	constructor(message: IncomingMessage, defaultTransactionOrigin?: TransactionOrigin) {
+	constructor(
+		message: IncomingMessage,
+		defaultTransactionOrigin?: TransactionOrigin,
+	) {
 		this.message = message;
 		this.defaultTransactionOrigin = defaultTransactionOrigin;
 	}
@@ -52,7 +55,7 @@ export class MessageReceiver {
 					if (reply) {
 						reply(message.toUint8Array());
 					} else if (connection) {
-						// TODO: We should log this, shouldn’t we?
+						// TODO: We should log this, shouldn't we?
 						// this.logger.log({
 						//   direction: 'out',
 						//   type: MessageType.Awareness,
@@ -68,13 +71,13 @@ export class MessageReceiver {
 				applyAwarenessUpdate(
 					document.awareness,
 					message.readVarUint8Array(),
-					connection?.webSocket,
+					connection ?? null,
 				);
 
 				break;
 			}
 			case MessageType.QueryAwareness: {
-				this.applyQueryAwarenessMessage(document, reply);
+				this.applyQueryAwarenessMessage(document, connection, reply);
 
 				break;
 			}
@@ -134,6 +137,7 @@ export class MessageReceiver {
 		requestFirstSync = true,
 	) {
 		const type = message.readVarUint();
+		const messageAddress = connection?.messageAddress ?? document.name;
 
 		if (connection) {
 			await connection.callbacks.beforeSync(connection, {
@@ -148,13 +152,13 @@ export class MessageReceiver {
 
 				// When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
 				if (reply && requestFirstSync) {
-					const syncMessage = new OutgoingMessage(document.name)
+					const syncMessage = new OutgoingMessage(messageAddress)
 						.createSyncReplyMessage()
 						.writeFirstSyncStepFor(document);
 
 					reply(syncMessage.toUint8Array());
 				} else if (connection) {
-					const syncMessage = new OutgoingMessage(document.name)
+					const syncMessage = new OutgoingMessage(messageAddress)
 						.createSyncMessage()
 						.writeFirstSyncStepFor(document);
 
@@ -162,7 +166,7 @@ export class MessageReceiver {
 				}
 				break;
 			}
-			case messageYjsSyncStep2:
+			case messageYjsSyncStep2: {
 				if (connection?.readOnly) {
 					// We're in read-only mode, so we can't apply the update.
 					// Let's use snapshotContainsUpdate to see if the update actually contains changes.
@@ -171,16 +175,16 @@ export class MessageReceiver {
 					const update = decoding.readVarUint8Array(message.decoder);
 					if (Y.snapshotContainsUpdate(snapshot, update)) {
 						// no new changes in update
-						const ackMessage = new OutgoingMessage(
-							document.name,
-						).writeSyncStatus(true);
+						const ackMessage = new OutgoingMessage(messageAddress).writeSyncStatus(
+							true,
+						);
 
 						connection.send(ackMessage.toUint8Array());
 					} else {
 						// new changes in update that we can't apply, because readOnly
-						const ackMessage = new OutgoingMessage(
-							document.name,
-						).writeSyncStatus(false);
+						const ackMessage = new OutgoingMessage(messageAddress).writeSyncStatus(
+							false,
+						);
 
 						connection.send(ackMessage.toUint8Array());
 					}
@@ -192,21 +196,22 @@ export class MessageReceiver {
 					document,
 					connection
 						? { source: "connection" as const, connection }
-						: this.defaultTransactionOrigin ?? { source: "local" as const },
+						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
 				);
 
 				if (connection) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(true)
 							.toUint8Array(),
 					);
 				}
 				break;
-			case messageYjsUpdate:
+			}
+			case messageYjsUpdate: {
 				if (connection?.readOnly) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(false)
 							.toUint8Array(),
 					);
@@ -218,16 +223,17 @@ export class MessageReceiver {
 					document,
 					connection
 						? { source: "connection" as const, connection }
-						: this.defaultTransactionOrigin ?? { source: "local" as const },
+						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
 				);
 				if (connection) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(true)
 							.toUint8Array(),
 					);
 				}
 				break;
+			}
 			default:
 				throw new Error(`Received a message with an unknown type: ${type}`);
 		}
@@ -237,10 +243,11 @@ export class MessageReceiver {
 
 	applyQueryAwarenessMessage(
 		document: Document,
+		connection?: Connection,
 		reply?: (message: Uint8Array) => void,
 	) {
 		const message = new OutgoingMessage(
-			document.name,
+			connection?.messageAddress ?? document.name,
 		).createAwarenessUpdateMessage(document.awareness);
 
 		if (reply) {
