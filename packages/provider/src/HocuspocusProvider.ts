@@ -97,6 +97,13 @@ export interface CompleteHocuspocusProviderConfiguration {
 	onAwarenessChange: (data: onAwarenessChangeParameters) => void;
 	onStateless: (data: onStatelessParameters) => void;
 	onUnsyncedChanges: (data: onUnsyncedChangesParameters) => void;
+
+	/**
+	 * Called when the maximum number of connection attempts has been exhausted
+	 * and the provider will no longer try to reconnect automatically.
+	 * Only relevant when `maxAttempts` is set to a value greater than 0.
+	 */
+	onMaximumAttemptsExhausted: () => void;
 }
 
 export class AwarenessError extends Error {
@@ -127,6 +134,7 @@ export class HocuspocusProvider extends EventEmitter {
 		onAwarenessChange: () => null,
 		onStateless: () => null,
 		onUnsyncedChanges: () => null,
+		onMaximumAttemptsExhausted: () => null,
 	};
 
 	isSynced = false;
@@ -167,6 +175,7 @@ export class HocuspocusProvider extends EventEmitter {
 		this.on("awarenessChange", this.configuration.onAwarenessChange);
 		this.on("stateless", this.configuration.onStateless);
 		this.on("unsyncedChanges", this.configuration.onUnsyncedChanges);
+		this.on("maximumAttemptsExhausted", this.configuration.onMaximumAttemptsExhausted);
 
 		this.on("authenticated", this.configuration.onAuthenticated);
 		this.on("authenticationFailed", this.configuration.onAuthenticationFailed);
@@ -222,6 +231,8 @@ export class HocuspocusProvider extends EventEmitter {
 	forwardDisconnect = (e: onDisconnectParameters) => this.emit("disconnect", e);
 
 	forwardDestroy = () => this.emit("destroy");
+
+	forwardMaximumAttemptsExhausted = () => this.emit("maximumAttemptsExhausted");
 
 	public setConfiguration(
 		configuration: Partial<HocuspocusProviderConfiguration> = {},
@@ -530,6 +541,15 @@ export class HocuspocusProvider extends EventEmitter {
 		);
 		this.configuration.websocketProvider.off("destroy", this.forwardDestroy);
 
+		this.configuration.websocketProvider.off(
+			"maximumAttemptsExhausted",
+			this.configuration.onMaximumAttemptsExhausted,
+		);
+		this.configuration.websocketProvider.off(
+			"maximumAttemptsExhausted",
+			this.forwardMaximumAttemptsExhausted,
+		);
+
 		this.configuration.websocketProvider.detach(this);
 
 		this._isAttached = false;
@@ -573,6 +593,15 @@ export class HocuspocusProvider extends EventEmitter {
 			this.configuration.onDestroy,
 		);
 		this.configuration.websocketProvider.on("destroy", this.forwardDestroy);
+
+		this.configuration.websocketProvider.on(
+			"maximumAttemptsExhausted",
+			this.configuration.onMaximumAttemptsExhausted,
+		);
+		this.configuration.websocketProvider.on(
+			"maximumAttemptsExhausted",
+			this.forwardMaximumAttemptsExhausted,
+		);
 
 		this.configuration.websocketProvider.attach(this);
 

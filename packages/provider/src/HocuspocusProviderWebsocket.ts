@@ -98,6 +98,13 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	onAwarenessChange: (data: onAwarenessChangeParameters) => void;
 
 	/**
+	 * Called when the maximum number of connection attempts has been exhausted
+	 * and the provider will no longer try to reconnect automatically.
+	 * Only relevant when `maxAttempts` is set to a value greater than 0.
+	 */
+	onMaximumAttemptsExhausted: () => void;
+
+	/**
 	 * Map of attached providers keyed by documentName.
 	 */
 	providerMap: Map<string, HocuspocusProvider>;
@@ -141,6 +148,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		onDestroy: () => null,
 		onAwarenessUpdate: () => null,
 		onAwarenessChange: () => null,
+		onMaximumAttemptsExhausted: () => null,
 		handleTimeout: null,
 		providerMap: new Map(),
 	};
@@ -185,6 +193,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.on("destroy", this.configuration.onDestroy);
 		this.on("awarenessUpdate", this.configuration.onAwarenessUpdate);
 		this.on("awarenessChange", this.configuration.onAwarenessChange);
+		this.on("maximumAttemptsExhausted", this.configuration.onMaximumAttemptsExhausted);
 
 		this.on("close", this.onClose.bind(this));
 		this.on("message", this.onMessage.bind(this));
@@ -281,7 +290,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 				// If we aborted the connection attempt then don’t throw an error
 				// ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
 				if (error && error.code !== "ATTEMPT_ABORTED") {
-					throw error;
+					this.emit("maximumAttemptsExhausted");
 				}
 			});
 
