@@ -1,18 +1,10 @@
 {
 	"private": true,
-	"packageManager": "pnpm@9.15.4",
-	"browserslist": [
-		"defaults",
-		"not IE 11",
-		"maintained node versions"
-	],
+	"packageManager": "pnpm@10.30.3",
+	"browserslist": ["defaults", "not IE 11", "maintained node versions"],
 	"type": "module",
 	"ava": {
-		"files": [
-			"tests/**/*",
-			"!tests/utils/**/*",
-			"!database/**/*"
-		],
+		"files": ["tests/**/*", "!tests/utils/**/*", "!database/**/*"],
 		"extensions": {
 			"ts": "module"
 		},
