@@ -21,6 +21,7 @@ const generateRequests = async (instance: Throttle, ip: string, numberOfRequests
 
 test('throttle extension bans properly', async t => {
   const throttle = new Throttle({ banTime: 5, throttle: 15 })
+  t.teardown(() => throttle.onDestroy())
   const ip = '127.0.0.1'
 
   t.false(throttle.isBanned(ip))
@@ -38,6 +39,7 @@ test('throttle extension bans properly', async t => {
 
 test('throttle extension unbans properly', async t => {
   const throttle = new Throttle({ banTime: 5, throttle: 15 })
+  t.teardown(() => throttle.onDestroy())
   const ip = '127.0.0.1'
 
   t.false(throttle.isBanned(ip))
@@ -61,6 +63,7 @@ test('throttle extension unbans properly', async t => {
 
 test.serial('map cleanup works for connectionsByIp', async t => {
   const throttle = new Throttle({ consideredSeconds: 60 })
+  t.teardown(() => throttle.onDestroy())
   const ip = '127.0.0.1'
 
   await generateRequests(throttle, ip, 10)
@@ -78,6 +81,7 @@ test.serial('map cleanup works for connectionsByIp', async t => {
 
 test.serial('map cleanup works for bannedIps', async t => {
   const throttle = new Throttle({ consideredSeconds: 60, throttle: 15 })
+  t.teardown(() => throttle.onDestroy())
   const ip = '127.0.0.1'
 
   await generateRequests(throttle, ip, 15)

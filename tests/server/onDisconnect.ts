@@ -3,14 +3,14 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onDisconnect callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onDisconnect() {
         t.pass()
         resolve('done')
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
@@ -21,7 +21,7 @@ test('executes the onDisconnect callback', async t => {
 
 test('executes the onDisconnect callback from an extension', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
     class CustomExtension {
       async onDisconnect() {
@@ -36,7 +36,7 @@ test('executes the onDisconnect callback from an extension', async t => {
       ],
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
 
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
@@ -48,7 +48,7 @@ test('executes the onDisconnect callback from an extension', async t => {
 
 test('passes the context to the onLoadDocument callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
     const mockContext = {
       user: 123,
@@ -65,7 +65,7 @@ test('passes the context to the onLoadDocument callback', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
 
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
@@ -77,7 +77,7 @@ test('passes the context to the onLoadDocument callback', async t => {
 
 test('has the server instance', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onDisconnect({ instance }) {
         t.is(instance, server)
 
@@ -85,7 +85,7 @@ test('has the server instance', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
 
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
@@ -97,14 +97,14 @@ test('has the server instance', async t => {
 
 test('the connections count is correct', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onDisconnect() {
         t.is(server.getConnectionsCount(), 0)
         resolve('done')
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
         provider.disconnect()

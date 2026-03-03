@@ -12,7 +12,7 @@ import {
 
 test("onAuthenticate receives providerVersion", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ providerVersion }: onAuthenticatePayload) {
 				t.is(typeof providerVersion, "string");
 				t.not(providerVersion, null);
@@ -20,7 +20,7 @@ test("onAuthenticate receives providerVersion", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "test-token",
 		});
 	});
@@ -28,7 +28,7 @@ test("onAuthenticate receives providerVersion", async (t) => {
 
 test("onConnect receives providerVersion", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ providerVersion }: onConnectPayload) {
 				t.is(typeof providerVersion, "string");
 				t.not(providerVersion, null);
@@ -36,7 +36,7 @@ test("onConnect receives providerVersion", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "test-token",
 		});
 	});
@@ -44,7 +44,7 @@ test("onConnect receives providerVersion", async (t) => {
 
 test("connected receives providerVersion and it is set on the connection", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async connected({
 				providerVersion,
 				connection,
@@ -56,7 +56,7 @@ test("connected receives providerVersion and it is set on the connection", async
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "test-token",
 		});
 	});
@@ -64,7 +64,7 @@ test("connected receives providerVersion and it is set on the connection", async
 
 test("providerVersion is a non-empty string", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ providerVersion }: onAuthenticatePayload) {
 				t.is(typeof providerVersion, "string");
 				t.truthy(providerVersion!.length > 0);
@@ -72,7 +72,7 @@ test("providerVersion is a non-empty string", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "test-token",
 		});
 	});
@@ -82,7 +82,7 @@ test("providerVersion is the same across multiplexed documents", async (t) => {
 	await new Promise(async (resolve) => {
 		const versions: string[] = [];
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ providerVersion }: onAuthenticatePayload) {
 				versions.push(providerVersion!);
 				if (versions.length === 2) {
@@ -93,9 +93,9 @@ test("providerVersion is the same across multiplexed documents", async (t) => {
 			},
 		});
 
-		const ws = newHocuspocusProviderWebsocket(server);
+		const ws = newHocuspocusProviderWebsocket(t, server);
 
-		newHocuspocusProvider(server, { name: "doc1", token: "t1" }, {}, ws);
-		newHocuspocusProvider(server, { name: "doc2", token: "t2" }, {}, ws);
+		newHocuspocusProvider(t, server, { name: "doc1", token: "t1" }, {}, ws);
+		newHocuspocusProvider(t, server, { name: "doc2", token: "t2" }, {}, ws);
 	});
 });

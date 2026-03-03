@@ -6,14 +6,14 @@ import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
 test("executes the beforeUnloadDocument callback", async (t) => {
 	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async beforeUnloadDocument() {
 				t.pass();
 				resolve("done");
 			},
 		});
 
-		const p = newHocuspocusProvider(server, {
+		const p = newHocuspocusProvider(t, server, {
 			onSynced(data) {
 				p.destroy();
 			},
@@ -38,11 +38,11 @@ test("executes the beforeUnloadDocument callback when all clients disconnect aft
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
-		provider = newHocuspocusProvider(server);
+		provider = newHocuspocusProvider(t, server);
 	});
 });
 
@@ -62,11 +62,11 @@ test("throwing an exception in beforeUnloadDocument prevents a document from bei
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
-		const p = newHocuspocusProvider(server, {
+		const p = newHocuspocusProvider(t, server, {
 			onSynced(data) {
 				p.destroy();
 			},

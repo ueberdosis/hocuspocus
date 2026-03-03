@@ -10,7 +10,7 @@ import * as Y from "yjs";
 
 test("calls the debouned onStoreDocument hook before the document is removed from memory", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			debounce: 3000,
 			async onStoreDocument() {
 				t.pass();
@@ -18,9 +18,9 @@ test("calls the debouned onStoreDocument hook before the document is removed fro
 			},
 		});
 
-		const socket = newHocuspocusProviderWebsocket(server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			websocketProvider: socket,
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
@@ -34,15 +34,15 @@ test("calls the debouned onStoreDocument hook before the document is removed fro
 
 test("doesn’t remove the document from memory when there’s a new connection established during onStoreDocument is called", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument() {
 				return sleep(1000);
 			},
 		});
-		const socket = newHocuspocusProviderWebsocket(server);
-		const anotherSocket = newHocuspocusProviderWebsocket(server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
+		const anotherSocket = newHocuspocusProviderWebsocket(t, server);
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			websocketProvider: socket,
 			onSynced() {
 				setTimeout(() => {
@@ -55,7 +55,7 @@ test("doesn’t remove the document from memory when there’s a new connection 
 				}, 1100);
 			},
 		});
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			websocketProvider: anotherSocket,
 		});
 	});
@@ -63,13 +63,13 @@ test("doesn’t remove the document from memory when there’s a new connection 
 
 test("removes the document from memory when there’s no connection after onStoreDocument is called", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument() {
 				return sleep(1000);
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
@@ -90,7 +90,7 @@ test("removes the document from memory when there’s no connection after onStor
 
 test("onStoreDocument callback receives document updates", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument({ document }: onStoreDocumentPayload) {
 				const value = document.getArray("foo").get(0);
 				t.is(value, "bar");
@@ -99,7 +99,7 @@ test("onStoreDocument callback receives document updates", async (t) => {
 			},
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		provider.on("synced", () => {
 			provider.document.getArray("foo").insert(0, ["bar"]);
@@ -112,7 +112,7 @@ test("debounces document changes for onStoreDocument hooks", async (t) => {
 		let executedOnChange = 0;
 		let executedOnStoreDocument = 0;
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			debounce: 300,
 			async onChange() {
 				executedOnChange += 1;
@@ -120,15 +120,9 @@ test("debounces document changes for onStoreDocument hooks", async (t) => {
 			async onStoreDocument() {
 				executedOnStoreDocument += 1;
 			},
-			async onDestroy() {
-				t.is(executedOnChange, 5);
-				t.is(executedOnStoreDocument, 1);
-
-				resolve("done");
-			},
 		});
 
-		const provider = newHocuspocusProvider(hocuspocus, {
+		const provider = newHocuspocusProvider(t, hocuspocus, {
 			onSynced() {
 				provider.document.getArray("foo").push(["foo"]);
 				provider.document.getArray("foo").push(["bar"]);
@@ -136,8 +130,13 @@ test("debounces document changes for onStoreDocument hooks", async (t) => {
 				provider.document.getArray("foo").push(["foobar"]);
 				provider.document.getArray("foo").push(["foofoo"]);
 
-				setTimeout(() => {
-					hocuspocus.server!.destroy();
+				setTimeout(async () => {
+					await hocuspocus.server!.destroy();
+
+					t.is(executedOnChange, 5);
+					t.is(executedOnStoreDocument, 1);
+
+					resolve("done");
 				}, 200);
 			},
 		});
@@ -155,11 +154,11 @@ test("executes onStoreDocument callback from an extension", async (t) => {
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		provider.on("synced", () => {
 			provider.document.getArray("foo").insert(0, ["bar"]);
@@ -189,11 +188,11 @@ test("stops when one of the onStoreDocument hooks throws an error", async (t) =>
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new BreakingTheChain(), new NotExecuted()],
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		provider.on("synced", () => {
 			provider.document.getArray("foo").insert(0, ["bar"]);
@@ -203,7 +202,7 @@ test("stops when one of the onStoreDocument hooks throws an error", async (t) =>
 
 test("has the server instance", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument({ instance }) {
 				t.is(instance, server);
 
@@ -211,7 +210,7 @@ test("has the server instance", async (t) => {
 			},
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		provider.on("synced", () => {
 			provider.document.getArray("foo").insert(0, ["bar"]);
@@ -242,7 +241,7 @@ test("runs hooks in the given order", async (t) => {
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new Running(), new BreakTheChain(), new NotRunning()],
 			// lowest priority
 			async onStoreDocument() {
@@ -253,7 +252,7 @@ test("runs hooks in the given order", async (t) => {
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
@@ -301,7 +300,7 @@ test("allows to overwrite the order of extension with a priority", async (t) => 
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			afterStoreDocument: async () => {
 				t.fail();
 			},
@@ -313,7 +312,7 @@ test("allows to overwrite the order of extension with a priority", async (t) => 
 			],
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
@@ -335,7 +334,7 @@ test("if a connection connects while another disconnects onStoreDocument is stil
 		let isStoredOnDb = false;
 		let loadCalls = 0;
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument({ instance }) {
 				return new Promise((resolve) => {
 					setTimeout(() => {
@@ -357,14 +356,14 @@ test("if a connection connects while another disconnects onStoreDocument is stil
 			},
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 		provider.on("synced", () => {
 			// Dummy change to trigger onStoreDocument
 			provider.document.getArray("foo").push(["foo"]);
 			provider.configuration.websocketProvider.disconnect();
 
 			setTimeout(() => {
-				const provider2 = newHocuspocusProvider(server);
+				const provider2 = newHocuspocusProvider(t, server);
 
 				provider2.on("synced", () => {
 					provider2.configuration.websocketProvider.disconnect();
@@ -379,7 +378,7 @@ test("if a connection connects while another disconnects onStoreDocument is stil
 test("waits before calling onStoreDocument after the last user disconnects when configured", async (t) => {
 	await new Promise(async (resolve) => {
 		let startTime = 0;
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			unloadImmediately: false,
 			debounce: 500,
 			async onStoreDocument() {
@@ -395,9 +394,9 @@ test("waits before calling onStoreDocument after the last user disconnects when 
 			},
 		});
 
-		const socket = newHocuspocusProviderWebsocket(server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			websocketProvider: socket,
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
@@ -412,7 +411,7 @@ test("waits before calling onStoreDocument after the last user disconnects when 
 test("calls debounced onStoreDocument immediately after the last user disconnects when configured", async (t) => {
 	await new Promise(async (resolve) => {
 		let startTime = 0;
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			unloadImmediately: true,
 			debounce: 500,
 			async onStoreDocument() {
@@ -428,9 +427,9 @@ test("calls debounced onStoreDocument immediately after the last user disconnect
 			},
 		});
 
-		const socket = newHocuspocusProviderWebsocket(server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			websocketProvider: socket,
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
@@ -444,7 +443,7 @@ test("calls debounced onStoreDocument immediately after the last user disconnect
 
 test("does not call the onStoreDocument hook if document is not changed after the last user disconnects", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument() {
 				t.fail(
 					"no need to call onStoreDocument if the document is not changed",
@@ -452,9 +451,9 @@ test("does not call the onStoreDocument hook if document is not changed after th
 			},
 		});
 
-		const socket = newHocuspocusProviderWebsocket(server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			websocketProvider: socket,
 			onSynced() {
 				socket.destroy();
@@ -487,7 +486,7 @@ test("does not start a new onStoreDocument if there is already one running (shou
 	await new Promise(async (resolve) => {
 		let started = 0
 		let finished = 0
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			debounce: 100,
 			async onStoreDocument() {
 				if (started === 1) {
@@ -502,8 +501,8 @@ test("does not start a new onStoreDocument if there is already one running (shou
 			},
 		});
 
-		const socket1 = newHocuspocusProviderWebsocket(server);
-		const provider1 = newHocuspocusProvider(server, {
+		const socket1 = newHocuspocusProviderWebsocket(t, server);
+		const provider1 = newHocuspocusProvider(t, server, {
 			websocketProvider: socket1,
 			async onSynced() {
 				// Change 1
@@ -532,7 +531,7 @@ test("triggers unload only after finishing with a save in progress", async (t) =
 			const start = Date.now()
 			let saveStarted = false
 			let saveFinished = false
-			const server = await newHocuspocus({
+			const server = await newHocuspocus(t, {
 				debounce: 1000,
 				extensions: [{
 					async onStoreDocument() {
@@ -547,8 +546,8 @@ test("triggers unload only after finishing with a save in progress", async (t) =
 					},
 				}],
 			});
-			const socket1 = newHocuspocusProviderWebsocket(server);
-			const provider1 = newHocuspocusProvider(server, {
+			const socket1 = newHocuspocusProviderWebsocket(t, server);
+			const provider1 = newHocuspocusProvider(t, server, {
 				websocketProvider: socket1,
 				async onSynced() {
 					provider1.document.getArray("foo").push(["foo"]);
@@ -575,13 +574,13 @@ test("does not trigger unload prematurely when a save is in progress (unloadImme
   10. ~2100ms  We verify that Client 2 sees both changes.
   */
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			debounce: 1000,
       extensions: [new SlowInMemoryStorage()],			
 		});
 
-		const socket1 = newHocuspocusProviderWebsocket(server);
-		const provider1 = newHocuspocusProvider(server, {
+		const socket1 = newHocuspocusProviderWebsocket(t, server);
+		const provider1 = newHocuspocusProvider(t, server, {
 			websocketProvider: socket1,
       
 			async onSynced() {
@@ -596,8 +595,8 @@ test("does not trigger unload prematurely when a save is in progress (unloadImme
 		});
 
     setTimeout(() => {
-      const socket2 = newHocuspocusProviderWebsocket(server);
-      const provider2 = newHocuspocusProvider(server, {
+      const socket2 = newHocuspocusProviderWebsocket(t, server);
+      const provider2 = newHocuspocusProvider(t, server, {
         websocketProvider: socket2,
         
         async onSynced() {
@@ -632,14 +631,14 @@ test("Does not unload prematurely when a debounced save is pending (unloadImmedi
   */
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			debounce: 1000,
       unloadImmediately: false,
       extensions: [new SlowInMemoryStorage()],			
 		});
 
-		const socket1 = newHocuspocusProviderWebsocket(server);
-		const provider1 = newHocuspocusProvider(server, {
+		const socket1 = newHocuspocusProviderWebsocket(t, server);
+		const provider1 = newHocuspocusProvider(t, server, {
 			websocketProvider: socket1,
       
 			async onSynced() {
@@ -654,8 +653,8 @@ test("Does not unload prematurely when a debounced save is pending (unloadImmedi
     }, 1100)
 
     setTimeout(() => {
-      const socket2 = newHocuspocusProviderWebsocket(server);
-      const provider2 = newHocuspocusProvider(server, {
+      const socket2 = newHocuspocusProviderWebsocket(t, server);
+      const provider2 = newHocuspocusProvider(t, server, {
         websocketProvider: socket2,        
         async onSynced() {
           setTimeout(() => {

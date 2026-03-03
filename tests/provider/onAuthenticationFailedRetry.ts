@@ -10,7 +10,7 @@ test("provider retries auth with token function after initial failure", async (t
 	const docName = "superSecretDoc";
 	const requiredToken = "SUPER-SECRET-TOKEN";
 
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		async onAuthenticate({ token, documentName }) {
 			if (documentName !== docName) {
 				throw new Error();
@@ -22,11 +22,11 @@ test("provider retries auth with token function after initial failure", async (t
 		},
 	});
 
-	const socket = newHocuspocusProviderWebsocket(server);
+	const socket = newHocuspocusProviderWebsocket(t, server);
 
 	let tokenCallCount = 0;
 
-	const provider = newHocuspocusProvider(server, {
+	const provider = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		name: docName,
 		token: () => {
@@ -49,7 +49,7 @@ test("second provider with same doc name succeeds after first fails auth", async
 	const docName = "superSecretDoc";
 	const requiredToken = "SUPER-SECRET-TOKEN";
 
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		async onAuthenticate({ token, documentName }) {
 			if (documentName !== docName) {
 				throw new Error();
@@ -61,9 +61,9 @@ test("second provider with same doc name succeeds after first fails auth", async
 		},
 	});
 
-	const socket = newHocuspocusProviderWebsocket(server);
+	const socket = newHocuspocusProviderWebsocket(t, server);
 
-	const providerFail = newHocuspocusProvider(server, {
+	const providerFail = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: "wrongToken",
 		name: docName,
@@ -74,7 +74,7 @@ test("second provider with same doc name succeeds after first fails auth", async
 
 	await sleep(1000);
 
-	const providerOK = newHocuspocusProvider(server, {
+	const providerOK = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: requiredToken,
 		name: docName,

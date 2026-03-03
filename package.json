@@ -8,12 +8,14 @@
 		"extensions": {
 			"ts": "module"
 		},
+		"require": ["./tests/utils/_force-exit.ts"],
 		"nodeArguments": [
 			"--no-warnings",
 			"--conditions=source",
 			"--experimental-transform-types",
 			"--experimental-specifier-resolution=node"
 		],
+		"timeout": "30s",
 		"workerThreads": false
 	},
 	"scripts": {
@@ -47,10 +49,9 @@
 		"ncu": "ncu -i --deep && pnpm install"
 	},
 	"devDependencies": {
-		"@ava/typescript": "^3.0.1",
 		"@biomejs/biome": "2.4.5",
 		"@types/bun": "^1.3.9",
-		"ava": "^4.3.3",
+		"ava": "^7.0.0",
 		"concurrently": "^6.4.0",
 		"lerna": "^9.0.5",
 		"nx": "^22.5.3",

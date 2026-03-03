@@ -4,7 +4,7 @@ import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 test("executes the onDestroy hook and has the instance", async (t) => {
 	await new Promise(async (resolve) => {
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			async onDestroy({ instance }) {
 				t.is(instance, hocuspocus);
 
@@ -18,7 +18,7 @@ test("executes the onDestroy hook and has the instance", async (t) => {
 
 test("destroy works if no document is open", async (t) => {
 	await new Promise(async (resolve) => {
-		const hocuspocus = await newHocuspocus();
+		const hocuspocus = await newHocuspocus(t);
 
 		await hocuspocus.server!.destroy();
 
@@ -37,7 +37,7 @@ test("executes the onDestroy hook from a custom extension", async (t) => {
 			}
 		}
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
@@ -47,9 +47,9 @@ test("executes the onDestroy hook from a custom extension", async (t) => {
 
 test("destroy closes all connections", async (t) => {
 	await new Promise(async (resolve) => {
-		const hocuspocus = await newHocuspocus();
+		const hocuspocus = await newHocuspocus(t);
 
-		const provider1 = newHocuspocusProvider(hocuspocus);
+		const provider1 = newHocuspocusProvider(t, hocuspocus);
 
 		await retryableAssertion(t, (t2) => t2.is(provider1.synced, true));
 
@@ -67,13 +67,13 @@ test("destroy closes all connections", async (t) => {
 
 test("destroy does not call onStoreDocument if nothing debounced", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onStoreDocument() {
 				t.fail();
 			},
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		await retryableAssertion(t, (t2) => t2.is(provider.synced, true));
 
@@ -87,7 +87,7 @@ test("destroy does not call onStoreDocument after debounced onStoreDocument exec
 	await new Promise(async (resolve) => {
 		let called = 0;
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			debounce: 200,
 			unloadImmediately: true,
 			async onStoreDocument() {
@@ -95,7 +95,7 @@ test("destroy does not call onStoreDocument after debounced onStoreDocument exec
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
@@ -119,20 +119,20 @@ test("destroy calls onStoreDocument before returning if debounced", async (t) =>
 	await new Promise(async (resolve) => {
 		let called = false;
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			async onStoreDocument() {
 				called = true;
 			},
 		});
 
-		const provider = newHocuspocusProvider(hocuspocus, {
+		const provider = newHocuspocusProvider(t, hocuspocus, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
 			},
 		});
 
-		const provider1 = newHocuspocusProvider(hocuspocus);
+		const provider1 = newHocuspocusProvider(t, hocuspocus);
 
 		await retryableAssertion(t, (t2) => t2.is(provider1.synced, true));
 
@@ -148,21 +148,21 @@ test("destroy calls onStoreDocument before returning, even with unloadImmediatel
 	await new Promise(async (resolve) => {
 		let called = false;
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			async onStoreDocument() {
 				called = true;
 			},
 			unloadImmediately: false,
 		});
 
-		const provider = newHocuspocusProvider(hocuspocus, {
+		const provider = newHocuspocusProvider(t, hocuspocus, {
 			onSynced() {
 				// Dummy change to trigger onStoreDocument
 				provider.document.getArray("foo").push(["foo"]);
 			},
 		});
 
-		const provider1 = newHocuspocusProvider(hocuspocus);
+		const provider1 = newHocuspocusProvider(t, hocuspocus);
 
 		await retryableAssertion(t, (t2) => t2.is(provider1.synced, true));
 		await retryableAssertion(t, (t2) => t2.is(provider.synced, true));
@@ -179,26 +179,26 @@ test("destroy calls onStoreDocument before returning, even with unloadImmediatel
 	await new Promise(async (resolve) => {
 		let called = 0;
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			async onStoreDocument() {
 				called += 1;
 			},
 			unloadImmediately: false,
 		});
 
-		const provider1 = newHocuspocusProvider(hocuspocus, {
+		const provider1 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test1",
 			onSynced() {
 				provider1.document.getArray("foo").push(["foo"]);
 			},
 		});
-		const provider2 = newHocuspocusProvider(hocuspocus, {
+		const provider2 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test2",
 			onSynced() {
 				provider2.document.getArray("foo").push(["foo"]);
 			},
 		});
-		const provider3 = newHocuspocusProvider(hocuspocus, {
+		const provider3 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test3",
 			onSynced() {
 				provider3.document.getArray("foo").push(["foo"]);
@@ -221,26 +221,26 @@ test("destroy calls onStoreDocument before returning, with multiple docs if debo
 	await new Promise(async (resolve) => {
 		let called = 0;
 
-		const hocuspocus = await newHocuspocus({
+		const hocuspocus = await newHocuspocus(t, {
 			async onStoreDocument() {
 				called += 1;
 			},
 			unloadImmediately: true,
 		});
 
-		const provider1 = newHocuspocusProvider(hocuspocus, {
+		const provider1 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test1",
 			onSynced() {
 				provider1.document.getArray("foo").push(["foo"]);
 			},
 		});
-		const provider2 = newHocuspocusProvider(hocuspocus, {
+		const provider2 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test2",
 			onSynced() {
 				provider2.document.getArray("foo").push(["foo"]);
 			},
 		});
-		const provider3 = newHocuspocusProvider(hocuspocus, {
+		const provider3 = newHocuspocusProvider(t, hocuspocus, {
 			name: "test3",
 			onSynced() {
 				provider3.document.getArray("foo").push(["foo"]);

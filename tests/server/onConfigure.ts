@@ -6,7 +6,7 @@ test('onConfigure callback is executed', async t => {
   await new Promise(async resolve => {
     let givenInstance = null
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConfigure({ instance }) {
         givenInstance = instance
       },
@@ -26,19 +26,19 @@ test('executes onConfigure callback from an extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('has the configuration', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       debounce: 2001,
       async onConfigure({ configuration }) {
         t.is(configuration.debounce, 2001)
@@ -51,7 +51,7 @@ test('has the configuration', async t => {
 
 test('has the version', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       async onConfigure({ version }) {
         t.truthy(version)
 

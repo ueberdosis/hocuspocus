@@ -8,7 +8,9 @@ import {
 
 test("syncs updates between servers and clients", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		let resolved = false;
+
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -17,7 +19,7 @@ test("syncs updates between servers and clients", async (t) => {
 			],
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -29,7 +31,7 @@ test("syncs updates between servers and clients", async (t) => {
 		// Once we’re setup make an edit on anotherProvider. To get to the provider it will need
 		// to pass through Redis:
 		// provider -> server -> Redis -> anotherServer -> anotherProvider
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				provider.document.getArray("foo").insert(0, ["bar"]);
 			},
@@ -37,9 +39,12 @@ test("syncs updates between servers and clients", async (t) => {
 
 		// Once the initial data is synced, wait for an additional update to check
 		// if both documents have the same content.
-		const anotherProvider = newHocuspocusProvider(anotherServer, {
+		const anotherProvider = newHocuspocusProvider(t, anotherServer, {
 			onSynced() {
 				provider.on("message", () => {
+					if (resolved) return;
+					resolved = true;
+
 					setTimeout(() => {
 						t.is(
 							provider.document.getArray("foo").get(0),

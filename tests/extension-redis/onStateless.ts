@@ -11,7 +11,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 
 	await new Promise(async (resolve) => {
 		const payloadToSend = "STATELESS-MESSAGE";
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -21,7 +21,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 			],
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -36,7 +36,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 		// provider -> server -> Redis -> anotherServer -> anotherProvider
 
 		// Wait for a stateless message to confirm whether another provider has the same payload.
-		newHocuspocusProvider(anotherServer, {
+		newHocuspocusProvider(t, anotherServer, {
 			onStateless: ({ payload }) => {
 				t.is(payload, payloadToSend);
 				t.pass();
@@ -44,7 +44,7 @@ test("syncs broadcast stateless message between servers and clients", async (t) 
 			},
 			onSynced() {
 				// Once the initial data is synced, send a stateless message
-				newHocuspocusProvider(server, {
+				newHocuspocusProvider(t, server, {
 					onSynced() {
 						server.documents
 							.get("hocuspocus-test")
@@ -61,7 +61,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 
 	await new Promise(async (resolve) => {
 		const payloadToSend = "STATELESS-MESSAGE";
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -76,7 +76,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 			},
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -90,7 +90,7 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				provider.sendStateless(payloadToSend);
 			},
@@ -102,7 +102,7 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 	await new Promise(async (resolve) => {
 		const redisPrefix = crypto.randomUUID();
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -115,7 +115,7 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 			},
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -128,13 +128,13 @@ test("server client stateless messages shouldnt propagate to other client", asyn
 			},
 		});
 
-		const provider2 = newHocuspocusProvider(anotherServer, {
+		const provider2 = newHocuspocusProvider(t, anotherServer, {
 			onStateless() {
 				t.fail();
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				provider.sendStateless("ok");
 			},
