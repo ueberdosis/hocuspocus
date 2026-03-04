@@ -3,12 +3,12 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onAuthenticationFailed callback', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       async onAuthenticate({ token }) {
         throw new Error()
       },
     }).then(server => {
-      newHocuspocusProvider(server, {
+      newHocuspocusProvider(t, server, {
         token: 'SUPER-SECRET-TOKEN',
         onAuthenticationFailed() {
           t.pass()

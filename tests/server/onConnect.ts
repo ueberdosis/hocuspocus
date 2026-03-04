@@ -4,26 +4,26 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
 
 test("executes the onConnect callback", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect() {
 				t.pass();
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("refuses connection when an error is thrown", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect() {
 				throw new Error();
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onAuthenticationFailed() {
 				t.pass();
 				resolve("done");
@@ -34,7 +34,7 @@ test("refuses connection when an error is thrown", async (t) => {
 
 test("executes the onConnect callback from an extension", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
 		class CustomExtension {
 			async onConnect() {
@@ -47,32 +47,32 @@ test("executes the onConnect callback from an extension", async (t) => {
 			extensions: [new CustomExtension()],
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has the document name", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ documentName }) {
 				t.is(documentName, "hocuspocus-test");
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("sets the provider to readOnly", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ connectionConfig }) {
 				connectionConfig.readOnly = true;
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onSynced() {
 				server.documents.get("hocuspocus-test")?.connections.forEach((conn) => {
 					t.is(conn.connection.readOnly, true);
@@ -103,7 +103,7 @@ const weirdDocumentNames = [
 weirdDocumentNames.forEach((weirdDocumentName) => {
 	test(`encodes weird document names: "${weirdDocumentName}"`, async (t) => {
 		await new Promise(async (resolve) => {
-			const server = await newHocuspocus({
+			const server = await newHocuspocus(t, {
 				async onConnect({ documentName }) {
 					t.is(documentName, weirdDocumentName);
 
@@ -111,7 +111,7 @@ weirdDocumentNames.forEach((weirdDocumentName) => {
 				},
 			});
 
-			newHocuspocusProvider(server, {
+			newHocuspocusProvider(t, server, {
 				name: weirdDocumentName,
 			});
 		});
@@ -120,7 +120,7 @@ weirdDocumentNames.forEach((weirdDocumentName) => {
 
 test("stops when the onConnect hook throws an Error", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onConnect() {
 				throw new Error();
 			},
@@ -132,7 +132,7 @@ test("stops when the onConnect hook throws an Error", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onAuthenticationFailed() {
 				t.pass();
 				resolve("done");
@@ -143,7 +143,7 @@ test("stops when the onConnect hook throws an Error", async (t) => {
 
 test("stops when the onConnect hook returns a rejecting promise", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onConnect() {
 				return Promise.reject();
 			},
@@ -155,7 +155,7 @@ test("stops when the onConnect hook returns a rejecting promise", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onAuthenticationFailed() {
 				t.pass();
 				resolve("done");
@@ -166,66 +166,66 @@ test("stops when the onConnect hook returns a rejecting promise", async (t) => {
 
 test("has the request headers", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ requestHeaders }) {
 				t.is(requestHeaders.get("connection") !== null, true);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has the whole request", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ request }) {
 				t.is(new URL(request.url).pathname, "/");
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has the socketId", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ socketId }) {
 				t.is(socketId !== undefined, true);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has the server instance", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ instance }) {
 				t.is(instance, server);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("defaults to readOnly = false", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ connectionConfig }) {
 				t.is(connectionConfig.readOnly, false);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
@@ -234,7 +234,7 @@ test("cleans up correctly when provider disconnects during onLoadDocument", asyn
 		// eslint-disable-next-line prefer-const
 		let provider: HocuspocusProvider;
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onLoadDocument: async () => {
 				provider.configuration.websocketProvider.disconnect();
 				provider.disconnect();
@@ -244,7 +244,7 @@ test("cleans up correctly when provider disconnects during onLoadDocument", asyn
 			},
 		});
 
-		provider = newHocuspocusProvider(server, {
+		provider = newHocuspocusProvider(t, server, {
 			name: "super-unique-name",
 			async onDisconnect() {
 				await sleep(100);
@@ -262,39 +262,39 @@ test("cleans up correctly when provider disconnects during onLoadDocument", asyn
 
 test("the connections count is correct", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async connected() {
 				t.is(server.getConnectionsCount(), 1);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has connection.readOnly", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ connectionConfig }) {
 				t.is(connectionConfig.readOnly, false);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("has the request", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ request }) {
 				t.truthy(request.url);
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });

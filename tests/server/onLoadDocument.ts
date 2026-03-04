@@ -5,14 +5,14 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 test("executes the onLoadDocument callback", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument() {
 				t.pass();
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
@@ -25,11 +25,11 @@ test("executes the onLoadDocument callback from an extension", async (t) => {
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
@@ -39,7 +39,7 @@ test("passes the context and connection to the onLoadDocument callback", async (
 			user: 123,
 		};
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onConnect({ connectionConfig }) {
 				connectionConfig.readOnly = true;
 				return mockContext;
@@ -55,19 +55,19 @@ test("passes the context and connection to the onLoadDocument callback", async (
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
 test("sets the provider to readOnly", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument({ connectionConfig }) {
 				connectionConfig.readOnly = true;
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onSynced() {
 				server.documents.get("hocuspocus-test")?.connections.forEach((conn) => {
 					t.is(conn.connection.readOnly, true);
@@ -80,7 +80,7 @@ test("sets the provider to readOnly", async (t) => {
 
 test("creates a new document in the onLoadDocument callback", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onLoadDocument({ document }) {
 				// delay more accurately simulates a database fetch
 				return new Promise(async (resolve) => {
@@ -92,7 +92,7 @@ test("creates a new document in the onLoadDocument callback", async (t) => {
 			},
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				const value = provider.document.getArray("foo").get(0);
 				t.is(value, "bar");
@@ -105,7 +105,7 @@ test("creates a new document in the onLoadDocument callback", async (t) => {
 
 test("multiple simultaneous connections do not create multiple documents", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onLoadDocument({ document }) {
 				// delay more accurately simulates a database fetch
 				return new Promise(async (resolve) => {
@@ -117,9 +117,9 @@ test("multiple simultaneous connections do not create multiple documents", async
 			},
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 
 		provider.on("synced", () => {
 			t.is(server.documents.size, 1);
@@ -135,7 +135,7 @@ test("multiple simultaneous connections wait for the document to be loaded", asy
 	await new Promise(async (resolve) => {
 		let resolveOnLoadDocument: () => void = () => {};
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onLoadDocument({ document }) {
 				// delay more accurately simulates a database fetch
 				return new Promise(async (innerResolve) => {
@@ -147,8 +147,8 @@ test("multiple simultaneous connections wait for the document to be loaded", asy
 			},
 		});
 
-		const provider1 = newHocuspocusProvider(server);
-		const provider2 = newHocuspocusProvider(server);
+		const provider1 = newHocuspocusProvider(t, server);
+		const provider2 = newHocuspocusProvider(t, server);
 		let provider1Synced = false;
 		let provider2Synced = false;
 
@@ -181,7 +181,7 @@ test("multiple simultaneous connections wait for the document to be loaded", asy
 
 test("has the server instance", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument({ instance }) {
 				t.is(instance, server);
 
@@ -189,7 +189,7 @@ test("has the server instance", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server);
+		newHocuspocusProvider(t, server);
 	});
 });
 
@@ -198,13 +198,13 @@ test("has the server instance", async (t) => {
  */
 test("stops when an error is thrown in onLoadDocument", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument() {
 				throw new Error();
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onAuthenticationFailed() {
 				t.pass();
 				resolve("done");
@@ -215,7 +215,7 @@ test("stops when an error is thrown in onLoadDocument", async (t) => {
 
 test("stops when an error is thrown in onLoadDocument, even when authenticated", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate() {
 				return true;
 			},
@@ -224,7 +224,7 @@ test("stops when an error is thrown in onLoadDocument, even when authenticated",
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "super-secret-token",
 			onAuthenticationFailed() {
 				t.pass();
@@ -241,7 +241,7 @@ test("disconnects all clients related to the document when an error is thrown in
 	const resolvesNeeded = 2;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument() {
 				return new Promise((resolve, fail) => {
 					setTimeout(() => {
@@ -266,14 +266,14 @@ test("disconnects all clients related to the document when an error is thrown in
 			}
 		};
 
-		const provider1 = newHocuspocusProvider(server, {
+		const provider1 = newHocuspocusProvider(t, server, {
 			onAuthenticationFailed(event) {
 				provider1.disconnect();
 				resolver();
 			},
 		});
 
-		const provider2 = newHocuspocusProvider(server, {
+		const provider2 = newHocuspocusProvider(t, server, {
 			onAuthenticationFailed() {
 				provider2.disconnect();
 				resolver();
@@ -299,7 +299,7 @@ test("if a new connection connects while the previous connection still fetches t
 			}
 		};
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onLoadDocument({ document }) {
 				return new Promise(async (resolve) => {
 					setTimeout(() => {
@@ -314,7 +314,7 @@ test("if a new connection connects while the previous connection still fetches t
 		});
 
 		let provider1MessagesReceived = 0;
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced({ state }) {
 				// if (!state) return
 				t.is(server.documents.size, 1);
@@ -352,7 +352,7 @@ test("if a new connection connects while the previous connection still fetches t
 
 		let provider2MessagesReceived = 0;
 		setTimeout(() => {
-			const provider2 = newHocuspocusProvider(server, {
+			const provider2 = newHocuspocusProvider(t, server, {
 				onSynced({ state }) {
 					// if (!state) return
 
@@ -402,13 +402,13 @@ test("stops when an error is thrown in onLoadDocument and passed on to the provi
 	}
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onLoadDocument() {
 				throw new CustomError("testdoc");
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			onAuthenticationFailed(e) {
 				t.is(e.reason, "mycustomreason");
 				t.pass();

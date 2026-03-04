@@ -14,14 +14,14 @@ import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 test("executes the onAuthenticate callback", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate() {
 				t.pass();
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 		});
 	});
@@ -36,11 +36,11 @@ test("executes the onAuthenticate callback from a custom extension", async (t) =
 			}
 		}
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [new CustomExtension()],
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 		});
 	});
@@ -48,14 +48,14 @@ test("executes the onAuthenticate callback from a custom extension", async (t) =
 
 test("confirms the `Token` message with an `Authenticated` message", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate() {
 				// success
 				return true;
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 			onAuthenticated() {
 				t.pass();
@@ -67,14 +67,14 @@ test("confirms the `Token` message with an `Authenticated` message", async (t) =
 
 test("replies with a `PermissionDenied` message when authentication fails", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate() {
 				// fail
 				throw Error();
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 			onAuthenticationFailed() {
 				t.pass();
@@ -90,7 +90,7 @@ test("passes context from onAuthenticate to onLoadDocument", async (t) => {
 			user: 123,
 		};
 
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate() {
 				return mockContext;
 			},
@@ -101,7 +101,7 @@ test("passes context from onAuthenticate to onLoadDocument", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 		});
 	});
@@ -109,9 +109,9 @@ test("passes context from onAuthenticate to onLoadDocument", async (t) => {
 
 test("ignores the authentication token when having no onAuthenticate hook", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 			onOpen() {
 				t.pass();
@@ -123,7 +123,7 @@ test("ignores the authentication token when having no onAuthenticate hook", asyn
 
 test("has the authentication token", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ token }: onAuthenticatePayload) {
 				t.is(token, "SUPER-SECRET-TOKEN");
 
@@ -131,14 +131,14 @@ test("has the authentication token", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 		});
 	});
 });
 
 test("does not disconnect provider when the onAuthenticate hook throws an Error", async (t) => {
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		async onAuthenticate() {
 			throw new Error();
 		},
@@ -150,7 +150,7 @@ test("does not disconnect provider when the onAuthenticate hook throws an Error"
 		},
 	});
 
-	const provider = newHocuspocusProvider(server, {
+	const provider = newHocuspocusProvider(t, server, {
 		onClose() {
 			t.fail();
 		},
@@ -169,7 +169,7 @@ test("does not disconnect provider when the onAuthenticate hook throws an Error"
 
 test("connects with the correct token", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ token }: onAuthenticatePayload) {
 				if (token !== "SUPER-SECRET-TOKEN") {
 					throw new Error();
@@ -181,7 +181,7 @@ test("connects with the correct token", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: "SUPER-SECRET-TOKEN",
 		});
 	});
@@ -192,7 +192,7 @@ test("onAuthenticate has access to document name", async (t) => {
 	const requiredToken = "SUPER-SECRET-TOKEN";
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ token, documentName }: onAuthenticatePayload) {
 				if (documentName !== docName) {
 					throw new Error();
@@ -204,7 +204,7 @@ test("onAuthenticate has access to document name", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			token: requiredToken,
 			name: docName,
 			onAuthenticated() {
@@ -219,7 +219,7 @@ test("onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 	const docName = "superSecretDoc";
 	const requiredToken = "SUPER-SECRET-TOKEN";
 
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		async onAuthenticate({ token, documentName }: onAuthenticatePayload) {
 			if (documentName !== docName) {
 				throw new Error();
@@ -231,9 +231,9 @@ test("onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 		},
 	});
 
-	const socket = newHocuspocusProviderWebsocket(server);
+	const socket = newHocuspocusProviderWebsocket(t, server);
 
-	const providerFail = newHocuspocusProvider(server, {
+	const providerFail = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: "wrongToken",
 		name: "otherDocu",
@@ -244,7 +244,7 @@ test("onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 
 	await sleep(100);
 
-	const providerOK = newHocuspocusProvider(server, {
+	const providerOK = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: requiredToken,
 		name: docName,
@@ -261,7 +261,7 @@ test("onAuthenticate wrong auth only disconnects affected doc (when multiplexing
 });
 
 test("onAuthenticate readonly auth only affects 1 doc (when multiplexing)", async (t) => {
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		async onAuthenticate({
 			token,
 			documentName,
@@ -273,9 +273,9 @@ test("onAuthenticate readonly auth only affects 1 doc (when multiplexing)", asyn
 		},
 	});
 
-	const socket = newHocuspocusProviderWebsocket(server);
+	const socket = newHocuspocusProviderWebsocket(t, server);
 
-	const providerReadOnly = newHocuspocusProvider(server, {
+	const providerReadOnly = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: "readonly",
 		name: "doc1",
@@ -284,7 +284,7 @@ test("onAuthenticate readonly auth only affects 1 doc (when multiplexing)", asyn
 		},
 	});
 
-	const providerOK = newHocuspocusProvider(server, {
+	const providerOK = newHocuspocusProvider(t, server, {
 		websocketProvider: socket,
 		token: "read+write",
 		name: "doc2",
@@ -319,14 +319,14 @@ test("onAuthenticate is called even if no token is provided", async (t) => {
 	const docName = "superSecretDoc";
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			async onAuthenticate({ documentName }: onAuthenticatePayload) {
 				t.pass();
 				resolve("done");
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			name: docName,
 		});
 	});

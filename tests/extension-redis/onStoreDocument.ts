@@ -19,7 +19,7 @@ test('stores documents without conflicts', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       name: 'redis-1',
       extensions: [
         new Redis({
@@ -31,7 +31,7 @@ test('stores documents without conflicts', async t => {
       ],
     })
 
-    const anotherServer = await newHocuspocus({
+    const anotherServer = await newHocuspocus(t, {
       name: 'redis-2',
       extensions: [
         new Redis({
@@ -43,9 +43,9 @@ test('stores documents without conflicts', async t => {
       ],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
 
-    anotherProvider = newHocuspocusProvider(anotherServer, {
+    anotherProvider = newHocuspocusProvider(t, anotherServer, {
       onSynced() {
         // once we're setup make an edit on anotherProvider, if all succeeds the onStoreDocument
         // callback will be called after the debounce period and all docs will
@@ -62,7 +62,7 @@ test('stores documents when the last client disconnects', async t => {
     // eslint-disable-next-line prefer-const
     let provider: HocuspocusProvider
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new Redis({
           prefix: 'extension-redis/onStoreDocument2',
@@ -79,7 +79,7 @@ test('stores documents when the last client disconnects', async t => {
       },
     })
 
-    provider = newHocuspocusProvider(server, {
+    provider = newHocuspocusProvider(t, server, {
       onSynced() {
         provider.document.getArray('foo').insert(0, ['bar'])
         provider.disconnect()
@@ -105,7 +105,7 @@ test('document gets unloaded on both servers after disconnection', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       name: 'redis-1',
       extensions: [
         new Redis({
@@ -116,7 +116,7 @@ test('document gets unloaded on both servers after disconnection', async t => {
       ],
     })
 
-    const anotherServer = await newHocuspocus({
+    const anotherServer = await newHocuspocus(t, {
       name: 'redis-2',
       extensions: [
         new Redis({
@@ -127,9 +127,9 @@ test('document gets unloaded on both servers after disconnection', async t => {
       ],
     })
 
-    const provider = newHocuspocusProvider(server)
+    const provider = newHocuspocusProvider(t, server)
 
-    const anotherProvider = newHocuspocusProvider(anotherServer, {
+    const anotherProvider = newHocuspocusProvider(t, anotherServer, {
       onSynced() {
         // once we're setup make an edit on anotherProvider, if all succeeds the onStoreDocument
         // callback will be called after the debounce period and all docs will

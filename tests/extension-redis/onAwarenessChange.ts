@@ -11,7 +11,7 @@ test("syncs existing awareness state", async (t) => {
 	const documentName = `test-${crypto.randomUUID()}`;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -20,7 +20,7 @@ test("syncs existing awareness state", async (t) => {
 			],
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -29,7 +29,7 @@ test("syncs existing awareness state", async (t) => {
 			],
 		});
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			name: documentName,
 			onSynced() {
 				// Once we're set up, change the local Awareness state.
@@ -39,7 +39,7 @@ test("syncs existing awareness state", async (t) => {
 
 				// Time to initialize a second provider, and connect to `anotherServer`
 				// to check whether existing Awareness states are synced through Redis.
-				newHocuspocusProvider(anotherServer, {
+				newHocuspocusProvider(t, anotherServer, {
 					name: documentName,
 					onAwarenessChange({ states }: onAwarenessChangeParameters) {
 						// Wait until we have exactly 2 states with the expected data
@@ -61,7 +61,7 @@ test("syncs awareness between servers and clients", async (t) => {
 	const documentName = `test-${crypto.randomUUID()}`;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -70,7 +70,7 @@ test("syncs awareness between servers and clients", async (t) => {
 			],
 		});
 
-		const anotherServer = await newHocuspocus({
+		const anotherServer = await newHocuspocus(t, {
 			extensions: [
 				new Redis({
 					...redisConnectionSettings,
@@ -79,7 +79,7 @@ test("syncs awareness between servers and clients", async (t) => {
 			],
 		});
 
-		const provider = newHocuspocusProvider(anotherServer, {
+		const provider = newHocuspocusProvider(t, anotherServer, {
 			name: documentName,
 			onSynced() {
 				// once we're setup change awareness on provider, to get to client it will
@@ -89,7 +89,7 @@ test("syncs awareness between servers and clients", async (t) => {
 			},
 		});
 
-		newHocuspocusProvider(server, {
+		newHocuspocusProvider(t, server, {
 			name: documentName,
 			onAwarenessChange: ({ states }: onAwarenessChangeParameters) => {
 				// Wait until we have exactly 2 states with the expected data

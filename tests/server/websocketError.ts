@@ -4,7 +4,7 @@ import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } 
 
 test('does not crash when malformed message is sent pre-authentication', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate(data: onAuthenticatePayload) {
         return new Promise(async resolve => {
           setTimeout(resolve, 2000)
@@ -12,12 +12,15 @@ test('does not crash when malformed message is sent pre-authentication', async t
       },
     })
 
-    const socket = newHocuspocusProviderWebsocket(server)
+    const socket = newHocuspocusProviderWebsocket(t, server)
 
-    const provider = newHocuspocusProvider(server, {
+    let interval: ReturnType<typeof setInterval>
+
+    const provider = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       onClose({ event }) {
         t.is(event.code, 4401)
+        clearInterval(interval)
         provider.destroy()
       },
       onDestroy() {
@@ -26,8 +29,10 @@ test('does not crash when malformed message is sent pre-authentication', async t
       },
     })
 
-    setInterval(() => {
-      socket.webSocket!.send('ϩ') // eslint-disable-line
+    interval = setInterval(() => {
+      if (socket.webSocket) {
+        socket.webSocket.send('ϩ') // eslint-disable-line
+      }
     }, 500)
   })
 })

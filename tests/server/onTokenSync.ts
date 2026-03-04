@@ -14,7 +14,7 @@ test('provider sendToken: onTokenSync receives correct token from provider after
   await new Promise(async resolve => {
     const expectedToken = 'UPDATED-TOKEN'
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true // Allow initial auth
       },
@@ -24,7 +24,7 @@ test('provider sendToken: onTokenSync receives correct token from provider after
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'INITIAL-TOKEN', // Initial token for auth
       onAuthenticated() {
         // Update the provider's token before sending
@@ -50,13 +50,13 @@ test('provider sendToken: executes onTokenSync from custom extension when provid
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         provider.sendToken()
@@ -69,7 +69,7 @@ test('provider sendToken: onTokenSync has access to full payload when provider s
   const mockContext = { user: 123 }
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return mockContext
       },
@@ -82,7 +82,7 @@ test('provider sendToken: onTokenSync has access to full payload when provider s
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         provider.sendToken()
@@ -99,7 +99,7 @@ test('provider sendToken: onTokenSync works with multiple providers sending toke
   let completedCount = 0
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true // Allow initial auth
       },
@@ -118,10 +118,10 @@ test('provider sendToken: onTokenSync works with multiple providers sending toke
       },
     })
 
-    const socket = newHocuspocusProviderWebsocket(server)
+    const socket = newHocuspocusProviderWebsocket(t, server)
 
     // Create two providers for different documents
-    const provider1 = newHocuspocusProvider(server, {
+    const provider1 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       token: token1,
       name: doc1,
@@ -130,7 +130,7 @@ test('provider sendToken: onTokenSync works with multiple providers sending toke
       },
     })
 
-    const provider2 = newHocuspocusProvider(server, {
+    const provider2 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       token: token2,
       name: doc2,
@@ -148,7 +148,7 @@ test('provider sendToken: onTokenSync works with multiple providers sending toke
 
 test('server requestToken: executes onTokenSync when server requests token after authentication', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true
       },
@@ -159,7 +159,7 @@ test('server requestToken: executes onTokenSync when server requests token after
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
     })
 
@@ -190,13 +190,13 @@ test('server requestToken: executes onTokenSync from custom extension when serve
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
     })
 
@@ -216,7 +216,7 @@ test('server requestToken: onTokenSync receives correct token when server reques
   await new Promise(async resolve => {
     const expectedToken = 'UPDATED-TOKEN'
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true
       },
@@ -226,7 +226,7 @@ test('server requestToken: onTokenSync receives correct token when server reques
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'INITIAL-TOKEN',
       onAuthenticated() {
         // Update the provider's token after connection
@@ -255,7 +255,7 @@ test('server requestToken: onTokenSync works with multiple documents when server
   let completedCount = 0
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true // Allow initial auth
       },
@@ -274,16 +274,16 @@ test('server requestToken: onTokenSync works with multiple documents when server
       },
     })
 
-    const socket = newHocuspocusProviderWebsocket(server)
+    const socket = newHocuspocusProviderWebsocket(t, server)
 
     // Create two providers for different documents
-    const provider1 = newHocuspocusProvider(server, {
+    const provider1 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       token: token1,
       name: doc1,
     })
 
-    const provider2 = newHocuspocusProvider(server, {
+    const provider2 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       token: token2,
       name: doc2,
@@ -303,7 +303,7 @@ test('server requestToken: onTokenSync works with multiple documents when server
 
 test('server requestToken: onTokenSync works with readonly connections when server requests token', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate({ connectionConfig }: onAuthenticatePayload) {
         connectionConfig.readOnly = true
         return true
@@ -314,7 +314,7 @@ test('server requestToken: onTokenSync works with readonly connections when serv
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'readonly-token',
     })
 
@@ -334,7 +334,7 @@ test('server requestToken: onTokenSync works with readonly connections when serv
 
 test('server requestToken: failure of onTokenSync should close the connection', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate() {
         return true // Allow initial auth
       },
@@ -343,7 +343,7 @@ test('server requestToken: failure of onTokenSync should close the connection', 
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       onClose({ event }) {
         t.is(event.reason, Unauthorized.reason)

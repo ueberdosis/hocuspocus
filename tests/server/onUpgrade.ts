@@ -3,14 +3,14 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onUpgrade callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onUpgrade() {
         t.pass()
         resolve('done')
       },
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
@@ -23,19 +23,19 @@ test('executes the onUpgrade callback from an extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('has the server instance', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
 
       async onUpgrade({ instance }) {
         t.is(instance, server)
@@ -43,13 +43,13 @@ test('has the server instance', async t => {
       },
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('has the request', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
 
       async onUpgrade({ request }) {
         t.is(request.url, '/')
@@ -57,13 +57,13 @@ test('has the request', async t => {
       },
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('has the socket', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
 
       async onUpgrade({ socket }) {
         t.truthy(socket)
@@ -71,13 +71,13 @@ test('has the socket', async t => {
       },
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('has the head', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
 
       async onUpgrade({ head }) {
         t.truthy(head)
@@ -85,6 +85,6 @@ test('has the head', async t => {
       },
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })

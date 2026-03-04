@@ -3,7 +3,7 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onAuthenticated callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -11,7 +11,7 @@ test('executes the onAuthenticated callback', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         t.is(provider.isAuthenticated, true)
@@ -25,7 +25,7 @@ test('executes the onAuthenticated callback', async t => {
 
 test('executes the onAuthenticated callback when token is provided as a function that returns a promise', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -33,7 +33,7 @@ test('executes the onAuthenticated callback when token is provided as a function
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: async () => Promise.resolve('SUPER-SECRET-TOKEN'),
       onAuthenticated() {
         t.is(provider.isAuthenticated, true)
@@ -47,7 +47,7 @@ test('executes the onAuthenticated callback when token is provided as a function
 
 test('executes the onAuthenticated callback when token is provided as a function that returns a string', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate({ token }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -55,7 +55,7 @@ test('executes the onAuthenticated callback when token is provided as a function
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: () => 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         t.is(provider.isAuthenticated, true)
@@ -69,7 +69,7 @@ test('executes the onAuthenticated callback when token is provided as a function
 
 test('sets correct scope for readonly', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onAuthenticate({ token, connectionConfig }) {
         if (token !== 'SUPER-SECRET-TOKEN') {
           throw new Error()
@@ -78,7 +78,7 @@ test('sets correct scope for readonly', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       onAuthenticated() {
         t.is(provider.isAuthenticated, true)
