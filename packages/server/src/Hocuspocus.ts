@@ -163,6 +163,23 @@ export class Hocuspocus<Context = any> {
 	}
 
 	/**
+	 * Immediately execute all pending debounced onStoreDocument calls.
+	 * Useful during shutdown to ensure documents are persisted and unloaded
+	 * before the server exits, even when unloadImmediately is false.
+	 */
+	flushPendingStores() {
+		this.documents.forEach((document: Document) => {
+			const debounceId = `onStoreDocument-${document.name}`;
+			if (
+				!document.isLoading &&
+				this.debouncer.isDebounced(debounceId)
+			) {
+				this.debouncer.executeNow(debounceId);
+			}
+		});
+	}
+
+	/**
 	 * Force close one or more connections
 	 */
 	closeConnections(documentName?: string) {

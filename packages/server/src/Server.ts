@@ -212,6 +212,10 @@ export class Server<Context = any> {
 				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
 
 				this.hocuspocus.closeConnections();
+
+				// Flush any remaining debounced stores so documents unload
+				// promptly, even when unloadImmediately is false.
+				this.hocuspocus.flushPendingStores();
 			} catch (error) {
 				console.error(error);
 			}
