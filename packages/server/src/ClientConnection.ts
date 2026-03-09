@@ -53,6 +53,7 @@ export class ClientConnection<Context = any> {
 			connectionConfig: ConnectionConfiguration;
 			context: Context;
 			providerVersion: string | null;
+			clientYjsEncodingVersion: number;
 		}
 	> = {};
 
@@ -144,6 +145,10 @@ export class ClientConnection<Context = any> {
 		sessionId: string | null,
 		providerVersion: string | null,
 	): Connection {
+		// Negotiate encoding version: min(server max, client max)
+		const serverMax = (this.documentProvider as Hocuspocus).configuration.yjsEncodingVersion;
+		const negotiatedVersion = Math.min(serverMax, hookPayload.clientYjsEncodingVersion);
+
 		const instance = new Connection(
 			connection,
 			hookPayload.request,
@@ -153,6 +158,7 @@ export class ClientConnection<Context = any> {
 			hookPayload.connectionConfig.readOnly,
 			sessionId,
 			providerVersion,
+			negotiatedVersion,
 		);
 
 		instance.onClose(async (document, event) => {
@@ -329,6 +335,12 @@ export class ClientConnection<Context = any> {
 				providerVersion = decoding.readVarString(tmpMsg.decoder);
 			}
 
+			// Try to read the client's preferred Yjs encoding version
+			let clientYjsEncodingVersion = 1;
+			if (decoding.hasContent(tmpMsg.decoder)) {
+				clientYjsEncodingVersion = decoding.readVarUint(tmpMsg.decoder);
+			}
+
 			// Extract sessionId from the rawKey (documentName\0sessionId) if present
 			const sepIdx = rawKey.indexOf('\0');
 			const sessionId = sepIdx === -1 ? null : rawKey.substring(sepIdx + 1);
@@ -339,6 +351,7 @@ export class ClientConnection<Context = any> {
 			try {
 				const hookPayload = this.hookPayloads[rawKey];
 				hookPayload.providerVersion = providerVersion;
+				hookPayload.clientYjsEncodingVersion = clientYjsEncodingVersion;
 
 				await this.hooks(
 					"onConnect",
@@ -445,6 +458,7 @@ export class ClientConnection<Context = any> {
 						...this.defaultContext,
 					},
 					providerVersion: null as string | null,
+					clientYjsEncodingVersion: 1,
 				};
 			}
 

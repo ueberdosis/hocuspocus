@@ -1,4 +1,4 @@
-import { awarenessStatesToArray, makeRoutingKey, parseRoutingKey } from "@hocuspocus/common";
+import { type YjsEncodingVersion, awarenessStatesToArray, convertUpdate, makeRoutingKey, parseRoutingKey } from "@hocuspocus/common";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";
@@ -90,6 +90,17 @@ export interface CompleteHocuspocusProviderConfiguration {
 	sessionAwareness: boolean;
 
 	/**
+	 * The Yjs encoding version to use for sync messages on the wire.
+	 *
+	 * - `1` (default): Standard Yjs v1 encoding. Compatible with all existing servers.
+	 * - `2`: Yjs v2 encoding. More compact, but requires server support.
+	 *
+	 * This is advertised to the server during authentication. The effective version
+	 * per connection is negotiated as min(server version, client version).
+	 */
+	yjsEncodingVersion: YjsEncodingVersion;
+
+	/**
 	 * Force syncing the document in the defined interval.
 	 */
 	forceSyncInterval: false | number;
@@ -124,6 +135,7 @@ export class HocuspocusProvider extends EventEmitter {
 		awareness: undefined,
 		token: null,
 		sessionAwareness: true,
+		yjsEncodingVersion: 1,
 		forceSyncInterval: false,
 		onAuthenticated: () => null,
 		onAuthenticationFailed: () => null,
@@ -352,6 +364,7 @@ export class HocuspocusProvider extends EventEmitter {
 		this.send(AuthenticationMessage, {
 			token: token ?? "",
 			documentName: this.effectiveName,
+			yjsEncodingVersion: this.configuration.yjsEncodingVersion,
 		});
 	}
 
@@ -360,8 +373,13 @@ export class HocuspocusProvider extends EventEmitter {
 			return;
 		}
 
+		// doc.on('update') always emits v1 updates; convert if needed
+		const wireUpdate = this.configuration.yjsEncodingVersion >= 2
+			? convertUpdate(update, 1, this.configuration.yjsEncodingVersion)
+			: update;
+
 		this.incrementUnsyncedChanges();
-		this.send(UpdateMessage, { update, documentName: this.effectiveName });
+		this.send(UpdateMessage, { update: wireUpdate, documentName: this.effectiveName });
 	}
 
 	awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {

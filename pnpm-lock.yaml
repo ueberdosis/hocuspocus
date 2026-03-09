@@ -75,9 +75,15 @@ importers:
       lib0:
         specifier: ^0.2.87
         version: 0.2.117
+      yjs:
+        specifier: ^13.6.8
+        version: 13.6.29
 
   packages/extension-database:
     dependencies:
+      '@hocuspocus/common':
+        specifier: workspace:^
+        version: link:../common
       '@hocuspocus/server':
         specifier: workspace:^
         version: link:../server

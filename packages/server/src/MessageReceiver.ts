@@ -1,15 +1,16 @@
-import { AuthMessageType } from "@hocuspocus/common";
-import * as decoding from "lib0/decoding";
-import { readVarString } from "lib0/decoding";
-import { applyAwarenessUpdate } from "y-protocols/awareness";
 import {
+	AuthMessageType,
+	convertUpdate,
 	messageYjsSyncStep1,
 	messageYjsSyncStep2,
 	messageYjsUpdate,
 	readSyncStep1,
 	readSyncStep2,
 	readUpdate,
-} from "y-protocols/sync";
+} from "@hocuspocus/common";
+import * as decoding from "lib0/decoding";
+import { readVarString } from "lib0/decoding";
+import { applyAwarenessUpdate } from "y-protocols/awareness";
 import * as Y from "yjs";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
@@ -138,6 +139,7 @@ export class MessageReceiver {
 	) {
 		const type = message.readVarUint();
 		const messageAddress = connection?.messageAddress ?? document.name;
+		const encodingVersion = connection?.yjsEncodingVersion ?? 1;
 
 		if (connection) {
 			await connection.callbacks.beforeSync(connection, {
@@ -148,7 +150,7 @@ export class MessageReceiver {
 
 		switch (type) {
 			case messageYjsSyncStep1: {
-				readSyncStep1(message.decoder, message.encoder, document);
+				readSyncStep1(message.decoder, message.encoder, document, encodingVersion);
 
 				// When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
 				if (reply && requestFirstSync) {
@@ -173,7 +175,13 @@ export class MessageReceiver {
 					// If not, we can still ack the update
 					const snapshot = Y.snapshot(document);
 					const update = decoding.readVarUint8Array(message.decoder);
-					if (Y.snapshotContainsUpdate(snapshot, update)) {
+
+					// For v2 encoding, convert the update to v1 for snapshot comparison
+					const v1Update = encodingVersion >= 2
+						? convertUpdate(update, encodingVersion, 1)
+						: update;
+
+					if (Y.snapshotContainsUpdate(snapshot, v1Update)) {
 						// no new changes in update
 						const ackMessage = new OutgoingMessage(messageAddress).writeSyncStatus(
 							true,
@@ -197,6 +205,7 @@ export class MessageReceiver {
 					connection
 						? { source: "connection" as const, connection }
 						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
+					encodingVersion,
 				);
 
 				if (connection) {
@@ -224,6 +233,7 @@ export class MessageReceiver {
 					connection
 						? { source: "connection" as const, connection }
 						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
+					encodingVersion,
 				);
 				if (connection) {
 					connection.send(

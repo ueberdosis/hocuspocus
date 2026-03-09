@@ -1,3 +1,4 @@
+import { convertUpdate } from "@hocuspocus/common";
 import { Mutex } from "async-mutex";
 import {
 	Awareness,
@@ -216,15 +217,22 @@ export class Document extends Doc {
 	}
 
 	/**
-	 * Handle an updated document and sync changes to clients
+	 * Handle an updated document and sync changes to clients.
+	 *
+	 * The `update` from `doc.on('update')` is always v1 encoded.
+	 * For connections negotiated to use v2 encoding, the update is converted before sending.
 	 */
 	private handleUpdate(update: Uint8Array, origin: unknown): Document {
 		this.callbacks.onUpdate(this, origin, update);
 
 		for (const connection of this.getConnections()) {
+			const wireUpdate = connection.yjsEncodingVersion >= 2
+				? convertUpdate(update, 1, connection.yjsEncodingVersion)
+				: update;
+
 			const message = new OutgoingMessage(connection.messageAddress)
 				.createSyncMessage()
-				.writeUpdate(update);
+				.writeUpdate(wireUpdate);
 
 			connection.send(message.toUint8Array());
 		}

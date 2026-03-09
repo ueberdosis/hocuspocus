@@ -1,5 +1,5 @@
 import * as encoding from "lib0/encoding";
-import * as syncProtocol from "y-protocols/sync";
+import { writeSyncStep2 } from "@hocuspocus/common";
 import type { OutgoingMessageArguments } from "../types.ts";
 import { MessageType } from "../types.ts";
 import { OutgoingMessage } from "../OutgoingMessage.ts";
@@ -18,7 +18,7 @@ export class SyncStepTwoMessage extends OutgoingMessage {
 
 		encoding.writeVarString(this.encoder, args.documentName!);
 		encoding.writeVarUint(this.encoder, this.type);
-		syncProtocol.writeSyncStep2(this.encoder, args.document);
+		writeSyncStep2(this.encoder, args.document, undefined, args.yjsEncodingVersion ?? 1);
 
 		return this.encoder;
 	}

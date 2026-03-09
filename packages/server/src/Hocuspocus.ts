@@ -34,6 +34,7 @@ export const defaultConfiguration = {
 		gcFilter: () => true,
 	},
 	unloadImmediately: true,
+	yjsEncodingVersion: 1 as number,
 };
 
 export class Hocuspocus<Context = any> {

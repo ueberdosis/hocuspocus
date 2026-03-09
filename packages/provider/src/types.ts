@@ -46,6 +46,7 @@ export interface OutgoingMessageArguments {
 	update: any;
 	payload: string;
 	encoder: Encoder;
+	yjsEncodingVersion: number;
 }
 
 export interface Constructable<T> {

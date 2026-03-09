@@ -43,6 +43,12 @@ export class Connection<Context = any> {
 	providerVersion: string | null;
 
 	/**
+	 * The negotiated Yjs encoding version for this connection's sync messages.
+	 * Computed as min(server configured version, client advertised version).
+	 */
+	yjsEncodingVersion: number;
+
+	/**
 	 * The address string prefixed to outgoing messages.
 	 * Session-aware clients get `documentName\0sessionId`; legacy clients get plain `documentName`.
 	 */
@@ -68,6 +74,7 @@ export class Connection<Context = any> {
 		readOnly = false,
 		sessionId?: string | null,
 		providerVersion?: string | null,
+		yjsEncodingVersion?: number,
 	) {
 		this.webSocket = connection;
 		this.context = context;
@@ -77,6 +84,7 @@ export class Connection<Context = any> {
 		this.readOnly = readOnly;
 		this.sessionId = sessionId ?? null;
 		this.providerVersion = providerVersion ?? null;
+		this.yjsEncodingVersion = yjsEncodingVersion ?? 1;
 
 		this.document.addConnection(this);
 

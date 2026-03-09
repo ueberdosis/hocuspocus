@@ -27,6 +27,7 @@
 		"dist"
 	],
 	"dependencies": {
+		"@hocuspocus/common": "workspace:^",
 		"@hocuspocus/server": "workspace:^"
 	},
 	"peerDependencies": {

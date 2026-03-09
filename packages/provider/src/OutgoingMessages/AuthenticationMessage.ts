@@ -21,6 +21,7 @@ export class AuthenticationMessage extends OutgoingMessage {
 		writeVarUint(this.encoder, this.type);
 		writeAuthentication(this.encoder, args.token);
 		writeVarString(this.encoder, version);
+		writeVarUint(this.encoder, args.yjsEncodingVersion ?? 1);
 
 		return this.encoder;
 	}

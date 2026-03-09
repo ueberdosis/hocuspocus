@@ -1,3 +1,8 @@
+import {
+	type YjsEncodingVersion,
+	applyUpdate as applyUpdateVersioned,
+	encodeStateAsUpdate as encodeStateAsUpdateVersioned,
+} from "@hocuspocus/common";
 import type {
 	Extension,
 	fetchPayload,
@@ -6,7 +11,6 @@ import type {
 	onStoreDocumentPayload,
 	storePayload,
 } from "@hocuspocus/server";
-import * as Y from "yjs";
 
 export interface DatabaseConfiguration {
 	/**
@@ -18,6 +22,16 @@ export interface DatabaseConfiguration {
 	 * Pass a function to store updates in your database.
 	 */
 	store: (data: storePayload) => Promise<void>;
+	/**
+	 * The Yjs encoding version used for storing and loading documents.
+	 *
+	 * - `1` (default): Standard Yjs v1 encoding.
+	 * - `2`: Yjs v2 encoding. More compact but cannot be auto-detected — the
+	 *   same version must be used for both storing and loading.
+	 *
+	 * Note: This is independent of the wire encoding version configured on the server.
+	 */
+	encodingVersion: YjsEncodingVersion;
 }
 
 export class Database implements Extension {
@@ -27,6 +41,7 @@ export class Database implements Extension {
 	configuration: DatabaseConfiguration = {
 		fetch: async () => null,
 		store: async () => {},
+		encodingVersion: 1,
 	};
 
 	/**
@@ -46,7 +61,7 @@ export class Database implements Extension {
 		const update = await this.configuration.fetch(data);
 
 		if (update) {
-			Y.applyUpdate(data.document, update);
+			applyUpdateVersioned(data.document, update, undefined, this.configuration.encodingVersion);
 		}
 	}
 
@@ -56,7 +71,7 @@ export class Database implements Extension {
 	async onStoreDocument(data: onStoreDocumentPayload) {
 		await this.configuration.store({
 			...data,
-			state: Buffer.from(Y.encodeStateAsUpdate(data.document)),
+			state: Buffer.from(encodeStateAsUpdateVersioned(data.document, undefined, this.configuration.encodingVersion)),
 		});
 	}
 }

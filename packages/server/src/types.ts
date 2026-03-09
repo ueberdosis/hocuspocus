@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import type { YjsEncodingVersion } from "@hocuspocus/common";
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
@@ -207,6 +208,17 @@ export interface Configuration<Context = any> extends Extension<Context> {
 		gc: boolean; // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
 		gcFilter: () => boolean; // will be called before garbage collecting ; return false to keep it
 	};
+
+	/**
+	 * The maximum Yjs encoding version this server supports for sync messages on the wire.
+	 *
+	 * - `1` (default): Standard Yjs v1 encoding. Compatible with all existing clients.
+	 * - `2`: Yjs v2 encoding. More compact, but requires client support.
+	 *
+	 * The effective version per connection is negotiated as `min(serverVersion, clientVersion)`.
+	 * Clients that don't advertise a version are assumed to support v1 only.
+	 */
+	yjsEncodingVersion: YjsEncodingVersion;
 }
 
 export interface onStatelessPayload {

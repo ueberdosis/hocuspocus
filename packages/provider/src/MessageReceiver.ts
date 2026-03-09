@@ -1,7 +1,11 @@
-import { type CloseEvent, readAuthMessage } from "@hocuspocus/common";
+import {
+	type CloseEvent,
+	messageYjsSyncStep2,
+	readAuthMessage,
+	readSyncMessage,
+} from "@hocuspocus/common";
 import { readVarInt, readVarString } from "lib0/decoding";
 import * as awarenessProtocol from "y-protocols/awareness";
-import { messageYjsSyncStep2, readSyncMessage } from "y-protocols/sync";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
@@ -76,12 +80,13 @@ export class MessageReceiver {
 
 		message.writeVarUint(MessageType.Sync);
 
-		// Apply update
+		// Apply update using the provider's configured encoding version
 		const syncMessageType = readSyncMessage(
 			message.decoder,
 			message.encoder,
 			provider.document,
 			provider,
+			provider.configuration.yjsEncodingVersion,
 		);
 
 		// Synced once we receive Step2
