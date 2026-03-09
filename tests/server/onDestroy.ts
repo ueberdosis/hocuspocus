@@ -209,6 +209,13 @@ test("destroy calls onStoreDocument before returning, even with unloadImmediatel
 		await retryableAssertion(t, (t2) => t2.is(provider2.synced, true));
 		await retryableAssertion(t, (t2) => t2.is(provider3.synced, true));
 
+		// Wait for all changes to reach the server and trigger debounced stores
+		await retryableAssertion(t, (t2) => {
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test1"));
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test2"));
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test3"));
+		});
+
 		t.is(called, 0);
 		await hocuspocus.server!.destroy();
 		await retryableAssertion(t, (t2) => t2.is(called, 3));
@@ -250,6 +257,13 @@ test("destroy calls onStoreDocument before returning, with multiple docs if debo
 		await retryableAssertion(t, (t2) => t2.is(provider1.synced, true));
 		await retryableAssertion(t, (t2) => t2.is(provider2.synced, true));
 		await retryableAssertion(t, (t2) => t2.is(provider3.synced, true));
+
+		// Wait for all changes to reach the server and trigger debounced stores
+		await retryableAssertion(t, (t2) => {
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test1"));
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test2"));
+			t2.true(hocuspocus.debouncer.isDebounced("onStoreDocument-test3"));
+		});
 
 		t.is(called, 0);
 		await hocuspocus.server!.destroy();
