@@ -30,7 +30,7 @@ import { getParameters } from "./util/getParameters.ts";
  * - use event handlers instead of calling hooks directly, hooks should probably be called from Hocuspocus.ts
  */
 export class ClientConnection<Context = any> {
-	// this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
+	// Map of established document connections, keyed by rawKey (composite or plain)
 	private readonly documentConnections: Record<string, Connection<Context>> =
 		{};
 
@@ -38,10 +38,10 @@ export class ClientConnection<Context = any> {
 	// be queued and handled later.
 	private readonly incomingMessageQueue: Record<string, Uint8Array[]> = {};
 
-	// While the connection is establishing, kee
+	// While the connection is establishing, keep track of which documents have received auth
 	private readonly documentConnectionsEstablished = new Set<string>();
 
-	// hooks payload by Document
+	// Hook payloads keyed by rawKey (composite or plain)
 	private readonly hookPayloads: Record<
 		string,
 		{
@@ -140,8 +140,10 @@ export class ClientConnection<Context = any> {
 	private createConnection(
 		connection: WebSocketLike,
 		document: Document,
+		hookPayload: (typeof this.hookPayloads)[string],
+		sessionId: string | null,
+		providerVersion: string | null,
 	): Connection {
-		const hookPayload = this.hookPayloads[document.name];
 		const instance = new Connection(
 			connection,
 			hookPayload.request,
@@ -149,7 +151,8 @@ export class ClientConnection<Context = any> {
 			hookPayload.socketId,
 			hookPayload.context,
 			hookPayload.connectionConfig.readOnly,
-			hookPayload.providerVersion,
+			sessionId,
+			providerVersion,
 		);
 
 		instance.onClose(async (document, event) => {
@@ -225,8 +228,8 @@ export class ClientConnection<Context = any> {
 	}
 
 	// Once all hooks are run, we'll fully establish the connection:
-	private setUpNewConnection = async (documentName: string) => {
-		const hookPayload = this.hookPayloads[documentName];
+	private setUpNewConnection = async (rawKey: string, documentName: string, sessionId: string | null) => {
+		const hookPayload = this.hookPayloads[rawKey];
 		// If no hook interrupts, create a document and connection
 		const document = await this.documentProvider.createDocument(
 			documentName,
@@ -235,13 +238,13 @@ export class ClientConnection<Context = any> {
 			hookPayload.connectionConfig,
 			hookPayload.context,
 		);
-		const connection = this.createConnection(this.websocket, document);
+		const connection = this.createConnection(this.websocket, document, hookPayload, sessionId, hookPayload.providerVersion);
 
 		connection.onClose((document, event) => {
-			delete this.hookPayloads[documentName];
-			delete this.documentConnections[documentName];
-			delete this.incomingMessageQueue[documentName];
-			this.documentConnectionsEstablished.delete(documentName);
+			delete this.hookPayloads[rawKey];
+			delete this.documentConnections[rawKey];
+			delete this.incomingMessageQueue[rawKey];
+			this.documentConnectionsEstablished.delete(rawKey);
 		});
 
 		connection.onTokenSyncCallback(async (payload) => {
@@ -269,7 +272,7 @@ export class ClientConnection<Context = any> {
 			}
 		});
 
-		this.documentConnections[documentName] = connection;
+		this.documentConnections[rawKey] = connection;
 
 		// If the WebSocket has already disconnected (wow, that was fast) – then
 		// immediately call close to cleanup the connection and document in memory.
@@ -281,10 +284,9 @@ export class ClientConnection<Context = any> {
 			return;
 		}
 
-		// There's no need to queue messages anymore.
-		// Let's work through queued messages.
-		this.incomingMessageQueue[documentName].forEach((input) => {
-			this.handleMessage(input);
+		// Drain queued messages to the Connection.
+		this.incomingMessageQueue[rawKey]?.forEach((input) => {
+			connection.handleMessage(input);
 		});
 
 		await this.hooks("connected", {
@@ -296,46 +298,52 @@ export class ClientConnection<Context = any> {
 	};
 
 	// This listener handles authentication messages and queues everything else.
-	private handleQueueingMessage = async (data: Uint8Array) => {
+	private handleQueueingMessage = async (data: Uint8Array, rawKey: string, documentName: string) => {
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 
-			const documentName = decoding.readVarString(tmpMsg.decoder);
+			decoding.readVarString(tmpMsg.decoder); // skip the message address (already extracted)
 			const type = decoding.readVarUint(tmpMsg.decoder);
 
 			if (
 				!(
 					type === MessageType.Auth &&
-					!this.documentConnectionsEstablished.has(documentName)
+					!this.documentConnectionsEstablished.has(rawKey)
 				)
 			) {
-				this.incomingMessageQueue[documentName].push(data);
+				this.incomingMessageQueue[rawKey].push(data);
 				return;
 			}
 
 			// Okay, we've got the authentication message we're waiting for:
-			this.documentConnectionsEstablished.add(documentName);
+			this.documentConnectionsEstablished.add(rawKey);
 
 			// The 2nd integer contains the submessage type
 			// which will always be authentication when sent from client -> server
 			decoding.readVarUint(tmpMsg.decoder);
 			const token = decoding.readVarString(tmpMsg.decoder);
 
-			// Try to read providerVersion (new protocol field, sent by v4+ providers)
+			// Try to read providerVersion (new protocol field)
 			let providerVersion: string | null = null;
 			if (decoding.hasContent(tmpMsg.decoder)) {
 				providerVersion = decoding.readVarString(tmpMsg.decoder);
 			}
 
+			// Extract sessionId from the rawKey (documentName\0sessionId) if present
+			const sepIdx = rawKey.indexOf('\0');
+			const sessionId = sepIdx === -1 ? null : rawKey.substring(sepIdx + 1);
+
+			// Response uses rawKey so session-aware clients can route correctly
+			const responseAddress = rawKey;
+
 			try {
-				const hookPayload = this.hookPayloads[documentName];
+				const hookPayload = this.hookPayloads[rawKey];
 				hookPayload.providerVersion = providerVersion;
 
 				await this.hooks(
 					"onConnect",
 					{ ...hookPayload, documentName },
 					(contextAdditions: Partial<Context>) => {
-						// merge context from all hooks
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -351,8 +359,6 @@ export class ClientConnection<Context = any> {
 						documentName,
 					},
 					(contextAdditions: Partial<Context>) => {
-						// Hooks are allowed to give us even more context and we'll merge everything together.
-						// We'll pass the context to other hooks then.
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -363,17 +369,17 @@ export class ClientConnection<Context = any> {
 				hookPayload.connectionConfig.isAuthenticated = true;
 
 				// Let the client know that authentication was successful.
-				const message = new OutgoingMessage(documentName).writeAuthenticated(
+				const message = new OutgoingMessage(responseAddress).writeAuthenticated(
 					hookPayload.connectionConfig.readOnly,
 				);
 
 				this.websocket.send(message.toUint8Array());
 
 				// Time to actually establish the connection.
-				await this.setUpNewConnection(documentName);
+				await this.setUpNewConnection(rawKey, documentName, sessionId);
 			} catch (err: any) {
 				const error = err || Forbidden;
-				const message = new OutgoingMessage(documentName).writePermissionDenied(
+				const message = new OutgoingMessage(responseAddress).writePermissionDenied(
 					error.reason ?? "permission-denied",
 				);
 
@@ -381,9 +387,9 @@ export class ClientConnection<Context = any> {
 
 				// Clean up all state for this document so a retry is treated
 				// as a fresh first connection attempt.
-				this.documentConnectionsEstablished.delete(documentName);
-				delete this.hookPayloads[documentName];
-				delete this.incomingMessageQueue[documentName];
+				this.documentConnectionsEstablished.delete(rawKey);
+				delete this.hookPayloads[rawKey];
+				delete this.incomingMessageQueue[rawKey];
 			}
 
 			// Catch errors due to failed decoding of data
@@ -403,25 +409,29 @@ export class ClientConnection<Context = any> {
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 
-			const documentName = decoding.readVarString(tmpMsg.decoder);
+			const rawKey = decoding.readVarString(tmpMsg.decoder);
 
-			const connection = this.documentConnections[documentName];
+			// Extract the plain documentName (the raw key may be documentName\0sessionId)
+			const sepIdx = rawKey.indexOf('\0');
+			const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx);
+
+			// Look up by rawKey first (session-aware providers), then fall back
+			// to plain documentName for backward compatibility with old providers
+			const connection = this.documentConnections[rawKey]
+				?? this.documentConnections[documentName];
 			if (connection) {
-				// forward the message to the connection
 				connection.handleMessage(data);
-
-				// we already have a `Connection` set up for this document
 				return;
 			}
 
-			const isFirst = this.incomingMessageQueue[documentName] === undefined;
+			const isFirst = this.incomingMessageQueue[rawKey] === undefined;
 			if (isFirst) {
-				this.incomingMessageQueue[documentName] = [];
-				if (this.hookPayloads[documentName]) {
+				this.incomingMessageQueue[rawKey] = [];
+				if (this.hookPayloads[rawKey]) {
 					throw new Error("first message, but hookPayloads exists");
 				}
 
-				this.hookPayloads[documentName] = {
+				this.hookPayloads[rawKey] = {
 					instance: this.documentProvider as Hocuspocus,
 					request: this.request,
 					connectionConfig: {
@@ -438,7 +448,7 @@ export class ClientConnection<Context = any> {
 				};
 			}
 
-			this.handleQueueingMessage(data);
+			this.handleQueueingMessage(data, rawKey, documentName);
 		} catch (closeError) {
 			// catch is needed in case an invalid payload crashes the parsing of the Uint8Array
 			console.error(closeError);

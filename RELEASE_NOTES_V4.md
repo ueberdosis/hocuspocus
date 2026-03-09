@@ -55,6 +55,7 @@ Hook payloads now use the web-standard `Request` and `Headers` objects instead o
 - **`onLoadDocument` now accepts `Uint8Array` returns** -- extensions can return raw Yjs updates instead of constructing a full `Y.Doc`, simplifying storage extensions
 - **`handleConnection()` returns `ClientConnection`** -- enables programmatic access to the connection lifecycle for custom integrations
 - **Ordered message processing** -- messages are queued and processed sequentially per connection
+- **Session awareness** -- multiple providers can now share a single WebSocket connection with the same document name via session-aware multiplexing. Each provider gets a unique `sessionId`, enabling isolated authentication and document sessions on one socket. Enabled by default (`sessionAwareness: true`); set to `false` only when connecting to a v3 server.
 - **Auth retry support** -- failed authentication now properly cleans up state, allowing clients to retry without reconnecting
 - **DirectConnection context** -- `openDirectConnection(documentName, context)` now accepts and propagates a context object
 - **Store hooks on all changes** -- `onStoreDocument` is now triggered on any document change (not just WebSocket-originated ones), with explicit opt-out via `skipStoreHooks` on `LocalTransactionOrigin`
@@ -363,9 +364,21 @@ const server = Server.configure({
 });
 ```
 
-## 11. Provider Changes (Non-Breaking)
+## 11. Provider: Session Awareness (Default On)
 
-No code changes are required in your provider setup.
+The provider now enables `sessionAwareness` by default (`true`). This allows multiple providers to share a single WebSocket connection with the same document name via session-aware multiplexing. Each provider embeds a unique `sessionId` in messages, so the server can isolate sessions.
+
+**If you are connecting to a v3 server**, disable it explicitly:
+
+```typescript
+const provider = new HocuspocusProvider({
+  url: 'ws://localhost:1234',
+  name: 'my-document',
+  sessionAwareness: false, // required for v3 server compatibility
+});
+```
+
+No changes are needed when connecting to a v4 server.
 
 ## Summary Checklist
 
@@ -380,4 +393,5 @@ No code changes are required in your provider setup.
 - [ ] Update transaction origin checks to use `isTransactionOrigin()` and `.source`
 - [ ] If using SQLite extension: replace `sqlite3` with `better-sqlite3`
 - [ ] If using custom `handleConnection`: update to new signature and `Request` type
+- [ ] If connecting to a v3 server: set `sessionAwareness: false` on the provider
 - [ ] Test your extensions and hooks thoroughly
