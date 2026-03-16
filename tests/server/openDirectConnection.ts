@@ -3,6 +3,26 @@ import test from "ava";
 import * as Y from "yjs";
 import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
 
+test("rejects empty document name via direct connection", async (t) => {
+	const server = await newHocuspocus(t);
+
+	await t.throwsAsync(() => server.openDirectConnection(""), {
+		message: "Document name must not be empty",
+	});
+
+	t.is(server.getDocumentsCount(), 0);
+});
+
+test("rejects whitespace-only document name via direct connection", async (t) => {
+	const server = await newHocuspocus(t);
+
+	await t.throwsAsync(() => server.openDirectConnection("   "), {
+		message: "Document name must not be empty",
+	});
+
+	t.is(server.getDocumentsCount(), 0);
+});
+
 test("direct connection prevents document from being removed from memory", async (t) => {
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus(t);

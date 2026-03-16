@@ -118,6 +118,36 @@ weirdDocumentNames.forEach((weirdDocumentName) => {
 	});
 });
 
+test("rejects empty document name via WebSocket", async (t) => {
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus(t);
+
+		newHocuspocusProvider(t, server, {
+			name: "",
+			onAuthenticationFailed() {
+				t.is(server.getDocumentsCount(), 0);
+				t.pass();
+				resolve("done");
+			},
+		});
+	});
+});
+
+test("rejects whitespace-only document name via WebSocket", async (t) => {
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus(t);
+
+		newHocuspocusProvider(t, server, {
+			name: "   ",
+			onAuthenticationFailed() {
+				t.is(server.getDocumentsCount(), 0);
+				t.pass();
+				resolve("done");
+			},
+		});
+	});
+});
+
 test("stops when the onConnect hook throws an Error", async (t) => {
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus(t, {
