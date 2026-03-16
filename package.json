@@ -1,14 +1,24 @@
 {
 	"private": true,
 	"packageManager": "pnpm@10.30.3",
-	"browserslist": ["defaults", "not IE 11", "maintained node versions"],
+	"browserslist": [
+		"defaults",
+		"not IE 11",
+		"maintained node versions"
+	],
 	"type": "module",
 	"ava": {
-		"files": ["tests/**/*", "!tests/utils/**/*", "!database/**/*"],
+		"files": [
+			"tests/**/*",
+			"!tests/utils/**/*",
+			"!database/**/*"
+		],
 		"extensions": {
 			"ts": "module"
 		},
-		"require": ["./tests/utils/_force-exit.ts"],
+		"require": [
+			"./tests/utils/_force-exit.ts"
+		],
 		"nodeArguments": [
 			"--no-warnings",
 			"--conditions=source",
@@ -36,15 +46,15 @@
 		"build:packages": "pnpm clean:packages && rolldown -c",
 		"build:watch": "pnpm clean:packages && rolldown --watch -c",
 		"clean:packages": "rm -Rf ./packages/*/dist",
-		"release:major": "pnpm build:packages && lerna version major --force-publish",
-		"release:major:pre": "pnpm build:packages && lerna version premajor --force-publish --preid rc",
-		"release:minor": "pnpm build:packages && lerna version minor --force-publish",
-		"release:minor:pre": "pnpm build:packages && lerna version preminor --force-publish --preid rc",
-		"release:patch": "pnpm build:packages && lerna version patch --force-publish",
-		"release:patch:pre": "pnpm build:packages && lerna version prepatch --force-publish --preid rc",
-		"release:pre": "pnpm build:packages && lerna version prerelease --force-publish --preid rc",
-		"publish": "pnpm build:packages && lerna exec --since --no-private -- pnpm publish --no-git-checks --access public",
-		"publish:pre": "pnpm build:packages && lerna exec --since --no-private -- pnpm publish --no-git-checks --tag next --access public",
+		"release:major": "pnpm build:packages && lerna version major --force-publish --sign-git-tag --sign-git-commit",
+		"release:major:pre": "pnpm build:packages && lerna version premajor --force-publish --preid rc --sign-git-tag --sign-git-commit",
+		"release:minor": "pnpm build:packages && lerna version minor --force-publish --sign-git-tag --sign-git-commit",
+		"release:minor:pre": "pnpm build:packages && lerna version preminor --force-publish --preid rc --sign-git-tag --sign-git-commit",
+		"release:patch": "pnpm build:packages && lerna version patch --force-publish --sign-git-tag --sign-git-commit",
+		"release:patch:pre": "pnpm build:packages && lerna version prepatch --force-publish --preid rc --sign-git-tag --sign-git-commit",
+		"release:pre": "pnpm build:packages && lerna version prerelease --force-publish --preid rc --sign-git-tag --sign-git-commit",
+		"publish": "pnpm build:packages && lerna exec --since --no-private -- pnpm publish --no-git-checks --access public --sign-git-tag --sign-git-commit",
+		"publish:pre": "pnpm build:packages && lerna exec --since --no-private -- pnpm publish --no-git-checks --tag next --access public --sign-git-tag --sign-git-commit",
 		"reset": "pnpm clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./pnpm-lock.yaml && pnpm install",
 		"ncu": "ncu -i --deep && pnpm install"
 	},
