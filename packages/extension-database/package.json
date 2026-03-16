@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/extension-database",
 	"description": "a generic Hocuspocus persistence driver for the database",
-	"version": "4.0.0-rc.4",
+	"version": "4.0.0-rc.5",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
