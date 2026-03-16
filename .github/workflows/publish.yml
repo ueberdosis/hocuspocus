@@ -32,7 +32,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm publish
+      - run: pnpm publish:latest
         if: "!contains(github.ref, '-rc.')"
 
       - run: pnpm publish:pre
