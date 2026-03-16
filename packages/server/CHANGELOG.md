@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/server
+
+
+
+
+
 # [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
 
 **Note:** Version bump only for package @hocuspocus/server
