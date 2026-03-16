@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Features
+
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+
+
+
+
+
 # [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
 
 **Note:** Version bump only for package @hocuspocus/common
