@@ -8,6 +8,6 @@
       "conventionalCommits": true
     }
   },
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-rc.1",
   "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* upgrade deps ([f3fc252](https://github.com/ueberdosis/hocuspocus/commit/f3fc252c3978df3229813f370d80ff3f2f0759d0))
+
+
+
+
+
 # [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
 
 
