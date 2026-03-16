@@ -55,12 +55,6 @@ export class MessageReceiver {
 					if (reply) {
 						reply(message.toUint8Array());
 					} else if (connection) {
-						// TODO: We should log this, shouldn't we?
-						// this.logger.log({
-						//   direction: 'out',
-						//   type: MessageType.Awareness,
-						//   category: 'Update',
-						// })
 						connection.send(message.toUint8Array());
 					}
 				}
@@ -175,16 +169,16 @@ export class MessageReceiver {
 					const update = decoding.readVarUint8Array(message.decoder);
 					if (Y.snapshotContainsUpdate(snapshot, update)) {
 						// no new changes in update
-						const ackMessage = new OutgoingMessage(messageAddress).writeSyncStatus(
-							true,
-						);
+						const ackMessage = new OutgoingMessage(
+							messageAddress,
+						).writeSyncStatus(true);
 
 						connection.send(ackMessage.toUint8Array());
 					} else {
 						// new changes in update that we can't apply, because readOnly
-						const ackMessage = new OutgoingMessage(messageAddress).writeSyncStatus(
-							false,
-						);
+						const ackMessage = new OutgoingMessage(
+							messageAddress,
+						).writeSyncStatus(false);
 
 						connection.send(ackMessage.toUint8Array());
 					}
