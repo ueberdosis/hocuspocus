@@ -53,8 +53,8 @@
 		"release:patch": "pnpm build:packages && lerna version patch --force-publish --sign-git-tag --sign-git-commit",
 		"release:patch:pre": "pnpm build:packages && lerna version prepatch --force-publish --preid rc --sign-git-tag --sign-git-commit",
 		"release:pre": "pnpm build:packages && lerna version prerelease --force-publish --preid rc --sign-git-tag --sign-git-commit",
-		"publish": "pnpm build:packages && lerna publish from-package --no-git-checks --yes --access public",
-		"publish:pre": "pnpm build:packages && lerna publish from-package --no-git-checks --yes --dist-tag next --access public",
+		"publish": "pnpm build:packages && lerna publish from-package --yes",
+		"publish:pre": "pnpm build:packages && lerna publish from-package --yes --dist-tag next",
 		"reset": "pnpm clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./pnpm-lock.yaml && pnpm install",
 		"ncu": "ncu -i --deep && pnpm install"
 	},
