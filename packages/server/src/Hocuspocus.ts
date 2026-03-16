@@ -1,23 +1,23 @@
 import crypto from "node:crypto";
-import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
-import { Doc } from "yjs";
-import { applyUpdate, encodeStateAsUpdate } from "yjs";
-import meta from "../package.json" assert { type: "json" };
+import { awarenessStatesToArray, ResetConnection } from "@hocuspocus/common";
+import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
+import meta from "../package.json" with { type: "json" };
+
 import { ClientConnection } from "./ClientConnection.ts";
 import { DirectConnection } from "./DirectConnection.ts";
 import Document from "./Document.ts";
 import type { Server } from "./Server.ts";
 import type {
 	AwarenessUpdate,
+	beforeBroadcastStatelessPayload,
 	Configuration,
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
-	WebSocketLike,
-	beforeBroadcastStatelessPayload,
 	onChangePayload,
 	onDisconnectPayload,
 	onStoreDocumentPayload,
+	WebSocketLike,
 } from "./types.ts";
 import { isTransactionOrigin, shouldSkipStoreHooks } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
@@ -170,10 +170,7 @@ export class Hocuspocus<Context = any> {
 	flushPendingStores() {
 		this.documents.forEach((document: Document) => {
 			const debounceId = `onStoreDocument-${document.name}`;
-			if (
-				!document.isLoading &&
-				this.debouncer.isDebounced(debounceId)
-			) {
+			if (!document.isLoading && this.debouncer.isDebounced(debounceId)) {
 				this.debouncer.executeNow(debounceId);
 			}
 		});
@@ -323,6 +320,10 @@ export class Hocuspocus<Context = any> {
 		connection: ConnectionConfiguration,
 		context?: Context,
 	): Promise<Document> {
+		if (!documentName.trim()) {
+			throw new Error('Document name must not be empty')
+		}
+
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
 
 		if (existingLoadingDoc) {
@@ -472,17 +473,17 @@ export class Hocuspocus<Context = any> {
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
 				} catch (error: any) {
-					console.error("Caught error during storeDocumentHooks", error);
-					if (error?.message) {
-						throw error;
-					}
-				} finally {
-					setTimeout(() => {
-						if (this.shouldUnloadDocument(document)) {
-							this.unloadDocument(document);
-						}
-					}, 0);
+					console.error("Caught error during storeDocumentHooks, retrying", error);
+					// Retry to avoid data loss — the document stays in memory until the store succeeds
+					this.storeDocumentHooks(document, hookPayload);
+					return;
 				}
+
+				setTimeout(() => {
+					if (this.shouldUnloadDocument(document)) {
+						this.unloadDocument(document);
+					}
+				}, 0);
 			},
 			immediately ? 0 : this.configuration.debounce,
 			this.configuration.maxDebounce,

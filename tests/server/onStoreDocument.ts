@@ -200,6 +200,66 @@ test("stops when one of the onStoreDocument hooks throws an error", async (t) =>
 	});
 });
 
+test("stops when one of the onStoreDocument hooks throws a non-Error value", async (t) => {
+	await new Promise(async (resolve) => {
+		class BreakingTheChain {
+			async onStoreDocument() {
+				setTimeout(() => {
+					t.pass();
+					resolve("done");
+				}, 100);
+
+				// Throw a string instead of an Error object
+				throw "storage unavailable";
+			}
+		}
+
+		class NotExecuted {
+			async onStoreDocument() {
+				// This MUST NOT be executed.
+				t.fail("NotExecuted should not run");
+			}
+		}
+
+		const server = await newHocuspocus(t, {
+			extensions: [new BreakingTheChain(), new NotExecuted()],
+		});
+
+		const provider = newHocuspocusProvider(t, server);
+
+		provider.on("synced", () => {
+			provider.document.getArray("foo").insert(0, ["bar"]);
+		});
+	});
+});
+
+test("retries onStoreDocument on transient failure and succeeds", async (t) => {
+	await new Promise(async (resolve) => {
+		let callCount = 0;
+
+		const server = await newHocuspocus(t, {
+			debounce: 100,
+			async onStoreDocument({ document }) {
+				callCount++;
+				if (callCount < 3) {
+					throw new Error("transient failure");
+				}
+				// Third attempt succeeds
+				const value = document.getArray("foo").get(0);
+				t.is(value, "bar");
+				t.is(callCount, 3, "should succeed on third attempt");
+				resolve("done");
+			},
+		});
+
+		const provider = newHocuspocusProvider(t, server);
+
+		provider.on("synced", () => {
+			provider.document.getArray("foo").insert(0, ["bar"]);
+		});
+	});
+});
+
 test("has the server instance", async (t) => {
 	await new Promise(async (resolve) => {
 		const server = await newHocuspocus(t, {
