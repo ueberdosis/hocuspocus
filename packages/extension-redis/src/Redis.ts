@@ -1,24 +1,25 @@
 import crypto from "node:crypto";
 import type {
-	Document,
-	Extension,
-	Hocuspocus,
-	RedisTransactionOrigin,
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
 	afterUnloadDocumentPayload,
 	beforeBroadcastStatelessPayload,
 	beforeUnloadDocumentPayload,
+	Document,
+	Extension,
+	Hocuspocus,
 	onAwarenessUpdatePayload,
 	onChangePayload,
 	onConfigurePayload,
 	onStoreDocumentPayload,
+	RedisTransactionOrigin,
 } from "@hocuspocus/server";
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import {
 	IncomingMessage,
+	isTransactionOrigin,
 	MessageReceiver,
 	OutgoingMessage,
-	isTransactionOrigin,
 } from "@hocuspocus/server";
 import {
 	ExecutionError,
@@ -266,10 +267,8 @@ export class Redis implements Extension {
 					"The operation was unable to achieve a quorum during its retry window."
 			) {
 				// Expected behavior: Could not acquire lock, another instance locked it already.
-				// No further `onStoreDocument` hooks will be executed; should throw a silent error with no message.
-				throw new Error("", {
-					cause: "Could not acquire lock, another instance locked it already.",
-				});
+				// Skip further hooks and retry — the data is safe on the other instance.
+				throw new SkipFurtherHooksError("Another instance is already storing this document");
 			}
 			//unexpected error
 			console.error("unexpected error:", error);

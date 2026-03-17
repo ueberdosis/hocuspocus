@@ -146,7 +146,7 @@ test('document gets unloaded on both servers after disconnection', async t => {
             t.is(server.documents.size, 0)
 
             resolve('')
-          }, 5000) // must be higher than RedisExtension.disconnectDelay
+          }, 10000) // must be higher than CustomStorageExtension delay (3s) + RedisExtension.disconnectDelay (1s)
         }, 1500)
 
       },

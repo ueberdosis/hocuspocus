@@ -93,6 +93,9 @@ importers:
 
   packages/extension-redis:
     dependencies:
+      '@hocuspocus/common':
+        specifier: workspace:^
+        version: link:../common
       '@hocuspocus/server':
         specifier: workspace:^
         version: link:../server

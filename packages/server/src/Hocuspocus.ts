@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { awarenessStatesToArray, ResetConnection } from "@hocuspocus/common";
+import { awarenessStatesToArray, ResetConnection, SkipFurtherHooksError } from "@hocuspocus/common";
 import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" with { type: "json" };
 
@@ -321,7 +321,7 @@ export class Hocuspocus<Context = any> {
 		context?: Context,
 	): Promise<Document> {
 		if (!documentName.trim()) {
-			throw new Error('Document name must not be empty')
+			throw new Error("Document name must not be empty");
 		}
 
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
@@ -473,9 +473,20 @@ export class Hocuspocus<Context = any> {
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
 				} catch (error: any) {
-					console.error("Caught error during storeDocumentHooks, retrying", error);
-					// Retry to avoid data loss — the document stays in memory until the store succeeds
-					this.storeDocumentHooks(document, hookPayload);
+					if (error instanceof SkipFurtherHooksError) {
+						// Another extension handled this — proceed to unload
+						setTimeout(() => {
+							if (this.shouldUnloadDocument(document)) {
+								this.unloadDocument(document);
+							}
+						}, 0);
+						return;
+					}
+
+					console.error(
+						"Caught error during storeDocumentHooks. Document stays in memory to avoid data loss",
+						error,
+					);
 					return;
 				}
 

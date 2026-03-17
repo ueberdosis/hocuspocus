@@ -233,29 +233,29 @@ test("stops when one of the onStoreDocument hooks throws a non-Error value", asy
 	});
 });
 
-test("retries onStoreDocument on transient failure and succeeds", async (t) => {
+test("keeps document in memory when onStoreDocument fails", async (t) => {
 	await new Promise(async (resolve) => {
-		let callCount = 0;
-
 		const server = await newHocuspocus(t, {
 			debounce: 100,
-			async onStoreDocument({ document }) {
-				callCount++;
-				if (callCount < 3) {
-					throw new Error("transient failure");
-				}
-				// Third attempt succeeds
-				const value = document.getArray("foo").get(0);
-				t.is(value, "bar");
-				t.is(callCount, 3, "should succeed on third attempt");
-				resolve("done");
+			async onStoreDocument() {
+				throw new Error("storage unavailable");
 			},
 		});
 
-		const provider = newHocuspocusProvider(t, server);
+		const socket = newHocuspocusProviderWebsocket(t, server);
 
-		provider.on("synced", () => {
-			provider.document.getArray("foo").insert(0, ["bar"]);
+		const provider = newHocuspocusProvider(t, server, {
+			websocketProvider: socket,
+			onSynced() {
+				provider.document.getArray("foo").push(["bar"]);
+				socket.destroy();
+
+				setTimeout(() => {
+					// Document must remain in memory since the store failed
+					t.is(server.getDocumentsCount(), 1);
+					resolve("done");
+				}, 500);
+			},
 		});
 	});
 });
