@@ -1,5 +1,6 @@
 import { WsReadyStates } from "@hocuspocus/common";
 import { retry } from "@lifeomic/attempt";
+import { createDecoder, readVarString, readVarUint } from "lib0/decoding";
 import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
 import EventEmitter from "./EventEmitter.ts";
@@ -8,7 +9,6 @@ import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
 import {
 	MessageType,
-	WebSocketStatus,
 	type onAwarenessChangeParameters,
 	type onAwarenessUpdateParameters,
 	type onCloseParameters,
@@ -17,6 +17,7 @@ import {
 	type onOpenParameters,
 	type onOutgoingMessageParameters,
 	type onStatusParameters,
+	WebSocketStatus,
 } from "./types.ts";
 
 export type HocuspocusWebSocket = WebSocket & { identifier: string };
@@ -104,13 +105,18 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 }
 
 export class HocuspocusProviderWebsocket extends EventEmitter {
+	private static readonly DEDUPLICATABLE_TYPES = new Set([
+		MessageType.Awareness,
+		MessageType.QueryAwareness,
+	]);
+
 	private messageQueue: any[] = [];
 
 	public configuration: CompleteHocuspocusProviderWebsocketConfiguration = {
 		url: "",
 		autoConnect: true,
 		preserveTrailingSlash: false,
-		// @ts-ignore
+		// @ts-expect-error
 		document: undefined,
 		WebSocketPolyfill: undefined,
 		// TODO: this should depend on awareness.outdatedTime
@@ -218,7 +224,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			if (existing.isAuthenticated) {
 				throw new Error(
 					`Cannot attach two providers with the same effective name "${key}". ` +
-					"Use sessionAwareness: true to multiplex providers with the same document name.",
+						"Use sessionAwareness: true to multiplex providers with the same document name.",
 				);
 			}
 		}
@@ -510,11 +516,45 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 	}
 
+	private parseQueuedMessage(
+		message: Uint8Array,
+	): { documentName: string; messageType: number } | null {
+		try {
+			const decoder = createDecoder(message);
+			const documentName = readVarString(decoder);
+			const messageType = readVarUint(decoder);
+			return { documentName, messageType };
+		} catch {
+			return null;
+		}
+	}
+
+	private addToQueue(message: any) {
+		if (message instanceof Uint8Array) {
+			const parsed = this.parseQueuedMessage(message);
+			if (
+				parsed &&
+				HocuspocusProviderWebsocket.DEDUPLICATABLE_TYPES.has(parsed.messageType)
+			) {
+				this.messageQueue = this.messageQueue.filter((queued) => {
+					if (!(queued instanceof Uint8Array)) return true;
+					const queuedParsed = this.parseQueuedMessage(queued);
+					if (!queuedParsed) return true;
+					return !(
+						queuedParsed.documentName === parsed.documentName &&
+						queuedParsed.messageType === parsed.messageType
+					);
+				});
+			}
+		}
+		this.messageQueue.push(message);
+	}
+
 	send(message: any) {
 		if (this.webSocket?.readyState === WsReadyStates.Open) {
 			this.webSocket.send(message);
 		} else {
-			this.messageQueue.push(message);
+			this.addToQueue(message);
 		}
 	}
 
