@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+
+### Features
+
+* adds deduplication for queued awareness messages ([e0453f0](https://github.com/ueberdosis/hocuspocus/commit/e0453f0210a4a30f6f8b742629ed777724429df9))
+
+
+
+
+
 # [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
 
 

@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/server",
 	"description": "plug & play collaboration backend",
-	"version": "4.0.0-rc.0",
+	"version": "4.0.0-rc.1",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
