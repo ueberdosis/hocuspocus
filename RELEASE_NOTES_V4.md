@@ -59,6 +59,9 @@ Hook payloads now use the web-standard `Request` and `Headers` objects instead o
 - **Auth retry support** -- failed authentication now properly cleans up state, allowing clients to retry without reconnecting
 - **DirectConnection context** -- `openDirectConnection(documentName, context)` now accepts and propagates a context object
 - **Store hooks on all changes** -- `onStoreDocument` is now triggered on any document change (not just WebSocket-originated ones), with explicit opt-out via `skipStoreHooks` on `LocalTransactionOrigin`
+- **Provider version awareness** -- the provider now sends its package version to the server during authentication. The version is available on `Connection.providerVersion` and in hook payloads (`onConnect`, `onAuthenticate`, `connected`), making it easier to introduce protocol changes in a backward-compatible way
+- **`SkipFurtherHooksError`** -- extensions can throw `SkipFurtherHooksError` (from `@hocuspocus/common`) in `onStoreDocument` to signal that persistence was handled and remaining hooks should be skipped
+- **Awareness message deduplication** -- when the WebSocket is not yet open and messages are queued, duplicate awareness messages for the same document are deduplicated, keeping only the latest one
 
 ## Bug Fixes
 
@@ -68,6 +71,10 @@ Hook payloads now use the web-standard `Request` and `Headers` objects instead o
 - **Store hooks reliability** -- `onStoreDocument` now triggers on any document change, preventing accidental data loss when updates lacked a Yjs origin
 - **Unknown message types no longer crash the provider** -- `console.error` instead of `throw`. This makes future protocol additions easier.
 - **`onStoreDocument` payload type** -- the Database extension and Logger extension now correctly type the parameter as `onStoreDocumentPayload` instead of the incorrect `onChangePayload` / `onDisconnectPayload`
+- **Document name validation** -- empty and whitespace-only document names are now rejected on both WebSocket connections and direct connections
+- **Store hook retry on failure** -- when `onStoreDocument` hooks throw, the document stays in memory and retries are attempted to avoid data loss
+- **Graceful shutdown flushes pending stores** -- `Server.destroy()` now immediately executes all pending debounced `onStoreDocument` calls, ensuring documents are persisted before the server exits (even when `unloadImmediately: false`)
+- **Memory optimization** -- outgoing Yjs update messages are now encoded once and shared across connections instead of being re-created per connection
 
 ## Infrastructure Changes
 
