@@ -123,7 +123,7 @@ export class HocuspocusProvider extends EventEmitter {
 		// @ts-ignore
 		awareness: undefined,
 		token: null,
-		sessionAwareness: true,
+		sessionAwareness: false,
 		forceSyncInterval: false,
 		onAuthenticated: () => null,
 		onAuthenticationFailed: () => null,
