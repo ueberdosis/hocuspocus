@@ -66,7 +66,7 @@ test('doesn\'t log anything if all messages are disabled', async t => {
           // onDisconnect: false,
           // onUpgrade: false,
           // onRequest: false,
-          // @ts-ignore
+          // @ts-expect-error
           onListen: false,
           onDestroy: false,
           onConfigure: false,

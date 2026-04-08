@@ -1,5 +1,5 @@
 import type { Doc } from "yjs";
-// @ts-ignore
+// @ts-expect-error
 import type { Extensions } from "@tiptap/core";
 import { getSchema } from "@tiptap/core";
 import { StarterKit } from "@tiptap/starter-kit";

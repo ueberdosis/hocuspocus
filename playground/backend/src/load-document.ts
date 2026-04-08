@@ -32,7 +32,7 @@ const server = new Server({
 
   async onConnect(data) {
     await new Promise(resolve => setTimeout(() => {
-      // @ts-ignore
+      // @ts-expect-error
       resolve()
     }, 1337))
   },
