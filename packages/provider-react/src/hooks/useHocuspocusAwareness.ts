@@ -35,17 +35,21 @@ import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
 export function useHocuspocusAwareness(): CollabUser[] {
 	const provider = useHocuspocusProvider();
 
-	// Cache the last snapshot to avoid unnecessary array allocations
-	const cacheRef = useRef<{
-		users: CollabUser[];
-		json: string;
-	} | null>(null);
+	const versionRef = useRef(0);
+	const cacheRef = useRef<{ users: CollabUser[]; version: number }>({
+		users: [],
+		version: -1,
+	});
 
 	const subscribe = useCallback(
 		(onStoreChange: () => void) => {
-			provider.awareness?.on("change", onStoreChange);
+			const onChange = () => {
+				versionRef.current++;
+				onStoreChange();
+			};
+			provider.awareness?.on("change", onChange);
 			return () => {
-				provider.awareness?.off("change", onStoreChange);
+				provider.awareness?.off("change", onChange);
 			};
 		},
 		[provider],
@@ -57,6 +61,11 @@ export function useHocuspocusAwareness(): CollabUser[] {
 			return [];
 		}
 
+		// Return cached value if awareness hasn't changed since last snapshot
+		if (cacheRef.current.version === versionRef.current) {
+			return cacheRef.current.users;
+		}
+
 		const users: CollabUser[] = [];
 		awareness.getStates().forEach((state, clientId) => {
 			users.push({
@@ -65,14 +74,7 @@ export function useHocuspocusAwareness(): CollabUser[] {
 			});
 		});
 
-		const json = JSON.stringify(users);
-
-		// Return cached value if unchanged to preserve referential equality
-		if (cacheRef.current && cacheRef.current.json === json) {
-			return cacheRef.current.users;
-		}
-
-		cacheRef.current = { users, json };
+		cacheRef.current = { users, version: versionRef.current };
 		return users;
 	}, [provider]);
 

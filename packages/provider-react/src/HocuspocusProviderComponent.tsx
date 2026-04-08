@@ -32,7 +32,7 @@ export function HocuspocusProviderComponent({
 	// Create WebSocket provider once on mount
 	if (!websocketRef.current && !externalWebsocketProvider) {
 		websocketRef.current = new HocuspocusProviderWebsocket({
-			url: url ?? "",
+			url: url!,
 		});
 	}
 

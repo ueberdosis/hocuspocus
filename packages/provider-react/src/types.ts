@@ -3,19 +3,29 @@ import type { ReactNode } from "react";
 import type * as Y from "yjs";
 
 /**
- * Configuration for HocuspocusProvider component
+ * Configuration for HocuspocusProvider component.
+ *
+ * Provide either a `url` to create a managed WebSocket connection,
+ * or a `websocketProvider` instance for full control — but not both.
  */
-export interface HocuspocusProviderComponentProps {
+export type HocuspocusProviderComponentProps = {
 	children: ReactNode;
-	/**
-	 * URL of your @hocuspocus/server instance
-	 */
-	url?: string;
-	/**
-	 * Optional: provide your own websocket instance for full control
-	 */
-	websocketProvider?: HocuspocusProviderWebsocket;
-}
+} & (
+	| {
+			/**
+			 * URL of your @hocuspocus/server instance
+			 */
+			url: string;
+			websocketProvider?: never;
+	  }
+	| {
+			url?: never;
+			/**
+			 * Provide your own websocket instance for full control
+			 */
+			websocketProvider: HocuspocusProviderWebsocket;
+	  }
+);
 
 /**
  * Configuration for HocuspocusRoom component

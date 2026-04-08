@@ -1,7 +1,7 @@
 "use client";
 
 import { HocuspocusProvider } from "@hocuspocus/provider";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { HocuspocusContext, HocuspocusRoomContext } from "./context.ts";
 import type { HocuspocusRoomProps } from "./types.ts";
@@ -40,66 +40,56 @@ export function HocuspocusRoom({
 
 	const { websocketProvider } = hocuspocusContext;
 
-	const providerRef = useRef<HocuspocusProvider | null>(null);
+	const [provider, setProvider] = useState(
+		() =>
+			new HocuspocusProvider({
+				name,
+				websocketProvider,
+				document,
+				token,
+			}),
+	);
+
 	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Store current props in a ref to access in cleanup without triggering re-creation
-	const propsRef = useRef({ name, document, token });
-	propsRef.current = { name, document, token };
-
-	// Create or retrieve provider
-	// We use a ref to prevent recreation on every render
-	if (!providerRef.current) {
-		providerRef.current = new HocuspocusProvider({
-			name,
-			websocketProvider,
-			document,
-			token,
-		});
-	}
-
-	const provider = providerRef.current;
-
+	// Recreate provider when name or document changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: provider.configuration holds the previous values we compare against — not a reactive dependency
 	useEffect(() => {
-		// Cancel any pending destruction (handles StrictMode double-mount)
+		if (
+			provider.configuration.name !== name ||
+			provider.configuration.document !== document
+		) {
+			provider.destroy();
+			setProvider(
+				new HocuspocusProvider({
+					name,
+					websocketProvider,
+					document,
+					// token is intentionally read from the current closure but not
+					// included as a dependency — token refreshes should not destroy
+					// the connection. Function tokens are called on-demand by the provider.
+					token,
+				}),
+			);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [name, document, websocketProvider]);
+
+	// Attach/detach lifecycle with deferred destruction for StrictMode
+	useEffect(() => {
 		if (destroyTimeoutRef.current) {
 			clearTimeout(destroyTimeoutRef.current);
 			destroyTimeoutRef.current = null;
 		}
 
-		// Attach the provider to the websocket so it starts syncing
 		provider.attach();
 
 		return () => {
-			// Deferred destruction - wait for potential remount in StrictMode
-			// Using setTimeout(0) allows React to remount before we destroy
 			destroyTimeoutRef.current = setTimeout(() => {
-				if (providerRef.current) {
-					providerRef.current.destroy();
-					providerRef.current = null;
-				}
+				provider.destroy();
 			}, 0);
 		};
-	}, []);
-
-	// Handle document name changes - need to recreate provider
-	useEffect(() => {
-		// Skip on initial mount since we already created the provider
-		if (
-			providerRef.current &&
-			providerRef.current.configuration.name !== name
-		) {
-			// Name changed, need to recreate provider
-			providerRef.current.destroy();
-			providerRef.current = new HocuspocusProvider({
-				name,
-				websocketProvider,
-				document: propsRef.current.document,
-				token: propsRef.current.token,
-			});
-			providerRef.current.attach();
-		}
-	}, [name, websocketProvider]);
+	}, [provider]);
 
 	const contextValue = useMemo(
 		() => ({
