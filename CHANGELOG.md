@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+
+### Bug Fixes
+
+* turn off sessionAwareness by default to keep BC with old servers ([3a57071](https://github.com/ueberdosis/hocuspocus/commit/3a57071517adb5c9e037fb7c0ac169ffc330df90))
+
+
+
+
+
 # [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
 
 
