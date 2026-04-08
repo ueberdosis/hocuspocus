@@ -4,28 +4,28 @@ import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 import { useEffect, useMemo, useRef } from "react";
 
 import { HocuspocusContext } from "./context.ts";
-import type { HocuspocusProviderComponentProps } from "./types.ts";
+import type { HocuspocusProviderWebsocketComponentProps } from "./types.ts";
 
 /**
- * HocuspocusProviderComponent manages the WebSocket connection that is shared across all rooms.
+ * HocuspocusProviderWebsocketComponent manages the WebSocket connection that is shared across all rooms.
  *
  * This component creates a single WebSocket connection that can be used by multiple
  * HocuspocusRoom components, preventing connection overhead when switching between documents.
  *
  * @example
  * ```tsx
- * <HocuspocusProviderComponent url="ws://localhost:1234">
+ * <HocuspocusProviderWebsocketComponent url="ws://localhost:1234">
  *   <HocuspocusRoom name="document-1">
  *     <Editor />
  *   </HocuspocusRoom>
- * </HocuspocusProviderComponent>
+ * </HocuspocusProviderWebsocketComponent>
  * ```
  */
-export function HocuspocusProviderComponent({
+export function HocuspocusProviderWebsocketComponent({
 	children,
 	url,
 	websocketProvider: externalWebsocketProvider,
-}: HocuspocusProviderComponentProps) {
+}: HocuspocusProviderWebsocketComponentProps) {
 	const websocketRef = useRef<HocuspocusProviderWebsocket | null>(null);
 	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

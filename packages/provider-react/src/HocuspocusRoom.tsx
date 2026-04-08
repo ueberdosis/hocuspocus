@@ -4,12 +4,33 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { HocuspocusContext, HocuspocusRoomContext } from "./context.ts";
-import type { HocuspocusRoomProps } from "./types.ts";
+import type { HocuspocusProviderEvents, HocuspocusRoomProps } from "./types.ts";
+
+/**
+ * Mapping from HocuspocusRoom `on*` prop names to provider event names.
+ */
+const EVENT_PROP_MAP: Record<string, keyof HocuspocusProviderEvents> = {
+	onOpen: "open",
+	onConnect: "connect",
+	onClose: "close",
+	onDisconnect: "disconnect",
+	onStatus: "status",
+	onSynced: "synced",
+	onUnsyncedChanges: "unsyncedChanges",
+	onMessage: "message",
+	onOutgoingMessage: "outgoingMessage",
+	onStateless: "stateless",
+	onAuthenticated: "authenticated",
+	onAuthenticationFailed: "authenticationFailed",
+	onAwarenessUpdate: "awarenessUpdate",
+	onAwarenessChange: "awarenessChange",
+	onDestroy: "destroy",
+};
 
 /**
  * HocuspocusRoom manages the connection to a specific document.
  *
- * It uses the shared WebSocket from HocuspocusProviderComponent and creates a document-specific
+ * It uses the shared WebSocket from HocuspocusProviderWebsocketComponent and creates a document-specific
  * provider that connects on mount and disconnects on unmount.
  *
  * This component handles React's StrictMode gracefully by using deferred destruction,
@@ -17,11 +38,14 @@ import type { HocuspocusRoomProps } from "./types.ts";
  *
  * @example
  * ```tsx
- * <HocuspocusProviderComponent url="ws://localhost:1234">
- *   <HocuspocusRoom name="document-1">
+ * <HocuspocusProviderWebsocketComponent url="ws://localhost:1234">
+ *   <HocuspocusRoom
+ *     name="document-1"
+ *     onAuthenticationFailed={(data) => console.error(data.reason)}
+ *   >
  *     <Editor />
  *   </HocuspocusRoom>
- * </HocuspocusProviderComponent>
+ * </HocuspocusProviderWebsocketComponent>
  * ```
  */
 export function HocuspocusRoom({
@@ -29,12 +53,13 @@ export function HocuspocusRoom({
 	name,
 	document,
 	token,
+	...eventHandlers
 }: HocuspocusRoomProps) {
 	const hocuspocusContext = useContext(HocuspocusContext);
 
 	if (!hocuspocusContext) {
 		throw new Error(
-			"HocuspocusRoom must be used within a HocuspocusProviderComponent",
+			"HocuspocusRoom must be used within a HocuspocusProviderWebsocketComponent",
 		);
 	}
 
@@ -88,6 +113,31 @@ export function HocuspocusRoom({
 			destroyTimeoutRef.current = setTimeout(() => {
 				provider.destroy();
 			}, 0);
+		};
+	}, [provider]);
+
+	// Wire up on* event handler props with stable refs
+	const handlersRef = useRef(eventHandlers);
+	handlersRef.current = eventHandlers;
+
+	useEffect(() => {
+		const cleanups: (() => void)[] = [];
+
+		for (const [propName, eventName] of Object.entries(EVENT_PROP_MAP)) {
+			const listener = (...args: unknown[]) => {
+				const handler = handlersRef.current[
+					propName as keyof typeof handlersRef.current
+				] as ((...a: unknown[]) => void) | undefined;
+				handler?.(...args);
+			};
+			provider.on(eventName, listener);
+			cleanups.push(() => provider.off(eventName, listener));
+		}
+
+		return () => {
+			for (const cleanup of cleanups) {
+				cleanup();
+			}
 		};
 	}, [provider]);
 

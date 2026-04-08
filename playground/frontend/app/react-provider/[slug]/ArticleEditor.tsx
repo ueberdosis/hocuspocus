@@ -1,15 +1,22 @@
 "use client";
 
 import {
-	HocuspocusProviderComponent,
+	HocuspocusProviderWebsocketComponent,
 	HocuspocusRoom,
 } from "@hocuspocus/provider-react";
-import React from "react";
+import React, { useCallback } from "react";
 import CollaborationStatus from "./CollaborationStatus";
 import CollaborativeEditor from "./CollaborativeEditor";
 import ConnectedUsers from "./ConnectedUsers";
 
 export default function ArticleEditor({ slug }: { slug: string }) {
+	const handleAuthFailed = useCallback(
+		(data: { reason: string }) => {
+			console.error(`[Editor 1] Auth failed for "${slug}":`, data.reason);
+		},
+		[slug],
+	);
+
 	return (
 		<div className="flex flex-col min-h-screen">
 			{/* Header */}
@@ -36,16 +43,25 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 				<div className="max-w-7xl mx-auto space-y-6">
 					{/* Two independent WebSocket connections, each with its own room */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						{/* Editor 1 — own WebSocket */}
-						<HocuspocusProviderComponent url="ws://localhost:8000">
-							<HocuspocusRoom name={slug}>
+						{/* Editor 1 — event handlers via HocuspocusRoom props */}
+						<HocuspocusProviderWebsocketComponent url="ws://localhost:18080">
+							<HocuspocusRoom
+								name={slug}
+								onAuthenticationFailed={handleAuthFailed}
+								onClose={(data) =>
+									console.log("[Editor 1] Connection closed:", data.event)
+								}
+								onSynced={(data) =>
+									console.log("[Editor 1] Synced:", data.state)
+								}
+							>
 								<div className="space-y-4">
 									<div className="flex items-center justify-between">
 										<h2 className="text-lg font-semibold text-slate-900 dark:text-white">
 											Editor 1
 										</h2>
 										<span className="text-sm text-slate-500 dark:text-slate-400">
-											Independent WebSocket
+											Event handlers via props
 										</span>
 									</div>
 
@@ -58,10 +74,10 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 									</div>
 								</div>
 							</HocuspocusRoom>
-						</HocuspocusProviderComponent>
+						</HocuspocusProviderWebsocketComponent>
 
-						{/* Editor 2 — own WebSocket */}
-						<HocuspocusProviderComponent url="ws://localhost:8000">
+						{/* Editor 2 — event handlers via useHocuspocusEvent hook (see CollaborationStatus) */}
+						<HocuspocusProviderWebsocketComponent url="ws://localhost:18080">
 							<HocuspocusRoom name={slug}>
 								<div className="space-y-4">
 									<div className="flex items-center justify-between">
@@ -69,7 +85,7 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 											Editor 2
 										</h2>
 										<span className="text-sm text-slate-500 dark:text-slate-400">
-											Independent WebSocket
+											Event handlers via hook
 										</span>
 									</div>
 
@@ -82,7 +98,7 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 									</div>
 								</div>
 							</HocuspocusRoom>
-						</HocuspocusProviderComponent>
+						</HocuspocusProviderWebsocketComponent>
 					</div>
 
 					{/* Info panel */}
@@ -113,7 +129,7 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 									This demo uses the new React-specific package. Each editor is
 									wrapped in its own{" "}
 									<code className="bg-purple-200/50 dark:bg-purple-800/50 px-1 rounded">
-										HocuspocusProviderComponent
+										HocuspocusProviderWebsocketComponent
 									</code>{" "}
 									(independent WebSocket) and{" "}
 									<code className="bg-purple-200/50 dark:bg-purple-800/50 px-1 rounded">

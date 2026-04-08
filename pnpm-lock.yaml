@@ -388,6 +388,9 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
+      yjs:
+        specifier: ^13
+        version: 13.6.29
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
