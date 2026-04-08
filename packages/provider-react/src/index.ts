@@ -15,9 +15,6 @@ export {
 	useHocuspocusSyncStatus,
 } from "./hooks/index.ts";
 
-// Utils
-export { useStableCallback } from "./utils/index.ts";
-
 // Types
 export type {
 	CollabUser,
