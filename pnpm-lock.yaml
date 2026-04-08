@@ -211,8 +211,8 @@ importers:
   packages/provider-react:
     dependencies:
       '@hocuspocus/provider':
-        specifier: ^3.4.6-rc.2
-        version: 3.4.6-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)
+        specifier: 4.0.0-rc.2
+        version: 4.0.0-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)
       yjs:
         specifier: ^13.6.8
         version: 13.6.29
@@ -753,11 +753,11 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@hocuspocus/common@3.4.6-rc.2':
-    resolution: {integrity: sha512-iuQyE00zGGtS7jmedIbYPPjRuf9BNRSkTWY9QWmmV+o2AFdYzmFA9pmJwHCZeguEYyVbl+AR1Xgz8hpUdT16JA==}
+  '@hocuspocus/common@4.0.0-rc.2':
+    resolution: {integrity: sha512-tg+05D0Rkke0mvHVhp75IGTAupCCizh/E4NKGBvAkEgU+2YM4A3P8Q4NI4XRNYa0e7wCdQgLjTPKIbTgJPRxRg==}
 
-  '@hocuspocus/provider@3.4.6-rc.2':
-    resolution: {integrity: sha512-IyOOZG58EpQ0UG0KH3VnGzCtXkLsq8vbS0X5gQnEtaUeIpUk9iCJBoVAH01XlaBC/BQhE42tW3C8DrxUueN37A==}
+  '@hocuspocus/provider@4.0.0-rc.2':
+    resolution: {integrity: sha512-qRRqOhgHPtB5/G0zj0axeXcoseeCVdWSUybyTYvA8YSioHFbRHOa38GSsbmk0DpWJVI8lEZFdKCsqvmPzXdAmw==}
     peerDependencies:
       y-protocols: ^1.0.6
       yjs: ^13.6.8
@@ -5904,13 +5904,13 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hocuspocus/common@3.4.6-rc.2':
+  '@hocuspocus/common@4.0.0-rc.2':
     dependencies:
       lib0: 0.2.117
 
-  '@hocuspocus/provider@3.4.6-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)':
+  '@hocuspocus/provider@4.0.0-rc.2(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)':
     dependencies:
-      '@hocuspocus/common': 3.4.6-rc.2
+      '@hocuspocus/common': 4.0.0-rc.2
       '@lifeomic/attempt': 3.1.0
       lib0: 0.2.117
       ws: 8.19.0
