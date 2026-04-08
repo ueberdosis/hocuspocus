@@ -4,13 +4,14 @@
 export { HocuspocusContext, HocuspocusRoomContext } from "./context.ts";
 
 // Components
-export { HocuspocusProviderComponent } from "./HocuspocusProviderComponent.tsx";
+export { HocuspocusProviderWebsocketComponent } from "./HocuspocusProviderWebsocketComponent.tsx";
 export { HocuspocusRoom } from "./HocuspocusRoom.tsx";
 
 // Hooks
 export {
 	useHocuspocusAwareness,
 	useHocuspocusConnectionStatus,
+	useHocuspocusEvent,
 	useHocuspocusProvider,
 	useHocuspocusSyncStatus,
 } from "./hooks/index.ts";
@@ -20,7 +21,8 @@ export type {
 	CollabUser,
 	ConnectionStatus,
 	HocuspocusContextValue,
-	HocuspocusProviderComponentProps,
+	HocuspocusProviderEvents,
+	HocuspocusProviderWebsocketComponentProps,
 	HocuspocusRoomContextValue,
 	HocuspocusRoomProps,
 	SyncStatus,
