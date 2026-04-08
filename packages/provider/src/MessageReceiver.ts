@@ -48,7 +48,7 @@ export class MessageReceiver {
 				);
 				break;
 
-			case MessageType.CLOSE:
+			case MessageType.CLOSE: {
 				// eslint-disable-next-line no-case-declarations
 				const event: CloseEvent = {
 					code: 1000,
@@ -58,6 +58,7 @@ export class MessageReceiver {
 				provider.configuration.onClose({ event });
 				provider.forwardClose({ event });
 				break;
+			}
 
 			default:
 				console.error(`Can’t apply message of unknown type: ${type}`);
@@ -66,7 +67,7 @@ export class MessageReceiver {
 		// Reply
 		if (message.length() > emptyMessageLength + 1) {
 			// length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
-			// @ts-ignore
+			// @ts-expect-error
 			provider.send(OutgoingMessage, { encoder: message.encoder });
 		}
 	}

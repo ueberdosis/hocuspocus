@@ -1,54 +1,25 @@
-import type {
-	HocuspocusProvider,
-	onStatusParameters,
-	onUnsyncedChangesParameters,
-} from "@hocuspocus/provider";
-import { useEffect, useState } from "react";
+"use client";
 
-const CollaborationStatus = (props: {
-	provider: HocuspocusProvider;
-}) => {
-	const { provider } = props;
+import {
+	useHocuspocusConnectionStatus,
+	useHocuspocusEvent,
+	useHocuspocusProvider,
+	useHocuspocusSyncStatus,
+} from "@hocuspocus/provider-react";
+import { useState } from "react";
 
+const CollaborationStatus = () => {
+	const provider = useHocuspocusProvider();
+	const connectionStatus = useHocuspocusConnectionStatus();
+	const syncStatus = useHocuspocusSyncStatus();
 	const [unsyncedChanges, setUnsyncedChanges] = useState(0);
-	const [socketStatus, setSocketStatus] = useState<string | null>(null);
-	const [isAttached, _setAttached] = useState<boolean>(false);
 
-	useEffect(() => {
-		setSocketStatus(provider.configuration.websocketProvider.status);
-		_setAttached(provider.isAttached);
+	// Using the useHocuspocusEvent hook instead of manual provider.on/off
+	useHocuspocusEvent("unsyncedChanges", (data) => {
+		setUnsyncedChanges(data.number);
+	});
 
-		const handleUnsyncedChanges = (changes: onUnsyncedChangesParameters) => {
-			setUnsyncedChanges(changes.number);
-		};
-
-		const handleSocketStatus = (status: onStatusParameters) => {
-			setSocketStatus(status.status);
-		};
-
-		provider.on("unsyncedChanges", handleUnsyncedChanges);
-		provider.configuration.websocketProvider.on("status", handleSocketStatus);
-
-		return () => {
-			provider.off("unsyncedChanges", handleUnsyncedChanges);
-			provider.configuration.websocketProvider.off(
-				"status",
-				handleSocketStatus,
-			);
-		};
-	}, [provider]);
-
-	const updateAttached = (attach: boolean) => {
-		if (attach) {
-			provider.attach();
-		} else {
-			provider.detach();
-		}
-
-		_setAttached(provider.isAttached);
-	};
-
-	const getStatusColor = (status: string | null) => {
+	const getStatusColor = (status: string) => {
 		switch (status) {
 			case "connected":
 				return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
@@ -98,28 +69,28 @@ const CollaborationStatus = (props: {
 				<div className="flex items-center space-x-4">
 					<div className="flex items-center space-x-2">
 						<div
-							className={`w-3 h-3 rounded-full ${socketStatus === "connected" ? "bg-green-500" : socketStatus === "connecting" ? "bg-yellow-500" : "bg-red-500"}`}
-						></div>
+							className={`w-3 h-3 rounded-full ${connectionStatus === "connected" ? "bg-green-500" : connectionStatus === "connecting" ? "bg-yellow-500" : "bg-red-500"}`}
+						/>
 						<span
-							className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(socketStatus)}`}
+							className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(connectionStatus)}`}
 						>
-							{socketStatus || "Unknown"}
+							{connectionStatus}
 						</span>
 					</div>
 					<div className="flex items-center space-x-2">
 						<div
-							className={`w-3 h-3 rounded-full ${provider.isAttached ? "bg-green-500" : "bg-red-500"}`}
-						></div>
+							className={`w-3 h-3 rounded-full ${syncStatus === "synced" ? "bg-green-500" : "bg-orange-500 animate-pulse"}`}
+						/>
 						<span
-							className={`px-2 py-1 rounded-full text-xs font-medium ${provider.isAttached ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}
+							className={`px-2 py-1 rounded-full text-xs font-medium ${syncStatus === "synced" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400"}`}
 						>
-							{isAttached ? "Attached" : "Detached"}
+							{syncStatus}
 						</span>
 					</div>
 					<div className="flex items-center space-x-2">
 						<div
 							className={`w-3 h-3 rounded-full ${unsyncedChanges >= UNSYNCED_THRESHOLD ? "bg-red-500 animate-pulse" : "bg-orange-500 animate-pulse"}`}
-						></div>
+						/>
 						<span
 							className={`px-2 py-1 rounded-full text-xs font-medium ${unsyncedChanges >= UNSYNCED_THRESHOLD ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400" : "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400"}`}
 						>
@@ -141,14 +112,16 @@ const CollaborationStatus = (props: {
 							onClick={() =>
 								provider.configuration.websocketProvider.disconnect()
 							}
-							disabled={socketStatus === "disconnected"}
+							disabled={connectionStatus === "disconnected"}
 						>
 							Disconnect
 						</button>
 						<button
 							className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							onClick={() => provider.configuration.websocketProvider.connect()}
-							disabled={socketStatus === "connected"}
+							onClick={() =>
+								provider.configuration.websocketProvider.connect()
+							}
+							disabled={connectionStatus === "connected"}
 						>
 							Connect
 						</button>
@@ -162,15 +135,13 @@ const CollaborationStatus = (props: {
 					<div className="flex space-x-2">
 						<button
 							className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							onClick={() => updateAttached(false)}
-							disabled={!isAttached}
+							onClick={() => provider.detach()}
 						>
 							Detach
 						</button>
 						<button
 							className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							onClick={() => updateAttached(true)}
-							disabled={isAttached}
+							onClick={() => provider.attach()}
 						>
 							Attach
 						</button>

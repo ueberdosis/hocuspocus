@@ -53,7 +53,7 @@ test.beforeEach(() => {
       }
       const err = new Error("NoSuchKey");
       err.name = "NoSuchKey";
-      // @ts-ignore
+      // @ts-expect-error
       err.$metadata = { httpStatusCode: 404 };
       throw err;
     }

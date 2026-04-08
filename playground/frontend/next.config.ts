@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
 			"@hocuspocus/provider": "../../packages/provider/src/index.ts",
 			"@hocuspocus/common": "../../packages/common/src/index.ts",
 			"@hocuspocus/transformer": "../../packages/transformer/src/index.ts",
+			"@hocuspocus/provider-react":
+				"../../packages/provider-react/src/index.ts",
 		},
 	},
 	webpack: (config) => {
