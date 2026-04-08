@@ -71,7 +71,7 @@ class WebhookReceiver {
       const { event, payload } = <{ event: string, payload: any }> JSON.parse(data)
 
       try {
-        // @ts-ignore - let me do some magic here please TypeScript
+        // @ts-expect-error - let me do some magic here please TypeScript
         this[`on${event[0].toUpperCase()}${event.substr(1)}`](payload, response)
       } catch (e) {
         console.log(`[WebhookReceiver] unknown event "${event}"`)

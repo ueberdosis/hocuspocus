@@ -12,22 +12,22 @@ import { AwarenessMessage } from "./OutgoingMessages/AwarenessMessage.ts";
 import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
-import {
-	type AuthorizedScope,
-	type ConstructableOutgoingMessage,
-	type onAuthenticatedParameters,
-	type onAuthenticationFailedParameters,
-	type onAwarenessChangeParameters,
-	type onAwarenessUpdateParameters,
-	type onCloseParameters,
-	type onDisconnectParameters,
-	type onMessageParameters,
-	type onOpenParameters,
-	type onOutgoingMessageParameters,
-	type onStatelessParameters,
-	type onStatusParameters,
-	type onSyncedParameters,
-	type onUnsyncedChangesParameters,
+import type {
+	AuthorizedScope,
+	ConstructableOutgoingMessage,
+	onAuthenticatedParameters,
+	onAuthenticationFailedParameters,
+	onAwarenessChangeParameters,
+	onAwarenessUpdateParameters,
+	onCloseParameters,
+	onDisconnectParameters,
+	onMessageParameters,
+	onOpenParameters,
+	onOutgoingMessageParameters,
+	onStatelessParameters,
+	onStatusParameters,
+	onSyncedParameters,
+	onUnsyncedChangesParameters,
 } from "./types.ts";
 
 export type HocuspocusProviderConfiguration = Required<
@@ -118,9 +118,9 @@ export class AwarenessError extends Error {
 export class HocuspocusProvider extends EventEmitter {
 	public configuration: CompleteHocuspocusProviderConfiguration = {
 		name: "",
-		// @ts-ignore
+		// @ts-expect-error
 		document: undefined,
-		// @ts-ignore
+		// @ts-expect-error
 		awareness: undefined,
 		token: null,
 		sessionAwareness: false,
