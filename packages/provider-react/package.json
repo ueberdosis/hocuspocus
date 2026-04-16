@@ -40,5 +40,8 @@
 	},
 	"repository": {
 		"url": "https://github.com/ueberdosis/hocuspocus"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }
