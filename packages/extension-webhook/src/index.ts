@@ -9,7 +9,6 @@ import type {
 } from "@hocuspocus/server";
 import type { Transformer } from "@hocuspocus/transformer";
 import { TiptapTransformer } from "@hocuspocus/transformer";
-import axios from "axios";
 import type { Doc } from "yjs";
 
 export enum Events {
@@ -97,12 +96,29 @@ export class Webhook implements Extension {
 	async sendRequest(event: Events, payload: any) {
 		const json = JSON.stringify({ event, payload });
 
-		return axios.post(this.configuration.url, json, {
+		const response = await fetch(this.configuration.url, {
+			method: "POST",
+			body: json,
 			headers: {
 				"X-Hocuspocus-Signature-256": this.createSignature(json),
 				"Content-Type": "application/json",
 			},
 		});
+
+		if (!response.ok) {
+			throw new Error(
+				`Webhook request to ${this.configuration.url} failed with status ${response.status}`,
+			);
+		}
+
+		const text = await response.text();
+		const contentType = response.headers.get("content-type") ?? "";
+		const data =
+			contentType.includes("application/json") && text
+				? JSON.parse(text)
+				: text;
+
+		return { status: response.status, data };
 	}
 
 	/**
@@ -151,12 +167,8 @@ export class Webhook implements Extension {
 				requestParameters: Object.fromEntries(data.requestParameters.entries()),
 			});
 
-			if (response.status !== 200 || !response.data) return;
-
-			const document =
-				typeof response.data === "string"
-					? JSON.parse(response.data)
-					: response.data;
+			const document = response.data;
+			if (!document) return;
 
 			// eslint-disable-next-line guard-for-in,no-restricted-syntax
 			for (const fieldName in document) {
@@ -189,9 +201,7 @@ export class Webhook implements Extension {
 				requestParameters: Object.fromEntries(data.requestParameters.entries()),
 			});
 
-			return typeof response.data === "string" && response.data.length > 0
-				? JSON.parse(response.data)
-				: response.data;
+			return response.data;
 		} catch (e) {
 			console.error(`Caught error in extension-webhook: ${e}`);
 			throw Forbidden;

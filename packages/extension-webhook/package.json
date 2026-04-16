@@ -32,8 +32,7 @@
 	"dependencies": {
 		"@hocuspocus/common": "workspace:^",
 		"@hocuspocus/server": "workspace:^",
-		"@hocuspocus/transformer": "workspace:^",
-		"axios": "^1.12.2"
+		"@hocuspocus/transformer": "workspace:^"
 	},
 	"peerDependencies": {
 		"yjs": "^13.6.8"
