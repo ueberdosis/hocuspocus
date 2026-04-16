@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* remove unused packages ([#1090](https://github.com/ueberdosis/hocuspocus/issues/1090)) ([66fb35c](https://github.com/ueberdosis/hocuspocus/commit/66fb35cff71d986d671fe9a8118ce4da87507b44))
+
+
+### Features
+
+* first draft of @hocuspocus/provider-react package ([#1059](https://github.com/ueberdosis/hocuspocus/issues/1059)) ([cbc9977](https://github.com/ueberdosis/hocuspocus/commit/cbc99770096e8c674dae304c7e1a16e0fbec827b))
+* remove axios ([#1089](https://github.com/ueberdosis/hocuspocus/issues/1089)) ([fe99d02](https://github.com/ueberdosis/hocuspocus/commit/fe99d02496cae65f9c3c4f1b37c0c6823f05f95a))
+
+
+
+
+
 # [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
 
 

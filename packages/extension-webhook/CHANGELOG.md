@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Features
+
+* remove axios ([#1089](https://github.com/ueberdosis/hocuspocus/issues/1089)) ([fe99d02](https://github.com/ueberdosis/hocuspocus/commit/fe99d02496cae65f9c3c4f1b37c0c6823f05f95a))
+
+
+
+
+
 # [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
 
 **Note:** Version bump only for package @hocuspocus/extension-webhook

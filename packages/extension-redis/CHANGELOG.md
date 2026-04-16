@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* remove unused packages ([#1090](https://github.com/ueberdosis/hocuspocus/issues/1090)) ([66fb35c](https://github.com/ueberdosis/hocuspocus/commit/66fb35cff71d986d671fe9a8118ce4da87507b44))
+
+
+
+
+
 # [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis
