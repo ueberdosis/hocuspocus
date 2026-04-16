@@ -5,7 +5,7 @@
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
 ## Introduction
-Hocuspocus is an opinionated collaborative editing backend for [Tiptap](https://github.com/ueberdosis/tiptap) – based on [Y.js](https://github.com/yjs/yjs), a CRDT framework with a powerful abstraction of shared data.
+A generic persistence base class for [Hocuspocus](https://github.com/ueberdosis/hocuspocus). Provide your own `fetch` and `store` functions to plug any database into the collaboration backend, or extend the `Database` class to build a dedicated storage extension (as `@hocuspocus/extension-sqlite` and `@hocuspocus/extension-s3` do).
 
 ## Official Documentation
 Documentation can be found in the [GitHub repository](https://github.com/ueberdosis/hocuspocus).
