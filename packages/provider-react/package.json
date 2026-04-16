@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/provider-react",
-	"version": "3.4.6-rc.2",
+	"version": "4.0.0-rc.2",
 	"description": "React bindings for Hocuspocus provider",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -30,7 +30,7 @@
 		"dist"
 	],
 	"peerDependencies": {
-		"@hocuspocus/provider": "4.0.0-rc.2",
+		"@hocuspocus/provider": "workspace:^",
 		"react": "^18.0.0 || ^19.0.0",
 		"yjs": "^13.6.8"
 	},

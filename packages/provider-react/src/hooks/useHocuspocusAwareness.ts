@@ -1,4 +1,4 @@
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 
 import type { CollabUser } from "../types.ts";
 import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
@@ -40,6 +40,13 @@ export function useHocuspocusAwareness(): CollabUser[] {
 		users: [],
 		version: -1,
 	});
+
+	// Reset cache when provider changes so we don't serve stale users
+	// from a previous provider instance.
+	useEffect(() => {
+		versionRef.current++;
+		cacheRef.current = { users: [], version: -1 };
+	}, [provider]);
 
 	const subscribe = useCallback(
 		(onStoreChange: () => void) => {

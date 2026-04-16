@@ -83,7 +83,8 @@ export function HocuspocusRoom({
 		if (
 			provider.configuration.name !== name ||
 			provider.configuration.document !== document ||
-			provider.configuration.token !== (token ?? null)
+			provider.configuration.token !== (token ?? null) ||
+			provider.configuration.websocketProvider !== websocketProvider
 		) {
 			provider.destroy();
 			setProvider(

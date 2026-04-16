@@ -44,7 +44,7 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 					{/* Two independent WebSocket connections, each with its own room */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 						{/* Editor 1 — event handlers via HocuspocusRoom props */}
-						<HocuspocusProviderWebsocketComponent url="ws://localhost:18080">
+						<HocuspocusProviderWebsocketComponent url="ws://localhost:8080">
 							<HocuspocusRoom
 								name={slug}
 								onAuthenticationFailed={handleAuthFailed}
@@ -77,7 +77,7 @@ export default function ArticleEditor({ slug }: { slug: string }) {
 						</HocuspocusProviderWebsocketComponent>
 
 						{/* Editor 2 — event handlers via useHocuspocusEvent hook (see CollaborationStatus) */}
-						<HocuspocusProviderWebsocketComponent url="ws://localhost:18080">
+						<HocuspocusProviderWebsocketComponent url="ws://localhost:8080">
 							<HocuspocusRoom name={slug}>
 								<div className="space-y-4">
 									<div className="flex items-center justify-between">
