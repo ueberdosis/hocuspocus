@@ -1,5 +1,5 @@
 import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
-// @ts-ignore
+// @ts-expect-error
 import { yDocToProsemirrorJSON, prosemirrorJSONToYDoc } from "y-prosemirror";
 import { Schema } from "@tiptap/pm/model";
 import type { Transformer } from "./types.ts";
@@ -32,7 +32,7 @@ class Prosemirror implements Transformer {
 		}
 
 		fieldName.forEach((field) => {
-			// @ts-ignore
+			// @ts-expect-error
 			data[field] = yDocToProsemirrorJSON(document, field);
 		});
 

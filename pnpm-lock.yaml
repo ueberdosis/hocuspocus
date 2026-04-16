@@ -208,6 +208,22 @@ importers:
         specifier: ^13.6.8
         version: 13.6.29
 
+  packages/provider-react:
+    dependencies:
+      '@hocuspocus/provider':
+        specifier: workspace:^
+        version: link:../provider
+      yjs:
+        specifier: ^13.6.8
+        version: 13.6.29
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+
   packages/server:
     dependencies:
       '@hocuspocus/common':
@@ -342,6 +358,9 @@ importers:
       '@hocuspocus/provider':
         specifier: workspace:*
         version: link:../../packages/provider
+      '@hocuspocus/provider-react':
+        specifier: workspace:*
+        version: link:../../packages/provider-react
       '@tiptap/extension-collaboration':
         specifier: ^3.18.0
         version: 3.19.0(@tiptap/core@3.19.0(@tiptap/pm@3.19.0))(@tiptap/pm@3.19.0)(@tiptap/y-tiptap@3.0.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.6)(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29))(yjs@13.6.29)
@@ -369,6 +388,9 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
+      yjs:
+        specifier: ^13
+        version: 13.6.29
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
