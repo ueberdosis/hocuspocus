@@ -180,9 +180,6 @@ importers:
       '@hocuspocus/transformer':
         specifier: workspace:^
         version: link:../transformer
-      axios:
-        specifier: ^1.12.2
-        version: 1.15.0
       yjs:
         specifier: ^13.6.8
         version: 13.6.29
