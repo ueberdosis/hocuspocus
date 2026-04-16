@@ -280,10 +280,10 @@ importers:
         version: link:../../packages/transformer
       '@hono/node-server':
         specifier: ^1.19.9
-        version: 1.19.10(hono@4.12.7)
+        version: 1.19.10(hono@4.12.14)
       '@hono/node-ws':
         specifier: ^1.3.0
-        version: 1.3.0(@hono/node-server@1.19.10(hono@4.12.7))(hono@4.12.7)
+        version: 1.3.0(@hono/node-server@1.19.10(hono@4.12.14))(hono@4.12.14)
       '@tiptap/core':
         specifier: ^3.0.1
         version: 3.19.0(@tiptap/pm@3.19.0)
@@ -313,7 +313,7 @@ importers:
         version: 5.0.2(express@4.22.1)
       hono:
         specifier: ^4.8.4
-        version: 4.12.7
+        version: 4.12.14
       jsonwebtoken:
         specifier: 9.0.3
         version: 9.0.3
@@ -3216,8 +3216,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.12.7:
-    resolution: {integrity: sha512-jq9l1DM0zVIvsm3lv9Nw9nlJnMNPOcAtsbsgiUhWcFzPE99Gvo6yRTlszSLLYacMeQ6quHD6hMfId8crVHvexw==}
+  hono@4.12.14:
+    resolution: {integrity: sha512-am5zfg3yu6sqn5yjKBNqhnTX7Cv+m00ox+7jbaKkrLMRJ4rAdldd1xPd/JzbBWspqaQv6RSTrgFN95EsfhC+7w==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@2.8.9:
@@ -5875,14 +5875,14 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hono/node-server@1.19.10(hono@4.12.7)':
+  '@hono/node-server@1.19.10(hono@4.12.14)':
     dependencies:
-      hono: 4.12.7
+      hono: 4.12.14
 
-  '@hono/node-ws@1.3.0(@hono/node-server@1.19.10(hono@4.12.7))(hono@4.12.7)':
+  '@hono/node-ws@1.3.0(@hono/node-server@1.19.10(hono@4.12.14))(hono@4.12.14)':
     dependencies:
-      '@hono/node-server': 1.19.10(hono@4.12.7)
-      hono: 4.12.7
+      '@hono/node-server': 1.19.10(hono@4.12.14)
+      hono: 4.12.14
       ws: 8.19.0
     transitivePeerDependencies:
       - bufferutil
@@ -8531,7 +8531,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.12.7: {}
+  hono@4.12.14: {}
 
   hosted-git-info@2.8.9: {}
 
