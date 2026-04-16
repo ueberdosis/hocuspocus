@@ -29,7 +29,10 @@ export function HocuspocusProviderWebsocketComponent({
 	const websocketRef = useRef<HocuspocusProviderWebsocket | null>(null);
 	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Create WebSocket provider once on mount
+	// Create WebSocket provider once on mount.
+	// Safe in StrictMode: useRef persists across double-renders, so the instance
+	// is created only once. The deferred destruction in the effect below ensures
+	// the second mount cancels the pending destroy before it fires.
 	if (!websocketRef.current && !externalWebsocketProvider) {
 		websocketRef.current = new HocuspocusProviderWebsocket({
 			url: url!,

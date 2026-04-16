@@ -77,12 +77,13 @@ export function HocuspocusRoom({
 
 	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Recreate provider when name or document changes
+	// Recreate provider when name, document, or token changes
 	// biome-ignore lint/correctness/useExhaustiveDependencies: provider.configuration holds the previous values we compare against — not a reactive dependency
 	useEffect(() => {
 		if (
 			provider.configuration.name !== name ||
-			provider.configuration.document !== document
+			provider.configuration.document !== document ||
+			provider.configuration.token !== (token ?? null)
 		) {
 			provider.destroy();
 			setProvider(
@@ -90,15 +91,12 @@ export function HocuspocusRoom({
 					name,
 					websocketProvider,
 					document,
-					// token is intentionally read from the current closure but not
-					// included as a dependency — token refreshes should not destroy
-					// the connection. Function tokens are called on-demand by the provider.
 					token,
 				}),
 			);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [name, document, websocketProvider]);
+	}, [name, document, token, websocketProvider]);
 
 	// Attach/detach lifecycle with deferred destruction for StrictMode
 	useEffect(() => {
