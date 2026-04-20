@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+
+### Bug Fixes
+
+* react provider in strict mode ([4f27b7f](https://github.com/ueberdosis/hocuspocus/commit/4f27b7f0e57423b08fabb59cfa6d0a2cc67bc996))
+
+
+
+
+
 # [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
 
 
