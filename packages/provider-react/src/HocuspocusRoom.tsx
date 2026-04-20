@@ -77,15 +77,22 @@ export function HocuspocusRoom({
 
 	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Recreate provider when name, document, or token changes
+	// Recreate provider when name, document, or token changes.
+	// Only compare `document`/`token` when the caller actually provided them —
+	// otherwise the provider's constructor-initialized defaults (auto-created
+	// Y.Doc, null token) will never match the undefined prop, causing a destroy
+	// on every render (and in StrictMode, a stray CloseMessage for the current
+	// doc once the provider is already attached).
 	// biome-ignore lint/correctness/useExhaustiveDependencies: provider.configuration holds the previous values we compare against — not a reactive dependency
 	useEffect(() => {
-		if (
+		const shouldRecreate =
 			provider.configuration.name !== name ||
-			provider.configuration.document !== document ||
-			provider.configuration.token !== (token ?? null) ||
-			provider.configuration.websocketProvider !== websocketProvider
-		) {
+			(document !== undefined &&
+				provider.configuration.document !== document) ||
+			(token !== undefined && provider.configuration.token !== token) ||
+			provider.configuration.websocketProvider !== websocketProvider;
+
+		if (shouldRecreate) {
 			provider.destroy();
 			setProvider(
 				new HocuspocusProvider({
