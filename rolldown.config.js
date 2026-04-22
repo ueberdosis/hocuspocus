@@ -52,6 +52,11 @@ function getExternalDependencies(pkgJson) {
 	];
 }
 
+// Match a package name or any of its sub-paths (e.g. `react` and `react/jsx-runtime`).
+function isExternal(id, packages) {
+	return packages.some((pkg) => id === pkg || id.startsWith(`${pkg}/`));
+}
+
 const packages = getWorkspacePackages();
 
 // Build aliases dynamically from all packages
@@ -68,11 +73,7 @@ const configs = packages.flatMap((pkg) => {
 	// Main bundle config (ESM + CJS)
 	const bundleConfig = defineConfig({
 		input,
-		external: [
-			...external,
-			// Also externalize Node built-ins
-			/^node:/,
-		],
+		external: (id) => id.startsWith("node:") || isExternal(id, external),
 		plugins: [nodeProtocolPlugin(), defineVersionPlugin(pkg.package.version)],
 		output: [
 			{
@@ -96,7 +97,7 @@ const configs = packages.flatMap((pkg) => {
 	// Don't use aliases here - we want to reference external package types, not inline them
 	const dtsConfig = defineConfig({
 		input,
-		external: [...external, /^node:/],
+		external: (id) => id.startsWith("node:") || isExternal(id, external),
 		plugins: [nodeProtocolPlugin(), dts({ emitDtsOnly: true })],
 		output: {
 			dir: path.join(basePath, "dist"),
