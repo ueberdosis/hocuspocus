@@ -57,6 +57,14 @@ function isExternal(id, packages) {
 	return packages.some((pkg) => id === pkg || id.startsWith(`${pkg}/`));
 }
 
+// Per-package list of dependencies to bundle into the CJS output instead of leaving
+// external. Use this for ESM-only dependencies whose `require()` would fail under
+// CJS-only module loaders (e.g. Jest 29, ts-node default). They remain external in
+// the ESM build so consumers can still tree-shake / dedupe via node_modules.
+const cjsInlineDeps = {
+	"@hocuspocus/server": ["crossws"],
+};
+
 const packages = getWorkspacePackages();
 
 // Build aliases dynamically from all packages
@@ -69,25 +77,37 @@ const configs = packages.flatMap((pkg) => {
 	const input = path.join(basePath, "src/index.ts");
 	const { name, exports } = pkg.package;
 	const external = getExternalDependencies(pkg.package);
+	const inlineInCjs = cjsInlineDeps[name] ?? [];
+	const cjsExternal = external.filter((dep) => !inlineInCjs.includes(dep));
 
-	// Main bundle config (ESM + CJS)
-	const bundleConfig = defineConfig({
+	// ESM bundle: all deps external.
+	const esmConfig = defineConfig({
 		input,
 		external: (id) => id.startsWith("node:") || isExternal(id, external),
 		plugins: [nodeProtocolPlugin(), defineVersionPlugin(pkg.package.version)],
-		output: [
-			{
-				file: path.join(basePath, exports.default.require),
-				format: "cjs",
-				sourcemap: true,
-				exports: "auto",
-			},
-			{
-				file: path.join(basePath, exports.default.import),
-				format: "esm",
-				sourcemap: true,
-			},
-		],
+		output: {
+			file: path.join(basePath, exports.default.import),
+			format: "esm",
+			sourcemap: true,
+		},
+		resolve: {
+			alias: aliases,
+		},
+	});
+
+	// CJS bundle: same as ESM, but inline any ESM-only deps listed in
+	// `cjsInlineDeps` so consumers on CJS-only module loaders (Jest 29, ts-node
+	// default) don't have to require() native ESM.
+	const cjsConfig = defineConfig({
+		input,
+		external: (id) => id.startsWith("node:") || isExternal(id, cjsExternal),
+		plugins: [nodeProtocolPlugin(), defineVersionPlugin(pkg.package.version)],
+		output: {
+			file: path.join(basePath, exports.default.require),
+			format: "cjs",
+			sourcemap: true,
+			exports: "auto",
+		},
 		resolve: {
 			alias: aliases,
 		},
@@ -105,7 +125,7 @@ const configs = packages.flatMap((pkg) => {
 		},
 	});
 
-	return [bundleConfig, dtsConfig];
+	return [esmConfig, cjsConfig, dtsConfig];
 });
 
 export default configs;
