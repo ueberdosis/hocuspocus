@@ -7,7 +7,12 @@ import {
 import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type { AwarenessUpdate } from "./types.ts";
+import { isTransactionOrigin } from "./types.ts";
+import type {
+	AwarenessUpdate,
+	ConnectionTransactionOrigin,
+	TransactionOrigin,
+} from "./types.ts";
 
 export class Document extends Doc {
 	awareness: Awareness;
@@ -180,7 +185,10 @@ export class Document extends Doc {
 	 * Apply the given awareness update
 	 */
 	applyAwarenessUpdate(connection: Connection, update: Uint8Array): Document {
-		applyAwarenessUpdate(this.awareness, update, connection);
+		applyAwarenessUpdate(this.awareness, update, {
+			source: "connection",
+			connection,
+		} satisfies ConnectionTransactionOrigin);
 
 		return this;
 	}
@@ -191,9 +199,14 @@ export class Document extends Doc {
 	 */
 	private handleAwarenessUpdate(
 		{ added, updated, removed }: AwarenessUpdate,
-		originConnection: Connection | null,
+		origin: TransactionOrigin | null,
 	): Document {
 		const changedClients = added.concat(updated, removed);
+
+		const originConnection: Connection | null =
+			isTransactionOrigin(origin) && origin.source === "connection"
+				? origin.connection
+				: null;
 
 		if (originConnection !== null) {
 			const entry = this.connections.get(originConnection);

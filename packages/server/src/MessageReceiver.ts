@@ -15,7 +15,11 @@ import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { MessageType, type TransactionOrigin } from "./types.ts";
+import {
+	MessageType,
+	type ConnectionTransactionOrigin,
+	type TransactionOrigin,
+} from "./types.ts";
 
 export class MessageReceiver {
 	message: IncomingMessage;
@@ -62,10 +66,17 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.Awareness: {
+				const origin: TransactionOrigin = connection
+					? ({
+							source: "connection",
+							connection,
+						} satisfies ConnectionTransactionOrigin)
+					: (this.defaultTransactionOrigin ?? { source: "local" });
+
 				applyAwarenessUpdate(
 					document.awareness,
 					message.readVarUint8Array(),
-					connection ?? null,
+					origin,
 				);
 
 				break;

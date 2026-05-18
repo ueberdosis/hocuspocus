@@ -55,3 +55,31 @@ test('executes the onAwarenessUpdate callback from a custom extension', async t 
     })
   })
 })
+
+test('forwards the originating connection on onAwarenessUpdate', async t => {
+  await new Promise(async resolve => {
+    let resolved = false
+
+    const server = await newHocuspocus(t, {
+      async onAuthenticate() {
+        return { user: { id: 'u-1', displayName: 'Test User' } }
+      },
+      async onAwarenessUpdate({ connection, states }) {
+        if (resolved || states.length === 0) return
+        resolved = true
+
+        t.truthy(connection, 'connection should be defined for client-originated awareness updates')
+        t.is((connection?.context as { user: { id: string } } | undefined)?.user?.id, 'u-1')
+
+        resolve('done')
+      },
+    })
+
+    const provider = newHocuspocusProvider(t, server, {
+      token: 'anything',
+      onConnect() {
+        provider.setAwarenessField('foo', 'bar')
+      },
+    })
+  })
+})
