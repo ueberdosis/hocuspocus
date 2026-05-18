@@ -190,7 +190,7 @@ importers:
         version: 0.2.117
       ws:
         specifier: ^8.17.1
-        version: 8.19.0
+        version: 8.20.1
       y-protocols:
         specifier: ^1.0.6
         version: 1.0.7(yjs@13.6.29)
@@ -434,7 +434,7 @@ importers:
         version: 12.0.1
       ws:
         specifier: ^8.5.0
-        version: 8.19.0
+        version: 8.20.1
       yjs:
         specifier: ^13.6.4
         version: 13.6.29
@@ -5199,8 +5199,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.19.0:
-    resolution: {integrity: sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==}
+  ws@8.20.1:
+    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -5878,7 +5878,7 @@ snapshots:
     dependencies:
       '@hono/node-server': 1.19.13(hono@4.12.18)
       hono: 4.12.18
-      ws: 8.19.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -10692,7 +10692,7 @@ snapshots:
 
   ws@7.5.10: {}
 
-  ws@8.19.0: {}
+  ws@8.20.1: {}
 
   xtend@4.0.2: {}
 
