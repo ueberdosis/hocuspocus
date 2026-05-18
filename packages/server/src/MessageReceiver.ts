@@ -1,7 +1,11 @@
 import { AuthMessageType } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
 import { readVarString } from "lib0/decoding";
-import { applyAwarenessUpdate } from "y-protocols/awareness";
+import {
+	Awareness,
+	applyAwarenessUpdate,
+	encodeAwarenessUpdate,
+} from "y-protocols/awareness";
 import {
 	messageYjsSyncStep1,
 	messageYjsSyncStep2,
@@ -66,6 +70,8 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.Awareness: {
+				let update = message.readVarUint8Array();
+
 				const origin: TransactionOrigin = connection
 					? ({
 							source: "connection",
@@ -73,11 +79,26 @@ export class MessageReceiver {
 						} satisfies ConnectionTransactionOrigin)
 					: (this.defaultTransactionOrigin ?? { source: "local" });
 
-				applyAwarenessUpdate(
-					document.awareness,
-					message.readVarUint8Array(),
+				// Decode the inbound update into a scratch Awareness so the hook
+				// chain sees a high-level Map<clientId, state>. Mutations to that
+				// map (including `set`, `delete`, and field changes on each state
+				// object) are picked up by the re-encode below and forwarded as
+				// the broadcast payload. Hooks may also throw to reject the
+				// update entirely.
+				const scratch = new Awareness(new Y.Doc());
+				applyAwarenessUpdate(scratch, update, null);
+
+				await document.callbacks.beforeHandleAwareness(
+					document,
+					scratch.getStates(),
 					origin,
 				);
+
+				update = encodeAwarenessUpdate(scratch, [
+					...scratch.getStates().keys(),
+				]);
+
+				applyAwarenessUpdate(document.awareness, update, origin);
 
 				break;
 			}

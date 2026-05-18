@@ -46,6 +46,7 @@ export class Hocuspocus<Context = any> {
 		onConnect: () => new Promise((r) => r(null)),
 		connected: () => new Promise((r) => r(null)),
 		beforeHandleMessage: () => new Promise((r) => r(null)),
+		beforeHandleAwareness: () => new Promise<void>((r) => r()),
 		beforeSync: () => new Promise((r) => r(null)),
 		beforeBroadcastStateless: () => new Promise((r) => r(null)),
 		onStateless: () => new Promise((r) => r(null)),
@@ -112,6 +113,7 @@ export class Hocuspocus<Context = any> {
 			onLoadDocument: this.configuration.onLoadDocument,
 			afterLoadDocument: this.configuration.afterLoadDocument,
 			beforeHandleMessage: this.configuration.beforeHandleMessage,
+			beforeHandleAwareness: this.configuration.beforeHandleAwareness,
 			beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
 			beforeSync: this.configuration.beforeSync,
 			onStateless: this.configuration.onStateless,
@@ -435,6 +437,31 @@ export class Hocuspocus<Context = any> {
 				this.hooks("beforeBroadcastStateless", hookPayload);
 			},
 		);
+
+		document.beforeHandleAwareness((document, states, transactionOrigin) => {
+			const connection =
+				isTransactionOrigin(transactionOrigin) &&
+				transactionOrigin.source === "connection"
+					? transactionOrigin.connection
+					: undefined;
+			const request = connection?.request;
+			return this.hooks("beforeHandleAwareness", {
+				awareness: document.awareness,
+				clientsCount: document.getConnectionsCount(),
+				context: connection?.context,
+				document,
+				documentName: document.name,
+				instance: this,
+				requestHeaders: request?.headers ?? new Headers(),
+				requestParameters: request
+					? getParameters(request)
+					: new URLSearchParams(),
+				socketId: connection?.socketId ?? "",
+				transactionOrigin,
+				connection,
+				states,
+			});
+		});
 
 		document.awareness.on(
 			"update",
