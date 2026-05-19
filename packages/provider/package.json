@@ -31,8 +31,7 @@
 	"dependencies": {
 		"@hocuspocus/common": "workspace:^",
 		"@lifeomic/attempt": "^3.0.2",
-		"lib0": "^0.2.87",
-		"ws": "^8.17.1"
+		"lib0": "^0.2.87"
 	},
 	"peerDependencies": {
 		"y-protocols": "^1.0.6",
