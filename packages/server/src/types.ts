@@ -98,6 +98,20 @@ export interface Extension<Context = any> {
 	onLoadDocument?(data: onLoadDocumentPayload<Context>): Promise<any>;
 	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
 	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
+	/**
+	 * Fired before an inbound awareness update is applied to the document's
+	 * awareness state. The hook receives the decoded per-client `states` as a
+	 * mutable `Map` keyed by Yjs clientId. Mutate the map and the contained
+	 * state objects in place to rewrite fields, drop peers (`states.delete`),
+	 * or add synthetic ones (`states.set`); mutations are reflected in the
+	 * broadcast. Throw to reject the update without applying anything.
+	 *
+	 * Multiple extensions chain naturally: each extension sees the map as
+	 * mutated by previous extensions and can mutate it further.
+	 */
+	beforeHandleAwareness?(
+		data: beforeHandleAwarenessPayload<Context>,
+	): Promise<any>;
 	beforeSync?(data: beforeSyncPayload<Context>): Promise<any>;
 	beforeBroadcastStateless?(
 		data: beforeBroadcastStatelessPayload,
@@ -126,6 +140,7 @@ export type HookName =
 	| "onLoadDocument"
 	| "afterLoadDocument"
 	| "beforeHandleMessage"
+	| "beforeHandleAwareness"
 	| "beforeBroadcastStateless"
 	| "beforeSync"
 	| "onStateless"
@@ -151,6 +166,7 @@ export type HookPayloadByName<Context = any> = {
 	onLoadDocument: onLoadDocumentPayload<Context>;
 	afterLoadDocument: afterLoadDocumentPayload<Context>;
 	beforeHandleMessage: beforeHandleMessagePayload<Context>;
+	beforeHandleAwareness: beforeHandleAwarenessPayload<Context>;
 	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
 	beforeSync: beforeSyncPayload<Context>;
 	onStateless: onStatelessPayload;
@@ -324,6 +340,44 @@ export interface beforeHandleMessagePayload<Context = any> {
 	update: Uint8Array;
 	socketId: string;
 	connection: Connection<Context>;
+}
+
+export interface beforeHandleAwarenessPayload<Context = any> {
+	awareness: Awareness;
+	clientsCount: number;
+	/**
+	 * Connection context populated by `onAuthenticate`. `undefined` when the
+	 * update did not originate from a client connection (e.g. server-internal
+	 * writes via `DirectConnection`).
+	 */
+	context: Context | undefined;
+	document: Document;
+	documentName: string;
+	instance: Hocuspocus;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	/**
+	 * Per-client awareness states decoded from the inbound update, keyed by
+	 * Yjs clientId. Mutate this map in place to rewrite the update: change
+	 * fields on a state object, `states.delete(clientId)` to drop a peer, or
+	 * `states.set(clientId, ...)` to add or replace one. The encoded update
+	 * sent to peers reflects whatever the map looks like after every hook in
+	 * the chain has run.
+	 */
+	states: Map<number, Record<string, any>>;
+	socketId: string;
+	/**
+	 * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
+	 * Use `isTransactionOrigin(origin)` to discriminate sources. Matches the
+	 * `transactionOrigin` shape of `onAwarenessUpdatePayload`.
+	 */
+	transactionOrigin: unknown;
+	/**
+	 * Convenience shortcut: `origin.connection` when `transactionOrigin` is a
+	 * `ConnectionTransactionOrigin`, otherwise `undefined`. Matches the
+	 * `connection?` shape of `onAwarenessUpdatePayload`.
+	 */
+	connection?: Connection<Context>;
 }
 
 export interface beforeSyncPayload<Context = any> {

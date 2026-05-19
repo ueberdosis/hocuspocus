@@ -21,6 +21,11 @@ export class Document extends Doc {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => {},
 		beforeBroadcastStateless: (document: Document, stateless: string) => {},
+		beforeHandleAwareness: (
+			document: Document,
+			states: Map<number, Record<string, any>>,
+			transactionOrigin: unknown,
+		) => Promise.resolve(),
 	};
 
 	connections: Map<
@@ -96,6 +101,27 @@ export class Document extends Doc {
 		callback: (document: Document, stateless: string) => void,
 	): Document {
 		this.callbacks.beforeBroadcastStateless = callback;
+
+		return this;
+	}
+
+	/**
+	 * Set a callback that will be triggered before an inbound awareness update
+	 * is applied to this document's awareness state. The callback receives the
+	 * document, the decoded per-client states as a mutable `Map`, and the
+	 * `TransactionOrigin` that will be forwarded to `applyAwarenessUpdate`.
+	 * Use `isTransactionOrigin(origin)` to discriminate sources. Mutate the
+	 * map in place (set/delete/field changes) to rewrite the update, or throw
+	 * to reject it entirely.
+	 */
+	beforeHandleAwareness(
+		callback: (
+			document: Document,
+			states: Map<number, Record<string, any>>,
+			transactionOrigin: unknown,
+		) => Promise<any>,
+	): Document {
+		this.callbacks.beforeHandleAwareness = callback;
 
 		return this;
 	}
