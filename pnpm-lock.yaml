@@ -188,9 +188,6 @@ importers:
       lib0:
         specifier: ^0.2.87
         version: 0.2.117
-      ws:
-        specifier: ^8.17.1
-        version: 8.19.0
       y-protocols:
         specifier: ^1.0.6
         version: 1.0.7(yjs@13.6.29)
