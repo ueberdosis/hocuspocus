@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* **server:** wrap awareness origin as TransactionOrigin ([#1094](https://github.com/ueberdosis/hocuspocus/issues/1094)) ([bb24de0](https://github.com/ueberdosis/hocuspocus/commit/bb24de0ffb944e10845174e26971eaa95b2db675))
+
+
+### Features
+
+* **server:** add beforeHandleAwareness hook ([#1096](https://github.com/ueberdosis/hocuspocus/issues/1096)) ([1597da8](https://github.com/ueberdosis/hocuspocus/commit/1597da8217c4ed20b06d46052f1db7c7765d6153))
+
+
+
+
+
 # [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
 
 **Note:** Version bump only for package @hocuspocus/server
