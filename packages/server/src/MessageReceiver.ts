@@ -118,9 +118,21 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.BroadcastStateless: {
+				// Server-internal opcode used by @hocuspocus/extension-redis to
+				// fan a stateless payload across server instances. The Redis path
+				// invokes MessageReceiver without a `connection`, so a defined
+				// `connection` here means this frame came from a WebSocket client
+				// — which is never legitimate. Clients must use MessageType.Stateless
+				// (opcode 5); the onStateless hook is the authorization point and
+				// may call Document.broadcastStateless() to fan out if appropriate.
+				if (connection) {
+					throw new Error(
+						"BroadcastStateless is a server-internal opcode and cannot be sent from a client",
+					);
+				}
 				const msg = message.readVarString();
-				document.getConnections().forEach((connection) => {
-					connection.sendStateless(msg);
+				document.getConnections().forEach((c) => {
+					c.sendStateless(msg);
 				});
 				break;
 			}
