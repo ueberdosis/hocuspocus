@@ -53,6 +53,7 @@ export function HocuspocusRoom({
 	name,
 	document,
 	token,
+	sessionAwareness,
 	...eventHandlers
 }: HocuspocusRoomProps) {
 	const hocuspocusContext = useContext(HocuspocusContext);
@@ -72,6 +73,7 @@ export function HocuspocusRoom({
 				websocketProvider,
 				document,
 				token,
+				sessionAwareness,
 			}),
 	);
 
@@ -100,6 +102,7 @@ export function HocuspocusRoom({
 					websocketProvider,
 					document,
 					token,
+					sessionAwareness,
 				}),
 			);
 		}
