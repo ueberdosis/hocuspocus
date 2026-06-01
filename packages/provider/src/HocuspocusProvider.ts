@@ -82,7 +82,7 @@ export interface CompleteHocuspocusProviderConfiguration {
 	 * sessionId in the documentName field of every message, allowing multiple
 	 * providers with the same document name on a single WebSocket connection.
 	 *
-	 * Only set this to `false` when connecting to a v3 server that does not
+	 * Only set this to `true` when connecting to a v4 server that does 
 	 * support session awareness.
 	 *
 	 * Default: false
