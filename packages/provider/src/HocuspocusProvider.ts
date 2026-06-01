@@ -85,7 +85,7 @@ export interface CompleteHocuspocusProviderConfiguration {
 	 * Only set this to `false` when connecting to a v3 server that does not
 	 * support session awareness.
 	 *
-	 * Default: true
+	 * Default: false
 	 */
 	sessionAwareness: boolean;
 
