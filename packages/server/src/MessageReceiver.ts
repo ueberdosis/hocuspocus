@@ -85,18 +85,24 @@ export class MessageReceiver {
 				// object) are picked up by the re-encode below and forwarded as
 				// the broadcast payload. Hooks may also throw to reject the
 				// update entirely.
-				const scratch = new Awareness(new Y.Doc());
-				applyAwarenessUpdate(scratch, update, null);
+				const scratchDoc = new Y.Doc();
+				const scratch = new Awareness(scratchDoc);
+				try {
+					applyAwarenessUpdate(scratch, update, null);
 
-				await document.callbacks.beforeHandleAwareness(
-					document,
-					scratch.getStates(),
-					origin,
-				);
+					await document.callbacks.beforeHandleAwareness(
+						document,
+						scratch.getStates(),
+						origin,
+					);
 
-				update = encodeAwarenessUpdate(scratch, [
-					...scratch.getStates().keys(),
-				]);
+					update = encodeAwarenessUpdate(scratch, [
+						...scratch.getStates().keys(),
+					]);
+				} finally {
+					scratch.destroy();
+					scratchDoc.destroy();
+				}
 
 				applyAwarenessUpdate(document.awareness, update, origin);
 
