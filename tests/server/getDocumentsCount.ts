@@ -5,16 +5,16 @@ import {
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('documents count is zero by default', async t => {
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
 
   t.is(server.getDocumentsCount(), 0)
 })
 
 test('documents count is 1 when one provider is connected', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced() {
         t.is(server.getDocumentsCount(), 1)
 
@@ -25,11 +25,11 @@ test('documents count is 1 when one provider is connected', async t => {
 })
 
 test('the same document name counts as one document', async t => {
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
 
   const providers = [
-    newHocuspocusProvider(server, { name: 'foobar' }),
-    newHocuspocusProvider(server, { name: 'foobar' }),
+    newHocuspocusProvider(t, server, { name: 'foobar' }),
+    newHocuspocusProvider(t, server, { name: 'foobar' }),
   ]
 
   await retryableAssertion(t, tt => {
@@ -44,14 +44,14 @@ test('the same document name counts as one document', async t => {
 })
 
 test('adds and removes different documents properly', async t => {
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
 
   const providers = [
-    newHocuspocusProvider(server, { name: 'foo-1' }),
-    newHocuspocusProvider(server, { name: 'foo-2' }),
-    newHocuspocusProvider(server, { name: 'foo-3' }),
-    newHocuspocusProvider(server, { name: 'foo-4' }),
-    newHocuspocusProvider(server, { name: 'foo-5' }),
+    newHocuspocusProvider(t, server, { name: 'foo-1' }),
+    newHocuspocusProvider(t, server, { name: 'foo-2' }),
+    newHocuspocusProvider(t, server, { name: 'foo-3' }),
+    newHocuspocusProvider(t, server, { name: 'foo-4' }),
+    newHocuspocusProvider(t, server, { name: 'foo-5' }),
   ]
 
   await retryableAssertion(t, tt => {
@@ -67,12 +67,12 @@ test('adds and removes different documents properly', async t => {
 
 test('adds and removes random number of documents properly', async t => {
   // random number of providers
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
   const numberOfProviders = randomInteger(10, 100)
   const providers = []
   for (let index = 0; index < numberOfProviders; index += 1) {
     providers.push(
-      newHocuspocusProvider(server, { name: `foobar-${index}` }),
+      newHocuspocusProvider(t, server, { name: `foobar-${index}` }),
     )
   }
   await retryableAssertion(t, tt => {

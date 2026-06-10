@@ -1,6 +1,11 @@
+import { AuthMessageType } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
 import { readVarString } from "lib0/decoding";
-import { applyAwarenessUpdate } from "y-protocols/awareness";
+import {
+	Awareness,
+	applyAwarenessUpdate,
+	encodeAwarenessUpdate,
+} from "y-protocols/awareness";
 import {
 	messageYjsSyncStep1,
 	messageYjsSyncStep2,
@@ -14,14 +19,21 @@ import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { MessageType } from "./types.ts";
+import {
+	MessageType,
+	type ConnectionTransactionOrigin,
+	type TransactionOrigin,
+} from "./types.ts";
 
 export class MessageReceiver {
 	message: IncomingMessage;
 
-	defaultTransactionOrigin?: string;
+	defaultTransactionOrigin?: TransactionOrigin;
 
-	constructor(message: IncomingMessage, defaultTransactionOrigin?: string) {
+	constructor(
+		message: IncomingMessage,
+		defaultTransactionOrigin?: TransactionOrigin,
+	) {
 		this.message = message;
 		this.defaultTransactionOrigin = defaultTransactionOrigin;
 	}
@@ -51,12 +63,6 @@ export class MessageReceiver {
 					if (reply) {
 						reply(message.toUint8Array());
 					} else if (connection) {
-						// TODO: We should log this, shouldn’t we?
-						// this.logger.log({
-						//   direction: 'out',
-						//   type: MessageType.Awareness,
-						//   category: 'Update',
-						// })
 						connection.send(message.toUint8Array());
 					}
 				}
@@ -64,16 +70,46 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.Awareness: {
-				await applyAwarenessUpdate(
-					document.awareness,
-					message.readVarUint8Array(),
-					connection?.webSocket,
-				);
+				let update = message.readVarUint8Array();
+
+				const origin: TransactionOrigin = connection
+					? ({
+							source: "connection",
+							connection,
+						} satisfies ConnectionTransactionOrigin)
+					: (this.defaultTransactionOrigin ?? { source: "local" });
+
+				// Decode the inbound update into a scratch Awareness so the hook
+				// chain sees a high-level Map<clientId, state>. Mutations to that
+				// map (including `set`, `delete`, and field changes on each state
+				// object) are picked up by the re-encode below and forwarded as
+				// the broadcast payload. Hooks may also throw to reject the
+				// update entirely.
+				const scratchDoc = new Y.Doc();
+				const scratch = new Awareness(scratchDoc);
+				try {
+					applyAwarenessUpdate(scratch, update, null);
+
+					await document.callbacks.beforeHandleAwareness(
+						document,
+						scratch.getStates(),
+						origin,
+					);
+
+					update = encodeAwarenessUpdate(scratch, [
+						...scratch.getStates().keys(),
+					]);
+				} finally {
+					scratch.destroy();
+					scratchDoc.destroy();
+				}
+
+				applyAwarenessUpdate(document.awareness, update, origin);
 
 				break;
 			}
 			case MessageType.QueryAwareness: {
-				this.applyQueryAwarenessMessage(document, reply);
+				this.applyQueryAwarenessMessage(document, connection, reply);
 
 				break;
 			}
@@ -88,9 +124,21 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.BroadcastStateless: {
+				// Server-internal opcode used by @hocuspocus/extension-redis to
+				// fan a stateless payload across server instances. The Redis path
+				// invokes MessageReceiver without a `connection`, so a defined
+				// `connection` here means this frame came from a WebSocket client
+				// — which is never legitimate. Clients must use MessageType.Stateless
+				// (opcode 5); the onStateless hook is the authorization point and
+				// may call Document.broadcastStateless() to fan out if appropriate.
+				if (connection) {
+					throw new Error(
+						"BroadcastStateless is a server-internal opcode and cannot be sent from a client",
+					);
+				}
 				const msg = message.readVarString();
-				document.getConnections().forEach((connection) => {
-					connection.sendStateless(msg);
+				document.getConnections().forEach((c) => {
+					c.sendStateless(msg);
 				});
 				break;
 			}
@@ -103,11 +151,19 @@ export class MessageReceiver {
 				break;
 			}
 
-			case MessageType.Auth:
+			case MessageType.Auth: {
+				const authType = message.readVarUint();
+				if (authType === AuthMessageType.Token) {
+					connection?.callbacks.onTokenSyncCallback({
+						token: message.readVarString(),
+					});
+					break;
+				}
 				console.error(
 					"Received an authentication message on a connection that is already fully authenticated. Probably your provider has been destroyed + recreated really fast.",
 				);
 				break;
+			}
 
 			default:
 				console.error(
@@ -125,6 +181,7 @@ export class MessageReceiver {
 		requestFirstSync = true,
 	) {
 		const type = message.readVarUint();
+		const messageAddress = connection?.messageAddress ?? document.name;
 
 		if (connection) {
 			await connection.callbacks.beforeSync(connection, {
@@ -139,13 +196,13 @@ export class MessageReceiver {
 
 				// When the server receives SyncStep1, it should reply with SyncStep2 immediately followed by SyncStep1.
 				if (reply && requestFirstSync) {
-					const syncMessage = new OutgoingMessage(document.name)
+					const syncMessage = new OutgoingMessage(messageAddress)
 						.createSyncReplyMessage()
 						.writeFirstSyncStepFor(document);
 
 					reply(syncMessage.toUint8Array());
 				} else if (connection) {
-					const syncMessage = new OutgoingMessage(document.name)
+					const syncMessage = new OutgoingMessage(messageAddress)
 						.createSyncMessage()
 						.writeFirstSyncStepFor(document);
 
@@ -153,7 +210,7 @@ export class MessageReceiver {
 				}
 				break;
 			}
-			case messageYjsSyncStep2:
+			case messageYjsSyncStep2: {
 				if (connection?.readOnly) {
 					// We're in read-only mode, so we can't apply the update.
 					// Let's use snapshotContainsUpdate to see if the update actually contains changes.
@@ -163,14 +220,14 @@ export class MessageReceiver {
 					if (Y.snapshotContainsUpdate(snapshot, update)) {
 						// no new changes in update
 						const ackMessage = new OutgoingMessage(
-							document.name,
+							messageAddress,
 						).writeSyncStatus(true);
 
 						connection.send(ackMessage.toUint8Array());
 					} else {
 						// new changes in update that we can't apply, because readOnly
 						const ackMessage = new OutgoingMessage(
-							document.name,
+							messageAddress,
 						).writeSyncStatus(false);
 
 						connection.send(ackMessage.toUint8Array());
@@ -181,36 +238,46 @@ export class MessageReceiver {
 				readSyncStep2(
 					message.decoder,
 					document,
-					connection ?? this.defaultTransactionOrigin,
+					connection
+						? { source: "connection" as const, connection }
+						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
 				);
 
 				if (connection) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(true)
 							.toUint8Array(),
 					);
 				}
 				break;
-			case messageYjsUpdate:
+			}
+			case messageYjsUpdate: {
 				if (connection?.readOnly) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(false)
 							.toUint8Array(),
 					);
 					break;
 				}
 
-				readUpdate(message.decoder, document, connection);
+				readUpdate(
+					message.decoder,
+					document,
+					connection
+						? { source: "connection" as const, connection }
+						: (this.defaultTransactionOrigin ?? { source: "local" as const }),
+				);
 				if (connection) {
 					connection.send(
-						new OutgoingMessage(document.name)
+						new OutgoingMessage(messageAddress)
 							.writeSyncStatus(true)
 							.toUint8Array(),
 					);
 				}
 				break;
+			}
 			default:
 				throw new Error(`Received a message with an unknown type: ${type}`);
 		}
@@ -220,10 +287,11 @@ export class MessageReceiver {
 
 	applyQueryAwarenessMessage(
 		document: Document,
+		connection?: Connection,
 		reply?: (message: Uint8Array) => void,
 	) {
 		const message = new OutgoingMessage(
-			document.name,
+			connection?.messageAddress ?? document.name,
 		).createAwarenessUpdateMessage(document.awareness);
 
 		if (reply) {

@@ -5,14 +5,14 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the afterUnloadDocument callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async afterUnloadDocument() {
         t.pass()
         resolve('done')
       },
     })
 
-    const p = newHocuspocusProvider(server, {
+    const p = newHocuspocusProvider(t, server, {
       onSynced(data) {
         p.configuration.websocketProvider.disconnect()
         p.disconnect()
@@ -38,17 +38,17 @@ test('executes the afterUnloadDocument callback when all clients disconnect afte
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [new CustomExtension()],
     })
 
-    provider = newHocuspocusProvider(server)
+    provider = newHocuspocusProvider(t, server)
   })
 })
 
 test('does not execute the afterUnloadDocument callback when document fails to load', async t => {
   await new Promise(async (resolve, reject) => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
     class CustomExtension {
       async onLoadDocument() {
@@ -67,7 +67,7 @@ test('does not execute the afterUnloadDocument callback when document fails to l
       ],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
 
     setTimeout(() => {
       t.pass()

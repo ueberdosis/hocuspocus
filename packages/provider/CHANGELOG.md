@@ -3,6 +3,280 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.7](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.6...v4.0.0-rc.7) (2026-04-22)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
+
+
+### Features
+
+* adds package readmes ([c7d63f7](https://github.com/ueberdosis/hocuspocus/commit/c7d63f79980de3c34e63b60073f22774bf27ac13))
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Features
+
+* first draft of @hocuspocus/provider-react package ([#1059](https://github.com/ueberdosis/hocuspocus/issues/1059)) ([cbc9977](https://github.com/ueberdosis/hocuspocus/commit/cbc99770096e8c674dae304c7e1a16e0fbec827b))
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+
+### Bug Fixes
+
+* turn off sessionAwareness by default to keep BC with old servers ([3a57071](https://github.com/ueberdosis/hocuspocus/commit/3a57071517adb5c9e037fb7c0ac169ffc330df90))
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+
+### Features
+
+* adds deduplication for queued awareness messages ([e0453f0](https://github.com/ueberdosis/hocuspocus/commit/e0453f0210a4a30f6f8b742629ed777724429df9))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Features
+
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* make the server aware of the provider version, so future protocol changes are easier to make backward-compatible. ([2b47dc2](https://github.com/ueberdosis/hocuspocus/commit/2b47dc2ede1bf15ff90f1048352f103cea57f300))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+
+### Features
+
+* make the server aware of the provider version, so future protocol changes are easier to make backward-compatible. ([2b47dc2](https://github.com/ueberdosis/hocuspocus/commit/2b47dc2ede1bf15ff90f1048352f103cea57f300))
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+
+
+
+
+
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* fixes [#1041](https://github.com/ueberdosis/hocuspocus/issues/1041): websocket URL ending with / wont work ([#1046](https://github.com/ueberdosis/hocuspocus/issues/1046)) ([0df9b09](https://github.com/ueberdosis/hocuspocus/commit/0df9b095d47e7953a9dff090942e937894d8f7fc))
+* fixes provider.forwardClose type error ([5438500](https://github.com/ueberdosis/hocuspocus/commit/543850064ba1cb18c13cb4211cec76a3ad05ddb4))
+* strict types for authorizedScope ([#1029](https://github.com/ueberdosis/hocuspocus/issues/1029)) ([44e1b5d](https://github.com/ueberdosis/hocuspocus/commit/44e1b5d19f632bf646b654efd2c2ba70587adf62))
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+
+### Features
+
+* add onTokenSync hook for auth token re-sync ([#1001](https://github.com/ueberdosis/hocuspocus/issues/1001)) ([ee252fb](https://github.com/ueberdosis/hocuspocus/commit/ee252fb99ea6faf80cc71d2e1ce51726e698b76b))
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+**Note:** Version bump only for package @hocuspocus/provider
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 

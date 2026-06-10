@@ -1,5 +1,4 @@
-import { awarenessStatesToArray } from "@hocuspocus/common";
-import type { Event, MessageEvent } from "ws";
+import { awarenessStatesToArray, makeRoutingKey, parseRoutingKey } from "@hocuspocus/common";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";
@@ -14,6 +13,7 @@ import { StatelessMessage } from "./OutgoingMessages/StatelessMessage.ts";
 import { SyncStepOneMessage } from "./OutgoingMessages/SyncStepOneMessage.ts";
 import { UpdateMessage } from "./OutgoingMessages/UpdateMessage.ts";
 import type {
+	AuthorizedScope,
 	ConstructableOutgoingMessage,
 	onAuthenticatedParameters,
 	onAuthenticationFailedParameters,
@@ -35,7 +35,13 @@ export type HocuspocusProviderConfiguration = Required<
 > &
 	Partial<CompleteHocuspocusProviderConfiguration> &
 	(
-		| Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, "url">>
+		| (Required<Pick<CompleteHocuspocusProviderWebsocketConfiguration, "url">> &
+				Partial<
+					Pick<
+						CompleteHocuspocusProviderWebsocketConfiguration,
+						"preserveTrailingSlash"
+					>
+				>)
 		| Required<
 				Pick<CompleteHocuspocusProviderConfiguration, "websocketProvider">
 		  >
@@ -72,6 +78,18 @@ export interface CompleteHocuspocusProviderConfiguration {
 	websocketProvider: HocuspocusProviderWebsocket;
 
 	/**
+	 * Enable session-aware multiplexing. When true, the provider embeds a unique
+	 * sessionId in the documentName field of every message, allowing multiple
+	 * providers with the same document name on a single WebSocket connection.
+	 *
+	 * Only set this to `true` when connecting to a v4 server that does 
+	 * support session awareness.
+	 *
+	 * Default: false
+	 */
+	sessionAwareness: boolean;
+
+	/**
 	 * Force syncing the document in the defined interval.
 	 */
 	forceSyncInterval: false | number;
@@ -100,11 +118,12 @@ export class AwarenessError extends Error {
 export class HocuspocusProvider extends EventEmitter {
 	public configuration: CompleteHocuspocusProviderConfiguration = {
 		name: "",
-		// @ts-ignore
+		// @ts-expect-error
 		document: undefined,
-		// @ts-ignore
+		// @ts-expect-error
 		awareness: undefined,
 		token: null,
+		sessionAwareness: false,
 		forceSyncInterval: false,
 		onAuthenticated: () => null,
 		onAuthenticationFailed: () => null,
@@ -129,12 +148,29 @@ export class HocuspocusProvider extends EventEmitter {
 
 	isAuthenticated = false;
 
-	authorizedScope: string | undefined = undefined;
+	authorizedScope: AuthorizedScope | undefined = undefined;
 
 	// @internal
 	manageSocket = false;
 
 	private _isAttached = false;
+
+	/**
+	 * Unique session identifier for this provider instance.
+	 * Used for multiplexing multiple providers with the same document name on a single WebSocket.
+	 */
+	sessionId: string = Math.random().toString(36).slice(2);
+
+	/**
+	 * The effective name used as the first VarString in messages.
+	 * When `sessionAwareness` is enabled, returns a composite key (documentName\0sessionId).
+	 * Otherwise, returns the plain document name.
+	 */
+	get effectiveName(): string {
+		return this.configuration.sessionAwareness
+			? makeRoutingKey(this.configuration.name, this.sessionId)
+			: this.configuration.name;
+	}
 
 	intervals: any = {
 		forceSync: null,
@@ -221,12 +257,10 @@ export class HocuspocusProvider extends EventEmitter {
 		configuration: Partial<HocuspocusProviderConfiguration> = {},
 	): void {
 		if (!configuration.websocketProvider) {
-			const websocketProviderConfig =
-				configuration as CompleteHocuspocusProviderWebsocketConfiguration;
 			this.manageSocket = true;
-			this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
-				url: websocketProviderConfig.url,
-			});
+			this.configuration.websocketProvider = new HocuspocusProviderWebsocket(
+				configuration as CompleteHocuspocusProviderWebsocketConfiguration,
+			);
 		}
 
 		this.configuration = { ...this.configuration, ...configuration };
@@ -275,7 +309,7 @@ export class HocuspocusProvider extends EventEmitter {
 
 		this.send(SyncStepOneMessage, {
 			document: this.document,
-			documentName: this.configuration.name,
+			documentName: this.effectiveName,
 		});
 	}
 
@@ -299,8 +333,25 @@ export class HocuspocusProvider extends EventEmitter {
 
 	sendStateless(payload: string) {
 		this.send(StatelessMessage, {
-			documentName: this.configuration.name,
+			documentName: this.effectiveName,
 			payload,
+		});
+	}
+
+	async sendToken() {
+		let token: string | null;
+		try {
+			token = await this.getToken();
+		} catch (error) {
+			this.permissionDeniedHandler(
+				`Failed to get token during sendToken(): ${error}`,
+			);
+			return;
+		}
+
+		this.send(AuthenticationMessage, {
+			token: token ?? "",
+			documentName: this.effectiveName,
 		});
 	}
 
@@ -310,7 +361,7 @@ export class HocuspocusProvider extends EventEmitter {
 		}
 
 		this.incrementUnsyncedChanges();
-		this.send(UpdateMessage, { update, documentName: this.configuration.name });
+		this.send(UpdateMessage, { update, documentName: this.effectiveName });
 	}
 
 	awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
@@ -319,7 +370,7 @@ export class HocuspocusProvider extends EventEmitter {
 		this.send(AwarenessMessage, {
 			awareness: this.awareness,
 			clients: changedClients,
-			documentName: this.configuration.name,
+			documentName: this.effectiveName,
 		});
 	}
 
@@ -374,20 +425,7 @@ export class HocuspocusProvider extends EventEmitter {
 		this.isAuthenticated = false;
 
 		this.emit("open", { event });
-
-		let token: string | null;
-		try {
-			token = await this.getToken();
-		} catch (error) {
-			this.permissionDeniedHandler(`Failed to get token: ${error}`);
-			return;
-		}
-
-		this.send(AuthenticationMessage, {
-			token: token ?? "",
-			documentName: this.configuration.name,
-		});
-
+		await this.sendToken();
 		this.startSync();
 	}
 
@@ -405,14 +443,14 @@ export class HocuspocusProvider extends EventEmitter {
 
 		this.send(SyncStepOneMessage, {
 			document: this.document,
-			documentName: this.configuration.name,
+			documentName: this.effectiveName,
 		});
 
 		if (this.awareness && this.awareness.getLocalState() !== null) {
 			this.send(AwarenessMessage, {
 				awareness: this.awareness,
 				clients: [this.document.clientID],
-				documentName: this.configuration.name,
+				documentName: this.effectiveName,
 			});
 		}
 	}
@@ -429,9 +467,11 @@ export class HocuspocusProvider extends EventEmitter {
 	onMessage(event: MessageEvent) {
 		const message = new IncomingMessage(event.data);
 
-		const documentName = message.readVarString();
+		const rawKey = message.readVarString();
+		// Extract actual documentName from potentially composite routing key
+		const { documentName } = parseRoutingKey(rawKey);
 
-		message.writeVarString(documentName);
+		message.writeVarString(this.effectiveName);
 
 		this.emit("message", { event, message: new IncomingMessage(event.data) });
 
@@ -578,7 +618,7 @@ export class HocuspocusProvider extends EventEmitter {
 
 	authenticatedHandler(scope: string) {
 		this.isAuthenticated = true;
-		this.authorizedScope = scope;
+		this.authorizedScope = scope as AuthorizedScope;
 
 		this.emit("authenticated", { scope });
 	}

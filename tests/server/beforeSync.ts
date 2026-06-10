@@ -4,26 +4,32 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('beforeSync gets called in proper order', async t => {
   await new Promise(async resolve => {
+    let resolved = false
     const mockContext = {
       user: 123,
     }
 
     let callNumber = 0
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         return mockContext
       },
       async beforeSync({ document, context, payload }) {
+        if (resolved) return
+
         t.deepEqual(context, mockContext)
 
         callNumber += 1
 
         if (callNumber === 2) {
+          resolved = true
           resolve('done')
         }
       },
       async onChange({ context, document }) {
+        if (resolved) return
+
         t.deepEqual(context, mockContext)
 
         const value = document.getArray('foo').get(0)
@@ -32,7 +38,7 @@ test('beforeSync gets called in proper order', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onSynced() {
         provider.document.getArray('foo').insert(0, ['bar'])
       },
@@ -47,7 +53,7 @@ test('beforeSync callback is called for every sync', async t => {
   let syncstep2Count = 0
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         onConnectCount += 1
       },
@@ -64,7 +70,7 @@ test('beforeSync callback is called for every sync', async t => {
 
     await Promise.all([
       new Promise(done => {
-        newHocuspocusProvider(server, {
+        newHocuspocusProvider(t, server, {
           onClose() {
             t.fail()
           },
@@ -74,7 +80,7 @@ test('beforeSync callback is called for every sync', async t => {
         })
       }),
       new Promise(done => {
-        newHocuspocusProvider(server, {
+        newHocuspocusProvider(t, server, {
           onClose() {
             t.fail()
           },
@@ -105,7 +111,7 @@ test('beforeSync callback is called on every update', async t => {
 
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         onConnectCount += 1
       },
@@ -122,7 +128,7 @@ test('beforeSync callback is called on every update', async t => {
 
     await Promise.all([
       new Promise(done => {
-        newHocuspocusProvider(server, {
+        newHocuspocusProvider(t, server, {
           onClose() {
             t.fail()
           },
@@ -132,7 +138,7 @@ test('beforeSync callback is called on every update', async t => {
         })
       }),
       new Promise(done => {
-        const provider = newHocuspocusProvider(server, {
+        const provider = newHocuspocusProvider(t, server, {
           onClose() {
             t.fail()
           },

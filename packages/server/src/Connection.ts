@@ -1,24 +1,26 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
 	WsReadyStates,
 } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type { beforeSyncPayload, onStatelessPayload } from "./types.ts";
+import type {
+	WebSocketLike,
+	beforeSyncPayload,
+	onStatelessPayload,
+} from "./types.ts";
 
-export class Connection {
-	webSocket: WebSocket;
+export class Connection<Context = any> {
+	webSocket: WebSocketLike;
 
-	context: any;
+	context: Context;
 
 	document: Document;
 
-	request: HTTPIncomingMessage;
+	request: Request;
 
 	callbacks = {
 		onClose: [(document: Document, event?: CloseEvent) => {}],
@@ -29,22 +31,43 @@ export class Connection {
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
 		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
+		onTokenSyncCallback: (payload: { token: string }) => Promise.resolve(),
 	};
 
 	socketId: string;
 
 	readOnly: boolean;
 
+	sessionId: string | null;
+
+	providerVersion: string | null;
+
+	/**
+	 * The address string prefixed to outgoing messages.
+	 * Session-aware clients get `documentName\0sessionId`; legacy clients get plain `documentName`.
+	 */
+	get messageAddress(): string {
+		return this.sessionId
+			? `${this.document.name}\0${this.sessionId}`
+			: this.document.name;
+	}
+
+	private messageQueue: Uint8Array[] = [];
+
+	private processingPromise: Promise<void> = Promise.resolve();
+
 	/**
 	 * Constructor.
 	 */
 	constructor(
-		connection: WebSocket,
-		request: HTTPIncomingMessage,
+		connection: WebSocketLike,
+		request: Request,
 		document: Document,
 		socketId: string,
-		context: any,
+		context: Context,
 		readOnly = false,
+		sessionId?: string | null,
+		providerVersion?: string | null,
 	) {
 		this.webSocket = connection;
 		this.context = context;
@@ -52,8 +75,9 @@ export class Connection {
 		this.request = request;
 		this.socketId = socketId;
 		this.readOnly = readOnly;
+		this.sessionId = sessionId ?? null;
+		this.providerVersion = providerVersion ?? null;
 
-		this.webSocket.binaryType = "nodebuffer";
 		this.document.addConnection(this);
 
 		this.sendCurrentAwareness();
@@ -107,9 +131,27 @@ export class Connection {
 	}
 
 	/**
+	 * Set a callback that will be triggered when on token sync message is received
+	 */
+	onTokenSyncCallback(
+		callback: (payload: { token: string }) => Promise<void>,
+	): Connection {
+		this.callbacks.onTokenSyncCallback = callback;
+
+		return this;
+	}
+
+	/**
+	 * Returns a promise that resolves when all queued messages have been processed.
+	 */
+	waitForPendingMessages(): Promise<void> {
+		return this.processingPromise;
+	}
+
+	/**
 	 * Send the given message
 	 */
-	send(message: any): void {
+	send(message: Uint8Array): void {
 		if (
 			this.webSocket.readyState === WsReadyStates.Closing ||
 			this.webSocket.readyState === WsReadyStates.Closed
@@ -119,9 +161,7 @@ export class Connection {
 		}
 
 		try {
-			this.webSocket.send(message, (error: any) => {
-				if (error != null) this.close();
-			});
+			this.webSocket.send(message);
 		} catch (exception) {
 			this.close();
 		}
@@ -131,9 +171,20 @@ export class Connection {
 	 * Send a stateless message with payload
 	 */
 	public sendStateless(payload: string): void {
-		const message = new OutgoingMessage(this.document.name).writeStateless(
+		const message = new OutgoingMessage(this.messageAddress).writeStateless(
 			payload,
 		);
+
+		this.send(message.toUint8Array());
+	}
+
+	/**
+	 * Request current token from the client
+	 */
+	public requestToken(): void {
+		const message = new OutgoingMessage(
+			this.messageAddress,
+		).writeTokenSyncRequest();
 
 		this.send(message.toUint8Array());
 	}
@@ -149,7 +200,7 @@ export class Connection {
 					callback(this.document, event),
 			);
 
-			const closeMessage = new OutgoingMessage(this.document.name);
+			const closeMessage = new OutgoingMessage(this.messageAddress);
 			closeMessage.writeCloseMessage(
 				event?.reason ?? "Server closed the connection",
 			);
@@ -167,7 +218,7 @@ export class Connection {
 		}
 
 		const awarenessMessage = new OutgoingMessage(
-			this.document.name,
+			this.messageAddress,
 		).createAwarenessUpdateMessage(this.document.awareness);
 
 		this.send(awarenessMessage.toUint8Array());
@@ -178,39 +229,50 @@ export class Connection {
 	 * @public
 	 */
 	public handleMessage(data: Uint8Array): void {
-		const message = new IncomingMessage(data);
-		const documentName = message.readVarString();
+		this.messageQueue.push(data);
 
-		if (documentName !== this.document.name) return;
+		if (this.messageQueue.length === 1) {
+			this.processingPromise = this.processMessages();
+		}
+	}
 
-		message.writeVarString(documentName);
+	private async processMessages() {
+		while (this.messageQueue.length > 0) {
+			const rawUpdate = this.messageQueue.at(0) as Uint8Array;
 
-		this.callbacks
-			.beforeHandleMessage(this, data)
-			.then(() => {
-				new MessageReceiver(message)
-					.apply(this.document, this)
-					.catch((e: any) => {
-						console.error(
-							`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
-							e,
-						);
-						this.close({
-							code: "code" in e ? e.code : ResetConnection.code,
-							reason: "reason" in e ? e.reason : ResetConnection.reason,
-						});
-					});
-			})
-			.catch((e: any) => {
+			const message = new IncomingMessage(rawUpdate);
+			const rawKey = message.readVarString();
+
+			// Accept messages addressed with either the plain documentName or documentName\0sessionId
+			const sepIdx = rawKey.indexOf('\0');
+			const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx);
+			if (documentName !== this.document.name) {
+				this.messageQueue.shift();
+				continue;
+			}
+
+			// Write the correct address so replies reach the right provider
+			message.writeVarString(this.messageAddress);
+
+			try {
+				await this.callbacks.beforeHandleMessage(this, rawUpdate);
+				const receiver = new MessageReceiver(message);
+
+				await receiver.apply(this.document, this);
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			} catch (e: any) {
 				console.error(
 					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 					e,
 				);
 				this.close({
-					code: "code" in e ? e.code : ResetConnection.code,
+					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
 					reason: "reason" in e ? e.reason : ResetConnection.reason,
 				});
-			});
+			}
+
+			this.messageQueue.shift();
+		}
 	}
 }
 

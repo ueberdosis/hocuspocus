@@ -26,14 +26,14 @@ const server = new Server({
 
 	// async onConnect(data) {
 	//   await new Promise((resolve, reject) => setTimeout(() => {
-	//     // @ts-ignore
+	//     // @ts-expect-error
 	//     reject()
 	//   }, 1337))
 	// },
 
 	// async onConnect(data) {
 	//   await new Promise((resolve, reject) => setTimeout(() => {
-	//     // @ts-ignore
+	//     // @ts-expect-error
 	//     resolve()
 	//   }, 1337))
 	// },

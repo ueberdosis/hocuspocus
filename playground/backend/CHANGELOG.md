@@ -3,6 +3,105 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* fixes hono types in playground ([#1045](https://github.com/ueberdosis/hocuspocus/issues/1045)) ([163fbed](https://github.com/ueberdosis/hocuspocus/commit/163fbed167222eac8e89095cca09074bb7ddf6e2))
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+**Note:** Version bump only for package @hocuspocus/server-demos
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 **Note:** Version bump only for package @hocuspocus/server-demos

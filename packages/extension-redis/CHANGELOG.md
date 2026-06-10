@@ -3,6 +3,273 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.7](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.6...v4.0.0-rc.7) (2026-04-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
+
+
+### Features
+
+* adds package readmes ([c7d63f7](https://github.com/ueberdosis/hocuspocus/commit/c7d63f79980de3c34e63b60073f22774bf27ac13))
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* remove unused packages ([#1090](https://github.com/ueberdosis/hocuspocus/issues/1090)) ([66fb35c](https://github.com/ueberdosis/hocuspocus/commit/66fb35cff71d986d671fe9a8118ce4da87507b44))
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+
+### Features
+
+* optimize retry logic ([302eb08](https://github.com/ueberdosis/hocuspocus/commit/302eb08d9a2a2b59d44424571fdc70d5790d8fd8))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Features
+
+* better type safety for yjs origin. Improve type safety and allow any yjs operation to skip store document hooks. ([5f480cd](https://github.com/ueberdosis/hocuspocus/commit/5f480cd07de378704a8b13780460e43ab7917655))
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* process update message in the order that they are received ([#1058](https://github.com/ueberdosis/hocuspocus/issues/1058)) ([b6162ac](https://github.com/ueberdosis/hocuspocus/commit/b6162ac9154d0e56bca748917e4ebe1e3fb071cf))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* better type safety for yjs origin. Improve type safety and allow any yjs operation to skip store document hooks. ([5f480cd](https://github.com/ueberdosis/hocuspocus/commit/5f480cd07de378704a8b13780460e43ab7917655))
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* process update message in the order that they are received ([#1058](https://github.com/ueberdosis/hocuspocus/issues/1058)) ([b6162ac](https://github.com/ueberdosis/hocuspocus/commit/b6162ac9154d0e56bca748917e4ebe1e3fb071cf))
+
+
+
+
+
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* on awareness craah prevention and memory leak onStoreDocument ([#1032](https://github.com/ueberdosis/hocuspocus/issues/1032)) ([67957ae](https://github.com/ueberdosis/hocuspocus/commit/67957ae4d114c07b8b63cf2900a7ae07f1300f72)), closes [#1](https://github.com/ueberdosis/hocuspocus/issues/1) [#3](https://github.com/ueberdosis/hocuspocus/issues/3) [#1027](https://github.com/ueberdosis/hocuspocus/issues/1027)
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-redis
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+
+### Features
+
+* rewrite of redis unloading logic to utilize before/after-unloadDocument ([#1007](https://github.com/ueberdosis/hocuspocus/issues/1007)) ([8f86caf](https://github.com/ueberdosis/hocuspocus/commit/8f86caff4e74601ecc98fff293fc58584af27176))
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 

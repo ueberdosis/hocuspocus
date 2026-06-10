@@ -1,13 +1,62 @@
-import type {
-	IncomingHttpHeaders,
-	IncomingMessage,
-	ServerResponse,
-} from "node:http";
-import type { URLSearchParams } from "node:url";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
+
+export interface ConnectionTransactionOrigin {
+	source: "connection";
+	connection: Connection;
+}
+
+export interface RedisTransactionOrigin {
+	source: "redis";
+}
+
+export interface LocalTransactionOrigin {
+	source: "local";
+	skipStoreHooks?: boolean;
+	context?: any;
+}
+
+export type TransactionOrigin =
+	| ConnectionTransactionOrigin
+	| RedisTransactionOrigin
+	| LocalTransactionOrigin;
+
+export function isTransactionOrigin(
+	origin: unknown,
+): origin is TransactionOrigin {
+	return (
+		typeof origin === "object" &&
+		origin !== null &&
+		"source" in origin &&
+		((origin as any).source === "connection" ||
+			(origin as any).source === "redis" ||
+			(origin as any).source === "local")
+	);
+}
+
+export function shouldSkipStoreHooks(origin: unknown): boolean {
+	if (!isTransactionOrigin(origin)) return false;
+	switch (origin.source) {
+		case "connection":
+			return false;
+		case "redis":
+			return true;
+		case "local":
+			return origin.skipStoreHooks ?? false;
+	}
+}
+
+/**
+ * Minimal interface for any WebSocket-like object for WebSocket, Bun's ServerWebSocket, ws, Deno, etc.
+ */
+export interface WebSocketLike {
+	send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
+	close(code?: number, reason?: string): void;
+	readyState: number;
+}
 
 export enum MessageType {
 	Unknown = -1,
@@ -20,6 +69,8 @@ export enum MessageType {
 	BroadcastStateless = 6,
 	CLOSE = 7,
 	SyncStatus = 8,
+	Ping = 9,
+	Pong = 10,
 }
 
 export interface AwarenessUpdate {
@@ -33,30 +84,45 @@ export interface ConnectionConfiguration {
 	isAuthenticated: boolean;
 }
 
-export interface Extension {
+export interface Extension<Context = any> {
 	priority?: number;
 	extensionName?: string;
 	onConfigure?(data: onConfigurePayload): Promise<any>;
 	onListen?(data: onListenPayload): Promise<any>;
 	onUpgrade?(data: onUpgradePayload): Promise<any>;
-	onConnect?(data: onConnectPayload): Promise<any>;
-	connected?(data: connectedPayload): Promise<any>;
-	onAuthenticate?(data: onAuthenticatePayload): Promise<any>;
-	onCreateDocument?(data: onCreateDocumentPayload): Promise<any>;
-	onLoadDocument?(data: onLoadDocumentPayload): Promise<any>;
-	afterLoadDocument?(data: afterLoadDocumentPayload): Promise<any>;
-	beforeHandleMessage?(data: beforeHandleMessagePayload): Promise<any>;
-	beforeSync?(data: beforeSyncPayload): Promise<any>;
+	onConnect?(data: onConnectPayload<Context>): Promise<any>;
+	connected?(data: connectedPayload<Context>): Promise<any>;
+	onAuthenticate?(data: onAuthenticatePayload<Context>): Promise<any>;
+	onTokenSync?(data: onTokenSyncPayload<Context>): Promise<any>;
+	onCreateDocument?(data: onCreateDocumentPayload<Context>): Promise<any>;
+	onLoadDocument?(data: onLoadDocumentPayload<Context>): Promise<any>;
+	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
+	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
+	/**
+	 * Fired before an inbound awareness update is applied to the document's
+	 * awareness state. The hook receives the decoded per-client `states` as a
+	 * mutable `Map` keyed by Yjs clientId. Mutate the map and the contained
+	 * state objects in place to rewrite fields, drop peers (`states.delete`),
+	 * or add synthetic ones (`states.set`); mutations are reflected in the
+	 * broadcast. Throw to reject the update without applying anything.
+	 *
+	 * Multiple extensions chain naturally: each extension sees the map as
+	 * mutated by previous extensions and can mutate it further.
+	 */
+	beforeHandleAwareness?(
+		data: beforeHandleAwarenessPayload<Context>,
+	): Promise<any>;
+	beforeSync?(data: beforeSyncPayload<Context>): Promise<any>;
 	beforeBroadcastStateless?(
 		data: beforeBroadcastStatelessPayload,
 	): Promise<any>;
 	onStateless?(payload: onStatelessPayload): Promise<any>;
-	onChange?(data: onChangePayload): Promise<any>;
-	onStoreDocument?(data: onStoreDocumentPayload): Promise<any>;
-	afterStoreDocument?(data: afterStoreDocumentPayload): Promise<any>;
-	onAwarenessUpdate?(data: onAwarenessUpdatePayload): Promise<any>;
+	onChange?(data: onChangePayload<Context>): Promise<any>;
+	onStoreDocument?(data: onStoreDocumentPayload<Context>): Promise<any>;
+	afterStoreDocument?(data: afterStoreDocumentPayload<Context>): Promise<any>;
+	onAwarenessUpdate?(data: onAwarenessUpdatePayload<Context>): Promise<any>;
 	onRequest?(data: onRequestPayload): Promise<any>;
-	onDisconnect?(data: onDisconnectPayload): Promise<any>;
+	onDisconnect?(data: onDisconnectPayload<Context>): Promise<any>;
 	beforeUnloadDocument?(data: beforeUnloadDocumentPayload): Promise<any>;
 	afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
 	onDestroy?(data: onDestroyPayload): Promise<any>;
@@ -69,10 +135,12 @@ export type HookName =
 	| "onConnect"
 	| "connected"
 	| "onAuthenticate"
+	| "onTokenSync"
 	| "onCreateDocument"
 	| "onLoadDocument"
 	| "afterLoadDocument"
 	| "beforeHandleMessage"
+	| "beforeHandleAwareness"
 	| "beforeBroadcastStateless"
 	| "beforeSync"
 	| "onStateless"
@@ -86,32 +154,34 @@ export type HookName =
 	| "afterUnloadDocument"
 	| "onDestroy";
 
-export type HookPayloadByName = {
+export type HookPayloadByName<Context = any> = {
 	onConfigure: onConfigurePayload;
 	onListen: onListenPayload;
 	onUpgrade: onUpgradePayload;
-	onConnect: onConnectPayload;
-	connected: connectedPayload;
-	onAuthenticate: onAuthenticatePayload;
-	onCreateDocument: onCreateDocumentPayload;
-	onLoadDocument: onLoadDocumentPayload;
-	afterLoadDocument: afterLoadDocumentPayload;
-	beforeHandleMessage: beforeHandleMessagePayload;
+	onConnect: onConnectPayload<Context>;
+	connected: connectedPayload<Context>;
+	onAuthenticate: onAuthenticatePayload<Context>;
+	onTokenSync: onTokenSyncPayload<Context>;
+	onCreateDocument: onCreateDocumentPayload<Context>;
+	onLoadDocument: onLoadDocumentPayload<Context>;
+	afterLoadDocument: afterLoadDocumentPayload<Context>;
+	beforeHandleMessage: beforeHandleMessagePayload<Context>;
+	beforeHandleAwareness: beforeHandleAwarenessPayload<Context>;
 	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
-	beforeSync: beforeSyncPayload;
+	beforeSync: beforeSyncPayload<Context>;
 	onStateless: onStatelessPayload;
-	onChange: onChangePayload;
-	onStoreDocument: onStoreDocumentPayload;
-	afterStoreDocument: afterStoreDocumentPayload;
-	onAwarenessUpdate: onAwarenessUpdatePayload;
+	onChange: onChangePayload<Context>;
+	onStoreDocument: onStoreDocumentPayload<Context>;
+	afterStoreDocument: afterStoreDocumentPayload<Context>;
+	onAwarenessUpdate: onAwarenessUpdatePayload<Context>;
 	onRequest: onRequestPayload;
-	onDisconnect: onDisconnectPayload;
+	onDisconnect: onDisconnectPayload<Context>;
 	afterUnloadDocument: afterUnloadDocumentPayload;
 	beforeUnloadDocument: beforeUnloadDocumentPayload;
 	onDestroy: onDestroyPayload;
 };
 
-export interface Configuration extends Extension {
+export interface Configuration<Context = any> extends Extension<Context> {
 	/**
 	 * A name for the instance, used for logging.
 	 */
@@ -162,105 +232,160 @@ export interface onStatelessPayload {
 	payload: string;
 }
 
-export interface onAuthenticatePayload {
-	context: any;
+export interface onAuthenticatePayload<Context = any> {
+	context: Context;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
-	request: IncomingMessage;
+	request: Request;
 	socketId: string;
 	token: string;
 	connectionConfig: ConnectionConfiguration;
+	providerVersion: string | null;
 }
 
-export interface onCreateDocumentPayload {
-	context: any;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-}
-
-export interface onConnectPayload {
-	context: any;
-	documentName: string;
-	instance: Hocuspocus;
-	request: IncomingMessage;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-}
-
-export interface connectedPayload {
-	context: any;
-	documentName: string;
-	instance: Hocuspocus;
-	request: IncomingMessage;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-	connection: Connection;
-}
-
-export interface onLoadDocumentPayload {
-	context: any;
+export interface onTokenSyncPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	token: string;
+	connectionConfig: ConnectionConfiguration;
+	connection: Connection<Context>;
+}
+
+export interface onCreateDocumentPayload<Context = any> {
+	context: Context;
+	documentName: string;
+	instance: Hocuspocus;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface afterLoadDocumentPayload {
-	context: any;
+export interface onConnectPayload<Context = any> {
+	context: Context;
+	documentName: string;
+	instance: Hocuspocus;
+	request: Request;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	connectionConfig: ConnectionConfiguration;
+	providerVersion: string | null;
+}
+
+export interface connectedPayload<Context = any> {
+	context: Context;
+	documentName: string;
+	instance: Hocuspocus;
+	request: Request;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	connectionConfig: ConnectionConfiguration;
+	connection: Connection<Context>;
+	providerVersion: string | null;
+}
+
+export interface onLoadDocumentPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface onChangePayload {
+export interface afterLoadDocumentPayload<Context = any> {
+	context: Context;
+	document: Document;
+	documentName: string;
+	instance: Hocuspocus;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	connectionConfig: ConnectionConfiguration;
+}
+
+export interface onChangePayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
-	transactionOrigin: any;
+	transactionOrigin: unknown;
+	connection?: Connection<Context>;
 }
 
-export interface beforeHandleMessagePayload {
+export interface beforeHandleMessagePayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	update: Uint8Array;
 	socketId: string;
-	connection: Connection;
+	connection: Connection<Context>;
 }
 
-export interface beforeSyncPayload {
+export interface beforeHandleAwarenessPayload<Context = any> {
+	awareness: Awareness;
 	clientsCount: number;
-	context: any;
+	/**
+	 * Connection context populated by `onAuthenticate`. `undefined` when the
+	 * update did not originate from a client connection (e.g. server-internal
+	 * writes via `DirectConnection`).
+	 */
+	context: Context | undefined;
 	document: Document;
 	documentName: string;
-	connection: Connection;
+	instance: Hocuspocus;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	/**
+	 * Per-client awareness states decoded from the inbound update, keyed by
+	 * Yjs clientId. Mutate this map in place to rewrite the update: change
+	 * fields on a state object, `states.delete(clientId)` to drop a peer, or
+	 * `states.set(clientId, ...)` to add or replace one. The encoded update
+	 * sent to peers reflects whatever the map looks like after every hook in
+	 * the chain has run.
+	 */
+	states: Map<number, Record<string, any>>;
+	socketId: string;
+	/**
+	 * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
+	 * Use `isTransactionOrigin(origin)` to discriminate sources. Matches the
+	 * `transactionOrigin` shape of `onAwarenessUpdatePayload`.
+	 */
+	transactionOrigin: unknown;
+	/**
+	 * Convenience shortcut: `origin.connection` when `transactionOrigin` is a
+	 * `ConnectionTransactionOrigin`, otherwise `undefined`. Matches the
+	 * `connection?` shape of `onAwarenessUpdatePayload`.
+	 */
+	connection?: Connection<Context>;
+}
+
+export interface beforeSyncPayload<Context = any> {
+	clientsCount: number;
+	context: Context;
+	document: Document;
+	documentName: string;
+	connection: Connection<Context>;
 	/**
 	 * The y-protocols/sync message type
 	 * @example
@@ -283,29 +408,25 @@ export interface beforeBroadcastStatelessPayload {
 	payload: string;
 }
 
-export interface onStoreDocumentPayload {
+export interface onStoreDocumentPayload<Context = any> {
 	clientsCount: number;
-	context: any;
 	document: Document;
+	lastContext: Context;
+	lastTransactionOrigin: unknown;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	transactionOrigin?: any;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
-export interface afterStoreDocumentPayload extends onStoreDocumentPayload {}
+export interface afterStoreDocumentPayload<Context = any>
+	extends onStoreDocumentPayload<Context> {}
 
-export interface onAwarenessUpdatePayload {
-	context: any;
+export interface onAwarenessUpdatePayload<Context = any> {
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
-	requestParameters: URLSearchParams;
-	socketId: string;
+	transactionOrigin: unknown;
+	connection?: Connection<Context>;
 	added: number[];
 	updated: number[];
 	removed: number[];
@@ -315,28 +436,29 @@ export interface onAwarenessUpdatePayload {
 
 export type StatesArray = { clientId: number; [key: string | number]: any }[];
 
-export interface fetchPayload {
-	context: any;
+export interface fetchPayload<Context = any> {
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 	connectionConfig: ConnectionConfiguration;
 }
 
-export interface storePayload extends onStoreDocumentPayload {
+export interface storePayload<Context = any>
+	extends onStoreDocumentPayload<Context> {
 	state: Buffer;
 }
 
-export interface onDisconnectPayload {
+export interface onDisconnectPayload<Context = any> {
 	clientsCount: number;
-	context: any;
+	context: Context;
 	document: Document;
 	documentName: string;
 	instance: Hocuspocus;
-	requestHeaders: IncomingHttpHeaders;
+	requestHeaders: Headers;
 	requestParameters: URLSearchParams;
 	socketId: string;
 }

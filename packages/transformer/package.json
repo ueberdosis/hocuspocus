@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/transformer",
-	"version": "3.2.5",
+	"version": "4.1.1",
 	"description": "hocuspocus transformation utilities",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -12,7 +12,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-transformer.cjs",
 	"module": "dist/hocuspocus-transformer.esm.js",
-	"types": "dist/packages/transformer/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -20,7 +20,7 @@
 		"default": {
 			"import": "./dist/hocuspocus-transformer.esm.js",
 			"require": "./dist/hocuspocus-transformer.cjs",
-			"types": "./dist/packages/transformer/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
@@ -39,5 +39,11 @@
 	"devDependencies": {
 		"@tiptap/pm": "^3.0.1"
 	},
-	"gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3"
+	"gitHead": "8f2e9df95de9968d70622ea8697c303a333b6cb3",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

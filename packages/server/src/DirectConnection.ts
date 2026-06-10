@@ -1,22 +1,27 @@
 import { URLSearchParams } from "node:url";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
-import type { DirectConnection as DirectConnectionInterface } from "./types.ts";
+import type {
+	DirectConnection as DirectConnectionInterface,
+	LocalTransactionOrigin,
+} from "./types.ts";
 
-export class DirectConnection implements DirectConnectionInterface {
+export class DirectConnection<Context = any>
+	implements DirectConnectionInterface
+{
 	document: Document | null = null;
 
 	instance!: Hocuspocus;
 
-	context: any;
+	context: Context;
 
 	/**
 	 * Constructor.
 	 */
-	constructor(document: Document, instance: Hocuspocus, context?: any) {
+	constructor(document: Document, instance: Hocuspocus, context?: Context) {
 		this.document = document;
 		this.instance = instance;
-		this.context = context;
+		this.context = (context ?? {}) as Context;
 
 		this.document.addDirectConnection();
 	}
@@ -26,21 +31,15 @@ export class DirectConnection implements DirectConnectionInterface {
 			throw new Error("direct connection closed");
 		}
 
-		transaction(this.document);
-
-		await this.instance.storeDocumentHooks(
-			this.document,
-			{
-				clientsCount: this.document.getConnectionsCount(),
-				context: this.context,
-				document: this.document,
-				documentName: this.document.name,
-				instance: this.instance,
-				requestHeaders: {},
-				requestParameters: new URLSearchParams(),
-				socketId: "server",
+		this.document.transact(
+			(x) => {
+				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				transaction(this.document!);
 			},
-			true,
+			{
+				source: "local",
+				context: this.context,
+			} satisfies LocalTransactionOrigin,
 		);
 	}
 
@@ -52,13 +51,14 @@ export class DirectConnection implements DirectConnectionInterface {
 				this.document,
 				{
 					clientsCount: this.document.getConnectionsCount(),
-					context: this.context,
+					lastContext: this.context,
+					lastTransactionOrigin: {
+						source: "local",
+						context: this.context,
+					} satisfies LocalTransactionOrigin,
 					document: this.document,
 					documentName: this.document.name,
 					instance: this.instance,
-					requestHeaders: {},
-					requestParameters: new URLSearchParams(),
-					socketId: "server",
 				},
 				true,
 			);
@@ -77,7 +77,7 @@ export class DirectConnection implements DirectConnectionInterface {
 					document: this.document,
 					socketId: "server",
 					documentName: this.document.name,
-					requestHeaders: {},
+					requestHeaders: new Headers(),
 					requestParameters: new URLSearchParams(),
 				});
 

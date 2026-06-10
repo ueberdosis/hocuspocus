@@ -1,6 +1,10 @@
 # @hocuspocus/extension-s3
+[![Version](https://img.shields.io/npm/v/@hocuspocus/extension-s3.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-s3)
+[![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-s3.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
+[![License](https://img.shields.io/npm/l/@hocuspocus/extension-s3.svg)](https://www.npmjs.com/package/@hocuspocus/extension-s3)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
-A S3-compatible persistence driver for Hocuspocus that stores Y.js documents in Amazon S3 or S3-compatible storage services like MinIO, DigitalOcean Spaces, etc.
+A S3-compatible persistence driver for [Hocuspocus](https://github.com/ueberdosis/hocuspocus). Stores Y.js documents in Amazon S3 or S3-compatible storage (MinIO, DigitalOcean Spaces, Cloudflare R2, Backblaze B2, etc.).
 
 ## Installation
 

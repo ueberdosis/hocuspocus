@@ -1,34 +1,33 @@
 import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
-import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
-import type WebSocket from "ws";
-import type { Doc } from "yjs";
-import { applyUpdate, encodeStateAsUpdate } from "yjs";
-import meta from "../package.json" assert { type: "json" };
+import { awarenessStatesToArray, ResetConnection, SkipFurtherHooksError } from "@hocuspocus/common";
+import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
+import meta from "../package.json" with { type: "json" };
+
 import { ClientConnection } from "./ClientConnection.ts";
-import type Connection from "./Connection.ts";
 import { DirectConnection } from "./DirectConnection.ts";
 import Document from "./Document.ts";
 import type { Server } from "./Server.ts";
 import type {
 	AwarenessUpdate,
+	beforeBroadcastStatelessPayload,
 	Configuration,
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
-	beforeBroadcastStatelessPayload,
 	onChangePayload,
 	onDisconnectPayload,
 	onStoreDocumentPayload,
+	WebSocketLike,
 } from "./types.ts";
+import { isTransactionOrigin, shouldSkipStoreHooks } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
 
 export const defaultConfiguration = {
 	name: null,
-	timeout: 30000,
-	debounce: 2000,
-	maxDebounce: 10000,
+	timeout: 60_000,
+	debounce: 2_000,
+	maxDebounce: 10_000,
 	quiet: false,
 	yDocOptions: {
 		gc: true,
@@ -37,8 +36,8 @@ export const defaultConfiguration = {
 	unloadImmediately: true,
 };
 
-export class Hocuspocus {
-	configuration: Configuration = {
+export class Hocuspocus<Context = any> {
+	configuration: Configuration<Context> = {
 		...defaultConfiguration,
 		extensions: [],
 		onConfigure: () => new Promise((r) => r(null)),
@@ -47,6 +46,7 @@ export class Hocuspocus {
 		onConnect: () => new Promise((r) => r(null)),
 		connected: () => new Promise((r) => r(null)),
 		beforeHandleMessage: () => new Promise((r) => r(null)),
+		beforeHandleAwareness: () => new Promise<void>((r) => r()),
 		beforeSync: () => new Promise((r) => r(null)),
 		beforeBroadcastStateless: () => new Promise((r) => r(null)),
 		onStateless: () => new Promise((r) => r(null)),
@@ -62,6 +62,7 @@ export class Hocuspocus {
 	};
 
 	loadingDocuments: Map<string, Promise<Document>> = new Map();
+	unloadingDocuments: Map<string, Promise<void>> = new Map();
 
 	documents: Map<string, Document> = new Map();
 
@@ -69,7 +70,7 @@ export class Hocuspocus {
 
 	debouncer = useDebounce();
 
-	constructor(configuration?: Partial<Configuration>) {
+	constructor(configuration?: Partial<Configuration<Context>>) {
 		if (configuration) {
 			this.configure(configuration);
 		}
@@ -78,7 +79,9 @@ export class Hocuspocus {
 	/**
 	 * Configure Hocuspocus
 	 */
-	configure(configuration: Partial<Configuration>): Hocuspocus {
+	configure(
+		configuration: Partial<Configuration<Context>>,
+	): Hocuspocus<Context> {
 		this.configuration = {
 			...this.configuration,
 			...configuration,
@@ -106,9 +109,11 @@ export class Hocuspocus {
 			onConnect: this.configuration.onConnect,
 			connected: this.configuration.connected,
 			onAuthenticate: this.configuration.onAuthenticate,
+			onTokenSync: this.configuration.onTokenSync,
 			onLoadDocument: this.configuration.onLoadDocument,
 			afterLoadDocument: this.configuration.afterLoadDocument,
 			beforeHandleMessage: this.configuration.beforeHandleMessage,
+			beforeHandleAwareness: this.configuration.beforeHandleAwareness,
 			beforeBroadcastStateless: this.configuration.beforeBroadcastStateless,
 			beforeSync: this.configuration.beforeSync,
 			onStateless: this.configuration.onStateless,
@@ -160,6 +165,20 @@ export class Hocuspocus {
 	}
 
 	/**
+	 * Immediately execute all pending debounced onStoreDocument calls.
+	 * Useful during shutdown to ensure documents are persisted and unloaded
+	 * before the server exits, even when unloadImmediately is false.
+	 */
+	flushPendingStores() {
+		this.documents.forEach((document: Document) => {
+			const debounceId = `onStoreDocument-${document.name}`;
+			if (!document.isLoading && this.debouncer.isDebounced(debounceId)) {
+				this.debouncer.executeNow(debounceId);
+			}
+		});
+	}
+
+	/**
 	 * Force close one or more connections
 	 */
 	closeConnections(documentName?: string) {
@@ -172,7 +191,7 @@ export class Hocuspocus {
 				return;
 			}
 
-			document.connections.forEach(({ connection }) => {
+			document.connections.forEach((_clients, connection) => {
 				connection.close(ResetConnection);
 			});
 		});
@@ -185,14 +204,14 @@ export class Hocuspocus {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothing fails it’ll fully establish the connection and
+	 * … and if nothing fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	handleConnection(
-		incoming: WebSocket,
-		request: IncomingMessage,
-		defaultContext: any = {},
-	): void {
+		incoming: WebSocket | WebSocketLike,
+		request: Request,
+		defaultContext: Context = {} as Context,
+	): ClientConnection {
 		const clientConnection = new ClientConnection(
 			incoming,
 			request,
@@ -233,6 +252,8 @@ export class Hocuspocus {
 				}
 			},
 		);
+
+		return clientConnection;
 	}
 
 	/**
@@ -241,39 +262,54 @@ export class Hocuspocus {
 	 * "connection" is not necessarily type "Connection", it's the Yjs "origin" (which is "Connection" if
 	 * the update is incoming from the provider, but can be anything if the updates is originated from an extension.
 	 */
-	private async handleDocumentUpdate(
+	private handleDocumentUpdate(
 		document: Document,
-		connection: Connection | undefined,
+		origin: unknown,
 		update: Uint8Array,
-		request?: IncomingMessage,
 	) {
-		const hookPayload: onChangePayload | onStoreDocumentPayload = {
+		const connection =
+			isTransactionOrigin(origin) && origin.source === "connection"
+				? origin.connection
+				: undefined;
+		const request = connection?.request;
+		const context = isTransactionOrigin(origin)
+			? origin.source === "connection"
+				? origin.connection.context
+				: origin.source === "local"
+					? (origin.context ?? {})
+					: {}
+			: {};
+
+		const changePayload: onChangePayload = {
 			instance: this,
 			clientsCount: document.getConnectionsCount(),
-			context: connection?.context || {},
 			document,
 			documentName: document.name,
-			requestHeaders: request?.headers ?? {},
+			requestHeaders: request?.headers ?? new Headers(),
 			requestParameters: getParameters(request),
 			socketId: connection?.socketId ?? "",
 			update,
-			transactionOrigin: connection,
+			transactionOrigin: origin,
+			connection: connection,
+			context,
 		};
 
-		this.hooks("onChange", hookPayload);
+		this.hooks("onChange", changePayload);
 
-		// If the update was received through other ways than the
-		// WebSocket connection, we don’t need to feel responsible for
-		// storing the content.
-		// also ignore changes incoming through redis connection, as this would be a breaking change (#730, #696, #606)
-		if (
-			!connection ||
-			(connection as unknown as string) === "__hocuspocus__redis__origin__"
-		) {
+		if (shouldSkipStoreHooks(origin)) {
 			return;
 		}
 
-		await this.storeDocumentHooks(document, hookPayload);
+		const storePayload: onStoreDocumentPayload = {
+			instance: this,
+			clientsCount: document.getConnectionsCount(),
+			document,
+			lastContext: context,
+			lastTransactionOrigin: origin,
+			documentName: document.name,
+		};
+
+		this.storeDocumentHooks(document, storePayload);
 	}
 
 	/**
@@ -281,11 +317,15 @@ export class Hocuspocus {
 	 */
 	public async createDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connection: ConnectionConfiguration,
-		context?: any,
+		context?: Context,
 	): Promise<Document> {
+		if (!documentName.trim()) {
+			throw new Error("Document name must not be empty");
+		}
+
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
 
 		if (existingLoadingDoc) {
@@ -320,20 +360,22 @@ export class Hocuspocus {
 
 	async loadDocument(
 		documentName: string,
-		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
+		request: Request,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
-		context?: any,
+		context?: Context,
 	): Promise<Document> {
-		const requestHeaders = request.headers ?? {};
+		const requestHeaders = request.headers;
 		const requestParameters = getParameters(request);
+
+		const resolvedContext = (context ?? {}) as Context;
 
 		const yDocOptions = await this.hooks("onCreateDocument", {
 			documentName,
 			requestHeaders,
 			requestParameters,
 			connectionConfig,
-			context,
+			context: resolvedContext,
 			socketId,
 			instance: this,
 		});
@@ -345,7 +387,7 @@ export class Hocuspocus {
 
 		const hookPayload = {
 			instance: this,
-			context,
+			context: resolvedContext,
 			connectionConfig,
 			document,
 			documentName,
@@ -358,15 +400,11 @@ export class Hocuspocus {
 			await this.hooks(
 				"onLoadDocument",
 				hookPayload,
-				(loadedDocument: Doc | undefined) => {
-					// if a hook returns a Y-Doc, encode the document state as update
-					// and apply it to the newly created document
-					// Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
-					if (
-						loadedDocument?.constructor.name === "Document" ||
-						loadedDocument?.constructor.name === "Doc"
-					) {
+				(loadedDocument: Doc | Uint8ArrayConstructor | undefined) => {
+					if (loadedDocument instanceof Doc) {
 						applyUpdate(document, encodeStateAsUpdate(loadedDocument));
+					} else if (loadedDocument instanceof Uint8Array) {
+						applyUpdate(document, loadedDocument);
 					}
 				},
 			);
@@ -377,18 +415,16 @@ export class Hocuspocus {
 		}
 
 		document.isLoading = false;
-		await this.hooks("afterLoadDocument", hookPayload);
 
 		document.onUpdate(
-			(document: Document, connection: Connection, update: Uint8Array) => {
-				this.handleDocumentUpdate(
-					document,
-					connection,
-					update,
-					connection?.request,
-				);
+			(document: Document, origin: unknown, update: Uint8Array) => {
+				document.lastChangeTime = Date.now();
+
+				this.handleDocumentUpdate(document, origin, update);
 			},
 		);
+
+		await this.hooks("afterLoadDocument", hookPayload);
 
 		document.beforeBroadcastStateless(
 			(document: Document, stateless: string) => {
@@ -402,14 +438,49 @@ export class Hocuspocus {
 			},
 		);
 
-		document.awareness.on("update", (update: AwarenessUpdate) => {
-			this.hooks("onAwarenessUpdate", {
-				...hookPayload,
-				...update,
+		document.beforeHandleAwareness((document, states, transactionOrigin) => {
+			const connection =
+				isTransactionOrigin(transactionOrigin) &&
+				transactionOrigin.source === "connection"
+					? transactionOrigin.connection
+					: undefined;
+			const request = connection?.request;
+			return this.hooks("beforeHandleAwareness", {
 				awareness: document.awareness,
-				states: awarenessStatesToArray(document.awareness.getStates()),
+				clientsCount: document.getConnectionsCount(),
+				context: connection?.context,
+				document,
+				documentName: document.name,
+				instance: this,
+				requestHeaders: request?.headers ?? new Headers(),
+				requestParameters: request
+					? getParameters(request)
+					: new URLSearchParams(),
+				socketId: connection?.socketId ?? "",
+				transactionOrigin,
+				connection,
+				states,
 			});
 		});
+
+		document.awareness.on(
+			"update",
+			(update: AwarenessUpdate, origin: unknown) => {
+				this.hooks("onAwarenessUpdate", {
+					document,
+					documentName,
+					instance: this,
+					...update,
+					transactionOrigin: origin,
+					connection:
+						isTransactionOrigin(origin) && origin.source === "connection"
+							? origin.connection
+							: undefined,
+					awareness: document.awareness,
+					states: awarenessStatesToArray(document.awareness.getStates()),
+				});
+			},
+		);
 
 		return document;
 	}
@@ -429,20 +500,28 @@ export class Hocuspocus {
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
 				} catch (error: any) {
-					console.error("Caught error during storeDocumentHooks", error);
-					if (error?.message) {
-						throw error;
+					if (error instanceof SkipFurtherHooksError) {
+						// Another extension handled this — proceed to unload
+						setTimeout(() => {
+							if (this.shouldUnloadDocument(document)) {
+								this.unloadDocument(document);
+							}
+						}, 0);
+						return;
 					}
-				} finally {
-					const hasPendingWork =
-						this.debouncer.isDebounced(debounceId) ||
-						document.saveMutex.isLocked();
-					const shouldUnload =
-						document.getConnectionsCount() == 0 && !hasPendingWork;
-					if (shouldUnload) {
+
+					console.error(
+						"Caught error during storeDocumentHooks. Document stays in memory to avoid data loss",
+						error,
+					);
+					return;
+				}
+
+				setTimeout(() => {
+					if (this.shouldUnloadDocument(document)) {
 						this.unloadDocument(document);
 					}
-				}
+				}, 0);
 			},
 			immediately ? 0 : this.configuration.debounce,
 			this.configuration.maxDebounce,
@@ -456,7 +535,8 @@ export class Hocuspocus {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	hooks<T extends HookName>(
 		name: T,
-		payload: HookPayloadByName[T],
+		payload: HookPayloadByName<Context>[T],
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		callback: Function | null = null,
 	): Promise<any> {
 		const { extensions } = this.configuration;
@@ -489,33 +569,58 @@ export class Hocuspocus {
 		return chain;
 	}
 
+	shouldUnloadDocument(document: Document): boolean {
+		const hasPendingWork =
+			this.debouncer.isDebounced(`onStoreDocument-${document.name}`) ||
+			this.debouncer.isCurrentlyExecuting(`onStoreDocument-${document.name}`) ||
+			document.saveMutex.isLocked();
+
+		return hasPendingWork === false && document.getConnectionsCount() === 0;
+	}
+
 	async unloadDocument(document: Document): Promise<any> {
 		const documentName = document.name;
+
+		if (!this.shouldUnloadDocument(document)) return;
+
 		if (!this.documents.has(documentName)) return;
 
-		try {
-			await this.hooks("beforeUnloadDocument", {
-				instance: this,
-				documentName,
-				document,
-			});
-		} catch (e) {
-			return;
-		}
+		if (this.unloadingDocuments.has(documentName))
+			return this.unloadingDocuments.get(documentName);
 
-		if (document.getConnectionsCount() > 0) {
-			return;
-		}
+		// we need to make sure that the logic runs just once, even if multiple clients disconnect together
+		const actualUnloadingLogic = async () => {
+			try {
+				await this.hooks("beforeUnloadDocument", {
+					instance: this,
+					documentName,
+					document,
+				});
+			} catch (e) {
+				return;
+			}
 
-		this.documents.delete(documentName);
-		document.destroy();
-		await this.hooks("afterUnloadDocument", { instance: this, documentName });
+			// need sync check here as well, to avoid timing problems
+			if (!this.shouldUnloadDocument(document)) return;
+
+			this.documents.delete(documentName);
+			document.destroy();
+			await this.hooks("afterUnloadDocument", { instance: this, documentName });
+		};
+
+		const unloading = actualUnloadingLogic();
+
+		this.unloadingDocuments.set(documentName, Promise.resolve(unloading));
+
+		await unloading;
+
+		this.unloadingDocuments.delete(documentName);
 	}
 
 	async openDirectConnection(
 		documentName: string,
-		context?: any,
-	): Promise<DirectConnection> {
+		context?: Context,
+	): Promise<DirectConnection<Context>> {
 		const connectionConfig: ConnectionConfiguration = {
 			isAuthenticated: true,
 			readOnly: false,
@@ -523,12 +628,12 @@ export class Hocuspocus {
 
 		const document: Document = await this.createDocument(
 			documentName,
-			{}, // direct connection has no request params
+			new Request("http://localhost"), // direct connection has no request params
 			crypto.randomUUID(),
 			connectionConfig,
 			context,
 		);
 
-		return new DirectConnection(document, this, context);
+		return new DirectConnection<Context>(document, this, context);
 	}
 }

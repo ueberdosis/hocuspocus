@@ -5,7 +5,7 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 test('broadcast stateless message to all connections', async t => {
   await new Promise(async resolve => {
     const payloadToSend = 'STATELESS-MESSAGE'
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       onStateless: async ({ document }) => {
         await document.broadcastStateless(payloadToSend)
       },
@@ -21,8 +21,8 @@ test('broadcast stateless message to all connections', async t => {
       }
     }
 
-    newHocuspocusProvider(server, { onStateless: ({ payload }) => onStatelessCallback(payload) })
-    const provider = newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, { onStateless: ({ payload }) => onStatelessCallback(payload) })
+    const provider = newHocuspocusProvider(t, server, {
       onStateless: ({ payload }) => onStatelessCallback(payload),
       onSynced: () => {
         provider.sendStateless(payloadToSend)
@@ -33,19 +33,19 @@ test('broadcast stateless message to all connections', async t => {
 
 test('send a stateless message to a specific connection', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       onStateless: async ({ connection }: onStatelessPayload) => {
         connection.sendStateless('This is a specific message.')
       },
     })
 
-    await newHocuspocusProvider(server, {
+    await newHocuspocusProvider(t, server, {
       onStateless: async () => {
         throw Error('The provider1 should not receive messages')
       },
     })
 
-    const provider = await newHocuspocusProvider(server, {
+    const provider = await newHocuspocusProvider(t, server, {
       onSynced: () => {
         provider.sendStateless('Send stateless message, and then a stateless message is will be received')
       },
@@ -68,13 +68,13 @@ test('calls the onStateless hook', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
     })
 
-    const provider = await newHocuspocusProvider(server, {
+    const provider = await newHocuspocusProvider(t, server, {
       onSynced: async () => {
         provider.sendStateless(payloadToSend)
       },
@@ -84,10 +84,10 @@ test('calls the onStateless hook', async t => {
 
 test('the server actively sends a stateless message', async t => {
   const payloadToSend = 'STATELESS-MESSAGE'
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
 
   await new Promise(resolve => {
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced: async () => {
         server.documents.get('hocuspocus-test')?.broadcastStateless(payloadToSend)
       },

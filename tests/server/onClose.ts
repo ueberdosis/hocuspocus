@@ -5,10 +5,10 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('server closes connection when receiving close event from provider', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({})
-    const socket = newHocuspocusProviderWebsocket(server, {})
+    const server = await newHocuspocus(t, {})
+    const socket = newHocuspocusProviderWebsocket(t, server, {})
 
-    const provider1 = newHocuspocusProvider(server, {
+    const provider1 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       name: 'hocuspocus-test',
     })
@@ -28,15 +28,15 @@ test('server closes connection when receiving close event from provider', async 
 
 test('server doesnt close connection after receiving close event from all connections', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({})
-    const socket = newHocuspocusProviderWebsocket(server, {})
+    const server = await newHocuspocus(t, {})
+    const socket = newHocuspocusProviderWebsocket(t, server, {})
 
-    const provider1 = newHocuspocusProvider(server, {
+    const provider1 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       name: 'hocuspocus-test',
     })
 
-    const provider2 = newHocuspocusProvider(server, {
+    const provider2 = newHocuspocusProvider(t, server, {
       websocketProvider: socket,
       name: 'hocuspocus-test2',
     })

@@ -6,11 +6,11 @@ import {
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 // test('closes all connections', async t => {
-//   const server = await newHocuspocus()
-//   const socket = newHocuspocusProviderWebsocket(server)
-//   const socket2 = newHocuspocusProviderWebsocket(server)
+//   const server = await newHocuspocus(t)
+//   const socket = newHocuspocusProviderWebsocket(t, server)
+//   const socket2 = newHocuspocusProviderWebsocket(t, server)
 
-//   const provider = newHocuspocusProvider(server, {
+//   const provider = newHocuspocusProvider(t, server, {
 //     name: 'hocuspocus-test',
 //     onClose() {
 //       // Make sure it doesn’t reconnect.
@@ -19,7 +19,7 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 //     websocketProvider: socket,
 //   })
 
-//   const anotherProvider = newHocuspocusProvider(server, {
+//   const anotherProvider = newHocuspocusProvider(t, server, {
 //     name: 'hocuspocus-test-2',
 //     onClose() {
 //       // Make sure it doesn’t reconnect.
@@ -36,11 +36,11 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 // })
 
 test('closes a specific connection when a documentName is passed', async t => {
-  const server = await newHocuspocus()
-  const socket = newHocuspocusProviderWebsocket(server)
-  const socket2 = newHocuspocusProviderWebsocket(server)
+  const server = await newHocuspocus(t)
+  const socket = newHocuspocusProviderWebsocket(t, server)
+  const socket2 = newHocuspocusProviderWebsocket(t, server)
 
-  const provider = newHocuspocusProvider(server, {
+  const provider = newHocuspocusProvider(t, server, {
     name: 'hocuspocus-test',
     onClose() {
       // Make sure it doesn’t reconnect.
@@ -49,7 +49,7 @@ test('closes a specific connection when a documentName is passed', async t => {
     websocketProvider: socket,
   })
 
-  const anotherProvider = newHocuspocusProvider(server, {
+  const anotherProvider = newHocuspocusProvider(t, server, {
     name: 'hocuspocus-test-2',
     websocketProvider: socket2,
   })
@@ -66,9 +66,9 @@ test('closes a specific connection when a documentName is passed', async t => {
 
 // test('uses a proper close event', async t => {
 //   await new Promise(async resolve => {
-//     const server = await newHocuspocus()
+//     const server = await newHocuspocus(t)
 
-//     newHocuspocusProvider(server, {
+//     newHocuspocusProvider(t, server, {
 //       name: 'hocuspocus-test',
 //       onSynced() {
 //         server.closeConnections()

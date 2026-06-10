@@ -3,6 +3,265 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.7](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.6...v4.0.0-rc.7) (2026-04-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
+
+
+### Features
+
+* adds package readmes ([c7d63f7](https://github.com/ueberdosis/hocuspocus/commit/c7d63f79980de3c34e63b60073f22774bf27ac13))
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Bug Fixes
+
+* upgrade deps ([f3fc252](https://github.com/ueberdosis/hocuspocus/commit/f3fc252c3978df3229813f370d80ff3f2f0759d0))
+
+
+### Features
+
+* migrate from sqlite3 to better-sqlite3, as sqlite3 is now unmaintained. ([a247146](https://github.com/ueberdosis/hocuspocus/commit/a24714624c6effdb521e84352f0623d24be5d3f0))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* upgrade deps ([f3fc252](https://github.com/ueberdosis/hocuspocus/commit/f3fc252c3978df3229813f370d80ff3f2f0759d0))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Features
+
+* migrate from sqlite3 to better-sqlite3, as sqlite3 is now unmaintained. ([a247146](https://github.com/ueberdosis/hocuspocus/commit/a24714624c6effdb521e84352f0623d24be5d3f0))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+
+
+
+
+
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+**Note:** Version bump only for package @hocuspocus/extension-sqlite
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 **Note:** Version bump only for package @hocuspocus/extension-sqlite

@@ -1,6 +1,4 @@
 import crypto from "node:crypto";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -10,7 +8,6 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import type WebSocket from "ws";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
@@ -18,6 +15,7 @@ import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
+	WebSocketLike,
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
@@ -31,28 +29,30 @@ import { getParameters } from "./util/getParameters.ts";
  * TODO-refactor:
  * - use event handlers instead of calling hooks directly, hooks should probably be called from Hocuspocus.ts
  */
-export class ClientConnection {
-	// this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
-	private readonly documentConnections: Record<string, Connection> = {};
+export class ClientConnection<Context = any> {
+	// Map of established document connections, keyed by rawKey (composite or plain)
+	private readonly documentConnections: Record<string, Connection<Context>> =
+		{};
 
 	// While the connection will be establishing messages will
 	// be queued and handled later.
 	private readonly incomingMessageQueue: Record<string, Uint8Array[]> = {};
 
-	// While the connection is establishing, kee
+	// While the connection is establishing, keep track of which documents have received auth
 	private readonly documentConnectionsEstablished = new Set<string>();
 
-	// hooks payload by Document
+	// Hook payloads keyed by rawKey (composite or plain)
 	private readonly hookPayloads: Record<
 		string,
 		{
 			instance: Hocuspocus;
-			request: IncomingMessage;
-			requestHeaders: IncomingHttpHeaders;
+			request: Request;
+			requestHeaders: Headers;
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
-			context: any;
+			context: Context;
+			providerVersion: string | null;
 		}
 	> = {};
 
@@ -67,7 +67,7 @@ export class ClientConnection {
 
 	pingInterval: NodeJS.Timeout;
 
-	pongReceived = true;
+	lastMessageReceivedAt = Date.now();
 
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
@@ -76,12 +76,12 @@ export class ClientConnection {
 	 *  - onConnect for all connections
 	 *  - onAuthenticate only if required
 	 *
-	 * … and if nothings fails it’ll fully establish the connection and
+	 * … and if nothings fails it'll fully establish the connection and
 	 * load the Document then.
 	 */
 	constructor(
-		private readonly websocket: WebSocket,
-		private readonly request: IncomingMessage,
+		private readonly websocket: WebSocketLike,
+		private readonly request: Request,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
 		},
@@ -90,47 +90,35 @@ export class ClientConnection {
 		private readonly opts: {
 			timeout: number;
 		},
-		private readonly defaultContext: any = {},
+		private readonly defaultContext: Context = {} as Context,
 	) {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
-		websocket.on("pong", this.handlePong);
-
-		websocket.on("message", this.messageHandler);
-		websocket.once("close", this.handleWebsocketClose);
 	}
 
-	private handleWebsocketClose = (code: number, reason: Buffer) => {
-		this.close({ code, reason: reason.toString() });
-		this.websocket.removeListener("message", this.messageHandler);
-		this.websocket.removeListener("pong", this.handlePong);
+	/**
+	 * Handle WebSocket close event. Call this from your integration
+	 * when the WebSocket connection closes.
+	 */
+	handleClose(event?: CloseEvent) {
+		this.close(event);
 		clearInterval(this.pingInterval);
-	};
+	}
 
-	close(event?: CloseEvent) {
+	private close(event?: CloseEvent) {
 		Object.values(this.documentConnections).forEach((connection) =>
 			connection.close(event),
 		);
 	}
 
-	handlePong = () => {
-		this.pongReceived = true;
-	};
-
 	/**
-	 * Check if pong was received and close the connection otherwise
-	 * @private
+	 * Close the connection if no messages have been received within the timeout period.
+	 * This replaces application-level ping/pong to maintain backward compatibility
+	 * with older provider versions that don't understand Ping/Pong message types.
+	 * Awareness updates (~every 30s) keep active connections alive.
 	 */
 	private check = () => {
-		if (!this.pongReceived) {
-			return this.close(ConnectionTimeout);
-		}
-
-		this.pongReceived = false;
-
-		try {
-			this.websocket.ping();
-		} catch (error) {
+		if (Date.now() - this.lastMessageReceivedAt > this.timeout) {
 			this.close(ConnectionTimeout);
 		}
 	};
@@ -150,10 +138,12 @@ export class ClientConnection {
 	 * Create a new connection by the given request and document
 	 */
 	private createConnection(
-		connection: WebSocket,
+		connection: WebSocketLike,
 		document: Document,
+		hookPayload: (typeof this.hookPayloads)[string],
+		sessionId: string | null,
+		providerVersion: string | null,
 	): Connection {
-		const hookPayload = this.hookPayloads[document.name];
 		const instance = new Connection(
 			connection,
 			hookPayload.request,
@@ -161,9 +151,17 @@ export class ClientConnection {
 			hookPayload.socketId,
 			hookPayload.context,
 			hookPayload.connectionConfig.readOnly,
+			sessionId,
+			providerVersion,
 		);
 
 		instance.onClose(async (document, event) => {
+			// Wait for any pending message processing to complete before running
+			// disconnect hooks. This ensures that document updates from queued messages
+			// are applied (and their debounced onStoreDocument scheduled) before the
+			// disconnect handler checks whether to call executeNow.
+			await instance.waitForPendingMessages();
+
 			const disconnectHookPayload: onDisconnectPayload = {
 				instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
 				clientsCount: document.getConnectionsCount(),
@@ -229,9 +227,9 @@ export class ClientConnection {
 		return instance;
 	}
 
-	// Once all hooks are run, we’ll fully establish the connection:
-	private setUpNewConnection = async (documentName: string) => {
-		const hookPayload = this.hookPayloads[documentName];
+	// Once all hooks are run, we'll fully establish the connection:
+	private setUpNewConnection = async (rawKey: string, documentName: string, sessionId: string | null) => {
+		const hookPayload = this.hookPayloads[rawKey];
 		// If no hook interrupts, create a document and connection
 		const document = await this.documentProvider.createDocument(
 			documentName,
@@ -240,16 +238,41 @@ export class ClientConnection {
 			hookPayload.connectionConfig,
 			hookPayload.context,
 		);
-		const connection = this.createConnection(this.websocket, document);
+		const connection = this.createConnection(this.websocket, document, hookPayload, sessionId, hookPayload.providerVersion);
 
 		connection.onClose((document, event) => {
-			delete this.hookPayloads[documentName];
-			delete this.documentConnections[documentName];
-			delete this.incomingMessageQueue[documentName];
-			this.documentConnectionsEstablished.delete(documentName);
+			delete this.hookPayloads[rawKey];
+			delete this.documentConnections[rawKey];
+			delete this.incomingMessageQueue[rawKey];
+			this.documentConnectionsEstablished.delete(rawKey);
 		});
 
-		this.documentConnections[documentName] = connection;
+		connection.onTokenSyncCallback(async (payload) => {
+			try {
+				return await this.hooks(
+					"onTokenSync",
+					{
+						...hookPayload,
+						...payload,
+						document,
+						connection,
+						documentName,
+					},
+					(contextAdditions: Partial<Context>) => {
+						hookPayload.context = {
+							...hookPayload.context,
+							...contextAdditions,
+						};
+					},
+				);
+			} catch (err: any) {
+				console.error(err);
+				const error = { ...Unauthorized, ...err };
+				connection.close({ code: error.code, reason: error.reason });
+			}
+		});
+
+		this.documentConnections[rawKey] = connection;
 
 		// If the WebSocket has already disconnected (wow, that was fast) – then
 		// immediately call close to cleanup the connection and document in memory.
@@ -261,10 +284,9 @@ export class ClientConnection {
 			return;
 		}
 
-		// There’s no need to queue messages anymore.
-		// Let’s work through queued messages.
-		this.incomingMessageQueue[documentName].forEach((input) => {
-			this.websocket.emit("message", input);
+		// Drain queued messages to the Connection.
+		this.incomingMessageQueue[rawKey]?.forEach((input) => {
+			connection.handleMessage(input);
 		});
 
 		await this.hooks("connected", {
@@ -276,39 +298,52 @@ export class ClientConnection {
 	};
 
 	// This listener handles authentication messages and queues everything else.
-	private handleQueueingMessage = async (data: Uint8Array) => {
+	private handleQueueingMessage = async (data: Uint8Array, rawKey: string, documentName: string) => {
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 
-			const documentName = decoding.readVarString(tmpMsg.decoder);
+			decoding.readVarString(tmpMsg.decoder); // skip the message address (already extracted)
 			const type = decoding.readVarUint(tmpMsg.decoder);
 
 			if (
 				!(
 					type === MessageType.Auth &&
-					!this.documentConnectionsEstablished.has(documentName)
+					!this.documentConnectionsEstablished.has(rawKey)
 				)
 			) {
-				this.incomingMessageQueue[documentName].push(data);
+				this.incomingMessageQueue[rawKey].push(data);
 				return;
 			}
 
-			// Okay, we’ve got the authentication message we’re waiting for:
-			this.documentConnectionsEstablished.add(documentName);
+			// Okay, we've got the authentication message we're waiting for:
+			this.documentConnectionsEstablished.add(rawKey);
 
 			// The 2nd integer contains the submessage type
 			// which will always be authentication when sent from client -> server
 			decoding.readVarUint(tmpMsg.decoder);
 			const token = decoding.readVarString(tmpMsg.decoder);
 
+			// Try to read providerVersion (new protocol field)
+			let providerVersion: string | null = null;
+			if (decoding.hasContent(tmpMsg.decoder)) {
+				providerVersion = decoding.readVarString(tmpMsg.decoder);
+			}
+
+			// Extract sessionId from the rawKey (documentName\0sessionId) if present
+			const sepIdx = rawKey.indexOf('\0');
+			const sessionId = sepIdx === -1 ? null : rawKey.substring(sepIdx + 1);
+
+			// Response uses rawKey so session-aware clients can route correctly
+			const responseAddress = rawKey;
+
 			try {
-				const hookPayload = this.hookPayloads[documentName];
+				const hookPayload = this.hookPayloads[rawKey];
+				hookPayload.providerVersion = providerVersion;
 
 				await this.hooks(
 					"onConnect",
 					{ ...hookPayload, documentName },
-					(contextAdditions: any) => {
-						// merge context from all hooks
+					(contextAdditions: Partial<Context>) => {
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -323,9 +358,7 @@ export class ClientConnection {
 						...hookPayload,
 						documentName,
 					},
-					(contextAdditions: any) => {
-						// Hooks are allowed to give us even more context and we’ll merge everything together.
-						// We’ll pass the context to other hooks then.
+					(contextAdditions: Partial<Context>) => {
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
@@ -336,21 +369,27 @@ export class ClientConnection {
 				hookPayload.connectionConfig.isAuthenticated = true;
 
 				// Let the client know that authentication was successful.
-				const message = new OutgoingMessage(documentName).writeAuthenticated(
+				const message = new OutgoingMessage(responseAddress).writeAuthenticated(
 					hookPayload.connectionConfig.readOnly,
 				);
 
 				this.websocket.send(message.toUint8Array());
 
 				// Time to actually establish the connection.
-				await this.setUpNewConnection(documentName);
+				await this.setUpNewConnection(rawKey, documentName, sessionId);
 			} catch (err: any) {
 				const error = err || Forbidden;
-				const message = new OutgoingMessage(documentName).writePermissionDenied(
+				const message = new OutgoingMessage(responseAddress).writePermissionDenied(
 					error.reason ?? "permission-denied",
 				);
 
 				this.websocket.send(message.toUint8Array());
+
+				// Clean up all state for this document so a retry is treated
+				// as a fresh first connection attempt.
+				this.documentConnectionsEstablished.delete(rawKey);
+				delete this.hookPayloads[rawKey];
+				delete this.incomingMessageQueue[rawKey];
 			}
 
 			// Catch errors due to failed decoding of data
@@ -360,29 +399,39 @@ export class ClientConnection {
 		}
 	};
 
-	private messageHandler = async (data: Uint8Array) => {
+	/**
+	 * Handle an incoming WebSocket message. Call this from your integration
+	 * when the WebSocket receives a binary message.
+	 */
+	handleMessage = (data: Uint8Array) => {
+		this.lastMessageReceivedAt = Date.now();
+
 		try {
 			const tmpMsg = new SocketIncomingMessage(data);
 
-			const documentName = decoding.readVarString(tmpMsg.decoder);
+			const rawKey = decoding.readVarString(tmpMsg.decoder);
 
-			const connection = this.documentConnections[documentName];
+			// Extract the plain documentName (the raw key may be documentName\0sessionId)
+			const sepIdx = rawKey.indexOf('\0');
+			const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx);
+
+			// Look up by rawKey first (session-aware providers), then fall back
+			// to plain documentName for backward compatibility with old providers
+			const connection = this.documentConnections[rawKey]
+				?? this.documentConnections[documentName];
 			if (connection) {
-				// forward the message to the connection
 				connection.handleMessage(data);
-
-				// we already have a `Connection` set up for this document
 				return;
 			}
 
-			const isFirst = this.incomingMessageQueue[documentName] === undefined;
+			const isFirst = this.incomingMessageQueue[rawKey] === undefined;
 			if (isFirst) {
-				this.incomingMessageQueue[documentName] = [];
-				if (this.hookPayloads[documentName]) {
+				this.incomingMessageQueue[rawKey] = [];
+				if (this.hookPayloads[rawKey]) {
 					throw new Error("first message, but hookPayloads exists");
 				}
 
-				const hookPayload = {
+				this.hookPayloads[rawKey] = {
 					instance: this.documentProvider as Hocuspocus,
 					request: this.request,
 					connectionConfig: {
@@ -395,12 +444,11 @@ export class ClientConnection {
 					context: {
 						...this.defaultContext,
 					},
+					providerVersion: null as string | null,
 				};
-
-				this.hookPayloads[documentName] = hookPayload;
 			}
 
-			this.handleQueueingMessage(data);
+			this.handleQueueingMessage(data, rawKey, documentName);
 		} catch (closeError) {
 			// catch is needed in case an invalid payload crashes the parsing of the Uint8Array
 			console.error(closeError);

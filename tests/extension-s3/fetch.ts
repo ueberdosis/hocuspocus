@@ -1,3 +1,4 @@
+// @ts-nocheck - AWS SDK types resolved through extension package
 import test from "ava";
 import sinon from "sinon";
 import { S3 } from "@hocuspocus/extension-s3";
@@ -52,7 +53,7 @@ test.beforeEach(() => {
       }
       const err = new Error("NoSuchKey");
       err.name = "NoSuchKey";
-      // @ts-ignore
+      // @ts-expect-error
       err.$metadata = { httpStatusCode: 404 };
       throw err;
     }

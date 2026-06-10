@@ -3,7 +3,7 @@ import { newHocuspocus } from '../utils/index.ts'
 
 test('executes the onListen callback', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       async onListen() {
         t.pass()
         resolve('done')
@@ -21,7 +21,7 @@ test('executes the onListen callback from an extension', async t => {
       }
     }
 
-    newHocuspocus({
+    newHocuspocus(t, {
       extensions: [
         new CustomExtension(),
       ],
@@ -31,7 +31,7 @@ test('executes the onListen callback from an extension', async t => {
 
 test('has the configuration', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       async onListen({ configuration }) {
         t.is(configuration.quiet, true)
         resolve('done')
@@ -42,7 +42,7 @@ test('has the configuration', async t => {
 
 test('has the port', async t => {
   await new Promise(async resolve => {
-    newHocuspocus({
+    newHocuspocus(t, {
       async onListen({ port }) {
         t.truthy(port)
         resolve('done')

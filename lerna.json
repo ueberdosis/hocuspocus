@@ -1,8 +1,13 @@
 {
+  "packages": [
+    "packages/*"
+  ],
+  "npmClient": "pnpm",
   "command": {
     "publish": {
       "conventionalCommits": true
     }
   },
-  "version": "3.2.5"
+  "version": "4.1.1",
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

@@ -1,13 +1,14 @@
 import { WsReadyStates } from "@hocuspocus/common";
 import { retry } from "@lifeomic/attempt";
+import { createDecoder, readVarString, readVarUint } from "lib0/decoding";
+import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
-import type { Event, MessageEvent } from "ws";
 import EventEmitter from "./EventEmitter.ts";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
 import {
-	WebSocketStatus,
+	MessageType,
 	type onAwarenessChangeParameters,
 	type onAwarenessUpdateParameters,
 	type onCloseParameters,
@@ -16,6 +17,7 @@ import {
 	type onOpenParameters,
 	type onOutgoingMessageParameters,
 	type onStatusParameters,
+	WebSocketStatus,
 } from "./types.ts";
 
 export type HocuspocusWebSocket = WebSocket & { identifier: string };
@@ -36,6 +38,12 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	 * URL of your @hocuspocus/server instance
 	 */
 	url: string;
+
+	/**
+	 * By default, trailing slashes are removed from the URL. Set this to true
+	 * to preserve trailing slashes if your server configuration requires them.
+	 */
+	preserveTrailingSlash: boolean;
 
 	/**
 	 * An optional WebSocket polyfill, for example for Node.js
@@ -97,12 +105,18 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 }
 
 export class HocuspocusProviderWebsocket extends EventEmitter {
+	private static readonly DEDUPLICATABLE_TYPES = new Set([
+		MessageType.Awareness,
+		MessageType.QueryAwareness,
+	]);
+
 	private messageQueue: any[] = [];
 
 	public configuration: CompleteHocuspocusProviderWebsocketConfiguration = {
 		url: "",
 		autoConnect: true,
-		// @ts-ignore
+		preserveTrailingSlash: false,
+		// @ts-expect-error
 		document: undefined,
 		WebSocketPolyfill: undefined,
 		// TODO: this should depend on awareness.outdatedTime
@@ -202,7 +216,20 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	}
 
 	attach(provider: HocuspocusProvider) {
-		this.configuration.providerMap.set(provider.configuration.name, provider);
+		const key = provider.effectiveName;
+		const existing = this.configuration.providerMap.get(key);
+
+		if (existing && existing !== provider) {
+			// Allow replacing a provider that hasn't authenticated (e.g., after auth failure retry)
+			if (existing.isAuthenticated) {
+				throw new Error(
+					`Cannot attach two providers with the same effective name "${key}". ` +
+						"Use sessionAwareness: true to multiplex providers with the same document name.",
+				);
+			}
+		}
+
+		this.configuration.providerMap.set(key, provider);
 
 		if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
 			this.connect();
@@ -217,11 +244,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	}
 
 	detach(provider: HocuspocusProvider) {
-		if (this.configuration.providerMap.has(provider.configuration.name)) {
+		const key = provider.effectiveName;
+		if (this.configuration.providerMap.has(key)) {
 			provider.send(CloseMessage, {
-				documentName: provider.configuration.name,
+				documentName: key,
 			});
-			this.configuration.providerMap.delete(provider.configuration.name);
+			this.configuration.providerMap.delete(key);
 		}
 	}
 
@@ -366,10 +394,31 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		this.lastMessageReceived = time.getUnixTime();
 
-		const message = new IncomingMessage(event.data);
-		const documentName = message.peekVarString();
+		const data = new Uint8Array(event.data as ArrayBuffer);
 
-		this.configuration.providerMap.get(documentName)?.onMessage(event);
+		// Check for connection-level Ping message (no document name prefix)
+		// Ping messages are sent as just the message type byte (length 1)
+		// We check length to avoid confusing with regular messages that happen to have
+		// a document name length of 9 as the first byte
+		if (data.length === 1 && data[0] === MessageType.Ping) {
+			this.sendPong();
+			return;
+		}
+
+		const message = new IncomingMessage(data);
+		const rawKey = message.peekVarString();
+
+		const provider = this.configuration.providerMap.get(rawKey);
+		provider?.onMessage(event);
+	}
+
+	/**
+	 * Send application-level Pong response to server Ping
+	 */
+	private sendPong() {
+		const encoder = encoding.createEncoder();
+		encoding.writeVarUint(encoder, MessageType.Pong);
+		this.send(encoding.toUint8Array(encoder));
 	}
 
 	resolveConnectionAttempt() {
@@ -434,13 +483,18 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 	}
 
-	// Ensure that the URL never ends with /
 	get serverUrl() {
-		while (this.configuration.url[this.configuration.url.length - 1] === "/") {
-			return this.configuration.url.slice(0, this.configuration.url.length - 1);
+		if (this.configuration.preserveTrailingSlash) {
+			return this.configuration.url;
 		}
 
-		return this.configuration.url;
+		// By default, ensure that the URL never ends with /
+		let url = this.configuration.url;
+		while (url[url.length - 1] === "/") {
+			url = url.slice(0, url.length - 1);
+		}
+
+		return url;
 	}
 
 	get url() {
@@ -462,11 +516,45 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 	}
 
+	private parseQueuedMessage(
+		message: Uint8Array,
+	): { documentName: string; messageType: number } | null {
+		try {
+			const decoder = createDecoder(message);
+			const documentName = readVarString(decoder);
+			const messageType = readVarUint(decoder);
+			return { documentName, messageType };
+		} catch {
+			return null;
+		}
+	}
+
+	private addToQueue(message: any) {
+		if (message instanceof Uint8Array) {
+			const parsed = this.parseQueuedMessage(message);
+			if (
+				parsed &&
+				HocuspocusProviderWebsocket.DEDUPLICATABLE_TYPES.has(parsed.messageType)
+			) {
+				this.messageQueue = this.messageQueue.filter((queued) => {
+					if (!(queued instanceof Uint8Array)) return true;
+					const queuedParsed = this.parseQueuedMessage(queued);
+					if (!queuedParsed) return true;
+					return !(
+						queuedParsed.documentName === parsed.documentName &&
+						queuedParsed.messageType === parsed.messageType
+					);
+				});
+			}
+		}
+		this.messageQueue.push(message);
+	}
+
 	send(message: any) {
 		if (this.webSocket?.readyState === WsReadyStates.Open) {
 			this.webSocket.send(message);
 		} else {
-			this.messageQueue.push(message);
+			this.addToQueue(message);
 		}
 	}
 

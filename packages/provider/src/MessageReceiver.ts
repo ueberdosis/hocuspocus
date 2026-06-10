@@ -1,8 +1,7 @@
-import { readAuthMessage } from "@hocuspocus/common";
+import { type CloseEvent, readAuthMessage } from "@hocuspocus/common";
 import { readVarInt, readVarString } from "lib0/decoding";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { messageYjsSyncStep2, readSyncMessage } from "y-protocols/sync";
-import type { CloseEvent } from "ws";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
@@ -49,28 +48,26 @@ export class MessageReceiver {
 				);
 				break;
 
-			case MessageType.CLOSE:
+			case MessageType.CLOSE: {
 				// eslint-disable-next-line no-case-declarations
 				const event: CloseEvent = {
 					code: 1000,
 					reason: readVarString(message.decoder),
-					// @ts-ignore
-					target: provider.configuration.websocketProvider.webSocket!,
-					type: "close",
 				};
 				provider.onClose();
 				provider.configuration.onClose({ event });
-				provider.forwardClose(event);
+				provider.forwardClose({ event });
 				break;
+			}
 
 			default:
-				throw new Error(`Can’t apply message of unknown type: ${type}`);
+				console.error(`Can’t apply message of unknown type: ${type}`);
 		}
 
 		// Reply
 		if (message.length() > emptyMessageLength + 1) {
 			// length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
-			// @ts-ignore
+			// @ts-expect-error
 			provider.send(OutgoingMessage, { encoder: message.encoder });
 		}
 	}
@@ -117,6 +114,7 @@ export class MessageReceiver {
 
 		readAuthMessage(
 			message.decoder,
+			provider.sendToken.bind(provider),
 			provider.permissionDeniedHandler.bind(provider),
 			provider.authenticatedHandler.bind(provider),
 		);

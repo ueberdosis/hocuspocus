@@ -1,7 +1,7 @@
 {
 	"name": "@hocuspocus/cli",
 	"description": "a CLI tool to start a local Hocuspocus server",
-	"version": "3.2.5",
+	"version": "4.1.1",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
 		"hocuspocus",
@@ -18,12 +18,18 @@
 		"src"
 	],
 	"dependencies": {
-		"@hocuspocus/extension-logger": "^3.2.5",
-		"@hocuspocus/extension-s3": "^3.2.5",
-		"@hocuspocus/extension-sqlite": "^3.2.5",
-		"@hocuspocus/extension-webhook": "^3.2.5",
-		"@hocuspocus/server": "^3.2.5",
+		"@hocuspocus/extension-logger": "workspace:^",
+		"@hocuspocus/extension-s3": "workspace:^",
+		"@hocuspocus/extension-sqlite": "workspace:^",
+		"@hocuspocus/extension-webhook": "workspace:^",
+		"@hocuspocus/server": "workspace:^",
 		"meow": "^14.0.0"
 	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

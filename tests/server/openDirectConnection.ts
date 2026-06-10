@@ -3,13 +3,33 @@ import test from "ava";
 import * as Y from "yjs";
 import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
 
+test("rejects empty document name via direct connection", async (t) => {
+	const server = await newHocuspocus(t);
+
+	await t.throwsAsync(() => server.openDirectConnection(""), {
+		message: "Document name must not be empty",
+	});
+
+	t.is(server.getDocumentsCount(), 0);
+});
+
+test("rejects whitespace-only document name via direct connection", async (t) => {
+	const server = await newHocuspocus(t);
+
+	await t.throwsAsync(() => server.openDirectConnection("   "), {
+		message: "Document name must not be empty",
+	});
+
+	t.is(server.getDocumentsCount(), 0);
+});
+
 test("direct connection prevents document from being removed from memory", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
 		await server.openDirectConnection("hocuspocus-test");
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				provider.configuration.websocketProvider.destroy();
 				provider.destroy();
@@ -24,9 +44,9 @@ test("direct connection prevents document from being removed from memory", async
 });
 test("direct connection works even if provider is connected", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
-		const provider = newHocuspocusProvider(server, {
+		const provider = newHocuspocusProvider(t, server, {
 			onSynced() {
 				provider.document.getMap("config").set("a", "valueFromProvider");
 			},
@@ -54,9 +74,9 @@ test("direct connection works even if provider is connected", async (t) => {
 
 test("direct connection can apply yjsUpdate", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		t.is("", provider.document.getXmlFragment("default").toJSON());
 
@@ -97,7 +117,7 @@ test("direct connection can apply yjsUpdate", async (t) => {
 });
 
 test("direct connection can transact", async (t) => {
-	const server = await newHocuspocus();
+	const server = await newHocuspocus(t);
 
 	const direct = await server.openDirectConnection("hocuspocus-test");
 
@@ -109,7 +129,7 @@ test("direct connection can transact", async (t) => {
 });
 
 test("direct connection cannot transact once closed", async (t) => {
-	const server = await newHocuspocus();
+	const server = await newHocuspocus(t);
 
 	const direct = await server.openDirectConnection("hocuspocus-test");
 	await direct.disconnect();
@@ -132,7 +152,7 @@ test("direct connection cannot transact once closed", async (t) => {
 
 test("if a direct connection closes, the document should be unloaded if there is no other connection left", async (t) => {
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus();
+		const server = await newHocuspocus(t);
 
 		const direct = await server.openDirectConnection("hocuspocus-test1");
 		t.is(server.getDocumentsCount(), 1);
@@ -154,7 +174,7 @@ test("direct connection transact awaits until onStoreDocument has finished", asy
 	let onStoreDocumentFinished = false;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onStoreDocument: async () => {
 				onStoreDocumentFinished = false;
 				await sleep(200);
@@ -187,7 +207,7 @@ test("direct connection transact awaits until onStoreDocument has finished, even
 	let storedAfterDisconnect = false;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			unloadImmediately: false,
 			onStoreDocument: async () => {
 				onStoreDocumentFinished = false;
@@ -214,7 +234,7 @@ test("direct connection transact awaits until onStoreDocument has finished, even
 			document.getArray("test").insert(0, ["value"]);
 		});
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 		provider.document.getMap("aaa").set("bb", "b");
 		provider.disconnect();
 		provider.configuration.websocketProvider.disconnect();
@@ -237,7 +257,7 @@ test("does not unload document if an earlierly started onStoreDocument is still 
 	let onStoreDocumentStarted = 0;
 	let onStoreDocumentFinished = 0;
 
-	const server = await newHocuspocus({
+	const server = await newHocuspocus(t, {
 		unloadImmediately: false,
 		debounce: 100,
 		onStoreDocument: async () => {
@@ -252,7 +272,7 @@ test("does not unload document if an earlierly started onStoreDocument is still 
 	});
 
 	// Trigger a change, which will start a debounced onStoreDocument after 100ms
-	const provider = newHocuspocusProvider(server);
+	const provider = newHocuspocusProvider(t, server);
 	provider.document.getMap("aaa").set("bb", "b");
 
 	await new Promise(async (resolve) => {
@@ -305,17 +325,17 @@ test("does not unload document if an earlierly started onStoreDocument is still 
 test("creating a websocket connection after transact but before debounce interval doesnt create different docs", async (t) => {
 	let onStoreDocumentFinished = false;
 	let disconnected = false;
+	let testDone = false;
 
 	await new Promise(async (resolve) => {
-		const server = await newHocuspocus({
+		const server = await newHocuspocus(t, {
 			onStoreDocument: async () => {
 				onStoreDocumentFinished = false;
 				await sleep(200);
 				onStoreDocumentFinished = true;
 			},
 			async afterUnloadDocument(data) {
-				console.log("called");
-				if (disconnected) {
+				if (disconnected && !testDone) {
 					t.fail("must not be called");
 				}
 			},
@@ -340,10 +360,33 @@ test("creating a websocket connection after transact but before debounce interva
 		t.is(server.getDocumentsCount(), 0);
 		t.is(onStoreDocumentFinished, true);
 
-		const provider = newHocuspocusProvider(server);
+		const provider = newHocuspocusProvider(t, server);
 
 		await sleep(server.configuration.debounce * 2);
 
+		testDone = true;
 		resolve("done");
+	});
+});
+
+test("direct connection passes context", async (t) => {
+	return new Promise(async (resolve) => {
+		const server = await newHocuspocus(t, {
+			async onChange(x) {
+				t.is(x.context.x, 123);
+				t.pass();
+				resolve();
+			},
+		});
+
+		const direct = await server.openDirectConnection("hocuspocus-test", {
+			x: 123,
+		});
+
+		await direct.transact((document) => {
+			document.getArray("test").insert(0, ["value"]);
+		});
+
+		t.is(direct.document?.getArray("test").toJSON()[0], "value");
 	});
 });

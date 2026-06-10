@@ -5,14 +5,14 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('executes the afterLoadDocument callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async afterLoadDocument() {
         t.pass()
         resolve('done')
       },
     })
 
-    newHocuspocusProvider(server, {})
+    newHocuspocusProvider(t, server, {})
   })
 })
 
@@ -27,17 +27,17 @@ test('executes the afterLoadDocument callback in an extension', async t => {
       }
     }
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [new CustomExtension()],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
   })
 })
 
 test('does not execute the afterLoadDocument callback when document fails to load', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
     class CustomExtension {
       async onLoadDocument() {
@@ -56,7 +56,7 @@ test('does not execute the afterLoadDocument callback when document fails to loa
       ],
     })
 
-    newHocuspocusProvider(server)
+    newHocuspocusProvider(t, server)
 
     await sleep(300)
     t.pass()

@@ -1,33 +1,37 @@
-import type WebSocket from "ws";
+import { Mutex } from "async-mutex";
 import {
 	Awareness,
-	removeAwarenessStates,
 	applyAwarenessUpdate,
+	removeAwarenessStates,
 } from "y-protocols/awareness";
-import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
-import type { AwarenessUpdate } from "./types.ts";
+import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { Mutex } from "async-mutex";
+import { isTransactionOrigin } from "./types.ts";
+import type {
+	AwarenessUpdate,
+	ConnectionTransactionOrigin,
+	TransactionOrigin,
+} from "./types.ts";
 
 export class Document extends Doc {
 	awareness: Awareness;
 
 	callbacks = {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
-		onUpdate: (
-			document: Document,
-			connection: Connection,
-			update: Uint8Array,
-		) => {},
+		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => {},
 		beforeBroadcastStateless: (document: Document, stateless: string) => {},
+		beforeHandleAwareness: (
+			document: Document,
+			states: Map<number, Record<string, any>>,
+			transactionOrigin: unknown,
+		) => Promise.resolve(),
 	};
 
 	connections: Map<
-		WebSocket,
+		Connection,
 		{
 			clients: Set<any>;
-			connection: Connection;
 		}
 	> = new Map();
 
@@ -41,6 +45,8 @@ export class Document extends Doc {
 	isDestroyed = false;
 
 	saveMutex = new Mutex();
+
+	lastChangeTime = 0;
 
 	/**
 	 * Constructor.
@@ -63,7 +69,6 @@ export class Document extends Doc {
 	 * Check if the Document (XMLFragment or Map) is empty
 	 */
 	isEmpty(fieldName: string): boolean {
-		// eslint-disable-next-line no-underscore-dangle
 		return !this.get(fieldName)._start && !this.get(fieldName)._map.size;
 	}
 
@@ -82,11 +87,7 @@ export class Document extends Doc {
 	 * Set a callback that will be triggered when the document is updated
 	 */
 	onUpdate(
-		callback: (
-			document: Document,
-			connection: Connection,
-			update: Uint8Array,
-		) => void,
+		callback: (document: Document, origin: unknown, update: Uint8Array) => void,
 	): Document {
 		this.callbacks.onUpdate = callback;
 
@@ -105,13 +106,33 @@ export class Document extends Doc {
 	}
 
 	/**
+	 * Set a callback that will be triggered before an inbound awareness update
+	 * is applied to this document's awareness state. The callback receives the
+	 * document, the decoded per-client states as a mutable `Map`, and the
+	 * `TransactionOrigin` that will be forwarded to `applyAwarenessUpdate`.
+	 * Use `isTransactionOrigin(origin)` to discriminate sources. Mutate the
+	 * map in place (set/delete/field changes) to rewrite the update, or throw
+	 * to reject it entirely.
+	 */
+	beforeHandleAwareness(
+		callback: (
+			document: Document,
+			states: Map<number, Record<string, any>>,
+			transactionOrigin: unknown,
+		) => Promise<any>,
+	): Document {
+		this.callbacks.beforeHandleAwareness = callback;
+
+		return this;
+	}
+
+	/**
 	 * Register a connection and a set of clients on this document keyed by the
 	 * underlying websocket connection
 	 */
 	addConnection(connection: Connection): Document {
-		this.connections.set(connection.webSocket, {
+		this.connections.set(connection, {
 			clients: new Set(),
-			connection,
 		});
 
 		return this;
@@ -121,20 +142,23 @@ export class Document extends Doc {
 	 * Is the given connection registered on this document
 	 */
 	hasConnection(connection: Connection): boolean {
-		return this.connections.has(connection.webSocket);
+		return this.connections.has(connection);
 	}
 
 	/**
 	 * Remove the given connection from this document
 	 */
 	removeConnection(connection: Connection): Document {
-		removeAwarenessStates(
-			this.awareness,
-			Array.from(this.getClients(connection.webSocket)),
-			null,
-		);
+		const entry = this.connections.get(connection);
+		if (entry) {
+			removeAwarenessStates(
+				this.awareness,
+				Array.from(entry.clients),
+				null,
+			);
+		}
 
-		this.connections.delete(connection.webSocket);
+		this.connections.delete(connection);
 
 		return this;
 	}
@@ -164,16 +188,16 @@ export class Document extends Doc {
 	 * Get an array of registered connections
 	 */
 	getConnections(): Array<Connection> {
-		return Array.from(this.connections.values()).map((data) => data.connection);
+		return Array.from(this.connections.keys());
 	}
 
 	/**
 	 * Get the client ids for the given connection instance
 	 */
-	getClients(connectionInstance: WebSocket): Set<any> {
-		const connection = this.connections.get(connectionInstance);
+	getClients(connection: Connection): Set<any> {
+		const entry = this.connections.get(connection);
 
-		return connection?.clients === undefined ? new Set() : connection.clients;
+		return entry?.clients === undefined ? new Set() : entry.clients;
 	}
 
 	/**
@@ -187,7 +211,10 @@ export class Document extends Doc {
 	 * Apply the given awareness update
 	 */
 	applyAwarenessUpdate(connection: Connection, update: Uint8Array): Document {
-		applyAwarenessUpdate(this.awareness, update, connection.webSocket);
+		applyAwarenessUpdate(this.awareness, update, {
+			source: "connection",
+			connection,
+		} satisfies ConnectionTransactionOrigin);
 
 		return this;
 	}
@@ -198,26 +225,31 @@ export class Document extends Doc {
 	 */
 	private handleAwarenessUpdate(
 		{ added, updated, removed }: AwarenessUpdate,
-		connectionInstance: WebSocket,
+		origin: TransactionOrigin | null,
 	): Document {
 		const changedClients = added.concat(updated, removed);
 
-		if (connectionInstance !== null) {
-			const connection = this.connections.get(connectionInstance);
+		const originConnection: Connection | null =
+			isTransactionOrigin(origin) && origin.source === "connection"
+				? origin.connection
+				: null;
 
-			if (connection) {
-				added.forEach((clientId: any) => connection.clients.add(clientId));
-				removed.forEach((clientId: any) => connection.clients.delete(clientId));
+		if (originConnection !== null) {
+			const entry = this.connections.get(originConnection);
+
+			if (entry) {
+				added.forEach((clientId: any) => entry.clients.add(clientId));
+				removed.forEach((clientId: any) => entry.clients.delete(clientId));
 			}
 		}
 
-		this.getConnections().forEach((connection) => {
+		for (const connection of this.getConnections()) {
 			const awarenessMessage = new OutgoingMessage(
-				this.name,
+				connection.messageAddress,
 			).createAwarenessUpdateMessage(this.awareness, changedClients);
 
 			connection.send(awarenessMessage.toUint8Array());
-		});
+		}
 
 		return this;
 	}
@@ -225,16 +257,16 @@ export class Document extends Doc {
 	/**
 	 * Handle an updated document and sync changes to clients
 	 */
-	private handleUpdate(update: Uint8Array, connection: Connection): Document {
-		this.callbacks.onUpdate(this, connection, update);
+	private handleUpdate(update: Uint8Array, origin: unknown): Document {
+		this.callbacks.onUpdate(this, origin, update);
 
-		const message = new OutgoingMessage(this.name)
-			.createSyncMessage()
-			.writeUpdate(update);
+		for (const connection of this.getConnections()) {
+			const message = new OutgoingMessage(connection.messageAddress)
+				.createSyncMessage()
+				.writeUpdate(update);
 
-		this.getConnections().forEach((connection) => {
 			connection.send(message.toUint8Array());
-		});
+		}
 
 		return this;
 	}

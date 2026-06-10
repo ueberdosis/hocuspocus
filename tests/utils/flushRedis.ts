@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error
 import { createClient } from 'redis'
 import { redisConnectionSettings } from './redisConnectionSettings.ts'
 

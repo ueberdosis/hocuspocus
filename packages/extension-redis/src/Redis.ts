@@ -1,23 +1,28 @@
 import crypto from "node:crypto";
 import type {
+	afterLoadDocumentPayload,
+	afterStoreDocumentPayload,
+	afterUnloadDocumentPayload,
+	beforeBroadcastStatelessPayload,
+	beforeUnloadDocumentPayload,
 	Document,
 	Extension,
 	Hocuspocus,
-	afterLoadDocumentPayload,
-	afterStoreDocumentPayload,
-	beforeBroadcastStatelessPayload,
 	onAwarenessUpdatePayload,
 	onChangePayload,
 	onConfigurePayload,
-	onDisconnectPayload,
 	onStoreDocumentPayload,
+	RedisTransactionOrigin,
 } from "@hocuspocus/server";
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import {
 	IncomingMessage,
+	isTransactionOrigin,
 	MessageReceiver,
 	OutgoingMessage,
 } from "@hocuspocus/server";
 import {
+	ExecutionError,
 	type ExecutionResult,
 	type Lock,
 	Redlock,
@@ -94,7 +99,9 @@ export class Redis implements Extension {
 		disconnectDelay: 1000,
 	};
 
-	redisTransactionOrigin = "__hocuspocus__redis__origin__";
+	redisTransactionOrigin: RedisTransactionOrigin = {
+		source: "redis",
+	};
 
 	pub: RedisInstance;
 
@@ -107,12 +114,6 @@ export class Redis implements Extension {
 	locks = new Map<string, { lock: Lock; release?: Promise<ExecutionResult> }>();
 
 	messagePrefix: Buffer;
-
-	/**
-	 * When we have a high frequency of updates to a document we don't need tons of setTimeouts
-	 * piling up, so we'll track them to keep it to the most recent per document.
-	 */
-	private pendingDisconnects = new Map<string, NodeJS.Timeout>();
 
 	private pendingAfterStoreDocumentResolves = new Map<
 		string,
@@ -142,6 +143,7 @@ export class Redis implements Extension {
 			this.pub = new RedisClient(port, host, options ?? {});
 			this.sub = new RedisClient(port, host, options ?? {});
 		}
+
 		this.sub.on("messageBuffer", this.handleIncomingMessage);
 
 		this.redlock = new Redlock([this.pub], {
@@ -251,22 +253,22 @@ export class Redis implements Extension {
 		const resource = this.lockKey(documentName);
 		const ttl = this.configuration.lockTimeout;
 		try {
-			await this.redlock.acquire([resource], ttl);
+			const lock = await this.redlock.acquire([resource], ttl);
 			const oldLock = this.locks.get(resource);
-			if (oldLock) {
+			if (oldLock?.release) {
 				await oldLock.release;
 			}
-		} catch (error) {
+			this.locks.set(resource, { lock });
+		} catch (error: any) {
 			//based on: https://github.com/sesamecare/redlock/blob/508e00dcd1e4d2bc6373ce455f4fe847e98a9aab/src/index.ts#L347-L349
 			if (
-				error ==
-				"ExecutionError: The operation was unable to achieve a quorum during its retry window."
+				error instanceof ExecutionError &&
+				error.message ===
+					"The operation was unable to achieve a quorum during its retry window."
 			) {
 				// Expected behavior: Could not acquire lock, another instance locked it already.
-				// No further `onStoreDocument` hooks will be executed; should throw a silent error with no message.
-				throw new Error("", {
-					cause: "Could not acquire lock, another instance locked it already.",
-				});
+				// Skip further hooks and retry — the data is safe on the other instance.
+				throw new SkipFurtherHooksError("Another instance is already storing this document");
 			}
 			//unexpected error
 			console.error("unexpected error:", error);
@@ -279,7 +281,7 @@ export class Redis implements Extension {
 	 */
 	async afterStoreDocument({
 		documentName,
-		socketId,
+		lastTransactionOrigin,
 	}: afterStoreDocumentPayload) {
 		const lockKey = this.lockKey(documentName);
 		const lock = this.locks.get(lockKey);
@@ -294,9 +296,13 @@ export class Redis implements Extension {
 				this.locks.delete(lockKey);
 			}
 		}
-		// if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
+
+		// if the change was initiated by a directConnection (or otherwise local source), we need to delay this hook to make sure sync can finish first.
 		// for provider connections, this usually happens in the onDisconnect hook
-		if (socketId === "server") {
+		if (
+			isTransactionOrigin(lastTransactionOrigin) &&
+			lastTransactionOrigin.source === "local"
+		) {
 			const pending = this.pendingAfterStoreDocumentResolves.get(documentName);
 
 			if (pending) {
@@ -333,7 +339,13 @@ export class Redis implements Extension {
 		added,
 		updated,
 		removed,
+		document,
 	}: onAwarenessUpdatePayload) {
+		// Do not publish if there is no connection: it fixes this issue: "https://github.com/ueberdosis/hocuspocus/issues/1027"
+		const connections = document?.connections.size || 0;
+		if (connections === 0) {
+			return; // avoids exception
+		}
 		const changedClients = added.concat(updated, removed);
 		const message = new OutgoingMessage(
 			documentName,
@@ -367,64 +379,49 @@ export class Redis implements Extension {
 			return;
 		}
 
-		new MessageReceiver(message, this.redisTransactionOrigin).apply(
-			document,
-			undefined,
-			(reply) => {
-				return this.pub.publish(
-					this.pubKey(document.name),
-					this.encodeMessage(reply),
-				);
-			},
-		);
+		const receiver = new MessageReceiver(message, this.redisTransactionOrigin);
+		await receiver.apply(document, undefined, (reply) => {
+			return this.pub.publish(
+				this.pubKey(document.name),
+				this.encodeMessage(reply),
+			);
+		});
 	};
 
 	/**
 	 * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
 	 */
 	public async onChange(data: onChangePayload): Promise<any> {
-		if (data.transactionOrigin !== this.redisTransactionOrigin) {
-			return this.publishFirstSyncStep(data.documentName, data.document);
+		if (
+			isTransactionOrigin(data.transactionOrigin) &&
+			data.transactionOrigin.source === "redis"
+		) {
+			return;
 		}
+
+		return this.publishFirstSyncStep(data.documentName, data.document);
 	}
 
 	/**
-	 * Make sure to *not* listen for further changes, when there’s
-	 * no one connected anymore.
+	 * Delay unloading to allow syncs to finish
 	 */
-	public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
-		const pending = this.pendingDisconnects.get(documentName);
+	async beforeUnloadDocument(data: beforeUnloadDocumentPayload) {
+		return new Promise<void>((resolve) => {
+			setTimeout(() => {
+				resolve();
+			}, this.configuration.disconnectDelay);
+		});
+	}
 
-		if (pending) {
-			clearTimeout(pending);
-			this.pendingDisconnects.delete(documentName);
-		}
+	async afterUnloadDocument(data: afterUnloadDocumentPayload) {
+		if (data.instance.documents.has(data.documentName)) return; // skip unsubscribe if the document is already loaded again (maybe fast reconnect)
 
-		const disconnect = () => {
-			const document = this.instance.documents.get(documentName);
-
-			this.pendingDisconnects.delete(documentName);
-
-			// Do nothing, when other users are still connected to the document.
-			if (document && document.getConnectionsCount() > 0) {
-				return;
+		this.sub.unsubscribe(this.subKey(data.documentName), (error: any) => {
+			if (error) {
+				console.error(error);
 			}
-
-			// Time to end the subscription on the document channel.
-			this.sub.unsubscribe(this.subKey(documentName), (error: any) => {
-				if (error) {
-					console.error(error);
-				}
-			});
-
-			if (document) {
-				this.instance.unloadDocument(document);
-			}
-		};
-		// Delay the disconnect procedure to allow last minute syncs to happen
-		const timeout = setTimeout(disconnect, this.configuration.disconnectDelay);
-		this.pendingDisconnects.set(documentName, timeout);
-	};
+		});
+	}
 
 	async beforeBroadcastStateless(data: beforeBroadcastStatelessPayload) {
 		const message = new OutgoingMessage(

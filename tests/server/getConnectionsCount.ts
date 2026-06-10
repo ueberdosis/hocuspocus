@@ -4,7 +4,7 @@ import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } 
 
 test('returns 0 connections when there’s no one connected', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
     t.is(server.getConnectionsCount(), 0)
 
@@ -14,13 +14,13 @@ test('returns 0 connections when there’s no one connected', async t => {
 
 test('close connection open when it fails', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         throw new Error()
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onAuthenticationFailed() {
         t.is(server.getConnectionsCount(), 0)
         resolve('done')
@@ -31,13 +31,13 @@ test('close connection open when it fails', async t => {
 
 test('dont close connection open when it fails but socket is external', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         throw new Error()
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onAuthenticationFailed() {
         t.is(server.getConnectionsCount(), 0)
         resolve('done')
@@ -48,13 +48,13 @@ test('dont close connection open when it fails but socket is external', async t 
 
 test('outputs the total connections', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced() {
         t.is(server.getConnectionsCount(), 1)
 
-        newHocuspocusProvider(server, {
+        newHocuspocusProvider(t, server, {
           onSynced() {
             t.is(server.getConnectionsCount(), 2)
 
@@ -68,12 +68,12 @@ test('outputs the total connections', async t => {
 
 test('total connections includes direct connections', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({ name: 'hocuspocus-test' })
+    const server = await newHocuspocus(t, { name: 'hocuspocus-test' })
 
     await server.openDirectConnection('hocuspocus-test')
     t.is(server.getConnectionsCount(), 1)
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced() {
         t.is(server.getConnectionsCount(), 2)
 
@@ -84,14 +84,14 @@ test('total connections includes direct connections', async t => {
 })
 
 test('adds and removes connections properly', async t => {
-  const server = await newHocuspocus()
+  const server = await newHocuspocus(t)
 
   const providers = [
-    newHocuspocusProvider(server),
-    newHocuspocusProvider(server),
-    newHocuspocusProvider(server),
-    newHocuspocusProvider(server),
-    newHocuspocusProvider(server),
+    newHocuspocusProvider(t, server),
+    newHocuspocusProvider(t, server),
+    newHocuspocusProvider(t, server),
+    newHocuspocusProvider(t, server),
+    newHocuspocusProvider(t, server),
   ]
 
   await retryableAssertion(t, tt => {
@@ -106,15 +106,15 @@ test('adds and removes connections properly', async t => {
 })
 
 test('multiplexed connections counts properly', async t => {
-  const server = await newHocuspocus()
-  const socket = newHocuspocusProviderWebsocket(server)
+  const server = await newHocuspocus(t)
+  const socket = newHocuspocusProviderWebsocket(t, server)
 
   const providers = [
-    newHocuspocusProvider(server, { name: 'mux-1' }, {}, socket),
-    newHocuspocusProvider(server, { name: 'mux-2' }, {}, socket),
-    newHocuspocusProvider(server, { name: 'mux-3' }, {}, socket),
-    newHocuspocusProvider(server),
-    newHocuspocusProvider(server),
+    newHocuspocusProvider(t, server, { name: 'mux-1' }, {}, socket),
+    newHocuspocusProvider(t, server, { name: 'mux-2' }, {}, socket),
+    newHocuspocusProvider(t, server, { name: 'mux-3' }, {}, socket),
+    newHocuspocusProvider(t, server),
+    newHocuspocusProvider(t, server),
 
   ]
 

@@ -3,9 +3,9 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('onDisconnect callback is executed', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onConnect() {
         provider.configuration.websocketProvider.disconnect()
         provider.disconnect()
@@ -20,9 +20,9 @@ test('onDisconnect callback is executed', async t => {
 
 test("on('disconnect') callback is executed", async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    const provider = newHocuspocusProvider(server)
+    const provider = newHocuspocusProvider(t, server)
 
     provider.on('connect', () => {
       provider.configuration.websocketProvider.disconnect()

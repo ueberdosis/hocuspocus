@@ -3,6 +3,402 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* client-initiated broadcastStateless ([#1103](https://github.com/ueberdosis/hocuspocus/issues/1103)) ([6872d08](https://github.com/ueberdosis/hocuspocus/commit/6872d08bbb2ebe8175dcfb51953481b2f4988291))
+
+
+
+
+
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* **server:** wrap awareness origin as TransactionOrigin ([#1094](https://github.com/ueberdosis/hocuspocus/issues/1094)) ([bb24de0](https://github.com/ueberdosis/hocuspocus/commit/bb24de0ffb944e10845174e26971eaa95b2db675))
+
+
+### Features
+
+* **server:** add beforeHandleAwareness hook ([#1096](https://github.com/ueberdosis/hocuspocus/issues/1096)) ([1597da8](https://github.com/ueberdosis/hocuspocus/commit/1597da8217c4ed20b06d46052f1db7c7765d6153))
+
+
+
+
+
+# [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+# [4.0.0-rc.7](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.6...v4.0.0-rc.7) (2026-04-22)
+
+
+### Bug Fixes
+
+* provider-react ESM now emits a clean import { jsx } from "react/jsx-runtime" and zero CJS shims ([e40afd9](https://github.com/ueberdosis/hocuspocus/commit/e40afd94935eff7e3c607a379511cc83c67d72ac))
+
+
+
+
+
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+
+### Bug Fixes
+
+* react provider in strict mode ([4f27b7f](https://github.com/ueberdosis/hocuspocus/commit/4f27b7f0e57423b08fabb59cfa6d0a2cc67bc996))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
+
+
+### Features
+
+* adds package readmes ([c7d63f7](https://github.com/ueberdosis/hocuspocus/commit/c7d63f79980de3c34e63b60073f22774bf27ac13))
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-04-16)
+
+
+### Bug Fixes
+
+* publishConfig for provider-react ([376765f](https://github.com/ueberdosis/hocuspocus/commit/376765f6623259c79940da67a1f970ac9a1e84b1))
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* remove unused packages ([#1090](https://github.com/ueberdosis/hocuspocus/issues/1090)) ([66fb35c](https://github.com/ueberdosis/hocuspocus/commit/66fb35cff71d986d671fe9a8118ce4da87507b44))
+
+
+### Features
+
+* first draft of @hocuspocus/provider-react package ([#1059](https://github.com/ueberdosis/hocuspocus/issues/1059)) ([cbc9977](https://github.com/ueberdosis/hocuspocus/commit/cbc99770096e8c674dae304c7e1a16e0fbec827b))
+* remove axios ([#1089](https://github.com/ueberdosis/hocuspocus/issues/1089)) ([fe99d02](https://github.com/ueberdosis/hocuspocus/commit/fe99d02496cae65f9c3c4f1b37c0c6823f05f95a))
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+
+### Bug Fixes
+
+* turn off sessionAwareness by default to keep BC with old servers ([3a57071](https://github.com/ueberdosis/hocuspocus/commit/3a57071517adb5c9e037fb7c0ac169ffc330df90))
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* reject whitespaces in documents ([3c19888](https://github.com/ueberdosis/hocuspocus/commit/3c198883b50cddf02141debbb74d5250948ee310))
+* when storeDocumentHooks throw, retry until storing suceeds. ([99db64d](https://github.com/ueberdosis/hocuspocus/commit/99db64df234946f2492129e793298734c5e2c503))
+
+
+### Features
+
+* adds deduplication for queued awareness messages ([e0453f0](https://github.com/ueberdosis/hocuspocus/commit/e0453f0210a4a30f6f8b742629ed777724429df9))
+* optimize retry logic ([302eb08](https://github.com/ueberdosis/hocuspocus/commit/302eb08d9a2a2b59d44424571fdc70d5790d8fd8))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Bug Fixes
+
+* adds @aws-sdk/client-s3 to devDependencies to fix possible test issues with pnpm ([d36773c](https://github.com/ueberdosis/hocuspocus/commit/d36773cc62d385c32e16e46b4b9a18079eed3e0e))
+* adds override for vulnerable packages (mostly xml DDoS) ([de075ff](https://github.com/ueberdosis/hocuspocus/commit/de075ffd9a6958782d2ae8ea64286be2168b71dd))
+* check code is type number ([#1062](https://github.com/ueberdosis/hocuspocus/issues/1062)) ([6dfa610](https://github.com/ueberdosis/hocuspocus/commit/6dfa610b35fa1aab7a7f0dd2f2a216cc3094612f))
+* force-run debounced ops on server shutdown (even when unloadImmediately=false) ([dba9984](https://github.com/ueberdosis/hocuspocus/commit/dba99845a52e798884cda7e2c81d16e4dc462e9c))
+* npm audit ([ba727ea](https://github.com/ueberdosis/hocuspocus/commit/ba727ea8a2a60c961d683116393291b43be3051d))
+* onLoadDocument now accepts a yjs update (Uint8Array or Buffer) or a Y.Doc. fixes [#795](https://github.com/ueberdosis/hocuspocus/issues/795), [#271](https://github.com/ueberdosis/hocuspocus/issues/271) ([667e145](https://github.com/ueberdosis/hocuspocus/commit/667e14535d2da3986ecc731b18c976b3662552aa))
+* optimize memory usage by creating message uint8arrays once, not per connection ([#1051](https://github.com/ueberdosis/hocuspocus/issues/1051)) ([ad398a8](https://github.com/ueberdosis/hocuspocus/commit/ad398a8304908068df8e11c87edf9962f416751a))
+* reset auth state on failed auth, so a new auth message can run auth hooks again. fixes [#944](https://github.com/ueberdosis/hocuspocus/issues/944) ([#1065](https://github.com/ueberdosis/hocuspocus/issues/1065)) ([81ce838](https://github.com/ueberdosis/hocuspocus/commit/81ce8382a80509bad7d8c6581ff87e9d91b26179))
+* trigger storeDocumentHooks on any change to the doc (except if incoming via redis). Before, it was easy to accidentally prevent changes from being saved by forgetting to include an origin in the Yjs update ([81975e7](https://github.com/ueberdosis/hocuspocus/commit/81975e7a38b4b594024863278e61ce5ecf318121))
+* upgrade deps ([f3fc252](https://github.com/ueberdosis/hocuspocus/commit/f3fc252c3978df3229813f370d80ff3f2f0759d0))
+
+
+### Features
+
+* add generic `Context` support across server classes and hooks ([#1057](https://github.com/ueberdosis/hocuspocus/issues/1057)) ([67741a0](https://github.com/ueberdosis/hocuspocus/commit/67741a0661004f1d222795bb99e68d27a5a701aa))
+* better type safety for yjs origin. Improve type safety and allow any yjs operation to skip store document hooks. ([5f480cd](https://github.com/ueberdosis/hocuspocus/commit/5f480cd07de378704a8b13780460e43ab7917655))
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* make the server aware of the provider version, so future protocol changes are easier to make backward-compatible. ([2b47dc2](https://github.com/ueberdosis/hocuspocus/commit/2b47dc2ede1bf15ff90f1048352f103cea57f300))
+* migrate from sqlite3 to better-sqlite3, as sqlite3 is now unmaintained. ([a247146](https://github.com/ueberdosis/hocuspocus/commit/a24714624c6effdb521e84352f0623d24be5d3f0))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* pass context when using DirectConnection. Do not run storeDocumentHooks on any transact, just on disconnect ([ffa32b7](https://github.com/ueberdosis/hocuspocus/commit/ffa32b7a96a15d953b031df1005df6cfe7624d51))
+* process update message in the order that they are received ([#1058](https://github.com/ueberdosis/hocuspocus/issues/1058)) ([b6162ac](https://github.com/ueberdosis/hocuspocus/commit/b6162ac9154d0e56bca748917e4ebe1e3fb071cf))
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+* upgrade ava ([#1075](https://github.com/ueberdosis/hocuspocus/issues/1075)) ([9a23823](https://github.com/ueberdosis/hocuspocus/commit/9a23823c5100b2e87d23a5cbeeafde45b847a970))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-03-16)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* adds @aws-sdk/client-s3 to devDependencies to fix possible test issues with pnpm ([d36773c](https://github.com/ueberdosis/hocuspocus/commit/d36773cc62d385c32e16e46b4b9a18079eed3e0e))
+* adds override for vulnerable packages (mostly xml DDoS) ([de075ff](https://github.com/ueberdosis/hocuspocus/commit/de075ffd9a6958782d2ae8ea64286be2168b71dd))
+* force-run debounced ops on server shutdown (even when unloadImmediately=false) ([dba9984](https://github.com/ueberdosis/hocuspocus/commit/dba99845a52e798884cda7e2c81d16e4dc462e9c))
+* upgrade deps ([f3fc252](https://github.com/ueberdosis/hocuspocus/commit/f3fc252c3978df3229813f370d80ff3f2f0759d0))
+
+
+### Features
+
+* make the server aware of the provider version, so future protocol changes are easier to make backward-compatible. ([2b47dc2](https://github.com/ueberdosis/hocuspocus/commit/2b47dc2ede1bf15ff90f1048352f103cea57f300))
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+* upgrade ava ([#1075](https://github.com/ueberdosis/hocuspocus/issues/1075)) ([9a23823](https://github.com/ueberdosis/hocuspocus/commit/9a23823c5100b2e87d23a5cbeeafde45b847a970))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+
+### Bug Fixes
+
+* check code is type number ([#1062](https://github.com/ueberdosis/hocuspocus/issues/1062)) ([6dfa610](https://github.com/ueberdosis/hocuspocus/commit/6dfa610b35fa1aab7a7f0dd2f2a216cc3094612f))
+* npm audit ([ba727ea](https://github.com/ueberdosis/hocuspocus/commit/ba727ea8a2a60c961d683116393291b43be3051d))
+* onLoadDocument now accepts a yjs update (Uint8Array or Buffer) or a Y.Doc. fixes [#795](https://github.com/ueberdosis/hocuspocus/issues/795), [#271](https://github.com/ueberdosis/hocuspocus/issues/271) ([667e145](https://github.com/ueberdosis/hocuspocus/commit/667e14535d2da3986ecc731b18c976b3662552aa))
+* optimize memory usage by creating message uint8arrays once, not per connection ([#1051](https://github.com/ueberdosis/hocuspocus/issues/1051)) ([ad398a8](https://github.com/ueberdosis/hocuspocus/commit/ad398a8304908068df8e11c87edf9962f416751a))
+* reset auth state on failed auth, so a new auth message can run auth hooks again. fixes [#944](https://github.com/ueberdosis/hocuspocus/issues/944) ([#1065](https://github.com/ueberdosis/hocuspocus/issues/1065)) ([81ce838](https://github.com/ueberdosis/hocuspocus/commit/81ce8382a80509bad7d8c6581ff87e9d91b26179))
+* trigger storeDocumentHooks on any change to the doc (except if incoming via redis). Before, it was easy to accidentally prevent changes from being saved by forgetting to include an origin in the Yjs update ([81975e7](https://github.com/ueberdosis/hocuspocus/commit/81975e7a38b4b594024863278e61ce5ecf318121))
+
+
+### Features
+
+* add generic `Context` support across server classes and hooks ([#1057](https://github.com/ueberdosis/hocuspocus/issues/1057)) ([67741a0](https://github.com/ueberdosis/hocuspocus/commit/67741a0661004f1d222795bb99e68d27a5a701aa))
+* better type safety for yjs origin. Improve type safety and allow any yjs operation to skip store document hooks. ([5f480cd](https://github.com/ueberdosis/hocuspocus/commit/5f480cd07de378704a8b13780460e43ab7917655))
+* cross-ws (bun, deno, cloudflare, node uwebsocket) ([#1056](https://github.com/ueberdosis/hocuspocus/issues/1056)) ([2666542](https://github.com/ueberdosis/hocuspocus/commit/2666542aafafb6b055c6ac7b22ba50a6f28d4e9a))
+* migrate from sqlite3 to better-sqlite3, as sqlite3 is now unmaintained. ([a247146](https://github.com/ueberdosis/hocuspocus/commit/a24714624c6effdb521e84352f0623d24be5d3f0))
+* migrate to pnpm ([#1061](https://github.com/ueberdosis/hocuspocus/issues/1061)) ([dcaab57](https://github.com/ueberdosis/hocuspocus/commit/dcaab571bad694e48efd41bbb1d675855a7e2055))
+* pass context when using DirectConnection. Do not run storeDocumentHooks on any transact, just on disconnect ([ffa32b7](https://github.com/ueberdosis/hocuspocus/commit/ffa32b7a96a15d953b031df1005df6cfe7624d51))
+* process update message in the order that they are received ([#1058](https://github.com/ueberdosis/hocuspocus/issues/1058)) ([b6162ac](https://github.com/ueberdosis/hocuspocus/commit/b6162ac9154d0e56bca748917e4ebe1e3fb071cf))
+
+
+
+
+
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* dev setup (use local packages instead of the released ones) ([0137da0](https://github.com/ueberdosis/hocuspocus/commit/0137da0a32d45002f37ed933f886e0fc737997bc))
+* dont release demos ([148e12f](https://github.com/ueberdosis/hocuspocus/commit/148e12f6fdbd4982076b726afdc8d6c77edfb9a0))
+
+
+
+
+
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+
+### Bug Fixes
+
+* dont include all types in all packages ([4dade25](https://github.com/ueberdosis/hocuspocus/commit/4dade250371c641a23c8df1fd2814d56c00d8b59))
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* fixes [#1041](https://github.com/ueberdosis/hocuspocus/issues/1041): websocket URL ending with / wont work ([#1046](https://github.com/ueberdosis/hocuspocus/issues/1046)) ([0df9b09](https://github.com/ueberdosis/hocuspocus/commit/0df9b095d47e7953a9dff090942e937894d8f7fc))
+* fixes hono types in playground ([#1045](https://github.com/ueberdosis/hocuspocus/issues/1045)) ([163fbed](https://github.com/ueberdosis/hocuspocus/commit/163fbed167222eac8e89095cca09074bb7ddf6e2))
+* fixes provider.forwardClose type error ([5438500](https://github.com/ueberdosis/hocuspocus/commit/543850064ba1cb18c13cb4211cec76a3ad05ddb4))
+* fixes typings for onTokenSync ([b2ac132](https://github.com/ueberdosis/hocuspocus/commit/b2ac13250b2ddc6bb41ce456b56bac8db2a6e0d5))
+* strict types for authorizedScope ([#1029](https://github.com/ueberdosis/hocuspocus/issues/1029)) ([44e1b5d](https://github.com/ueberdosis/hocuspocus/commit/44e1b5d19f632bf646b654efd2c2ba70587adf62))
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package hocuspocus
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+
+### Bug Fixes
+
+* fixes memory leak under high load, replace nextTick by setTimeout ([1f0b5a4](https://github.com/ueberdosis/hocuspocus/commit/1f0b5a4f9084c0b6e01ddd19ec831d2e2664fc23))
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* on awareness craah prevention and memory leak onStoreDocument ([#1032](https://github.com/ueberdosis/hocuspocus/issues/1032)) ([67957ae](https://github.com/ueberdosis/hocuspocus/commit/67957ae4d114c07b8b63cf2900a7ae07f1300f72)), closes [#1](https://github.com/ueberdosis/hocuspocus/issues/1) [#3](https://github.com/ueberdosis/hocuspocus/issues/3) [#1027](https://github.com/ueberdosis/hocuspocus/issues/1027)
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+
+### Bug Fixes
+
+* fixes timing issues with debouncer: new debounced functions may start before the previous had finished ([708bfdb](https://github.com/ueberdosis/hocuspocus/commit/708bfdb0197833d5d6371b4f2c930fe815a66d15))
+* make beforeSync not async, as this may break message processing order (see https://github.com/yjs/yjs/issues/591) ([abeb298](https://github.com/ueberdosis/hocuspocus/commit/abeb2985d522539d30ea96217417a300569f77fd))
+* make beforeSync not async, as this may break message processing order (see issue 591 of yjs) ([1d11bea](https://github.com/ueberdosis/hocuspocus/commit/1d11bea8f78572a4138442ee063b6fa02890248d))
+* make handleUpdate sync to avoid timing issues ([9a6485b](https://github.com/ueberdosis/hocuspocus/commit/9a6485b9c0ee2f193e9ba68b39a8c93196a796bf))
+
+
+### Features
+
+* adds Document.lastChangeTime, which is set to Date.now() whenever a change on the documment has been detected ([9092efd](https://github.com/ueberdosis/hocuspocus/commit/9092efd604f20e1ec5228a93dd8b1ee9b48d5e98))
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+
+### Reverts
+
+* Revert "fix: temporarily removes beforeSync callback (#919, partially reverts a6a7bcd0768378908ffb5d32096183280115631b). Making applySync async causes timing issues that leads to issues when using PermanentUserData. This can be reproduced by using the playground server with sqlite and a sleep(1000). Additionally, use Y.PermanentUserData, or try to read data from the ydoc in the onSynced event." ([e33dbe2](https://github.com/ueberdosis/hocuspocus/commit/e33dbe22d6ec98279699e11ef6d5bb224299e2d3)), closes [#919](https://github.com/ueberdosis/hocuspocus/issues/919)
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+
+### Bug Fixes
+
+* temporarily removes beforeSync callback ([#919](https://github.com/ueberdosis/hocuspocus/issues/919), partially reverts a6a7bcd0768378908ffb5d32096183280115631b). Making applySync async causes timing issues that leads to issues when using PermanentUserData. This can be reproduced by using the playground server with sqlite and a sleep(1000). Additionally, use Y.PermanentUserData, or try to read data from the ydoc in the onSynced event. ([7192664](https://github.com/ueberdosis/hocuspocus/commit/719266443e13e0dab3f69cd8e10b29da547ceab1))
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+
+### Bug Fixes
+
+* fixes timing issues when multiple users leave the same document together ([70e5955](https://github.com/ueberdosis/hocuspocus/commit/70e59553e95acbeaf170e0e5a13ea14cfd4ff152))
+
+
+### Features
+
+* add onTokenSync hook for auth token re-sync ([#1001](https://github.com/ueberdosis/hocuspocus/issues/1001)) ([ee252fb](https://github.com/ueberdosis/hocuspocus/commit/ee252fb99ea6faf80cc71d2e1ce51726e698b76b))
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+
+### Bug Fixes
+
+* bind onUpdate before afterLoadDocument, as changes wont be saved otherwise ([bf8a6f9](https://github.com/ueberdosis/hocuspocus/commit/bf8a6f9b2902a81664bbbba8e8a34f7112570d2a))
+
+
+### Features
+
+* rewrite of redis unloading logic to utilize before/after-unloadDocument ([#1007](https://github.com/ueberdosis/hocuspocus/issues/1007)) ([8f86caf](https://github.com/ueberdosis/hocuspocus/commit/8f86caff4e74601ecc98fff293fc58584af27176))
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 

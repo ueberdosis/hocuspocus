@@ -3,9 +3,9 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onConnect callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onConnect() {
         t.pass()
         resolve('done')
@@ -16,9 +16,9 @@ test('executes the onConnect callback', async t => {
 
 test("executes the on('connect') callback", async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    const provider = newHocuspocusProvider(server)
+    const provider = newHocuspocusProvider(t, server)
 
     provider.on('connect', () => {
       t.pass()

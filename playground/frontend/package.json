@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/frontend-demo",
-	"version": "3.2.5",
+	"version": "3.4.6-rc.1",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
@@ -9,22 +9,22 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@hocuspocus/provider": "^3.2.5",
-		"@tiptap/extension-collaboration": "^3.0.1",
-		"@tiptap/extension-collaboration-caret": "^3.0.1",
-		"@tiptap/react": "^3.0.1",
-		"@tiptap/starter-kit": "^3.0.1",
+		"@hocuspocus/provider": "workspace:*",
+		"@hocuspocus/provider-react": "workspace:*",
+		"@tiptap/extension-collaboration": "^3.18.0",
+		"@tiptap/extension-collaboration-caret": "^3.18.0",
+		"@tiptap/extension-floating-menu": "^3.18.0",
+		"@tiptap/react": "^3.18.0",
+		"@tiptap/starter-kit": "^3.18.0",
 		"jwt-encode": "^1.0.1",
-		"next": "15.4.7",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
-	},
-	"overrides": {
-		"@hocuspocus/provider": "$@hocuspocus/provider"
+		"next": "16.2.6",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"yjs": "^13"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4",
-		"@types/node": "^20",
+		"@types/node": "^22",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"tailwindcss": "^4",

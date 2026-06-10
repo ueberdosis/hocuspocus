@@ -1,6 +1,6 @@
 {
 	"name": "@hocuspocus/extension-redis",
-	"version": "3.2.5",
+	"version": "4.1.1",
 	"description": "Scale Hocuspocus horizontally with Redis",
 	"homepage": "https://hocuspocus.dev",
 	"keywords": [
@@ -12,7 +12,7 @@
 	"type": "module",
 	"main": "dist/hocuspocus-redis.cjs",
 	"module": "dist/hocuspocus-redis.esm.js",
-	"types": "dist/packages/extension-redis/src/index.d.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		"source": {
 			"import": "./src/index.ts"
@@ -20,26 +20,29 @@
 		"default": {
 			"import": "./dist/hocuspocus-redis.esm.js",
 			"require": "./dist/hocuspocus-redis.cjs",
-			"types": "./dist/packages/extension-redis/src/index.d.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
 		"src",
 		"dist"
 	],
-	"devDependencies": {
-		"@types/lodash.debounce": "^4.0.6"
-	},
 	"dependencies": {
-		"@hocuspocus/server": "^3.2.5",
+		"@hocuspocus/common": "workspace:^",
+		"@hocuspocus/server": "workspace:^",
 		"@sesamecare-oss/redlock": "^1.4.0",
-		"ioredis": "^5.6.1",
-		"kleur": "^4.1.4",
-		"lodash.debounce": "^4.0.8"
+		"ioredis": "~5.6.1",
+		"kleur": "^4.1.4"
 	},
 	"peerDependencies": {
 		"y-protocols": "^1.0.6",
 		"yjs": "^13.6.8"
 	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d"
+	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

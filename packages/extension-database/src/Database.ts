@@ -1,9 +1,10 @@
 import type {
 	Extension,
+	fetchPayload,
 	onChangePayload,
 	onLoadDocumentPayload,
+	onStoreDocumentPayload,
 	storePayload,
-	fetchPayload,
 } from "@hocuspocus/server";
 import * as Y from "yjs";
 
@@ -52,7 +53,7 @@ export class Database implements Extension {
 	/**
 	 * Store new updates in the database.
 	 */
-	async onStoreDocument(data: onChangePayload) {
+	async onStoreDocument(data: onStoreDocumentPayload) {
 		await this.configuration.store({
 			...data,
 			state: Buffer.from(Y.encodeStateAsUpdate(data.document)),

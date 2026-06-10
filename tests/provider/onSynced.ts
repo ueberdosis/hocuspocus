@@ -3,9 +3,9 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('onSynced callback is executed', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced() {
         t.pass()
         resolve('done')
@@ -16,9 +16,9 @@ test('onSynced callback is executed', async t => {
 
 test("on('synced') callback is executed", async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus()
+    const server = await newHocuspocus(t)
 
-    const provider = newHocuspocusProvider(server)
+    const provider = newHocuspocusProvider(t, server)
 
     provider.on('synced', () => {
       t.pass()
@@ -29,13 +29,13 @@ test("on('synced') callback is executed", async t => {
 
 test('onSynced callback is executed, even when the onConnect takes longer', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect(data) {
         await sleep(100)
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onSynced() {
         t.pass()
         resolve('done')
@@ -46,7 +46,7 @@ test('onSynced callback is executed, even when the onConnect takes longer', asyn
 
 test('onSynced callback is executed when the document is actually synced', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
@@ -54,7 +54,7 @@ test('onSynced callback is executed when the document is actually synced', async
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onSynced() {
         const value = provider.document.getArray('foo').get(0)
         t.is(value, 'bar')
@@ -67,7 +67,7 @@ test('onSynced callback is executed when the document is actually synced', async
 
 test('send all messages according to the protocol', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onLoadDocument({ document }) {
         document.getArray('foo').insert(0, ['bar'])
 
@@ -75,7 +75,7 @@ test('send all messages according to the protocol', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       async onSynced() {
         t.deepEqual(provider.document.getArray('foo').get(0), 'bar')
 
@@ -87,7 +87,7 @@ test('send all messages according to the protocol', async t => {
 
 test('onSynced callback is executed when the document is actually synced, even if it takes longer', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onLoadDocument({ document }) {
         await sleep(100)
 
@@ -97,7 +97,7 @@ test('onSynced callback is executed when the document is actually synced, even i
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onSynced() {
         const value = provider.document.getArray('foo').get(0)
         t.is(value, 'bar')

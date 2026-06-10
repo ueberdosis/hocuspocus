@@ -1,8 +1,8 @@
 import express from 'express'
 import expressWebsockets from 'express-ws'
-// @ts-ignore
+// @ts-expect-error
 import jsonwebtoken from 'jsonwebtoken'
-// @ts-ignore
+// @ts-expect-error
 import cors from 'cors'
 
 const { app } = expressWebsockets(express())

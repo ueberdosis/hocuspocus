@@ -2,7 +2,7 @@ import test from 'ava'
 import { newHocuspocus } from '../utils/index.ts'
 
 test('returns a dynamic HTTP/WebSocket address with the correct port', async t => {
-  const hocuspocus = await newHocuspocus({
+  const hocuspocus = await newHocuspocus(t, {
     port: 4010,
   })
 

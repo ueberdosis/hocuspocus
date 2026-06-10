@@ -5,7 +5,7 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('fetch has the document name', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new Database({
           async fetch({ documentName }) {
@@ -19,7 +19,7 @@ test('fetch has the document name', async t => {
       ],
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       name: 'my-unique-document-name',
     })
   })
@@ -27,7 +27,7 @@ test('fetch has the document name', async t => {
 
 test('passes context from onAuthenticate to fetch', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       extensions: [
         new Database({
           async fetch({ context }) {
@@ -48,7 +48,7 @@ test('passes context from onAuthenticate to fetch', async t => {
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       token: 'SUPER-SECRET-TOKEN',
       name: 'my-unique-document-name',
     })

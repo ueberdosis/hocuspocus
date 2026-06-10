@@ -3,6 +3,264 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.7...v4.0.0) (2026-04-23)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.7](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.6...v4.0.0-rc.7) (2026-04-22)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.6](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.5...v4.0.0-rc.6) (2026-04-20)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-04-16)
+
+
+### Features
+
+* adds package readmes ([c7d63f7](https://github.com/ueberdosis/hocuspocus/commit/c7d63f79980de3c34e63b60073f22774bf27ac13))
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-04-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-04-08)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-30)
+
+
+### Features
+
+* optimize retry logic ([302eb08](https://github.com/ueberdosis/hocuspocus/commit/302eb08d9a2a2b59d44424571fdc70d5790d8fd8))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-03-16)
+
+
+### Features
+
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+
+
+
+
+
+# [4.0.0-rc.5](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.4...v4.0.0-rc.5) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.4](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.3...v4.0.0-rc.4) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.3](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.2...v4.0.0-rc.3) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.1...v4.0.0-rc.2) (2026-03-16)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [4.0.0-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0-rc.0...v4.0.0-rc.1) (2026-03-16)
+
+
+### Features
+
+* session awareness ([#1071](https://github.com/ueberdosis/hocuspocus/issues/1071)) ([00dd3eb](https://github.com/ueberdosis/hocuspocus/commit/00dd3ebf856c79443f7bf7e6ea8e7f42015bb3d4))
+
+
+
+
+
+# [4.0.0-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v4.0.0-rc.0) (2026-02-18)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.6-rc.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.1...v3.4.6-rc.2) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.6-rc.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.6-rc.0...v3.4.6-rc.1) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.6-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.5-rc.0...v3.4.6-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.5-rc.0](https://github.com/ueberdosis/hocuspocus/compare/v3.4.4...v3.4.5-rc.0) (2026-02-03)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.4](https://github.com/ueberdosis/hocuspocus/compare/v3.4.3...v3.4.4) (2026-01-25)
+
+
+### Bug Fixes
+
+* strict types for authorizedScope ([#1029](https://github.com/ueberdosis/hocuspocus/issues/1029)) ([44e1b5d](https://github.com/ueberdosis/hocuspocus/commit/44e1b5d19f632bf646b654efd2c2ba70587adf62))
+
+
+
+
+
+## [3.4.3](https://github.com/ueberdosis/hocuspocus/compare/v3.4.2...v3.4.3) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.2](https://github.com/ueberdosis/hocuspocus/compare/v3.4.1...v3.4.2) (2025-12-15)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.4.1](https://github.com/ueberdosis/hocuspocus/compare/v3.4.0...v3.4.1) (2025-12-09)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [3.4.0](https://github.com/ueberdosis/hocuspocus/compare/v3.3.2...v3.4.0) (2025-10-24)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.3.2](https://github.com/ueberdosis/hocuspocus/compare/v3.3.1...v3.3.2) (2025-10-23)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+## [3.3.1](https://github.com/ueberdosis/hocuspocus/compare/v3.3.0...v3.3.1) (2025-10-22)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
+# [3.3.0](https://github.com/ueberdosis/hocuspocus/compare/v3.2.6...v3.3.0) (2025-10-22)
+
+
+### Features
+
+* add onTokenSync hook for auth token re-sync ([#1001](https://github.com/ueberdosis/hocuspocus/issues/1001)) ([ee252fb](https://github.com/ueberdosis/hocuspocus/commit/ee252fb99ea6faf80cc71d2e1ce51726e698b76b))
+
+
+
+
+
+## [3.2.6](https://github.com/ueberdosis/hocuspocus/compare/v3.2.5...v3.2.6) (2025-10-17)
+
+**Note:** Version bump only for package @hocuspocus/common
+
+
+
+
+
 ## [3.2.5](https://github.com/ueberdosis/hocuspocus/compare/v3.2.4...v3.2.5) (2025-10-07)
 
 **Note:** Version bump only for package @hocuspocus/common

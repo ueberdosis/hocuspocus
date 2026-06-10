@@ -1,13 +1,13 @@
 "use client";
 
-import { SocketContext1 } from "@/app/SocketContext1";
-import { SocketContext2 } from "@/app/SocketContext2";
 import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 // import {
 // 	TiptapCollabProvider,
 // 	TiptapCollabProviderWebsocket,
 // } from "@tiptap-cloud/provider";
 import { useEffect, useState } from "react";
+import { SocketContext1 } from "@/app/SocketContext1";
+import { SocketContext2 } from "@/app/SocketContext2";
 
 export default function Layout({
 	children,
@@ -23,10 +23,10 @@ export default function Layout({
 
 	useEffect(() => {
 		const newlyCreatedSocket1 = new HocuspocusProviderWebsocket({
-			url: "ws://localhost:8000",
+			url: "ws://localhost:8080",
 		});
 		const newlyCreatedSocket2 = new HocuspocusProviderWebsocket({
-			url: "ws://localhost:8000",
+			url: "ws://localhost:8080",
 		});
 		// const newlyCreatedSocket = new TiptapCollabProviderWebsocket({
 		// 	appId: "",

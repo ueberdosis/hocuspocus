@@ -3,7 +3,7 @@ import { Server } from '@hocuspocus/server'
 import { newHocuspocus } from '../utils/index.ts'
 
 test('should respond with OK', async t => {
-  const hocuspocus = await newHocuspocus()
+  const hocuspocus = await newHocuspocus(t)
 
   const response = await fetch(hocuspocus.server!.httpURL)
 
@@ -11,7 +11,7 @@ test('should respond with OK', async t => {
 })
 
 test('should respond with status 200', async t => {
-  const hocuspocus = await newHocuspocus()
+  const hocuspocus = await newHocuspocus(t)
 
   const response = await fetch(hocuspocus.server!.httpURL)
 
@@ -19,7 +19,7 @@ test('should respond with status 200', async t => {
 })
 
 test('should respond with OK on a custom port', async t => {
-  const hocuspocus = await newHocuspocus({
+  const hocuspocus = await newHocuspocus(t, {
     port: 4000,
   })
 
@@ -32,7 +32,10 @@ test('should respond with OK on a custom port', async t => {
 test('should respond with OK on a custom port passed to listen()', async t => {
   const server = new Server({
     port: 0,
+    stopOnSignals: false,
   })
+
+  t.teardown(() => server.httpServer.close())
 
   server.listen(4001)
 
@@ -45,7 +48,10 @@ test('should respond with OK on a custom port passed to listen()', async t => {
 test('should take a custom port and a callback', async t => {
   const server = new Server({
     port: 0,
+    stopOnSignals: false,
   })
+
+  t.teardown(() => server.httpServer.close())
 
   await new Promise(async resolve => {
     server.listen(4002, () => {
@@ -62,7 +68,10 @@ test('should take a custom port and a callback', async t => {
 test('should execute a callback', async t => {
   const server = new Server({
     port: 0,
+    stopOnSignals: false,
   })
+
+  t.teardown(() => server.httpServer.close())
 
   await new Promise(async resolve => {
     server.listen(0, async () => {
@@ -78,7 +87,10 @@ test('should execute a callback', async t => {
 test('should have the custom port as a parameter in the callback', async t => {
   const server = new Server({
     port: 0,
+    stopOnSignals: false,
   })
+
+  t.teardown(() => server.httpServer.close())
 
   await new Promise(async resolve => {
     server.listen(0, async ({ port }: any) => {

@@ -15,7 +15,7 @@ test('beforeHandleMessage gets called in proper order', async t => {
     ]
     let callNumber = 0
 
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         return mockContext
       },
@@ -40,7 +40,7 @@ test('beforeHandleMessage gets called in proper order', async t => {
       },
     })
 
-    const provider = newHocuspocusProvider(server, {
+    const provider = newHocuspocusProvider(t, server, {
       onSynced() {
         provider.document.getArray('foo').insert(0, ['bar'])
       },
@@ -53,7 +53,7 @@ test('beforeHandleMessage callback is called for every new client', async t => {
   let beforeHandleMessageCount = 0
 
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async onConnect() {
         onConnectCount += 1
       },
@@ -62,12 +62,12 @@ test('beforeHandleMessage callback is called for every new client', async t => {
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onClose() {
         t.fail()
       },
     })
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onClose() {
         t.fail()
       },
@@ -85,13 +85,13 @@ test('beforeHandleMessage callback is called for every new client', async t => {
 
 test('an exception thrown in beforeHandleMessage closes the connection', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus({
+    const server = await newHocuspocus(t, {
       async beforeHandleMessage() {
         throw new Error()
       },
     })
 
-    newHocuspocusProvider(server, {
+    newHocuspocusProvider(t, server, {
       onClose() {
         t.pass()
         resolve('done')
