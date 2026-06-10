@@ -43,6 +43,7 @@ new RedisServerAffinity(configuration: Configuration)
 | `customEventTTL` | `number`                                                                       | (Optional) Timeout for custom event replies. Default: `30_000`.               |                                              |
 | `prefix`         | `string`                                                                       | (Optional) Prefix for Redis keys. Default: `'rsa'`.                           |                                              |
 | `customEvents`   | `Record<string, (documentName: string, payload: unknown) => Promise<unknown>>` | (Optional) Map of custom event handlers.                                      |                                              |
+| `deriveContext`  | `(serializedHTTPRequest: SerializedHTTPRequest) => Record<string, any>`        | (Optional) Derives the Hocuspocus context once per socket rather than once per document. See below. |  |
 
 ---
 
@@ -106,6 +107,31 @@ const reuslt = await redisHocusPocus.handleEvent('updateLinkedTitles', documentN
 
 * If the document is loaded locally, the event is handled immediately.
 * If another server owns the document, the event is proxied via Redis.
+
+---
+
+## `deriveContext`
+
+Derives the Hocuspocus context once per socket rather than once per document. Runs on the origin server when the socket opens, and on the document-owner server when the first proxied message arrives.
+
+```ts
+const redisAffinity = new RedisServerAffinity({
+  // ...
+  deriveContext: ({headers}) => {
+    const cookie = Object.fromEntries(
+      (headers['cookie'] ?? '').split('; ').map((c) => c.split('='))
+    )
+    return {userId: cookie['userId']}
+  },
+})
+
+const server = new Hocuspocus({
+  async onAuthenticate({context}) {
+    if (!context.userId) throw new Error('Unauthenticated')
+  },
+  extensions: [redisAffinity],
+})
+```
 
 ---
 
