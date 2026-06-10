@@ -82,6 +82,17 @@ export interface HocuspocusRoomProps {
 	 * JWT token or function that returns a promise resolving to a token
 	 */
 	token?: string | (() => Promise<string>) | (() => string);
+	/**
+	 * Enable session-aware multiplexing. When true, the provider embeds a unique
+	 * sessionId in the documentName field of every message, allowing multiple
+	 * providers with the same document name on a single WebSocket connection.
+	 *
+	 * Only set this to `true` when connecting to a v4 server that does 
+	 * support session awareness.
+	 *
+	 * Default: false
+	 */
+	sessionAwareness?: boolean;
 
 	// Event handlers — all optional, called when the provider emits the corresponding event.
 	onOpen?: (data: onOpenParameters) => void;
