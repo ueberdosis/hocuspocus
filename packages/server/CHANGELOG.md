@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* client-initiated broadcastStateless ([#1103](https://github.com/ueberdosis/hocuspocus/issues/1103)) ([6872d08](https://github.com/ueberdosis/hocuspocus/commit/6872d08bbb2ebe8175dcfb51953481b2f4988291))
+
+
+
+
+
 # [4.1.0](https://github.com/ueberdosis/hocuspocus/compare/v4.0.0...v4.1.0) (2026-05-20)
 
 
