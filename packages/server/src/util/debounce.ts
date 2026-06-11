@@ -22,12 +22,12 @@ export const useDebounce = () => {
 		const start = old?.start || Date.now();
 
 		const run = async () => {
+			timers.delete(id);
+
 			if (runningExecutions.has(id)) {
 				// wait for previous execution to finish
 				await runningExecutions.get(id);
 			}
-
-			timers.delete(id);
 
 			const execution = func();
 
