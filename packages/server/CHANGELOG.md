@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.2](https://github.com/ueberdosis/hocuspocus/compare/v4.1.1...v4.1.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* delete debouncer timer entry before awaiting the in-flight execution ([#1110](https://github.com/ueberdosis/hocuspocus/issues/1110)) ([f05f1d0](https://github.com/ueberdosis/hocuspocus/commit/f05f1d02f7890822e76d7b16f3cf3b3d9901ab02)), closes [#1014](https://github.com/ueberdosis/hocuspocus/issues/1014)
+
+
+
+
+
 ## [4.1.1](https://github.com/ueberdosis/hocuspocus/compare/v4.1.0...v4.1.1) (2026-06-10)
 
 
