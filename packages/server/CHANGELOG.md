@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/ueberdosis/hocuspocus/compare/v4.1.2...v4.2.0) (2026-06-12)
+
+
+### Features
+
+* add `unloadImmediately` option to `disconnect()` for configurable document persistence behavior ([#1111](https://github.com/ueberdosis/hocuspocus/issues/1111)) ([eeb4696](https://github.com/ueberdosis/hocuspocus/commit/eeb469630540b8aeb08d699ba130a86e50e7ee5e))
+
+
+
+
+
 ## [4.1.2](https://github.com/ueberdosis/hocuspocus/compare/v4.1.1...v4.1.2) (2026-06-11)
 
 
