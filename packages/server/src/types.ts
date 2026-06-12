@@ -505,9 +505,9 @@ export interface beforeUnloadDocumentPayload {
 
 export interface DisconnectOptions {
 	/**
-	 * When `true` (the default) the document is persisted synchronously and
-	 * unloaded from memory as the connection closes. When `false` the store is
-	 * handed to the debounce timer and the document is kept warm in memory, so a
+	 * When `true` (the default) the document is persisted immediately (no debouncing)
+	 * and unloaded from memory as the connection closes. When `false` the store is
+	 * scheduled via the debounce timer and the document is kept warm in memory, so a
 	 * follow-up direct connection reuses it and repeated writes coalesce. With
 	 * `false`, persistence is no longer guaranteed by the time `disconnect()`
 	 * resolves.
