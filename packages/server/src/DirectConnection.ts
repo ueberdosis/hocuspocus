@@ -3,6 +3,7 @@ import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import type {
 	DirectConnection as DirectConnectionInterface,
+	DisconnectOptions,
 	LocalTransactionOrigin,
 } from "./types.ts";
 
@@ -43,10 +44,19 @@ export class DirectConnection<Context = any>
 		);
 	}
 
-	async disconnect() {
+	async disconnect(options?: DisconnectOptions) {
 		if (this.document) {
+			// Defaults to true regardless of the server-wide `unloadImmediately`
+			// setting, so the historical "durable on disconnect" behavior is kept
+			// unless a caller explicitly opts into keeping the document warm.
+			const unloadImmediately = options?.unloadImmediately ?? true;
+
 			this.document?.removeDirectConnection();
 
+			// With unloadImmediately the document is persisted synchronously.
+			// Otherwise the store is debounced, so the document stays warm in memory
+			// and a follow-up direct connection can reuse it (coalescing writes),
+			// mirroring how websocket connections behave on close.
 			await this.instance.storeDocumentHooks(
 				this.document,
 				{
@@ -60,12 +70,13 @@ export class DirectConnection<Context = any>
 					documentName: this.document.name,
 					instance: this.instance,
 				},
-				true,
+				unloadImmediately,
 			);
 
 			// If the direct connection was the only connection to the document
-			// then we should trigger the onDisconnect hook for
-			// this doc and unload the document
+			// then we should trigger the onDisconnect hook for this doc. We only
+			// unload it right away when unloadImmediately is set; otherwise the
+			// debounced store above unloads it once it has flushed.
 			if (
 				this.document.getConnectionsCount() === 0 &&
 				!this.document.saveMutex.isLocked()
@@ -81,7 +92,9 @@ export class DirectConnection<Context = any>
 					requestParameters: new URLSearchParams(),
 				});
 
-				await this.instance.unloadDocument(this.document);
+				if (unloadImmediately) {
+					await this.instance.unloadDocument(this.document);
+				}
 			}
 
 			this.document = null;

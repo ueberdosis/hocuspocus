@@ -390,3 +390,63 @@ test("direct connection passes context", async (t) => {
 		t.is(direct.document?.getArray("test").toJSON()[0], "value");
 	});
 });
+
+test("disconnect({ unloadImmediately: false }) keeps the document warm and coalesces stores", async (t) => {
+	let storeCount = 0;
+
+	const server = await newHocuspocus(t, {
+		debounce: 100,
+		maxDebounce: 500,
+		onStoreDocument: async () => {
+			storeCount += 1;
+		},
+	});
+
+	const first = await server.openDirectConnection("hocuspocus-test");
+	await first.transact((document) => {
+		document.getArray("test").insert(0, ["a"]);
+	});
+	await first.disconnect({ unloadImmediately: false });
+
+	// The document stays in memory and nothing is persisted yet.
+	t.is(server.getConnectionsCount(), 0);
+	t.is(server.getDocumentsCount(), 1);
+	t.is(storeCount, 0);
+
+	// A follow-up direct connection reuses the warm document.
+	const second = await server.openDirectConnection("hocuspocus-test");
+	t.is(server.getDocumentsCount(), 1);
+	await second.transact((document) => {
+		document.getArray("test").insert(1, ["b"]);
+	});
+	await second.disconnect({ unloadImmediately: false });
+
+	t.is(server.getDocumentsCount(), 1);
+	t.is(storeCount, 0);
+
+	// After the debounce window the store flushes once (coalesced) and the
+	// document is unloaded.
+	await sleep(700);
+	t.is(storeCount, 1);
+	t.is(server.getDocumentsCount(), 0);
+});
+
+test("disconnect() without options still persists and unloads immediately", async (t) => {
+	let storeCount = 0;
+
+	const server = await newHocuspocus(t, {
+		onStoreDocument: async () => {
+			storeCount += 1;
+		},
+	});
+
+	const direct = await server.openDirectConnection("hocuspocus-test");
+	await direct.transact((document) => {
+		document.getArray("test").insert(0, ["value"]);
+	});
+	await direct.disconnect();
+
+	t.is(storeCount, 1);
+	t.is(server.getConnectionsCount(), 0);
+	t.is(server.getDocumentsCount(), 0);
+});
