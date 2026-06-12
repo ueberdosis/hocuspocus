@@ -426,7 +426,7 @@ test("disconnect({ unloadImmediately: false }) keeps the document warm and coale
 
 	// After the debounce window the store flushes once (coalesced) and the
 	// document is unloaded.
-	await sleep(700);
+	await sleep(server.configuration.maxDebounce + server.configuration.debounce + 100);
 	t.is(storeCount, 1);
 	t.is(server.getDocumentsCount(), 0);
 });
