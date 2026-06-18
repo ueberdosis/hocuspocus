@@ -90,6 +90,11 @@ export class ClientConnection<Context = any> {
 	// of its documents.
 	private hasAuthenticated = false;
 
+	// Set once the connection has been proactively torn down (timeout or a limit
+	// breach). Guards against processing — and re-logging — frames that were
+	// already in flight when we decided to close the socket.
+	private terminated = false;
+
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
 	 * runs all hooks:
@@ -159,6 +164,11 @@ export class ClientConnection<Context = any> {
 	 * keep the socket (and its resources) open even after a timeout fires.
 	 */
 	private terminate(event?: CloseEvent) {
+		if (this.terminated) {
+			return;
+		}
+		this.terminated = true;
+
 		this.close(event);
 
 		if (
@@ -445,12 +455,19 @@ export class ClientConnection<Context = any> {
 				// Bound the amount of data buffered before authentication. An
 				// unauthenticated client must not be able to grow this queue without
 				// limit (GHSA-xwhh-v746-pj9m).
-				if (
-					this.getQueuedBytes() + data.byteLength >
-						this.maxUnauthenticatedQueueSize ||
-					this.getQueuedMessageCount() + 1 >
-						this.maxUnauthenticatedQueueMessages
-				) {
+				const queuedBytes = this.getQueuedBytes();
+				const queuedMessages = this.getQueuedMessageCount();
+				const exceedsBytes =
+					queuedBytes + data.byteLength > this.maxUnauthenticatedQueueSize;
+				const exceedsMessages =
+					queuedMessages + 1 > this.maxUnauthenticatedQueueMessages;
+
+				if (exceedsBytes || exceedsMessages) {
+					console.warn(
+						exceedsBytes
+							? `Hocuspocus: closing connection ${this.socketId}: unauthenticated message queue size limit exceeded for "${documentName}" (${queuedBytes + data.byteLength} > maxUnauthenticatedQueueSize ${this.maxUnauthenticatedQueueSize} bytes).`
+							: `Hocuspocus: closing connection ${this.socketId}: unauthenticated message queue length limit exceeded for "${documentName}" (${queuedMessages + 1} > maxUnauthenticatedQueueMessages ${this.maxUnauthenticatedQueueMessages}).`,
+					);
 					this.terminate(ResetConnection);
 					return;
 				}
@@ -552,6 +569,12 @@ export class ClientConnection<Context = any> {
 	 * when the WebSocket receives a binary message.
 	 */
 	handleMessage = (data: Uint8Array) => {
+		// Ignore anything that arrives after we've decided to tear the connection
+		// down (e.g. frames that were already in flight when a limit was breached).
+		if (this.terminated) {
+			return;
+		}
+
 		this.lastMessageReceivedAt = Date.now();
 
 		try {
@@ -579,6 +602,9 @@ export class ClientConnection<Context = any> {
 				// queue and hook payload, so this prevents memory amplification by
 				// fanning out across many document names (GHSA-xwhh-v746-pj9m).
 				if (this.getPendingDocumentCount() >= this.maxPendingDocuments) {
+					console.warn(
+						`Hocuspocus: closing connection ${this.socketId}: too many pending unauthenticated documents (maxPendingDocuments ${this.maxPendingDocuments}). Last requested document: "${documentName}".`,
+					);
 					this.terminate(ResetConnection);
 					return;
 				}
