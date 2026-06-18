@@ -39,6 +39,10 @@ export class ClientConnection<Context = any> {
 	// be queued and handled later.
 	private readonly incomingMessageQueue: Record<string, Uint8Array[]> = {};
 
+	// Tracks the number of bytes buffered per document key, so the total amount
+	// of unauthenticated buffered data can be bounded (see GHSA-xwhh-v746-pj9m).
+	private readonly incomingMessageQueueBytes: Record<string, number> = {};
+
 	// While the connection is establishing, keep track of which documents have received auth
 	private readonly documentConnectionsEstablished = new Set<string>();
 
@@ -66,9 +70,30 @@ export class ClientConnection<Context = any> {
 
 	timeout: number;
 
+	private readonly maxUnauthenticatedQueueSize: number;
+
+	private readonly maxUnauthenticatedQueueMessages: number;
+
+	private readonly maxPendingDocuments: number;
+
 	pingInterval: NodeJS.Timeout;
 
 	lastMessageReceivedAt = Date.now();
+
+	// When the connection was opened. Used to enforce a pre-authentication
+	// deadline that inbound traffic cannot refresh.
+	private readonly connectionEstablishedAt = Date.now();
+
+	// Set once any document on this connection has successfully authenticated.
+	// Sticky on purpose: once a client has proven itself, the normal idle-timeout
+	// logic applies for the rest of the socket's life, even if it later closes all
+	// of its documents.
+	private hasAuthenticated = false;
+
+	// Set once the connection has been proactively torn down (timeout or a limit
+	// breach). Guards against processing — and re-logging — frames that were
+	// already in flight when we decided to close the socket.
+	private terminated = false;
 
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
@@ -90,10 +115,18 @@ export class ClientConnection<Context = any> {
 		private readonly hooks: Hocuspocus["hooks"],
 		private readonly opts: {
 			timeout: number;
+			maxUnauthenticatedQueueSize?: number;
+			maxUnauthenticatedQueueMessages?: number;
+			maxPendingDocuments?: number;
 		},
 		private readonly defaultContext: Context = {} as Context,
 	) {
 		this.timeout = opts.timeout;
+		this.maxUnauthenticatedQueueSize =
+			opts.maxUnauthenticatedQueueSize ?? 5 * 1024 * 1024;
+		this.maxUnauthenticatedQueueMessages =
+			opts.maxUnauthenticatedQueueMessages ?? 1_000;
+		this.maxPendingDocuments = opts.maxPendingDocuments ?? 100;
 		this.pingInterval = setInterval(this.check, this.timeout);
 	}
 
@@ -110,6 +143,42 @@ export class ClientConnection<Context = any> {
 		Object.values(this.documentConnections).forEach((connection) =>
 			connection.close(event),
 		);
+
+		// Release any buffered pre-authentication state. Without this, a
+		// timed-out or rejected connection would keep its queued messages and
+		// hook payloads in memory until the process exits (GHSA-xwhh-v746-pj9m).
+		for (const rawKey of Object.keys(this.incomingMessageQueue)) {
+			delete this.incomingMessageQueue[rawKey];
+			delete this.incomingMessageQueueBytes[rawKey];
+		}
+		for (const rawKey of Object.keys(this.hookPayloads)) {
+			delete this.hookPayloads[rawKey];
+		}
+		this.documentConnectionsEstablished.clear();
+	}
+
+	/**
+	 * Tear down the connection: release the established document connections and
+	 * the buffered pre-authentication state, then close the underlying socket.
+	 * Closing the socket is essential — otherwise an unauthenticated client can
+	 * keep the socket (and its resources) open even after a timeout fires.
+	 */
+	private terminate(event?: CloseEvent) {
+		if (this.terminated) {
+			return;
+		}
+		this.terminated = true;
+
+		this.close(event);
+
+		if (
+			this.websocket.readyState !== WsReadyStates.Closing &&
+			this.websocket.readyState !== WsReadyStates.Closed
+		) {
+			this.websocket.close(event?.code, event?.reason);
+		}
+
+		clearInterval(this.pingInterval);
 	}
 
 	/**
@@ -119,10 +188,58 @@ export class ClientConnection<Context = any> {
 	 * Awareness updates (~every 30s) keep active connections alive.
 	 */
 	private check = () => {
-		if (Date.now() - this.lastMessageReceivedAt > this.timeout) {
-			this.close(ConnectionTimeout);
+		// Until the connection has authenticated at least one document, use an
+		// absolute deadline based on when the connection opened. Inbound traffic
+		// updates `lastMessageReceivedAt`, so a flood of unauthenticated frames
+		// could otherwise refresh the timeout forever and keep the socket alive.
+		// Once authenticated, fall back to the normal idle behavior — even if the
+		// client later closes all of its documents — so an established client that
+		// keeps its socket open is not closed based on the original open time.
+		const referenceTime = this.hasAuthenticated
+			? this.lastMessageReceivedAt
+			: this.connectionEstablishedAt;
+
+		if (Date.now() - referenceTime > this.timeout) {
+			this.terminate(ConnectionTimeout);
 		}
 	};
+
+	// Total bytes currently buffered for unauthenticated documents on this
+	// connection. Derived on demand so the various cleanup paths only need to
+	// delete their keys without keeping a running counter in sync.
+	private getQueuedBytes(): number {
+		let total = 0;
+		for (const rawKey of Object.keys(this.incomingMessageQueueBytes)) {
+			total += this.incomingMessageQueueBytes[rawKey];
+		}
+		return total;
+	}
+
+	// Total number of messages currently buffered for unauthenticated documents.
+	private getQueuedMessageCount(): number {
+		let total = 0;
+		for (const rawKey of Object.keys(this.incomingMessageQueue)) {
+			total += this.incomingMessageQueue[rawKey].length;
+		}
+		return total;
+	}
+
+	// Number of distinct documents on this connection that have not yet finished
+	// authenticating. Each holds its own queue and hook payload, so this is capped
+	// to prevent a single connection from amplifying memory usage by fanning out
+	// across many document names. We count by `isAuthenticated` (not by whether an
+	// Auth frame has been seen) so that sending an Auth frame first — which marks
+	// the document as "establishing" but keeps its hook payload alive while a slow
+	// `onAuthenticate` runs — cannot be used to bypass the limit.
+	private getPendingDocumentCount(): number {
+		let total = 0;
+		for (const rawKey of Object.keys(this.hookPayloads)) {
+			if (!this.hookPayloads[rawKey].connectionConfig.isAuthenticated) {
+				total += 1;
+			}
+		}
+		return total;
+	}
 
 	/**
 	 * Set a callback that will be triggered when the connection is closed
@@ -262,6 +379,7 @@ export class ClientConnection<Context = any> {
 			delete this.hookPayloads[rawKey];
 			delete this.documentConnections[rawKey];
 			delete this.incomingMessageQueue[rawKey];
+			delete this.incomingMessageQueueBytes[rawKey];
 			this.documentConnectionsEstablished.delete(rawKey);
 		});
 
@@ -302,10 +420,15 @@ export class ClientConnection<Context = any> {
 			return;
 		}
 
-		// Drain queued messages to the Connection.
+		// Drain queued messages to the Connection. Once drained, the buffered
+		// data is no longer needed (subsequent messages route straight to the
+		// Connection), so release it and stop counting it against the queue
+		// limits.
 		this.incomingMessageQueue[rawKey]?.forEach((input) => {
 			connection.handleMessage(input);
 		});
+		delete this.incomingMessageQueue[rawKey];
+		delete this.incomingMessageQueueBytes[rawKey];
 
 		await this.hooks("connected", {
 			...hookPayload,
@@ -329,7 +452,29 @@ export class ClientConnection<Context = any> {
 					!this.documentConnectionsEstablished.has(rawKey)
 				)
 			) {
+				// Bound the amount of data buffered before authentication. An
+				// unauthenticated client must not be able to grow this queue without
+				// limit (GHSA-xwhh-v746-pj9m).
+				const queuedBytes = this.getQueuedBytes();
+				const queuedMessages = this.getQueuedMessageCount();
+				const exceedsBytes =
+					queuedBytes + data.byteLength > this.maxUnauthenticatedQueueSize;
+				const exceedsMessages =
+					queuedMessages + 1 > this.maxUnauthenticatedQueueMessages;
+
+				if (exceedsBytes || exceedsMessages) {
+					console.warn(
+						exceedsBytes
+							? `Hocuspocus: closing connection ${this.socketId}: unauthenticated message queue size limit exceeded for "${documentName}" (${queuedBytes + data.byteLength} > maxUnauthenticatedQueueSize ${this.maxUnauthenticatedQueueSize} bytes).`
+							: `Hocuspocus: closing connection ${this.socketId}: unauthenticated message queue length limit exceeded for "${documentName}" (${queuedMessages + 1} > maxUnauthenticatedQueueMessages ${this.maxUnauthenticatedQueueMessages}).`,
+					);
+					this.terminate(ResetConnection);
+					return;
+				}
+
 				this.incomingMessageQueue[rawKey].push(data);
+				this.incomingMessageQueueBytes[rawKey] =
+					(this.incomingMessageQueueBytes[rawKey] ?? 0) + data.byteLength;
 				return;
 			}
 
@@ -385,6 +530,7 @@ export class ClientConnection<Context = any> {
 				);
 				// All `onAuthenticate` hooks passed.
 				hookPayload.connectionConfig.isAuthenticated = true;
+				this.hasAuthenticated = true;
 
 				// Let the client know that authentication was successful.
 				const message = new OutgoingMessage(responseAddress).writeAuthenticated(
@@ -408,6 +554,7 @@ export class ClientConnection<Context = any> {
 				this.documentConnectionsEstablished.delete(rawKey);
 				delete this.hookPayloads[rawKey];
 				delete this.incomingMessageQueue[rawKey];
+				delete this.incomingMessageQueueBytes[rawKey];
 			}
 
 			// Catch errors due to failed decoding of data
@@ -422,6 +569,12 @@ export class ClientConnection<Context = any> {
 	 * when the WebSocket receives a binary message.
 	 */
 	handleMessage = (data: Uint8Array) => {
+		// Ignore anything that arrives after we've decided to tear the connection
+		// down (e.g. frames that were already in flight when a limit was breached).
+		if (this.terminated) {
+			return;
+		}
+
 		this.lastMessageReceivedAt = Date.now();
 
 		try {
@@ -444,6 +597,18 @@ export class ClientConnection<Context = any> {
 
 			const isFirst = this.incomingMessageQueue[rawKey] === undefined;
 			if (isFirst) {
+				// Cap the number of documents a single connection can open before
+				// authenticating any of them. Each pending document allocates its own
+				// queue and hook payload, so this prevents memory amplification by
+				// fanning out across many document names (GHSA-xwhh-v746-pj9m).
+				if (this.getPendingDocumentCount() >= this.maxPendingDocuments) {
+					console.warn(
+						`Hocuspocus: closing connection ${this.socketId}: too many pending unauthenticated documents (maxPendingDocuments ${this.maxPendingDocuments}). Last requested document: "${documentName}".`,
+					);
+					this.terminate(ResetConnection);
+					return;
+				}
+
 				this.incomingMessageQueue[rawKey] = [];
 				if (this.hookPayloads[rawKey]) {
 					throw new Error("first message, but hookPayloads exists");

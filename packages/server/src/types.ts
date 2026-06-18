@@ -226,6 +226,34 @@ export interface Configuration<Context = any> extends Extension<Context> {
 	unloadImmediately: boolean;
 
 	/**
+	 * Maximum number of bytes that may be buffered, across all documents, for a single
+	 * connection while it is still unauthenticated. Messages received before authentication
+	 * completes are queued in memory; without a limit an unauthenticated client could exhaust
+	 * server memory (see GHSA-xwhh-v746-pj9m). When the limit is exceeded the connection is closed.
+	 *
+	 * @default 5_242_880 (5 MiB)
+	 */
+	maxUnauthenticatedQueueSize: number;
+	/**
+	 * Maximum number of messages that may be buffered, across all documents, for a single
+	 * connection while it is still unauthenticated. When the limit is exceeded the connection
+	 * is closed.
+	 *
+	 * @default 1_000
+	 */
+	maxUnauthenticatedQueueMessages: number;
+	/**
+	 * Maximum number of distinct documents a single connection may open before any of them is
+	 * authenticated. Each pending document holds its own queue and hook payload, so an
+	 * unauthenticated client fanning out across many document names could otherwise exhaust
+	 * memory even while staying under the per-connection queue limits. When the limit is
+	 * exceeded the connection is closed.
+	 *
+	 * @default 100
+	 */
+	maxPendingDocuments: number;
+
+	/**
 	 * options to pass to the ydoc document
 	 */
 	yDocOptions: {
