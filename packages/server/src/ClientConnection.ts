@@ -84,6 +84,12 @@ export class ClientConnection<Context = any> {
 	// deadline that inbound traffic cannot refresh.
 	private readonly connectionEstablishedAt = Date.now();
 
+	// Set once any document on this connection has successfully authenticated.
+	// Sticky on purpose: once a client has proven itself, the normal idle-timeout
+	// logic applies for the rest of the socket's life, even if it later closes all
+	// of its documents.
+	private hasAuthenticated = false;
+
 	/**
 	 * The `ClientConnection` class receives incoming WebSocket connections,
 	 * runs all hooks:
@@ -172,13 +178,14 @@ export class ClientConnection<Context = any> {
 	 * Awareness updates (~every 30s) keep active connections alive.
 	 */
 	private check = () => {
-		// Until at least one document on this connection is authenticated, use an
+		// Until the connection has authenticated at least one document, use an
 		// absolute deadline based on when the connection opened. Inbound traffic
 		// updates `lastMessageReceivedAt`, so a flood of unauthenticated frames
 		// could otherwise refresh the timeout forever and keep the socket alive.
-		const hasEstablishedConnection =
-			Object.keys(this.documentConnections).length > 0;
-		const referenceTime = hasEstablishedConnection
+		// Once authenticated, fall back to the normal idle behavior — even if the
+		// client later closes all of its documents — so an established client that
+		// keeps its socket open is not closed based on the original open time.
+		const referenceTime = this.hasAuthenticated
 			? this.lastMessageReceivedAt
 			: this.connectionEstablishedAt;
 
@@ -207,14 +214,17 @@ export class ClientConnection<Context = any> {
 		return total;
 	}
 
-	// Number of distinct documents that have buffered data but have not yet
-	// sent an authentication message. Each such document holds its own queue and
-	// hook payload, so this is capped to prevent a single connection from
-	// amplifying memory usage by fanning out across many document names.
+	// Number of distinct documents on this connection that have not yet finished
+	// authenticating. Each holds its own queue and hook payload, so this is capped
+	// to prevent a single connection from amplifying memory usage by fanning out
+	// across many document names. We count by `isAuthenticated` (not by whether an
+	// Auth frame has been seen) so that sending an Auth frame first — which marks
+	// the document as "establishing" but keeps its hook payload alive while a slow
+	// `onAuthenticate` runs — cannot be used to bypass the limit.
 	private getPendingDocumentCount(): number {
 		let total = 0;
-		for (const rawKey of Object.keys(this.incomingMessageQueue)) {
-			if (!this.documentConnectionsEstablished.has(rawKey)) {
+		for (const rawKey of Object.keys(this.hookPayloads)) {
+			if (!this.hookPayloads[rawKey].connectionConfig.isAuthenticated) {
 				total += 1;
 			}
 		}
@@ -503,6 +513,7 @@ export class ClientConnection<Context = any> {
 				);
 				// All `onAuthenticate` hooks passed.
 				hookPayload.connectionConfig.isAuthenticated = true;
+				this.hasAuthenticated = true;
 
 				// Let the client know that authentication was successful.
 				const message = new OutgoingMessage(responseAddress).writeAuthenticated(

@@ -25,6 +25,13 @@ const buildAuthFrame = (documentName: string, token: string): Uint8Array => {
   return encoding.toUint8Array(encoder)
 }
 
+const buildCloseFrame = (documentName: string): Uint8Array => {
+  const encoder = encoding.createEncoder()
+  encoding.writeVarString(encoder, documentName)
+  encoding.writeVarUint(encoder, 7) // MessageType.CLOSE
+  return encoding.toUint8Array(encoder)
+}
+
 const openRawSocket = (url: string): Promise<WebSocket> => new Promise((resolve, reject) => {
   const ws = new WebSocket(url)
   ws.binaryType = 'arraybuffer'
@@ -128,6 +135,67 @@ test('closes a continuously-sending unauthenticated connection once the pre-auth
   const code = await closed
   clearInterval(interval)
   t.is(code, 4408, 'connection should be closed with ConnectionTimeout (4408)')
+})
+
+test('counts in-flight authentications toward the pending-document limit', async t => {
+  const server = await newHocuspocus(t, {
+    maxPendingDocuments: 3,
+    // Never resolves, so every document stays in the "authenticating" state.
+    // Sending Auth first marks a document as establishing but keeps its hook
+    // payload alive while onAuthenticate runs — this must still count.
+    onAuthenticate: () => new Promise(() => {}),
+  })
+
+  const attacker = await openRawSocket(server.server!.webSocketURL)
+  t.teardown(() => attacker.close())
+
+  const closed = waitForClose(attacker)
+
+  // Send Auth as the FIRST frame for many distinct documents.
+  for (let i = 0; i < 25; i += 1) {
+    attacker.send(buildAuthFrame(`auth-first-doc-${i}`, ''))
+  }
+
+  const code = await closed
+  t.is(code, 4205, 'connection should be closed with ResetConnection (4205)')
+})
+
+test('does not close an authenticated connection that has closed all of its documents', async t => {
+  const server = await newHocuspocus(t, {
+    timeout: 600,
+  })
+
+  const attacker = await openRawSocket(server.server!.webSocketURL)
+  t.teardown(() => attacker.close())
+
+  // Authenticate a document (no onAuthenticate hook => allowed).
+  const authenticated = new Promise<void>((resolve) => {
+    attacker.addEventListener('message', () => resolve(), { once: true })
+  })
+  attacker.send(buildAuthFrame('soon-empty-doc', ''))
+  await authenticated
+
+  let closedCode: number | undefined
+  attacker.addEventListener('close', (event) => { closedCode = event.code }, { once: true })
+
+  // Keep the socket alive with periodic frames so `lastMessageReceivedAt` stays
+  // fresh. Halfway through, close the only document, leaving zero established
+  // document connections. Because the connection already authenticated, the idle
+  // check must keep using `lastMessageReceivedAt` rather than the original open
+  // time — so the socket must survive past `timeout` measured from open.
+  const interval = setInterval(() => {
+    if (attacker.readyState === WebSocket.OPEN) {
+      attacker.send(buildStatelessFrame('keepalive-doc', 8))
+    }
+  }, 150)
+  t.teardown(() => clearInterval(interval))
+
+  await new Promise((resolve) => setTimeout(resolve, 700))
+  attacker.send(buildCloseFrame('soon-empty-doc'))
+  await new Promise((resolve) => setTimeout(resolve, 1100))
+
+  clearInterval(interval)
+  t.is(closedCode, undefined, 'authenticated connection must not be closed by the pre-auth deadline')
 })
 
 test('does not close an authenticated connection that later exceeds the pre-auth limits', async t => {
