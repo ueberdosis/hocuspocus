@@ -26,6 +26,8 @@ export class Connection<Context = any> {
 		onClose: [(document: Document, event?: CloseEvent) => {}],
 		beforeHandleMessage: (connection: Connection, update: Uint8Array) =>
 			Promise.resolve(),
+		afterHandleMessage: (connection: Connection, update: Uint8Array) =>
+			Promise.resolve(),
 		beforeSync: (
 			connection: Connection,
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
@@ -112,6 +114,17 @@ export class Connection<Context = any> {
 		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
 	): Connection {
 		this.callbacks.beforeHandleMessage = callback;
+
+		return this;
+	}
+
+	/**
+	 * Set a callback that will be triggered after a message has been handled
+	 */
+	afterHandleMessage(
+		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
+	): Connection {
+		this.callbacks.afterHandleMessage = callback;
 
 		return this;
 	}
@@ -258,7 +271,18 @@ export class Connection<Context = any> {
 				await this.callbacks.beforeHandleMessage(this, rawUpdate);
 				const receiver = new MessageReceiver(message);
 
-				await receiver.apply(this.document, this);
+				try {
+					await receiver.apply(this.document, this);
+				} finally {
+					try {
+						await this.callbacks.afterHandleMessage(this, rawUpdate);
+					} catch (afterError) {
+						console.error(
+							`afterHandleMessage hook failed (while handling ${documentName})`,
+							afterError,
+						);
+					}
+				}
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			} catch (e: any) {
 				console.error(

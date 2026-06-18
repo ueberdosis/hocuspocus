@@ -99,6 +99,13 @@ export interface Extension<Context = any> {
 	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
 	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
 	/**
+	 * Fired after an inbound message has been handled (i.e. after the Yjs
+	 * update has been applied to the document). Fires whether the apply
+	 * resolved or threw, but not when `beforeHandleMessage` rejected the
+	 * message.
+	 */
+	afterHandleMessage?(data: afterHandleMessagePayload<Context>): Promise<any>;
+	/**
 	 * Fired before an inbound awareness update is applied to the document's
 	 * awareness state. The hook receives the decoded per-client `states` as a
 	 * mutable `Map` keyed by Yjs clientId. Mutate the map and the contained
@@ -140,6 +147,7 @@ export type HookName =
 	| "onLoadDocument"
 	| "afterLoadDocument"
 	| "beforeHandleMessage"
+	| "afterHandleMessage"
 	| "beforeHandleAwareness"
 	| "beforeBroadcastStateless"
 	| "beforeSync"
@@ -166,6 +174,7 @@ export type HookPayloadByName<Context = any> = {
 	onLoadDocument: onLoadDocumentPayload<Context>;
 	afterLoadDocument: afterLoadDocumentPayload<Context>;
 	beforeHandleMessage: beforeHandleMessagePayload<Context>;
+	afterHandleMessage: afterHandleMessagePayload<Context>;
 	beforeHandleAwareness: beforeHandleAwarenessPayload<Context>;
 	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
 	beforeSync: beforeSyncPayload<Context>;
@@ -330,6 +339,19 @@ export interface onChangePayload<Context = any> {
 }
 
 export interface beforeHandleMessagePayload<Context = any> {
+	clientsCount: number;
+	context: Context;
+	document: Document;
+	documentName: string;
+	instance: Hocuspocus;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	update: Uint8Array;
+	socketId: string;
+	connection: Connection<Context>;
+}
+
+export interface afterHandleMessagePayload<Context = any> {
 	clientsCount: number;
 	context: Context;
 	document: Document;

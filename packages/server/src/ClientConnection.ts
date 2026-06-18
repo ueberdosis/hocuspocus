@@ -16,6 +16,7 @@ import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
 	WebSocketLike,
+	afterHandleMessagePayload,
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
@@ -208,6 +209,23 @@ export class ClientConnection<Context = any> {
 			};
 
 			return this.hooks("beforeHandleMessage", beforeHandleMessagePayload);
+		});
+
+		instance.afterHandleMessage((connection, update) => {
+			const afterHandleMessagePayload: afterHandleMessagePayload = {
+				instance: this.documentProvider as Hocuspocus,
+				clientsCount: document.getConnectionsCount(),
+				context: hookPayload.context,
+				document,
+				socketId: hookPayload.socketId,
+				connection,
+				documentName: document.name,
+				requestHeaders: hookPayload.request.headers,
+				requestParameters: getParameters(hookPayload.request),
+				update,
+			};
+
+			return this.hooks("afterHandleMessage", afterHandleMessagePayload);
 		});
 
 		instance.beforeSync((connection, payload) => {
