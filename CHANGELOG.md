@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/ueberdosis/hocuspocus/compare/v4.2.0...v4.3.0) (2026-06-18)
+
+
+### Features
+
+* add `afterHandleMessage` hook to run after message handling completion ([#1112](https://github.com/ueberdosis/hocuspocus/issues/1112)) ([abec66d](https://github.com/ueberdosis/hocuspocus/commit/abec66db76ab43737e3e5baf8a461ea38637d5d6))
+* enforce pre-auth resource limits to safeguard server stability ([#1113](https://github.com/ueberdosis/hocuspocus/issues/1113)) ([6e1a932](https://github.com/ueberdosis/hocuspocus/commit/6e1a932662f38074b732b5e51394461b91809570))
+
+
+
+
+
 # [4.2.0](https://github.com/ueberdosis/hocuspocus/compare/v4.1.2...v4.2.0) (2026-06-12)
 
 
