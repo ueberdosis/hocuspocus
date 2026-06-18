@@ -54,6 +54,33 @@ server.listen()
 
 For a database-backed server, combine with an extension like [`@hocuspocus/extension-sqlite`](../extension-sqlite) or [`@hocuspocus/extension-database`](../extension-database).
 
+## Resource limits
+
+Messages received from a client before authentication completes are buffered in
+memory. To prevent an unauthenticated client from exhausting server memory, the
+server bounds this buffer per connection and closes connections that exceed the
+limits. The defaults are safe for typical clients (which authenticate before
+sending document data); raise them only if you have a specific need.
+
+```js
+const server = new Server({
+  port: 1234,
+
+  // Max bytes buffered across all documents of one unauthenticated connection.
+  maxUnauthenticatedQueueSize: 5 * 1024 * 1024, // default: 5 MiB
+
+  // Max number of messages buffered for one unauthenticated connection.
+  maxUnauthenticatedQueueMessages: 1_000, // default: 1000
+
+  // Max number of documents one connection may open before authenticating any.
+  maxPendingDocuments: 100, // default: 100
+
+  // Connections that don't authenticate any document within `timeout` ms are
+  // closed. This deadline is not refreshed by inbound traffic.
+  timeout: 60_000, // default: 60s
+})
+```
+
 ## Non-Node.js runtimes
 
 Use the `Hocuspocus` class directly to attach to any `WebSocketLike` instance (Bun, Deno, Cloudflare Workers, Express, etc.):

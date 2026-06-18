@@ -34,6 +34,9 @@ export const defaultConfiguration = {
 		gcFilter: () => true,
 	},
 	unloadImmediately: true,
+	maxUnauthenticatedQueueSize: 5 * 1024 * 1024,
+	maxUnauthenticatedQueueMessages: 1_000,
+	maxPendingDocuments: 100,
 };
 
 export class Hocuspocus<Context = any> {
@@ -221,6 +224,11 @@ export class Hocuspocus<Context = any> {
 			this.hooks.bind(this),
 			{
 				timeout: this.configuration.timeout,
+				maxUnauthenticatedQueueSize:
+					this.configuration.maxUnauthenticatedQueueSize,
+				maxUnauthenticatedQueueMessages:
+					this.configuration.maxUnauthenticatedQueueMessages,
+				maxPendingDocuments: this.configuration.maxPendingDocuments,
 			},
 			defaultContext,
 		);
