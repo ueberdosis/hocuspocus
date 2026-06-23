@@ -197,7 +197,18 @@ export class Server<Context = any> {
 		}) as AddressInfo;
 	}
 
+	private destroyPromise?: Promise<void>;
+
 	async destroy(): Promise<void> {
+		// Guard against multiple shutdowns (e.g. repeated SIGINT signals).
+		// Subsequent callers await the same in-flight shutdown rather than
+		// re-running close hooks on already-closed resources.
+		this.destroyPromise ??= this.runDestroy();
+
+		return this.destroyPromise;
+	}
+
+	private async runDestroy(): Promise<void> {
 		await new Promise<void>((resolve) => {
 			this.httpServer.close();
 
