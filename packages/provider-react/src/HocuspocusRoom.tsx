@@ -54,6 +54,7 @@ export function HocuspocusRoom({
 	document,
 	token,
 	sessionAwareness,
+	flushDelay,
 	...eventHandlers
 }: HocuspocusRoomProps) {
 	const hocuspocusContext = useContext(HocuspocusContext);
@@ -74,6 +75,7 @@ export function HocuspocusRoom({
 				document,
 				token,
 				sessionAwareness,
+				flushDelay,
 			}),
 	);
 
@@ -103,6 +105,7 @@ export function HocuspocusRoom({
 					document,
 					token,
 					sessionAwareness,
+					flushDelay,
 				}),
 			);
 		}

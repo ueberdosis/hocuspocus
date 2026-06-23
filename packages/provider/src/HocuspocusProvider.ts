@@ -94,6 +94,22 @@ export interface CompleteHocuspocusProviderConfiguration {
 	 */
 	forceSyncInterval: false | number;
 
+	/**
+	 * Batch outgoing document and awareness updates over a short window (in
+	 * milliseconds) instead of sending one message per change. During heavy
+	 * editing this drastically reduces the number of websocket messages: Yjs
+	 * updates collected in the window are merged with `Y.mergeUpdates` into a
+	 * single message, and awareness collapses to the latest state of each
+	 * changed client.
+	 *
+	 * The window is a fixed batch, not a resetting debounce, so the added
+	 * latency is capped at `flushDelay` even while the user keeps typing. Keep
+	 * it small (e.g. 500) to avoid delaying what other clients see.
+	 *
+	 * Set to `false` (the default) to send every change immediately.
+	 */
+	flushDelay: false | number;
+
 	onAuthenticated: (data: onAuthenticatedParameters) => void;
 	onAuthenticationFailed: (data: onAuthenticationFailedParameters) => void;
 	onOpen: (data: onOpenParameters) => void;
@@ -125,6 +141,7 @@ export class HocuspocusProvider extends EventEmitter {
 		token: null,
 		sessionAwareness: false,
 		forceSyncInterval: false,
+		flushDelay: false,
 		onAuthenticated: () => null,
 		onAuthenticationFailed: () => null,
 		onOpen: () => null,
@@ -154,6 +171,18 @@ export class HocuspocusProvider extends EventEmitter {
 	manageSocket = false;
 
 	private _isAttached = false;
+
+	/**
+	 * Outgoing document updates buffered for the current `flushDelay` window.
+	 */
+	private pendingUpdates: Uint8Array[] = [];
+
+	/**
+	 * Awareness client ids whose latest state should be sent on the next flush.
+	 */
+	private pendingAwarenessClients = new Set<number>();
+
+	private flushTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	/**
 	 * Unique session identifier for this provider instance.
@@ -355,23 +384,99 @@ export class HocuspocusProvider extends EventEmitter {
 		});
 	}
 
+	private get batchingEnabled(): boolean {
+		return (
+			!!this.configuration.flushDelay &&
+			typeof this.configuration.flushDelay === "number"
+		);
+	}
+
 	documentUpdateHandler(update: Uint8Array, origin: any) {
 		if (origin === this) {
 			return;
 		}
 
-		this.incrementUnsyncedChanges();
-		this.send(UpdateMessage, { update, documentName: this.effectiveName });
+		if (!this.batchingEnabled) {
+			this.incrementUnsyncedChanges();
+			this.send(UpdateMessage, { update, documentName: this.effectiveName });
+			return;
+		}
+
+		// Count one outstanding change per batch: the server acks once per
+		// merged message, so incrementing per buffered update would never balance.
+		if (this.pendingUpdates.length === 0) {
+			this.incrementUnsyncedChanges();
+		}
+
+		this.pendingUpdates.push(update);
+		this.scheduleFlush();
 	}
 
 	awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
 		const changedClients = added.concat(updated).concat(removed);
 
-		this.send(AwarenessMessage, {
-			awareness: this.awareness,
-			clients: changedClients,
-			documentName: this.effectiveName,
-		});
+		if (!this.batchingEnabled) {
+			this.send(AwarenessMessage, {
+				awareness: this.awareness,
+				clients: changedClients,
+				documentName: this.effectiveName,
+			});
+			return;
+		}
+
+		for (const client of changedClients) {
+			this.pendingAwarenessClients.add(client);
+		}
+
+		this.scheduleFlush();
+	}
+
+	private scheduleFlush() {
+		// Fixed-window batching: the first pending change starts the timer and
+		// everything until it fires is flushed together, so latency stays capped
+		// at `flushDelay` instead of growing while the user keeps typing.
+		if (this.flushTimeout !== null) {
+			return;
+		}
+
+		this.flushTimeout = setTimeout(() => {
+			this.flushTimeout = null;
+			this.flushPendingUpdates();
+		}, this.configuration.flushDelay as number);
+	}
+
+	/**
+	 * Send everything buffered for the current `flushDelay` window right away.
+	 * Buffered document updates are merged into a single message and awareness
+	 * collapses to the latest state of each changed client. Safe to call when
+	 * nothing is pending.
+	 */
+	flushPendingUpdates() {
+		if (this.flushTimeout !== null) {
+			clearTimeout(this.flushTimeout);
+			this.flushTimeout = null;
+		}
+
+		if (this.pendingUpdates.length > 0) {
+			const update =
+				this.pendingUpdates.length === 1
+					? this.pendingUpdates[0]
+					: Y.mergeUpdates(this.pendingUpdates);
+
+			this.pendingUpdates = [];
+			this.send(UpdateMessage, { update, documentName: this.effectiveName });
+		}
+
+		if (this.pendingAwarenessClients.size > 0) {
+			const clients = Array.from(this.pendingAwarenessClients);
+
+			this.pendingAwarenessClients.clear();
+			this.send(AwarenessMessage, {
+				awareness: this.awareness,
+				clients,
+				documentName: this.effectiveName,
+			});
+		}
 	}
 
 	/**
@@ -482,6 +587,15 @@ export class HocuspocusProvider extends EventEmitter {
 		this.isAuthenticated = false;
 		this.synced = false;
 
+		// Drop anything buffered for batching; the reconnect sync handshake will
+		// reconcile these changes from the document via state vectors.
+		if (this.flushTimeout !== null) {
+			clearTimeout(this.flushTimeout);
+			this.flushTimeout = null;
+		}
+		this.pendingUpdates = [];
+		this.pendingAwarenessClients.clear();
+
 		// update awareness (all users except local left)
 		if (this.awareness) {
 			removeAwarenessStates(
@@ -496,6 +610,10 @@ export class HocuspocusProvider extends EventEmitter {
 
 	destroy() {
 		this.emit("destroy");
+
+		// Send any buffered updates before the socket is torn down. The websocket
+		// safely queues the message if it is no longer open.
+		this.flushPendingUpdates();
 
 		if (this.intervals.forceSync) {
 			clearInterval(this.intervals.forceSync);
