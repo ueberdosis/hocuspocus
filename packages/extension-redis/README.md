@@ -47,6 +47,26 @@ new Redis({
 
 Redis handles real-time sync — you still need a persistence extension (e.g. [`@hocuspocus/extension-sqlite`](../extension-sqlite), [`@hocuspocus/extension-s3`](../extension-s3), or your own [`Database`](../extension-database)) to store documents long-term.
 
+### Consistent reads on load
+
+When a document is loaded on one instance while another instance already has it
+open (and possibly modified in memory, not yet persisted), the load blocks until
+the other instance has sent its current state — so a `DirectConnection` or a
+freshly connected client observes the latest collaborative content rather than
+just what was read from storage. If no other instance has the document open, the
+load is not delayed.
+
+The wait is bounded by `awaitInitialSyncTimeout` (ms, default `1000`). Set it to
+`0` to disable the wait and restore the previous fire-and-forget behavior:
+
+```js
+new Redis({
+  host: "127.0.0.1",
+  port: 6379,
+  awaitInitialSyncTimeout: 1000,
+})
+```
+
 ## Documentation
 
 Full scaling architecture and multi-instance deployment guide: [tiptap.dev/docs/hocuspocus/server/extensions/redis](https://tiptap.dev/docs/hocuspocus/server/extensions/redis).
