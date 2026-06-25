@@ -247,20 +247,31 @@ export class Redis implements Extension {
 		// dropped while we wait for it.
 		this.documents.set(documentName, document);
 
-		await new Promise<void>((resolve, reject) => {
-			// On document creation the node will connect to pub and sub channels
-			// for the document.
-			this.sub.subscribe(this.subKey(documentName), (error: any) => {
-				if (error) {
-					reject(error);
-					return;
-				}
+		try {
+			await new Promise<void>((resolve, reject) => {
+				// On document creation the node will connect to pub and sub channels
+				// for the document.
+				this.sub.subscribe(this.subKey(documentName), (error: any) => {
+					if (error) {
+						reject(error);
+						return;
+					}
 
-				resolve();
+					resolve();
+				});
 			});
-		});
 
-		await this.syncInitialStateFromPeers(documentName, document);
+			await this.syncInitialStateFromPeers(documentName, document);
+		} catch (error) {
+			// Loading failed: stop tracking the document so future messages aren't
+			// applied to a doc that never finished loading, release any pending
+			// wait, and best-effort unsubscribe (afterUnloadDocument does not run
+			// for a load that never completed).
+			this.documents.delete(documentName);
+			this.pendingInitialSyncResolves.delete(documentName);
+			this.sub.unsubscribe(this.subKey(documentName), () => {});
+			throw error;
+		}
 	}
 
 	/**
@@ -274,30 +285,39 @@ export class Redis implements Extension {
 	) {
 		const timeout = this.configuration.awaitInitialSyncTimeout;
 
+		const waitForPeers =
+			timeout > 0 && (await this.hasOtherSubscribers(documentName));
+
+		// Announce our state and request awareness. Awaited so a Redis publish
+		// failure surfaces as a load error instead of an unhandled rejection.
+		await Promise.all([
+			this.publishFirstSyncStep(documentName, document),
+			this.requestAwarenessFromOtherInstances(documentName),
+		]);
+
 		// Skip the wait when it's disabled or nobody else has the document open:
 		// there is no peer to sync from, so blocking would only add latency.
-		if (timeout <= 0 || !(await this.hasOtherSubscribers(documentName))) {
-			this.publishFirstSyncStep(documentName, document);
-			this.requestAwarenessFromOtherInstances(documentName);
+		if (!waitForPeers) {
 			return;
 		}
 
+		// A peer has the document open. Block until it replies with its state
+		// (a SyncStep2/Update applied via handleIncomingMessage resolves this) or
+		// the timeout elapses. The reply cannot arrive before the SyncStep1 we
+		// just published is delivered, so registering the resolver now — right
+		// after the awaited publish, before yielding to the event loop — cannot
+		// miss it.
 		await new Promise<void>((resolve) => {
 			const timer = setTimeout(() => {
 				this.pendingInitialSyncResolves.delete(documentName);
 				resolve();
 			}, timeout);
 
-			// Register the resolver *before* publishing so a fast reply can't be
-			// missed.
 			this.pendingInitialSyncResolves.set(documentName, () => {
 				clearTimeout(timer);
 				this.pendingInitialSyncResolves.delete(documentName);
 				resolve();
 			});
-
-			this.publishFirstSyncStep(documentName, document);
-			this.requestAwarenessFromOtherInstances(documentName);
 		});
 	}
 
