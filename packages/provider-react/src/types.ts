@@ -87,12 +87,22 @@ export interface HocuspocusRoomProps {
 	 * sessionId in the documentName field of every message, allowing multiple
 	 * providers with the same document name on a single WebSocket connection.
 	 *
-	 * Only set this to `true` when connecting to a v4 server that does 
+	 * Only set this to `true` when connecting to a v4 server that does
 	 * support session awareness.
 	 *
 	 * Default: false
 	 */
 	sessionAwareness?: boolean;
+
+	/**
+	 * Batch outgoing document and awareness updates over a short window (in
+	 * milliseconds) instead of sending one message per change, to reduce the
+	 * number of websocket messages during heavy editing. The added latency is
+	 * capped at `flushDelay`, so keep it small (e.g. 500).
+	 *
+	 * Default: false (send every change immediately)
+	 */
+	flushDelay?: false | number;
 
 	// Event handlers — all optional, called when the provider emits the corresponding event.
 	onOpen?: (data: onOpenParameters) => void;
