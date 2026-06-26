@@ -1,4 +1,8 @@
-import { awarenessStatesToArray, makeRoutingKey, parseRoutingKey } from "@hocuspocus/common";
+import {
+	awarenessStatesToArray,
+	makeRoutingKey,
+	parseRoutingKey,
+} from "@hocuspocus/common";
 import { Awareness, removeAwarenessStates } from "y-protocols/awareness";
 import * as Y from "yjs";
 import EventEmitter from "./EventEmitter.ts";
@@ -82,7 +86,7 @@ export interface CompleteHocuspocusProviderConfiguration {
 	 * sessionId in the documentName field of every message, allowing multiple
 	 * providers with the same document name on a single WebSocket connection.
 	 *
-	 * Only set this to `true` when connecting to a v4 server that does 
+	 * Only set this to `true` when connecting to a v4 server that does
 	 * support session awareness.
 	 *
 	 * Default: false
@@ -611,10 +615,6 @@ export class HocuspocusProvider extends EventEmitter {
 	destroy() {
 		this.emit("destroy");
 
-		// Send any buffered updates before the socket is torn down. The websocket
-		// safely queues the message if it is no longer open.
-		this.flushPendingUpdates();
-
 		if (this.intervals.forceSync) {
 			clearInterval(this.intervals.forceSync);
 		}
@@ -628,6 +628,10 @@ export class HocuspocusProvider extends EventEmitter {
 			this.awareness.off("update", this.boundAwarenessUpdateHandler);
 			this.awareness.destroy();
 		}
+
+		// Send any buffered updates before the socket is torn down. The websocket
+		// safely queues the message if it is no longer open.
+		this.flushPendingUpdates();
 
 		this.document.off("update", this.boundDocumentUpdateHandler);
 
