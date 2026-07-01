@@ -152,6 +152,12 @@ importers:
         specifier: ^13.6.8
         version: 13.6.29
 
+  packages/extension-redis-affinity:
+    dependencies:
+      ioredis:
+        specifier: ^5.6.1
+        version: 5.6.1
+
   packages/extension-s3:
     dependencies:
       '@aws-sdk/client-s3':
