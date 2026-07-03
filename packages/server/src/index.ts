@@ -6,4 +6,5 @@ export * from "./MessageReceiver.ts";
 export * from "./OutgoingMessage.ts";
 export * from "./Server.ts";
 export * from "./types.ts";
+export * from "./util/asyncContext.ts";
 export * from "./util/debounce.ts";
