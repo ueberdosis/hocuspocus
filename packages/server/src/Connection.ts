@@ -12,6 +12,7 @@ import type {
 	beforeSyncPayload,
 	onStatelessPayload,
 } from "./types.ts";
+import { runWithActiveContext } from "./util/asyncContext.ts";
 
 export class Connection<Context = any> {
 	webSocket: WebSocketLike;
@@ -267,33 +268,45 @@ export class Connection<Context = any> {
 			// Write the correct address so replies reach the right provider
 			message.writeVarString(this.messageAddress);
 
-			try {
-				await this.callbacks.beforeHandleMessage(this, rawUpdate);
-				const receiver = new MessageReceiver(message);
-
-				try {
-					await receiver.apply(this.document, this);
-				} finally {
+			// Bind the connection context to the async call chain for the whole
+			// message so hooks and any code they invoke can recover the active
+			// connection (for logging, tracing, metrics, …) via getActiveContext().
+			await runWithActiveContext(
+				{
+					context: this.context,
+					documentName,
+					socketId: this.socketId,
+				},
+				async () => {
 					try {
-						await this.callbacks.afterHandleMessage(this, rawUpdate);
-					} catch (afterError) {
+						await this.callbacks.beforeHandleMessage(this, rawUpdate);
+						const receiver = new MessageReceiver(message);
+
+						try {
+							await receiver.apply(this.document, this);
+						} finally {
+							try {
+								await this.callbacks.afterHandleMessage(this, rawUpdate);
+							} catch (afterError) {
+								console.error(
+									`afterHandleMessage hook failed (while handling ${documentName})`,
+									afterError,
+								);
+							}
+						}
+						// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					} catch (e: any) {
 						console.error(
-							`afterHandleMessage hook failed (while handling ${documentName})`,
-							afterError,
+							`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
+							e,
 						);
+						this.close({
+							code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
+							reason: "reason" in e ? e.reason : ResetConnection.reason,
+						});
 					}
-				}
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			} catch (e: any) {
-				console.error(
-					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
-					e,
-				);
-				this.close({
-					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
-					reason: "reason" in e ? e.reason : ResetConnection.reason,
-				});
-			}
+				},
+			);
 
 			this.messageQueue.shift();
 		}
