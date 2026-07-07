@@ -26,7 +26,6 @@ export interface ServerConfiguration<Context = any>
 
 export const defaultServerConfiguration = {
 	port: 80,
-	address: "0.0.0.0",
 	stopOnSignals: true,
 };
 
@@ -159,11 +158,13 @@ export class Server<Context = any> {
 		}
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 		return new Promise((resolve: Function, reject: Function) => {
+			const listenOptions: ListenOptions = {
+				port: this.configuration.port,
+				host: this.configuration.address,
+			};
+
 			this.httpServer.listen(
-				{
-					port: this.configuration.port,
-					address: this.configuration.address,
-				} as ListenOptions,
+				listenOptions,
 				async () => {
 					if (
 						!this.configuration.quiet &&
@@ -192,7 +193,7 @@ export class Server<Context = any> {
 	get address(): AddressInfo {
 		return (this.httpServer.address() || {
 			port: this.configuration.port,
-			address: this.configuration.address,
+			address: this.configuration.address ?? "0.0.0.0",
 			family: "IPv4",
 		}) as AddressInfo;
 	}
@@ -236,7 +237,7 @@ export class Server<Context = any> {
 	}
 
 	get URL(): string {
-		return `${this.configuration.address}:${this.address.port}`;
+		return `${this.configuration.address ?? "0.0.0.0"}:${this.address.port}`;
 	}
 
 	get webSocketURL(): string {
