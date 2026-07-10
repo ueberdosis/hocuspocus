@@ -46,6 +46,10 @@ pub trait EventHooks: Send + Sync + 'static {
     async fn disconnect(&self, document_name: &str) {
         let _ = document_name;
     }
+    /// A client sent a Stateless message (TS `onStateless`).
+    async fn stateless(&self, document_name: &str, payload: &str) {
+        let _ = (document_name, payload);
+    }
 }
 
 /// Default no-op event hooks.

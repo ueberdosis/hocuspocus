@@ -7,10 +7,16 @@ license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
+[features]
+default = []
+sqlite = ["dep:sqlx", "sqlx/sqlite"]
+postgres = ["dep:sqlx", "sqlx/postgres"]
+
 [dependencies]
 async-trait = { workspace = true }
 bytes = { workspace = true }
 hocuspocus-core = { workspace = true }
+sqlx = { version = "0.8", optional = true, default-features = false, features = ["runtime-tokio-rustls"] }
 
 [dev-dependencies]
 tokio = { workspace = true }

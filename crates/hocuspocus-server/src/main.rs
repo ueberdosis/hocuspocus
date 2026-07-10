@@ -29,7 +29,7 @@ struct AppState {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), hocuspocus_core::BoxError> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
@@ -63,6 +63,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let storage: Arc<dyn hocuspocus_core::Storage> = match config.storage.backend {
         config::StorageBackend::Memory => Arc::new(InMemoryStorage::new()),
+        config::StorageBackend::Sqlite => {
+            Arc::new(hocuspocus_storage::SqliteStorage::open(&config.storage.path).await?)
+        }
+        config::StorageBackend::Postgres => {
+            let url = config
+                .storage
+                .url
+                .clone()
+                .ok_or("[storage] backend = \"postgres\" requires [storage] url")?;
+            Arc::new(hocuspocus_storage::PostgresStorage::connect(&url).await?)
+        }
         config::StorageBackend::Webhook => {
             let url = config
                 .webhook
@@ -83,6 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .filter_map(|event| match event.trim() {
                         "connect" => Some(hocuspocus_webhook::Event::Connect),
                         "disconnect" => Some(hocuspocus_webhook::Event::Disconnect),
+                        "stateless" => Some(hocuspocus_webhook::Event::Stateless),
                         _ => None,
                     })
                     .collect();

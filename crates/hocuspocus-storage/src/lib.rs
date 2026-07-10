@@ -13,6 +13,16 @@
 //! M0 scaffold — ships only [`InMemoryStorage`], which backs unit tests and
 //! the default standalone-server configuration (no persistence configured).
 
+#[cfg(feature = "postgres")]
+pub mod postgres;
+#[cfg(feature = "sqlite")]
+pub mod sqlite;
+
+#[cfg(feature = "postgres")]
+pub use postgres::PostgresStorage;
+#[cfg(feature = "sqlite")]
+pub use sqlite::SqliteStorage;
+
 use std::collections::HashMap;
 use std::sync::Mutex;
 

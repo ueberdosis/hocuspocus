@@ -181,6 +181,7 @@ impl EngineInner {
             name.clone(),
             self.config.clone(),
             self.storage.clone(),
+            self.events.clone(),
             on_unload,
         )
         .await?;

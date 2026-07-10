@@ -23,11 +23,26 @@ pub struct Config {
     pub storage: StorageConfig,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct StorageConfig {
-    /// "memory" (default) or "webhook" (GET/PUT {webhook.url}/documents/{name}).
+    /// "memory" (default), "webhook" (GET/PUT {webhook.url}/documents/{name}),
+    /// "sqlite" (uses `path`) or "postgres" (uses `url`).
     pub backend: StorageBackend,
+    /// SQLite database path; ":memory:" for a non-persistent database.
+    pub path: String,
+    /// Postgres connection URL.
+    pub url: Option<String>,
+}
+
+impl Default for StorageConfig {
+    fn default() -> Self {
+        Self {
+            backend: StorageBackend::default(),
+            path: ":memory:".into(),
+            url: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -36,6 +51,8 @@ pub enum StorageBackend {
     #[default]
     Memory,
     Webhook,
+    Sqlite,
+    Postgres,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

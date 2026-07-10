@@ -25,6 +25,7 @@ pub enum Event {
     Change,
     Connect,
     Disconnect,
+    Stateless,
 }
 
 impl Event {
@@ -35,6 +36,7 @@ impl Event {
             Self::Change => "change",
             Self::Connect => "connect",
             Self::Disconnect => "disconnect",
+            Self::Stateless => "stateless",
         }
     }
 }
@@ -295,6 +297,23 @@ impl WebhookEvents {
             "event": event.as_str(),
             "payload": { "documentName": document_name },
         }))?;
+        self.post_body(body).await
+    }
+
+    async fn post_with(
+        &self,
+        event: Event,
+        document_name: &str,
+        payload: &str,
+    ) -> Result<(), hocuspocus_core::BoxError> {
+        let body = serde_json::to_vec(&serde_json::json!({
+            "event": event.as_str(),
+            "payload": { "documentName": document_name, "payload": payload },
+        }))?;
+        self.post_body(body).await
+    }
+
+    async fn post_body(&self, body: Vec<u8>) -> Result<(), hocuspocus_core::BoxError> {
         let response = self
             .client
             .post(&self.url)
@@ -334,6 +353,18 @@ impl hocuspocus_core::EventHooks for WebhookEvents {
         }
         if let Err(error) = self.post(Event::Disconnect, document_name).await {
             tracing::warn!(%error, "disconnect webhook failed");
+        }
+    }
+
+    async fn stateless(&self, document_name: &str, payload: &str) {
+        if !self.events.contains(&Event::Stateless) {
+            return;
+        }
+        if let Err(error) = self
+            .post_with(Event::Stateless, document_name, payload)
+            .await
+        {
+            tracing::warn!(%error, "stateless webhook failed");
         }
     }
 }

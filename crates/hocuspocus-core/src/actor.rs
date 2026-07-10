@@ -57,6 +57,7 @@ struct DocumentActor {
     dirty: Option<DirtyState>,
     config: Configuration,
     storage: Option<Arc<dyn Storage>>,
+    events: Arc<dyn crate::auth::EventHooks>,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
@@ -65,6 +66,7 @@ pub(crate) async fn spawn(
     name: Arc<str>,
     config: Configuration,
     storage: Option<Arc<dyn Storage>>,
+    events: Arc<dyn crate::auth::EventHooks>,
     on_unload: Box<dyn FnOnce(&str) + Send>,
 ) -> Result<mpsc::Sender<DocMessage>, crate::BoxError> {
     let doc = yrs::Doc::with_options(yrs::Options {
@@ -91,6 +93,7 @@ pub(crate) async fn spawn(
         dirty: None,
         config,
         storage,
+        events,
     };
 
     tokio::spawn(async move {
@@ -196,9 +199,12 @@ impl DocumentActor {
                 }
                 false
             }
-            DocMessage::Stateless { .. } => {
-                // Delivered to on_stateless hooks (wired in M3); TS only
-                // invokes the hook, there is no automatic relay.
+            DocMessage::Stateless { payload, .. } => {
+                // Delivered to the stateless event hook; TS only invokes
+                // the hook chain, there is no automatic relay. Awaited
+                // inline to preserve per-document ordering, like the TS
+                // sequential message queue.
+                self.events.stateless(&self.name, &payload).await;
                 false
             }
             DocMessage::DirectTransact { transact, done, .. } => {

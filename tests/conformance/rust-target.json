@@ -15,12 +15,12 @@
 		"tests/provider/onDisconnect.ts",
 		"tests/provider/onMessage.ts",
 		"tests/provider/onOpen.ts",
+		"tests/provider/onStateless.ts",
 		"tests/provider/onSynced.ts",
 		"tests/providerwebsocket/configuration.ts",
 		"tests/providerwebsocket/messageQueueDeduplication.ts"
 	],
 	"skip": {
-		"tests/provider/onStateless.ts": "onStateless server hook (M3)",
 		"tests/server/*": "hook-centric / in-process API (M3 webhook transport + control API growth)",
 		"tests/extension-database/*": "storage backends land in M3",
 		"tests/extension-s3/*": "storage backends land in M3",

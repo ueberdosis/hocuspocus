@@ -21,7 +21,7 @@ export const newHocuspocusRust = async (
 	t: ExecutionContext,
 	options?: Partial<ServerConfiguration>,
 ): Promise<Hocuspocus> => {
-	const supportedHooks = ["onAuthenticate", "onLoadDocument", "onStoreDocument", "onConnect", "onDisconnect"];
+	const supportedHooks = ["onAuthenticate", "onLoadDocument", "onStoreDocument", "onConnect", "onDisconnect", "onStateless"];
 	const unsupported = Object.entries(options ?? {}).filter(
 		([key, value]) =>
 			(typeof value === "function" && !supportedHooks.includes(key)) ||
@@ -59,7 +59,8 @@ export const newHocuspocusRust = async (
 		options?.onLoadDocument ||
 		options?.onStoreDocument ||
 		options?.onConnect ||
-		options?.onDisconnect
+		options?.onDisconnect ||
+		options?.onStateless
 	) {
 		const Y = await import("yjs");
 		const receiver = http.createServer((request, response) => {
@@ -121,6 +122,16 @@ export const newHocuspocusRust = async (
 						response.end(JSON.stringify({}));
 						return;
 					}
+					if (event === "stateless") {
+						await options.onStateless?.({
+							documentName: payload.documentName,
+							payload: payload.payload,
+							context: {},
+						} as never);
+						response.writeHead(200, { "Content-Type": "application/json" });
+						response.end(JSON.stringify({}));
+						return;
+					}
 					if (event === "disconnect") {
 						await options.onDisconnect?.({
 							documentName: payload.documentName,
@@ -166,6 +177,7 @@ export const newHocuspocusRust = async (
 		const events = [
 			options.onConnect ? "connect" : null,
 			options.onDisconnect ? "disconnect" : null,
+			options.onStateless ? "stateless" : null,
 		].filter(Boolean);
 		if (events.length > 0) env.HOCUSPOCUS_WEBHOOK__EVENTS = events.join(",");
 		if (options.onLoadDocument || options.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
