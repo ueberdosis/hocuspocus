@@ -17,6 +17,7 @@ figment = { workspace = true }
 hocuspocus-axum = { workspace = true }
 hocuspocus-core = { workspace = true }
 hocuspocus-protocol = { workspace = true }
+hocuspocus-redis = { workspace = true }
 hocuspocus-storage = { workspace = true, features = ["sqlite", "postgres"] }
 hocuspocus-webhook = { workspace = true }
 serde = { workspace = true }

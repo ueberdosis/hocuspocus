@@ -21,6 +21,28 @@ pub struct Config {
     pub auth: AuthConfig,
     pub webhook: WebhookConfig,
     pub storage: StorageConfig,
+    pub redis: RedisConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct RedisConfig {
+    /// Redis URL (`redis://…`); setting it enables horizontal scaling.
+    pub url: Option<String>,
+    /// Channel/key prefix, like the Node extension's `prefix`.
+    pub prefix: String,
+    /// Instance identifier for self-echo filtering (default `host-{uuid}`).
+    pub identifier: Option<String>,
+}
+
+impl Default for RedisConfig {
+    fn default() -> Self {
+        Self {
+            url: None,
+            prefix: "hocuspocus".into(),
+            identifier: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

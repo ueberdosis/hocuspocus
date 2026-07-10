@@ -57,3 +57,22 @@ pub struct NoEvents;
 
 #[async_trait]
 impl EventHooks for NoEvents {}
+
+/// Horizontal-scaling integration (the Redis extension's role): attach a
+/// relay to newly loaded documents and coordinate stores across instances.
+#[async_trait]
+pub trait Scaler: Send + Sync + 'static {
+    /// A document was loaded; subscribe its channel and hand it a relay.
+    async fn attach(&self, document_name: &str, mailbox: crate::document::DocHandle);
+    /// The document unloaded; unsubscribe.
+    async fn detach(&self, document_name: &str);
+    /// Try-once store lock. `false` = another instance is storing; skip
+    /// (TS Redis extension throws SkipFurtherHooksError on contention).
+    async fn acquire_store_lock(&self, document_name: &str) -> bool {
+        let _ = document_name;
+        true
+    }
+    async fn release_store_lock(&self, document_name: &str) {
+        let _ = document_name;
+    }
+}

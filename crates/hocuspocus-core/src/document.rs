@@ -71,9 +71,16 @@ pub enum DocMessage {
         origin: Origin,
         update: Bytes,
     },
-    /// Reply with the full awareness state.
+    /// Reply with the full awareness state. `None` = requested by a peer
+    /// instance via the relay.
     QueryAwareness {
-        conn_id: ConnId,
+        conn_id: Option<ConnId>,
+    },
+    /// Attach the pub/sub relay: raw wire frames sent to this channel are
+    /// published to the document's Redis channel. The actor answers by
+    /// publishing its first sync step and querying peer awareness.
+    SetRelay {
+        outbound: mpsc::Sender<Bytes>,
     },
     /// Deliver a stateless payload to `on_stateless` hooks.
     Stateless {

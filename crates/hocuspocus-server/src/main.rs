@@ -106,7 +106,18 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
             }
             _ => Arc::new(hocuspocus_core::NoEvents),
         };
-    let engine = Engine::with_parts(engine_config, Some(storage), authenticator, events);
+    let scaler: Option<Arc<dyn hocuspocus_core::Scaler>> = match &config.redis.url {
+        Some(url) => {
+            let mut redis_config = hocuspocus_redis::RedisConfiguration::new(url.clone());
+            redis_config.prefix = config.redis.prefix.clone();
+            redis_config.identifier = config.redis.identifier.clone();
+            Some(Arc::new(
+                hocuspocus_redis::RedisScaling::connect(redis_config).await?,
+            ))
+        }
+        None => None,
+    };
+    let engine = Engine::with_parts(engine_config, Some(storage), authenticator, events, scaler);
     let state = AppState {
         engine: engine.clone(),
     };

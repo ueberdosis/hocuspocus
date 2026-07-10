@@ -58,6 +58,10 @@ struct DocumentActor {
     config: Configuration,
     storage: Option<Arc<dyn Storage>>,
     events: Arc<dyn crate::auth::EventHooks>,
+    scaler: Option<Arc<dyn crate::auth::Scaler>>,
+    /// Raw wire frames sent here are published to the document's pub/sub
+    /// channel (identifier framing added by the relay task).
+    relay: Option<mpsc::Sender<Bytes>>,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
@@ -67,6 +71,7 @@ pub(crate) async fn spawn(
     config: Configuration,
     storage: Option<Arc<dyn Storage>>,
     events: Arc<dyn crate::auth::EventHooks>,
+    scaler: Option<Arc<dyn crate::auth::Scaler>>,
     on_unload: Box<dyn FnOnce(&str) + Send>,
 ) -> Result<mpsc::Sender<DocMessage>, crate::BoxError> {
     let doc = yrs::Doc::with_options(yrs::Options {
@@ -94,6 +99,8 @@ pub(crate) async fn spawn(
         config,
         storage,
         events,
+        scaler,
+        relay: None,
     };
 
     tokio::spawn(async move {
@@ -169,24 +176,51 @@ impl DocumentActor {
             }
             DocMessage::ApplySync {
                 conn_id,
-                origin: _,
+                origin,
                 payload,
                 is_reply,
             } => {
-                self.apply_sync(conn_id, payload, is_reply);
+                self.apply_sync(conn_id, origin, payload, is_reply);
                 false
             }
             DocMessage::ApplyAwareness {
-                conn_id, update, ..
+                conn_id,
+                origin,
+                update,
             } => {
-                self.apply_awareness(conn_id, update);
+                self.apply_awareness(conn_id, origin, update);
                 false
             }
             DocMessage::QueryAwareness { conn_id } => {
-                if let Some(subscriber) = self.subscribers.get(&conn_id) {
-                    let full = self.awareness.full_update();
-                    send_awareness_to(subscriber, &full);
+                let full = self.awareness.full_update();
+                match conn_id {
+                    Some(conn_id) => {
+                        if let Some(subscriber) = self.subscribers.get(&conn_id) {
+                            send_awareness_to(subscriber, &full);
+                        }
+                    }
+                    // Peer instance asked via the relay.
+                    None => {
+                        if !full.entries.is_empty() {
+                            self.publish(
+                                MessageBuilder::new(&self.name).awareness(&full.to_bytes()),
+                            );
+                        }
+                    }
                 }
+                false
+            }
+            DocMessage::SetRelay { outbound } => {
+                self.relay = Some(outbound);
+                // Bootstrap, like the Node extension's afterLoadDocument:
+                // publish our first sync step and ask peers for awareness.
+                let own_sv = self.doc.transact().state_vector().encode_v1();
+                let step1 = SyncMessage::Step1 {
+                    state_vector: Bytes::from(own_sv),
+                }
+                .to_payload();
+                self.publish(MessageBuilder::new(&self.name).sync(MessageType::Sync, &step1));
+                self.publish(MessageBuilder::new(&self.name).query_awareness());
                 false
             }
             DocMessage::BroadcastStateless { payload, exclude } => {
@@ -214,7 +248,10 @@ impl DocumentActor {
                     txn.encode_update_v1()
                 };
                 self.broadcast_update(&update);
-                self.mark_dirty();
+                if update != EMPTY_UPDATE_V1 {
+                    self.mark_dirty();
+                    self.publish_own_step1();
+                }
                 let _ = done.send(());
                 false
             }
@@ -239,7 +276,13 @@ impl DocumentActor {
         }
     }
 
-    fn apply_sync(&mut self, conn_id: Option<ConnId>, payload: Bytes, inbound_was_reply: bool) {
+    fn apply_sync(
+        &mut self,
+        conn_id: Option<ConnId>,
+        origin: crate::document::Origin,
+        payload: Bytes,
+        inbound_was_reply: bool,
+    ) {
         let mut reader = Reader::new(payload);
         let message = match SyncMessage::decode(&mut reader) {
             Ok(message) => message,
@@ -252,8 +295,16 @@ impl DocumentActor {
         let is_step2 = matches!(message, SyncMessage::Step2 { .. });
         match message {
             SyncMessage::Step1 { state_vector } => {
-                let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) else {
+                let subscriber = conn_id.and_then(|id| self.subscribers.get(&id));
+                // A Step1 without a connection comes from a peer instance;
+                // replies are published to the relay (Node: `reply` path).
+                let via_relay = subscriber.is_none();
+                if via_relay && self.relay.is_none() {
                     return;
+                }
+                let reply_address: Arc<str> = match subscriber {
+                    Some(subscriber) => subscriber.raw_address.clone(),
+                    None => self.name.clone(),
                 };
                 let remote_sv = match StateVector::decode_v1(&state_vector) {
                     Ok(sv) => sv,
@@ -272,9 +323,8 @@ impl DocumentActor {
                     update: Bytes::from(diff),
                 }
                 .to_payload();
-                let frame =
-                    MessageBuilder::new(&subscriber.raw_address).sync(MessageType::Sync, &step2);
-                let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
+                let frame = MessageBuilder::new(&reply_address).sync(MessageType::Sync, &step2);
+                self.send_reply(conn_id, via_relay, frame);
 
                 // Reply 2: our own Step1, so the peer answers with its
                 // Step2 (clients reply Step2 without initiating another
@@ -287,9 +337,15 @@ impl DocumentActor {
                         state_vector: Bytes::from(own_sv),
                     }
                     .to_payload();
-                    let frame = MessageBuilder::new(&subscriber.raw_address)
-                        .sync(MessageType::Sync, &step1);
-                    let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
+                    // Toward peers the own step1 is a SyncReply (Node's
+                    // createSyncReplyMessage), preventing step1 ping-pong.
+                    let kind = if via_relay {
+                        MessageType::SyncReply
+                    } else {
+                        MessageType::Sync
+                    };
+                    let frame = MessageBuilder::new(&reply_address).sync(kind, &step1);
+                    self.send_reply(conn_id, via_relay, frame);
                 }
             }
             SyncMessage::Step2 { update } | SyncMessage::Update { update } => {
@@ -322,7 +378,15 @@ impl DocumentActor {
                 };
 
                 self.broadcast_update(&produced);
-                self.mark_dirty();
+                if !origin.skips_store_hooks() {
+                    self.mark_dirty();
+                }
+                // Node's onChange publishes the server's first sync step to
+                // peers for every non-redis-origin change.
+                if !matches!(origin, crate::document::Origin::Redis) && produced != EMPTY_UPDATE_V1
+                {
+                    self.publish_own_step1();
+                }
 
                 if let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) {
                     let frame = MessageBuilder::new(&subscriber.raw_address).sync_status(true);
@@ -330,6 +394,33 @@ impl DocumentActor {
                 }
             }
         }
+    }
+
+    fn send_reply(&self, conn_id: Option<ConnId>, via_relay: bool, frame: Bytes) {
+        if via_relay {
+            self.publish(frame);
+        } else if let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) {
+            let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
+        }
+    }
+
+    /// Publishes a raw wire frame to the pub/sub channel, if attached.
+    fn publish(&self, frame: Bytes) {
+        if let Some(relay) = &self.relay {
+            let _ = relay.try_send(frame);
+        }
+    }
+
+    fn publish_own_step1(&self) {
+        if self.relay.is_none() {
+            return;
+        }
+        let own_sv = self.doc.transact().state_vector().encode_v1();
+        let step1 = SyncMessage::Step1 {
+            state_vector: Bytes::from(own_sv),
+        }
+        .to_payload();
+        self.publish(MessageBuilder::new(&self.name).sync(MessageType::Sync, &step1));
     }
 
     /// Whether the document already contains everything in `update`:
@@ -347,7 +438,12 @@ impl DocumentActor {
             .all(|(client, clock)| doc_sv.get(client) >= *clock)
     }
 
-    fn apply_awareness(&mut self, conn_id: Option<ConnId>, update_bytes: Bytes) {
+    fn apply_awareness(
+        &mut self,
+        conn_id: Option<ConnId>,
+        _origin: crate::document::Origin,
+        update_bytes: Bytes,
+    ) {
         let update = match AwarenessUpdate::decode_bytes(update_bytes) {
             Ok(update) => update,
             Err(error) => {
@@ -369,6 +465,13 @@ impl DocumentActor {
         }
 
         self.broadcast_awareness(&changed);
+        // Node's onAwarenessUpdate publishes changed clients to peers, but
+        // only while the document has local connections (issue #1027). The
+        // identifier filter and unchanged-clock convergence prevent echo
+        // loops.
+        if !changed.entries.is_empty() && !self.subscribers.is_empty() {
+            self.publish(MessageBuilder::new(&self.name).awareness(&changed.to_bytes()));
+        }
     }
 
     /// Broadcasts a document update produced by an apply to ALL subscribers
@@ -429,12 +532,22 @@ impl DocumentActor {
         }
         self.dirty = None;
         let Some(storage) = &self.storage else { return };
+        // Cross-instance store coordination: a lost try-once lock means
+        // another instance is persisting (TS: SkipFurtherHooksError).
+        if let Some(scaler) = &self.scaler {
+            if !scaler.acquire_store_lock(&self.name).await {
+                return;
+            }
+        }
         let state = {
             let txn = self.doc.transact();
             Bytes::from(txn.encode_state_as_update_v1(&StateVector::default()))
         };
         if let Err(error) = storage.store(&self.name, state).await {
             tracing::error!(document = %self.name, %error, "store failed");
+        }
+        if let Some(scaler) = &self.scaler {
+            scaler.release_store_lock(&self.name).await;
         }
     }
 }

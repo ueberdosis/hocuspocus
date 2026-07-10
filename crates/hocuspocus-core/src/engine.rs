@@ -37,6 +37,7 @@ pub(crate) struct EngineInner {
     pub(crate) storage: Option<Arc<dyn Storage>>,
     pub(crate) authenticator: Arc<dyn Authenticator>,
     pub(crate) events: Arc<dyn crate::auth::EventHooks>,
+    pub(crate) scaler: Option<Arc<dyn crate::auth::Scaler>>,
     docs: tokio::sync::Mutex<HashMap<Arc<str>, DocHandle>>,
     sockets: StdMutex<HashMap<ConnId, mpsc::Sender<Outbound>>>,
     next_conn_id: AtomicU64,
@@ -64,6 +65,7 @@ impl Engine {
             None,
             Arc::new(AllowAll),
             Arc::new(crate::auth::NoEvents),
+            None,
         )
     }
 
@@ -72,12 +74,14 @@ impl Engine {
         storage: Option<Arc<dyn Storage>>,
         authenticator: Arc<dyn Authenticator>,
         events: Arc<dyn crate::auth::EventHooks>,
+        scaler: Option<Arc<dyn crate::auth::Scaler>>,
     ) -> Self {
         let inner = Arc::new(EngineInner {
             config,
             storage,
             authenticator,
             events,
+            scaler,
             docs: tokio::sync::Mutex::new(HashMap::new()),
             sockets: StdMutex::new(HashMap::new()),
             next_conn_id: AtomicU64::new(1),
@@ -167,6 +171,9 @@ impl EngineInner {
         let on_unload: Box<dyn FnOnce(&str) + Send> = Box::new(move |_| {
             if let Some(inner) = weak.upgrade() {
                 tokio::spawn(async move {
+                    if let Some(scaler) = &inner.scaler {
+                        scaler.detach(&unload_name).await;
+                    }
                     let mut docs = inner.docs.lock().await;
                     if docs
                         .get(&unload_name)
@@ -182,10 +189,14 @@ impl EngineInner {
             self.config.clone(),
             self.storage.clone(),
             self.events.clone(),
+            self.scaler.clone(),
             on_unload,
         )
         .await?;
-        docs.insert(name, handle.clone());
+        docs.insert(name.clone(), handle.clone());
+        if let Some(scaler) = &self.scaler {
+            scaler.attach(&name, handle.clone()).await;
+        }
         Ok(handle)
     }
 

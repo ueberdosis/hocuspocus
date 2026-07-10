@@ -360,7 +360,7 @@ impl SocketTask {
                 }
             }
             MessageType::QueryAwareness => Some(DocMessage::QueryAwareness {
-                conn_id: self.conn_id,
+                conn_id: Some(self.conn_id),
             }),
             MessageType::Stateless => {
                 let mut reader = Reader::new(envelope.payload);
