@@ -1,0 +1,16 @@
+[package]
+name = "hocuspocus-storage"
+description = "Persistence backends (SQLite, Postgres, S3) for Hocuspocus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bytes = { workspace = true }
+hocuspocus-core = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

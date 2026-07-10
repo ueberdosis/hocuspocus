@@ -1,0 +1,15 @@
+[package]
+name = "hocuspocus-redis"
+description = "Redis horizontal scaling for Hocuspocus, interoperable with @hocuspocus/extension-redis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+bytes = { workspace = true }
+hocuspocus-core = { workspace = true }
+hocuspocus-protocol = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }

@@ -1,0 +1,46 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/hocuspocus-protocol",
+  "crates/hocuspocus-core",
+  "crates/hocuspocus-axum",
+  "crates/hocuspocus-redis",
+  "crates/hocuspocus-storage",
+  "crates/hocuspocus-webhook",
+  "crates/hocuspocus-metrics",
+  "crates/hocuspocus-server",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/ueberdosis/hocuspocus"
+# yrs 0.27 uses if-let guards, stabilized in Rust 1.96.
+rust-version = "1.96"
+
+[workspace.dependencies]
+hocuspocus-protocol = { path = "crates/hocuspocus-protocol" }
+hocuspocus-core = { path = "crates/hocuspocus-core" }
+hocuspocus-axum = { path = "crates/hocuspocus-axum" }
+hocuspocus-redis = { path = "crates/hocuspocus-redis" }
+hocuspocus-storage = { path = "crates/hocuspocus-storage" }
+hocuspocus-webhook = { path = "crates/hocuspocus-webhook" }
+hocuspocus-metrics = { path = "crates/hocuspocus-metrics" }
+
+async-trait = "0.1"
+axum = { version = "0.8", features = ["ws"] }
+bytes = "1"
+figment = { version = "0.10", features = ["toml", "env"] }
+futures = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time", "signal", "net"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+yrs = "0.27"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

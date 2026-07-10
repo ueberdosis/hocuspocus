@@ -1,0 +1,20 @@
+[package]
+name = "hocuspocus-core"
+description = "Embeddable Hocuspocus collaboration engine: documents, connections, hooks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+hocuspocus-protocol = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+yrs = { workspace = true }

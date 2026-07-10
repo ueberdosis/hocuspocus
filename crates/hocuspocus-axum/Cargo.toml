@@ -1,0 +1,16 @@
+[package]
+name = "hocuspocus-axum"
+description = "Axum WebSocket transport for the Hocuspocus collaboration engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+bytes = { workspace = true }
+hocuspocus-core = { workspace = true }
+hocuspocus-protocol = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }

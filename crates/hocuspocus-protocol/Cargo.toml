@@ -1,0 +1,12 @@
+[package]
+name = "hocuspocus-protocol"
+description = "Hocuspocus wire protocol: lib0-compatible framing, message types, routing keys"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+bytes = { workspace = true }
+thiserror = { workspace = true }

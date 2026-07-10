@@ -1,0 +1,10 @@
+[package]
+name = "hocuspocus-metrics"
+description = "Prometheus metrics and tracing for Hocuspocus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
