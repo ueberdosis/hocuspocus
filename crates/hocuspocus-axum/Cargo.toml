@@ -10,6 +10,7 @@ rust-version.workspace = true
 [dependencies]
 axum = { workspace = true }
 bytes = { workspace = true }
+futures = { workspace = true }
 hocuspocus-core = { workspace = true }
 hocuspocus-protocol = { workspace = true }
 tokio = { workspace = true }

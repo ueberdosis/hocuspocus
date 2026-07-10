@@ -1,20 +1,32 @@
 //! Standalone Hocuspocus server.
 //!
-//! M0 scaffold: loads configuration, binds the listener, announces
-//! readiness as a single JSON line on stdout (consumed by the conformance
-//! harness), serves `/` and `/healthz`, and shuts down gracefully on
-//! SIGTERM/SIGINT. The WebSocket endpoint and the engine wiring land in M2.
+//! M2: serves the collaboration engine over WebSockets on any path, plus
+//! `/healthz` and the control API (`/control/stats`,
+//! `/control/close-connections`) used by operators and the conformance
+//! harness. Storage defaults to in-memory; persistent backends and webhook
+//! auth land in M3.
 
 mod config;
 
 use std::net::SocketAddr;
+use std::sync::Arc;
 
-use axum::routing::get;
+use axum::extract::{State, WebSocketUpgrade};
+use axum::response::IntoResponse;
+use axum::routing::{get, post};
 use axum::Router;
 use tokio::net::TcpListener;
 use tokio::signal;
 
 use config::Config;
+use hocuspocus_core::{Configuration, Engine};
+use hocuspocus_protocol::close;
+use hocuspocus_storage::InMemoryStorage;
+
+#[derive(Clone)]
+struct AppState {
+    engine: Engine,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,9 +39,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config_path = parse_config_arg();
     let config = Config::load(config_path.as_deref())?;
 
+    let engine_config = Configuration {
+        name: config.server.name.clone(),
+        timeout: std::time::Duration::from_millis(config.server.timeout_ms),
+        debounce: std::time::Duration::from_millis(config.server.debounce_ms),
+        max_debounce: std::time::Duration::from_millis(config.server.max_debounce_ms),
+        unload_immediately: config.server.unload_immediately,
+        ..Configuration::default()
+    };
+    let engine = Engine::with_parts(
+        engine_config,
+        Some(Arc::new(InMemoryStorage::new())),
+        Arc::new(hocuspocus_core::AllowAll),
+    );
+    let state = AppState {
+        engine: engine.clone(),
+    };
+
     let app = Router::new()
-        .route("/", get(|| async { hocuspocus_axum::WELCOME_MESSAGE }))
-        .route("/healthz", get(|| async { "ok" }));
+        .route("/healthz", get(|| async { "ok" }))
+        .route("/control/stats", get(control_stats))
+        .route(
+            "/control/close-connections",
+            post(control_close_connections),
+        )
+        .route("/", get(root_or_upgrade))
+        .route("/{*path}", get(root_or_upgrade))
+        .with_state(state);
 
     let listener = TcpListener::bind(&config.server.listen).await?;
     let local_addr: SocketAddr = listener.local_addr()?;
@@ -54,8 +90,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_graceful_shutdown(shutdown_signal())
         .await?;
 
+    // Graceful shutdown, mirroring destroy(): close clients so providers
+    // reconnect elsewhere, then flush pending stores.
+    engine
+        .close_all_connections(close::RESET_CONNECTION.code, close::RESET_CONNECTION.reason)
+        .await;
+    engine.flush_all_documents().await;
     tracing::info!("shut down gracefully");
     Ok(())
+}
+
+/// The WebSocket endpoint accepts the upgrade on ANY path (document names
+/// travel in-band); plain HTTP requests get the welcome text.
+async fn root_or_upgrade(
+    State(state): State<AppState>,
+    request: axum::extract::Request,
+) -> axum::response::Response {
+    use axum::extract::FromRequestParts;
+    let (mut parts, _body) = request.into_parts();
+    match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+        Ok(upgrade) => upgrade
+            .on_upgrade(move |socket| hocuspocus_axum::serve_socket(state.engine.clone(), socket)),
+        Err(_) => hocuspocus_axum::WELCOME_MESSAGE.into_response(),
+    }
+}
+
+async fn control_stats(State(state): State<AppState>) -> axum::Json<serde_json::Value> {
+    axum::Json(serde_json::json!({
+        "connections": state.engine.connections_count(),
+        "documents": state.engine.documents_count().await,
+    }))
+}
+
+async fn control_close_connections(State(state): State<AppState>) -> &'static str {
+    state
+        .engine
+        .close_all_connections(close::RESET_CONNECTION.code, close::RESET_CONNECTION.reason)
+        .await;
+    "ok"
 }
 
 /// Reads `--config <path>` from argv or the `HOCUSPOCUS_CONFIG` variable.

@@ -12,18 +12,24 @@
 //! skeletons are defined here; the runtime implementation lands in M2 (see
 //! `crates/RFC.md`).
 
+mod actor;
 pub mod auth;
+pub mod awareness;
 pub mod config;
 pub mod context;
 pub mod document;
+pub mod engine;
 pub mod extension;
+pub mod socket;
 pub mod storage;
 
 pub use auth::{AuthDecision, AuthRequest, Authenticator};
 pub use config::Configuration;
 pub use context::Context;
-pub use document::{DocHandle, DocMessage, DocRegistry, Origin};
+pub use document::{ConnId, DocHandle, DocMessage, Origin};
+pub use engine::{AllowAll, Engine, SocketChannels};
 pub use extension::{Extension, HookChain, HookError, HookResult};
+pub use socket::Outbound;
 pub use storage::Storage;
 
 /// Boxed error type used across hook and storage boundaries.

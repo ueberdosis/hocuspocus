@@ -430,6 +430,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "bytes",
+ "futures",
  "hocuspocus-core",
  "hocuspocus-protocol",
  "tokio",
@@ -487,6 +488,8 @@ dependencies = [
  "figment",
  "hocuspocus-axum",
  "hocuspocus-core",
+ "hocuspocus-protocol",
+ "hocuspocus-storage",
  "serde",
  "serde_json",
  "tokio",
