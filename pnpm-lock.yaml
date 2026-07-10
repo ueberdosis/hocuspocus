@@ -474,6 +474,9 @@ importers:
       mockdate:
         specifier: ^3.0.5
         version: 3.0.5
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.7(yjs@13.6.29)
 
 packages:
 
