@@ -1,11 +1,18 @@
 import type { ExecutionContext } from "ava";
 import type { ServerConfiguration } from "@hocuspocus/server";
 import { Server } from "@hocuspocus/server";
+import { newHocuspocusRust } from "./newHocuspocusRust.ts";
 
 export const newHocuspocus = (
 	t: ExecutionContext,
 	options?: Partial<ServerConfiguration>,
 ) => {
+	// HOCUSPOCUS_TEST_TARGET=rust runs the suite against the Rust server
+	// binary (see tests/conformance/rust-target.json for the skip-map).
+	if (process.env.HOCUSPOCUS_TEST_TARGET === "rust") {
+		return newHocuspocusRust(t, options);
+	}
+
 	const server = new Server({
 		// We don't need the logging in testing.
 		quiet: true,

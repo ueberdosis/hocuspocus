@@ -1,0 +1,33 @@
+{
+	"note": "Which AVA test files run against the Rust server binary (HOCUSPOCUS_TEST_TARGET=rust). Files move from skip to run as milestones land (see crates/RFC.md § 13).",
+	"run": [
+		"tests/provider/flushDelay.ts",
+		"tests/provider/observe.ts",
+		"tests/provider/observeDeep.ts",
+		"tests/provider/onOpen.ts",
+		"tests/providerwebsocket/configuration.ts",
+		"tests/providerwebsocket/messageQueueDeduplication.ts"
+	],
+	"skip": {
+		"tests/provider/hasUnsyncedChanges.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onAuthenticated.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onAuthenticationFailed.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onAuthenticationFailedRetry.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onAwarenessChange.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onAwarenessUpdate.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onClose.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onConnect.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onDisconnect.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onMessage.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onStateless.ts": "server-hook-options (M3 webhook transport)",
+		"tests/provider/onSynced.ts": "server-hook-options (M3 webhook transport)",
+		"tests/server/*": "hook-centric / in-process API (M3 webhook transport + control API growth)",
+		"tests/extension-database/*": "storage backends land in M3",
+		"tests/extension-s3/*": "storage backends land in M3",
+		"tests/extension-redis/*": "redis relay lands in M4",
+		"tests/extension-throttle/*": "throttle lands in M5",
+		"tests/extension-logger/*": "TS-extension mechanics (rust-native equivalent)",
+		"tests/transformer/*": "TS-only package, out of scope",
+		"tests/docs/*": "TS-only, out of scope"
+	}
+}

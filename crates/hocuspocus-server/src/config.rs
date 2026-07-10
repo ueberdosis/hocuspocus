@@ -11,8 +11,11 @@ use figment::providers::{Env, Format, Serialized, Toml};
 use figment::Figment;
 use serde::{Deserialize, Serialize};
 
+// No deny_unknown_fields here: unrelated HOCUSPOCUS_* environment
+// variables (e.g. HOCUSPOCUS_TEST_TARGET, HOCUSPOCUS_CONFIG) map into this
+// level of the figment namespace and must be ignored.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(default, deny_unknown_fields)]
+#[serde(default)]
 pub struct Config {
     pub server: ServerConfig,
 }

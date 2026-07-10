@@ -42,6 +42,7 @@
 		"lint": "biome lint && pnpm lint:ts",
 		"lint:fix": "biome lint --fix",
 		"test": "ava",
+		"test:rust": "node --experimental-transform-types tests/conformance/run-rust-conformance.mts",
 		"test:watch": "ava --watch",
 		"build:packages": "pnpm clean:packages && rolldown -c",
 		"build:watch": "pnpm clean:packages && rolldown --watch -c",
