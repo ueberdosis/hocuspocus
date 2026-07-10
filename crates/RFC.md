@@ -414,7 +414,7 @@ Beyond the ported suite:
 | **M1** | ✅ done | protocol crate complete: sync steps over yrs, awareness codec, TS-generated fixture corpus, fuzz targets | 100 % fixtures parse; byte-exact re-encode where deterministic (24/24); fuzz smoke ~22M execs clean (1 h soak pending CI) |
 | **M2** | ✅ done | single-node sync server: WS, doc lifecycle, sync/awareness broadcast, stateless, auth handshake, close codes, control API; test dispatcher + skip-map | Tier-1 conformance: ALL of tests/provider + tests/providerwebsocket pass (18 files / 62 tests); conformance job in CI |
 | **M3** | 🔶 mostly done | webhook auth + load/store + connect/disconnect/stateless events; sqlite/postgres backends; debounced store. Remaining: s3 backend, `change` events, tests/server suite | Tier-2 conformance green; debounce semantics matched |
-| **M4** | Redis multi-node | extension-redis tests green in all three topologies |
+| **M4** | 🔶 core done | Redis multi-node | three-topology smoke green against real Redis (Rust↔Rust, Node↔Rust both directions: sync, awareness, late-joiner state, store lock). Remaining: extension-redis AVA suite via dispatcher, reconnect re-subscribe, disconnectDelay |
 | **M5** | metrics, limits, graceful shutdown, differential nightly, load tests | 24 h soak clean; published perf comparison vs Node |
 | **M6** | npm platform packages, Docker, release workflow, migration guide | install smoke test on all platforms; parity checklist signed off |
 
