@@ -243,6 +243,7 @@ impl DocumentActor {
             }
         };
 
+        let is_step2 = matches!(message, SyncMessage::Step2 { .. });
         match message {
             SyncMessage::Step1 { state_vector } => {
                 let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) else {
@@ -289,9 +290,11 @@ impl DocumentActor {
                 if let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) {
                     if subscriber.read_only {
                         // Read-only connections never mutate the document.
-                        // (TS additionally acks Step2 with saved=true when
-                        // the update contains nothing new — refined in M3.)
-                        let frame = MessageBuilder::new(&subscriber.raw_address).sync_status(false);
+                        // A Step2 whose content the document already covers
+                        // is acked saved=true (TS snapshotContainsUpdate);
+                        // anything new is acked saved=false.
+                        let saved = is_step2 && self.doc_covers_update(&update);
+                        let frame = MessageBuilder::new(&subscriber.raw_address).sync_status(saved);
                         let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
                         return;
                     }
@@ -321,6 +324,21 @@ impl DocumentActor {
                 }
             }
         }
+    }
+
+    /// Whether the document already contains everything in `update`:
+    /// every client clock in the update is covered by the document's state
+    /// vector (the observable behavior of TS `snapshotContainsUpdate`).
+    fn doc_covers_update(&self, update: &[u8]) -> bool {
+        let Ok(decoded) = Update::decode_v1(update) else {
+            return false;
+        };
+        let update_sv = decoded.state_vector();
+        let txn = self.doc.transact();
+        let doc_sv = txn.state_vector();
+        update_sv
+            .iter()
+            .all(|(client, clock)| doc_sv.get(client) >= *clock)
     }
 
     fn apply_awareness(&mut self, conn_id: Option<ConnId>, update_bytes: Bytes) {

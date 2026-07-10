@@ -23,7 +23,7 @@ pub mod extension;
 pub mod socket;
 pub mod storage;
 
-pub use auth::{AuthDecision, AuthRequest, Authenticator};
+pub use auth::{AuthDecision, AuthRequest, Authenticator, EventHooks, NoEvents};
 pub use config::Configuration;
 pub use context::Context;
 pub use document::{ConnId, DocHandle, DocMessage, Origin};

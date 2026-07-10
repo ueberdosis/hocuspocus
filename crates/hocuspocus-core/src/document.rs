@@ -106,3 +106,12 @@ pub enum DocMessage {
     /// Terminate the actor after a final store.
     Shutdown,
 }
+
+/// Document name portion of a raw routing key.
+pub fn document_name_of(raw_address: &str) -> String {
+    raw_address
+        .split('\0')
+        .next()
+        .unwrap_or(raw_address)
+        .to_owned()
+}

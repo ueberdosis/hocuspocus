@@ -20,6 +20,22 @@ pub struct Config {
     pub server: ServerConfig,
     pub auth: AuthConfig,
     pub webhook: WebhookConfig,
+    pub storage: StorageConfig,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct StorageConfig {
+    /// "memory" (default) or "webhook" (GET/PUT {webhook.url}/documents/{name}).
+    pub backend: StorageBackend,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StorageBackend {
+    #[default]
+    Memory,
+    Webhook,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -45,6 +61,8 @@ pub struct WebhookConfig {
     pub url: Option<String>,
     /// Shared secret for X-Hocuspocus-Signature-256 signing.
     pub secret: String,
+    /// Comma-separated events to deliver: "connect,disconnect".
+    pub events: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -86,7 +104,7 @@ impl Default for ServerConfig {
 impl Config {
     /// Loads configuration from defaults, an optional TOML file and
     /// `HOCUSPOCUS_*` environment variables (e.g.
-    /// `HOCUSPOCUS_SERVER_LISTEN=0.0.0.0:80`).
+    /// `HOCUSPOCUS_SERVER__LISTEN=0.0.0.0:80`).
     // figment::Error is large by value; config loading runs once at startup,
     // so the copy is irrelevant.
     #[allow(clippy::result_large_err)]
@@ -98,7 +116,7 @@ impl Config {
             figment = figment.merge(Toml::file("hocuspocus.toml"));
         }
         figment
-            .merge(Env::prefixed("HOCUSPOCUS_").split("_").lowercase(true))
+            .merge(Env::prefixed("HOCUSPOCUS_").split("__").lowercase(true))
             .extract()
     }
 }

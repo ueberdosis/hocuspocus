@@ -61,11 +61,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ))
         }
     };
-    let engine = Engine::with_parts(
-        engine_config,
-        Some(Arc::new(InMemoryStorage::new())),
-        authenticator,
-    );
+    let storage: Arc<dyn hocuspocus_core::Storage> = match config.storage.backend {
+        config::StorageBackend::Memory => Arc::new(InMemoryStorage::new()),
+        config::StorageBackend::Webhook => {
+            let url = config
+                .webhook
+                .url
+                .clone()
+                .ok_or("[storage] backend = \"webhook\" requires [webhook] url")?;
+            Arc::new(hocuspocus_webhook::WebhookStorage::new(
+                url,
+                config.webhook.secret.clone(),
+            ))
+        }
+    };
+    let events: Arc<dyn hocuspocus_core::EventHooks> =
+        match (&config.webhook.url, config.webhook.events.as_str()) {
+            (Some(url), events) if !events.is_empty() => {
+                let events = events
+                    .split(',')
+                    .filter_map(|event| match event.trim() {
+                        "connect" => Some(hocuspocus_webhook::Event::Connect),
+                        "disconnect" => Some(hocuspocus_webhook::Event::Disconnect),
+                        _ => None,
+                    })
+                    .collect();
+                Arc::new(hocuspocus_webhook::WebhookEvents::new(
+                    url.clone(),
+                    config.webhook.secret.clone(),
+                    events,
+                ))
+            }
+            _ => Arc::new(hocuspocus_core::NoEvents),
+        };
+    let engine = Engine::with_parts(engine_config, Some(storage), authenticator, events);
     let state = AppState {
         engine: engine.clone(),
     };

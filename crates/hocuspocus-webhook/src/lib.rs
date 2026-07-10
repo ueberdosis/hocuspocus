@@ -188,3 +188,152 @@ impl hocuspocus_core::Authenticator for WebhookAuthenticator {
         })
     }
 }
+
+/// Persistence over the webhook binary endpoints:
+/// `GET {base}/documents/{name}` (200 = yjs update v1, 404 = new document)
+/// and `PUT {base}/documents/{name}` (body = full state). Requests are
+/// signed over the canonical path (GET) or the raw body (PUT).
+pub struct WebhookStorage {
+    base_url: String,
+    secret: String,
+    client: reqwest::Client,
+}
+
+impl WebhookStorage {
+    pub fn new(base_url: impl Into<String>, secret: impl Into<String>) -> Self {
+        Self {
+            base_url: base_url.into(),
+            secret: secret.into(),
+            client: reqwest::Client::new(),
+        }
+    }
+
+    fn document_url(&self, document_name: &str) -> String {
+        let encoded: String = document_name
+            .bytes()
+            .flat_map(|byte| match byte {
+                b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                    vec![byte as char]
+                }
+                _ => format!("%{byte:02X}").chars().collect(),
+            })
+            .collect();
+        format!(
+            "{}/documents/{encoded}",
+            self.base_url.trim_end_matches('/')
+        )
+    }
+}
+
+#[async_trait::async_trait]
+impl hocuspocus_core::Storage for WebhookStorage {
+    async fn fetch(
+        &self,
+        document_name: &str,
+    ) -> Result<Option<bytes::Bytes>, hocuspocus_core::BoxError> {
+        let url = self.document_url(document_name);
+        let response = self
+            .client
+            .get(&url)
+            .header(SIGNATURE_HEADER, sign(&self.secret, url.as_bytes()))
+            .send()
+            .await?;
+        match response.status() {
+            reqwest::StatusCode::NOT_FOUND => Ok(None),
+            status if status.is_success() => Ok(Some(response.bytes().await?)),
+            status => Err(format!("webhook fetch failed: {status}").into()),
+        }
+    }
+
+    async fn store(
+        &self,
+        document_name: &str,
+        state: bytes::Bytes,
+    ) -> Result<(), hocuspocus_core::BoxError> {
+        let url = self.document_url(document_name);
+        let response = self
+            .client
+            .put(&url)
+            .header("Content-Type", "application/octet-stream")
+            .header(SIGNATURE_HEADER, sign(&self.secret, &state))
+            .body(state)
+            .send()
+            .await?;
+        if !response.status().is_success() {
+            return Err(format!("webhook store failed: {}", response.status()).into());
+        }
+        Ok(())
+    }
+}
+
+/// Posts `connect`/`disconnect` events to the webhook URL. `connect` is
+/// awaited before authentication; a non-2xx response rejects the
+/// connection (TS onConnect → Forbidden).
+pub struct WebhookEvents {
+    url: String,
+    secret: String,
+    events: Vec<Event>,
+    client: reqwest::Client,
+}
+
+impl WebhookEvents {
+    pub fn new(url: impl Into<String>, secret: impl Into<String>, events: Vec<Event>) -> Self {
+        Self {
+            url: url.into(),
+            secret: secret.into(),
+            events,
+            client: reqwest::Client::new(),
+        }
+    }
+
+    async fn post(
+        &self,
+        event: Event,
+        document_name: &str,
+    ) -> Result<(), hocuspocus_core::BoxError> {
+        let body = serde_json::to_vec(&serde_json::json!({
+            "event": event.as_str(),
+            "payload": { "documentName": document_name },
+        }))?;
+        let response = self
+            .client
+            .post(&self.url)
+            .header("Content-Type", "application/json")
+            .header(SIGNATURE_HEADER, sign(&self.secret, &body))
+            .body(body)
+            .send()
+            .await?;
+        if !response.status().is_success() {
+            #[derive(serde::Deserialize, Default)]
+            struct Denied {
+                #[serde(default)]
+                reason: Option<String>,
+            }
+            let denied: Denied = response.json().await.unwrap_or_default();
+            return Err(denied
+                .reason
+                .unwrap_or_else(|| "forbidden".to_owned())
+                .into());
+        }
+        Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl hocuspocus_core::EventHooks for WebhookEvents {
+    async fn connect(&self, document_name: &str) -> Result<(), hocuspocus_core::BoxError> {
+        if !self.events.contains(&Event::Connect) {
+            return Ok(());
+        }
+        self.post(Event::Connect, document_name).await
+    }
+
+    async fn disconnect(&self, document_name: &str) {
+        if !self.events.contains(&Event::Disconnect) {
+            return;
+        }
+        if let Err(error) = self.post(Event::Disconnect, document_name).await {
+            tracing::warn!(%error, "disconnect webhook failed");
+        }
+    }
+}

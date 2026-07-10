@@ -21,9 +21,10 @@ export const newHocuspocusRust = async (
 	t: ExecutionContext,
 	options?: Partial<ServerConfiguration>,
 ): Promise<Hocuspocus> => {
+	const supportedHooks = ["onAuthenticate", "onLoadDocument", "onStoreDocument", "onConnect", "onDisconnect"];
 	const unsupported = Object.entries(options ?? {}).filter(
 		([key, value]) =>
-			(typeof value === "function" && key !== "onAuthenticate") ||
+			(typeof value === "function" && !supportedHooks.includes(key)) ||
 			key_is_extensions(value),
 	);
 	if (unsupported.length > 0) {
@@ -43,21 +44,98 @@ export const newHocuspocusRust = async (
 	// events to the closure the test provided.
 	const env: Record<string, string | undefined> = {
 		...process.env,
-		HOCUSPOCUS_SERVER_LISTEN: "127.0.0.1:0",
-		HOCUSPOCUS_SERVER_QUIET: "true",
+		HOCUSPOCUS_SERVER__LISTEN: "127.0.0.1:0",
+		HOCUSPOCUS_SERVER__QUIET: "true",
 	};
-	if (options?.onAuthenticate) {
-		const onAuthenticate = options.onAuthenticate;
+	// Scalar server options map onto the binary's config env.
+	if (typeof options?.debounce === "number") env.HOCUSPOCUS_SERVER__DEBOUNCE_MS = String(options.debounce);
+	if (typeof options?.maxDebounce === "number") env.HOCUSPOCUS_SERVER__MAX_DEBOUNCE_MS = String(options.maxDebounce);
+	if (typeof options?.timeout === "number") env.HOCUSPOCUS_SERVER__TIMEOUT_MS = String(options.timeout);
+	if (typeof options?.unloadImmediately === "boolean")
+		env.HOCUSPOCUS_SERVER__UNLOAD_IMMEDIATELY = String(options.unloadImmediately);
+
+	if (
+		options?.onAuthenticate ||
+		options?.onLoadDocument ||
+		options?.onStoreDocument ||
+		options?.onConnect ||
+		options?.onDisconnect
+	) {
+		const Y = await import("yjs");
 		const receiver = http.createServer((request, response) => {
-			let body = "";
-			request.on("data", (chunk) => {
-				body += chunk;
-			});
+			const chunks: Buffer[] = [];
+			request.on("data", (chunk) => chunks.push(chunk));
 			request.on("end", async () => {
+				const body = Buffer.concat(chunks);
 				try {
-					const { payload } = JSON.parse(body);
+					const documentMatch = request.url?.match(/^\/documents\/(.+)$/);
+					if (documentMatch && request.method === "GET") {
+						// Binary persistence fetch → onLoadDocument closure.
+						const documentName = decodeURIComponent(documentMatch[1]);
+						if (!options.onLoadDocument) {
+							response.writeHead(404).end();
+							return;
+						}
+						const document = new Y.Doc();
+						const returned = await options.onLoadDocument({
+							document,
+							documentName,
+							context: {},
+							instance: undefined,
+						} as never);
+						const state = Y.encodeStateAsUpdate((returned as InstanceType<typeof Y.Doc>) ?? document);
+						response.writeHead(200, { "Content-Type": "application/octet-stream" });
+						response.end(Buffer.from(state));
+						return;
+					}
+					if (documentMatch && request.method === "PUT") {
+						// Binary persistence store → onStoreDocument closure.
+						const documentName = decodeURIComponent(documentMatch[1]);
+						if (options.onStoreDocument) {
+							const document = new Y.Doc();
+							Y.applyUpdate(document, new Uint8Array(body));
+							await options.onStoreDocument({
+								document,
+								documentName,
+								state: body,
+								context: {},
+								instance: undefined,
+							} as never);
+						}
+						response.writeHead(200).end();
+						return;
+					}
+					// JSON event endpoint (auth / connect / disconnect).
+					const { event, payload } = JSON.parse(body.toString());
 					const connectionConfig = { readOnly: false, isAuthenticated: false };
-					const context = await onAuthenticate({
+					if (event === "connect") {
+						await options.onConnect?.({
+							documentName: payload.documentName,
+							context: {},
+							connectionConfig,
+							connection: connectionConfig,
+							requestHeaders: {},
+							requestParameters: new URLSearchParams(),
+						} as never);
+						response.writeHead(200, { "Content-Type": "application/json" });
+						response.end(JSON.stringify({}));
+						return;
+					}
+					if (event === "disconnect") {
+						await options.onDisconnect?.({
+							documentName: payload.documentName,
+							context: {},
+						} as never);
+						response.writeHead(200, { "Content-Type": "application/json" });
+						response.end(JSON.stringify({}));
+						return;
+					}
+					if (!options.onAuthenticate) {
+						response.writeHead(200, { "Content-Type": "application/json" });
+						response.end(JSON.stringify({ context: {}, scope: "read-write" }));
+						return;
+					}
+					const context = await options.onAuthenticate({
 						token: payload.token,
 						documentName: payload.documentName,
 						connectionConfig,
@@ -82,9 +160,15 @@ export const newHocuspocusRust = async (
 		await new Promise<void>((resolve) => receiver.listen(0, "127.0.0.1", resolve));
 		const receiverPort = (receiver.address() as { port: number }).port;
 		t.teardown(() => receiver.close());
-		env.HOCUSPOCUS_AUTH_MODE = "webhook";
-		env.HOCUSPOCUS_WEBHOOK_URL = `http://127.0.0.1:${receiverPort}`;
-		env.HOCUSPOCUS_WEBHOOK_SECRET = "test-secret";
+		env.HOCUSPOCUS_WEBHOOK__URL = `http://127.0.0.1:${receiverPort}`;
+		env.HOCUSPOCUS_WEBHOOK__SECRET = "test-secret";
+		if (options.onAuthenticate) env.HOCUSPOCUS_AUTH__MODE = "webhook";
+		const events = [
+			options.onConnect ? "connect" : null,
+			options.onDisconnect ? "disconnect" : null,
+		].filter(Boolean);
+		if (events.length > 0) env.HOCUSPOCUS_WEBHOOK__EVENTS = events.join(",");
+		if (options.onLoadDocument || options.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
 	}
 
 	const child = spawn(binary, [], {

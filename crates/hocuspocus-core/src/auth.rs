@@ -33,3 +33,23 @@ pub struct AuthDecision {
 pub trait Authenticator: Send + Sync + 'static {
     async fn authenticate(&self, request: AuthRequest<'_>) -> Result<AuthDecision, BoxError>;
 }
+
+/// Connection lifecycle notifications (the webhook `connect`/`disconnect`
+/// events; TS `onConnect`/`onDisconnect` hooks). `connect` runs BEFORE
+/// authentication and may reject the connection.
+#[async_trait]
+pub trait EventHooks: Send + Sync + 'static {
+    async fn connect(&self, document_name: &str) -> Result<(), BoxError> {
+        let _ = document_name;
+        Ok(())
+    }
+    async fn disconnect(&self, document_name: &str) {
+        let _ = document_name;
+    }
+}
+
+/// Default no-op event hooks.
+pub struct NoEvents;
+
+#[async_trait]
+impl EventHooks for NoEvents {}

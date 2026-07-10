@@ -2,6 +2,7 @@
 	"note": "Which AVA test files run against the Rust server binary (HOCUSPOCUS_TEST_TARGET=rust). Files move from skip to run as milestones land (see crates/RFC.md \u00a7 13).",
 	"run": [
 		"tests/provider/flushDelay.ts",
+		"tests/provider/hasUnsyncedChanges.ts",
 		"tests/provider/observe.ts",
 		"tests/provider/observeDeep.ts",
 		"tests/provider/onAuthenticated.ts",
@@ -14,13 +15,12 @@
 		"tests/provider/onDisconnect.ts",
 		"tests/provider/onMessage.ts",
 		"tests/provider/onOpen.ts",
+		"tests/provider/onSynced.ts",
 		"tests/providerwebsocket/configuration.ts",
 		"tests/providerwebsocket/messageQueueDeduplication.ts"
 	],
 	"skip": {
-		"tests/provider/hasUnsyncedChanges.ts": "onLoadDocument server hook (M3 webhook load/store)",
 		"tests/provider/onStateless.ts": "onStateless server hook (M3)",
-		"tests/provider/onSynced.ts": "onLoadDocument server hook (M3 webhook load/store)",
 		"tests/server/*": "hook-centric / in-process API (M3 webhook transport + control API growth)",
 		"tests/extension-database/*": "storage backends land in M3",
 		"tests/extension-s3/*": "storage backends land in M3",

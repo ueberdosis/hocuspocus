@@ -229,7 +229,16 @@ impl SocketTask {
             request_headers: &[],
             remote_addr: None,
         };
-        let decision = self.engine.authenticator.authenticate(request).await;
+        // TS runs onConnect before onAuthenticate; either may reject.
+        let decision = match self
+            .engine
+            .events
+            .connect(&envelope.address.document_name)
+            .await
+        {
+            Ok(()) => self.engine.authenticator.authenticate(request).await,
+            Err(error) => Err(error),
+        };
 
         let decision = match decision {
             Ok(decision) => decision,
@@ -397,8 +406,11 @@ impl SocketTask {
     }
 
     async fn teardown(mut self) {
-        for (_address, state) in self.docs.drain() {
+        for (address, state) in self.docs.drain() {
             if let DocState::Active { doc, .. } = state {
+                let events = self.engine.events.clone();
+                let document_name = crate::document::document_name_of(&address);
+                tokio::spawn(async move { events.disconnect(&document_name).await });
                 let _ = doc
                     .send(DocMessage::Leave {
                         conn_id: self.conn_id,

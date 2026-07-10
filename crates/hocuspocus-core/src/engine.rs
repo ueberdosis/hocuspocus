@@ -36,6 +36,7 @@ pub(crate) struct EngineInner {
     pub(crate) config: Configuration,
     pub(crate) storage: Option<Arc<dyn Storage>>,
     pub(crate) authenticator: Arc<dyn Authenticator>,
+    pub(crate) events: Arc<dyn crate::auth::EventHooks>,
     docs: tokio::sync::Mutex<HashMap<Arc<str>, DocHandle>>,
     sockets: StdMutex<HashMap<ConnId, mpsc::Sender<Outbound>>>,
     next_conn_id: AtomicU64,
@@ -58,18 +59,25 @@ pub struct Engine {
 
 impl Engine {
     pub fn new(config: Configuration) -> Self {
-        Self::with_parts(config, None, Arc::new(AllowAll))
+        Self::with_parts(
+            config,
+            None,
+            Arc::new(AllowAll),
+            Arc::new(crate::auth::NoEvents),
+        )
     }
 
     pub fn with_parts(
         config: Configuration,
         storage: Option<Arc<dyn Storage>>,
         authenticator: Arc<dyn Authenticator>,
+        events: Arc<dyn crate::auth::EventHooks>,
     ) -> Self {
         let inner = Arc::new(EngineInner {
             config,
             storage,
             authenticator,
+            events,
             docs: tokio::sync::Mutex::new(HashMap::new()),
             sockets: StdMutex::new(HashMap::new()),
             next_conn_id: AtomicU64::new(1),

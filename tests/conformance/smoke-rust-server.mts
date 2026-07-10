@@ -50,7 +50,7 @@ const waitFor = async (predicate: () => boolean, label: string, timeoutMs = 5000
 // --- start the server ------------------------------------------------------
 
 const server = spawn(binary, [], {
-	env: { ...process.env, HOCUSPOCUS_SERVER_LISTEN: "127.0.0.1:0" },
+	env: { ...process.env, HOCUSPOCUS_SERVER__LISTEN: "127.0.0.1:0" },
 	stdio: ["ignore", "pipe", "inherit"],
 });
 const readyLine: string = await new Promise((resolve, reject) => {
