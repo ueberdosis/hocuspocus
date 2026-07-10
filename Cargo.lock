@@ -460,8 +460,12 @@ version = "0.1.0"
 name = "hocuspocus-protocol"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "bytes",
+ "serde",
+ "serde_json",
  "thiserror",
+ "yrs",
 ]
 
 [[package]]

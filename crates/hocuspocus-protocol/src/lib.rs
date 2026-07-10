@@ -16,15 +16,19 @@
 
 pub mod address;
 pub mod auth;
+pub mod awareness;
 pub mod close;
 pub mod frame;
 pub mod redis;
+pub mod sync;
 pub mod types;
 pub mod varint;
 
 pub use address::DocumentAddress;
 pub use auth::{AuthInbound, AuthOutbound, Scope};
+pub use awareness::{AwarenessEntry, AwarenessUpdate};
 pub use frame::{Envelope, Frame, MessageBuilder};
+pub use sync::SyncMessage;
 pub use types::{AuthMessageType, MessageType, SyncMessageType};
 pub use varint::{Reader, Writer};
 

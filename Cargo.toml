@@ -1,5 +1,7 @@
 [workspace]
 resolver = "2"
+# The fuzz crate needs nightly + cargo-fuzz; it has its own workspace.
+exclude = ["crates/hocuspocus-protocol/fuzz"]
 members = [
   "crates/hocuspocus-protocol",
   "crates/hocuspocus-core",

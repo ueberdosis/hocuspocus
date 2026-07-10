@@ -1,0 +1,273 @@
+{
+	"generated_by": "tests/conformance/generate-protocol-fixtures.mts",
+	"note": "Golden vectors produced by the TypeScript implementation. Do not edit by hand.",
+	"fixtures": [
+		{
+			"name": "yjs full update",
+			"kind": "yjs_update",
+			"base64": "AQLF34vrBAAEAQdkZWZhdWx0FUhlbGxvIGZyb20gaG9jdXNwb2N1cygBBG1ldGEHdmVyc2lvbgF9AQA=",
+			"expect": {
+				"text_name": "default",
+				"text_content": "Hello from hocuspocus",
+				"map_name": "meta",
+				"map_key": "version",
+				"map_value": 1
+			}
+		},
+		{
+			"name": "yjs state vector",
+			"kind": "state_vector",
+			"base64": "AcXfi+sEFg==",
+			"expect": {}
+		},
+		{
+			"name": "authenticated read-write",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwICCnJlYWQtd3JpdGU=",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"authenticated_scope": "read-write"
+				}
+			}
+		},
+		{
+			"name": "authenticated readonly",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwICCHJlYWRvbmx5",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"authenticated_scope": "readonly"
+				}
+			}
+		},
+		{
+			"name": "permission denied",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwIBEXBlcm1pc3Npb24tZGVuaWVk",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"permission_denied_reason": "permission-denied"
+				}
+			}
+		},
+		{
+			"name": "token sync request",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwIA",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"token_request": true
+				}
+			}
+		},
+		{
+			"name": "query awareness",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwM=",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 3
+			}
+		},
+		{
+			"name": "stateless with unicode",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwUYeyJtc2ciOiJow6lsbG8g4oCUIOKckyJ9",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 5,
+				"stateless_payload": "{\"msg\":\"héllo — ✓\"}"
+			}
+		},
+		{
+			"name": "broadcast stateless",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwYHcmVsYXllZA==",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 6,
+				"stateless_payload": "relayed"
+			}
+		},
+		{
+			"name": "sync status saved",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwgB",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 8,
+				"sync_status": true
+			}
+		},
+		{
+			"name": "sync status unsaved",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwgA",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 8,
+				"sync_status": false
+			}
+		},
+		{
+			"name": "close with reason",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwcQUmVzZXQgQ29ubmVjdGlvbg==",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 7,
+				"close_reason": "Reset Connection"
+			}
+		},
+		{
+			"name": "sync step1 (server first sync step)",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwAABwHF34vrBBY=",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 0,
+				"sync": {
+					"subtype": 0,
+					"body_base64": "AcXfi+sEFg=="
+				}
+			}
+		},
+		{
+			"name": "sync reply with update",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwQCOwECxd+L6wQABAEHZGVmYXVsdBVIZWxsbyBmcm9tIGhvY3VzcG9jdXMoAQRtZXRhB3ZlcnNpb24BfQEA",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 4,
+				"sync": {
+					"subtype": 2,
+					"body_base64": "AQLF34vrBAAEAQdkZWZhdWx0FUhlbGxvIGZyb20gaG9jdXNwb2N1cygBBG1ldGEHdmVyc2lvbgF9AQA="
+				}
+			}
+		},
+		{
+			"name": "session-aware address",
+			"kind": "envelope",
+			"base64": "Em15LWRvYwBzZXNzaW9uLTEyMwgB",
+			"expect": {
+				"address": "my-doc\u0000session-123",
+				"document_name": "my-doc",
+				"session_id": "session-123",
+				"message_type": 8,
+				"sync_status": true
+			}
+		},
+		{
+			"name": "unicode document name",
+			"kind": "envelope",
+			"base64": "DGTDtmMt4oCmLeKckwgB",
+			"expect": {
+				"address": "döc-…-✓",
+				"message_type": 8,
+				"sync_status": true
+			}
+		},
+		{
+			"name": "client auth with providerVersion",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwIADHMzY3JldC10b2tlbgU5LjkuOQ==",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"token": "s3cret-token",
+					"provider_version": "9.9.9"
+				}
+			}
+		},
+		{
+			"name": "client auth without providerVersion (old provider)",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwIADHMzY3JldC10b2tlbg==",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 2,
+				"auth": {
+					"token": "s3cret-token",
+					"provider_version": null
+				}
+			}
+		},
+		{
+			"name": "bare ping",
+			"kind": "bare",
+			"base64": "CQ==",
+			"expect": {
+				"ping": true
+			}
+		},
+		{
+			"name": "bare pong",
+			"kind": "bare",
+			"base64": "Cg==",
+			"expect": {
+				"pong": true
+			}
+		},
+		{
+			"name": "awareness update with state",
+			"kind": "awareness_update",
+			"base64": "AfTBsrEEASl7InVzZXIiOnsibmFtZSI6ImphbiIsImNvbG9yIjoiI2ZmY2MwMCJ9fQ==",
+			"expect": {
+				"entries": [
+					{
+						"client_id": 1177329908,
+						"clock": 1,
+						"state": {
+							"user": {
+								"name": "jan",
+								"color": "#ffcc00"
+							}
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "awareness removal (null state)",
+			"kind": "awareness_update",
+			"base64": "AfTBsrEEAgRudWxs",
+			"expect": {
+				"entries": [
+					{
+						"client_id": 1177329908,
+						"clock": 2,
+						"state": null
+					}
+				]
+			}
+		},
+		{
+			"name": "awareness envelope",
+			"kind": "envelope",
+			"base64": "Bm15LWRvYwEMAfTBsrEEAgRudWxs",
+			"expect": {
+				"address": "my-doc",
+				"message_type": 1,
+				"awareness_inner_base64": "AfTBsrEEAgRudWxs"
+			}
+		},
+		{
+			"name": "redis frame",
+			"kind": "redis",
+			"base64": "DGhvc3QtZml4dHVyZQZteS1kb2MIAQ==",
+			"expect": {
+				"identifier": "host-fixture",
+				"inner_base64": "Bm15LWRvYwgB"
+			}
+		}
+	]
+}
