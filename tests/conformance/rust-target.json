@@ -1,18 +1,18 @@
 {
-	"note": "Which AVA test files run against the Rust server binary (HOCUSPOCUS_TEST_TARGET=rust). Files move from skip to run as milestones land (see crates/RFC.md § 13).",
+	"note": "Which AVA test files run against the Rust server binary (HOCUSPOCUS_TEST_TARGET=rust). Files move from skip to run as milestones land (see crates/RFC.md \u00a7 13).",
 	"run": [
 		"tests/provider/flushDelay.ts",
 		"tests/provider/observe.ts",
 		"tests/provider/observeDeep.ts",
+		"tests/provider/onAuthenticated.ts",
+		"tests/provider/onAuthenticationFailed.ts",
+		"tests/provider/onAuthenticationFailedRetry.ts",
 		"tests/provider/onOpen.ts",
 		"tests/providerwebsocket/configuration.ts",
 		"tests/providerwebsocket/messageQueueDeduplication.ts"
 	],
 	"skip": {
 		"tests/provider/hasUnsyncedChanges.ts": "server-hook-options (M3 webhook transport)",
-		"tests/provider/onAuthenticated.ts": "server-hook-options (M3 webhook transport)",
-		"tests/provider/onAuthenticationFailed.ts": "server-hook-options (M3 webhook transport)",
-		"tests/provider/onAuthenticationFailedRetry.ts": "server-hook-options (M3 webhook transport)",
 		"tests/provider/onAwarenessChange.ts": "server-hook-options (M3 webhook transport)",
 		"tests/provider/onAwarenessUpdate.ts": "server-hook-options (M3 webhook transport)",
 		"tests/provider/onClose.ts": "server-hook-options (M3 webhook transport)",

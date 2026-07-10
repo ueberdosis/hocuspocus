@@ -13,3 +13,9 @@ hocuspocus-core = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = "0.10"
+async-trait = { workspace = true }
+bytes = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["json"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+hocuspocus-protocol = { workspace = true }

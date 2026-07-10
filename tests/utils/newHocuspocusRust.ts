@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExecutionContext } from "ava";
@@ -21,7 +22,9 @@ export const newHocuspocusRust = async (
 	options?: Partial<ServerConfiguration>,
 ): Promise<Hocuspocus> => {
 	const unsupported = Object.entries(options ?? {}).filter(
-		([, value]) => typeof value === "function" || key_is_extensions(value),
+		([key, value]) =>
+			(typeof value === "function" && key !== "onAuthenticate") ||
+			key_is_extensions(value),
 	);
 	if (unsupported.length > 0) {
 		throw new Error(
@@ -35,12 +38,57 @@ export const newHocuspocusRust = async (
 		process.env.HOCUSPOCUS_RUST_BIN ??
 		path.join(repoRoot, "target/debug/hocuspocus-server");
 
+	// onAuthenticate closures are served over the production webhook
+	// contract: a per-test HTTP receiver dispatches the Rust server's auth
+	// events to the closure the test provided.
+	const env: Record<string, string | undefined> = {
+		...process.env,
+		HOCUSPOCUS_SERVER_LISTEN: "127.0.0.1:0",
+		HOCUSPOCUS_SERVER_QUIET: "true",
+	};
+	if (options?.onAuthenticate) {
+		const onAuthenticate = options.onAuthenticate;
+		const receiver = http.createServer((request, response) => {
+			let body = "";
+			request.on("data", (chunk) => {
+				body += chunk;
+			});
+			request.on("end", async () => {
+				try {
+					const { payload } = JSON.parse(body);
+					const connectionConfig = { readOnly: false, isAuthenticated: false };
+					const context = await onAuthenticate({
+						token: payload.token,
+						documentName: payload.documentName,
+						connectionConfig,
+						connection: connectionConfig,
+						context: {},
+						requestHeaders: {},
+						requestParameters: new URLSearchParams(),
+					} as never);
+					response.writeHead(200, { "Content-Type": "application/json" });
+					response.end(
+						JSON.stringify({
+							context: context ?? {},
+							scope: connectionConfig.readOnly ? "readonly" : "read-write",
+						}),
+					);
+				} catch (error) {
+					response.writeHead(403, { "Content-Type": "application/json" });
+					response.end(JSON.stringify({ reason: (error as Error).message || "permission-denied" }));
+				}
+			});
+		});
+		await new Promise<void>((resolve) => receiver.listen(0, "127.0.0.1", resolve));
+		const receiverPort = (receiver.address() as { port: number }).port;
+		t.teardown(() => receiver.close());
+		env.HOCUSPOCUS_AUTH_MODE = "webhook";
+		env.HOCUSPOCUS_WEBHOOK_URL = `http://127.0.0.1:${receiverPort}`;
+		env.HOCUSPOCUS_WEBHOOK_SECRET = "test-secret";
+	}
+
 	const child = spawn(binary, [], {
-		env: {
-			...process.env,
-			HOCUSPOCUS_SERVER_LISTEN: "127.0.0.1:0",
-			HOCUSPOCUS_SERVER_QUIET: "true",
-		},
+		env,
 		stdio: ["ignore", "pipe", "inherit"],
 	});
 

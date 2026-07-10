@@ -107,3 +107,84 @@ mod tests {
         assert!(!verify("secret", body, "sha256=short"));
     }
 }
+
+/// Authenticates connections by POSTing an `auth` event to the webhook URL.
+///
+/// Request body: `{"event":"auth","payload":{"documentName":…,"token":…,
+/// "providerVersion":…}}`, signed with [`SIGNATURE_HEADER`]. Responses:
+/// `200 {"context": {...}, "scope": "read-write"|"readonly"}` grants
+/// access; any other status denies it (the `reason` field, if present,
+/// becomes the PermissionDenied reason).
+pub struct WebhookAuthenticator {
+    url: String,
+    secret: String,
+    client: reqwest::Client,
+}
+
+impl WebhookAuthenticator {
+    pub fn new(url: impl Into<String>, secret: impl Into<String>) -> Self {
+        Self {
+            url: url.into(),
+            secret: secret.into(),
+            client: reqwest::Client::new(),
+        }
+    }
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct AuthResponse {
+    #[serde(default)]
+    context: serde_json::Map<String, serde_json::Value>,
+    #[serde(default)]
+    scope: Option<String>,
+    #[serde(default)]
+    reason: Option<String>,
+}
+
+#[async_trait::async_trait]
+impl hocuspocus_core::Authenticator for WebhookAuthenticator {
+    async fn authenticate(
+        &self,
+        request: hocuspocus_core::AuthRequest<'_>,
+    ) -> Result<hocuspocus_core::AuthDecision, hocuspocus_core::BoxError> {
+        let body = serde_json::to_vec(&serde_json::json!({
+            "event": Event::Auth.as_str(),
+            "payload": {
+                "documentName": request.document_name,
+                "token": request.token,
+                "providerVersion": request.provider_version,
+            },
+        }))?;
+        let response = self
+            .client
+            .post(&self.url)
+            .header("Content-Type", "application/json")
+            .header(SIGNATURE_HEADER, sign(&self.secret, &body))
+            .body(body)
+            .send()
+            .await?;
+
+        let status = response.status();
+        let parsed: AuthResponse = response.json().await.unwrap_or(AuthResponse {
+            context: Default::default(),
+            scope: None,
+            reason: None,
+        });
+
+        if !status.is_success() {
+            return Err(parsed
+                .reason
+                .unwrap_or_else(|| "permission-denied".to_owned())
+                .into());
+        }
+
+        let scope = match parsed.scope.as_deref() {
+            Some("readonly") => hocuspocus_protocol::Scope::ReadOnly,
+            _ => hocuspocus_protocol::Scope::ReadWrite,
+        };
+        Ok(hocuspocus_core::AuthDecision {
+            scope,
+            context: parsed.context,
+        })
+    }
+}

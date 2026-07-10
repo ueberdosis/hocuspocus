@@ -18,6 +18,33 @@ use serde::{Deserialize, Serialize};
 #[serde(default)]
 pub struct Config {
     pub server: ServerConfig,
+    pub auth: AuthConfig,
+    pub webhook: WebhookConfig,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct AuthConfig {
+    /// "none" (accept everything, read-write) or "webhook" (POST auth
+    /// events to webhook.url).
+    pub mode: AuthMode,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AuthMode {
+    #[default]
+    None,
+    Webhook,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct WebhookConfig {
+    /// Base URL receiving JSON event POSTs.
+    pub url: Option<String>,
+    /// Shared secret for X-Hocuspocus-Signature-256 signing.
+    pub secret: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

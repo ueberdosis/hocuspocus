@@ -47,10 +47,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         unload_immediately: config.server.unload_immediately,
         ..Configuration::default()
     };
+    let authenticator: Arc<dyn hocuspocus_core::Authenticator> = match config.auth.mode {
+        config::AuthMode::None => Arc::new(hocuspocus_core::AllowAll),
+        config::AuthMode::Webhook => {
+            let url = config
+                .webhook
+                .url
+                .clone()
+                .ok_or("[auth] mode = \"webhook\" requires [webhook] url")?;
+            Arc::new(hocuspocus_webhook::WebhookAuthenticator::new(
+                url,
+                config.webhook.secret.clone(),
+            ))
+        }
+    };
     let engine = Engine::with_parts(
         engine_config,
         Some(Arc::new(InMemoryStorage::new())),
-        Arc::new(hocuspocus_core::AllowAll),
+        authenticator,
     );
     let state = AppState {
         engine: engine.clone(),

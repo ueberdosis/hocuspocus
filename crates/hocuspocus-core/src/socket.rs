@@ -235,19 +235,21 @@ impl SocketTask {
             Ok(decision) => decision,
             Err(error) => {
                 // TS: PermissionDenied message, then close 4401.
-                let frame =
-                    MessageBuilder::new(&raw_address).auth(&AuthOutbound::PermissionDenied {
-                        reason: error.to_string(),
-                    });
+                // TS keeps the socket OPEN after a failed auth: it sends
+                // PermissionDenied and clears the per-document state so a
+                // retry (provider re-sends a token) starts fresh.
+                let reason = match error.to_string() {
+                    reason if reason.is_empty() => "permission-denied".to_owned(),
+                    reason => reason,
+                };
+                let frame = MessageBuilder::new(&raw_address)
+                    .auth(&AuthOutbound::PermissionDenied { reason });
                 let _ = self.outbound.send(Outbound::Frame(frame)).await;
-                let _ = self
-                    .outbound
-                    .send(Outbound::Close {
-                        code: close::UNAUTHORIZED.code,
-                        reason: close::UNAUTHORIZED.reason,
-                    })
-                    .await;
-                return ControlFlow::Break(());
+                if let Some(DocState::Pending { queue, bytes }) = self.docs.remove(&raw_address) {
+                    self.queued_bytes -= bytes;
+                    self.queued_messages -= queue.len();
+                }
+                return ControlFlow::Continue(());
             }
         };
 

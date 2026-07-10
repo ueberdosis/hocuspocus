@@ -18,6 +18,7 @@ hocuspocus-axum = { workspace = true }
 hocuspocus-core = { workspace = true }
 hocuspocus-protocol = { workspace = true }
 hocuspocus-storage = { workspace = true }
+hocuspocus-webhook = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
