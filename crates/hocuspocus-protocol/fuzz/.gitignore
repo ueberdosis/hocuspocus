@@ -1,0 +1,4 @@
+target/
+corpus/*/.state
+artifacts/
+coverage/

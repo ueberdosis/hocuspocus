@@ -1,0 +1,41 @@
+[package]
+name = "hocuspocus-protocol-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+bytes = "1"
+
+[dependencies.hocuspocus-protocol]
+path = ".."
+
+# This crate is excluded from the root workspace (it needs nightly +
+# cargo-fuzz). Run with: cargo +nightly fuzz run <target> from crates/hocuspocus-protocol.
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "decode_frame"
+path = "fuzz_targets/decode_frame.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "decode_redis"
+path = "fuzz_targets/decode_redis.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "decode_awareness"
+path = "fuzz_targets/decode_awareness.rs"
+test = false
+doc = false
+bench = false
