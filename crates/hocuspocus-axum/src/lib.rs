@@ -41,11 +41,13 @@ pub async fn serve_socket(engine: Engine, socket: WebSocket) {
         }
     });
 
+    let mut engine_gone = false;
     while let Some(message) = futures::StreamExt::next(&mut stream).await {
         let Ok(message) = message else { break };
         match message {
             Message::Binary(data) => {
                 if channels.inbound.send(data).await.is_err() {
+                    engine_gone = true;
                     break;
                 }
             }
@@ -53,6 +55,22 @@ pub async fn serve_socket(engine: Engine, socket: WebSocket) {
             Message::Ping(_) | Message::Pong(_) | Message::Text(_) => {}
             Message::Close(_) => break,
         }
+    }
+
+    if engine_gone {
+        // The engine closed the connection while the client was still
+        // sending. Drain the stream (bounded) until the client answers the
+        // close handshake: dropping a socket with unread inbound data
+        // resets the TCP connection, destroying the in-flight close frame
+        // (the client would see 1006 instead of our close code).
+        let _ = tokio::time::timeout(std::time::Duration::from_secs(3), async {
+            while let Some(Ok(message)) = futures::StreamExt::next(&mut stream).await {
+                if matches!(message, Message::Close(_)) {
+                    break;
+                }
+            }
+        })
+        .await;
     }
 
     // Dropping the inbound sender tears the engine-side connection down.

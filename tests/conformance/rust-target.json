@@ -21,16 +21,31 @@
 		"tests/provider/onStateless.ts",
 		"tests/provider/onSynced.ts",
 		"tests/providerwebsocket/configuration.ts",
-		"tests/providerwebsocket/messageQueueDeduplication.ts"
+		"tests/providerwebsocket/messageQueueDeduplication.ts",
+		"tests/server/debounce.ts",
+		"tests/server/unauthenticatedQueueLimit.ts"
 	],
 	"skip": {
-		"tests/server/*": "hook-centric / in-process API (M3 webhook transport + control API growth)",
 		"tests/extension-database/*": "storage backends land in M3",
 		"tests/extension-s3/*": "storage backends land in M3",
 		"tests/extension-throttle/*": "throttle lands in M5",
 		"tests/extension-logger/*": "TS-extension mechanics (rust-native equivalent)",
 		"tests/transformer/*": "TS-only package, out of scope",
 		"tests/docs/*": "TS-only, out of scope",
-		"tests/extension-redis/onStoreDocument.ts": "custom in-process TS extension instances (rust-native equivalent)"
+		"tests/extension-redis/onStoreDocument.ts": "custom in-process TS extension instances (rust-native equivalent)",
+		"tests/server/onClose.ts": "in-process connection close API",
+		"tests/server/listen.ts": "in-process listen() API variants",
+		"tests/server/address.ts": "in-process address shape",
+		"tests/server/websocketError.ts": "in-process socket fault injection",
+		"tests/server/broadcastStatelessBypass.ts": "beforeBroadcastStateless hook (rust-native equivalent)",
+		"tests/server/* (rest)": "in-process hooks/APIs (before*/after*, onConfigure/onListen/onDestroy/onRequest/onUpgrade, openDirectConnection, destroy, get*Count) - rust-native equivalents",
+		"tests/server/onConnect.ts": "one test iterates in-process document.getConnections() in onSynced (uncaught TypeError hangs the ava worker); 17 wire tests otherwise pass",
+		"tests/server/onAuthenticate.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/onDisconnect.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/onLoadDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/onStateless.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/onStoreDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/providerVersion.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
+		"tests/server/sessionAwareness.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth"
 	}
 }

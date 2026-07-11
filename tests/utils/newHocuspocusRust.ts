@@ -68,6 +68,12 @@ export const newHocuspocusRust = async (
 	if (typeof options?.timeout === "number") env.HOCUSPOCUS_SERVER__TIMEOUT_MS = String(options.timeout);
 	if (typeof options?.unloadImmediately === "boolean")
 		env.HOCUSPOCUS_SERVER__UNLOAD_IMMEDIATELY = String(options.unloadImmediately);
+	if (typeof options?.maxUnauthenticatedQueueSize === "number")
+		env.HOCUSPOCUS_SERVER__MAX_UNAUTHENTICATED_QUEUE_SIZE = String(options.maxUnauthenticatedQueueSize);
+	if (typeof options?.maxUnauthenticatedQueueMessages === "number")
+		env.HOCUSPOCUS_SERVER__MAX_UNAUTHENTICATED_QUEUE_MESSAGES = String(options.maxUnauthenticatedQueueMessages);
+	if (typeof options?.maxPendingDocuments === "number")
+		env.HOCUSPOCUS_SERVER__MAX_PENDING_DOCUMENTS = String(options.maxPendingDocuments);
 
 	if (
 		options?.onAuthenticate ||

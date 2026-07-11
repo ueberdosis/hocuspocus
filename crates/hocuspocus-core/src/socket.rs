@@ -2,6 +2,11 @@
 //! machine with bounded queues (GHSA-xwhh-v746-pj9m), timeouts, and
 //! per-document multiplexing. The Rust equivalent of
 //! `packages/server/src/ClientConnection.ts`.
+//!
+//! Authentication runs **concurrently per document** (spawned tasks), like
+//! the TS async hook chain: a slow or never-resolving authenticator must
+//! not stall the frame loop, and in-flight authentications count toward
+//! the pending-document limit.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -10,7 +15,7 @@ use std::time::Instant;
 use bytes::Bytes;
 use tokio::sync::{mpsc, oneshot};
 
-use crate::auth::AuthRequest;
+use crate::auth::{AuthDecision, AuthRequest};
 use crate::document::{ConnId, DocHandle, DocMessage, Origin};
 use crate::engine::EngineInner;
 use hocuspocus_protocol::{
@@ -28,10 +33,20 @@ pub enum Outbound {
 
 /// Per-document state on one socket.
 enum DocState {
-    /// Frames queued until the document is authenticated.
+    /// Frames queued; no Auth frame seen yet.
     Pending { queue: Vec<Bytes>, bytes: usize },
+    /// Auth frame received; the auth task is running. Queued frames are
+    /// drained on success. Counts toward the pending-document limit.
+    Authenticating { queue: Vec<Bytes>, bytes: usize },
     /// Authenticated and joined to a document actor.
     Active { doc: DocHandle, read_only: bool },
+}
+
+/// Result of a spawned per-document auth task.
+struct AuthOutcome {
+    raw_address: Arc<str>,
+    document_name: Arc<str>,
+    result: Result<AuthDecision, String>,
 }
 
 pub(crate) struct SocketTask {
@@ -45,6 +60,7 @@ pub(crate) struct SocketTask {
     authenticated_any: bool,
     opened_at: Instant,
     last_inbound: Instant,
+    auth_tx: mpsc::Sender<AuthOutcome>,
 }
 
 impl SocketTask {
@@ -54,6 +70,7 @@ impl SocketTask {
         inbound: mpsc::Receiver<Bytes>,
         outbound: mpsc::Sender<Outbound>,
     ) {
+        let (auth_tx, auth_rx) = mpsc::channel::<AuthOutcome>(64);
         let task = Self {
             engine,
             conn_id,
@@ -64,15 +81,31 @@ impl SocketTask {
             authenticated_any: false,
             opened_at: Instant::now(),
             last_inbound: Instant::now(),
+            auth_tx,
         };
-        tokio::spawn(task.run(inbound));
+        tokio::spawn(task.run(inbound, auth_rx));
     }
 
-    async fn run(mut self, mut inbound: mpsc::Receiver<Bytes>) {
+    async fn run(
+        mut self,
+        mut inbound: mpsc::Receiver<Bytes>,
+        mut auth_rx: mpsc::Receiver<AuthOutcome>,
+    ) {
         loop {
             let deadline = self.timeout_deadline();
-            let frame = tokio::select! {
-                frame = inbound.recv() => frame,
+            let flow = tokio::select! {
+                frame = inbound.recv() => {
+                    let Some(frame) = frame else {
+                        // Transport closed the socket.
+                        break;
+                    };
+                    self.last_inbound = Instant::now();
+                    self.handle_frame(frame).await
+                }
+                outcome = auth_rx.recv() => {
+                    let Some(outcome) = outcome else { break };
+                    self.finish_auth(outcome).await
+                }
                 _ = tokio::time::sleep_until(tokio::time::Instant::from_std(deadline)) => {
                     // Idle / pre-auth timeout: TS closes with 4408.
                     let _ = self.outbound.send(Outbound::Close {
@@ -82,12 +115,7 @@ impl SocketTask {
                     break;
                 }
             };
-            let Some(frame) = frame else {
-                // Transport closed the socket.
-                break;
-            };
-            self.last_inbound = Instant::now();
-            if self.handle_frame(frame).await.is_break() {
+            if flow.is_break() {
                 break;
             }
         }
@@ -144,13 +172,29 @@ impl SocketTask {
                 self.route_active(&doc, read_only, envelope).await;
                 ControlFlow::Continue(())
             }
-            _ if envelope.kind == MessageType::Auth => self.authenticate(envelope).await,
-            _ => self.queue_pending(raw_address, raw).await,
+            Some(DocState::Authenticating { .. }) => self.queue_frame(raw_address, raw).await,
+            _ if envelope.kind == MessageType::Auth => self.start_auth(envelope).await,
+            _ => self.queue_frame(raw_address, raw).await,
         }
     }
 
-    /// Queue a pre-auth frame, enforcing the exact TS limits.
-    async fn queue_pending(
+    /// Closes the socket over a violated pre-auth limit. TS uses
+    /// ResetConnection (4205) so a well-behaved-but-bursty client
+    /// reconnects and resyncs.
+    async fn close_over_limit(&mut self) -> std::ops::ControlFlow<()> {
+        let _ = self
+            .outbound
+            .send(Outbound::Close {
+                code: close::RESET_CONNECTION.code,
+                reason: close::RESET_CONNECTION.reason,
+            })
+            .await;
+        std::ops::ControlFlow::Break(())
+    }
+
+    /// Queue a frame for a not-yet-authenticated document, enforcing the
+    /// exact TS limits.
+    async fn queue_frame(
         &mut self,
         raw_address: Arc<str>,
         raw: Bytes,
@@ -161,25 +205,11 @@ impl SocketTask {
         if self.queued_bytes + raw.len() > config.max_unauthenticated_queue_size
             || self.queued_messages + 1 > config.max_unauthenticated_queue_messages
         {
-            let _ = self
-                .outbound
-                .send(Outbound::Close {
-                    code: close::MESSAGE_TOO_BIG.code,
-                    reason: close::MESSAGE_TOO_BIG.reason,
-                })
-                .await;
-            return ControlFlow::Break(());
+            return self.close_over_limit().await;
         }
         let is_new_doc = !self.docs.contains_key(&raw_address);
-        if is_new_doc && self.pending_doc_count() + 1 > config.max_pending_documents {
-            let _ = self
-                .outbound
-                .send(Outbound::Close {
-                    code: close::MESSAGE_TOO_BIG.code,
-                    reason: close::MESSAGE_TOO_BIG.reason,
-                })
-                .await;
-            return ControlFlow::Break(());
+        if is_new_doc && self.unauthenticated_doc_count() + 1 > config.max_pending_documents {
+            return self.close_over_limit().await;
         }
 
         self.queued_bytes += raw.len();
@@ -188,7 +218,7 @@ impl SocketTask {
             queue: Vec::new(),
             bytes: 0,
         }) {
-            DocState::Pending { queue, bytes } => {
+            DocState::Pending { queue, bytes } | DocState::Authenticating { queue, bytes } => {
                 *bytes += raw.len();
                 queue.push(raw);
             }
@@ -197,16 +227,20 @@ impl SocketTask {
         ControlFlow::Continue(())
     }
 
-    fn pending_doc_count(&self) -> usize {
+    /// Documents that are not authenticated yet — queued or with an auth
+    /// in flight; both count toward the pending-document limit.
+    fn unauthenticated_doc_count(&self) -> usize {
         self.docs
             .values()
-            .filter(|state| matches!(state, DocState::Pending { .. }))
+            .filter(|state| !matches!(state, DocState::Active { .. }))
             .count()
     }
 
-    /// Runs the auth flow for one document address, then joins the actor
-    /// and drains any queued frames in order.
-    async fn authenticate(&mut self, envelope: Envelope) -> std::ops::ControlFlow<()> {
+    /// Kicks off the auth flow for one document address on its own task;
+    /// the frame loop keeps running (TS behavior — in-flight auths must
+    /// not block other documents, and they count toward the pending
+    /// limit).
+    async fn start_auth(&mut self, envelope: Envelope) -> std::ops::ControlFlow<()> {
         use std::ops::ControlFlow;
 
         let raw_address = envelope.address.raw.clone();
@@ -222,42 +256,102 @@ impl SocketTask {
             }
         };
 
-        let request = AuthRequest {
-            document_name: &envelope.address.document_name,
-            token: &token,
-            provider_version: provider_version.as_deref(),
-            request_headers: &[],
-            remote_addr: None,
+        // Transition Pending → Authenticating (carrying queued frames) and
+        // enforce the pending-document limit for brand-new addresses.
+        let previous = self.docs.remove(&raw_address);
+        let (queue, bytes) = match previous {
+            Some(DocState::Pending { queue, bytes }) => (queue, bytes),
+            Some(active @ DocState::Active { .. }) => {
+                // Late Auth on an established doc = token re-sync; restore.
+                self.docs.insert(raw_address, active);
+                return ControlFlow::Continue(());
+            }
+            Some(other) => {
+                self.docs.insert(raw_address, other);
+                return ControlFlow::Continue(());
+            }
+            None => {
+                if self.unauthenticated_doc_count() + 1 > self.engine.config.max_pending_documents {
+                    return self.close_over_limit().await;
+                }
+                (Vec::new(), 0)
+            }
         };
-        // TS runs onConnect before onAuthenticate; either may reject.
-        let decision = match self
-            .engine
-            .events
-            .connect(&envelope.address.document_name)
-            .await
-        {
-            Ok(()) => self.engine.authenticator.authenticate(request).await,
-            Err(error) => Err(error),
+        self.docs.insert(
+            raw_address.clone(),
+            DocState::Authenticating { queue, bytes },
+        );
+
+        let engine = self.engine.clone();
+        let auth_tx = self.auth_tx.clone();
+        let document_name = envelope.address.document_name.clone();
+        tokio::spawn(async move {
+            let request = AuthRequest {
+                document_name: &document_name,
+                token: &token,
+                provider_version: provider_version.as_deref(),
+                request_headers: &[],
+                remote_addr: None,
+            };
+            // TS runs onConnect before onAuthenticate; either may reject.
+            let result = match engine.events.connect(&document_name).await {
+                Ok(()) => engine
+                    .authenticator
+                    .authenticate(request)
+                    .await
+                    .map_err(|error| error.to_string()),
+                Err(error) => Err(error.to_string()),
+            };
+            let _ = auth_tx
+                .send(AuthOutcome {
+                    raw_address,
+                    document_name,
+                    result,
+                })
+                .await;
+        });
+        ControlFlow::Continue(())
+    }
+
+    /// Applies a finished auth: deny keeps the socket open with that
+    /// document's state reset (TS), grant joins the actor and drains the
+    /// queued frames in arrival order.
+    async fn finish_auth(&mut self, outcome: AuthOutcome) -> std::ops::ControlFlow<()> {
+        use std::ops::ControlFlow;
+
+        let AuthOutcome {
+            raw_address,
+            document_name,
+            result,
+        } = outcome;
+
+        let queued = match self.docs.remove(&raw_address) {
+            Some(DocState::Authenticating { queue, bytes }) => {
+                self.queued_bytes -= bytes;
+                self.queued_messages -= queue.len();
+                queue
+            }
+            Some(other) => {
+                self.docs.insert(raw_address.clone(), other);
+                return ControlFlow::Continue(());
+            }
+            None => Vec::new(),
         };
 
-        let decision = match decision {
+        let decision = match result {
             Ok(decision) => decision,
-            Err(error) => {
-                // TS: PermissionDenied message, then close 4401.
+            Err(reason) => {
                 // TS keeps the socket OPEN after a failed auth: it sends
                 // PermissionDenied and clears the per-document state so a
                 // retry (provider re-sends a token) starts fresh.
-                let reason = match error.to_string() {
-                    reason if reason.is_empty() => "permission-denied".to_owned(),
-                    reason => reason,
+                let reason = if reason.is_empty() {
+                    "permission-denied".to_owned()
+                } else {
+                    reason
                 };
                 let frame = MessageBuilder::new(&raw_address)
                     .auth(&AuthOutbound::PermissionDenied { reason });
                 let _ = self.outbound.send(Outbound::Frame(frame)).await;
-                if let Some(DocState::Pending { queue, bytes }) = self.docs.remove(&raw_address) {
-                    self.queued_bytes -= bytes;
-                    self.queued_messages -= queue.len();
-                }
                 return ControlFlow::Continue(());
             }
         };
@@ -271,7 +365,6 @@ impl SocketTask {
         // Join the document actor (loading it if needed). A handle whose
         // actor unloaded concurrently fails the join; retry once against a
         // freshly loaded actor.
-        let document_name: Arc<str> = envelope.address.document_name.clone();
         let mut joined: Option<DocHandle> = None;
         for _attempt in 0..2 {
             let doc = match self.engine.get_or_load(document_name.clone()).await {
@@ -308,22 +401,15 @@ impl SocketTask {
         };
 
         self.authenticated_any = true;
-
-        // Drain queued frames in arrival order through the active router.
-        let queued = match self.docs.insert(
-            raw_address.clone(),
+        self.docs.insert(
+            raw_address,
             DocState::Active {
                 doc: doc.clone(),
                 read_only,
             },
-        ) {
-            Some(DocState::Pending { queue, bytes }) => {
-                self.queued_bytes -= bytes;
-                self.queued_messages -= queue.len();
-                queue
-            }
-            _ => Vec::new(),
-        };
+        );
+
+        // Drain queued frames in arrival order through the active router.
         for raw in queued {
             if let Ok(Frame::Message(envelope)) = Frame::decode(raw) {
                 self.route_active(&doc, read_only, envelope).await;
@@ -395,7 +481,7 @@ impl SocketTask {
             }
             MessageType::Auth => {
                 // Token re-sync on an established connection → on_token_sync
-                // hooks (wired in M3).
+                // hooks (wired later).
                 None
             }
             MessageType::Ping | MessageType::Pong | MessageType::SyncStatus => None,

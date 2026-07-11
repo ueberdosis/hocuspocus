@@ -45,6 +45,9 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
         debounce: std::time::Duration::from_millis(config.server.debounce_ms),
         max_debounce: std::time::Duration::from_millis(config.server.max_debounce_ms),
         unload_immediately: config.server.unload_immediately,
+        max_unauthenticated_queue_size: config.server.max_unauthenticated_queue_size,
+        max_unauthenticated_queue_messages: config.server.max_unauthenticated_queue_messages,
+        max_pending_documents: config.server.max_pending_documents,
         ..Configuration::default()
     };
     let authenticator: Arc<dyn hocuspocus_core::Authenticator> = match config.auth.mode {

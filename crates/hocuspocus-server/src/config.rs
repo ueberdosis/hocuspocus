@@ -123,6 +123,13 @@ pub struct ServerConfig {
     /// Persist and unload immediately on last disconnect (TS
     /// `unloadImmediately`).
     pub unload_immediately: bool,
+    /// Max buffered bytes for an unauthenticated connection (TS
+    /// `maxUnauthenticatedQueueSize`).
+    pub max_unauthenticated_queue_size: usize,
+    /// Max buffered messages while unauthenticated.
+    pub max_unauthenticated_queue_messages: usize,
+    /// Max distinct documents before authentication.
+    pub max_pending_documents: usize,
 }
 
 impl Default for ServerConfig {
@@ -136,6 +143,9 @@ impl Default for ServerConfig {
             debounce_ms: engine.debounce.as_millis() as u64,
             max_debounce_ms: engine.max_debounce.as_millis() as u64,
             unload_immediately: engine.unload_immediately,
+            max_unauthenticated_queue_size: engine.max_unauthenticated_queue_size,
+            max_unauthenticated_queue_messages: engine.max_unauthenticated_queue_messages,
+            max_pending_documents: engine.max_pending_documents,
         }
     }
 }
