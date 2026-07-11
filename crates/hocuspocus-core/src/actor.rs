@@ -223,7 +223,11 @@ impl DocumentActor {
                 self.publish(MessageBuilder::new(&self.name).query_awareness());
                 false
             }
-            DocMessage::BroadcastStateless { payload, exclude } => {
+            DocMessage::BroadcastStateless {
+                payload,
+                exclude,
+                from_relay,
+            } => {
                 for (conn_id, subscriber) in &self.subscribers {
                     if Some(*conn_id) == exclude {
                         continue;
@@ -231,14 +235,27 @@ impl DocumentActor {
                     let frame = MessageBuilder::new(&subscriber.raw_address).stateless(&payload);
                     let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
                 }
+                // Locally initiated broadcasts also fan out across instances
+                // (Node: beforeBroadcastStateless → Redis publish). Relayed
+                // ones must not re-publish, or two instances would ping-pong.
+                if !from_relay {
+                    self.publish(MessageBuilder::new(&self.name).broadcast_stateless(&payload));
+                }
                 false
             }
-            DocMessage::Stateless { payload, .. } => {
+            DocMessage::Stateless { conn_id, payload } => {
                 // Delivered to the stateless event hook; TS only invokes
                 // the hook chain, there is no automatic relay. Awaited
                 // inline to preserve per-document ordering, like the TS
-                // sequential message queue.
-                self.events.stateless(&self.name, &payload).await;
+                // sequential message queue. A returned payload goes back to
+                // the sender (`connection.sendStateless`).
+                let response = self.events.stateless(&self.name, &payload).await;
+                if let (Some(response), Some(subscriber)) =
+                    (response, self.subscribers.get(&conn_id))
+                {
+                    let frame = MessageBuilder::new(&subscriber.raw_address).stateless(&response);
+                    let _ = subscriber.outbound.try_send(Outbound::Frame(frame));
+                }
                 false
             }
             DocMessage::DirectTransact { transact, done, .. } => {

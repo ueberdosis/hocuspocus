@@ -182,6 +182,7 @@ async fn route_frame(own_identifier: &str, payload: Bytes, mailbox: &DocHandle) 
                 .map(|payload| DocMessage::BroadcastStateless {
                     payload,
                     exclude: None,
+                    from_relay: true,
                 })
         }
         _ => None,

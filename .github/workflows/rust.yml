@@ -78,6 +78,12 @@ jobs:
   # binary (tests/conformance/rust-target.json is the skip-map).
   conformance:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
+        options: --entrypoint redis-server
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
@@ -95,3 +101,6 @@ jobs:
         run: cargo build -p hocuspocus-server
       - name: Run conformance suite
         run: pnpm test:rust
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: ${{ job.services.redis.ports[6379] }}

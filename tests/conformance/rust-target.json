@@ -1,6 +1,9 @@
 {
 	"note": "Which AVA test files run against the Rust server binary (HOCUSPOCUS_TEST_TARGET=rust). Files move from skip to run as milestones land (see crates/RFC.md \u00a7 13).",
 	"run": [
+		"tests/extension-redis/onAwarenessChange.ts",
+		"tests/extension-redis/onChange.ts",
+		"tests/extension-redis/onStateless.ts",
 		"tests/provider/flushDelay.ts",
 		"tests/provider/hasUnsyncedChanges.ts",
 		"tests/provider/observe.ts",
@@ -24,10 +27,10 @@
 		"tests/server/*": "hook-centric / in-process API (M3 webhook transport + control API growth)",
 		"tests/extension-database/*": "storage backends land in M3",
 		"tests/extension-s3/*": "storage backends land in M3",
-		"tests/extension-redis/*": "redis relay lands in M4",
 		"tests/extension-throttle/*": "throttle lands in M5",
 		"tests/extension-logger/*": "TS-extension mechanics (rust-native equivalent)",
 		"tests/transformer/*": "TS-only package, out of scope",
-		"tests/docs/*": "TS-only, out of scope"
+		"tests/docs/*": "TS-only, out of scope",
+		"tests/extension-redis/onStoreDocument.ts": "custom in-process TS extension instances (rust-native equivalent)"
 	}
 }

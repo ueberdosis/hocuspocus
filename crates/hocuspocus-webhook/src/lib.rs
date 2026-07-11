@@ -297,15 +297,17 @@ impl WebhookEvents {
             "event": event.as_str(),
             "payload": { "documentName": document_name },
         }))?;
-        self.post_body(body).await
+        self.post_body(body).await.map(|_| ())
     }
 
+    /// Like [`Self::post`], with a payload field; returns the response's
+    /// optional `respond` payload.
     async fn post_with(
         &self,
         event: Event,
         document_name: &str,
         payload: &str,
-    ) -> Result<(), hocuspocus_core::BoxError> {
+    ) -> Result<Option<String>, hocuspocus_core::BoxError> {
         let body = serde_json::to_vec(&serde_json::json!({
             "event": event.as_str(),
             "payload": { "documentName": document_name, "payload": payload },
@@ -313,7 +315,7 @@ impl WebhookEvents {
         self.post_body(body).await
     }
 
-    async fn post_body(&self, body: Vec<u8>) -> Result<(), hocuspocus_core::BoxError> {
+    async fn post_body(&self, body: Vec<u8>) -> Result<Option<String>, hocuspocus_core::BoxError> {
         let response = self
             .client
             .post(&self.url)
@@ -334,7 +336,13 @@ impl WebhookEvents {
                 .unwrap_or_else(|| "forbidden".to_owned())
                 .into());
         }
-        Ok(())
+        #[derive(serde::Deserialize, Default)]
+        struct EventResponse {
+            #[serde(default)]
+            respond: Option<String>,
+        }
+        let parsed: EventResponse = response.json().await.unwrap_or_default();
+        Ok(parsed.respond)
     }
 }
 
@@ -356,15 +364,19 @@ impl hocuspocus_core::EventHooks for WebhookEvents {
         }
     }
 
-    async fn stateless(&self, document_name: &str, payload: &str) {
+    async fn stateless(&self, document_name: &str, payload: &str) -> Option<String> {
         if !self.events.contains(&Event::Stateless) {
-            return;
+            return None;
         }
-        if let Err(error) = self
+        match self
             .post_with(Event::Stateless, document_name, payload)
             .await
         {
-            tracing::warn!(%error, "stateless webhook failed");
+            Ok(response) => response,
+            Err(error) => {
+                tracing::warn!(%error, "stateless webhook failed");
+                None
+            }
         }
     }
 }

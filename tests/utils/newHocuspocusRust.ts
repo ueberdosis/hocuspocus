@@ -22,11 +22,19 @@ export const newHocuspocusRust = async (
 	options?: Partial<ServerConfiguration>,
 ): Promise<Hocuspocus> => {
 	const supportedHooks = ["onAuthenticate", "onLoadDocument", "onStoreDocument", "onConnect", "onDisconnect", "onStateless"];
-	const unsupported = Object.entries(options ?? {}).filter(
-		([key, value]) =>
-			(typeof value === "function" && !supportedHooks.includes(key)) ||
-			key_is_extensions(value),
-	);
+	// Redis extension instances map onto the binary's [redis] config; any
+	// other extension is unsupported.
+	const extensions = (options?.extensions ?? []) as Array<{
+		constructor: { name: string };
+		configuration?: { host?: string; port?: number; identifier?: string; prefix?: string };
+	}>;
+	const redisExtension = extensions.find((ext) => ext?.constructor?.name === "Redis");
+	const unsupported = Object.entries(options ?? {}).filter(([key, value]) => {
+		if (key === "extensions") {
+			return extensions.some((ext) => ext?.constructor?.name !== "Redis");
+		}
+		return typeof value === "function" && !supportedHooks.includes(key);
+	});
 	if (unsupported.length > 0) {
 		throw new Error(
 			`HOCUSPOCUS_TEST_TARGET=rust does not support in-process hooks/extensions yet ` +
@@ -47,6 +55,13 @@ export const newHocuspocusRust = async (
 		HOCUSPOCUS_SERVER__LISTEN: "127.0.0.1:0",
 		HOCUSPOCUS_SERVER__QUIET: "true",
 	};
+	if (redisExtension?.configuration) {
+		const { host = "127.0.0.1", port = 6379, identifier, prefix } = redisExtension.configuration;
+		env.HOCUSPOCUS_REDIS__URL = `redis://${host}:${port}`;
+		if (identifier) env.HOCUSPOCUS_REDIS__IDENTIFIER = identifier;
+		if (prefix) env.HOCUSPOCUS_REDIS__PREFIX = prefix;
+	}
+
 	// Scalar server options map onto the binary's config env.
 	if (typeof options?.debounce === "number") env.HOCUSPOCUS_SERVER__DEBOUNCE_MS = String(options.debounce);
 	if (typeof options?.maxDebounce === "number") env.HOCUSPOCUS_SERVER__MAX_DEBOUNCE_MS = String(options.maxDebounce);
@@ -123,13 +138,21 @@ export const newHocuspocusRust = async (
 						return;
 					}
 					if (event === "stateless") {
+						// connection.sendStateless replies to the sender via the
+						// webhook response's `respond` field.
+						let respond: string | undefined;
 						await options.onStateless?.({
 							documentName: payload.documentName,
 							payload: payload.payload,
 							context: {},
+							connection: {
+								sendStateless(reply: string) {
+									respond = reply;
+								},
+							},
 						} as never);
 						response.writeHead(200, { "Content-Type": "application/json" });
-						response.end(JSON.stringify({}));
+						response.end(JSON.stringify(respond === undefined ? {} : { respond }));
 						return;
 					}
 					if (event === "disconnect") {
@@ -215,6 +238,18 @@ export const newHocuspocusRust = async (
 		async closeConnections() {
 			await fetch(`http://${baseURL}/control/close-connections`, { method: "POST" });
 		},
+		// server.documents.get(name)?.broadcastStateless(payload) — via the
+		// control API instead of the in-process map.
+		documents: {
+			get: (documentName: string) => ({
+				broadcastStateless: (payload: string) =>
+					fetch(`http://${baseURL}/control/broadcast-stateless`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ documentName, payload }),
+					}),
+			}),
+		},
 		// Async variants for rust-aware tests; the sync TS-native
 		// getConnectionsCount()/getDocumentsCount() cannot be shimmed.
 		controlStats,
@@ -222,6 +257,3 @@ export const newHocuspocusRust = async (
 
 	return shim as unknown as Hocuspocus;
 };
-
-const key_is_extensions = (value: unknown): boolean =>
-	Array.isArray(value) && value.some((entry) => typeof entry === "object" && entry !== null);

@@ -129,6 +129,10 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
             "/control/close-connections",
             post(control_close_connections),
         )
+        .route(
+            "/control/broadcast-stateless",
+            post(control_broadcast_stateless),
+        )
         .route("/", get(root_or_upgrade))
         .route("/{*path}", get(root_or_upgrade))
         .with_state(state);
@@ -186,6 +190,24 @@ async fn control_stats(State(state): State<AppState>) -> axum::Json<serde_json::
         "connections": state.engine.connections_count(),
         "documents": state.engine.documents_count().await,
     }))
+}
+
+#[derive(serde::Deserialize)]
+struct BroadcastStatelessRequest {
+    #[serde(rename = "documentName")]
+    document_name: String,
+    payload: String,
+}
+
+async fn control_broadcast_stateless(
+    State(state): State<AppState>,
+    axum::Json(request): axum::Json<BroadcastStatelessRequest>,
+) -> &'static str {
+    state
+        .engine
+        .broadcast_stateless(&request.document_name, request.payload)
+        .await;
+    "ok"
 }
 
 async fn control_close_connections(State(state): State<AppState>) -> &'static str {

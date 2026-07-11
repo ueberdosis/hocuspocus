@@ -46,9 +46,12 @@ pub trait EventHooks: Send + Sync + 'static {
     async fn disconnect(&self, document_name: &str) {
         let _ = document_name;
     }
-    /// A client sent a Stateless message (TS `onStateless`).
-    async fn stateless(&self, document_name: &str, payload: &str) {
+    /// A client sent a Stateless message (TS `onStateless`). The returned
+    /// payload, if any, is sent back to the originating connection (the
+    /// hook's `connection.sendStateless(...)`).
+    async fn stateless(&self, document_name: &str, payload: &str) -> Option<String> {
         let _ = (document_name, payload);
+        None
     }
 }
 

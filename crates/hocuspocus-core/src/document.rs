@@ -87,10 +87,12 @@ pub enum DocMessage {
         conn_id: ConnId,
         payload: String,
     },
-    /// Fan a stateless payload out to all local subscribers.
+    /// Fan a stateless payload out to all local subscribers, and (unless
+    /// it already arrived via the relay) to peer instances.
     BroadcastStateless {
         payload: String,
         exclude: Option<ConnId>,
+        from_relay: bool,
     },
     /// Run a closure inside the actor with exclusive document access
     /// (`DirectConnection.transact`). The produced update is broadcast.

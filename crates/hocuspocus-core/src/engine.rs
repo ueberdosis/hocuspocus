@@ -133,6 +133,22 @@ impl Engine {
         }
     }
 
+    /// Broadcasts a stateless payload to every client of a loaded document
+    /// (and, with scaling attached, to peer instances). No-op for unloaded
+    /// documents — matching `documents.get(name)?.broadcastStateless(...)`.
+    pub async fn broadcast_stateless(&self, document_name: &str, payload: String) {
+        let handle = { self.inner.docs.lock().await.get(document_name).cloned() };
+        if let Some(handle) = handle {
+            let _ = handle
+                .send(DocMessage::BroadcastStateless {
+                    payload,
+                    exclude: None,
+                    from_relay: false,
+                })
+                .await;
+        }
+    }
+
     /// Flushes pending stores on every loaded document (graceful shutdown).
     pub async fn flush_all_documents(&self) {
         let docs: Vec<_> = {
