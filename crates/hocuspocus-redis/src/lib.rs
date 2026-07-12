@@ -70,10 +70,12 @@ const RELEASE_LOCK_SCRIPT: &str = r#"if redis.call("get", KEYS[1]) == ARGV[1] th
 pub struct RedisScaling {
     config: RedisConfiguration,
     identifier: String,
-    publish: redis::aio::MultiplexedConnection,
+    publish: redis::aio::ConnectionManager,
     /// One pub/sub connection driven by a background task; channel → doc
-    /// mailbox routing table shared with it.
-    subscribe: redis::aio::MultiplexedConnection,
+    /// mailbox routing table shared with it. The manager reconnects with
+    /// backoff and re-subscribes all channels automatically — a silently
+    /// dropped subscription would partition a document across the fleet.
+    subscribe: redis::aio::ConnectionManager,
     docs: std::sync::Arc<StdMutex<HashMap<String, DocHandle>>>,
 }
 
@@ -85,14 +87,17 @@ impl RedisScaling {
             .unwrap_or_else(|| format!("host-{}", uuid::Uuid::new_v4()));
 
         let client = redis::Client::open(config.url.as_str())?;
-        let publish = client.get_multiplexed_async_connection().await?;
+        let publish = client.get_connection_manager().await?;
 
-        // RESP3 connection with a push channel for pub/sub messages.
+        // RESP3 connection with a push channel for pub/sub messages,
+        // reconnecting with automatic re-subscription.
         let (push_tx, mut push_rx) = mpsc::unbounded_channel();
-        let subscribe_config = redis::AsyncConnectionConfig::new().set_push_sender(push_tx);
+        let subscribe_config = redis::aio::ConnectionManagerConfig::new()
+            .set_push_sender(push_tx)
+            .set_automatic_resubscription();
         let subscribe_client = redis::Client::open(format!("{}?protocol=resp3", config.url))?;
         let subscribe = subscribe_client
-            .get_multiplexed_async_connection_with_config(&subscribe_config)
+            .get_connection_manager_with_config(subscribe_config)
             .await?;
 
         let docs: std::sync::Arc<StdMutex<HashMap<String, DocHandle>>> = Default::default();
@@ -217,8 +222,23 @@ impl Scaler for RedisScaling {
                 let Ok(encoded) = redis_frame::encode(&identifier, &frame) else {
                     continue;
                 };
-                if let Err(error) = publish.publish(&publish_channel, encoded.as_ref()).await {
-                    tracing::warn!(%error, "redis publish failed");
+                // A publish hitting a reconnecting manager fails; retry
+                // briefly so a Redis restart doesn't silently drop the
+                // frame that races the reconnect.
+                let mut attempts = 0;
+                loop {
+                    match publish.publish(&publish_channel, encoded.as_ref()).await {
+                        Ok(_receivers) => break,
+                        Err(error) if attempts < 5 => {
+                            attempts += 1;
+                            tracing::warn!(%error, attempts, "redis publish failed; retrying");
+                            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+                        }
+                        Err(error) => {
+                            tracing::error!(%error, "redis publish dropped after retries");
+                            break;
+                        }
+                    }
                 }
             }
         });

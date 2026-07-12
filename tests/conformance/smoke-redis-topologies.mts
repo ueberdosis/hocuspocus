@@ -154,15 +154,52 @@ try {
 	const nodePort = (nodeServer.server!.address as { port: number }).port;
 	await runTopology("node-rust", nodePort, rust1, "topology-nr");
 	await runTopology("rust-node", rust2, nodePort, "topology-rn");
-} finally {
-	if (nodeServer) {
-		try {
-			nodeServer.closeConnections();
-			await (nodeServer.server as unknown as { destroy?: () => Promise<void> }).destroy?.();
-		} catch {}
+
+	// Topology 4: Redis restarts mid-session — the Rust instances must
+	// reconnect AND re-subscribe (a silently dropped subscription would
+	// partition the document across the fleet).
+	console.log("\n=== redis restart resilience ===");
+	const r1 = newProvider(rust1, "topology-restart");
+	const r2 = newProvider(rust2, "topology-restart");
+	await waitFor(() => r1.provider.synced && r2.provider.synced, "restart: both synced");
+	r1.document.getText("default").insert(0, "before restart");
+	await waitFor(
+		() => r2.document.getText("default").toString() === "before restart",
+		"restart: pre-restart edit propagated",
+	);
+
+	redisServer.kill("SIGKILL");
+	await sleep(300);
+	const redisServer2 = spawn("redis-server", ["--port", String(REDIS_PORT), "--save", ""], {
+		stdio: "ignore",
+	});
+	children.push(redisServer2);
+	await sleep(1500); // reconnect + resubscribe backoff
+
+	r1.document.getText("default").insert(14, " and after");
+	await waitFor(
+		() => r2.document.getText("default").toString() === "before restart and after",
+		"restart: post-restart edit propagated across new Redis",
+		15000,
+	);
+	for (const peer of [r1, r2]) {
+		peer.provider.detach();
+		peer.socket.destroy();
 	}
-	for (const child of children.reverse()) child.kill("SIGKILL");
-	await Promise.allSettled(children.map((child) => once(child, "exit")));
+} finally {
+	// Bounded cleanup: the Node server's Redis extension can wedge against
+	// a restarted Redis; never let teardown mask the test result.
+	const cleanup = (async () => {
+		if (nodeServer) {
+			try {
+				nodeServer.closeConnections();
+				await (nodeServer.server as unknown as { destroy?: () => Promise<void> }).destroy?.();
+			} catch {}
+		}
+		for (const child of children.reverse()) child.kill("SIGKILL");
+		await Promise.allSettled(children.map((child) => once(child, "exit")));
+	})();
+	await Promise.race([cleanup, sleep(5000)]);
 }
 
 if (failures.length > 0) {
