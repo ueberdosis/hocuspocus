@@ -13,11 +13,15 @@
 //! M0 scaffold — ships only [`InMemoryStorage`], which backs unit tests and
 //! the default standalone-server configuration (no persistence configured).
 
+#[cfg(feature = "object")]
+pub mod object;
 #[cfg(feature = "postgres")]
 pub mod postgres;
 #[cfg(feature = "sqlite")]
 pub mod sqlite;
 
+#[cfg(feature = "object")]
+pub use object::ObjectStoreStorage;
 #[cfg(feature = "postgres")]
 pub use postgres::PostgresStorage;
 #[cfg(feature = "sqlite")]

@@ -55,6 +55,15 @@ pub struct StorageConfig {
     pub path: String,
     /// Postgres connection URL.
     pub url: Option<String>,
+    /// S3 bucket (backend = "s3"). Credentials come from the standard AWS
+    /// environment variables.
+    pub bucket: Option<String>,
+    /// S3 region.
+    pub region: String,
+    /// S3-compatible endpoint (e.g. MinIO); http endpoints are allowed.
+    pub endpoint: Option<String>,
+    /// S3 key prefix, like the Node extension's default.
+    pub prefix: String,
 }
 
 impl Default for StorageConfig {
@@ -63,6 +72,10 @@ impl Default for StorageConfig {
             backend: StorageBackend::default(),
             path: ":memory:".into(),
             url: None,
+            bucket: None,
+            region: "us-east-1".into(),
+            endpoint: None,
+            prefix: "hocuspocus-documents/".into(),
         }
     }
 }
@@ -75,6 +88,7 @@ pub enum StorageBackend {
     Webhook,
     Sqlite,
     Postgres,
+    S3,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

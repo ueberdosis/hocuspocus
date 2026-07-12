@@ -77,6 +77,19 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
                 .ok_or("[storage] backend = \"postgres\" requires [storage] url")?;
             Arc::new(hocuspocus_storage::PostgresStorage::connect(&url).await?)
         }
+        config::StorageBackend::S3 => {
+            let bucket = config
+                .storage
+                .bucket
+                .clone()
+                .ok_or("[storage] backend = \"s3\" requires [storage] bucket")?;
+            Arc::new(hocuspocus_storage::ObjectStoreStorage::s3(
+                &bucket,
+                &config.storage.region,
+                config.storage.endpoint.as_deref(),
+                config.storage.prefix.clone(),
+            )?)
+        }
         config::StorageBackend::Webhook => {
             let url = config
                 .webhook

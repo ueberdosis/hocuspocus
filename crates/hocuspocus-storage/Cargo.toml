@@ -11,11 +11,14 @@ rust-version.workspace = true
 default = []
 sqlite = ["dep:sqlx", "sqlx/sqlite"]
 postgres = ["dep:sqlx", "sqlx/postgres"]
+object = ["dep:object_store"]
+s3 = ["object", "object_store/aws"]
 
 [dependencies]
 async-trait = { workspace = true }
 bytes = { workspace = true }
 hocuspocus-core = { workspace = true }
+object_store = { version = "0.14", optional = true, default-features = false }
 sqlx = { version = "0.8", optional = true, default-features = false, features = ["runtime-tokio-rustls"] }
 
 [dev-dependencies]
