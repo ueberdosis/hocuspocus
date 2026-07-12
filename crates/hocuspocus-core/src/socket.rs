@@ -370,15 +370,15 @@ impl SocketTask {
             let doc = match self.engine.get_or_load(document_name.clone()).await {
                 Ok(doc) => doc,
                 Err(error) => {
-                    tracing::error!(conn = self.conn_id, %error, "document load failed");
-                    let _ = self
-                        .outbound
-                        .send(Outbound::Close {
-                            code: close::FORBIDDEN.code,
-                            reason: close::FORBIDDEN.reason,
-                        })
-                        .await;
-                    return ControlFlow::Break(());
+                    // TS: a failed onLoadDocument sends PermissionDenied and
+                    // resets the per-document state; the socket stays open.
+                    tracing::warn!(conn = self.conn_id, %error, "document load failed");
+                    let frame =
+                        MessageBuilder::new(&raw_address).auth(&AuthOutbound::PermissionDenied {
+                            reason: "permission-denied".to_owned(),
+                        });
+                    let _ = self.outbound.send(Outbound::Frame(frame)).await;
+                    return ControlFlow::Continue(());
                 }
             };
             let (reply_tx, reply_rx) = oneshot::channel();

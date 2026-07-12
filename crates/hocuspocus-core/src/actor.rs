@@ -64,6 +64,8 @@ struct DocumentActor {
     relay: Option<mpsc::Sender<Bytes>>,
     /// Engine-wide established-connection counter (TS getConnectionsCount).
     doc_connections: Arc<std::sync::atomic::AtomicUsize>,
+    /// The last subscriber left; unload once the final store succeeds.
+    pending_unload: bool,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
@@ -105,6 +107,7 @@ pub(crate) async fn spawn(
         scaler,
         relay: None,
         doc_connections,
+        pending_unload: false,
     };
 
     tokio::spawn(async move {
@@ -119,7 +122,7 @@ pub(crate) async fn spawn(
                     {
                         Ok(message) => message,
                         Err(_elapsed) => {
-                            actor.store_now().await;
+                            let _ = actor.store_now().await;
                             continue;
                         }
                     }
@@ -128,10 +131,16 @@ pub(crate) async fn spawn(
             };
             let Some(message) = message else { break };
             if actor.handle(message).await {
-                // Unload: flush, deregister, and drop any queued messages.
-                // Join replies error out (dropped channel) and the engine
-                // retries against a freshly loaded actor.
-                actor.store_now().await;
+                actor.pending_unload = true;
+            }
+            // Unload only once the final store succeeded: a failed store
+            // keeps the document in memory (TS keeps documents loaded when
+            // onStoreDocument throws, so no data is lost) and the debounce
+            // timer retries.
+            if actor.pending_unload && actor.subscribers.is_empty() && actor.store_now().await {
+                // Deregister and drop any queued messages. Join replies
+                // error out (dropped channel) and the engine retries
+                // against a freshly loaded actor.
                 on_unload(&actor.name);
                 rx.close();
                 while rx.recv().await.is_some() {}
@@ -168,6 +177,7 @@ impl DocumentActor {
                     send_awareness_to(&subscriber, &awareness);
                 }
                 self.subscribers.insert(conn_id, subscriber);
+                self.pending_unload = false;
                 self.doc_connections
                     .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 let _ = reply.send(Ok(()));
@@ -293,7 +303,7 @@ impl DocumentActor {
                 false
             }
             DocMessage::FlushStoreNow { reply } => {
-                self.store_now().await;
+                let _ = self.store_now().await;
                 let _ = reply.send(Ok(()));
                 false
             }
@@ -551,29 +561,40 @@ impl DocumentActor {
         ))
     }
 
-    async fn store_now(&mut self) {
+    /// Returns `true` when there is nothing left to store (stored
+    /// successfully, nothing dirty, or a peer instance holds the lock).
+    async fn store_now(&mut self) -> bool {
         if self.dirty.is_none() {
-            return;
+            return true;
         }
         self.dirty = None;
-        let Some(storage) = &self.storage else { return };
+        let Some(storage) = &self.storage else {
+            return true;
+        };
         // Cross-instance store coordination: a lost try-once lock means
         // another instance is persisting (TS: SkipFurtherHooksError).
         if let Some(scaler) = &self.scaler {
             if !scaler.acquire_store_lock(&self.name).await {
-                return;
+                return true;
             }
         }
         let state = {
             let txn = self.doc.transact();
             Bytes::from(txn.encode_state_as_update_v1(&StateVector::default()))
         };
-        if let Err(error) = storage.store(&self.name, state).await {
-            tracing::error!(document = %self.name, %error, "store failed");
-        }
+        let stored = match storage.store(&self.name, state).await {
+            Ok(()) => true,
+            Err(error) => {
+                tracing::error!(document = %self.name, %error, "store failed");
+                // Stay dirty so the debounce timer retries.
+                self.mark_dirty();
+                false
+            }
+        };
         if let Some(scaler) = &self.scaler {
             scaler.release_store_lock(&self.name).await;
         }
+        stored
     }
 }
 
