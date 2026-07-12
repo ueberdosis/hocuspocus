@@ -203,8 +203,9 @@ async fn root_or_upgrade(
     }
 }
 
-/// Prometheus text exposition of the engine gauges.
+/// Prometheus text exposition of the engine gauges and counters.
 async fn metrics(State(state): State<AppState>) -> ([(&'static str, &'static str); 1], String) {
+    let stats = state.engine.stats();
     let body = format!(
         "# HELP hocuspocus_connections Established document connections.\n\
          # TYPE hocuspocus_connections gauge\n\
@@ -214,10 +215,38 @@ async fn metrics(State(state): State<AppState>) -> ([(&'static str, &'static str
          hocuspocus_sockets {}\n\
          # HELP hocuspocus_documents Documents loaded in memory.\n\
          # TYPE hocuspocus_documents gauge\n\
-         hocuspocus_documents {}\n",
+         hocuspocus_documents {}\n\
+         # HELP hocuspocus_messages_received_total Inbound wire messages by type.\n\
+         # TYPE hocuspocus_messages_received_total counter\n\
+         hocuspocus_messages_received_total{{type=\"sync\"}} {}\n\
+         hocuspocus_messages_received_total{{type=\"awareness\"}} {}\n\
+         hocuspocus_messages_received_total{{type=\"stateless\"}} {}\n\
+         hocuspocus_messages_received_total{{type=\"auth\"}} {}\n\
+         hocuspocus_messages_received_total{{type=\"other\"}} {}\n\
+         # HELP hocuspocus_messages_sent_total Outbound wire frames.\n\
+         # TYPE hocuspocus_messages_sent_total counter\n\
+         hocuspocus_messages_sent_total {}\n\
+         # HELP hocuspocus_document_stores_total Document store executions by outcome.\n\
+         # TYPE hocuspocus_document_stores_total counter\n\
+         hocuspocus_document_stores_total{{outcome=\"success\"}} {}\n\
+         hocuspocus_document_stores_total{{outcome=\"failure\"}} {}\n\
+         hocuspocus_document_stores_total{{outcome=\"skipped\"}} {}\n\
+         # HELP hocuspocus_auth_denied_total Authentication denials.\n\
+         # TYPE hocuspocus_auth_denied_total counter\n\
+         hocuspocus_auth_denied_total {}\n",
         state.engine.connections_count(),
         state.engine.sockets_count(),
         state.engine.documents_count().await,
+        stats.received_sync,
+        stats.received_awareness,
+        stats.received_stateless,
+        stats.received_auth,
+        stats.received_other,
+        stats.sent,
+        stats.stores_succeeded,
+        stats.stores_failed,
+        stats.stores_skipped,
+        stats.auth_denied,
     );
     ([("Content-Type", "text/plain; version=0.0.4")], body)
 }

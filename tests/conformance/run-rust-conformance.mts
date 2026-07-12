@@ -14,7 +14,7 @@ const config = JSON.parse(
 	readFileSync(new URL("./rust-target.json", import.meta.url), "utf-8"),
 ) as {
 	run: string[];
-	partial?: Record<string, { exclude: string[]; reason: string }>;
+	partial?: Record<string, { exclude: string[]; reason: string; env?: Record<string, string> }>;
 	skip: Record<string, string>;
 };
 
@@ -33,12 +33,12 @@ failed ||= full.status !== 0;
 
 // Partial files run one ava invocation each, excluding the annotated
 // in-process tests via negative --match patterns.
-for (const [file, { exclude }] of partial) {
+for (const [file, { exclude, env }] of partial) {
 	console.log(`\npartial: ${file} (excluding ${exclude.length} in-process test(s))`);
 	const matches = exclude.flatMap((pattern) => ["--match", `!${pattern}`]);
 	const result = spawnSync("npx", ["ava", ...matches, file], {
 		stdio: "inherit",
-		env: { ...process.env, HOCUSPOCUS_TEST_TARGET: "rust" },
+		env: { ...process.env, HOCUSPOCUS_TEST_TARGET: "rust", ...env },
 	});
 	failed ||= result.status !== 0;
 }

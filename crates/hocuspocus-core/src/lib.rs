@@ -21,6 +21,7 @@ pub mod document;
 pub mod engine;
 pub mod extension;
 pub mod socket;
+pub mod stats;
 pub mod storage;
 
 pub use auth::{AuthDecision, AuthRequest, Authenticator, EventHooks, NoEvents, Scaler};
@@ -30,6 +31,7 @@ pub use document::{ConnId, DocHandle, DocMessage, Origin};
 pub use engine::{AllowAll, Engine, SocketChannels};
 pub use extension::{Extension, HookChain, HookError, HookResult};
 pub use socket::Outbound;
+pub use stats::{EngineStats, StatsSnapshot};
 pub use storage::Storage;
 
 /// Boxed error type used across hook and storage boundaries.

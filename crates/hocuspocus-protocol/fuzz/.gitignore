@@ -2,3 +2,6 @@ target/
 corpus/*/.state
 artifacts/
 coverage/
+corpus/
+artifacts/
+coverage/

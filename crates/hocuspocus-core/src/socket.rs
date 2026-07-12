@@ -168,6 +168,21 @@ impl SocketTask {
     ) -> std::ops::ControlFlow<()> {
         use std::ops::ControlFlow;
 
+        {
+            let stats = &self.engine.stats;
+            crate::stats::EngineStats::incr(match envelope.kind {
+                MessageType::Sync | MessageType::SyncReply | MessageType::SyncStatus => {
+                    &stats.received_sync
+                }
+                MessageType::Awareness | MessageType::QueryAwareness => &stats.received_awareness,
+                MessageType::Stateless | MessageType::BroadcastStateless => {
+                    &stats.received_stateless
+                }
+                MessageType::Auth => &stats.received_auth,
+                _ => &stats.received_other,
+            });
+        }
+
         let raw_address = envelope.address.raw.clone();
         match self.docs.get_mut(&raw_address) {
             Some(DocState::Active { doc, read_only, .. }) => {
@@ -352,6 +367,7 @@ impl SocketTask {
         let decision = match result {
             Ok(decision) => decision,
             Err(reason) => {
+                crate::stats::EngineStats::incr(&self.engine.stats.auth_denied);
                 // TS keeps the socket OPEN after a failed auth: it sends
                 // PermissionDenied and clears the per-document state so a
                 // retry (provider re-sends a token) starts fresh.

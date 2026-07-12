@@ -16,6 +16,7 @@ pub const WELCOME_MESSAGE: &str = "Welcome to Hocuspocus!";
 /// engine frames come out, [`Outbound::Close`] closes with the engine's
 /// code and reason. Returns when the socket is gone.
 pub async fn serve_socket(engine: Engine, socket: WebSocket) {
+    let stats = engine.stats_handle();
     let mut channels = engine.connect();
     let (mut sink, mut stream) = futures::StreamExt::split(socket);
 
@@ -27,6 +28,7 @@ pub async fn serve_socket(engine: Engine, socket: WebSocket) {
                     if sink.send(Message::Binary(frame)).await.is_err() {
                         break;
                     }
+                    stats.count_sent();
                 }
                 Outbound::Close { code, reason } => {
                     let _ = sink

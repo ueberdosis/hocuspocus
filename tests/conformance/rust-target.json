@@ -81,7 +81,8 @@
 				"executes the onDisconnect callback from an extension",
 				"has the server instance"
 			],
-			"reason": "in-process API tests excluded via --match; wire tests run"
+			"env": { "HOCUSPOCUS_RUST_FORCE_EVENTS": "1" },
+			"reason": "in-process API tests excluded via --match (server.configure tests need forced lifecycle events); wire tests run"
 		},
 		"tests/server/onStateless.ts": {
 			"exclude": [

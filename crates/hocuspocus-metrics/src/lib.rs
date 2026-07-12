@@ -32,3 +32,7 @@ pub const STORE_ENCODE_DURATION: &str = "hocuspocus_store_encode_duration_second
 /// Connections closed because the outbound buffer budget was exceeded
 /// (slow client, close code 4205). Counter.
 pub const SLOW_CLIENT_DISCONNECTS: &str = "hocuspocus_slow_client_disconnects_total";
+
+/// Authentication denials (failed auth webhook / authenticator error).
+/// Counter.
+pub const AUTH_DENIED: &str = "hocuspocus_auth_denied_total";

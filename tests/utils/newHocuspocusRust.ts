@@ -224,16 +224,16 @@ export const newHocuspocusRust = async (
 		t.teardown(() => receiver.close());
 		// Each webhook hop is a round trip through THIS process's event
 		// loop, which is saturated during a full-batch run — an always-on
-		// `connect` event reliably blew the suite's tightest fixed deadline
-		// (hasUnsyncedChanges' 200 ms readonly test). So every channel is
-		// enabled only when the test needs it: lifecycle events when
-		// lifecycle hooks were passed up front, or when the server was
-		// created bare — the `server.configure({...})`-after-construction
-		// pattern, whose hooks merge into the live dispatch later.
+		// `connect` event reliably blew the suite's tightest timing tests
+		// (hasUnsyncedChanges). So every channel is enabled only when the
+		// test needs it: lifecycle events when lifecycle hooks were passed
+		// up front, or when the conformance runner opts the file in via
+		// HOCUSPOCUS_RUST_FORCE_EVENTS (rust-target.json `env`) because its
+		// tests add hooks later through `server.configure({...})`.
 		env.HOCUSPOCUS_WEBHOOK__URL = `http://127.0.0.1:${receiverPort}`;
 		env.HOCUSPOCUS_WEBHOOK__SECRET = "test-secret";
-		const bare = Object.keys(options ?? {}).length === 0;
-		if (bare || options?.onConnect || options?.onDisconnect || options?.onStateless)
+		const forceEvents = process.env.HOCUSPOCUS_RUST_FORCE_EVENTS === "1";
+		if (forceEvents || options?.onConnect || options?.onDisconnect || options?.onStateless)
 			env.HOCUSPOCUS_WEBHOOK__EVENTS = "connect,disconnect,stateless";
 		if (options?.onAuthenticate) env.HOCUSPOCUS_AUTH__MODE = "webhook";
 		if (options?.onLoadDocument || options?.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";

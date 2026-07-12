@@ -41,10 +41,10 @@ pub(crate) struct EngineInner {
     docs: tokio::sync::Mutex<HashMap<Arc<str>, DocHandle>>,
     sockets: StdMutex<HashMap<ConnId, mpsc::Sender<Outbound>>>,
     next_conn_id: AtomicU64,
-    /// Established document connections across all documents — the TS
-    /// `getConnectionsCount()` semantic (a socket with a failed auth holds
-    /// no document connection and counts zero).
-    pub(crate) doc_connections: Arc<std::sync::atomic::AtomicUsize>,
+    /// Engine-wide counters, including the established-document-connection
+    /// gauge — the TS `getConnectionsCount()` semantic (a socket with a
+    /// failed auth holds no document connection and counts zero).
+    pub(crate) stats: Arc<crate::stats::EngineStats>,
     weak_self: StdMutex<Weak<EngineInner>>,
 }
 
@@ -89,7 +89,7 @@ impl Engine {
             docs: tokio::sync::Mutex::new(HashMap::new()),
             sockets: StdMutex::new(HashMap::new()),
             next_conn_id: AtomicU64::new(1),
-            doc_connections: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+            stats: Arc::new(crate::stats::EngineStats::default()),
             weak_self: StdMutex::new(Weak::new()),
         });
         *inner.weak_self.lock().expect("weak_self poisoned") = Arc::downgrade(&inner);
@@ -120,8 +120,19 @@ impl Engine {
     /// Established document connections (TS `getConnectionsCount()`).
     pub fn connections_count(&self) -> usize {
         self.inner
+            .stats
             .doc_connections
             .load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    /// Shared engine counters, for the transport's sent-frame accounting.
+    pub fn stats_handle(&self) -> Arc<crate::stats::EngineStats> {
+        self.inner.stats.clone()
+    }
+
+    /// Point-in-time copy of the engine counters.
+    pub fn stats(&self) -> crate::stats::StatsSnapshot {
+        self.inner.stats.snapshot()
     }
 
     /// Currently open sockets (any auth state).
@@ -222,7 +233,7 @@ impl EngineInner {
             self.storage.clone(),
             self.events.clone(),
             self.scaler.clone(),
-            self.doc_connections.clone(),
+            self.stats.clone(),
             load_context,
             on_unload,
         )

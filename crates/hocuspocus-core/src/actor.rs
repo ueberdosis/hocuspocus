@@ -64,8 +64,8 @@ struct DocumentActor {
     /// Raw wire frames sent here are published to the document's pub/sub
     /// channel (identifier framing added by the relay task).
     relay: Option<mpsc::Sender<Bytes>>,
-    /// Engine-wide established-connection counter (TS getConnectionsCount).
-    doc_connections: Arc<std::sync::atomic::AtomicUsize>,
+    /// Engine-wide counters (established connections, store outcomes).
+    stats: Arc<crate::stats::EngineStats>,
     /// The last subscriber left; unload once the final store succeeds.
     pending_unload: bool,
     /// State vector at the previous change event; the next event carries
@@ -85,7 +85,7 @@ pub(crate) async fn spawn(
     storage: Option<Arc<dyn Storage>>,
     events: Arc<dyn crate::auth::EventHooks>,
     scaler: Option<Arc<dyn crate::auth::Scaler>>,
-    doc_connections: Arc<std::sync::atomic::AtomicUsize>,
+    stats: Arc<crate::stats::EngineStats>,
     load_context: Arc<crate::storage::ContextData>,
     on_unload: Box<dyn FnOnce(&str) + Send>,
 ) -> Result<mpsc::Sender<DocMessage>, crate::BoxError> {
@@ -116,7 +116,7 @@ pub(crate) async fn spawn(
         events,
         scaler,
         relay: None,
-        doc_connections,
+        stats,
         pending_unload: false,
         last_change_event_sv: None,
         last_change_context: Arc::default(),
@@ -204,14 +204,16 @@ impl DocumentActor {
                 }
                 self.subscribers.insert(conn_id, subscriber);
                 self.pending_unload = false;
-                self.doc_connections
+                self.stats
+                    .doc_connections
                     .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 let _ = reply.send(Ok(()));
                 false
             }
             DocMessage::Leave { conn_id } => {
                 if let Some(subscriber) = self.subscribers.remove(&conn_id) {
-                    self.doc_connections
+                    self.stats
+                        .doc_connections
                         .fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
                     let removal = self.awareness.remove_clients(subscriber.client_ids);
                     self.broadcast_awareness(&removal);
@@ -628,6 +630,7 @@ impl DocumentActor {
         // another instance is persisting (TS: SkipFurtherHooksError).
         if let Some(scaler) = &self.scaler {
             if !scaler.acquire_store_lock(&self.name).await {
+                crate::stats::EngineStats::incr(&self.stats.stores_skipped);
                 return true;
             }
         }
@@ -637,9 +640,13 @@ impl DocumentActor {
         };
         let context = self.last_change_context.clone();
         let stored = match storage.store(&self.name, state, &context).await {
-            Ok(()) => true,
+            Ok(()) => {
+                crate::stats::EngineStats::incr(&self.stats.stores_succeeded);
+                true
+            }
             Err(error) => {
                 tracing::error!(document = %self.name, %error, "store failed");
+                crate::stats::EngineStats::incr(&self.stats.stores_failed);
                 // Stay dirty so the debounce timer retries.
                 self.mark_dirty();
                 false

@@ -21,6 +21,10 @@ on:
       - 'tests/conformance/**'
       - 'tests/utils/**'
       - '.github/workflows/rust.yml'
+  schedule:
+    # Nightly fuzz soak (see the `fuzz` job; other jobs also run).
+    - cron: '17 3 * * *'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -74,10 +78,49 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --release
 
+  # Nightly-only: ~1 h libFuzzer soak over the protocol decoders, seeded
+  # with the TS-generated golden fixtures. A crash uploads its artifact.
+  fuzz:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/hocuspocus-protocol/fuzz
+      - run: cargo install cargo-fuzz --locked
+      - name: Seed corpora from the golden fixtures
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, pathlib
+          fixtures = json.load(open("crates/hocuspocus-protocol/tests/fixtures/frames.json"))["fixtures"]
+          for target in ("decode_frame", "decode_awareness", "decode_redis"):
+              directory = pathlib.Path(f"crates/hocuspocus-protocol/fuzz/corpus/{target}")
+              directory.mkdir(parents=True, exist_ok=True)
+              for fixture in fixtures:
+                  data = base64.b64decode(fixture["base64"])
+                  (directory / hashlib.sha1(data).hexdigest()).write_bytes(data)
+          PY
+      - name: Fuzz each decoder for 20 minutes
+        working-directory: crates/hocuspocus-protocol
+        run: |
+          for target in decode_frame decode_awareness decode_redis; do
+            cargo fuzz run "$target" -- -max_total_time=1200 -timeout=10
+          done
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: fuzz-artifacts
+          path: crates/hocuspocus-protocol/fuzz/artifacts/
+
   # Runs the applicable slice of the TypeScript test suite against the Rust
   # binary (tests/conformance/rust-target.json is the skip-map).
   conformance:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       redis:
         image: redis
