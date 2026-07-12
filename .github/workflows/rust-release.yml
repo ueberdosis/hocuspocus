@@ -1,0 +1,179 @@
+# Release pipeline for the Rust server: build the binary for six platforms,
+# attach them to a GitHub release, publish the npm launcher + platform
+# packages, and push a multi-arch Docker image to GHCR.
+#
+# Trigger: push a tag like `server-rust-v0.1.0` (the version after
+# `server-rust-v` stamps every npm package), or run manually for a dry run
+# (everything except the publish/push steps).
+
+name: rust-release
+
+on:
+  push:
+    tags:
+      - 'server-rust-v*'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: build (${{ matrix.slug }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: linux-x64-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - slug: linux-x64-musl
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - slug: linux-arm64-gnu
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          - slug: darwin-x64
+            runner: macos-15-intel
+            target: x86_64-apple-darwin
+          - slug: darwin-arm64
+            runner: macos-latest
+            target: aarch64-apple-darwin
+          - slug: win32-x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.slug }}
+      - name: Install musl toolchain
+        if: matrix.slug == 'linux-x64-musl'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: cargo build --release -p hocuspocus-server --target ${{ matrix.target }}
+      - name: Stage binary
+        shell: bash
+        run: |
+          mkdir staged
+          if [[ "${{ matrix.slug }}" == win32-* ]]; then
+            cp "target/${{ matrix.target }}/release/hocuspocus-server.exe" staged/
+          else
+            cp "target/${{ matrix.target }}/release/hocuspocus-server" staged/
+          fi
+      - uses: actions/upload-artifact@v6
+        with:
+          name: hocuspocus-server-${{ matrix.slug }}
+          path: staged/*
+          if-no-files-found: error
+
+  github-release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/server-rust-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+      - name: Pack per-platform archives
+        run: |
+          mkdir dist
+          for directory in artifacts/hocuspocus-server-*; do
+            slug="${directory#artifacts/hocuspocus-server-}"
+            if [[ "$slug" == win32-* ]]; then
+              (cd "$directory" && zip -q "../../dist/hocuspocus-server-$slug.zip" *)
+            else
+              chmod +x "$directory"/hocuspocus-server
+              tar -czf "dist/hocuspocus-server-$slug.tar.gz" -C "$directory" .
+            fi
+          done
+          ls -la dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+  npm-publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/server-rust-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+      - name: Stamp versions and stage binaries
+        run: |
+          VERSION="${GITHUB_REF_NAME#server-rust-v}"
+          echo "version: $VERSION"
+          for directory in crates/npm/server-rust-*; do
+            slug="${directory#crates/npm/server-rust-}"
+            cp artifacts/hocuspocus-server-"$slug"/* "$directory"/
+            chmod +x "$directory"/hocuspocus-server 2>/dev/null || true
+            npm version --no-git-tag-version "$VERSION" --prefix "$directory"
+          done
+          npm version --no-git-tag-version "$VERSION" --prefix crates/npm/server-rust
+          # The launcher pins its platform packages to the same version.
+          node -e '
+            const fs = require("fs");
+            const path = "crates/npm/server-rust/package.json";
+            const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
+            for (const name of Object.keys(pkg.optionalDependencies)) {
+              pkg.optionalDependencies[name] = pkg.version;
+            }
+            fs.writeFileSync(path, JSON.stringify(pkg, null, "\t") + "\n");
+          '
+      - name: Publish platform packages
+        run: |
+          for directory in crates/npm/server-rust-*; do
+            npm publish --access public "$directory"
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish launcher package
+        run: npm publish --access public crates/npm/server-rust
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  docker:
+    if: startsWith(github.ref, 'refs/tags/server-rust-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/hocuspocus-server
+          tags: |
+            type=match,pattern=server-rust-v(.*),group=1
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: crates/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

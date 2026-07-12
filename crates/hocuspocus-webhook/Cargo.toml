@@ -16,7 +16,7 @@ sha2 = "0.10"
 async-trait = { workspace = true }
 base64 = "0.22"
 bytes = { workspace = true }
-reqwest = { version = "0.12", default-features = false, features = ["json"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 hocuspocus-protocol = { workspace = true }

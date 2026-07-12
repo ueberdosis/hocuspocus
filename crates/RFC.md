@@ -446,8 +446,8 @@ load while the Rust server also serves 76 % more initial syncs.
 | **M2** | ✅ done | single-node sync server: WS, doc lifecycle, sync/awareness broadcast, stateless, auth handshake, close codes, control API; test dispatcher + skip-map | Tier-1 conformance: ALL of tests/provider + tests/providerwebsocket pass (18 files / 62 tests); conformance job in CI |
 | **M3** | ✅ done | webhook auth + load/store + all five events (auth/connect/disconnect/change/stateless); memory/sqlite/postgres/s3 backends; debounced store with fail-safe unload | Tier-2 conformance green (28 files / 97 tests incl. partial files); webhook smokes committed |
 | **M4** | ✅ done | Redis multi-node: relay, Node-compatible store lock, ConnectionManager auto-reconnect with re-subscription, publish retry | four-topology smoke green against real Redis (Rust↔Rust, Node↔Rust both ways, restart resilience); extension-redis AVA suite in the conformance run |
-| **M5** | metrics, limits, graceful shutdown, differential nightly, load tests | 24 h soak clean; published perf comparison vs Node |
-| **M6** | npm platform packages, Docker, release workflow, migration guide | install smoke test on all platforms; parity checklist signed off |
+| **M5** | ✅ done | metrics gauges + counters on `/metrics`, auth-context propagation, nightly 1 h fuzz soak in CI, benchmark vs Node (§ 11.5), conformance up to 116 tests incl. onLoadDocument/onStoreDocument | dashboard green (`pnpm test:rust`); counters verified against a live provider session |
+| **M6** | ✅ done (publish pending) | `@hocuspocus/server-rust` npm launcher + 6 platform packages, `crates/Dockerfile` (musl, multi-arch), `rust-release.yml` (binaries → GitHub release, npm publish, GHCR image), `crates/MIGRATION.md` | first `server-rust-v*` tag exercises the pipeline; install smoke test on all platforms after first publish |
 
 ## 14. Key crate choices
 

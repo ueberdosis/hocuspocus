@@ -1,0 +1,30 @@
+{
+	"name": "@hocuspocus/server-rust",
+	"version": "0.1.0",
+	"description": "The Hocuspocus server, rewritten in Rust — wire-compatible with @hocuspocus/provider. This package launches the prebuilt binary for your platform.",
+	"homepage": "https://hocuspocus.dev",
+	"keywords": ["hocuspocus", "yjs", "crdt", "collaboration", "websocket", "rust"],
+	"license": "MIT",
+	"type": "module",
+	"bin": {
+		"hocuspocus-server": "bin/hocuspocus-server.js"
+	},
+	"main": "bin/index.js",
+	"files": ["bin"],
+	"engines": {
+		"node": ">=18"
+	},
+	"optionalDependencies": {
+		"@hocuspocus/server-rust-linux-x64-gnu": "0.1.0",
+		"@hocuspocus/server-rust-linux-x64-musl": "0.1.0",
+		"@hocuspocus/server-rust-linux-arm64-gnu": "0.1.0",
+		"@hocuspocus/server-rust-darwin-x64": "0.1.0",
+		"@hocuspocus/server-rust-darwin-arm64": "0.1.0",
+		"@hocuspocus/server-rust-win32-x64": "0.1.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ueberdosis/hocuspocus",
+		"directory": "crates/npm/server-rust"
+	}
+}

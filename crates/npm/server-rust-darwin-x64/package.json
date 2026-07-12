@@ -1,0 +1,21 @@
+{
+	"name": "@hocuspocus/server-rust-darwin-x64",
+	"version": "0.1.0",
+	"description": "Prebuilt hocuspocus-server binary for darwin-x64. Install @hocuspocus/server-rust instead of depending on this directly.",
+	"homepage": "https://hocuspocus.dev",
+	"license": "MIT",
+	"files": [
+		"hocuspocus-server"
+	],
+	"os": [
+		"darwin"
+	],
+	"cpu": [
+		"x64"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ueberdosis/hocuspocus",
+		"directory": "crates/npm/server-rust-darwin-x64"
+	}
+}
