@@ -213,15 +213,19 @@ export const newHocuspocusRust = async (
 		receiver.unref();
 		receiver.on("connection", (socket) => socket.unref());
 		t.teardown(() => receiver.close());
-		// Lifecycle events always route through the receiver so hooks added
-		// later via `configure()` still fire; absent closures no-op. Auth
-		// and persistence stay on the binary's fast built-ins unless the
-		// test provided the closures up front — the webhook hop on every
-		// connection/load otherwise adds enough latency to flake
-		// timing-sensitive tests under full-batch load.
+		// Each webhook hop is a round trip through THIS process's event
+		// loop, which is saturated during a full-batch run — an always-on
+		// `connect` event reliably blew the suite's tightest fixed deadline
+		// (hasUnsyncedChanges' 200 ms readonly test). So every channel is
+		// enabled only when the test needs it: lifecycle events when
+		// lifecycle hooks were passed up front, or when the server was
+		// created bare — the `server.configure({...})`-after-construction
+		// pattern, whose hooks merge into the live dispatch later.
 		env.HOCUSPOCUS_WEBHOOK__URL = `http://127.0.0.1:${receiverPort}`;
 		env.HOCUSPOCUS_WEBHOOK__SECRET = "test-secret";
-		env.HOCUSPOCUS_WEBHOOK__EVENTS = "connect,disconnect,stateless";
+		const bare = Object.keys(options ?? {}).length === 0;
+		if (bare || options?.onConnect || options?.onDisconnect || options?.onStateless)
+			env.HOCUSPOCUS_WEBHOOK__EVENTS = "connect,disconnect,stateless";
 		if (options?.onAuthenticate) env.HOCUSPOCUS_AUTH__MODE = "webhook";
 		if (options?.onLoadDocument || options?.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
 	}
