@@ -413,8 +413,8 @@ Beyond the ported suite:
 | **M0** | ✅ done | RFC + PORTING.md, compiling 8-crate scaffold, binary with ready-line + `/healthz`, Rust CI | cargo build/test/clippy/fmt green in CI |
 | **M1** | ✅ done | protocol crate complete: sync steps over yrs, awareness codec, TS-generated fixture corpus, fuzz targets | 100 % fixtures parse; byte-exact re-encode where deterministic (24/24); fuzz smoke ~22M execs clean (1 h soak pending CI) |
 | **M2** | ✅ done | single-node sync server: WS, doc lifecycle, sync/awareness broadcast, stateless, auth handshake, close codes, control API; test dispatcher + skip-map | Tier-1 conformance: ALL of tests/provider + tests/providerwebsocket pass (18 files / 62 tests); conformance job in CI |
-| **M3** | 🔶 mostly done | webhook auth + load/store + connect/disconnect/stateless events; sqlite/postgres backends; debounced store. Remaining: s3 backend, `change` events, tests/server suite | Tier-2 conformance green; debounce semantics matched |
-| **M4** | 🔶 core done | Redis multi-node | three-topology smoke green against real Redis (Rust↔Rust, Node↔Rust both directions: sync, awareness, late-joiner state, store lock). Remaining: extension-redis AVA suite via dispatcher, reconnect re-subscribe, disconnectDelay |
+| **M3** | ✅ done | webhook auth + load/store + all five events (auth/connect/disconnect/change/stateless); memory/sqlite/postgres/s3 backends; debounced store with fail-safe unload | Tier-2 conformance green (28 files / 97 tests incl. partial files); webhook smokes committed |
+| **M4** | ✅ done | Redis multi-node: relay, Node-compatible store lock, ConnectionManager auto-reconnect with re-subscription, publish retry | four-topology smoke green against real Redis (Rust↔Rust, Node↔Rust both ways, restart resilience); extension-redis AVA suite in the conformance run |
 | **M5** | metrics, limits, graceful shutdown, differential nightly, load tests | 24 h soak clean; published perf comparison vs Node |
 | **M6** | npm platform packages, Docker, release workflow, migration guide | install smoke test on all platforms; parity checklist signed off |
 
