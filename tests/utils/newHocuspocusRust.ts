@@ -206,16 +206,24 @@ export const newHocuspocusRust = async (
 		});
 		await new Promise<void>((resolve) => receiver.listen(0, "127.0.0.1", resolve));
 		const receiverPort = (receiver.address() as { port: number }).port;
+		// Nothing the shim holds may keep the ava worker's event loop
+		// alive: when a test fails inside a bare timer (uncaught exception)
+		// the worker dies WITHOUT running teardowns, and one ref'd handle
+		// turns that lost worker into a whole-batch hang after the summary.
+		receiver.unref();
+		receiver.on("connection", (socket) => socket.unref());
 		t.teardown(() => receiver.close());
-		// Everything runs through the webhook contract unconditionally so
-		// that hooks added later via `configure()` still fire; absent
-		// closures behave like the defaults (auth allows read-write, GET
-		// 404s = fresh document, events no-op).
+		// Lifecycle events always route through the receiver so hooks added
+		// later via `configure()` still fire; absent closures no-op. Auth
+		// and persistence stay on the binary's fast built-ins unless the
+		// test provided the closures up front — the webhook hop on every
+		// connection/load otherwise adds enough latency to flake
+		// timing-sensitive tests under full-batch load.
 		env.HOCUSPOCUS_WEBHOOK__URL = `http://127.0.0.1:${receiverPort}`;
 		env.HOCUSPOCUS_WEBHOOK__SECRET = "test-secret";
-		env.HOCUSPOCUS_AUTH__MODE = "webhook";
 		env.HOCUSPOCUS_WEBHOOK__EVENTS = "connect,disconnect,stateless";
-		env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
+		if (options?.onAuthenticate) env.HOCUSPOCUS_AUTH__MODE = "webhook";
+		if (options?.onLoadDocument || options?.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
 	}
 
 	const child = spawn(binary, [], {
@@ -230,6 +238,12 @@ export const newHocuspocusRust = async (
 	});
 	const ready = JSON.parse(readyLine);
 	const baseURL = `127.0.0.1:${ready.port}`;
+
+	// Same rule as the receiver: the child's process watch and stdout pipe
+	// must not hold the worker's event loop open if teardowns are skipped.
+	// Nothing is read from stdout after the ready line (QUIET=true).
+	child.stdout.destroy();
+	child.unref();
 
 	t.teardown(() => {
 		child.kill("SIGKILL");
