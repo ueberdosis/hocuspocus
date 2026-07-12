@@ -12,6 +12,7 @@ use bytes::Bytes;
 use object_store::path::Path;
 use object_store::{ObjectStore, ObjectStoreExt, PutPayload};
 
+use hocuspocus_core::storage::ContextData;
 use hocuspocus_core::{BoxError, Storage};
 
 pub struct ObjectStoreStorage {
@@ -59,7 +60,11 @@ impl ObjectStoreStorage {
 
 #[async_trait]
 impl Storage for ObjectStoreStorage {
-    async fn fetch(&self, document_name: &str) -> Result<Option<Bytes>, BoxError> {
+    async fn fetch(
+        &self,
+        document_name: &str,
+        _context: &ContextData,
+    ) -> Result<Option<Bytes>, BoxError> {
         match self.store.get(&self.key(document_name)).await {
             Ok(result) => Ok(Some(result.bytes().await?)),
             Err(object_store::Error::NotFound { .. }) => Ok(None),
@@ -67,7 +72,12 @@ impl Storage for ObjectStoreStorage {
         }
     }
 
-    async fn store(&self, document_name: &str, state: Bytes) -> Result<(), BoxError> {
+    async fn store(
+        &self,
+        document_name: &str,
+        state: Bytes,
+        _context: &ContextData,
+    ) -> Result<(), BoxError> {
         self.store
             .put(&self.key(document_name), PutPayload::from_bytes(state))
             .await?;
@@ -85,13 +95,21 @@ mod tests {
         let memory = Arc::new(InMemory::new());
         let storage = ObjectStoreStorage::new(memory.clone(), "hocuspocus-documents/");
 
-        assert!(storage.fetch("doc").await.unwrap().is_none());
+        assert!(storage
+            .fetch("doc", &Default::default())
+            .await
+            .unwrap()
+            .is_none());
         storage
-            .store("doc", Bytes::from_static(&[1, 2, 3]))
+            .store("doc", Bytes::from_static(&[1, 2, 3]), &Default::default())
             .await
             .unwrap();
         assert_eq!(
-            storage.fetch("doc").await.unwrap().unwrap(),
+            storage
+                .fetch("doc", &Default::default())
+                .await
+                .unwrap()
+                .unwrap(),
             Bytes::from_static(&[1, 2, 3])
         );
 

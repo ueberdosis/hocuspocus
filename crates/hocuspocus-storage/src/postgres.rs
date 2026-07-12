@@ -6,6 +6,7 @@ use async_trait::async_trait;
 use bytes::Bytes;
 use sqlx::{PgPool, Row};
 
+use hocuspocus_core::storage::ContextData;
 use hocuspocus_core::{BoxError, Storage};
 
 pub const SCHEMA: &str = r#"CREATE TABLE IF NOT EXISTS documents (
@@ -28,7 +29,11 @@ impl PostgresStorage {
 
 #[async_trait]
 impl Storage for PostgresStorage {
-    async fn fetch(&self, document_name: &str) -> Result<Option<Bytes>, BoxError> {
+    async fn fetch(
+        &self,
+        document_name: &str,
+        _context: &ContextData,
+    ) -> Result<Option<Bytes>, BoxError> {
         let row = sqlx::query("SELECT data FROM documents WHERE name = $1")
             .bind(document_name)
             .fetch_optional(&self.pool)
@@ -36,7 +41,12 @@ impl Storage for PostgresStorage {
         Ok(row.map(|row| Bytes::from(row.get::<Vec<u8>, _>("data"))))
     }
 
-    async fn store(&self, document_name: &str, state: Bytes) -> Result<(), BoxError> {
+    async fn store(
+        &self,
+        document_name: &str,
+        state: Bytes,
+        _context: &ContextData,
+    ) -> Result<(), BoxError> {
         sqlx::query(
             "INSERT INTO documents (name, data) VALUES ($1, $2)
     ON CONFLICT (name) DO UPDATE SET data = excluded.data",

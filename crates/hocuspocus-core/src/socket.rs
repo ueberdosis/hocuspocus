@@ -39,7 +39,11 @@ enum DocState {
     /// drained on success. Counts toward the pending-document limit.
     Authenticating { queue: Vec<Bytes>, bytes: usize },
     /// Authenticated and joined to a document actor.
-    Active { doc: DocHandle, read_only: bool },
+    Active {
+        doc: DocHandle,
+        read_only: bool,
+        context: Arc<crate::storage::ContextData>,
+    },
 }
 
 /// Result of a spawned per-document auth task.
@@ -166,7 +170,7 @@ impl SocketTask {
 
         let raw_address = envelope.address.raw.clone();
         match self.docs.get_mut(&raw_address) {
-            Some(DocState::Active { doc, read_only }) => {
+            Some(DocState::Active { doc, read_only, .. }) => {
                 let doc = doc.clone();
                 let read_only = *read_only;
                 self.route_active(&doc, read_only, envelope).await;
@@ -294,11 +298,18 @@ impl SocketTask {
                 remote_addr: None,
             };
             // TS runs onConnect before onAuthenticate; either may reject.
+            // Both may contribute context; onAuthenticate's keys win.
             let result = match engine.events.connect(&document_name).await {
-                Ok(()) => engine
+                Ok(connect_context) => engine
                     .authenticator
                     .authenticate(request)
                     .await
+                    .map(|mut decision| {
+                        let mut merged = connect_context;
+                        merged.extend(decision.context);
+                        decision.context = merged;
+                        decision
+                    })
                     .map_err(|error| error.to_string()),
                 Err(error) => Err(error.to_string()),
             };
@@ -357,6 +368,7 @@ impl SocketTask {
         };
 
         let read_only = matches!(decision.scope, hocuspocus_protocol::Scope::ReadOnly);
+        let context = Arc::new(decision.context);
         let frame = MessageBuilder::new(&raw_address).auth(&AuthOutbound::Authenticated {
             scope: decision.scope,
         });
@@ -367,7 +379,11 @@ impl SocketTask {
         // freshly loaded actor.
         let mut joined: Option<DocHandle> = None;
         for _attempt in 0..2 {
-            let doc = match self.engine.get_or_load(document_name.clone()).await {
+            let doc = match self
+                .engine
+                .get_or_load(document_name.clone(), context.clone())
+                .await
+            {
                 Ok(doc) => doc,
                 Err(error) => {
                     // TS: a failed onLoadDocument sends PermissionDenied and
@@ -387,6 +403,7 @@ impl SocketTask {
                 outbound: self.outbound.clone(),
                 raw_address: raw_address.clone(),
                 read_only,
+                context: context.clone(),
                 reply: reply_tx,
             };
             if doc.send(join).await.is_ok() && reply_rx.await.is_ok() {
@@ -406,6 +423,7 @@ impl SocketTask {
             DocState::Active {
                 doc: doc.clone(),
                 read_only,
+                context,
             },
         );
 
@@ -493,10 +511,10 @@ impl SocketTask {
 
     async fn teardown(mut self) {
         for (address, state) in self.docs.drain() {
-            if let DocState::Active { doc, .. } = state {
+            if let DocState::Active { doc, context, .. } = state {
                 let events = self.engine.events.clone();
                 let document_name = crate::document::document_name_of(&address);
-                tokio::spawn(async move { events.disconnect(&document_name).await });
+                tokio::spawn(async move { events.disconnect(&document_name, &context).await });
                 let _ = doc
                     .send(DocMessage::Leave {
                         conn_id: self.conn_id,

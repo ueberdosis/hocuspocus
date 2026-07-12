@@ -293,6 +293,10 @@ document scale is the wrong tool:
 - `GET {base}/documents/{name}` → `200` + `application/octet-stream`
   (yjs update v1, full state) or `404` (new document).
 - `PUT {base}/documents/{name}`, body = full state update → `2xx`.
+- Both carry `X-Hocuspocus-Context: <json>` (when non-empty): the auth
+  context of the connection that triggered the load / whose change
+  scheduled the store — the TS `onLoadDocument`/`onStoreDocument`
+  `context` payload field.
 
 **JSON event endpoint:** `POST {base}` with `{"event": "...", "payload":
 {...}}`. Signature header `X-Hocuspocus-Signature-256: sha256=<hmac-sha256
@@ -306,11 +310,18 @@ Events:
   socketId, providerVersion}`; response `200 {"context": {...}, "scope":
   "read-write"|"readonly"}` or `403 {"reason": "..."}` → PermissionDenied +
   close 4403.
-- `connect` / `disconnect` / `create` — parity with the Node extension;
-  response context merges into the connection context.
-- `change` — debounced with the store. Payload per `change_payload` config:
-  `none`, the incremental update as base64 (bounded — it is a delta), or
-  generic JSON via yrs's native JSON reflection (see § 10).
+- `connect` — awaited before `auth`; non-2xx rejects the connection, and
+  the response's `{"context": {...}}` merges into the connection context
+  *under* the auth response's keys (TS order: onConnect first,
+  onAuthenticate on top).
+- `disconnect` / `create` — parity with the Node extension; `disconnect`
+  payload carries the connection's `context`.
+- `change` — debounced with the store; payload carries the incremental
+  update (base64 — bounded, it is a delta) and the `context` of the
+  connection whose change scheduled it.
+- `stateless` — payload `{documentName, payload, context}`; the response's
+  optional `{"respond": "..."}` is sent back to the originating
+  connection.
 
 ## 9. Standalone binary
 

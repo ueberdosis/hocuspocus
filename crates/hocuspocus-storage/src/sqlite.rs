@@ -7,6 +7,7 @@ use bytes::Bytes;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::{Row, SqlitePool};
 
+use hocuspocus_core::storage::ContextData;
 use hocuspocus_core::{BoxError, Storage};
 
 /// The exact schema `extension-sqlite` creates.
@@ -44,7 +45,11 @@ impl SqliteStorage {
 
 #[async_trait]
 impl Storage for SqliteStorage {
-    async fn fetch(&self, document_name: &str) -> Result<Option<Bytes>, BoxError> {
+    async fn fetch(
+        &self,
+        document_name: &str,
+        _context: &ContextData,
+    ) -> Result<Option<Bytes>, BoxError> {
         let row = sqlx::query(r#"SELECT data FROM "documents" WHERE name = ? ORDER BY rowid DESC"#)
             .bind(document_name)
             .fetch_optional(&self.pool)
@@ -52,7 +57,12 @@ impl Storage for SqliteStorage {
         Ok(row.map(|row| Bytes::from(row.get::<Vec<u8>, _>("data"))))
     }
 
-    async fn store(&self, document_name: &str, state: Bytes) -> Result<(), BoxError> {
+    async fn store(
+        &self,
+        document_name: &str,
+        state: Bytes,
+        _context: &ContextData,
+    ) -> Result<(), BoxError> {
         sqlx::query(
             r#"INSERT INTO "documents" ("name", "data") VALUES (?, ?)
     ON CONFLICT(name) DO UPDATE SET data = excluded.data"#,
@@ -72,17 +82,25 @@ mod tests {
     #[tokio::test]
     async fn roundtrip_and_upsert() {
         let storage = SqliteStorage::open(":memory:").await.unwrap();
-        assert!(storage.fetch("doc").await.unwrap().is_none());
+        assert!(storage
+            .fetch("doc", &Default::default())
+            .await
+            .unwrap()
+            .is_none());
         storage
-            .store("doc", Bytes::from_static(&[1, 2]))
+            .store("doc", Bytes::from_static(&[1, 2]), &Default::default())
             .await
             .unwrap();
         storage
-            .store("doc", Bytes::from_static(&[3, 4, 5]))
+            .store("doc", Bytes::from_static(&[3, 4, 5]), &Default::default())
             .await
             .unwrap();
         assert_eq!(
-            storage.fetch("doc").await.unwrap().unwrap(),
+            storage
+                .fetch("doc", &Default::default())
+                .await
+                .unwrap()
+                .unwrap(),
             Bytes::from_static(&[3, 4, 5])
         );
     }

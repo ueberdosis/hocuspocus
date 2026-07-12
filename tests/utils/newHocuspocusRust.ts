@@ -75,14 +75,12 @@ export const newHocuspocusRust = async (
 	if (typeof options?.maxPendingDocuments === "number")
 		env.HOCUSPOCUS_SERVER__MAX_PENDING_DOCUMENTS = String(options.maxPendingDocuments);
 
-	if (
-		options?.onAuthenticate ||
-		options?.onLoadDocument ||
-		options?.onStoreDocument ||
-		options?.onConnect ||
-		options?.onDisconnect ||
-		options?.onStateless
-	) {
+	// Hook closures are mutable so the shim's `configure()` (TS
+	// `server.configure({...})`) can swap them in after the binary spawned;
+	// the receiver always runs and dispatches whatever is present at event
+	// time.
+	const liveOptions: Partial<ServerConfiguration> = { ...(options ?? {}) };
+	{
 		const Y = await import("yjs");
 		const receiver = http.createServer((request, response) => {
 			const chunks: Buffer[] = [];
@@ -90,19 +88,24 @@ export const newHocuspocusRust = async (
 			request.on("end", async () => {
 				const body = Buffer.concat(chunks);
 				try {
+					// Binary persistence requests carry the connection's auth
+					// context in a request header.
+					const headerContext = JSON.parse(
+						String(request.headers["x-hocuspocus-context"] ?? "{}"),
+					);
 					const documentMatch = request.url?.match(/^\/documents\/(.+)$/);
 					if (documentMatch && request.method === "GET") {
 						// Binary persistence fetch → onLoadDocument closure.
 						const documentName = decodeURIComponent(documentMatch[1]);
-						if (!options.onLoadDocument) {
+						if (!liveOptions.onLoadDocument) {
 							response.writeHead(404).end();
 							return;
 						}
 						const document = new Y.Doc();
-						const returned = await options.onLoadDocument({
+						const returned = await liveOptions.onLoadDocument({
 							document,
 							documentName,
-							context: {},
+							context: headerContext,
 							instance: undefined,
 						} as never);
 						const state = Y.encodeStateAsUpdate((returned as InstanceType<typeof Y.Doc>) ?? document);
@@ -113,14 +116,14 @@ export const newHocuspocusRust = async (
 					if (documentMatch && request.method === "PUT") {
 						// Binary persistence store → onStoreDocument closure.
 						const documentName = decodeURIComponent(documentMatch[1]);
-						if (options.onStoreDocument) {
+						if (liveOptions.onStoreDocument) {
 							const document = new Y.Doc();
 							Y.applyUpdate(document, new Uint8Array(body));
-							await options.onStoreDocument({
+							await liveOptions.onStoreDocument({
 								document,
 								documentName,
 								state: body,
-								context: {},
+								context: headerContext,
 								instance: undefined,
 							} as never);
 						}
@@ -131,7 +134,10 @@ export const newHocuspocusRust = async (
 					const { event, payload } = JSON.parse(body.toString());
 					const connectionConfig = { readOnly: false, isAuthenticated: false };
 					if (event === "connect") {
-						await options.onConnect?.({
+						// The onConnect return value becomes context data,
+						// echoed back so the server merges it into the
+						// connection context (TS contextAdditions).
+						const returned = await liveOptions.onConnect?.({
 							documentName: payload.documentName,
 							context: {},
 							connectionConfig,
@@ -140,17 +146,17 @@ export const newHocuspocusRust = async (
 							requestParameters: new URLSearchParams(),
 						} as never);
 						response.writeHead(200, { "Content-Type": "application/json" });
-						response.end(JSON.stringify({}));
+						response.end(JSON.stringify({ context: returned ?? {} }));
 						return;
 					}
 					if (event === "stateless") {
 						// connection.sendStateless replies to the sender via the
 						// webhook response's `respond` field.
 						let respond: string | undefined;
-						await options.onStateless?.({
+						await liveOptions.onStateless?.({
 							documentName: payload.documentName,
 							payload: payload.payload,
-							context: {},
+							context: payload.context ?? {},
 							connection: {
 								sendStateless(reply: string) {
 									respond = reply;
@@ -162,20 +168,20 @@ export const newHocuspocusRust = async (
 						return;
 					}
 					if (event === "disconnect") {
-						await options.onDisconnect?.({
+						await liveOptions.onDisconnect?.({
 							documentName: payload.documentName,
-							context: {},
+							context: payload.context ?? {},
 						} as never);
 						response.writeHead(200, { "Content-Type": "application/json" });
 						response.end(JSON.stringify({}));
 						return;
 					}
-					if (!options.onAuthenticate) {
+					if (!liveOptions.onAuthenticate) {
 						response.writeHead(200, { "Content-Type": "application/json" });
 						response.end(JSON.stringify({ context: {}, scope: "read-write" }));
 						return;
 					}
-					const context = await options.onAuthenticate({
+					const context = await liveOptions.onAuthenticate({
 						token: payload.token,
 						documentName: payload.documentName,
 						providerVersion: payload.providerVersion,
@@ -201,16 +207,15 @@ export const newHocuspocusRust = async (
 		await new Promise<void>((resolve) => receiver.listen(0, "127.0.0.1", resolve));
 		const receiverPort = (receiver.address() as { port: number }).port;
 		t.teardown(() => receiver.close());
+		// Everything runs through the webhook contract unconditionally so
+		// that hooks added later via `configure()` still fire; absent
+		// closures behave like the defaults (auth allows read-write, GET
+		// 404s = fresh document, events no-op).
 		env.HOCUSPOCUS_WEBHOOK__URL = `http://127.0.0.1:${receiverPort}`;
 		env.HOCUSPOCUS_WEBHOOK__SECRET = "test-secret";
-		if (options.onAuthenticate) env.HOCUSPOCUS_AUTH__MODE = "webhook";
-		const events = [
-			options.onConnect ? "connect" : null,
-			options.onDisconnect ? "disconnect" : null,
-			options.onStateless ? "stateless" : null,
-		].filter(Boolean);
-		if (events.length > 0) env.HOCUSPOCUS_WEBHOOK__EVENTS = events.join(",");
-		if (options.onLoadDocument || options.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
+		env.HOCUSPOCUS_AUTH__MODE = "webhook";
+		env.HOCUSPOCUS_WEBHOOK__EVENTS = "connect,disconnect,stateless";
+		env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
 	}
 
 	const child = spawn(binary, [], {
@@ -251,6 +256,13 @@ export const newHocuspocusRust = async (
 
 	// The shim: everything the Tier-1 tests and the provider utils touch.
 	const shim = {
+		// TS `server.configure({...})` after construction: hook closures
+		// merge into the live receiver dispatch. Scalar server options
+		// cannot change post-spawn; tests relying on that stay skipped.
+		configure(config: Partial<ServerConfiguration>) {
+			Object.assign(liveOptions, config);
+			return shim;
+		},
 		server: {
 			webSocketURL: `ws://${baseURL}`,
 			URL: baseURL,

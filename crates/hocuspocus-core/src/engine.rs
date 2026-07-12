@@ -186,7 +186,11 @@ impl EngineInner {
     /// Loads are serialized by the registry lock — acceptable while loads
     /// are cheap; the shared-future `DocSlot` design from the RFC replaces
     /// this when storage backends get slow (M3).
-    pub(crate) async fn get_or_load(&self, name: Arc<str>) -> Result<DocHandle, BoxError> {
+    pub(crate) async fn get_or_load(
+        &self,
+        name: Arc<str>,
+        load_context: Arc<crate::storage::ContextData>,
+    ) -> Result<DocHandle, BoxError> {
         let mut docs = self.docs.lock().await;
         if let Some(handle) = docs.get(&name) {
             if !handle.is_closed() {
@@ -219,6 +223,7 @@ impl EngineInner {
             self.events.clone(),
             self.scaler.clone(),
             self.doc_connections.clone(),
+            load_context,
             on_unload,
         )
         .await?;

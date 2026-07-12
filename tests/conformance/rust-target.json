@@ -47,7 +47,6 @@
 		"tests/server/onAuthenticate.ts": {
 			"exclude": [
 				"executes the onAuthenticate callback from a custom extension",
-				"passes context from onAuthenticate to onLoadDocument",
 				"onAuthenticate wrong auth only disconnects*",
 				"onAuthenticate readonly auth only affects*"
 			],
@@ -56,7 +55,6 @@
 		"tests/server/onDisconnect.ts": {
 			"exclude": [
 				"executes the onDisconnect callback from an extension",
-				"passes the context to the onLoadDocument callback",
 				"has the server instance"
 			],
 			"reason": "in-process API tests excluded via --match; wire tests run"

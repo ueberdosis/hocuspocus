@@ -39,23 +39,37 @@ pub trait Authenticator: Send + Sync + 'static {
 /// authentication and may reject the connection.
 #[async_trait]
 pub trait EventHooks: Send + Sync + 'static {
-    async fn connect(&self, document_name: &str) -> Result<(), BoxError> {
+    /// Runs before authentication; `Err` rejects the connection. The
+    /// returned data is merged into the connection context *under* the
+    /// authenticator's (TS order: onConnect first, onAuthenticate on top).
+    async fn connect(&self, document_name: &str) -> Result<crate::storage::ContextData, BoxError> {
         let _ = document_name;
-        Ok(())
+        Ok(Default::default())
     }
-    async fn disconnect(&self, document_name: &str) {
-        let _ = document_name;
+    async fn disconnect(&self, document_name: &str, context: &crate::storage::ContextData) {
+        let _ = (document_name, context);
     }
     /// The document changed (fired on the debounced store cadence). The
-    /// update is the incremental yjs diff since the previous change event.
-    async fn change(&self, document_name: &str, update: &[u8]) {
-        let _ = (document_name, update);
+    /// update is the incremental yjs diff since the previous change event;
+    /// `context` belongs to the connection whose change scheduled it.
+    async fn change(
+        &self,
+        document_name: &str,
+        update: &[u8],
+        context: &crate::storage::ContextData,
+    ) {
+        let _ = (document_name, update, context);
     }
     /// A client sent a Stateless message (TS `onStateless`). The returned
     /// payload, if any, is sent back to the originating connection (the
     /// hook's `connection.sendStateless(...)`).
-    async fn stateless(&self, document_name: &str, payload: &str) -> Option<String> {
-        let _ = (document_name, payload);
+    async fn stateless(
+        &self,
+        document_name: &str,
+        payload: &str,
+        context: &crate::storage::ContextData,
+    ) -> Option<String> {
+        let _ = (document_name, payload, context);
         None
     }
 }

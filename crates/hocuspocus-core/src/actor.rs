@@ -42,6 +42,8 @@ struct Subscriber {
     /// Awareness client ids introduced by this connection, removed from the
     /// shared awareness when it leaves (TS `connections` → `clients` set).
     client_ids: std::collections::HashSet<u64>,
+    /// Auth context of this connection.
+    context: Arc<crate::storage::ContextData>,
 }
 
 struct DirtyState {
@@ -69,10 +71,14 @@ struct DocumentActor {
     /// State vector at the previous change event; the next event carries
     /// the diff from here.
     last_change_event_sv: Option<StateVector>,
+    /// Context of the connection whose change most recently marked the
+    /// document dirty (TS `lastContext` on store payloads).
+    last_change_context: Arc<crate::storage::ContextData>,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
 /// Returns the mailbox sender once the document is fully loaded.
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn spawn(
     name: Arc<str>,
     config: Configuration,
@@ -80,6 +86,7 @@ pub(crate) async fn spawn(
     events: Arc<dyn crate::auth::EventHooks>,
     scaler: Option<Arc<dyn crate::auth::Scaler>>,
     doc_connections: Arc<std::sync::atomic::AtomicUsize>,
+    load_context: Arc<crate::storage::ContextData>,
     on_unload: Box<dyn FnOnce(&str) + Send>,
 ) -> Result<mpsc::Sender<DocMessage>, crate::BoxError> {
     let doc = yrs::Doc::with_options(yrs::Options {
@@ -89,7 +96,7 @@ pub(crate) async fn spawn(
 
     // Load persisted state before accepting any traffic (TS onLoadDocument).
     if let Some(storage) = &storage {
-        if let Some(state) = storage.fetch(&name).await? {
+        if let Some(state) = storage.fetch(&name, &load_context).await? {
             let mut txn = doc.transact_mut();
             let update = Update::decode_v1(&state)?;
             txn.apply_update(update)?;
@@ -112,6 +119,7 @@ pub(crate) async fn spawn(
         doc_connections,
         pending_unload: false,
         last_change_event_sv: None,
+        last_change_context: Arc::default(),
     };
 
     tokio::spawn(async move {
@@ -166,6 +174,7 @@ impl DocumentActor {
                 outbound,
                 raw_address,
                 read_only,
+                context,
                 reply,
             } => {
                 let subscriber = Subscriber {
@@ -173,6 +182,7 @@ impl DocumentActor {
                     raw_address,
                     read_only,
                     client_ids: Default::default(),
+                    context,
                 };
                 // TS: a new Connection immediately receives the current
                 // awareness states, if any.
@@ -271,7 +281,15 @@ impl DocumentActor {
                 // inline to preserve per-document ordering, like the TS
                 // sequential message queue. A returned payload goes back to
                 // the sender (`connection.sendStateless`).
-                let response = self.events.stateless(&self.name, &payload).await;
+                let sender_context = self
+                    .subscribers
+                    .get(&conn_id)
+                    .map(|subscriber| subscriber.context.clone())
+                    .unwrap_or_default();
+                let response = self
+                    .events
+                    .stateless(&self.name, &payload, &sender_context)
+                    .await;
                 if let (Some(response), Some(subscriber)) =
                     (response, self.subscribers.get(&conn_id))
                 {
@@ -418,6 +436,9 @@ impl DocumentActor {
 
                 self.broadcast_update(&produced);
                 if !origin.skips_store_hooks() {
+                    if let Some(subscriber) = conn_id.and_then(|id| self.subscribers.get(&id)) {
+                        self.last_change_context = subscriber.context.clone();
+                    }
                     self.mark_dirty();
                 }
                 // Node's onChange publishes the server's first sync step to
@@ -583,7 +604,8 @@ impl DocumentActor {
             (txn.encode_state_as_update_v1(&since), txn.state_vector())
         };
         if diff != EMPTY_UPDATE_V1 {
-            self.events.change(&self.name, &diff).await;
+            let context = self.last_change_context.clone();
+            self.events.change(&self.name, &diff, &context).await;
         }
         self.last_change_event_sv = Some(current_sv);
 
@@ -601,7 +623,8 @@ impl DocumentActor {
             let txn = self.doc.transact();
             Bytes::from(txn.encode_state_as_update_v1(&StateVector::default()))
         };
-        let stored = match storage.store(&self.name, state).await {
+        let context = self.last_change_context.clone();
+        let stored = match storage.store(&self.name, state, &context).await {
             Ok(()) => true,
             Err(error) => {
                 tracing::error!(document = %self.name, %error, "store failed");

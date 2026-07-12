@@ -17,6 +17,10 @@ use sha2::Sha256;
 /// Header carrying the request signature.
 pub const SIGNATURE_HEADER: &str = "X-Hocuspocus-Signature-256";
 
+/// Header carrying the connection's auth context (JSON) on binary
+/// persistence requests.
+pub const CONTEXT_HEADER: &str = "X-Hocuspocus-Context";
+
 /// Webhook events, mirroring the Node extension's `Events`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
@@ -232,14 +236,17 @@ impl hocuspocus_core::Storage for WebhookStorage {
     async fn fetch(
         &self,
         document_name: &str,
+        context: &hocuspocus_core::storage::ContextData,
     ) -> Result<Option<bytes::Bytes>, hocuspocus_core::BoxError> {
         let url = self.document_url(document_name);
-        let response = self
+        let mut request = self
             .client
             .get(&url)
-            .header(SIGNATURE_HEADER, sign(&self.secret, url.as_bytes()))
-            .send()
-            .await?;
+            .header(SIGNATURE_HEADER, sign(&self.secret, url.as_bytes()));
+        if !context.is_empty() {
+            request = request.header(CONTEXT_HEADER, serde_json::to_string(context)?);
+        }
+        let response = request.send().await?;
         match response.status() {
             reqwest::StatusCode::NOT_FOUND => Ok(None),
             status if status.is_success() => Ok(Some(response.bytes().await?)),
@@ -251,16 +258,18 @@ impl hocuspocus_core::Storage for WebhookStorage {
         &self,
         document_name: &str,
         state: bytes::Bytes,
+        context: &hocuspocus_core::storage::ContextData,
     ) -> Result<(), hocuspocus_core::BoxError> {
         let url = self.document_url(document_name);
-        let response = self
+        let mut request = self
             .client
             .put(&url)
             .header("Content-Type", "application/octet-stream")
-            .header(SIGNATURE_HEADER, sign(&self.secret, &state))
-            .body(state)
-            .send()
-            .await?;
+            .header(SIGNATURE_HEADER, sign(&self.secret, &state));
+        if !context.is_empty() {
+            request = request.header(CONTEXT_HEADER, serde_json::to_string(context)?);
+        }
+        let response = request.body(state).send().await?;
         if !response.status().is_success() {
             return Err(format!("webhook store failed: {}", response.status()).into());
         }
@@ -288,34 +297,23 @@ impl WebhookEvents {
         }
     }
 
-    async fn post(
-        &self,
-        event: Event,
-        document_name: &str,
-    ) -> Result<(), hocuspocus_core::BoxError> {
-        let body = serde_json::to_vec(&serde_json::json!({
-            "event": event.as_str(),
-            "payload": { "documentName": document_name },
-        }))?;
-        self.post_body(body).await.map(|_| ())
-    }
-
-    /// Like [`Self::post`], with a payload field; returns the response's
+    /// Like [`Self::post_body`], with a payload field; returns the response's
     /// optional `respond` payload.
     async fn post_with(
         &self,
         event: Event,
         document_name: &str,
         payload: &str,
+        context: &hocuspocus_core::storage::ContextData,
     ) -> Result<Option<String>, hocuspocus_core::BoxError> {
         let body = serde_json::to_vec(&serde_json::json!({
             "event": event.as_str(),
-            "payload": { "documentName": document_name, "payload": payload },
+            "payload": { "documentName": document_name, "payload": payload, "context": context },
         }))?;
-        self.post_body(body).await
+        Ok(self.post_body(body).await?.respond)
     }
 
-    async fn post_body(&self, body: Vec<u8>) -> Result<Option<String>, hocuspocus_core::BoxError> {
+    async fn post_body(&self, body: Vec<u8>) -> Result<EventResponse, hocuspocus_core::BoxError> {
         let response = self
             .client
             .post(&self.url)
@@ -336,35 +334,63 @@ impl WebhookEvents {
                 .unwrap_or_else(|| "forbidden".to_owned())
                 .into());
         }
-        #[derive(serde::Deserialize, Default)]
-        struct EventResponse {
-            #[serde(default)]
-            respond: Option<String>,
-        }
-        let parsed: EventResponse = response.json().await.unwrap_or_default();
-        Ok(parsed.respond)
+        Ok(response.json().await.unwrap_or_default())
     }
+}
+
+/// Successful JSON event response fields the server acts on.
+#[derive(serde::Deserialize, Default)]
+struct EventResponse {
+    /// `stateless`: payload to send back to the originating connection.
+    #[serde(default)]
+    respond: Option<String>,
+    /// `connect`: data merged into the connection context.
+    #[serde(default)]
+    context: serde_json::Map<String, serde_json::Value>,
 }
 
 #[async_trait::async_trait]
 impl hocuspocus_core::EventHooks for WebhookEvents {
-    async fn connect(&self, document_name: &str) -> Result<(), hocuspocus_core::BoxError> {
+    async fn connect(
+        &self,
+        document_name: &str,
+    ) -> Result<hocuspocus_core::storage::ContextData, hocuspocus_core::BoxError> {
         if !self.events.contains(&Event::Connect) {
-            return Ok(());
+            return Ok(Default::default());
         }
-        self.post(Event::Connect, document_name).await
+        let body = serde_json::to_vec(&serde_json::json!({
+            "event": Event::Connect.as_str(),
+            "payload": { "documentName": document_name },
+        }))?;
+        Ok(self.post_body(body).await?.context)
     }
 
-    async fn disconnect(&self, document_name: &str) {
+    async fn disconnect(
+        &self,
+        document_name: &str,
+        context: &hocuspocus_core::storage::ContextData,
+    ) {
         if !self.events.contains(&Event::Disconnect) {
             return;
         }
-        if let Err(error) = self.post(Event::Disconnect, document_name).await {
+        let body = match serde_json::to_vec(&serde_json::json!({
+            "event": Event::Disconnect.as_str(),
+            "payload": { "documentName": document_name, "context": context },
+        })) {
+            Ok(body) => body,
+            Err(_) => return,
+        };
+        if let Err(error) = self.post_body(body).await {
             tracing::warn!(%error, "disconnect webhook failed");
         }
     }
 
-    async fn change(&self, document_name: &str, update: &[u8]) {
+    async fn change(
+        &self,
+        document_name: &str,
+        update: &[u8],
+        context: &hocuspocus_core::storage::ContextData,
+    ) {
         if !self.events.contains(&Event::Change) {
             return;
         }
@@ -372,7 +398,7 @@ impl hocuspocus_core::EventHooks for WebhookEvents {
         let encoded = base64::engine::general_purpose::STANDARD.encode(update);
         let body = match serde_json::to_vec(&serde_json::json!({
             "event": Event::Change.as_str(),
-            "payload": { "documentName": document_name, "update": encoded },
+            "payload": { "documentName": document_name, "update": encoded, "context": context },
         })) {
             Ok(body) => body,
             Err(_) => return,
@@ -382,12 +408,17 @@ impl hocuspocus_core::EventHooks for WebhookEvents {
         }
     }
 
-    async fn stateless(&self, document_name: &str, payload: &str) -> Option<String> {
+    async fn stateless(
+        &self,
+        document_name: &str,
+        payload: &str,
+        context: &hocuspocus_core::storage::ContextData,
+    ) -> Option<String> {
         if !self.events.contains(&Event::Stateless) {
             return None;
         }
         match self
-            .post_with(Event::Stateless, document_name, payload)
+            .post_with(Event::Stateless, document_name, payload, context)
             .await
         {
             Ok(response) => response,

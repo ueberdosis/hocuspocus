@@ -33,6 +33,7 @@ use std::sync::Mutex;
 use async_trait::async_trait;
 use bytes::Bytes;
 
+use hocuspocus_core::storage::ContextData;
 use hocuspocus_core::{BoxError, Storage};
 
 /// Non-persistent storage: documents live only as long as the process.
@@ -49,7 +50,11 @@ impl InMemoryStorage {
 
 #[async_trait]
 impl Storage for InMemoryStorage {
-    async fn fetch(&self, document_name: &str) -> Result<Option<Bytes>, BoxError> {
+    async fn fetch(
+        &self,
+        document_name: &str,
+        _context: &ContextData,
+    ) -> Result<Option<Bytes>, BoxError> {
         Ok(self
             .documents
             .lock()
@@ -58,7 +63,12 @@ impl Storage for InMemoryStorage {
             .cloned())
     }
 
-    async fn store(&self, document_name: &str, state: Bytes) -> Result<(), BoxError> {
+    async fn store(
+        &self,
+        document_name: &str,
+        state: Bytes,
+        _context: &ContextData,
+    ) -> Result<(), BoxError> {
         self.documents
             .lock()
             .expect("storage poisoned")
@@ -74,18 +84,26 @@ mod tests {
     #[tokio::test]
     async fn fetch_missing_returns_none() {
         let storage = InMemoryStorage::new();
-        assert!(storage.fetch("doc").await.unwrap().is_none());
+        assert!(storage
+            .fetch("doc", &Default::default())
+            .await
+            .unwrap()
+            .is_none());
     }
 
     #[tokio::test]
     async fn store_then_fetch() {
         let storage = InMemoryStorage::new();
         storage
-            .store("doc", Bytes::from_static(&[1, 2, 3]))
+            .store("doc", Bytes::from_static(&[1, 2, 3]), &Default::default())
             .await
             .unwrap();
         assert_eq!(
-            storage.fetch("doc").await.unwrap().unwrap(),
+            storage
+                .fetch("doc", &Default::default())
+                .await
+                .unwrap()
+                .unwrap(),
             Bytes::from_static(&[1, 2, 3])
         );
     }

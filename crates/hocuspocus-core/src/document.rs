@@ -50,6 +50,9 @@ pub enum DocMessage {
         /// Raw routing key the connection used; replies echo it verbatim.
         raw_address: Arc<str>,
         read_only: bool,
+        /// Auth context of this connection; flows into stateless/change/
+        /// store payloads it causes.
+        context: Arc<crate::storage::ContextData>,
         reply: oneshot::Sender<Result<(), BoxError>>,
     },
     Leave {
