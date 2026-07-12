@@ -142,6 +142,7 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
     let app = Router::new()
         .route("/healthz", get(|| async { "ok" }))
         .route("/control/stats", get(control_stats))
+        .route("/metrics", get(metrics))
         .route(
             "/control/close-connections",
             post(control_close_connections),
@@ -200,6 +201,25 @@ async fn root_or_upgrade(
             .on_upgrade(move |socket| hocuspocus_axum::serve_socket(state.engine.clone(), socket)),
         Err(_) => hocuspocus_axum::WELCOME_MESSAGE.into_response(),
     }
+}
+
+/// Prometheus text exposition of the engine gauges.
+async fn metrics(State(state): State<AppState>) -> ([(&'static str, &'static str); 1], String) {
+    let body = format!(
+        "# HELP hocuspocus_connections Established document connections.\n\
+         # TYPE hocuspocus_connections gauge\n\
+         hocuspocus_connections {}\n\
+         # HELP hocuspocus_sockets Open WebSocket connections.\n\
+         # TYPE hocuspocus_sockets gauge\n\
+         hocuspocus_sockets {}\n\
+         # HELP hocuspocus_documents Documents loaded in memory.\n\
+         # TYPE hocuspocus_documents gauge\n\
+         hocuspocus_documents {}\n",
+        state.engine.connections_count(),
+        state.engine.sockets_count(),
+        state.engine.documents_count().await,
+    );
+    ([("Content-Type", "text/plain; version=0.0.4")], body)
 }
 
 async fn control_stats(State(state): State<AppState>) -> axum::Json<serde_json::Value> {
