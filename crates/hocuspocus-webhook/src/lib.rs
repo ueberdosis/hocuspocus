@@ -364,6 +364,24 @@ impl hocuspocus_core::EventHooks for WebhookEvents {
         }
     }
 
+    async fn change(&self, document_name: &str, update: &[u8]) {
+        if !self.events.contains(&Event::Change) {
+            return;
+        }
+        use base64::Engine;
+        let encoded = base64::engine::general_purpose::STANDARD.encode(update);
+        let body = match serde_json::to_vec(&serde_json::json!({
+            "event": Event::Change.as_str(),
+            "payload": { "documentName": document_name, "update": encoded },
+        })) {
+            Ok(body) => body,
+            Err(_) => return,
+        };
+        if let Err(error) = self.post_body(body).await {
+            tracing::warn!(%error, "change webhook failed");
+        }
+    }
+
     async fn stateless(&self, document_name: &str, payload: &str) -> Option<String> {
         if !self.events.contains(&Event::Stateless) {
             return None;

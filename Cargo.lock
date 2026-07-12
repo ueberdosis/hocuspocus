@@ -920,6 +920,7 @@ name = "hocuspocus-webhook"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "base64",
  "bytes",
  "hmac",
  "hocuspocus-core",

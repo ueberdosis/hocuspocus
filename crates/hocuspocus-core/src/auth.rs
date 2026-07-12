@@ -46,6 +46,11 @@ pub trait EventHooks: Send + Sync + 'static {
     async fn disconnect(&self, document_name: &str) {
         let _ = document_name;
     }
+    /// The document changed (fired on the debounced store cadence). The
+    /// update is the incremental yjs diff since the previous change event.
+    async fn change(&self, document_name: &str, update: &[u8]) {
+        let _ = (document_name, update);
+    }
     /// A client sent a Stateless message (TS `onStateless`). The returned
     /// payload, if any, is sent back to the originating connection (the
     /// hook's `connection.sendStateless(...)`).

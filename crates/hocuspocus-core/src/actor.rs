@@ -66,6 +66,9 @@ struct DocumentActor {
     doc_connections: Arc<std::sync::atomic::AtomicUsize>,
     /// The last subscriber left; unload once the final store succeeds.
     pending_unload: bool,
+    /// State vector at the previous change event; the next event carries
+    /// the diff from here.
+    last_change_event_sv: Option<StateVector>,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
@@ -108,6 +111,7 @@ pub(crate) async fn spawn(
         relay: None,
         doc_connections,
         pending_unload: false,
+        last_change_event_sv: None,
     };
 
     tokio::spawn(async move {
@@ -568,6 +572,21 @@ impl DocumentActor {
             return true;
         }
         self.dirty = None;
+
+        // Change event: the incremental diff since the previous event, on
+        // the same debounced cadence as the store (webhook extension
+        // parity). Redis-origin changes never mark dirty, so relayed
+        // updates don't re-fire on the receiving instance.
+        let (diff, current_sv) = {
+            let txn = self.doc.transact();
+            let since = self.last_change_event_sv.clone().unwrap_or_default();
+            (txn.encode_state_as_update_v1(&since), txn.state_vector())
+        };
+        if diff != EMPTY_UPDATE_V1 {
+            self.events.change(&self.name, &diff).await;
+        }
+        self.last_change_event_sv = Some(current_sv);
+
         let Some(storage) = &self.storage else {
             return true;
         };

@@ -108,6 +108,7 @@ async fn main() -> Result<(), hocuspocus_core::BoxError> {
                 let events = events
                     .split(',')
                     .filter_map(|event| match event.trim() {
+                        "change" => Some(hocuspocus_webhook::Event::Change),
                         "connect" => Some(hocuspocus_webhook::Event::Connect),
                         "disconnect" => Some(hocuspocus_webhook::Event::Disconnect),
                         "stateless" => Some(hocuspocus_webhook::Event::Stateless),
