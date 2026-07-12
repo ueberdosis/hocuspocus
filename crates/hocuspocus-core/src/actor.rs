@@ -124,7 +124,8 @@ pub(crate) async fn spawn(
 
     tokio::spawn(async move {
         loop {
-            let message = match actor.store_deadline() {
+            // `None` = the store debounce timer fired (no mailbox message).
+            let received = match actor.store_deadline() {
                 Some(deadline) => {
                     match tokio::time::timeout_at(
                         tokio::time::Instant::from_std(deadline),
@@ -132,24 +133,35 @@ pub(crate) async fn spawn(
                     )
                     .await
                     {
-                        Ok(message) => message,
+                        Ok(message) => Some(message),
                         Err(_elapsed) => {
                             let _ = actor.store_now().await;
-                            continue;
+                            None
                         }
                     }
                 }
-                None => rx.recv().await,
+                None => Some(rx.recv().await),
             };
-            let Some(message) = message else { break };
-            if actor.handle(message).await {
-                actor.pending_unload = true;
+            if let Some(received) = received {
+                let Some(message) = received else { break };
+                if actor.handle(message).await {
+                    actor.pending_unload = true;
+                }
             }
+            // TS `unloadImmediately: false`: a pending debounced store keeps
+            // its natural deadline after the last disconnect — the timer arm
+            // above stores, then this check unloads. `true` flushes at once.
+            let store_deferred =
+                !actor.config.unload_immediately && actor.store_deadline().is_some();
             // Unload only once the final store succeeded: a failed store
             // keeps the document in memory (TS keeps documents loaded when
             // onStoreDocument throws, so no data is lost) and the debounce
             // timer retries.
-            if actor.pending_unload && actor.subscribers.is_empty() && actor.store_now().await {
+            if actor.pending_unload
+                && actor.subscribers.is_empty()
+                && !store_deferred
+                && actor.store_now().await
+            {
                 // Deregister and drop any queued messages. Join replies
                 // error out (dropped channel) and the engine retries
                 // against a freshly loaded actor.

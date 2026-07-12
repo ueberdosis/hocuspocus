@@ -34,3 +34,20 @@ pub use storage::Storage;
 
 /// Boxed error type used across hook and storage boundaries.
 pub type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+/// A hook/storage error carrying a client-visible denial reason (the TS
+/// `error.reason` contract): the reason is sent verbatim in the
+/// `PermissionDenied` auth message. Errors of any other type surface to
+/// clients as the generic `"permission-denied"`.
+#[derive(Debug)]
+pub struct Refused {
+    pub reason: String,
+}
+
+impl std::fmt::Display for Refused {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.reason)
+    }
+}
+
+impl std::error::Error for Refused {}

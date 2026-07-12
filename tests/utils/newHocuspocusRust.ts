@@ -108,7 +108,9 @@ export const newHocuspocusRust = async (
 							context: headerContext,
 							instance: undefined,
 						} as never);
-						const state = Y.encodeStateAsUpdate((returned as InstanceType<typeof Y.Doc>) ?? document);
+						// TS only adopts the return value when it is a Y.Doc;
+						// anything else (true, undefined, …) keeps `document`.
+						const state = Y.encodeStateAsUpdate(returned instanceof Y.Doc ? returned : document);
 						response.writeHead(200, { "Content-Type": "application/octet-stream" });
 						response.end(Buffer.from(state));
 						return;
@@ -199,8 +201,15 @@ export const newHocuspocusRust = async (
 						}),
 					);
 				} catch (error) {
+					// TS contract: only an explicit `reason` property reaches
+					// the client (`error.reason ?? 'permission-denied'`) —
+					// plain Error messages do not leak.
 					response.writeHead(403, { "Content-Type": "application/json" });
-					response.end(JSON.stringify({ reason: (error as Error).message || "permission-denied" }));
+					response.end(
+						JSON.stringify({
+							reason: (error as { reason?: string })?.reason ?? "permission-denied",
+						}),
+					);
 				}
 			});
 		});
@@ -230,9 +239,18 @@ export const newHocuspocusRust = async (
 		if (options?.onLoadDocument || options?.onStoreDocument) env.HOCUSPOCUS_STORAGE__BACKEND = "webhook";
 	}
 
+	// stderr must NOT be "inherit": the child would hold the ava worker's
+	// stderr pipe, and if the worker crashes without running teardowns the
+	// orphaned server keeps that pipe open forever — ava's main process
+	// waits for its EOF and the whole run hangs after the summary. Set
+	// HOCUSPOCUS_RUST_STDERR=inherit locally when server logs are needed.
 	const child = spawn(binary, [], {
 		env,
-		stdio: ["ignore", "pipe", "inherit"],
+		stdio: [
+			"ignore",
+			"pipe",
+			process.env.HOCUSPOCUS_RUST_STDERR === "inherit" ? "inherit" : "ignore",
+		],
 	});
 
 	const readyLine: string = await new Promise((resolve, reject) => {
@@ -253,10 +271,27 @@ export const newHocuspocusRust = async (
 		child.kill("SIGKILL");
 	});
 
-	const controlStats = async () => {
-		const response = await fetch(`http://${baseURL}/control/stats`);
-		return (await response.json()) as { connections: number; documents: number };
-	};
+	// Plain node:http with no agent: fetch()'s global undici dispatcher
+	// keeps ref'd keep-alive sockets in its pool, and a 50 ms poller
+	// re-establishes them forever — one more way a crashed worker (skipped
+	// teardowns) can never drain its event loop. agent:false gives one
+	// unref'd, non-pooled socket per request instead.
+	const controlStats = () =>
+		new Promise<{ connections: number; documents: number }>((resolve, reject) => {
+			const request = http.get(`http://${baseURL}/control/stats`, { agent: false }, (response) => {
+				const chunks: Buffer[] = [];
+				response.on("data", (chunk) => chunks.push(chunk));
+				response.on("end", () => {
+					try {
+						resolve(JSON.parse(Buffer.concat(chunks).toString()));
+					} catch (error) {
+						reject(error);
+					}
+				});
+			});
+			request.on("socket", (socket) => socket.unref());
+			request.on("error", reject);
+		});
 
 	// Sync getConnectionsCount()/getDocumentsCount() are backed by a stats
 	// poller — tests only read them inside retryable assertions, so eventual
@@ -290,8 +325,12 @@ export const newHocuspocusRust = async (
 			await fetch(`http://${baseURL}/control/close-connections`, { method: "POST" });
 		},
 		// server.documents.get(name)?.broadcastStateless(payload) — via the
-		// control API instead of the in-process map.
+		// control API instead of the in-process map. `size` is backed by
+		// the stats poller, like getDocumentsCount().
 		documents: {
+			get size() {
+				return stats.documents;
+			},
 			get: (documentName: string) => ({
 				broadcastStateless: (payload: string) =>
 					fetch(`http://${baseURL}/control/broadcast-stateless`, {

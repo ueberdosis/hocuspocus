@@ -250,7 +250,20 @@ impl hocuspocus_core::Storage for WebhookStorage {
         match response.status() {
             reqwest::StatusCode::NOT_FOUND => Ok(None),
             status if status.is_success() => Ok(Some(response.bytes().await?)),
-            status => Err(format!("webhook fetch failed: {status}").into()),
+            status => {
+                // An explicit `reason` in the failure body becomes the
+                // client-visible PermissionDenied reason (TS `error.reason`).
+                #[derive(serde::Deserialize, Default)]
+                struct Denied {
+                    #[serde(default)]
+                    reason: Option<String>,
+                }
+                let denied: Denied = response.json().await.unwrap_or_default();
+                match denied.reason {
+                    Some(reason) => Err(Box::new(hocuspocus_core::Refused { reason })),
+                    None => Err(format!("webhook fetch failed: {status}").into()),
+                }
+            }
         }
     }
 

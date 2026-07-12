@@ -39,11 +39,35 @@
 		"tests/server/websocketError.ts": "in-process socket fault injection",
 		"tests/server/broadcastStatelessBypass.ts": "beforeBroadcastStateless hook (rust-native equivalent)",
 		"tests/server/* (rest)": "in-process hooks/APIs (before*/after*, onConfigure/onListen/onDestroy/onRequest/onUpgrade, openDirectConnection, destroy, get*Count) - rust-native equivalents",
-		"tests/server/onConnect.ts": "one test iterates in-process document.getConnections() in onSynced (uncaught TypeError hangs the ava worker); 17 wire tests otherwise pass",
-		"tests/server/onLoadDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/onStoreDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth"
+		"tests/server/onConnect.ts": "one test iterates in-process document.getConnections() in onSynced (uncaught TypeError hangs the ava worker); 17 wire tests otherwise pass"
 	},
 	"partial": {
+		"tests/server/onLoadDocument.ts": {
+			"exclude": [
+				"executes the onLoadDocument callback from an extension",
+				"passes the context and connection to the onLoadDocument callback",
+				"sets the provider to readOnly",
+				"has the server instance",
+				"multiple simultaneous connections do not create multiple documents",
+				"if a new connection connects while the previous connection still fetches*"
+			],
+			"reason": "extension instances, in-process introspection (documents.size sampled without retry outraces the shim's stats poller), and one test counting Node's exact ACK cadence excluded via --match; wire tests run"
+		},
+		"tests/server/onStoreDocument.ts": {
+			"exclude": [
+				"debounces document changes for onStoreDocument hooks",
+				"executes onStoreDocument callback from an extension",
+				"stops when one of the onStoreDocument hooks throws an error",
+				"stops when one of the onStoreDocument hooks throws a non-Error value",
+				"has the server instance",
+				"runs hooks in the given order",
+				"allows to overwrite the order of extension with a priority",
+				"triggers unload only after finishing with a save in progress",
+				"does not trigger unload prematurely when a save is in progress*",
+				"Does not unload prematurely when a debounced save is pending*"
+			],
+			"reason": "extension instances and in-process APIs (destroy, afterUnloadDocument, onChange) excluded via --match; wire tests run"
+		},
 		"tests/server/onAuthenticate.ts": {
 			"exclude": [
 				"executes the onAuthenticate callback from a custom extension",

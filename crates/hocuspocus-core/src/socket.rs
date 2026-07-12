@@ -388,11 +388,15 @@ impl SocketTask {
                 Err(error) => {
                     // TS: a failed onLoadDocument sends PermissionDenied and
                     // resets the per-document state; the socket stays open.
+                    // Only an explicit `Refused` reason reaches the client
+                    // (TS `error.reason ?? 'permission-denied'`).
                     tracing::warn!(conn = self.conn_id, %error, "document load failed");
-                    let frame =
-                        MessageBuilder::new(&raw_address).auth(&AuthOutbound::PermissionDenied {
-                            reason: "permission-denied".to_owned(),
-                        });
+                    let reason = error
+                        .downcast_ref::<crate::Refused>()
+                        .map(|refused| refused.reason.clone())
+                        .unwrap_or_else(|| "permission-denied".to_owned());
+                    let frame = MessageBuilder::new(&raw_address)
+                        .auth(&AuthOutbound::PermissionDenied { reason });
                     let _ = self.outbound.send(Outbound::Frame(frame)).await;
                     return ControlFlow::Continue(());
                 }
