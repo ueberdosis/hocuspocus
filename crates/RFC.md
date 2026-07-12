@@ -390,6 +390,26 @@ Beyond the ported suite:
    machine seeded with the fixture corpus; property-test the hocuspocus
    framing layer (yrs↔yjs CRDT encoding is covered upstream in y-crdt).
 
+## 11.5 Measured: the main-thread coupling, eliminated
+
+`tests/conformance/bench-latency.mts` measures the failure mode that
+motivated this rewrite: edit-propagation latency on a small document while
+peer processes hammer a LARGE document (8 M chars) with fresh initial
+syncs — each forcing a full-state encode server-side.
+
+| probe latency (separate small doc) | Node server | Rust server |
+|---|---|---|
+| baseline p50 / p99 | 2 ms / 4 ms | 1 ms / 2 ms |
+| under sync-storm p50 | **33 ms** | **1 ms** |
+| under sync-storm p95 | 97 ms | 8 ms |
+| under sync-storm p99 | 116 ms | 12 ms |
+| big-doc syncs served (12 s) | 368 | **648 (+76 %)** |
+
+(16-core container, release build, 4 loader processes × 2 connections.)
+Node's single thread couples every document to the busiest one; the
+per-document actors do not — the probe's median latency is unchanged under
+load while the Rust server also serves 76 % more initial syncs.
+
 ## 12. Migration & rollout
 
 - **Distribution:** npm (`@hocuspocus/server-rust` shim +
