@@ -178,6 +178,7 @@ export const newHocuspocusRust = async (
 					const context = await options.onAuthenticate({
 						token: payload.token,
 						documentName: payload.documentName,
+						providerVersion: payload.providerVersion,
 						connectionConfig,
 						connection: connectionConfig,
 						context: {},
@@ -234,6 +235,20 @@ export const newHocuspocusRust = async (
 		return (await response.json()) as { connections: number; documents: number };
 	};
 
+	// Sync getConnectionsCount()/getDocumentsCount() are backed by a stats
+	// poller — tests only read them inside retryable assertions, so eventual
+	// consistency is sufficient.
+	let stats = { connections: 0, documents: 0 };
+	const poller = setInterval(async () => {
+		try {
+			stats = await controlStats();
+		} catch {
+			// server may be shutting down between polls
+		}
+	}, 50);
+	(poller as { unref?: () => void }).unref?.();
+	t.teardown(() => clearInterval(poller));
+
 	// The shim: everything the Tier-1 tests and the provider utils touch.
 	const shim = {
 		server: {
@@ -256,9 +271,9 @@ export const newHocuspocusRust = async (
 					}),
 			}),
 		},
-		// Async variants for rust-aware tests; the sync TS-native
-		// getConnectionsCount()/getDocumentsCount() cannot be shimmed.
 		controlStats,
+		getConnectionsCount: () => stats.connections,
+		getDocumentsCount: () => stats.documents,
 	};
 
 	return shim as unknown as Hocuspocus;

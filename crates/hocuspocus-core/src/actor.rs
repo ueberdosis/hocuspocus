@@ -62,6 +62,8 @@ struct DocumentActor {
     /// Raw wire frames sent here are published to the document's pub/sub
     /// channel (identifier framing added by the relay task).
     relay: Option<mpsc::Sender<Bytes>>,
+    /// Engine-wide established-connection counter (TS getConnectionsCount).
+    doc_connections: Arc<std::sync::atomic::AtomicUsize>,
 }
 
 /// Spawns the actor: loads persisted state, then processes its mailbox.
@@ -72,6 +74,7 @@ pub(crate) async fn spawn(
     storage: Option<Arc<dyn Storage>>,
     events: Arc<dyn crate::auth::EventHooks>,
     scaler: Option<Arc<dyn crate::auth::Scaler>>,
+    doc_connections: Arc<std::sync::atomic::AtomicUsize>,
     on_unload: Box<dyn FnOnce(&str) + Send>,
 ) -> Result<mpsc::Sender<DocMessage>, crate::BoxError> {
     let doc = yrs::Doc::with_options(yrs::Options {
@@ -101,6 +104,7 @@ pub(crate) async fn spawn(
         events,
         scaler,
         relay: None,
+        doc_connections,
     };
 
     tokio::spawn(async move {
@@ -164,11 +168,15 @@ impl DocumentActor {
                     send_awareness_to(&subscriber, &awareness);
                 }
                 self.subscribers.insert(conn_id, subscriber);
+                self.doc_connections
+                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 let _ = reply.send(Ok(()));
                 false
             }
             DocMessage::Leave { conn_id } => {
                 if let Some(subscriber) = self.subscribers.remove(&conn_id) {
+                    self.doc_connections
+                        .fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
                     let removal = self.awareness.remove_clients(subscriber.client_ids);
                     self.broadcast_awareness(&removal);
                 }

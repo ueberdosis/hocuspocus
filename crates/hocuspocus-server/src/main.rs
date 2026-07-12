@@ -191,6 +191,7 @@ async fn root_or_upgrade(
 async fn control_stats(State(state): State<AppState>) -> axum::Json<serde_json::Value> {
     axum::Json(serde_json::json!({
         "connections": state.engine.connections_count(),
+        "sockets": state.engine.sockets_count(),
         "documents": state.engine.documents_count().await,
     }))
 }

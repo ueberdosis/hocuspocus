@@ -40,12 +40,48 @@
 		"tests/server/broadcastStatelessBypass.ts": "beforeBroadcastStateless hook (rust-native equivalent)",
 		"tests/server/* (rest)": "in-process hooks/APIs (before*/after*, onConfigure/onListen/onDestroy/onRequest/onUpgrade, openDirectConnection, destroy, get*Count) - rust-native equivalents",
 		"tests/server/onConnect.ts": "one test iterates in-process document.getConnections() in onSynced (uncaught TypeError hangs the ava worker); 17 wire tests otherwise pass",
-		"tests/server/onAuthenticate.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/onDisconnect.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
 		"tests/server/onLoadDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/onStateless.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/onStoreDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/providerVersion.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth",
-		"tests/server/sessionAwareness.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth"
+		"tests/server/onStoreDocument.ts": "mixes wire tests (pass) with in-process API tests (extension instances, server.documents/getConnections, context introspection) that hang the ava worker; needs per-test skip granularity or control-API growth"
+	},
+	"partial": {
+		"tests/server/onAuthenticate.ts": {
+			"exclude": [
+				"executes the onAuthenticate callback from a custom extension",
+				"passes context from onAuthenticate to onLoadDocument",
+				"onAuthenticate wrong auth only disconnects*",
+				"onAuthenticate readonly auth only affects*"
+			],
+			"reason": "in-process API tests excluded via --match; wire tests run"
+		},
+		"tests/server/onDisconnect.ts": {
+			"exclude": [
+				"executes the onDisconnect callback from an extension",
+				"passes the context to the onLoadDocument callback",
+				"has the server instance"
+			],
+			"reason": "in-process API tests excluded via --match; wire tests run"
+		},
+		"tests/server/onStateless.ts": {
+			"exclude": [
+				"broadcast stateless message to all connections",
+				"calls the onStateless hook"
+			],
+			"reason": "in-process API tests excluded via --match; wire tests run"
+		},
+		"tests/server/providerVersion.ts": {
+			"exclude": [
+				"onConnect receives providerVersion",
+				"connected receives providerVersion*"
+			],
+			"reason": "in-process API tests excluded via --match; wire tests run"
+		},
+		"tests/server/sessionAwareness.ts": {
+			"exclude": [
+				"sessionAwareness: auth failure isolation*",
+				"sessionAwareness: connection has correct sessionId",
+				"sessionAwareness: connection has correct providerVersion"
+			],
+			"reason": "in-process API tests excluded via --match; wire tests run"
+		}
 	}
 }

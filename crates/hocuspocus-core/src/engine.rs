@@ -41,6 +41,10 @@ pub(crate) struct EngineInner {
     docs: tokio::sync::Mutex<HashMap<Arc<str>, DocHandle>>,
     sockets: StdMutex<HashMap<ConnId, mpsc::Sender<Outbound>>>,
     next_conn_id: AtomicU64,
+    /// Established document connections across all documents — the TS
+    /// `getConnectionsCount()` semantic (a socket with a failed auth holds
+    /// no document connection and counts zero).
+    pub(crate) doc_connections: Arc<std::sync::atomic::AtomicUsize>,
     weak_self: StdMutex<Weak<EngineInner>>,
 }
 
@@ -85,6 +89,7 @@ impl Engine {
             docs: tokio::sync::Mutex::new(HashMap::new()),
             sockets: StdMutex::new(HashMap::new()),
             next_conn_id: AtomicU64::new(1),
+            doc_connections: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
             weak_self: StdMutex::new(Weak::new()),
         });
         *inner.weak_self.lock().expect("weak_self poisoned") = Arc::downgrade(&inner);
@@ -112,8 +117,15 @@ impl Engine {
         }
     }
 
-    /// Currently open sockets.
+    /// Established document connections (TS `getConnectionsCount()`).
     pub fn connections_count(&self) -> usize {
+        self.inner
+            .doc_connections
+            .load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    /// Currently open sockets (any auth state).
+    pub fn sockets_count(&self) -> usize {
         self.inner.sockets.lock().expect("sockets poisoned").len()
     }
 
@@ -206,6 +218,7 @@ impl EngineInner {
             self.storage.clone(),
             self.events.clone(),
             self.scaler.clone(),
+            self.doc_connections.clone(),
             on_unload,
         )
         .await?;
