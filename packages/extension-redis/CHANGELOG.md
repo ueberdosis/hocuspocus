@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
+
+
+### Features
+
+* add consistent state synchronization across Redis instances ([#1119](https://github.com/ueberdosis/hocuspocus/issues/1119)) ([0051a6c](https://github.com/ueberdosis/hocuspocus/commit/0051a6cb7618290d1f574da7ad61da2be77f839d))
+
+
+
+
+
 # [4.3.0](https://github.com/ueberdosis/hocuspocus/compare/v4.2.0...v4.3.0) (2026-06-18)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

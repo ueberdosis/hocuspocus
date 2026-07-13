@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
+
+
+### Features
+
+* add `flushDelay` option for batching updates to reduce websocket traffic during heavy editing ([#1118](https://github.com/ueberdosis/hocuspocus/issues/1118)) ([75594c0](https://github.com/ueberdosis/hocuspocus/commit/75594c05d57d48f2f70d4c9440c28b8226bf95ac))
+
+
+
+
+
 # [4.3.0](https://github.com/ueberdosis/hocuspocus/compare/v4.2.0...v4.3.0) (2026-06-18)
 
 **Note:** Version bump only for package @hocuspocus/provider-react

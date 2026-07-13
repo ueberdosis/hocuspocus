@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* allow binding the server to a specific address ([#1121](https://github.com/ueberdosis/hocuspocus/issues/1121)) ([408127b](https://github.com/ueberdosis/hocuspocus/commit/408127b1c090356cc9148a801f314a8e6f863b09))
+
+
+### Features
+
+* add `flushDelay` option for batching updates to reduce websocket traffic during heavy editing ([#1118](https://github.com/ueberdosis/hocuspocus/issues/1118)) ([75594c0](https://github.com/ueberdosis/hocuspocus/commit/75594c05d57d48f2f70d4c9440c28b8226bf95ac))
+* add consistent state synchronization across Redis instances ([#1119](https://github.com/ueberdosis/hocuspocus/issues/1119)) ([0051a6c](https://github.com/ueberdosis/hocuspocus/commit/0051a6cb7618290d1f574da7ad61da2be77f839d))
+
+
+
+
+
 # [4.3.0](https://github.com/ueberdosis/hocuspocus/compare/v4.2.0...v4.3.0) (2026-06-18)
 
 
