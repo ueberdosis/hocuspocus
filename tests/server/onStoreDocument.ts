@@ -234,30 +234,51 @@ test("stops when one of the onStoreDocument hooks throws a non-Error value", asy
 });
 
 test("keeps document in memory when onStoreDocument fails", async (t) => {
-	await new Promise(async (resolve) => {
-		const server = await newHocuspocus(t, {
-			debounce: 100,
-			async onStoreDocument() {
-				throw new Error("storage unavailable");
-			},
-		});
-
-		const socket = newHocuspocusProviderWebsocket(t, server);
-
-		const provider = newHocuspocusProvider(t, server, {
-			websocketProvider: socket,
-			onSynced() {
-				provider.document.getArray("foo").push(["bar"]);
-				socket.destroy();
-
-				setTimeout(() => {
-					// Document must remain in memory since the store failed
-					t.is(server.getDocumentsCount(), 1);
-					resolve("done");
-				}, 500);
-			},
-		});
+	let resolveProviderSynced!: () => void;
+	const providerSynced = new Promise<void>((resolve) => {
+		resolveProviderSynced = resolve;
 	});
+	let resolveDocumentChanged!: () => void;
+	const documentChanged = new Promise<void>((resolve) => {
+		resolveDocumentChanged = resolve;
+	});
+	let resolveStoreStarted!: () => void;
+	const storeStarted = new Promise<void>((resolve) => {
+		resolveStoreStarted = resolve;
+	});
+	const server = await newHocuspocus(t, {
+		debounce: 100,
+		onChange() {
+			resolveDocumentChanged();
+		},
+		async onStoreDocument() {
+			resolveStoreStarted();
+			throw new Error("storage unavailable");
+		},
+	});
+
+	const socket = newHocuspocusProviderWebsocket(t, server);
+	const provider = newHocuspocusProvider(t, server, {
+		websocketProvider: socket,
+		onSynced() {
+			resolveProviderSynced();
+		},
+	});
+
+	await providerSynced;
+	provider.document.getArray("foo").push(["bar"]);
+	await documentChanged;
+	socket.destroy();
+	await storeStarted;
+
+	const document = server.documents.get("hocuspocus-test");
+	if (!document) {
+		throw new Error("Expected the document to remain loaded while storing");
+	}
+	await document.saveMutex.waitForUnlock();
+
+	// Document must remain in memory since the store failed.
+	t.is(server.getDocumentsCount(), 1);
 });
 
 test("has the server instance", async (t) => {

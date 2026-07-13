@@ -73,47 +73,61 @@ test("direct connection works even if provider is connected", async (t) => {
 });
 
 test("direct connection can apply yjsUpdate", async (t) => {
-	await new Promise(async (resolve) => {
-		const server = await newHocuspocus(t);
-
-		const provider = newHocuspocusProvider(t, server);
-
-		t.is("", provider.document.getXmlFragment("default").toJSON());
-
-		const directConnection =
-			await server.openDirectConnection("hocuspocus-test");
-		await directConnection.transact((doc) => {
-			Y.applyUpdate(
-				doc,
-				Y.encodeStateAsUpdate(
-					TiptapTransformer.toYdoc({
-						type: "doc",
-						content: [
-							{
-								type: "paragraph",
-								content: [
-									{
-										type: "text",
-										text: "Example Paragraph",
-									},
-								],
-							},
-						],
-					}),
-				),
-			);
-		});
-
-		await sleep(100);
-
-		t.is(
-			"<paragraph>Example Paragraph</paragraph>",
-			provider.document.getXmlFragment("default").toJSON(),
-		);
-
-		resolve(1);
-		t.pass();
+	const server = await newHocuspocus(t);
+	const expectedContent = "<paragraph>Example Paragraph</paragraph>";
+	let resolveProviderSynced!: () => void;
+	const providerSynced = new Promise<void>((resolve) => {
+		resolveProviderSynced = resolve;
 	});
+	const provider = newHocuspocusProvider(t, server, {
+		onSynced() {
+			resolveProviderSynced();
+		},
+	});
+
+	await providerSynced;
+	const fragment = provider.document.getXmlFragment("default");
+	t.is(fragment.toJSON(), "");
+
+	let resolveUpdateApplied!: () => void;
+	const updateApplied = new Promise<void>((resolve) => {
+		resolveUpdateApplied = resolve;
+	});
+	const observer = () => {
+		if (fragment.toJSON() === expectedContent) {
+			fragment.unobserveDeep(observer);
+			resolveUpdateApplied();
+		}
+	};
+	fragment.observeDeep(observer);
+
+	const directConnection =
+		await server.openDirectConnection("hocuspocus-test");
+	await directConnection.transact((doc) => {
+		Y.applyUpdate(
+			doc,
+			Y.encodeStateAsUpdate(
+				TiptapTransformer.toYdoc({
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: "Example Paragraph",
+								},
+							],
+						},
+					],
+				}),
+			),
+		);
+	});
+
+	await updateApplied;
+	t.is(fragment.toJSON(), expectedContent);
+	await directConnection.disconnect();
 });
 
 test("direct connection can transact", async (t) => {
