@@ -99,52 +99,90 @@ test("client stateless messages shouldnt propagate to other server", async (t) =
 });
 
 test("server client stateless messages shouldnt propagate to other client", async (t) => {
-	await new Promise(async (resolve) => {
-		const redisPrefix = crypto.randomUUID();
+	const redisPrefix = crypto.randomUUID();
+	const response = "test123";
+	const barrier = "redis-barrier";
+	const remotePayloads: string[] = [];
 
-		const server = await newHocuspocus(t, {
-			extensions: [
-				new Redis({
-					...redisConnectionSettings,
-					identifier: `server${crypto.randomUUID()}`,
-					prefix: redisPrefix,
-				}),
-			],
-			async onStateless({ connection, document }) {
-				connection.sendStateless("test123");
-			},
-		});
-
-		const anotherServer = await newHocuspocus(t, {
-			extensions: [
-				new Redis({
-					...redisConnectionSettings,
-					identifier: `anotherServer${crypto.randomUUID()}`,
-					prefix: redisPrefix,
-				}),
-			],
-			async onStateless() {
-				t.fail();
-			},
-		});
-
-		const provider2 = newHocuspocusProvider(t, anotherServer, {
-			onStateless() {
-				t.fail();
-			},
-		});
-
-		const provider = newHocuspocusProvider(t, server, {
-			onSynced() {
-				provider.sendStateless("ok");
-			},
-			onStateless() {
-				t.pass();
-			},
-		});
-
-		setTimeout(() => {
-			resolve("done");
-		}, 500);
+	let resolveResponse: () => void;
+	const responseReceived = new Promise<void>((resolve) => {
+		resolveResponse = resolve;
 	});
+	let resolveRemoteSynced: () => void;
+	const remoteSynced = new Promise<void>((resolve) => {
+		resolveRemoteSynced = resolve;
+	});
+	let resolveRemoteBarrier: () => void;
+	const remoteBarrierReceived = new Promise<void>((resolve) => {
+		resolveRemoteBarrier = resolve;
+	});
+	let resolveSenderSynced: () => void;
+	const senderSynced = new Promise<void>((resolve) => {
+		resolveSenderSynced = resolve;
+	});
+
+	const server = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `server${crypto.randomUUID()}`,
+				prefix: redisPrefix,
+			}),
+		],
+		async onStateless({ connection }) {
+			connection.sendStateless(response);
+		},
+	});
+
+	const anotherServer = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `anotherServer${crypto.randomUUID()}`,
+				prefix: redisPrefix,
+			}),
+		],
+		async onStateless() {
+			t.fail();
+		},
+	});
+
+	newHocuspocusProvider(t, anotherServer, {
+		onSynced() {
+			resolveRemoteSynced();
+		},
+		onStateless({ payload }) {
+			if (payload === barrier) {
+				resolveRemoteBarrier();
+				return;
+			}
+			remotePayloads.push(payload);
+		},
+	});
+
+	const provider = newHocuspocusProvider(t, server, {
+		onSynced() {
+			resolveSenderSynced();
+		},
+		onStateless({ payload }) {
+			if (payload === response) {
+				resolveResponse();
+			}
+		},
+	});
+
+	await Promise.all([remoteSynced, senderSynced]);
+	provider.sendStateless("ok");
+	await responseReceived;
+
+	const document = server.documents.get("hocuspocus-test");
+	if (!document) {
+		throw new Error("Expected the document to be loaded");
+	}
+	// Redis preserves publish order, so receiving this broadcast proves any
+	// accidental propagation of the earlier response has already arrived.
+	document.broadcastStateless(barrier);
+	await remoteBarrierReceived;
+
+	t.deepEqual(remotePayloads, []);
 });
