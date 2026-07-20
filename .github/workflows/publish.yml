@@ -20,7 +20,7 @@ jobs:
 
       - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
