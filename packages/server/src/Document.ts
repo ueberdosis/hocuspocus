@@ -4,15 +4,15 @@ import {
 	applyAwarenessUpdate,
 	removeAwarenessStates,
 } from "y-protocols/awareness";
-import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
+import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
-import { isTransactionOrigin } from "./types.ts";
 import type {
 	AwarenessUpdate,
 	ConnectionTransactionOrigin,
 	TransactionOrigin,
 } from "./types.ts";
+import { isTransactionOrigin } from "./types.ts";
 
 export class Document extends Doc {
 	awareness: Awareness;
@@ -151,11 +151,7 @@ export class Document extends Doc {
 	removeConnection(connection: Connection): Document {
 		const entry = this.connections.get(connection);
 		if (entry) {
-			removeAwarenessStates(
-				this.awareness,
-				Array.from(entry.clients),
-				null,
-			);
+			removeAwarenessStates(this.awareness, Array.from(entry.clients), null);
 		}
 
 		this.connections.delete(connection);
@@ -221,6 +217,17 @@ export class Document extends Doc {
 
 	/**
 	 * Handle an awareness update and sync changes to clients
+	 *
+	 * Connections that share a message address receive byte-identical payloads,
+	 * so consecutive connections with the same address reuse one buffer instead
+	 * of re-encoding per connection. With session awareness disabled (the
+	 * default) every connection on a document shares the plain document name,
+	 * which collapses the whole broadcast to a single encode.
+	 *
+	 * A one-entry cache rather than a Map keyed by address: it makes the common
+	 * cases optimal (all addresses equal, or all distinct) at no cost, and only
+	 * gives up dedup when addresses interleave, where it still matches the
+	 * previous encode-per-connection behaviour.
 	 * @private
 	 */
 	private handleAwarenessUpdate(
@@ -243,12 +250,20 @@ export class Document extends Doc {
 			}
 		}
 
-		for (const connection of this.getConnections()) {
-			const awarenessMessage = new OutgoingMessage(
-				connection.messageAddress,
-			).createAwarenessUpdateMessage(this.awareness, changedClients);
+		let cachedAddress: string | undefined;
+		let cachedMessage: Uint8Array | undefined;
 
-			connection.send(awarenessMessage.toUint8Array());
+		for (const connection of this.getConnections()) {
+			const address = connection.messageAddress;
+
+			if (cachedMessage === undefined || address !== cachedAddress) {
+				cachedAddress = address;
+				cachedMessage = new OutgoingMessage(address)
+					.createAwarenessUpdateMessage(this.awareness, changedClients)
+					.toUint8Array();
+			}
+
+			connection.send(cachedMessage);
 		}
 
 		return this;
@@ -260,12 +275,21 @@ export class Document extends Doc {
 	private handleUpdate(update: Uint8Array, origin: unknown): Document {
 		this.callbacks.onUpdate(this, origin, update);
 
-		for (const connection of this.getConnections()) {
-			const message = new OutgoingMessage(connection.messageAddress)
-				.createSyncMessage()
-				.writeUpdate(update);
+		let cachedAddress: string | undefined;
+		let cachedMessage: Uint8Array | undefined;
 
-			connection.send(message.toUint8Array());
+		for (const connection of this.getConnections()) {
+			const address = connection.messageAddress;
+
+			if (cachedMessage === undefined || address !== cachedAddress) {
+				cachedAddress = address;
+				cachedMessage = new OutgoingMessage(address)
+					.createSyncMessage()
+					.writeUpdate(update)
+					.toUint8Array();
+			}
+
+			connection.send(cachedMessage);
 		}
 
 		return this;
