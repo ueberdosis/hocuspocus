@@ -4,7 +4,7 @@ import {
 	applyAwarenessUpdate,
 	removeAwarenessStates,
 } from "y-protocols/awareness";
-import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
+import { applyUpdate, Doc, encodeStateAsUpdate, mergeUpdates } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
@@ -49,12 +49,37 @@ export class Document extends Doc {
 	lastChangeTime = 0;
 
 	/**
+	 * Batch outgoing broadcasts over this window (ms), or false to send each one
+	 * immediately. See `scheduleFlush`.
+	 */
+	flushDelay: false | number;
+
+	/**
+	 * Flush early once this many bytes of document updates are buffered.
+	 */
+	flushMaxBytes: number;
+
+	private pendingUpdates: Array<Uint8Array> = [];
+
+	private pendingUpdateBytes = 0;
+
+	private pendingAwarenessClients: Set<number> = new Set();
+
+	private cancelFlush: (() => void) | null = null;
+
+	/**
 	 * Constructor.
 	 */
-	constructor(name: string, yDocOptions?: object) {
+	constructor(
+		name: string,
+		yDocOptions?: object,
+		options?: { flushDelay?: false | number; flushMaxBytes?: number },
+	) {
 		super(yDocOptions);
 
 		this.name = name;
+		this.flushDelay = options?.flushDelay ?? false;
+		this.flushMaxBytes = options?.flushMaxBytes ?? 1024 * 1024;
 
 		this.awareness = new Awareness(this);
 		this.awareness.setLocalState(null);
@@ -250,6 +275,22 @@ export class Document extends Doc {
 			}
 		}
 
+		if (this.flushDelay === false) {
+			this.broadcastAwarenessUpdate(changedClients);
+
+			return this;
+		}
+
+		for (const clientId of changedClients) {
+			this.pendingAwarenessClients.add(clientId);
+		}
+
+		this.scheduleFlush();
+
+		return this;
+	}
+
+	private broadcastAwarenessUpdate(changedClients: Array<number>): void {
 		let cachedAddress: string | undefined;
 		let cachedMessage: Uint8Array | undefined;
 
@@ -265,16 +306,37 @@ export class Document extends Doc {
 
 			connection.send(cachedMessage);
 		}
-
-		return this;
 	}
 
 	/**
 	 * Handle an updated document and sync changes to clients
 	 */
 	private handleUpdate(update: Uint8Array, origin: unknown): Document {
+		// Stays synchronous even when broadcasts are batched: this drives
+		// `onChange`, the `onStoreDocument` debounce and the Redis publish in
+		// extension-redis. Deferring it would change persistence and cluster
+		// sync timing, not just the wire traffic.
 		this.callbacks.onUpdate(this, origin, update);
 
+		if (this.flushDelay === false) {
+			this.broadcastUpdate(update);
+
+			return this;
+		}
+
+		this.pendingUpdates.push(update);
+		this.pendingUpdateBytes += update.length;
+
+		if (this.pendingUpdateBytes >= this.flushMaxBytes) {
+			this.flush();
+		} else {
+			this.scheduleFlush();
+		}
+
+		return this;
+	}
+
+	private broadcastUpdate(update: Uint8Array): void {
 		let cachedAddress: string | undefined;
 		let cachedMessage: Uint8Array | undefined;
 
@@ -290,6 +352,74 @@ export class Document extends Doc {
 			}
 
 			connection.send(cachedMessage);
+		}
+	}
+
+	/**
+	 * Fixed-window batching: the first buffered change starts the window and
+	 * everything until it closes goes out together, so the added latency stays
+	 * capped at `flushDelay` instead of growing while clients keep typing.
+	 *
+	 * `flushDelay: 0` means "coalesce whatever arrives in this event loop turn".
+	 * setImmediate runs right after the current poll phase, so a burst of socket
+	 * reads is merged without adding any delay. `setTimeout(…, 0)` would not do
+	 * that: it clamps to 1ms and runs in the timers phase.
+	 */
+	private scheduleFlush(): void {
+		if (this.cancelFlush !== null) {
+			return;
+		}
+
+		const run = () => {
+			this.cancelFlush = null;
+			this.flush();
+		};
+
+		if (this.flushDelay === 0 && typeof setImmediate === "function") {
+			const handle = setImmediate(run);
+
+			this.cancelFlush = () => clearImmediate(handle);
+
+			return;
+		}
+
+		const handle = setTimeout(run, this.flushDelay as number);
+
+		this.cancelFlush = () => clearTimeout(handle);
+	}
+
+	/**
+	 * Send everything buffered for the current flush window right away. Document
+	 * updates are merged into a single message; awareness collapses to the latest
+	 * state of each changed client, so an add and a removal within one window
+	 * resolve to the correct end state rather than both being sent.
+	 *
+	 * Safe to call when nothing is pending.
+	 */
+	public flush(): Document {
+		if (this.cancelFlush !== null) {
+			this.cancelFlush();
+			this.cancelFlush = null;
+		}
+
+		if (this.pendingUpdates.length > 0) {
+			const update =
+				this.pendingUpdates.length === 1
+					? this.pendingUpdates[0]
+					: mergeUpdates(this.pendingUpdates);
+
+			this.pendingUpdates = [];
+			this.pendingUpdateBytes = 0;
+
+			this.broadcastUpdate(update);
+		}
+
+		if (this.pendingAwarenessClients.size > 0) {
+			const clients = Array.from(this.pendingAwarenessClients);
+
+			this.pendingAwarenessClients.clear();
+
+			this.broadcastAwarenessUpdate(clients);
 		}
 
 		return this;
@@ -314,6 +444,14 @@ export class Document extends Doc {
 	}
 
 	destroy() {
+		// Send what is still buffered instead of dropping it, then stop batching:
+		// `super.destroy()` tears the awareness down, which broadcasts one last
+		// time, and that has to reach clients here just as it does on a document
+		// that never batched. Usually a no-op, because a document is only
+		// unloaded once its last connection is gone.
+		this.flush();
+		this.flushDelay = false;
+
 		super.destroy();
 		this.isDestroyed = true;
 	}

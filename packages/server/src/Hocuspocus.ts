@@ -37,6 +37,8 @@ export const defaultConfiguration = {
 	maxUnauthenticatedQueueSize: 5 * 1024 * 1024,
 	maxUnauthenticatedQueueMessages: 1_000,
 	maxPendingDocuments: 100,
+	flushDelay: false as false | number,
+	flushMaxBytes: 1024 * 1024,
 };
 
 export class Hocuspocus<Context = any> {
@@ -390,10 +392,17 @@ export class Hocuspocus<Context = any> {
 			instance: this,
 		});
 
-		const document = new Document(documentName, {
-			...this.configuration.yDocOptions,
-			...yDocOptions,
-		});
+		const document = new Document(
+			documentName,
+			{
+				...this.configuration.yDocOptions,
+				...yDocOptions,
+			},
+			{
+				flushDelay: this.configuration.flushDelay,
+				flushMaxBytes: this.configuration.flushMaxBytes,
+			},
+		);
 
 		const hookPayload = {
 			instance: this,
