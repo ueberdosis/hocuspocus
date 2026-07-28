@@ -293,6 +293,8 @@ export class Connection<Context = any> {
 					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
 					reason: "reason" in e ? e.reason : ResetConnection.reason,
 				});
+				this.messageQueue.length = 0;
+				return;
 			}
 
 			this.messageQueue.shift();

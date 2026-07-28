@@ -83,10 +83,18 @@ test('beforeHandleMessage callback is called for every new client', async t => {
 
 })
 
-test('an exception thrown in beforeHandleMessage closes the connection', async t => {
+test('an exception thrown in beforeHandleMessage closes the connection and discards queued messages', async t => {
+  let beforeHandleMessageCount = 0
+
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
-      async beforeHandleMessage() {
+      async beforeHandleMessage({ connection, update }) {
+        beforeHandleMessageCount += 1
+
+        if (beforeHandleMessageCount === 1) {
+          connection.handleMessage(update)
+        }
+
         throw new Error()
       },
     })
@@ -98,4 +106,6 @@ test('an exception thrown in beforeHandleMessage closes the connection', async t
       },
     })
   })
+
+  t.is(beforeHandleMessageCount, 1)
 })
