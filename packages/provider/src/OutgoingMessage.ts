@@ -11,6 +11,8 @@ export class OutgoingMessage implements OutgoingMessageInterface {
 
 	type?: MessageType;
 
+	description?: string;
+
 	constructor() {
 		this.encoder = createEncoder();
 	}

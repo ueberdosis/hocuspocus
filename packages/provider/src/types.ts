@@ -34,6 +34,7 @@ export type AuthorizedScope = "read-write" | "readonly";
 export interface OutgoingMessageInterface {
 	encoder: Encoder;
 	type?: MessageType;
+	description?: string;
 }
 
 export interface OutgoingMessageArguments {
