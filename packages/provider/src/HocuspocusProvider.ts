@@ -417,6 +417,10 @@ export class HocuspocusProvider extends EventEmitter {
 	}
 
 	awarenessUpdateHandler({ added, updated, removed }: any, origin: any) {
+		if (origin === this) {
+			return;
+		}
+
 		const changedClients = added.concat(updated).concat(removed);
 
 		if (!this.batchingEnabled) {
