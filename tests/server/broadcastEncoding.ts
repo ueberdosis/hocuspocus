@@ -10,9 +10,15 @@ type FakeConnection = {
 }
 
 /**
- * Registers a minimal stand-in for a Connection. `handleUpdate` and
- * `handleAwarenessUpdate` only read `messageAddress` and call `send`, so a
- * duck-typed object is enough to observe what the broadcast produces.
+ * Encoding is identical batched or not, so these tests opt out of batching to
+ * keep every assertion synchronous.
+ */
+const newDocument = () => new Document('hocuspocus-test', undefined, { flushDelay: false })
+
+/**
+ * Registers a minimal stand-in for a Connection. The broadcast paths only read
+ * `messageAddress` and call `send`, so a duck-typed object is enough to observe
+ * what they produce.
  */
 const addConnection = (document: Document, messageAddress: string): FakeConnection => {
   const connection: FakeConnection = {
@@ -31,7 +37,7 @@ const addConnection = (document: Document, messageAddress: string): FakeConnecti
 const readAddress = (message: Uint8Array) => decoding.readVarString(decoding.createDecoder(message))
 
 test('encodes a document update once and shares it across connections', t => {
-  const document = new Document('hocuspocus-test')
+  const document = newDocument()
 
   const first = addConnection(document, 'hocuspocus-test')
   const second = addConnection(document, 'hocuspocus-test')
@@ -49,7 +55,7 @@ test('encodes a document update once and shares it across connections', t => {
 })
 
 test('encodes an awareness update once and shares it across connections', t => {
-  const document = new Document('hocuspocus-test')
+  const document = newDocument()
 
   const first = addConnection(document, 'hocuspocus-test')
   const second = addConnection(document, 'hocuspocus-test')
@@ -62,7 +68,7 @@ test('encodes an awareness update once and shares it across connections', t => {
 })
 
 test('reuses the buffer across consecutive connections sharing an address', t => {
-  const document = new Document('hocuspocus-test')
+  const document = newDocument()
 
   const legacy = addConnection(document, 'hocuspocus-test')
   const sessionA = addConnection(document, makeRoutingKey('hocuspocus-test', 'session-a'))
@@ -80,7 +86,7 @@ test('reuses the buffer across consecutive connections sharing an address', t =>
 })
 
 test('addresses every broadcast message to the receiving connection', t => {
-  const document = new Document('hocuspocus-test')
+  const document = newDocument()
 
   // Interleaved addresses: buffer reuse does not apply here, so this also
   // covers the fallback path where every connection gets its own encode.

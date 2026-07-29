@@ -79,7 +79,7 @@ export class Document extends Doc {
 		super(yDocOptions);
 
 		this.name = name;
-		this.flushDelay = options?.flushDelay ?? false;
+		this.flushDelay = options?.flushDelay ?? 0;
 		this.flushMaxBytes = options?.flushMaxBytes ?? 1024 * 1024;
 
 		this.awareness = new Awareness(this);

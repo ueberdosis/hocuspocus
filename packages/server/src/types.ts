@@ -203,17 +203,26 @@ export interface FlushOptions {
 	 * many connected clients sends `connections` messages per window rather than
 	 * `changes × connections`.
 	 *
-	 * `0` is the recommended starting point: it flushes at the end of the current
-	 * event loop turn, which coalesces a burst of simultaneous updates without
-	 * adding any latency. A positive value trades up to that much extra latency
-	 * for more aggressive merging, and is only a win when several changes
+	 * The default `0` flushes at the end of the current event loop turn. It adds
+	 * no delay — a burst of updates that arrived together is coalesced before
+	 * anything is written to a socket — and with a single writer no merge happens
+	 * at all, because there is only one buffered update to send. On a document
+	 * with many writing clients the difference is large: 2000 clients each
+	 * writing once produces 2000 broadcast messages per turn instead of
+	 * 2000 × 2000.
+	 *
+	 * A positive value additionally merges across turns, trading up to that much
+	 * latency for fewer messages. That is only a win when several changes
 	 * genuinely land per window — with a handful of clients typing it is pure
-	 * added delay.
+	 * added delay, so prefer `0` unless you have measured otherwise.
+	 *
+	 * `false` restores the pre-batching behaviour and sends every broadcast
+	 * synchronously, inside the same tick that applied the change.
 	 *
 	 * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
 	 * debounce and the Redis publish still run synchronously per change.
 	 *
-	 * @default false (send each broadcast immediately)
+	 * @default 0 (coalesce within the current event loop turn)
 	 */
 	flushDelay: false | number;
 

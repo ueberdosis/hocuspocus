@@ -37,7 +37,7 @@ export const defaultConfiguration = {
 	maxUnauthenticatedQueueSize: 5 * 1024 * 1024,
 	maxUnauthenticatedQueueMessages: 1_000,
 	maxPendingDocuments: 100,
-	flushDelay: false as false | number,
+	flushDelay: 0 as false | number,
 	flushMaxBytes: 1024 * 1024,
 };
 

@@ -59,7 +59,7 @@ const readAwarenessStates = (message: Uint8Array) => {
 }
 
 test('sends one message per change when flushDelay is false', t => {
-  const document = new Document('hocuspocus-test')
+  const document = new Document('hocuspocus-test', undefined, { flushDelay: false })
   const connection = addConnection(document)
 
   document.getMap('test').set('a', 1)
@@ -67,6 +67,27 @@ test('sends one message per change when flushDelay is false', t => {
   document.getMap('test').set('c', 3)
 
   t.is(connection.sent.length, 3)
+})
+
+test('batches by default', async t => {
+  const document = new Document('hocuspocus-test')
+  const connection = addConnection(document)
+
+  document.getMap('test').set('a', 1)
+  document.getMap('test').set('b', 2)
+
+  t.is(document.flushDelay, 0)
+  t.is(connection.sent.length, 0)
+
+  await tick()
+
+  t.is(connection.sent.length, 1)
+})
+
+test('a server batches by default', async t => {
+  const server = await newHocuspocus(t)
+
+  t.is(server.configuration.flushDelay, 0)
 })
 
 test('merges updates from the same tick into a single message', async t => {
@@ -190,7 +211,7 @@ test('destroy flushes what is still buffered instead of dropping it', async t =>
 
   // The same document without batching emits exactly as many messages: the
   // buffered update plus the awareness teardown that destroy triggers.
-  const unbatched = new Document('hocuspocus-test')
+  const unbatched = new Document('hocuspocus-test', undefined, { flushDelay: false })
   const unbatchedConnection = addConnection(unbatched)
 
   unbatched.getMap('test').set('a', 1)
