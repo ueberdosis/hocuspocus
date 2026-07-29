@@ -190,7 +190,46 @@ export type HookPayloadByName<Context = any> = {
 	onDestroy: onDestroyPayload;
 };
 
-export interface Configuration<Context = any> extends Extension<Context> {
+/**
+ * Controls how a document batches its outgoing broadcasts. Shared by the server
+ * configuration and the `Document` constructor so both stay in step.
+ */
+export interface FlushOptions {
+	/**
+	 * Batch outgoing broadcasts per document over a window of this many
+	 * milliseconds, instead of sending one message per connection per change.
+	 * Updates within a window are merged into a single message and awareness
+	 * collapses to the latest state of each changed client, so a document with
+	 * many connected clients sends `connections` messages per window rather than
+	 * `changes × connections`.
+	 *
+	 * `0` is the recommended starting point: it flushes at the end of the current
+	 * event loop turn, which coalesces a burst of simultaneous updates without
+	 * adding any latency. A positive value trades up to that much extra latency
+	 * for more aggressive merging, and is only a win when several changes
+	 * genuinely land per window — with a handful of clients typing it is pure
+	 * added delay.
+	 *
+	 * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
+	 * debounce and the Redis publish still run synchronously per change.
+	 *
+	 * @default false (send each broadcast immediately)
+	 */
+	flushDelay: false | number;
+
+	/**
+	 * Flush a document's batched broadcasts early once this many bytes of updates
+	 * are buffered, bounding both the memory held per window and the cost of the
+	 * merge. Ignored when `flushDelay` is false.
+	 *
+	 * @default 1_048_576 (1 MiB)
+	 */
+	flushMaxBytes: number;
+}
+
+export interface Configuration<Context = any>
+	extends Extension<Context>,
+		FlushOptions {
 	/**
 	 * A name for the instance, used for logging.
 	 */
@@ -252,37 +291,6 @@ export interface Configuration<Context = any> extends Extension<Context> {
 	 * @default 100
 	 */
 	maxPendingDocuments: number;
-
-	/**
-	 * Batch outgoing broadcasts per document over a window of this many
-	 * milliseconds, instead of sending one message per connection per change.
-	 * Updates within a window are merged into a single message and awareness
-	 * collapses to the latest state of each changed client, so a document with
-	 * many connected clients sends `connections` messages per window rather than
-	 * `changes × connections`.
-	 *
-	 * `0` is the recommended starting point: it flushes at the end of the current
-	 * event loop turn, which coalesces a burst of simultaneous updates without
-	 * adding any latency. A positive value trades up to that much extra latency
-	 * for more aggressive merging, and is only a win when several changes
-	 * genuinely land per window — with a handful of clients typing it is pure
-	 * added delay.
-	 *
-	 * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
-	 * debounce and the Redis publish still run synchronously per change.
-	 *
-	 * @default false (send each broadcast immediately)
-	 */
-	flushDelay: false | number;
-
-	/**
-	 * Flush a document's batched broadcasts early once this many bytes of updates
-	 * are buffered, bounding both the memory held per window and the cost of the
-	 * merge. Ignored when `flushDelay` is false.
-	 *
-	 * @default 1_048_576 (1 MiB)
-	 */
-	flushMaxBytes: number;
 
 	/**
 	 * options to pass to the ydoc document

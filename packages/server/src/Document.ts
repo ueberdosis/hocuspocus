@@ -10,6 +10,7 @@ import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	AwarenessUpdate,
 	ConnectionTransactionOrigin,
+	FlushOptions,
 	TransactionOrigin,
 } from "./types.ts";
 import { isTransactionOrigin } from "./types.ts";
@@ -52,12 +53,12 @@ export class Document extends Doc {
 	 * Batch outgoing broadcasts over this window (ms), or false to send each one
 	 * immediately. See `scheduleFlush`.
 	 */
-	flushDelay: false | number;
+	flushDelay: FlushOptions["flushDelay"];
 
 	/**
 	 * Flush early once this many bytes of document updates are buffered.
 	 */
-	flushMaxBytes: number;
+	flushMaxBytes: FlushOptions["flushMaxBytes"];
 
 	private pendingUpdates: Array<Uint8Array> = [];
 
@@ -73,7 +74,7 @@ export class Document extends Doc {
 	constructor(
 		name: string,
 		yDocOptions?: object,
-		options?: { flushDelay?: false | number; flushMaxBytes?: number },
+		options?: Partial<FlushOptions>,
 	) {
 		super(yDocOptions);
 
@@ -242,17 +243,6 @@ export class Document extends Doc {
 
 	/**
 	 * Handle an awareness update and sync changes to clients
-	 *
-	 * Connections that share a message address receive byte-identical payloads,
-	 * so consecutive connections with the same address reuse one buffer instead
-	 * of re-encoding per connection. With session awareness disabled (the
-	 * default) every connection on a document shares the plain document name,
-	 * which collapses the whole broadcast to a single encode.
-	 *
-	 * A one-entry cache rather than a Map keyed by address: it makes the common
-	 * cases optimal (all addresses equal, or all distinct) at no cost, and only
-	 * gives up dedup when addresses interleave, where it still matches the
-	 * previous encode-per-connection behaviour.
 	 * @private
 	 */
 	private handleAwarenessUpdate(
@@ -290,7 +280,22 @@ export class Document extends Doc {
 		return this;
 	}
 
-	private broadcastAwarenessUpdate(changedClients: Array<number>): void {
+	/**
+	 * Send one message to every connection, encoding it once per run of
+	 * connections that share a message address.
+	 *
+	 * Connections that share a message address receive byte-identical payloads,
+	 * so consecutive connections with the same address reuse one buffer instead
+	 * of re-encoding per connection. With session awareness disabled (the
+	 * default) every connection on a document shares the plain document name,
+	 * which collapses the whole broadcast to a single encode.
+	 *
+	 * A one-entry cache rather than a Map keyed by address: it makes the common
+	 * cases optimal (all addresses equal, or all distinct) at no cost, and only
+	 * gives up dedup when addresses interleave, where it still matches the
+	 * previous encode-per-connection behaviour.
+	 */
+	private broadcast(encode: (messageAddress: string) => Uint8Array): void {
 		let cachedAddress: string | undefined;
 		let cachedMessage: Uint8Array | undefined;
 
@@ -299,13 +304,19 @@ export class Document extends Doc {
 
 			if (cachedMessage === undefined || address !== cachedAddress) {
 				cachedAddress = address;
-				cachedMessage = new OutgoingMessage(address)
-					.createAwarenessUpdateMessage(this.awareness, changedClients)
-					.toUint8Array();
+				cachedMessage = encode(address);
 			}
 
 			connection.send(cachedMessage);
 		}
+	}
+
+	private broadcastAwarenessUpdate(changedClients: Array<number>): void {
+		this.broadcast((address) =>
+			new OutgoingMessage(address)
+				.createAwarenessUpdateMessage(this.awareness, changedClients)
+				.toUint8Array(),
+		);
 	}
 
 	/**
@@ -337,22 +348,12 @@ export class Document extends Doc {
 	}
 
 	private broadcastUpdate(update: Uint8Array): void {
-		let cachedAddress: string | undefined;
-		let cachedMessage: Uint8Array | undefined;
-
-		for (const connection of this.getConnections()) {
-			const address = connection.messageAddress;
-
-			if (cachedMessage === undefined || address !== cachedAddress) {
-				cachedAddress = address;
-				cachedMessage = new OutgoingMessage(address)
-					.createSyncMessage()
-					.writeUpdate(update)
-					.toUint8Array();
-			}
-
-			connection.send(cachedMessage);
-		}
+		this.broadcast((address) =>
+			new OutgoingMessage(address)
+				.createSyncMessage()
+				.writeUpdate(update)
+				.toUint8Array(),
+		);
 	}
 
 	/**
