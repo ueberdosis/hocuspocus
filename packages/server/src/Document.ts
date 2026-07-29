@@ -295,11 +295,18 @@ export class Document extends Doc {
 	 * gives up dedup when addresses interleave, where it still matches the
 	 * previous encode-per-connection behaviour.
 	 */
-	private broadcast(encode: (messageAddress: string) => Uint8Array): void {
+	private broadcast(
+		encode: (messageAddress: string) => Uint8Array,
+		filter?: (connection: Connection) => boolean,
+	): void {
 		let cachedAddress: string | undefined;
 		let cachedMessage: Uint8Array | undefined;
 
 		for (const connection of this.getConnections()) {
+			if (filter !== undefined && !filter(connection)) {
+				continue;
+			}
+
 			const address = connection.messageAddress;
 
 			if (cachedMessage === undefined || address !== cachedAddress) {
@@ -428,6 +435,12 @@ export class Document extends Doc {
 
 	/**
 	 * Broadcast stateless message to all connections
+	 *
+	 * Shares one encoded buffer per message address like the update and awareness
+	 * broadcasts. Not batched, though: stateless payloads are opaque discrete
+	 * events, so unlike updates they cannot be merged and unlike awareness they
+	 * do not collapse to a latest state — deferring them would delay delivery
+	 * without reducing the number of messages.
 	 */
 	public broadcastStateless(
 		payload: string,
@@ -435,13 +448,11 @@ export class Document extends Doc {
 	): void {
 		this.callbacks.beforeBroadcastStateless(this, payload);
 
-		const connections = filter
-			? this.getConnections().filter(filter)
-			: this.getConnections();
-
-		connections.forEach((connection) => {
-			connection.sendStateless(payload);
-		});
+		this.broadcast(
+			(address) =>
+				new OutgoingMessage(address).writeStateless(payload).toUint8Array(),
+			filter,
+		);
 	}
 
 	destroy() {

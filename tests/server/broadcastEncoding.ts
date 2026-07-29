@@ -67,6 +67,49 @@ test('encodes an awareness update once and shares it across connections', t => {
   t.is(first.sent[0], second.sent[0])
 })
 
+test('encodes a stateless broadcast once and shares it across connections', t => {
+  const document = newDocument()
+
+  const first = addConnection(document, 'hocuspocus-test')
+  const second = addConnection(document, 'hocuspocus-test')
+
+  document.broadcastStateless('{"event":"document.saved"}')
+
+  t.is(first.sent.length, 1)
+  t.is(second.sent.length, 1)
+  t.is(first.sent[0], second.sent[0])
+})
+
+test('a filtered stateless broadcast only reaches matching connections', t => {
+  const document = newDocument()
+
+  const first = addConnection(document, 'hocuspocus-test')
+  const skipped = addConnection(document, 'hocuspocus-test')
+  const third = addConnection(document, 'hocuspocus-test')
+
+  document.broadcastStateless('{"event":"document.saved"}', connection => connection !== (skipped as any))
+
+  t.is(first.sent.length, 1)
+  t.is(skipped.sent.length, 0)
+  t.is(third.sent.length, 1)
+
+  // A skipped connection in the middle must not cost the others their shared buffer.
+  t.is(first.sent[0], third.sent[0])
+})
+
+test('addresses stateless broadcasts per connection', t => {
+  const document = newDocument()
+
+  const legacy = addConnection(document, 'hocuspocus-test')
+  const session = addConnection(document, makeRoutingKey('hocuspocus-test', 'session-a'))
+
+  document.broadcastStateless('{"event":"document.saved"}')
+
+  t.is(readAddress(legacy.sent[0]), 'hocuspocus-test')
+  t.is(readAddress(session.sent[0]), makeRoutingKey('hocuspocus-test', 'session-a'))
+  t.not(legacy.sent[0], session.sent[0])
+})
+
 test('reuses the buffer across consecutive connections sharing an address', t => {
   const document = newDocument()
 
