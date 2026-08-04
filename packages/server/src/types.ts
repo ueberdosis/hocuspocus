@@ -190,7 +190,55 @@ export type HookPayloadByName<Context = any> = {
 	onDestroy: onDestroyPayload;
 };
 
-export interface Configuration<Context = any> extends Extension<Context> {
+/**
+ * Controls how a document batches its outgoing broadcasts. Shared by the server
+ * configuration and the `Document` constructor so both stay in step.
+ */
+export interface FlushOptions {
+	/**
+	 * Batch outgoing broadcasts per document over a window of this many
+	 * milliseconds, instead of sending one message per connection per change.
+	 * Updates within a window are merged into a single message and awareness
+	 * collapses to the latest state of each changed client, so a document with
+	 * many connected clients sends `connections` messages per window rather than
+	 * `changes × connections`.
+	 *
+	 * The default `0` flushes at the end of the current event loop turn. It adds
+	 * no delay — a burst of updates that arrived together is coalesced before
+	 * anything is written to a socket — and with a single writer no merge happens
+	 * at all, because there is only one buffered update to send. On a document
+	 * with many writing clients the difference is large: 2000 clients each
+	 * writing once produces 2000 broadcast messages per turn instead of
+	 * 2000 × 2000.
+	 *
+	 * A positive value additionally merges across turns, trading up to that much
+	 * latency for fewer messages. That is only a win when several changes
+	 * genuinely land per window — with a handful of clients typing it is pure
+	 * added delay, so prefer `0` unless you have measured otherwise.
+	 *
+	 * `false` restores the pre-batching behaviour and sends every broadcast
+	 * synchronously, inside the same tick that applied the change.
+	 *
+	 * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
+	 * debounce and the Redis publish still run synchronously per change.
+	 *
+	 * @default 0 (coalesce within the current event loop turn)
+	 */
+	flushDelay: false | number;
+
+	/**
+	 * Flush a document's batched broadcasts early once this many bytes of updates
+	 * are buffered, bounding both the memory held per window and the cost of the
+	 * merge. Ignored when `flushDelay` is false.
+	 *
+	 * @default 1_048_576 (1 MiB)
+	 */
+	flushMaxBytes: number;
+}
+
+export interface Configuration<Context = any>
+	extends Extension<Context>,
+		FlushOptions {
 	/**
 	 * A name for the instance, used for logging.
 	 */

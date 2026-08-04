@@ -300,6 +300,11 @@ test("if a new connection connects while the previous connection still fetches t
 		};
 
 		const server = await newHocuspocus(t, {
+			// This test asserts on the document state at each individual inbound
+			// message, so it pins the unbatched fan-out. With the default
+			// `flushDelay: 0` a broadcast lands one event loop turn later, which
+			// reorders it relative to the sync acks and shifts these indices.
+			flushDelay: false,
 			onLoadDocument({ document }) {
 				return new Promise(async (resolve) => {
 					setTimeout(() => {
