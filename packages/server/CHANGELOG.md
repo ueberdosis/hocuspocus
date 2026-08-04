@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.5.0](https://github.com/ueberdosis/hocuspocus/compare/v4.4.0...v4.5.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* update packages via audit --fix ([1dc9ca0](https://github.com/ueberdosis/hocuspocus/commit/1dc9ca0ff35f1033136473d134cee8cb6b336281))
+* when beforeHandleMessage throws, we don't want to process other messages that were already queued ([#1123](https://github.com/ueberdosis/hocuspocus/issues/1123)) ([ed5dc40](https://github.com/ueberdosis/hocuspocus/commit/ed5dc40581cc829a6d0b04040717a8ee89296140))
+
+
+
+
+
 # [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
 
 

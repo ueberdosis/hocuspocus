@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.5.0](https://github.com/ueberdosis/hocuspocus/compare/v4.4.0...v4.5.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* audit ([141360c](https://github.com/ueberdosis/hocuspocus/commit/141360c256022deb5578c3902c3dfe0af8f6516e))
+* flawky test relying on timings ([fe4a8e6](https://github.com/ueberdosis/hocuspocus/commit/fe4a8e68801f1659624f53da745e595ad9f11c63))
+* ignore message in awarenessUpdateHandler if origin=this ([#1129](https://github.com/ueberdosis/hocuspocus/issues/1129)) ([08b25d4](https://github.com/ueberdosis/hocuspocus/commit/08b25d4b258d932c68c999c14edcb4efc65c7a9b))
+* update packages via audit --fix ([1dc9ca0](https://github.com/ueberdosis/hocuspocus/commit/1dc9ca0ff35f1033136473d134cee8cb6b336281))
+* when beforeHandleMessage throws, we don't want to process other messages that were already queued ([#1123](https://github.com/ueberdosis/hocuspocus/issues/1123)) ([ed5dc40](https://github.com/ueberdosis/hocuspocus/commit/ed5dc40581cc829a6d0b04040717a8ee89296140))
+
+
+### Features
+
+* pnpm11 ([#1133](https://github.com/ueberdosis/hocuspocus/issues/1133)) ([01c224a](https://github.com/ueberdosis/hocuspocus/commit/01c224ad9133340048c0e4f7bdce3981f4984d76))
+
+
+
+
+
 # [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
 
 

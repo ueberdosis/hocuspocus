@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.5.0](https://github.com/ueberdosis/hocuspocus/compare/v4.4.0...v4.5.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* update packages via audit --fix ([1dc9ca0](https://github.com/ueberdosis/hocuspocus/commit/1dc9ca0ff35f1033136473d134cee8cb6b336281))
+
+
+
+
+
 # [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
 
 **Note:** Version bump only for package @hocuspocus/extension-sqlite

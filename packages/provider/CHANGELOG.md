@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.5.0](https://github.com/ueberdosis/hocuspocus/compare/v4.4.0...v4.5.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* ignore message in awarenessUpdateHandler if origin=this ([#1129](https://github.com/ueberdosis/hocuspocus/issues/1129)) ([08b25d4](https://github.com/ueberdosis/hocuspocus/commit/08b25d4b258d932c68c999c14edcb4efc65c7a9b))
+* update packages via audit --fix ([1dc9ca0](https://github.com/ueberdosis/hocuspocus/commit/1dc9ca0ff35f1033136473d134cee8cb6b336281))
+
+
+
+
+
 # [4.4.0](https://github.com/ueberdosis/hocuspocus/compare/v4.3.0...v4.4.0) (2026-07-13)
 
 
