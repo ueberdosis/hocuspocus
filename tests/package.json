@@ -4,25 +4,25 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.990.0",
 		"@hocuspocus/common": "workspace:^",
 		"@hocuspocus/extension-database": "workspace:^",
 		"@hocuspocus/extension-logger": "workspace:^",
 		"@hocuspocus/extension-redis": "workspace:^",
-		"@aws-sdk/client-s3": "^3.981.0",
 		"@hocuspocus/extension-s3": "workspace:^",
 		"@hocuspocus/extension-throttle": "workspace:^",
 		"@hocuspocus/provider": "workspace:^",
 		"@hocuspocus/server": "workspace:^",
 		"@hocuspocus/transformer": "workspace:^",
-		"redis": "^4.0.4",
+		"redis": "^4.7.1",
 		"sinon": "^12.0.1",
-		"ws": "^8.5.0",
-		"yjs": "^13.6.4"
+		"ws": "^8.21.0",
+		"yjs": "^13.6.29"
 	},
 	"devDependencies": {
 		"@types/redis": "^4.0.11",
-		"@types/sinon": "^10.0.11",
-		"lib0": "^0.2.47",
+		"@types/sinon": "^10.0.20",
+		"lib0": "^0.2.117",
 		"mockdate": "^3.0.5"
 	}
 }
