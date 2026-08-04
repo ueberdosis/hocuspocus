@@ -2,3 +2,7 @@ packages:
   - "playground/*"
   - "packages/*"
   - "tests"
+allowBuilds:
+  better-sqlite3: true
+  nx: true
+  sharp: true
