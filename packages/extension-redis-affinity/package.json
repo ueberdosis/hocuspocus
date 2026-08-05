@@ -1,0 +1,39 @@
+{
+	"name": "@hocuspocus/extension-redis-affinity",
+	"description": "Guarantee server affinity with Redis",
+	"version": "4.1.1",
+	"homepage": "https://hocuspocus.dev",
+	"keywords": [
+		"hocuspocus",
+		"redis",
+		"yjs"
+	],
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/hocuspocus-redis-affinity.cjs",
+	"module": "dist/hocuspocus-redis-affinity.esm.js",
+	"types": "dist/packages/extension-redis-affinity/src/index.d.ts",
+	"exports": {
+		"source": {
+			"import": "./src/index.ts"
+		},
+		"default": {
+			"import": "./dist/hocuspocus-redis-affinity.esm.js",
+			"require": "./dist/hocuspocus-redis-affinity.cjs",
+			"types": "./dist/packages/extension-redis-affinity/src/index.d.ts"
+		}
+	},
+	"files": [
+		"src",
+		"dist"
+	],
+	"dependencies": {
+		"ioredis": "^5.6.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"url": "https://github.com/ueberdosis/hocuspocus"
+	}
+}
