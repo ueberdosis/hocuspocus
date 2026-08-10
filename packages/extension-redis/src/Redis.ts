@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import type {
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
@@ -14,7 +15,6 @@ import type {
 	onStoreDocumentPayload,
 	RedisTransactionOrigin,
 } from "@hocuspocus/server";
-import { SkipFurtherHooksError } from "@hocuspocus/common";
 import {
 	IncomingMessage,
 	isTransactionOrigin,
@@ -22,10 +22,6 @@ import {
 	MessageType,
 	OutgoingMessage,
 } from "@hocuspocus/server";
-import {
-	messageYjsSyncStep2,
-	messageYjsUpdate,
-} from "y-protocols/sync";
 import {
 	ExecutionError,
 	type ExecutionResult,
@@ -39,6 +35,8 @@ import type {
 	RedisOptions,
 } from "ioredis";
 import RedisClient from "ioredis";
+import type { Awareness } from "y-protocols/awareness";
+import { messageYjsSyncStep2, messageYjsUpdate } from "y-protocols/sync";
 export type RedisInstance = RedisClient | Cluster;
 export interface Configuration {
 	/**
@@ -105,6 +103,27 @@ export interface Configuration {
 	awaitInitialSyncTimeout: number;
 }
 
+/**
+ * Publishes for one document, accumulated over a single event loop turn.
+ *
+ * The two kinds are independent, not alternatives: a turn can carry a sync step,
+ * an awareness update, or both, and each is sent on its own.
+ */
+type PendingPublish = {
+	document: Document;
+
+	/** A SyncStep1 is pending. A flag, not a count: state vectors are idempotent. */
+	syncStepPending: boolean;
+
+	/** Clients whose awareness changed this turn; empty when none did. */
+	awarenessClients: Set<number>;
+
+	/** Set alongside `awarenessClients`; the awareness they belong to. */
+	awareness?: Awareness;
+
+	cancel: () => void;
+};
+
 export class Redis implements Extension {
 	/**
 	 * Make sure to give that extension a higher priority, so
@@ -161,6 +180,12 @@ export class Redis implements Extension {
 	 * Invoked by `handleIncomingMessage` as soon as a peer's state arrives.
 	 */
 	private pendingInitialSyncResolves = new Map<string, () => void>();
+
+	/**
+	 * Publishes coalesced into the current event loop turn, keyed by document
+	 * name. See `schedulePublish`.
+	 */
+	private pendingPublishes = new Map<string, PendingPublish>();
 
 	public constructor(configuration: Partial<Configuration>) {
 		this.configuration = {
@@ -362,14 +387,126 @@ export class Redis implements Extension {
 				return false;
 			}
 			const syncType = message.readVarUint();
-			return (
-				syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate
-			);
+			return syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate;
 		} catch {
 			return false;
 		} finally {
 			message.decoder.pos = pos;
 		}
+	}
+
+	/**
+	 * Coalesce this document's Redis publishes into the current event loop turn.
+	 *
+	 * Both publishers are per-change and neither is covered by the server's
+	 * `flushDelay` batching: `onChange` runs synchronously by design (it also
+	 * drives the store hooks) and `onAwarenessUpdate` is dispatched from a raw
+	 * awareness listener rather than from `Document`'s batched broadcast. Left
+	 * uncoalesced, a document with many writing clients publishes one SyncStep1
+	 * per change and every peer answers each one with a full
+	 * `encodeStateAsUpdate` diff — which is O(document), so this costs far more
+	 * per change than the WebSocket fan-out ever did.
+	 *
+	 * Collapsing is lossless. A SyncStep1 carries the document's *current* state
+	 * vector, so the last one of a turn is a superset of the ones it replaces
+	 * and a peer's reply to it covers every skipped change. Awareness collapses
+	 * to the latest state of each changed client, exactly as `Document` does for
+	 * its own fan-out.
+	 */
+	private schedulePublish(
+		documentName: string,
+		document: Document,
+	): PendingPublish {
+		const existing = this.pendingPublishes.get(documentName);
+
+		if (existing) {
+			if (existing.document === document) {
+				return existing;
+			}
+
+			// The document was reloaded under the same name. `afterUnloadDocument`
+			// returns early on a fast reconnect, so it cannot be relied on to have
+			// cleared this. Whatever is buffered describes the previous instance —
+			// its state vector and its awareness — so drop it rather than publish
+			// it on behalf of the new one.
+			existing.cancel();
+			this.pendingPublishes.delete(documentName);
+		}
+
+		const handle = setImmediate(() => {
+			this.flushPublish(documentName).catch((error) => {
+				console.error(
+					`Redis: failed to publish for document "${documentName}"`,
+					error,
+				);
+			});
+		});
+
+		const pending: PendingPublish = {
+			document,
+			syncStepPending: false,
+			awarenessClients: new Set<number>(),
+			cancel: () => clearImmediate(handle),
+		};
+
+		this.pendingPublishes.set(documentName, pending);
+
+		return pending;
+	}
+
+	private cancelPendingPublish(documentName: string) {
+		const pending = this.pendingPublishes.get(documentName);
+
+		if (pending) {
+			pending.cancel();
+			this.pendingPublishes.delete(documentName);
+		}
+	}
+
+	/**
+	 * Send everything accumulated for this document in the current turn.
+	 */
+	private async flushPublish(documentName: string) {
+		const pending = this.pendingPublishes.get(documentName);
+
+		if (!pending) {
+			return;
+		}
+
+		this.pendingPublishes.delete(documentName);
+
+		// Both are issued before anything is awaited, so a failing sync step
+		// cannot swallow the awareness update — the entry is already dropped from
+		// the map at this point, and those clients would never be retried.
+		const publishes: Array<Promise<unknown>> = [];
+
+		if (pending.syncStepPending) {
+			publishes.push(this.publishFirstSyncStep(documentName, pending.document));
+		}
+
+		// Same guard as the uncoalesced path: publishing awareness for a document
+		// nobody is connected to throws (see hocuspocus#1027).
+		if (
+			pending.awarenessClients.size > 0 &&
+			pending.awareness &&
+			pending.document.connections.size > 0
+		) {
+			const message = new OutgoingMessage(
+				documentName,
+			).createAwarenessUpdateMessage(
+				pending.awareness,
+				Array.from(pending.awarenessClients),
+			);
+
+			publishes.push(
+				this.pub.publish(
+					this.pubKey(documentName),
+					this.encodeMessage(message.toUint8Array()),
+				),
+			);
+		}
+
+		await Promise.all(publishes);
 	}
 
 	/**
@@ -425,7 +562,9 @@ export class Redis implements Extension {
 			) {
 				// Expected behavior: Could not acquire lock, another instance locked it already.
 				// Skip further hooks and retry — the data is safe on the other instance.
-				throw new SkipFurtherHooksError("Another instance is already storing this document");
+				throw new SkipFurtherHooksError(
+					"Another instance is already storing this document",
+				);
 			}
 			//unexpected error
 			console.error("unexpected error:", error);
@@ -503,15 +642,14 @@ export class Redis implements Extension {
 		if (connections === 0) {
 			return; // avoids exception
 		}
-		const changedClients = added.concat(updated, removed);
-		const message = new OutgoingMessage(
-			documentName,
-		).createAwarenessUpdateMessage(awareness, changedClients);
 
-		return this.pub.publish(
-			this.pubKey(documentName),
-			this.encodeMessage(message.toUint8Array()),
-		);
+		const pending = this.schedulePublish(documentName, document);
+
+		pending.awareness = awareness;
+
+		for (const clientId of added.concat(updated, removed)) {
+			pending.awarenessClients.add(clientId);
+		}
 	}
 
 	/**
@@ -569,7 +707,8 @@ export class Redis implements Extension {
 			return;
 		}
 
-		return this.publishFirstSyncStep(data.documentName, data.document);
+		this.schedulePublish(data.documentName, data.document).syncStepPending =
+			true;
 	}
 
 	/**
@@ -588,6 +727,11 @@ export class Redis implements Extension {
 
 		this.resolveInitialSync(data.documentName);
 		this.documents.delete(data.documentName);
+		// Nothing should be pending: the coalescing window is a single event loop
+		// turn and `beforeUnloadDocument` already waits `disconnectDelay` to let
+		// syncs finish. This is a safety net so a timer cannot fire against a
+		// document that is on its way out.
+		this.cancelPendingPublish(data.documentName);
 
 		this.sub.unsubscribe(this.subKey(data.documentName), (error: any) => {
 			if (error) {
@@ -611,6 +755,17 @@ export class Redis implements Extension {
 	 * Kill the Redlock connection immediately.
 	 */
 	async onDestroy() {
+		// Cancelled rather than flushed, because flushing could not achieve
+		// anything: a pending publish is a SyncStep1, i.e. a state vector, which
+		// only *asks* peers to reply. Our own changes reach them one round trip
+		// later, when we answer the SyncStep1 they send back — and the subscriber
+		// is disconnected a few lines below, so that answer would never come.
+		// Durability on shutdown comes from the fact that we flush per setImmediate,
+		// which runs before the delay in beforeUnloadDocument.
+		for (const documentName of Array.from(this.pendingPublishes.keys())) {
+			this.cancelPendingPublish(documentName);
+		}
+
 		await this.redlock.quit();
 		this.pub.disconnect(false);
 		this.sub.disconnect(false);
