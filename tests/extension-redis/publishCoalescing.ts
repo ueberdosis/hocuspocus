@@ -1,4 +1,5 @@
 import { Redis } from "@hocuspocus/extension-redis";
+import { Document, IncomingMessage, MessageType } from "@hocuspocus/server";
 import test from "ava";
 import {
 	newHocuspocus,
@@ -43,20 +44,23 @@ test("coalesces a burst of changes into a single publish", async (t) => {
 	await sleep(300);
 	redis.reset();
 
-	const map = provider.document.getMap("test");
+	// Drive the burst on the server's own document. Twenty separate transactions
+	// applied synchronously are guaranteed to share one event loop turn; sending
+	// them through the provider would leave frame delivery, and therefore the
+	// turn boundaries, outside the test's control.
+	const document = server.documents.get("redis-coalescing");
+
+	t.truthy(document);
+
+	const map = document!.getMap("test");
 	for (let i = 0; i < 20; i += 1) {
 		map.set(`key-${i}`, i);
 	}
 
-	await sleep(500);
+	await sleep(300);
 
-	// Without coalescing this is exactly one SyncStep1 publish per change, so 20.
-	// With it the whole burst collapses to 1; the bound allows 2 in case the
-	// provider's frames land across two poll phases under load.
-	t.true(
-		redis.publishCount() <= 2,
-		`expected the burst to collapse, got ${redis.publishCount()} publishes`,
-	);
+	// Without coalescing this is one SyncStep1 publish per change, so 20.
+	t.is(redis.publishCount(), 1);
 });
 
 test("a failing sync publish does not swallow the awareness publish", async (t) => {
@@ -73,28 +77,84 @@ test("a failing sync publish does not swallow the awareness publish", async (t) 
 	await new Promise((resolve) => provider.on("synced", () => resolve("done")));
 	await sleep(300);
 
-	// Fail only the sync step; the awareness publish that shares the same turn
-	// has to go out regardless.
+	// Reject the sync step specifically, by message type rather than by call
+	// order, and let everything else publish normally.
 	const publisher = (extension as any).pub;
 	const original = publisher.publish.bind(publisher);
-	const published: Uint8Array[] = [];
+	const attempted: number[] = [];
+	const succeeded: number[] = [];
 
-	publisher.publish = (key: string, payload: any) => {
-		published.push(payload);
+	publisher.publish = (key: string, payload: Buffer) => {
+		const [, messageBuffer] = (extension as any).decodeMessage(payload);
+		const message = new IncomingMessage(messageBuffer);
 
-		if (published.length === 1) {
+		message.readVarString(); // document name
+
+		const messageType = message.readVarUint();
+
+		attempted.push(messageType);
+
+		if (messageType === MessageType.Sync) {
 			return Promise.reject(new Error("redis is down"));
 		}
+
+		succeeded.push(messageType);
 
 		return original(key, payload);
 	};
 
-	provider.document.getMap("test").set("a", 1);
-	provider.setAwarenessField("user", "jan");
+	// Both applied server-side and synchronously, so they share one turn and
+	// therefore one pending entry — which is the case under test.
+	const document = server.documents.get("redis-publish-failure");
 
-	await sleep(500);
+	t.truthy(document);
 
-	t.is(published.length, 2);
+	document!.getMap("test").set("a", 1);
+	document!.awareness.setLocalState({ user: "jan" });
+
+	await sleep(300);
+
+	t.true(attempted.includes(MessageType.Sync), "the sync step was attempted");
+	t.true(
+		succeeded.includes(MessageType.Awareness),
+		"the awareness update was published despite the sync step failing",
+	);
+});
+
+test("a reloaded document does not inherit the previous instance's pending publish", async (t) => {
+	const extension = new Redis({
+		...redisConnectionSettings,
+		identifier: `server${crypto.randomUUID()}`,
+	});
+
+	const server = await newHocuspocus(t, { extensions: [extension] });
+	const provider = newHocuspocusProvider(t, server, {
+		name: "redis-reload",
+		awareness: null,
+	});
+
+	await new Promise((resolve) => provider.on("synced", () => resolve("done")));
+
+	const first = server.documents.get("redis-reload");
+
+	t.truthy(first);
+
+	// A fast reconnect can replace the Document under an unchanged name while a
+	// publish is still buffered, because `afterUnloadDocument` returns early and
+	// never clears it. Buffering against the old instance and then scheduling
+	// against a new one must not carry the stale document forward.
+	const schedule = (extension as any).schedulePublish.bind(extension);
+	const pending = (extension as any).pendingPublishes;
+
+	schedule("redis-reload", first);
+	t.is(pending.get("redis-reload").document, first);
+
+	const reloaded = new Document("redis-reload");
+
+	t.is(schedule("redis-reload", reloaded).document, reloaded);
+	t.is(pending.get("redis-reload").document, reloaded);
+
+	reloaded.destroy();
 });
 
 test("a coalesced burst still reaches another instance", async (t) => {

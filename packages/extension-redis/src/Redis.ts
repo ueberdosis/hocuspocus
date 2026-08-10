@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { Awareness } from "y-protocols/awareness";
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import type {
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
@@ -15,7 +15,6 @@ import type {
 	onStoreDocumentPayload,
 	RedisTransactionOrigin,
 } from "@hocuspocus/server";
-import { SkipFurtherHooksError } from "@hocuspocus/common";
 import {
 	IncomingMessage,
 	isTransactionOrigin,
@@ -23,10 +22,6 @@ import {
 	MessageType,
 	OutgoingMessage,
 } from "@hocuspocus/server";
-import {
-	messageYjsSyncStep2,
-	messageYjsUpdate,
-} from "y-protocols/sync";
 import {
 	ExecutionError,
 	type ExecutionResult,
@@ -40,6 +35,8 @@ import type {
 	RedisOptions,
 } from "ioredis";
 import RedisClient from "ioredis";
+import type { Awareness } from "y-protocols/awareness";
+import { messageYjsSyncStep2, messageYjsUpdate } from "y-protocols/sync";
 export type RedisInstance = RedisClient | Cluster;
 export interface Configuration {
 	/**
@@ -390,9 +387,7 @@ export class Redis implements Extension {
 				return false;
 			}
 			const syncType = message.readVarUint();
-			return (
-				syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate
-			);
+			return syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate;
 		} catch {
 			return false;
 		} finally {
@@ -425,7 +420,17 @@ export class Redis implements Extension {
 		const existing = this.pendingPublishes.get(documentName);
 
 		if (existing) {
-			return existing;
+			if (existing.document === document) {
+				return existing;
+			}
+
+			// The document was reloaded under the same name. `afterUnloadDocument`
+			// returns early on a fast reconnect, so it cannot be relied on to have
+			// cleared this. Whatever is buffered describes the previous instance —
+			// its state vector and its awareness — so drop it rather than publish
+			// it on behalf of the new one.
+			existing.cancel();
+			this.pendingPublishes.delete(documentName);
 		}
 
 		const handle = setImmediate(() => {
@@ -557,7 +562,9 @@ export class Redis implements Extension {
 			) {
 				// Expected behavior: Could not acquire lock, another instance locked it already.
 				// Skip further hooks and retry — the data is safe on the other instance.
-				throw new SkipFurtherHooksError("Another instance is already storing this document");
+				throw new SkipFurtherHooksError(
+					"Another instance is already storing this document",
+				);
 			}
 			//unexpected error
 			console.error("unexpected error:", error);
@@ -753,8 +760,8 @@ export class Redis implements Extension {
 		// only *asks* peers to reply. Our own changes reach them one round trip
 		// later, when we answer the SyncStep1 they send back — and the subscriber
 		// is disconnected a few lines below, so that answer would never come.
-		// Durability on shutdown comes from `flushPendingStores()`, which the
-		// server runs before this hook.
+		// Durability on shutdown comes from the fact that we flush per setImmediate,
+		// which runs before the delay in beforeUnloadDocument.
 		for (const documentName of Array.from(this.pendingPublishes.keys())) {
 			this.cancelPendingPublish(documentName);
 		}
