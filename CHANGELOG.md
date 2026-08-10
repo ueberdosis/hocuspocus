@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.6.0](https://github.com/ueberdosis/hocuspocus/compare/v4.5.0...v4.6.0) (2026-08-10)
+
+
+### Bug Fixes
+
+* encode stateless message once when received operation via Redis ; this is a performance fix. ([#1136](https://github.com/ueberdosis/hocuspocus/issues/1136)) ([b524b4b](https://github.com/ueberdosis/hocuspocus/commit/b524b4b30299a64ffa1309f70a0fd6e761103d4a))
+
+
+
+
+
 # [4.5.0](https://github.com/ueberdosis/hocuspocus/compare/v4.4.0...v4.5.0) (2026-08-04)
 
 
