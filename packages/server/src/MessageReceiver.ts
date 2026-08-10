@@ -137,9 +137,12 @@ export class MessageReceiver {
 					);
 				}
 				const msg = message.readVarString();
-				document.getConnections().forEach((c) => {
-					c.sendStateless(msg);
-				});
+				// `relayStateless`, not `broadcastStateless`: the originating
+				// instance already ran the beforeBroadcastStateless hook. It shares
+				// one encoded buffer across connections instead of encoding per
+				// connection, which matters here because this path fans out on
+				// every instance of a cluster.
+				document.relayStateless(msg);
 				break;
 			}
 

@@ -448,6 +448,21 @@ export class Document extends Doc {
 	): void {
 		this.callbacks.beforeBroadcastStateless(this, payload);
 
+		this.relayStateless(payload, filter);
+	}
+
+	/**
+	 * Send a stateless payload to this instance's connections *without* running
+	 * the `beforeBroadcastStateless` hook.
+	 *
+	 * For relaying a payload that another server instance already broadcast: the
+	 * hook ran there, and running it again here would fire it once per instance.
+	 * Prefer `broadcastStateless` unless you are that relay.
+	 */
+	public relayStateless(
+		payload: string,
+		filter?: (conn: Connection) => boolean,
+	): void {
 		this.broadcast(
 			(address) =>
 				new OutgoingMessage(address).writeStateless(payload).toUint8Array(),
