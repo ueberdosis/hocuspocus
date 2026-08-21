@@ -9,10 +9,7 @@ test('observeDeep is called just once', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observeDeep is called …
   type.observeDeep((events, transaction) => {
@@ -33,10 +30,7 @@ test('observeDeep is called for every single change', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observeDeep is called …
   type.observeDeep((events, transaction) => {
@@ -59,10 +53,7 @@ test('observeDeep is called once for a single transaction', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observeDeep is called …
   type.observeDeep((events, transaction) => {

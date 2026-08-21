@@ -4,7 +4,7 @@ import { Redis } from '@hocuspocus/extension-redis'
 import { S3 } from '@hocuspocus/extension-s3'
 
 // AWS S3 + Redis scaling example (only if AWS credentials are available)
-let awsServer1, awsServer2;
+let awsServer1, awsServer2
 
 if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
   awsServer1 = new Server({
@@ -22,8 +22,8 @@ if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
         prefix: process.env.S3_PREFIX || 'collaborative-docs/',
         credentials: {
           accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        },
       }),
     ],
   })
@@ -44,8 +44,8 @@ if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
         prefix: process.env.S3_PREFIX || 'collaborative-docs/',
         credentials: {
           accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        },
       }),
     ],
   })
@@ -67,8 +67,8 @@ const minioServer1 = new Server({
       forcePathStyle: true,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin'
-      }
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin',
+      },
     }),
   ],
 })
@@ -88,8 +88,8 @@ const minioServer2 = new Server({
       forcePathStyle: true,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin'
-      }
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin',
+      },
     }),
   ],
 })
@@ -102,10 +102,13 @@ if (awsServer1 && awsServer2) {
 minioServer1.listen()
 minioServer2.listen()
 
-const awsStatus = (awsServer1 && awsServer2) ? `
+const awsStatus =
+  awsServer1 && awsServer2
+    ? `
   AWS S3 Instances:
     Server 1:         http://localhost:8001
-    Server 2:         http://localhost:8002` : `
+    Server 2:         http://localhost:8002`
+    : `
   AWS S3 Instances:   [Skipped - no AWS credentials found]`
 
 console.log(`

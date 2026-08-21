@@ -3,7 +3,7 @@ import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
 test('executes the onMessage callback', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus(t, { })
+    const server = await newHocuspocus(t, {})
 
     newHocuspocusProvider(t, server, {
       onMessage() {

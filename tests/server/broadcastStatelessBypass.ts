@@ -27,12 +27,13 @@ const buildBroadcastStatelessFrame = (documentName: string, payload: string): Ui
   return encoding.toUint8Array(encoder)
 }
 
-const openRawSocket = (url: string): Promise<WebSocket> => new Promise((resolve, reject) => {
-  const ws = new WebSocket(url)
-  ws.binaryType = 'arraybuffer'
-  ws.addEventListener('open', () => resolve(ws), { once: true })
-  ws.addEventListener('error', (event) => reject(event), { once: true })
-})
+const openRawSocket = (url: string): Promise<WebSocket> =>
+  new Promise((resolve, reject) => {
+    const ws = new WebSocket(url)
+    ws.binaryType = 'arraybuffer'
+    ws.addEventListener('open', () => resolve(ws), { once: true })
+    ws.addEventListener('error', event => reject(event), { once: true })
+  })
 
 test('rejects client-sent BroadcastStateless (opcode 6) — payload must not reach peers', async t => {
   const documentName = 'hocuspocus-test'
@@ -56,7 +57,7 @@ test('rejects client-sent BroadcastStateless (opcode 6) — payload must not rea
   })
 
   const received: string[] = []
-  const victimReady = new Promise<void>((resolve) => {
+  const victimReady = new Promise<void>(resolve => {
     newHocuspocusProvider(t, server, {
       name: documentName,
       token: 'read+write',
@@ -77,10 +78,14 @@ test('rejects client-sent BroadcastStateless (opcode 6) — payload must not rea
 
   const authenticated = new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('auth timeout')), 5000)
-    attacker.addEventListener('message', () => {
-      clearTimeout(timer)
-      resolve()
-    }, { once: true })
+    attacker.addEventListener(
+      'message',
+      () => {
+        clearTimeout(timer)
+        resolve()
+      },
+      { once: true },
+    )
   })
 
   attacker.send(buildAuthFrame(documentName, 'readonly'))
@@ -89,13 +94,17 @@ test('rejects client-sent BroadcastStateless (opcode 6) — payload must not rea
   attacker.send(buildBroadcastStatelessFrame(documentName, attackerPayload))
 
   // Give the server time to (incorrectly) fan out, if the bug is present.
-  await new Promise((resolve) => setTimeout(resolve, 200))
+  await new Promise(resolve => setTimeout(resolve, 200))
 
   t.false(
     received.includes(attackerPayload),
     'victim must not receive payloads from client-sent BroadcastStateless frames',
   )
-  t.is(onStatelessCalls, 0, 'onStateless must not fire for opcode 6 (it is not the Stateless opcode)')
+  t.is(
+    onStatelessCalls,
+    0,
+    'onStateless must not fire for opcode 6 (it is not the Stateless opcode)',
+  )
   t.is(
     beforeBroadcastStatelessCalls,
     0,

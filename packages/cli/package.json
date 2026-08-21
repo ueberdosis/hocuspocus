@@ -1,35 +1,35 @@
 {
-	"name": "@hocuspocus/cli",
-	"description": "a CLI tool to start a local Hocuspocus server",
-	"version": "4.6.0",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"yjs",
-		"yjs-websocket"
-	],
-	"license": "MIT",
-	"type": "module",
-	"bin": {
-		"hocuspocus": "./src/index.js",
-		"@hocuspocus/cli": "./src/index.js"
-	},
-	"files": [
-		"src"
-	],
-	"dependencies": {
-		"@hocuspocus/extension-logger": "workspace:^",
-		"@hocuspocus/extension-s3": "workspace:^",
-		"@hocuspocus/extension-sqlite": "workspace:^",
-		"@hocuspocus/extension-webhook": "workspace:^",
-		"@hocuspocus/server": "workspace:^",
-		"meow": "^14.0.0"
-	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@hocuspocus/cli",
+  "version": "4.6.0",
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+  "description": "a CLI tool to start a local Hocuspocus server",
+  "keywords": [
+    "hocuspocus",
+    "yjs",
+    "yjs-websocket"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "bin": {
+    "@hocuspocus/cli": "./src/index.js",
+    "hocuspocus": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-logger": "workspace:^",
+    "@hocuspocus/extension-s3": "workspace:^",
+    "@hocuspocus/extension-sqlite": "workspace:^",
+    "@hocuspocus/extension-webhook": "workspace:^",
+    "@hocuspocus/server": "workspace:^",
+    "meow": "^14.0.0"
+  }
 }

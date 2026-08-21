@@ -1,4 +1,5 @@
 # @hocuspocus/server
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/server.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/server.svg)](https://www.npmjs.com/package/@hocuspocus/server)
@@ -17,7 +18,7 @@ npm install @hocuspocus/server
 Minimal WebSocket server on port `1234`:
 
 ```js
-import { Server } from "@hocuspocus/server"
+import { Server } from '@hocuspocus/server'
 
 const server = new Server({
   port: 1234,
@@ -29,14 +30,14 @@ server.listen()
 Hook into the document lifecycle:
 
 ```js
-import { Server } from "@hocuspocus/server"
+import { Server } from '@hocuspocus/server'
 
 const server = new Server({
   port: 1234,
 
   async onAuthenticate({ token }) {
-    if (token !== "super-secret-token") {
-      throw new Error("Not authorized!")
+    if (token !== 'super-secret-token') {
+      throw new Error('Not authorized!')
     }
   },
 
@@ -86,9 +87,9 @@ const server = new Server({
 Use the `Hocuspocus` class directly to attach to any `WebSocketLike` instance (Bun, Deno, Cloudflare Workers, Express, etc.):
 
 ```js
-import { Hocuspocus } from "@hocuspocus/server"
+import { Hocuspocus } from '@hocuspocus/server'
 
-const hocuspocus = new Hocuspocus({ /* config */ })
+const hocuspocus = new Hocuspocus({/* config */})
 
 // pass any WebSocket-like instance + request + optional context:
 hocuspocus.handleConnection(ws, request, context)

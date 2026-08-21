@@ -2,7 +2,10 @@ import test from 'ava'
 import type { onAuthenticatePayload, onTokenSyncPayload } from '@hocuspocus/server'
 import { Unauthorized } from '@hocuspocus/common'
 import {
-  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+  sleep,
 } from '../utils/index.ts'
 
 // ============================================================================
@@ -51,9 +54,7 @@ test('provider sendToken: executes onTokenSync from custom extension when provid
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const provider = newHocuspocusProvider(t, server, {
@@ -191,9 +192,7 @@ test('server requestToken: executes onTokenSync from custom extension when serve
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const provider = newHocuspocusProvider(t, server, {

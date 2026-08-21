@@ -1,7 +1,5 @@
-import type { IncomingMessage, ServerResponse, Server as HTTPServer} from 'http'
-import {
-  createServer,
-} from 'http'
+import type { IncomingMessage, ServerResponse, Server as HTTPServer } from 'http'
+import { createServer } from 'http'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { Server } from '@hocuspocus/server'
 import { Logger } from '@hocuspocus/extension-logger'
@@ -19,9 +17,7 @@ const server = new Server({
       transformer: TiptapTransformer,
       secret: '1234',
       url: 'http://localhost:12345',
-      events: [
-        Events.onCreate, Events.onChange, Events.onConnect,
-      ],
+      events: [Events.onCreate, Events.onChange, Events.onConnect],
     }),
   ],
 })
@@ -32,7 +28,6 @@ server.listen()
  * Setup receiver
  */
 class WebhookReceiver {
-
   secret = '1234'
 
   apiToken = '123456'
@@ -64,11 +59,11 @@ class WebhookReceiver {
     })
 
     request.on('end', () => {
-      if (!this.verifySignature(data, <string> request.headers['x-hocuspocus-signature-256'])) {
+      if (!this.verifySignature(data, <string>request.headers['x-hocuspocus-signature-256'])) {
         response.writeHead(403, 'signature not valid')
       }
 
-      const { event, payload } = <{ event: string, payload: any }> JSON.parse(data)
+      const { event, payload } = <{ event: string; payload: any }>JSON.parse(data)
 
       try {
         // @ts-expect-error - let me do some magic here please TypeScript
@@ -90,12 +85,14 @@ class WebhookReceiver {
 
     // return context
     response.writeHead(200, { 'Content-Type': 'application/json' })
-    response.end(JSON.stringify({
-      user: {
-        id: 1,
-        name: 'John',
-      },
-    }))
+    response.end(
+      JSON.stringify({
+        user: {
+          id: 1,
+          name: 'John',
+        },
+      }),
+    )
   }
 
   onCreate(payload: any, response: ServerResponse) {
@@ -103,9 +100,9 @@ class WebhookReceiver {
 
     // return a document for the "default" field
     response.writeHead(200, { 'Content-Type': 'application/json' })
-    response.end(JSON.stringify({
-      default:
-        {
+    response.end(
+      JSON.stringify({
+        default: {
           type: 'doc',
           content: [
             {
@@ -119,15 +116,20 @@ class WebhookReceiver {
             },
           ],
         },
-    }))
+      }),
+    )
   }
 
   onChange(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] document ${payload.documentName} was changed: ${JSON.stringify(payload.document)}`)
+    console.log(
+      `[WebhookReceiver] document ${payload.documentName} was changed: ${JSON.stringify(payload.document)}`,
+    )
   }
 
   onDisconnect(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] user ${payload.context.user.name} disconnected from ${payload.documentName}`)
+    console.log(
+      `[WebhookReceiver] user ${payload.context.user.name} disconnected from ${payload.documentName}`,
+    )
   }
 }
 

@@ -1,8 +1,4 @@
 module.exports = {
-  presets: [
-    '@babel/preset-env',
-  ],
-  plugins: [
-    '@babel/plugin-transform-class-properties',
-  ],
+  presets: ['@babel/preset-env'],
+  plugins: ['@babel/plugin-transform-class-properties'],
 }

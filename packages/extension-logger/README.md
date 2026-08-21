@@ -1,4 +1,5 @@
 # @hocuspocus/extension-logger
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-logger.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-logger)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-logger.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-logger.svg)](https://www.npmjs.com/package/@hocuspocus/extension-logger)
@@ -15,8 +16,8 @@ npm install @hocuspocus/extension-logger
 ## Usage
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { Logger } from "@hocuspocus/extension-logger"
+import { Server } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
 
 const server = new Server({
   extensions: [new Logger()],
@@ -43,7 +44,7 @@ Route output to your own logger (pino, winston, structured JSON, etc.):
 
 ```js
 new Logger({
-  log: (...args) => myLogger.info({ msg: args.join(" ") }),
+  log: (...args) => myLogger.info({ msg: args.join(' ') }),
 })
 ```
 

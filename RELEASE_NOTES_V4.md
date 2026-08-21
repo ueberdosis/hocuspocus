@@ -29,20 +29,20 @@ All core classes and hook payloads now accept a generic `Context` type parameter
 
 ```typescript
 interface MyContext {
-  userId: string;
-  permissions: string[];
+  userId: string
+  permissions: string[]
 }
 
 const server = Server.configure<MyContext>({
   async onAuthenticate({ context, token }) {
     // context is typed as MyContext
-    return { userId: '123', permissions: ['read', 'write'] };
+    return { userId: '123', permissions: ['read', 'write'] }
   },
   async onChange({ context }) {
     // context.userId is typed as string
-    console.log(context.userId);
+    console.log(context.userId)
   },
-});
+})
 ```
 
 The generic defaults to `any`, so existing code without explicit typing continues to work.
@@ -59,47 +59,47 @@ Hook payloads now use the web-standard `Request` and `Headers` objects instead o
 
 ### Server
 
-- **Cross-runtime WebSocket support** via `crossws` -- Bun, Deno, Cloudflare Workers, Node/uWebSockets all supported *(non-breaking)*
-- **Generic `Context` type parameter** on `Hocuspocus`, `Server`, `Extension`, `Connection`, `ClientConnection`, `DirectConnection`, and all hook payloads *(non-breaking -- defaults to `any`)*
-- **Structured transaction origins** -- new `TransactionOrigin` union type (`ConnectionTransactionOrigin | RedisTransactionOrigin | LocalTransactionOrigin`) with helper functions `isTransactionOrigin()` and `shouldSkipStoreHooks()` *(breaking -- see upgrade guide)*
-- **`onLoadDocument` now accepts `Uint8Array` returns** -- extensions can return raw Yjs updates instead of constructing a full `Y.Doc`, simplifying storage extensions *(non-breaking)*
-- **`handleConnection()` returns `ClientConnection`** -- enables programmatic access to the connection lifecycle for custom integrations *(non-breaking)*
-- **Ordered message processing** -- messages are queued and processed sequentially per connection *(non-breaking)*
-- **Session awareness** -- the server supports session-aware multiplexing, allowing multiple providers with the same document name on a single WebSocket. Each provider gets a unique `sessionId` routed via a composite key. The server transparently falls back to plain document names for v3 providers *(non-breaking)*
-- **Auth retry support** -- failed authentication now properly cleans up state, allowing clients to retry without reconnecting *(non-breaking)*
-- **DirectConnection context** -- `openDirectConnection(documentName, context)` now accepts and propagates a context object *(non-breaking)*
-- **Store hooks on all changes** -- `onStoreDocument` is now triggered on any document change (not just WebSocket-originated ones), with explicit opt-out via `skipStoreHooks` on `LocalTransactionOrigin` *(non-breaking)*
-- **Provider version awareness** -- the provider version is available on `Connection.providerVersion` and in hook payloads (`onConnect`, `onAuthenticate`, `connected`), making it easier to introduce protocol changes in a backward-compatible way *(non-breaking)*
-- **`SkipFurtherHooksError`** -- extensions can throw `SkipFurtherHooksError` (from `@hocuspocus/common`) in `onStoreDocument` to signal that persistence was handled and remaining hooks should be skipped *(non-breaking)*
+- **Cross-runtime WebSocket support** via `crossws` -- Bun, Deno, Cloudflare Workers, Node/uWebSockets all supported _(non-breaking)_
+- **Generic `Context` type parameter** on `Hocuspocus`, `Server`, `Extension`, `Connection`, `ClientConnection`, `DirectConnection`, and all hook payloads _(non-breaking -- defaults to `any`)_
+- **Structured transaction origins** -- new `TransactionOrigin` union type (`ConnectionTransactionOrigin | RedisTransactionOrigin | LocalTransactionOrigin`) with helper functions `isTransactionOrigin()` and `shouldSkipStoreHooks()` _(breaking -- see upgrade guide)_
+- **`onLoadDocument` now accepts `Uint8Array` returns** -- extensions can return raw Yjs updates instead of constructing a full `Y.Doc`, simplifying storage extensions _(non-breaking)_
+- **`handleConnection()` returns `ClientConnection`** -- enables programmatic access to the connection lifecycle for custom integrations _(non-breaking)_
+- **Ordered message processing** -- messages are queued and processed sequentially per connection _(non-breaking)_
+- **Session awareness** -- the server supports session-aware multiplexing, allowing multiple providers with the same document name on a single WebSocket. Each provider gets a unique `sessionId` routed via a composite key. The server transparently falls back to plain document names for v3 providers _(non-breaking)_
+- **Auth retry support** -- failed authentication now properly cleans up state, allowing clients to retry without reconnecting _(non-breaking)_
+- **DirectConnection context** -- `openDirectConnection(documentName, context)` now accepts and propagates a context object _(non-breaking)_
+- **Store hooks on all changes** -- `onStoreDocument` is now triggered on any document change (not just WebSocket-originated ones), with explicit opt-out via `skipStoreHooks` on `LocalTransactionOrigin` _(non-breaking)_
+- **Provider version awareness** -- the provider version is available on `Connection.providerVersion` and in hook payloads (`onConnect`, `onAuthenticate`, `connected`), making it easier to introduce protocol changes in a backward-compatible way _(non-breaking)_
+- **`SkipFurtherHooksError`** -- extensions can throw `SkipFurtherHooksError` (from `@hocuspocus/common`) in `onStoreDocument` to signal that persistence was handled and remaining hooks should be skipped _(non-breaking)_
 
 ### Provider
 
-- **Session awareness** -- new `sessionAwareness` option (default: `false`). When enabled, the provider embeds a unique `sessionId` in the document name field of every message, enabling multiple providers with the same document name on one WebSocket. Keep disabled when connecting to a v3 server *(non-breaking)*
-- **Provider version sent during auth** -- the provider now sends its package version to the server in the authentication message. The extra field is safely ignored by v3 servers *(non-breaking)*
-- **Awareness message deduplication** -- when the WebSocket is not yet open and messages are queued, duplicate awareness messages for the same document are deduplicated, keeping only the latest one *(non-breaking)*
-- **Application-level Ping/Pong** -- new `MessageType.Ping` (9) and `MessageType.Pong` (10). The provider responds to server Ping messages with Pong, replacing WebSocket-level ping/pong which is not available in all runtimes. The provider works fine without receiving Pings (e.g., when connected to a v3 server) *(non-breaking)*
-- **`ws` package types removed** -- the provider no longer imports `Event`, `MessageEvent`, or `CloseEvent` from the `ws` package. It uses web-standard types and types from `@hocuspocus/common` instead *(breaking for TypeScript users who relied on `ws` types being re-exported)*
-- **`CloseEvent` shape simplified** -- the `CloseEvent` passed to `onClose` callbacks no longer includes `target` and `type` fields. Only `code` and `reason` remain *(breaking if your `onClose` handler reads `event.target` or `event.type`)*
-- **Attach collision detection** -- `HocuspocusProviderWebsocket.attach()` now throws an error if you try to attach two authenticated providers with the same effective name. Previously it silently overwrote the existing provider *(non-breaking for correct usage; may surface existing bugs)*
-- **Unknown message types handled gracefully** -- unknown message types now log `console.error` instead of throwing. This makes rolling out future protocol additions easier *(non-breaking)*
+- **Session awareness** -- new `sessionAwareness` option (default: `false`). When enabled, the provider embeds a unique `sessionId` in the document name field of every message, enabling multiple providers with the same document name on one WebSocket. Keep disabled when connecting to a v3 server _(non-breaking)_
+- **Provider version sent during auth** -- the provider now sends its package version to the server in the authentication message. The extra field is safely ignored by v3 servers _(non-breaking)_
+- **Awareness message deduplication** -- when the WebSocket is not yet open and messages are queued, duplicate awareness messages for the same document are deduplicated, keeping only the latest one _(non-breaking)_
+- **Application-level Ping/Pong** -- new `MessageType.Ping` (9) and `MessageType.Pong` (10). The provider responds to server Ping messages with Pong, replacing WebSocket-level ping/pong which is not available in all runtimes. The provider works fine without receiving Pings (e.g., when connected to a v3 server) _(non-breaking)_
+- **`ws` package types removed** -- the provider no longer imports `Event`, `MessageEvent`, or `CloseEvent` from the `ws` package. It uses web-standard types and types from `@hocuspocus/common` instead _(breaking for TypeScript users who relied on `ws` types being re-exported)_
+- **`CloseEvent` shape simplified** -- the `CloseEvent` passed to `onClose` callbacks no longer includes `target` and `type` fields. Only `code` and `reason` remain _(breaking if your `onClose` handler reads `event.target` or `event.type`)_
+- **Attach collision detection** -- `HocuspocusProviderWebsocket.attach()` now throws an error if you try to attach two authenticated providers with the same effective name. Previously it silently overwrote the existing provider _(non-breaking for correct usage; may surface existing bugs)_
+- **Unknown message types handled gracefully** -- unknown message types now log `console.error` instead of throwing. This makes rolling out future protocol additions easier _(non-breaking)_
 
 ## Bug Fixes
 
 ### Server
 
-- **Auth state reset on failure** -- when authentication fails, document state is cleaned up so the client can send a new auth message without reconnecting (#944) *(non-breaking)*
-- **`onLoadDocument` accepts `Uint8Array`** -- the callback now correctly handles both `Y.Doc` and `Uint8Array` returns (#795, #271) *(non-breaking)*
-- **Close code type check** -- close event codes are now properly validated as numbers (#1062) *(non-breaking)*
-- **Store hooks reliability** -- `onStoreDocument` now triggers on any document change, preventing accidental data loss when updates lacked a Yjs origin *(non-breaking)*
-- **`onStoreDocument` payload type** -- the Database extension and Logger extension now correctly type the parameter as `onStoreDocumentPayload` instead of the incorrect `onChangePayload` / `onDisconnectPayload` *(non-breaking)*
-- **Document name validation** -- empty and whitespace-only document names are now rejected on both WebSocket connections and direct connections *(non-breaking)*
-- **Store hook retry on failure** -- when `onStoreDocument` hooks throw, the document stays in memory and retries are attempted to avoid data loss *(non-breaking)*
-- **Graceful shutdown flushes pending stores** -- `Server.destroy()` now immediately executes all pending debounced `onStoreDocument` calls, ensuring documents are persisted before the server exits (even when `unloadImmediately: false`) *(non-breaking)*
-- **Memory optimization** -- outgoing Yjs update messages are now encoded once and shared across connections instead of being re-created per connection *(non-breaking)*
+- **Auth state reset on failure** -- when authentication fails, document state is cleaned up so the client can send a new auth message without reconnecting (#944) _(non-breaking)_
+- **`onLoadDocument` accepts `Uint8Array`** -- the callback now correctly handles both `Y.Doc` and `Uint8Array` returns (#795, #271) _(non-breaking)_
+- **Close code type check** -- close event codes are now properly validated as numbers (#1062) _(non-breaking)_
+- **Store hooks reliability** -- `onStoreDocument` now triggers on any document change, preventing accidental data loss when updates lacked a Yjs origin _(non-breaking)_
+- **`onStoreDocument` payload type** -- the Database extension and Logger extension now correctly type the parameter as `onStoreDocumentPayload` instead of the incorrect `onChangePayload` / `onDisconnectPayload` _(non-breaking)_
+- **Document name validation** -- empty and whitespace-only document names are now rejected on both WebSocket connections and direct connections _(non-breaking)_
+- **Store hook retry on failure** -- when `onStoreDocument` hooks throw, the document stays in memory and retries are attempted to avoid data loss _(non-breaking)_
+- **Graceful shutdown flushes pending stores** -- `Server.destroy()` now immediately executes all pending debounced `onStoreDocument` calls, ensuring documents are persisted before the server exits (even when `unloadImmediately: false`) _(non-breaking)_
+- **Memory optimization** -- outgoing Yjs update messages are now encoded once and shared across connections instead of being re-created per connection _(non-breaking)_
 
 ### Provider
 
-- **Unknown message types no longer crash the provider** -- `console.error` instead of `throw`. This makes future protocol additions easier *(non-breaking)*
+- **Unknown message types no longer crash the provider** -- `console.error` instead of `throw`. This makes future protocol additions easier _(non-breaking)_
 
 ## Infrastructure Changes
 
@@ -158,6 +158,7 @@ async onAuthenticate({ request, requestHeaders }) {
 ```
 
 **Key differences:**
+
 - `requestHeaders['key']` becomes `requestHeaders.get('key')`
 - `request.socket.remoteAddress` is no longer available -- use `x-forwarded-for` or `x-real-ip` headers from your reverse proxy
 - `request` is now a web `Request` object, not Node.js `IncomingMessage`
@@ -203,6 +204,7 @@ async onStoreDocument({
 ```
 
 **Migration:**
+
 - `context` &rarr; `lastContext`
 - `transactionOrigin` &rarr; `lastTransactionOrigin`
 - `requestHeaders`, `requestParameters`, `socketId` -- removed. If you need these, access them from the `lastContext`. Note that they contain the context of the last connection that triggered the hook.
@@ -252,28 +254,28 @@ If your code references the `WebSocket` type from the `ws` package, update to `W
 #### Before (v3)
 
 ```typescript
-import { WebSocket } from 'ws';
+import { WebSocket } from 'ws'
 
 // In your code
-const ws: WebSocket = connection.webSocket;
+const ws: WebSocket = connection.webSocket
 ```
 
 #### After (v4)
 
 ```typescript
-import type { WebSocketLike } from '@hocuspocus/server';
+import type { WebSocketLike } from '@hocuspocus/server'
 
 // In your code
-const ws: WebSocketLike = connection.webSocket;
+const ws: WebSocketLike = connection.webSocket
 ```
 
 The `WebSocketLike` interface is minimal:
 
 ```typescript
 interface WebSocketLike {
-  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
-  close(code?: number, reason?: string): void;
-  readyState: number;
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void
+  close(code?: number, reason?: string): void
+  readyState: number
 }
 ```
 
@@ -351,11 +353,13 @@ async onChange({ transactionOrigin }) {
 The SQLite extension has been migrated from the unmaintained `sqlite3` package to `better-sqlite3`.
 
 **What you need to do:**
+
 1. Replace the `sqlite3` dependency with `better-sqlite3`
 2. No changes to your Hocuspocus configuration -- the extension API is the same
 3. Existing SQLite database files are fully compatible (no data migration needed)
 
 If you wrote a **custom schema** for the SQLite extension, note that `better-sqlite3` uses named parameters without the `$` prefix:
+
 - `$name` &rarr; `name`
 - `$data` &rarr; `data`
 
@@ -366,23 +370,24 @@ If you call `handleConnection()` directly (e.g., for Express/Koa integration), t
 #### Before (v3)
 
 ```typescript
-import { IncomingMessage } from 'http';
+import { IncomingMessage } from 'http'
 
 wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
-  hocuspocus.handleConnection(ws, request, context);
-});
+  hocuspocus.handleConnection(ws, request, context)
+})
 ```
 
 #### After (v4)
 
 ```typescript
 wss.on('connection', (ws, request: Request) => {
-  const clientConnection = hocuspocus.handleConnection(ws, request, context);
+  const clientConnection = hocuspocus.handleConnection(ws, request, context)
   // clientConnection is now returned for programmatic access
-});
+})
 ```
 
 **Key changes:**
+
 - `request` must be a web-standard `Request` (not `IncomingMessage`)
 - The method now returns a `ClientConnection` instance
 - The WebSocket no longer needs to be from the `ws` package -- any `WebSocketLike` works
@@ -395,7 +400,7 @@ The default connection timeout has increased from 30 seconds to 60 seconds. If y
 ```typescript
 const server = Server.configure({
   timeout: 30_000,
-});
+})
 ```
 
 ## Provider Changes
@@ -436,12 +441,13 @@ const provider = new HocuspocusProvider({
   url: 'ws://localhost:1234',
   name: 'my-document',
   sessionAwareness: true, // opt-in for v4 server multiplexing
-});
+})
 ```
 
 ## Summary Checklist
 
 ### Server
+
 - [ ] Update to Node.js 22+
 - [ ] Update all `@hocuspocus/*` packages to v4
 - [ ] Replace `requestHeaders['key']` with `requestHeaders.get('key')` in all hooks
@@ -455,6 +461,7 @@ const provider = new HocuspocusProvider({
 - [ ] If using custom `handleConnection`: update to new signature and `Request` type
 
 ### Provider
+
 - [ ] Update `@hocuspocus/provider` to v4
 - [ ] Remove references to `event.target` / `event.type` in `onClose` handlers
 - [ ] Update any TypeScript imports that relied on `ws` types from the provider

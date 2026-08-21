@@ -58,7 +58,7 @@ test('beforeSync callback is called for every sync', async t => {
         onConnectCount += 1
       },
       async beforeSync({ type }) {
-        if (type === 0){
+        if (type === 0) {
           syncstep1Count += 1
         } else if (type === 1) {
           syncstep2Count += 1
@@ -102,13 +102,11 @@ test('beforeSync callback is called for every sync', async t => {
   })
 })
 
-
 test('beforeSync callback is called on every update', async t => {
   let onConnectCount = 0
   let updateCount = 0
   let syncstep1Count = 0
   let syncstep2Count = 0
-
 
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
@@ -116,7 +114,7 @@ test('beforeSync callback is called on every update', async t => {
         onConnectCount += 1
       },
       async beforeSync({ type }) {
-        if (type === 0){
+        if (type === 0) {
           syncstep1Count += 1
         } else if (type === 1) {
           syncstep2Count += 1

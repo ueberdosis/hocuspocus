@@ -1,7 +1,10 @@
 import test from 'ava'
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
-  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+  sleep,
 } from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 

@@ -9,7 +9,6 @@ on:
     - cron: '5 1 * * *'
 
 jobs:
-
   docsearch:
     runs-on: ubuntu-latest
     steps:

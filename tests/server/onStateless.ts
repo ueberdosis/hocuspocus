@@ -47,7 +47,9 @@ test('send a stateless message to a specific connection', async t => {
 
     const provider = await newHocuspocusProvider(t, server, {
       onSynced: () => {
-        provider.sendStateless('Send stateless message, and then a stateless message is will be received')
+        provider.sendStateless(
+          'Send stateless message, and then a stateless message is will be received',
+        )
       },
       onStateless: () => {
         t.pass()
@@ -69,9 +71,7 @@ test('calls the onStateless hook', async t => {
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const provider = await newHocuspocusProvider(t, server, {

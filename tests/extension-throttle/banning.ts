@@ -34,7 +34,6 @@ test('throttle extension bans properly', async t => {
   } catch (e) {
     t.true(throttle.isBanned(ip))
   }
-
 })
 
 test('throttle extension unbans properly', async t => {

@@ -22,9 +22,7 @@ test('executes the onListen callback from an extension', async t => {
     }
 
     newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
   })
 })

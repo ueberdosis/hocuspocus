@@ -5,7 +5,6 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test("initially doesn't have unsynced changes", async t => {
   return new Promise(async resolve => {
-
     const server = await newHocuspocus(t)
 
     const provider = newHocuspocusProvider(t, server)

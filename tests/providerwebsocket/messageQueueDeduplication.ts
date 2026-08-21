@@ -7,7 +7,11 @@ import { newHocuspocus } from '../utils/index.ts'
  * Helper to create a raw message Uint8Array with a given documentName and messageType,
  * matching the wire format: VarString(documentName) + VarUint(messageType) + optional payload.
  */
-function createRawMessage(documentName: string, messageType: number, payload?: Uint8Array): Uint8Array {
+function createRawMessage(
+  documentName: string,
+  messageType: number,
+  payload?: Uint8Array,
+): Uint8Array {
   const encoder = encoding.createEncoder()
   encoding.writeVarString(encoder, documentName)
   encoding.writeVarUint(encoder, messageType)

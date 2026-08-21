@@ -1,15 +1,13 @@
 {
   "index_name": "hocuspocus",
-  "start_urls": [
-    "https://tiptap.dev/docs/hocuspocus"
-  ],
+  "start_urls": ["https://tiptap.dev/docs/hocuspocus"],
   "sitemap_alternate_links": true,
   "selectors": {
     "default": {
       "lvl0": {
-          "selector": "",
-          "global": true,
-          "default_value": "Documentation"
+        "selector": "",
+        "global": true,
+        "default_value": "Documentation"
       },
       "lvl1": "main h1",
       "lvl2": "main h2",
@@ -23,15 +21,7 @@
   "strip_chars": " .,;:#",
   "custom_settings": {
     "separatorsToIndex": "_",
-    "attributesForFaceting": [
-      "type",
-      "lang"
-    ],
-    "attributesToRetrieve": [
-      "hierarchy",
-      "text",
-      "anchor",
-      "url"
-    ]
+    "attributesForFaceting": ["type", "lang"],
+    "attributesToRetrieve": ["hierarchy", "text", "anchor", "url"]
   }
 }

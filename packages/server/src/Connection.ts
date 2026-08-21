@@ -1,305 +1,278 @@
-import {
-	type CloseEvent,
-	ResetConnection,
-	WsReadyStates,
-} from "@hocuspocus/common";
-import type Document from "./Document.ts";
-import { IncomingMessage } from "./IncomingMessage.ts";
-import { MessageReceiver } from "./MessageReceiver.ts";
-import { OutgoingMessage } from "./OutgoingMessage.ts";
-import type {
-	WebSocketLike,
-	beforeSyncPayload,
-	onStatelessPayload,
-} from "./types.ts";
+import { type CloseEvent, ResetConnection, WsReadyStates } from '@hocuspocus/common'
+import type Document from './Document.ts'
+import { IncomingMessage } from './IncomingMessage.ts'
+import { MessageReceiver } from './MessageReceiver.ts'
+import { OutgoingMessage } from './OutgoingMessage.ts'
+import type { WebSocketLike, beforeSyncPayload, onStatelessPayload } from './types.ts'
 
 export class Connection<Context = any> {
-	webSocket: WebSocketLike;
+  webSocket: WebSocketLike
 
-	context: Context;
+  context: Context
 
-	document: Document;
+  document: Document
 
-	request: Request;
+  request: Request
 
-	callbacks = {
-		onClose: [(document: Document, event?: CloseEvent) => {}],
-		beforeHandleMessage: (connection: Connection, update: Uint8Array) =>
-			Promise.resolve(),
-		afterHandleMessage: (connection: Connection, update: Uint8Array) =>
-			Promise.resolve(),
-		beforeSync: (
-			connection: Connection,
-			payload: Pick<beforeSyncPayload, "type" | "payload">,
-		) => Promise.resolve(),
-		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
-		onTokenSyncCallback: (payload: { token: string }) => Promise.resolve(),
-	};
+  callbacks = {
+    onClose: [(document: Document, event?: CloseEvent) => {}],
+    beforeHandleMessage: (connection: Connection, update: Uint8Array) => Promise.resolve(),
+    afterHandleMessage: (connection: Connection, update: Uint8Array) => Promise.resolve(),
+    beforeSync: (connection: Connection, payload: Pick<beforeSyncPayload, 'type' | 'payload'>) =>
+      Promise.resolve(),
+    statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
+    onTokenSyncCallback: (payload: { token: string }) => Promise.resolve(),
+  }
 
-	socketId: string;
+  socketId: string
 
-	readOnly: boolean;
+  readOnly: boolean
 
-	sessionId: string | null;
+  sessionId: string | null
 
-	providerVersion: string | null;
+  providerVersion: string | null
 
-	/**
-	 * The address string prefixed to outgoing messages.
-	 * Session-aware clients get `documentName\0sessionId`; legacy clients get plain `documentName`.
-	 */
-	get messageAddress(): string {
-		return this.sessionId
-			? `${this.document.name}\0${this.sessionId}`
-			: this.document.name;
-	}
+  /**
+   * The address string prefixed to outgoing messages.
+   * Session-aware clients get `documentName\0sessionId`; legacy clients get plain `documentName`.
+   */
+  get messageAddress(): string {
+    return this.sessionId ? `${this.document.name}\0${this.sessionId}` : this.document.name
+  }
 
-	private messageQueue: Uint8Array[] = [];
+  private messageQueue: Uint8Array[] = []
 
-	private processingPromise: Promise<void> = Promise.resolve();
+  private processingPromise: Promise<void> = Promise.resolve()
 
-	/**
-	 * Constructor.
-	 */
-	constructor(
-		connection: WebSocketLike,
-		request: Request,
-		document: Document,
-		socketId: string,
-		context: Context,
-		readOnly = false,
-		sessionId?: string | null,
-		providerVersion?: string | null,
-	) {
-		this.webSocket = connection;
-		this.context = context;
-		this.document = document;
-		this.request = request;
-		this.socketId = socketId;
-		this.readOnly = readOnly;
-		this.sessionId = sessionId ?? null;
-		this.providerVersion = providerVersion ?? null;
+  /**
+   * Constructor.
+   */
+  constructor(
+    connection: WebSocketLike,
+    request: Request,
+    document: Document,
+    socketId: string,
+    context: Context,
+    readOnly = false,
+    sessionId?: string | null,
+    providerVersion?: string | null,
+  ) {
+    this.webSocket = connection
+    this.context = context
+    this.document = document
+    this.request = request
+    this.socketId = socketId
+    this.readOnly = readOnly
+    this.sessionId = sessionId ?? null
+    this.providerVersion = providerVersion ?? null
 
-		this.document.addConnection(this);
+    this.document.addConnection(this)
 
-		this.sendCurrentAwareness();
-	}
+    this.sendCurrentAwareness()
+  }
 
-	/**
-	 * Set a callback that will be triggered when the connection is closed
-	 */
-	onClose(
-		callback: (document: Document, event?: CloseEvent) => void,
-	): Connection {
-		this.callbacks.onClose.push(callback);
+  /**
+   * Set a callback that will be triggered when the connection is closed
+   */
+  onClose(callback: (document: Document, event?: CloseEvent) => void): Connection {
+    this.callbacks.onClose.push(callback)
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Set a callback that will be triggered when an stateless message is received
-	 */
-	onStatelessCallback(
-		callback: (payload: onStatelessPayload) => Promise<void>,
-	): Connection {
-		this.callbacks.statelessCallback = callback;
+  /**
+   * Set a callback that will be triggered when an stateless message is received
+   */
+  onStatelessCallback(callback: (payload: onStatelessPayload) => Promise<void>): Connection {
+    this.callbacks.statelessCallback = callback
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Set a callback that will be triggered before an message is handled
-	 */
-	beforeHandleMessage(
-		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
-	): Connection {
-		this.callbacks.beforeHandleMessage = callback;
+  /**
+   * Set a callback that will be triggered before an message is handled
+   */
+  beforeHandleMessage(
+    callback: (connection: Connection, update: Uint8Array) => Promise<any>,
+  ): Connection {
+    this.callbacks.beforeHandleMessage = callback
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Set a callback that will be triggered after a message has been handled
-	 */
-	afterHandleMessage(
-		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
-	): Connection {
-		this.callbacks.afterHandleMessage = callback;
+  /**
+   * Set a callback that will be triggered after a message has been handled
+   */
+  afterHandleMessage(
+    callback: (connection: Connection, update: Uint8Array) => Promise<any>,
+  ): Connection {
+    this.callbacks.afterHandleMessage = callback
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Set a callback that will be triggered before a sync message is handled
-	 */
-	beforeSync(
-		callback: (
-			connection: Connection,
-			payload: Pick<beforeSyncPayload, "type" | "payload">,
-		) => Promise<any>,
-	): Connection {
-		this.callbacks.beforeSync = callback;
+  /**
+   * Set a callback that will be triggered before a sync message is handled
+   */
+  beforeSync(
+    callback: (
+      connection: Connection,
+      payload: Pick<beforeSyncPayload, 'type' | 'payload'>,
+    ) => Promise<any>,
+  ): Connection {
+    this.callbacks.beforeSync = callback
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Set a callback that will be triggered when on token sync message is received
-	 */
-	onTokenSyncCallback(
-		callback: (payload: { token: string }) => Promise<void>,
-	): Connection {
-		this.callbacks.onTokenSyncCallback = callback;
+  /**
+   * Set a callback that will be triggered when on token sync message is received
+   */
+  onTokenSyncCallback(callback: (payload: { token: string }) => Promise<void>): Connection {
+    this.callbacks.onTokenSyncCallback = callback
 
-		return this;
-	}
+    return this
+  }
 
-	/**
-	 * Returns a promise that resolves when all queued messages have been processed.
-	 */
-	waitForPendingMessages(): Promise<void> {
-		return this.processingPromise;
-	}
+  /**
+   * Returns a promise that resolves when all queued messages have been processed.
+   */
+  waitForPendingMessages(): Promise<void> {
+    return this.processingPromise
+  }
 
-	/**
-	 * Send the given message
-	 */
-	send(message: Uint8Array): void {
-		if (
-			this.webSocket.readyState === WsReadyStates.Closing ||
-			this.webSocket.readyState === WsReadyStates.Closed
-		) {
-			this.close();
-			return;
-		}
+  /**
+   * Send the given message
+   */
+  send(message: Uint8Array): void {
+    if (
+      this.webSocket.readyState === WsReadyStates.Closing ||
+      this.webSocket.readyState === WsReadyStates.Closed
+    ) {
+      this.close()
+      return
+    }
 
-		try {
-			this.webSocket.send(message);
-		} catch (exception) {
-			this.close();
-		}
-	}
+    try {
+      this.webSocket.send(message)
+    } catch (exception) {
+      this.close()
+    }
+  }
 
-	/**
-	 * Send a stateless message with payload
-	 */
-	public sendStateless(payload: string): void {
-		const message = new OutgoingMessage(this.messageAddress).writeStateless(
-			payload,
-		);
+  /**
+   * Send a stateless message with payload
+   */
+  public sendStateless(payload: string): void {
+    const message = new OutgoingMessage(this.messageAddress).writeStateless(payload)
 
-		this.send(message.toUint8Array());
-	}
+    this.send(message.toUint8Array())
+  }
 
-	/**
-	 * Request current token from the client
-	 */
-	public requestToken(): void {
-		const message = new OutgoingMessage(
-			this.messageAddress,
-		).writeTokenSyncRequest();
+  /**
+   * Request current token from the client
+   */
+  public requestToken(): void {
+    const message = new OutgoingMessage(this.messageAddress).writeTokenSyncRequest()
 
-		this.send(message.toUint8Array());
-	}
+    this.send(message.toUint8Array())
+  }
 
-	/**
-	 * Graceful wrapper around the WebSocket close method.
-	 */
-	close(event?: CloseEvent): void {
-		if (this.document.hasConnection(this)) {
-			this.document.removeConnection(this);
-			this.callbacks.onClose.forEach(
-				(callback: (arg0: Document, arg1?: CloseEvent) => any) =>
-					callback(this.document, event),
-			);
+  /**
+   * Graceful wrapper around the WebSocket close method.
+   */
+  close(event?: CloseEvent): void {
+    if (this.document.hasConnection(this)) {
+      this.document.removeConnection(this)
+      this.callbacks.onClose.forEach((callback: (arg0: Document, arg1?: CloseEvent) => any) =>
+        callback(this.document, event),
+      )
 
-			const closeMessage = new OutgoingMessage(this.messageAddress);
-			closeMessage.writeCloseMessage(
-				event?.reason ?? "Server closed the connection",
-			);
-			this.send(closeMessage.toUint8Array());
-		}
-	}
+      const closeMessage = new OutgoingMessage(this.messageAddress)
+      closeMessage.writeCloseMessage(event?.reason ?? 'Server closed the connection')
+      this.send(closeMessage.toUint8Array())
+    }
+  }
 
-	/**
-	 * Send the current document awareness to the client, if any
-	 * @private
-	 */
-	private sendCurrentAwareness(): void {
-		if (!this.document.hasAwarenessStates()) {
-			return;
-		}
+  /**
+   * Send the current document awareness to the client, if any
+   * @private
+   */
+  private sendCurrentAwareness(): void {
+    if (!this.document.hasAwarenessStates()) {
+      return
+    }
 
-		const awarenessMessage = new OutgoingMessage(
-			this.messageAddress,
-		).createAwarenessUpdateMessage(this.document.awareness);
+    const awarenessMessage = new OutgoingMessage(this.messageAddress).createAwarenessUpdateMessage(
+      this.document.awareness,
+    )
 
-		this.send(awarenessMessage.toUint8Array());
-	}
+    this.send(awarenessMessage.toUint8Array())
+  }
 
-	/**
-	 * Handle an incoming message
-	 * @public
-	 */
-	public handleMessage(data: Uint8Array): void {
-		this.messageQueue.push(data);
+  /**
+   * Handle an incoming message
+   * @public
+   */
+  public handleMessage(data: Uint8Array): void {
+    this.messageQueue.push(data)
 
-		if (this.messageQueue.length === 1) {
-			this.processingPromise = this.processMessages();
-		}
-	}
+    if (this.messageQueue.length === 1) {
+      this.processingPromise = this.processMessages()
+    }
+  }
 
-	private async processMessages() {
-		while (this.messageQueue.length > 0) {
-			const rawUpdate = this.messageQueue.at(0) as Uint8Array;
+  private async processMessages() {
+    while (this.messageQueue.length > 0) {
+      const rawUpdate = this.messageQueue.at(0) as Uint8Array
 
-			const message = new IncomingMessage(rawUpdate);
-			const rawKey = message.readVarString();
+      const message = new IncomingMessage(rawUpdate)
+      const rawKey = message.readVarString()
 
-			// Accept messages addressed with either the plain documentName or documentName\0sessionId
-			const sepIdx = rawKey.indexOf('\0');
-			const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx);
-			if (documentName !== this.document.name) {
-				this.messageQueue.shift();
-				continue;
-			}
+      // Accept messages addressed with either the plain documentName or documentName\0sessionId
+      const sepIdx = rawKey.indexOf('\0')
+      const documentName = sepIdx === -1 ? rawKey : rawKey.substring(0, sepIdx)
+      if (documentName !== this.document.name) {
+        this.messageQueue.shift()
+        continue
+      }
 
-			// Write the correct address so replies reach the right provider
-			message.writeVarString(this.messageAddress);
+      // Write the correct address so replies reach the right provider
+      message.writeVarString(this.messageAddress)
 
-			try {
-				await this.callbacks.beforeHandleMessage(this, rawUpdate);
-				const receiver = new MessageReceiver(message);
+      try {
+        await this.callbacks.beforeHandleMessage(this, rawUpdate)
+        const receiver = new MessageReceiver(message)
 
-				try {
-					await receiver.apply(this.document, this);
-				} finally {
-					try {
-						await this.callbacks.afterHandleMessage(this, rawUpdate);
-					} catch (afterError) {
-						console.error(
-							`afterHandleMessage hook failed (while handling ${documentName})`,
-							afterError,
-						);
-					}
-				}
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			} catch (e: any) {
-				console.error(
-					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
-					e,
-				);
-				this.close({
-					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
-					reason: "reason" in e ? e.reason : ResetConnection.reason,
-				});
-				this.messageQueue.length = 0;
-				return;
-			}
+        try {
+          await receiver.apply(this.document, this)
+        } finally {
+          try {
+            await this.callbacks.afterHandleMessage(this, rawUpdate)
+          } catch (afterError) {
+            console.error(
+              `afterHandleMessage hook failed (while handling ${documentName})`,
+              afterError,
+            )
+          }
+        }
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      } catch (e: any) {
+        console.error(
+          `closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
+          e,
+        )
+        this.close({
+          code: 'code' in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
+          reason: 'reason' in e ? e.reason : ResetConnection.reason,
+        })
+        this.messageQueue.length = 0
+        return
+      }
 
-			this.messageQueue.shift();
-		}
-	}
+      this.messageQueue.shift()
+    }
+  }
 }
 
-export default Connection;
+export default Connection

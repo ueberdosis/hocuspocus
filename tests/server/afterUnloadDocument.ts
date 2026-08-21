@@ -62,9 +62,7 @@ test('does not execute the afterUnloadDocument callback when document fails to l
     }
 
     server.configure({
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     newHocuspocusProvider(t, server)

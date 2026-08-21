@@ -1,7 +1,5 @@
 import test from 'ava'
-import {
-  newHocuspocus, newHocuspocusProvider, randomInteger,
-} from '../utils/index.ts'
+import { newHocuspocus, newHocuspocusProvider, randomInteger } from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('documents count is zero by default', async t => {
@@ -36,7 +34,10 @@ test('the same document name counts as one document', async t => {
     tt.is(server.getDocumentsCount(), 1)
   })
 
-  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
+  providers.forEach(provider => {
+    provider.disconnect()
+    provider.configuration.websocketProvider.disconnect()
+  })
 
   await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
@@ -58,7 +59,10 @@ test('adds and removes different documents properly', async t => {
     tt.is(server.getDocumentsCount(), 5)
   })
 
-  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
+  providers.forEach(provider => {
+    provider.disconnect()
+    provider.configuration.websocketProvider.disconnect()
+  })
 
   await retryableAssertion(t, tt => {
     tt.is(server.getConnectionsCount(), 0)
@@ -71,9 +75,7 @@ test('adds and removes random number of documents properly', async t => {
   const numberOfProviders = randomInteger(10, 100)
   const providers = []
   for (let index = 0; index < numberOfProviders; index += 1) {
-    providers.push(
-      newHocuspocusProvider(t, server, { name: `foobar-${index}` }),
-    )
+    providers.push(newHocuspocusProvider(t, server, { name: `foobar-${index}` }))
   }
   await retryableAssertion(t, tt => {
     tt.is(server.getDocumentsCount(), numberOfProviders)

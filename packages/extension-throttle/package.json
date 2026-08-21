@@ -1,40 +1,40 @@
 {
-	"name": "@hocuspocus/extension-throttle",
-	"version": "4.6.0",
-	"description": "hocuspocus throttle extension",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"throttle",
-		"yjs"
-	],
-	"license": "MIT",
-	"type": "module",
-	"main": "dist/hocuspocus-throttle.cjs",
-	"module": "dist/hocuspocus-throttle.esm.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
-			"import": "./dist/hocuspocus-throttle.esm.js",
-			"require": "./dist/hocuspocus-throttle.cjs",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"files": [
-		"src",
-		"dist"
-	],
-	"dependencies": {
-		"@hocuspocus/server": "workspace:^"
-	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@hocuspocus/extension-throttle",
+  "version": "4.6.0",
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+  "description": "hocuspocus throttle extension",
+  "keywords": [
+    "hocuspocus",
+    "throttle",
+    "yjs"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-throttle.cjs",
+  "module": "dist/hocuspocus-throttle.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-throttle.esm.js",
+      "require": "./dist/hocuspocus-throttle.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "workspace:^"
+  }
 }

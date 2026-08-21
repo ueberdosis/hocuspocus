@@ -51,9 +51,7 @@ test('does not execute the afterLoadDocument callback when document fails to loa
     }
 
     server.configure({
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     newHocuspocusProvider(t, server)

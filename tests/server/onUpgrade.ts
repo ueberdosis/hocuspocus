@@ -24,9 +24,7 @@ test('executes the onUpgrade callback from an extension', async t => {
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     newHocuspocusProvider(t, server)
@@ -36,7 +34,6 @@ test('executes the onUpgrade callback from an extension', async t => {
 test('has the server instance', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
-
       async onUpgrade({ instance }) {
         t.is(instance, server)
         resolve('done')
@@ -50,7 +47,6 @@ test('has the server instance', async t => {
 test('has the request', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
-
       async onUpgrade({ request }) {
         t.is(request.url, '/')
         resolve('done')
@@ -64,7 +60,6 @@ test('has the request', async t => {
 test('has the socket', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
-
       async onUpgrade({ socket }) {
         t.truthy(socket)
         resolve('done')
@@ -78,7 +73,6 @@ test('has the socket', async t => {
 test('has the head', async t => {
   await new Promise(async resolve => {
     const server = await newHocuspocus(t, {
-
       async onUpgrade({ head }) {
         t.truthy(head)
         resolve('done')

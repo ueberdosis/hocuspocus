@@ -1,4 +1,5 @@
 # @hocuspocus/extension-webhook
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-webhook.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-webhook)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-webhook.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-webhook.svg)](https://www.npmjs.com/package/@hocuspocus/extension-webhook)
@@ -15,14 +16,14 @@ npm install @hocuspocus/extension-webhook
 ## Usage
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { Webhook, Events } from "@hocuspocus/extension-webhook"
+import { Server } from '@hocuspocus/server'
+import { Webhook, Events } from '@hocuspocus/extension-webhook'
 
 const server = new Server({
   extensions: [
     new Webhook({
-      url: "https://example.com/hocuspocus-webhook",
-      secret: "your-signing-secret",
+      url: 'https://example.com/hocuspocus-webhook',
+      secret: 'your-signing-secret',
       events: [Events.onChange, Events.onConnect, Events.onDisconnect, Events.onCreate],
     }),
   ],

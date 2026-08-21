@@ -1,7 +1,7 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from 'react'
 
-import type { SyncStatus } from "../types.ts";
-import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
+import type { SyncStatus } from '../types.ts'
+import { useHocuspocusProvider } from './useHocuspocusProvider.ts'
 
 /**
  * Subscribe to the sync status of local changes.
@@ -24,28 +24,28 @@ import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
  * ```
  */
 export function useHocuspocusSyncStatus(): SyncStatus {
-	const provider = useHocuspocusProvider();
+  const provider = useHocuspocusProvider()
 
-	const subscribe = useCallback(
-		(onStoreChange: () => void) => {
-			provider.on("synced", onStoreChange);
-			provider.on("unsyncedChanges", onStoreChange);
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      provider.on('synced', onStoreChange)
+      provider.on('unsyncedChanges', onStoreChange)
 
-			return () => {
-				provider.off("synced", onStoreChange);
-				provider.off("unsyncedChanges", onStoreChange);
-			};
-		},
-		[provider],
-	);
+      return () => {
+        provider.off('synced', onStoreChange)
+        provider.off('unsyncedChanges', onStoreChange)
+      }
+    },
+    [provider],
+  )
 
-	const getSnapshot = useCallback((): SyncStatus => {
-		// Check if there are unsynced changes
-		if (provider.unsyncedChanges > 0) {
-			return "syncing";
-		}
-		return "synced";
-	}, [provider]);
+  const getSnapshot = useCallback((): SyncStatus => {
+    // Check if there are unsynced changes
+    if (provider.unsyncedChanges > 0) {
+      return 'syncing'
+    }
+    return 'synced'
+  }, [provider])
 
-	return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }

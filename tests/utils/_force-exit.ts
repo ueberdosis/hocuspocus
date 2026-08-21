@@ -1,6 +1,6 @@
-import process from "node:process";
-import { registerCompletionHandler } from "ava";
+import process from 'node:process'
+import { registerCompletionHandler } from 'ava'
 
 registerCompletionHandler(() => {
-	process.exit(); // eslint-disable-line
-});
+  process.exit() // eslint-disable-line
+})

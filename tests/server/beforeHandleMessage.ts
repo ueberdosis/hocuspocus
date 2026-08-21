@@ -80,7 +80,6 @@ test('beforeHandleMessage callback is called for every new client', async t => {
     tt.is(onConnectCount, 2)
     tt.is(beforeHandleMessageCount, 6) // 2x awareness per conn, 2x sync per conn (step 1 + 2)
   })
-
 })
 
 test('an exception thrown in beforeHandleMessage closes the connection and discards queued messages', async t => {

@@ -1,1 +1,1 @@
-export * from "./S3.ts";
+export * from './S3.ts'

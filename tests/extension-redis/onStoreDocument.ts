@@ -70,10 +70,7 @@ test('stores documents when the last client disconnects', async t => {
         }),
       ],
       onStoreDocument: async ({ document }) => {
-        t.is(
-          provider.document.getArray('foo').get(0),
-          document.getArray('foo').get(0),
-        )
+        t.is(provider.document.getArray('foo').get(0), document.getArray('foo').get(0))
 
         resolve('done')
       },
@@ -148,7 +145,6 @@ test('document gets unloaded on both servers after disconnection', async t => {
             resolve('')
           }, 10000) // must be higher than CustomStorageExtension delay (3s) + RedisExtension.disconnectDelay (1s)
         }, 1500)
-
       },
     })
   })

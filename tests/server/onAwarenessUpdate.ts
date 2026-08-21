@@ -43,9 +43,7 @@ test('executes the onAwarenessUpdate callback from a custom extension', async t 
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const provider = newHocuspocusProvider(t, server, {

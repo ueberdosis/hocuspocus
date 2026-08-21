@@ -32,21 +32,30 @@ const buildCloseFrame = (documentName: string): Uint8Array => {
   return encoding.toUint8Array(encoder)
 }
 
-const openRawSocket = (url: string): Promise<WebSocket> => new Promise((resolve, reject) => {
-  const ws = new WebSocket(url)
-  ws.binaryType = 'arraybuffer'
-  ws.addEventListener('open', () => resolve(ws), { once: true })
-  ws.addEventListener('error', (event) => reject(event), { once: true })
-})
+const openRawSocket = (url: string): Promise<WebSocket> =>
+  new Promise((resolve, reject) => {
+    const ws = new WebSocket(url)
+    ws.binaryType = 'arraybuffer'
+    ws.addEventListener('open', () => resolve(ws), { once: true })
+    ws.addEventListener('error', event => reject(event), { once: true })
+  })
 
 // Wait for the server to close the socket, returning the close code.
-const waitForClose = (ws: WebSocket, timeoutMs = 5000): Promise<number> => new Promise((resolve, reject) => {
-  const timer = setTimeout(() => reject(new Error('connection was not closed by the server')), timeoutMs)
-  ws.addEventListener('close', (event) => {
-    clearTimeout(timer)
-    resolve(event.code)
-  }, { once: true })
-})
+const waitForClose = (ws: WebSocket, timeoutMs = 5000): Promise<number> =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error('connection was not closed by the server')),
+      timeoutMs,
+    )
+    ws.addEventListener(
+      'close',
+      event => {
+        clearTimeout(timer)
+        resolve(event.code)
+      },
+      { once: true },
+    )
+  })
 
 test('closes an unauthenticated connection that exceeds the pre-auth message-count limit', async t => {
   const server = await newHocuspocus(t, {
@@ -169,14 +178,20 @@ test('does not close an authenticated connection that has closed all of its docu
   t.teardown(() => attacker.close())
 
   // Authenticate a document (no onAuthenticate hook => allowed).
-  const authenticated = new Promise<void>((resolve) => {
+  const authenticated = new Promise<void>(resolve => {
     attacker.addEventListener('message', () => resolve(), { once: true })
   })
   attacker.send(buildAuthFrame('soon-empty-doc', ''))
   await authenticated
 
   let closedCode: number | undefined
-  attacker.addEventListener('close', (event) => { closedCode = event.code }, { once: true })
+  attacker.addEventListener(
+    'close',
+    event => {
+      closedCode = event.code
+    },
+    { once: true },
+  )
 
   // Keep the socket alive with periodic frames so `lastMessageReceivedAt` stays
   // fresh. Halfway through, close the only document, leaving zero established
@@ -190,12 +205,16 @@ test('does not close an authenticated connection that has closed all of its docu
   }, 150)
   t.teardown(() => clearInterval(interval))
 
-  await new Promise((resolve) => setTimeout(resolve, 700))
+  await new Promise(resolve => setTimeout(resolve, 700))
   attacker.send(buildCloseFrame('soon-empty-doc'))
-  await new Promise((resolve) => setTimeout(resolve, 1100))
+  await new Promise(resolve => setTimeout(resolve, 1100))
 
   clearInterval(interval)
-  t.is(closedCode, undefined, 'authenticated connection must not be closed by the pre-auth deadline')
+  t.is(
+    closedCode,
+    undefined,
+    'authenticated connection must not be closed by the pre-auth deadline',
+  )
 })
 
 test('does not close an authenticated connection that later exceeds the pre-auth limits', async t => {
@@ -208,7 +227,7 @@ test('does not close an authenticated connection that later exceeds the pre-auth
   t.teardown(() => attacker.close())
 
   // Authenticate first (no onAuthenticate hook => allowed).
-  const authenticated = new Promise<void>((resolve) => {
+  const authenticated = new Promise<void>(resolve => {
     attacker.addEventListener('message', () => resolve(), { once: true })
   })
   attacker.send(buildAuthFrame('authenticated-doc', ''))
@@ -217,11 +236,17 @@ test('does not close an authenticated connection that later exceeds the pre-auth
   // After auth, large/many frames flow through the established connection and
   // are not subject to the pre-auth queue caps.
   let closedEarly = false
-  attacker.addEventListener('close', () => { closedEarly = true }, { once: true })
+  attacker.addEventListener(
+    'close',
+    () => {
+      closedEarly = true
+    },
+    { once: true },
+  )
   for (let i = 0; i < 50; i += 1) {
     attacker.send(buildStatelessFrame('authenticated-doc', 64 * 1024))
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  await new Promise(resolve => setTimeout(resolve, 300))
   t.false(closedEarly, 'authenticated connection must not be closed by pre-auth queue limits')
 })

@@ -9,10 +9,7 @@ test('observe is called just once', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observe is called …
   type.observe((events, transaction) => {
@@ -25,7 +22,6 @@ test('observe is called just once', async t => {
   await retryableAssertion(t, tt => {
     tt.is(count, 1)
   })
-
 })
 
 test('observe is called for every single change', async t => {
@@ -34,10 +30,7 @@ test('observe is called for every single change', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observe is called …
   type.observe((events, transaction) => {
@@ -60,10 +53,7 @@ test('observe is called once for a single transaction', async t => {
   const server = await newHocuspocus(t)
   const provider = newHocuspocusProvider(t, server)
 
-  const type = provider.document.get(
-    'xmlText',
-    Y.XmlText,
-  ) as unknown as Y.XmlText
+  const type = provider.document.get('xmlText', Y.XmlText) as unknown as Y.XmlText
 
   // Count how often observe is called …
   type.observe((events, transaction) => {

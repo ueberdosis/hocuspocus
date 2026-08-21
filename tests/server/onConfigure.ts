@@ -27,9 +27,7 @@ test('executes onConfigure callback from an extension', async t => {
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     newHocuspocusProvider(t, server)

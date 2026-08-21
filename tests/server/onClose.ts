@@ -1,6 +1,10 @@
 import test from 'ava'
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.ts'
+import {
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+} from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('server closes connection when receiving close event from provider', async t => {

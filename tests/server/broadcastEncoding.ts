@@ -87,7 +87,10 @@ test('a filtered stateless broadcast only reaches matching connections', t => {
   const skipped = addConnection(document, 'hocuspocus-test')
   const third = addConnection(document, 'hocuspocus-test')
 
-  document.broadcastStateless('{"event":"document.saved"}', connection => connection !== (skipped as any))
+  document.broadcastStateless(
+    '{"event":"document.saved"}',
+    connection => connection !== (skipped as any),
+  )
 
   t.is(first.sent.length, 1)
   t.is(skipped.sent.length, 0)

@@ -21,7 +21,6 @@ test('executes the onRequest callback of a custom extension', async t => {
     class CustomExtension {
       async onRequest({ response }: onRequestPayload) {
         return new Promise((resolve, reject) => {
-
           response.writeHead(200, { 'Content-Type': 'text/plain' })
           response.end('I like cats.')
 
@@ -31,9 +30,7 @@ test('executes the onRequest callback of a custom extension', async t => {
     }
 
     const hocuspocus = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const response = await fetch(hocuspocus.server!.httpURL)
@@ -48,7 +45,6 @@ test('can intercept specific URLs', async t => {
       async onRequest({ response, request }: onRequestPayload) {
         if (request.url === '/foobar') {
           return new Promise((resolve, reject) => {
-
             response.writeHead(200, { 'Content-Type': 'text/plain' })
             response.end('I like cats.')
 

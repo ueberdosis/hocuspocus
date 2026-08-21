@@ -5,7 +5,7 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 test('onAwarenessUpdate callback is executed', async t => {
   await new Promise(async resolve => {
     let resolved = false
-    const server = await newHocuspocus(t, { })
+    const server = await newHocuspocus(t, {})
 
     const provider = newHocuspocusProvider(t, server, {
       onConnect() {
@@ -27,7 +27,7 @@ test('onAwarenessUpdate callback is executed', async t => {
 test('shares awareness state with other users', async t => {
   await new Promise(async resolve => {
     let resolved = false
-    const server = await newHocuspocus(t, { })
+    const server = await newHocuspocus(t, {})
 
     const provider = newHocuspocusProvider(t, server, {
       onConnect() {
@@ -63,7 +63,7 @@ test('shares awareness state with other users', async t => {
 
 test('does not share awareness state with users in other documents', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus(t, { })
+    const server = await newHocuspocus(t, {})
 
     newHocuspocusProvider(t, server, {
       async onConnect() {
@@ -92,7 +92,7 @@ test('does not share awareness state with users in other documents', async t => 
 
 test('allows awareness to be null', async t => {
   await new Promise(async resolve => {
-    const server = await newHocuspocus(t, { })
+    const server = await newHocuspocus(t, {})
 
     newHocuspocusProvider(t, server, {
       awareness: null,

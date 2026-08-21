@@ -1,4 +1,5 @@
 # @hocuspocus/extension-s3
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-s3.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-s3)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-s3.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-s3.svg)](https://www.npmjs.com/package/@hocuspocus/extension-s3)
@@ -27,8 +28,8 @@ const server = new Server({
       region: 'us-east-1',
       credentials: {
         accessKeyId: 'your-access-key',
-        secretAccessKey: 'your-secret-key'
-      }
+        secretAccessKey: 'your-secret-key',
+      },
     }),
   ],
 })
@@ -49,8 +50,8 @@ const server = new Server({
       forcePathStyle: true,
       credentials: {
         accessKeyId: 'minioadmin',
-        secretAccessKey: 'minioadmin'
-      }
+        secretAccessKey: 'minioadmin',
+      },
     }),
   ],
 })
@@ -83,12 +84,12 @@ import { S3 } from '@hocuspocus/extension-s3'
 
 // Server 1
 const server1 = new Server({
-  name: "server-1",
+  name: 'server-1',
   port: 8001,
   extensions: [
     new Logger(),
     new Redis({
-      host: "127.0.0.1",
+      host: '127.0.0.1',
       port: 6379,
     }),
     new S3({
@@ -97,15 +98,15 @@ const server1 = new Server({
       forcePathStyle: true,
       credentials: {
         accessKeyId: 'minioadmin',
-        secretAccessKey: 'minioadmin'
-      }
+        secretAccessKey: 'minioadmin',
+      },
     }),
   ],
 })
 
 // Server 2 - same configuration with different name/port
 const server2 = new Server({
-  name: "server-2", 
+  name: 'server-2',
   port: 8002,
   extensions: [/* same extensions */],
 })
@@ -136,7 +137,7 @@ For local development with MinIO (S3-compatible storage):
 # Set up development environment
 npm run dev:setup
 
-# Test S3 configuration  
+# Test S3 configuration
 npm run dev:test-s3
 
 # Run S3 playground examples
@@ -162,7 +163,7 @@ Your AWS credentials or IAM role needs the following permissions:
       "Resource": "arn:aws:s3:::your-bucket-name/*"
     },
     {
-      "Effect": "Allow", 
+      "Effect": "Allow",
       "Action": ["s3:HeadBucket"],
       "Resource": "arn:aws:s3:::your-bucket-name"
     }

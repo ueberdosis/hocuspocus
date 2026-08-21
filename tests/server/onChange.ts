@@ -53,9 +53,7 @@ test('executes onChange callback from an extension', async t => {
     }
 
     const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
+      extensions: [new CustomExtension()],
     })
 
     const provider = newHocuspocusProvider(t, server, {
@@ -111,7 +109,7 @@ test('has the server instance', async t => {
   })
 })
 
-test('onChange callback isn\'t called for every new client', async t => {
+test("onChange callback isn't called for every new client", async t => {
   let onConnectCount = 0
   let onChangeCount = 0
 
@@ -135,7 +133,6 @@ test('onChange callback isn\'t called for every new client', async t => {
     tt.is(onConnectCount, 2)
     tt.is(onChangeCount, 0)
   })
-
 })
 
 test('onChange works properly for changes from direct connections', async t => {
