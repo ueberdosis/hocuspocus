@@ -1,4 +1,3 @@
-import type { ExecutionContext } from 'ava'
 import {
   HocuspocusProvider,
   type HocuspocusProviderConfiguration,
@@ -6,10 +5,10 @@ import {
   type HocuspocusProviderWebsocketConfiguration,
 } from '@hocuspocus/provider'
 import type { Hocuspocus } from '@hocuspocus/server'
+import { onTestFinished } from 'vite-plus/test'
 import { newHocuspocusProviderWebsocket } from './newHocuspocusProviderWebsocket.ts'
 
 export const newHocuspocusProvider = (
-  t: ExecutionContext,
   server: Hocuspocus,
   options: Partial<HocuspocusProviderConfiguration> = {},
   websocketOptions: Partial<HocuspocusProviderWebsocketConfiguration> = {},
@@ -17,15 +16,13 @@ export const newHocuspocusProvider = (
 ): HocuspocusProvider => {
   const provider = new HocuspocusProvider({
     websocketProvider:
-      websocketProvider ?? newHocuspocusProviderWebsocket(t, server, websocketOptions),
-    // Just use a generic document name for all tests.
+      websocketProvider ?? newHocuspocusProviderWebsocket(server, websocketOptions),
     name: 'hocuspocus-test',
-    // Add or overwrite settings, depending on the test case.
     ...options,
   })
   provider.attach()
 
-  t.teardown(() => provider.destroy())
+  onTestFinished(() => provider.destroy())
 
   return provider
 }

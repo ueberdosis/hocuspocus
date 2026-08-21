@@ -1,21 +1,12 @@
-import type { ExecutionContext } from 'ava'
 import { sleep } from './sleep.ts'
 
-/* eslint-disable no-await-in-loop */
-export const retryableAssertion = async (
-  t: ExecutionContext,
-  recoverableTry: (tt: ExecutionContext) => void,
-) => {
-  // eslint-disable-next-line no-constant-condition
+export const retryableAssertion = async (fn: () => void | Promise<void>) => {
   while (true) {
-    const lastTry = await t.try(recoverableTry)
-
-    if (lastTry.passed) {
-      lastTry.commit()
+    try {
+      await fn()
       break
+    } catch {
+      await sleep(100)
     }
-    lastTry.discard()
-
-    await sleep(100)
   }
 }

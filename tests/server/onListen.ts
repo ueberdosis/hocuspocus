@@ -1,50 +1,54 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import { newHocuspocus } from '../utils/index.ts'
 
-test('executes the onListen callback', async t => {
-  await new Promise(async resolve => {
-    newHocuspocus(t, {
-      async onListen() {
-        t.pass()
-        resolve('done')
-      },
+describe('onListen', () => {
+  test('executes the onListen callback', async t => {
+    await new Promise(async resolve => {
+      newHocuspocus({
+        async onListen() {
+          pass()
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test('executes the onListen callback from an extension', async t => {
-  await new Promise(async resolve => {
-    class CustomExtension {
-      async onListen() {
-        t.pass()
-        resolve('done')
+  test('executes the onListen callback from an extension', async t => {
+    await new Promise(async resolve => {
+      class CustomExtension {
+        async onListen() {
+          pass()
+          resolve('done')
+        }
       }
-    }
 
-    newHocuspocus(t, {
-      extensions: [new CustomExtension()],
+      newHocuspocus({
+        extensions: [new CustomExtension()],
+      })
     })
   })
-})
 
-test('has the configuration', async t => {
-  await new Promise(async resolve => {
-    newHocuspocus(t, {
-      async onListen({ configuration }) {
-        t.is(configuration.quiet, true)
-        resolve('done')
-      },
+  test('has the configuration', async t => {
+    await new Promise(async resolve => {
+      newHocuspocus({
+        async onListen({ configuration }) {
+          expect(configuration.quiet).toBe(true)
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test('has the port', async t => {
-  await new Promise(async resolve => {
-    newHocuspocus(t, {
-      async onListen({ port }) {
-        t.truthy(port)
-        resolve('done')
-      },
+  test('has the port', async t => {
+    await new Promise(async resolve => {
+      newHocuspocus({
+        async onListen({ port }) {
+          expect(port).toBeTruthy()
+          resolve('done')
+        },
+      })
     })
   })
 })

@@ -1,35 +1,39 @@
-import test from 'ava'
+import { describe, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
-test('onClose callback is executed', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+describe('onClose', () => {
+  test('onClose callback is executed', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    const provider = newHocuspocusProvider(t, server, {
-      onConnect() {
-        provider.configuration.websocketProvider.disconnect()
-      },
-      onClose() {
-        t.pass()
-        resolve('done')
-      },
+      const provider = newHocuspocusProvider(server, {
+        onConnect() {
+          provider.configuration.websocketProvider.disconnect()
+        },
+        onClose() {
+          pass()
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test("on('close') callback is executed", async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+  test("on('close') callback is executed", async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    const provider = newHocuspocusProvider(t, server)
+      const provider = newHocuspocusProvider(server)
 
-    provider.on('connect', () => {
-      provider.configuration.websocketProvider.disconnect()
-    })
+      provider.on('connect', () => {
+        provider.configuration.websocketProvider.disconnect()
+      })
 
-    provider.on('close', () => {
-      t.pass()
-      resolve('done')
+      provider.on('close', () => {
+        pass()
+        resolve('done')
+      })
     })
   })
 })
