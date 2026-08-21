@@ -36,10 +36,16 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "build": "vp pack"
+  },
   "dependencies": {
     "@hocuspocus/common": "workspace:^",
     "@hocuspocus/server": "workspace:^",
     "@hocuspocus/transformer": "workspace:^"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
   },
   "peerDependencies": {
     "yjs": "^13.6.8"

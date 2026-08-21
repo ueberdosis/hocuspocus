@@ -34,11 +34,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "build": "vp pack"
+  },
   "dependencies": {
     "@tiptap/starter-kit": "^3.19.0"
   },
   "devDependencies": {
-    "@tiptap/pm": "^3.19.0"
+    "@tiptap/pm": "^3.19.0",
+    "vite-plus": "catalog:"
   },
   "peerDependencies": {
     "@tiptap/core": "^3.0.1",

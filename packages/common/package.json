@@ -32,7 +32,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "build": "vp pack"
+  },
   "dependencies": {
     "lib0": "^0.2.117"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
   }
 }

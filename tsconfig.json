@@ -6,7 +6,7 @@
     "jsx": "react",
     "importHelpers": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "rewriteRelativeImportExtensions": true,

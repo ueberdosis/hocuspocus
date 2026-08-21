@@ -24,8 +24,7 @@
     "lint:staged": "vp staged",
     "test": "ava",
     "test:watch": "ava --watch",
-    "build:packages": "pnpm clean:packages && rolldown -c",
-    "build:watch": "pnpm clean:packages && rolldown --watch -c",
+    "build:packages": "vp run --filter './packages/*' --fail-if-no-match build",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release:major": "pnpm build:packages && lerna version major --force-publish --sign-git-tag --sign-git-commit",
     "release:major:pre": "pnpm build:packages && lerna version premajor --force-publish --preid rc --sign-git-tag --sign-git-commit",
@@ -48,8 +47,6 @@
     "nx": "^22.7.8",
     "oxfmt": "^0.64.0",
     "oxlint": "^1.79.0",
-    "rolldown": "1.0.0-rc.6",
-    "rolldown-plugin-dts": "^0.22.3",
     "typescript": "5.8.2",
     "vite-plus": "catalog:"
   },

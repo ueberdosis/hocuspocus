@@ -33,8 +33,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "build": "vp pack"
+  },
   "dependencies": {
     "@hocuspocus/server": "workspace:^"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
   },
   "peerDependencies": {
     "yjs": "^13.6.8"
