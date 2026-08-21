@@ -9,7 +9,7 @@ catalog:
   vite-plus: '0.2.9'
 allowBuilds:
   better-sqlite3: true
-  nx: true
+  nx: set this to true or false
   sharp: true
 overrides:
   '@hono/node-server@<2.0.5': ^2.0.5

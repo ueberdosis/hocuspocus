@@ -8,6 +8,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   publish-npm:
@@ -25,8 +26,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm publish:latest
-        if: "!contains(github.ref, '-rc.')"
+      - name: Build packages
+        run: pnpm build:packages
 
-      - run: pnpm publish:pre
-        if: "contains(github.ref, '-rc.')"
+      - name: Publish to npm
+        run: pnpm changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
