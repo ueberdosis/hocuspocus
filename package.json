@@ -41,6 +41,7 @@
 		"lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
 		"lint": "biome lint && pnpm lint:ts",
 		"lint:fix": "biome lint --fix",
+		"lint:staged": "vp staged",
 		"test": "ava",
 		"test:watch": "ava --watch",
 		"build:packages": "pnpm clean:packages && rolldown -c",
@@ -56,7 +57,8 @@
 		"publish:latest": "pnpm build:packages && lerna publish from-package --yes",
 		"publish:pre": "pnpm build:packages && lerna publish from-package --yes --dist-tag next",
 		"reset": "pnpm clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./pnpm-lock.yaml && pnpm install",
-		"ncu": "ncu -i --deep && pnpm install"
+		"ncu": "ncu -i --deep && pnpm install",
+		"prepare": "vp config --no-agent"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.5",
@@ -67,7 +69,8 @@
 		"nx": "^22.7.8",
 		"rolldown": "1.0.0-rc.6",
 		"rolldown-plugin-dts": "^0.22.3",
-		"typescript": "5.8.2"
+		"typescript": "5.8.2",
+		"vite-plus": "catalog:"
 	},
 	"engines": {
 		"node": ">=22"
