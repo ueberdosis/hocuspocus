@@ -25,6 +25,7 @@
     "test": "vp test",
     "test:watch": "vp test watch",
     "build:packages": "vp run --filter './packages/*' --fail-if-no-match build",
+    "check:package-exports": "node scripts/check-package-exports.mjs",
     "clean:packages": "rm -Rf ./packages/*/dist",
     "release:major": "pnpm build:packages && lerna version major --force-publish --sign-git-tag --sign-git-commit",
     "release:major:pre": "pnpm build:packages && lerna version premajor --force-publish --preid rc --sign-git-tag --sign-git-commit",
@@ -54,29 +55,8 @@
     "not IE 11",
     "maintained node versions"
   ],
-  "ava": {
-    "extensions": {
-      "ts": "module"
-    },
-    "files": [
-      "tests/**/*",
-      "!tests/utils/**/*",
-      "!database/**/*"
-    ],
-    "nodeArguments": [
-      "--no-warnings",
-      "--conditions=source",
-      "--experimental-transform-types",
-      "--experimental-specifier-resolution=node"
-    ],
-    "require": [
-      "./tests/utils/_force-exit.ts"
-    ],
-    "timeout": "30s",
-    "workerThreads": false
-  },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
 }
