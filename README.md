@@ -10,7 +10,7 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
 > [!TIP]
 > Help us **chart the future of Hocuspocus** by telling us about your needs in a short survey. Plus, you’ll get a chance to earn a $50 gift card.
-> **Take the survey →**
+> **[Take the survey →](https://docs.google.com/forms/d/e/1FAIpQLSeUS8S1iZTud58GBSD_d4c8lfUvkZHvzU99kWxP1wnNZnPKpw/viewform?usp=header)**
 
 ## Documentation
 The full documentation is a available on [hocuspocus.dev/introduction](https://tiptap.dev/docs/hocuspocus/introduction).
