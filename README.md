@@ -1,3 +1,7 @@
+> [!TIP]
+> Help us **chart the future of Hocuspocus** by telling us about your needs in a short survey. Plus, you’ll get a chance to earn a $50 gift card.
+> **[Take the survey →](https://docs.google.com/forms/d/e/1FAIpQLSeUS8S1iZTud58GBSD_d4c8lfUvkZHvzU99kWxP1wnNZnPKpw/viewform?usp=header)**
+
 # Hocuspocus
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
@@ -7,10 +11,6 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 [![License](https://img.shields.io/npm/l/@hocuspocus/server.svg)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/WtJ49jGshW)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
-
-> [!TIP]
-> Help us **chart the future of Hocuspocus** by telling us about your needs in a short survey. Plus, you’ll get a chance to earn a $50 gift card.
-> **[Take the survey →](https://docs.google.com/forms/d/e/1FAIpQLSeUS8S1iZTud58GBSD_d4c8lfUvkZHvzU99kWxP1wnNZnPKpw/viewform?usp=header)**
 
 ## Documentation
 The full documentation is a available on [hocuspocus.dev/introduction](https://tiptap.dev/docs/hocuspocus/introduction).
