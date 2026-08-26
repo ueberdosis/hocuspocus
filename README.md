@@ -8,6 +8,10 @@ A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/WtJ49jGshW)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/ueberdosis)
 
+> [!TIP]
+> Help us **chart the future of Hocuspocus** by telling us about your needs in a short survey. Plus, you’ll get a chance to earn a $50 gift card.
+> **Take the survey →**
+
 ## Documentation
 The full documentation is a available on [hocuspocus.dev/introduction](https://tiptap.dev/docs/hocuspocus/introduction).
 
