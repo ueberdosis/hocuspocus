@@ -13,6 +13,7 @@ import {
 	type onAwarenessUpdateParameters,
 	type onCloseParameters,
 	type onDisconnectParameters,
+	type onMaxAttemptsFailedParameters,
 	type onMessageParameters,
 	type onOpenParameters,
 	type onOutgoingMessageParameters,
@@ -94,6 +95,7 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	onStatus: (data: onStatusParameters) => void;
 	onDisconnect: (data: onDisconnectParameters) => void;
 	onClose: (data: onCloseParameters) => void;
+	onMaxAttemptsFailed: (data: onMaxAttemptsFailedParameters) => void;
 	onDestroy: () => void;
 	onAwarenessUpdate: (data: onAwarenessUpdateParameters) => void;
 	onAwarenessChange: (data: onAwarenessChangeParameters) => void;
@@ -144,6 +146,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		onStatus: () => null,
 		onDisconnect: () => null,
 		onClose: () => null,
+		onMaxAttemptsFailed: () => null,
 		onDestroy: () => null,
 		onAwarenessUpdate: () => null,
 		onAwarenessChange: () => null,
@@ -188,6 +191,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.on("status", this.configuration.onStatus);
 		this.on("disconnect", this.configuration.onDisconnect);
 		this.on("close", this.configuration.onClose);
+		this.on("maxAttemptsFailed", this.configuration.onMaxAttemptsFailed);
 		this.on("destroy", this.configuration.onDestroy);
 		this.on("awarenessUpdate", this.configuration.onAwarenessUpdate);
 		this.on("awarenessChange", this.configuration.onAwarenessChange);
@@ -301,7 +305,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 				// If we aborted the connection attempt then don’t throw an error
 				// ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
 				if (error && error.code !== "ATTEMPT_ABORTED") {
-					throw error;
+					// connect() is fire-and-forget; rethrowing becomes an unhandled rejection.
+					this.emit("maxAttemptsFailed", { error });
 				}
 			});
 
