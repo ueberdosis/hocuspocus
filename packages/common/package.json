@@ -1,38 +1,44 @@
 {
-	"name": "@hocuspocus/common",
-	"description": "shared code for multiple Hocuspocus packages",
-	"version": "4.6.0",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus"
-	],
-	"license": "MIT",
-	"type": "module",
-	"main": "dist/hocuspocus-common.cjs",
-	"module": "dist/hocuspocus-common.esm.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
-			"import": "./dist/hocuspocus-common.esm.js",
-			"require": "./dist/hocuspocus-common.cjs",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"files": [
-		"src",
-		"dist"
-	],
-	"gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
-	"dependencies": {
-		"lib0": "^0.2.117"
-	},
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@hocuspocus/common",
+  "version": "4.6.0",
+  "gitHead": "cd788b6a315f608ef531524409abdce1e6790726",
+  "description": "shared code for multiple Hocuspocus packages",
+  "keywords": [
+    "hocuspocus"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-common.cjs",
+  "module": "dist/hocuspocus-common.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-common.esm.js",
+      "require": "./dist/hocuspocus-common.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "lib0": "^0.2.117"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
 }

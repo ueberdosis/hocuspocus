@@ -1,619 +1,609 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
-import type { Awareness } from "y-protocols/awareness";
-import type Connection from "./Connection.ts";
-import type Document from "./Document.ts";
-import type { Hocuspocus } from "./Hocuspocus.ts";
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { Awareness } from 'y-protocols/awareness'
+import type Connection from './Connection.ts'
+import type Document from './Document.ts'
+import type { Hocuspocus } from './Hocuspocus.ts'
 
 export interface ConnectionTransactionOrigin {
-	source: "connection";
-	connection: Connection;
+  source: 'connection'
+  connection: Connection
 }
 
 export interface RedisTransactionOrigin {
-	source: "redis";
+  source: 'redis'
 }
 
 export interface LocalTransactionOrigin {
-	source: "local";
-	skipStoreHooks?: boolean;
-	context?: any;
+  source: 'local'
+  skipStoreHooks?: boolean
+  context?: any
 }
 
 export type TransactionOrigin =
-	| ConnectionTransactionOrigin
-	| RedisTransactionOrigin
-	| LocalTransactionOrigin;
+  | ConnectionTransactionOrigin
+  | RedisTransactionOrigin
+  | LocalTransactionOrigin
 
-export function isTransactionOrigin(
-	origin: unknown,
-): origin is TransactionOrigin {
-	return (
-		typeof origin === "object" &&
-		origin !== null &&
-		"source" in origin &&
-		((origin as any).source === "connection" ||
-			(origin as any).source === "redis" ||
-			(origin as any).source === "local")
-	);
+export function isTransactionOrigin(origin: unknown): origin is TransactionOrigin {
+  return (
+    typeof origin === 'object' &&
+    origin !== null &&
+    'source' in origin &&
+    ((origin as any).source === 'connection' ||
+      (origin as any).source === 'redis' ||
+      (origin as any).source === 'local')
+  )
 }
 
 export function shouldSkipStoreHooks(origin: unknown): boolean {
-	if (!isTransactionOrigin(origin)) return false;
-	switch (origin.source) {
-		case "connection":
-			return false;
-		case "redis":
-			return true;
-		case "local":
-			return origin.skipStoreHooks ?? false;
-	}
+  if (!isTransactionOrigin(origin)) return false
+  switch (origin.source) {
+    case 'connection':
+      return false
+    case 'redis':
+      return true
+    case 'local':
+      return origin.skipStoreHooks ?? false
+  }
 }
 
 /**
  * Minimal interface for any WebSocket-like object for WebSocket, Bun's ServerWebSocket, ws, Deno, etc.
  */
 export interface WebSocketLike {
-	send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
-	close(code?: number, reason?: string): void;
-	readyState: number;
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void
+  close(code?: number, reason?: string): void
+  readyState: number
 }
 
 export enum MessageType {
-	Unknown = -1,
-	Sync = 0,
-	Awareness = 1,
-	Auth = 2,
-	QueryAwareness = 3,
-	SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
-	Stateless = 5,
-	BroadcastStateless = 6,
-	CLOSE = 7,
-	SyncStatus = 8,
-	Ping = 9,
-	Pong = 10,
+  Unknown = -1,
+  Sync = 0,
+  Awareness = 1,
+  Auth = 2,
+  QueryAwareness = 3,
+  SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
+  Stateless = 5,
+  BroadcastStateless = 6,
+  CLOSE = 7,
+  SyncStatus = 8,
+  Ping = 9,
+  Pong = 10,
 }
 
 export interface AwarenessUpdate {
-	added: Array<any>;
-	updated: Array<any>;
-	removed: Array<any>;
+  added: Array<any>
+  updated: Array<any>
+  removed: Array<any>
 }
 
 export interface ConnectionConfiguration {
-	readOnly: boolean;
-	isAuthenticated: boolean;
+  readOnly: boolean
+  isAuthenticated: boolean
 }
 
 export interface Extension<Context = any> {
-	priority?: number;
-	extensionName?: string;
-	onConfigure?(data: onConfigurePayload): Promise<any>;
-	onListen?(data: onListenPayload): Promise<any>;
-	onUpgrade?(data: onUpgradePayload): Promise<any>;
-	onConnect?(data: onConnectPayload<Context>): Promise<any>;
-	connected?(data: connectedPayload<Context>): Promise<any>;
-	onAuthenticate?(data: onAuthenticatePayload<Context>): Promise<any>;
-	onTokenSync?(data: onTokenSyncPayload<Context>): Promise<any>;
-	onCreateDocument?(data: onCreateDocumentPayload<Context>): Promise<any>;
-	onLoadDocument?(data: onLoadDocumentPayload<Context>): Promise<any>;
-	afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>;
-	beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>;
-	/**
-	 * Fired after an inbound message has been handled (i.e. after the Yjs
-	 * update has been applied to the document). Fires whether the apply
-	 * resolved or threw, but not when `beforeHandleMessage` rejected the
-	 * message.
-	 */
-	afterHandleMessage?(data: afterHandleMessagePayload<Context>): Promise<any>;
-	/**
-	 * Fired before an inbound awareness update is applied to the document's
-	 * awareness state. The hook receives the decoded per-client `states` as a
-	 * mutable `Map` keyed by Yjs clientId. Mutate the map and the contained
-	 * state objects in place to rewrite fields, drop peers (`states.delete`),
-	 * or add synthetic ones (`states.set`); mutations are reflected in the
-	 * broadcast. Throw to reject the update without applying anything.
-	 *
-	 * Multiple extensions chain naturally: each extension sees the map as
-	 * mutated by previous extensions and can mutate it further.
-	 */
-	beforeHandleAwareness?(
-		data: beforeHandleAwarenessPayload<Context>,
-	): Promise<any>;
-	beforeSync?(data: beforeSyncPayload<Context>): Promise<any>;
-	beforeBroadcastStateless?(
-		data: beforeBroadcastStatelessPayload,
-	): Promise<any>;
-	onStateless?(payload: onStatelessPayload): Promise<any>;
-	onChange?(data: onChangePayload<Context>): Promise<any>;
-	onStoreDocument?(data: onStoreDocumentPayload<Context>): Promise<any>;
-	afterStoreDocument?(data: afterStoreDocumentPayload<Context>): Promise<any>;
-	onAwarenessUpdate?(data: onAwarenessUpdatePayload<Context>): Promise<any>;
-	onRequest?(data: onRequestPayload): Promise<any>;
-	onDisconnect?(data: onDisconnectPayload<Context>): Promise<any>;
-	beforeUnloadDocument?(data: beforeUnloadDocumentPayload): Promise<any>;
-	afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>;
-	onDestroy?(data: onDestroyPayload): Promise<any>;
+  priority?: number
+  extensionName?: string
+  onConfigure?(data: onConfigurePayload): Promise<any>
+  onListen?(data: onListenPayload): Promise<any>
+  onUpgrade?(data: onUpgradePayload): Promise<any>
+  onConnect?(data: onConnectPayload<Context>): Promise<any>
+  connected?(data: connectedPayload<Context>): Promise<any>
+  onAuthenticate?(data: onAuthenticatePayload<Context>): Promise<any>
+  onTokenSync?(data: onTokenSyncPayload<Context>): Promise<any>
+  onCreateDocument?(data: onCreateDocumentPayload<Context>): Promise<any>
+  onLoadDocument?(data: onLoadDocumentPayload<Context>): Promise<any>
+  afterLoadDocument?(data: afterLoadDocumentPayload<Context>): Promise<any>
+  beforeHandleMessage?(data: beforeHandleMessagePayload<Context>): Promise<any>
+  /**
+   * Fired after an inbound message has been handled (i.e. after the Yjs
+   * update has been applied to the document). Fires whether the apply
+   * resolved or threw, but not when `beforeHandleMessage` rejected the
+   * message.
+   */
+  afterHandleMessage?(data: afterHandleMessagePayload<Context>): Promise<any>
+  /**
+   * Fired before an inbound awareness update is applied to the document's
+   * awareness state. The hook receives the decoded per-client `states` as a
+   * mutable `Map` keyed by Yjs clientId. Mutate the map and the contained
+   * state objects in place to rewrite fields, drop peers (`states.delete`),
+   * or add synthetic ones (`states.set`); mutations are reflected in the
+   * broadcast. Throw to reject the update without applying anything.
+   *
+   * Multiple extensions chain naturally: each extension sees the map as
+   * mutated by previous extensions and can mutate it further.
+   */
+  beforeHandleAwareness?(data: beforeHandleAwarenessPayload<Context>): Promise<any>
+  beforeSync?(data: beforeSyncPayload<Context>): Promise<any>
+  beforeBroadcastStateless?(data: beforeBroadcastStatelessPayload): Promise<any>
+  onStateless?(payload: onStatelessPayload): Promise<any>
+  onChange?(data: onChangePayload<Context>): Promise<any>
+  onStoreDocument?(data: onStoreDocumentPayload<Context>): Promise<any>
+  afterStoreDocument?(data: afterStoreDocumentPayload<Context>): Promise<any>
+  onAwarenessUpdate?(data: onAwarenessUpdatePayload<Context>): Promise<any>
+  onRequest?(data: onRequestPayload): Promise<any>
+  onDisconnect?(data: onDisconnectPayload<Context>): Promise<any>
+  beforeUnloadDocument?(data: beforeUnloadDocumentPayload): Promise<any>
+  afterUnloadDocument?(data: afterUnloadDocumentPayload): Promise<any>
+  onDestroy?(data: onDestroyPayload): Promise<any>
 }
 
 export type HookName =
-	| "onConfigure"
-	| "onListen"
-	| "onUpgrade"
-	| "onConnect"
-	| "connected"
-	| "onAuthenticate"
-	| "onTokenSync"
-	| "onCreateDocument"
-	| "onLoadDocument"
-	| "afterLoadDocument"
-	| "beforeHandleMessage"
-	| "afterHandleMessage"
-	| "beforeHandleAwareness"
-	| "beforeBroadcastStateless"
-	| "beforeSync"
-	| "onStateless"
-	| "onChange"
-	| "onStoreDocument"
-	| "afterStoreDocument"
-	| "onAwarenessUpdate"
-	| "onRequest"
-	| "onDisconnect"
-	| "beforeUnloadDocument"
-	| "afterUnloadDocument"
-	| "onDestroy";
+  | 'onConfigure'
+  | 'onListen'
+  | 'onUpgrade'
+  | 'onConnect'
+  | 'connected'
+  | 'onAuthenticate'
+  | 'onTokenSync'
+  | 'onCreateDocument'
+  | 'onLoadDocument'
+  | 'afterLoadDocument'
+  | 'beforeHandleMessage'
+  | 'afterHandleMessage'
+  | 'beforeHandleAwareness'
+  | 'beforeBroadcastStateless'
+  | 'beforeSync'
+  | 'onStateless'
+  | 'onChange'
+  | 'onStoreDocument'
+  | 'afterStoreDocument'
+  | 'onAwarenessUpdate'
+  | 'onRequest'
+  | 'onDisconnect'
+  | 'beforeUnloadDocument'
+  | 'afterUnloadDocument'
+  | 'onDestroy'
 
 export type HookPayloadByName<Context = any> = {
-	onConfigure: onConfigurePayload;
-	onListen: onListenPayload;
-	onUpgrade: onUpgradePayload;
-	onConnect: onConnectPayload<Context>;
-	connected: connectedPayload<Context>;
-	onAuthenticate: onAuthenticatePayload<Context>;
-	onTokenSync: onTokenSyncPayload<Context>;
-	onCreateDocument: onCreateDocumentPayload<Context>;
-	onLoadDocument: onLoadDocumentPayload<Context>;
-	afterLoadDocument: afterLoadDocumentPayload<Context>;
-	beforeHandleMessage: beforeHandleMessagePayload<Context>;
-	afterHandleMessage: afterHandleMessagePayload<Context>;
-	beforeHandleAwareness: beforeHandleAwarenessPayload<Context>;
-	beforeBroadcastStateless: beforeBroadcastStatelessPayload;
-	beforeSync: beforeSyncPayload<Context>;
-	onStateless: onStatelessPayload;
-	onChange: onChangePayload<Context>;
-	onStoreDocument: onStoreDocumentPayload<Context>;
-	afterStoreDocument: afterStoreDocumentPayload<Context>;
-	onAwarenessUpdate: onAwarenessUpdatePayload<Context>;
-	onRequest: onRequestPayload;
-	onDisconnect: onDisconnectPayload<Context>;
-	afterUnloadDocument: afterUnloadDocumentPayload;
-	beforeUnloadDocument: beforeUnloadDocumentPayload;
-	onDestroy: onDestroyPayload;
-};
+  onConfigure: onConfigurePayload
+  onListen: onListenPayload
+  onUpgrade: onUpgradePayload
+  onConnect: onConnectPayload<Context>
+  connected: connectedPayload<Context>
+  onAuthenticate: onAuthenticatePayload<Context>
+  onTokenSync: onTokenSyncPayload<Context>
+  onCreateDocument: onCreateDocumentPayload<Context>
+  onLoadDocument: onLoadDocumentPayload<Context>
+  afterLoadDocument: afterLoadDocumentPayload<Context>
+  beforeHandleMessage: beforeHandleMessagePayload<Context>
+  afterHandleMessage: afterHandleMessagePayload<Context>
+  beforeHandleAwareness: beforeHandleAwarenessPayload<Context>
+  beforeBroadcastStateless: beforeBroadcastStatelessPayload
+  beforeSync: beforeSyncPayload<Context>
+  onStateless: onStatelessPayload
+  onChange: onChangePayload<Context>
+  onStoreDocument: onStoreDocumentPayload<Context>
+  afterStoreDocument: afterStoreDocumentPayload<Context>
+  onAwarenessUpdate: onAwarenessUpdatePayload<Context>
+  onRequest: onRequestPayload
+  onDisconnect: onDisconnectPayload<Context>
+  afterUnloadDocument: afterUnloadDocumentPayload
+  beforeUnloadDocument: beforeUnloadDocumentPayload
+  onDestroy: onDestroyPayload
+}
 
 /**
  * Controls how a document batches its outgoing broadcasts. Shared by the server
  * configuration and the `Document` constructor so both stay in step.
  */
 export interface FlushOptions {
-	/**
-	 * Batch outgoing broadcasts per document over a window of this many
-	 * milliseconds, instead of sending one message per connection per change.
-	 * Updates within a window are merged into a single message and awareness
-	 * collapses to the latest state of each changed client, so a document with
-	 * many connected clients sends `connections` messages per window rather than
-	 * `changes × connections`.
-	 *
-	 * The default `0` flushes at the end of the current event loop turn. It adds
-	 * no delay — a burst of updates that arrived together is coalesced before
-	 * anything is written to a socket — and with a single writer no merge happens
-	 * at all, because there is only one buffered update to send. On a document
-	 * with many writing clients the difference is large: 2000 clients each
-	 * writing once produces 2000 broadcast messages per turn instead of
-	 * 2000 × 2000.
-	 *
-	 * A positive value additionally merges across turns, trading up to that much
-	 * latency for fewer messages. That is only a win when several changes
-	 * genuinely land per window — with a handful of clients typing it is pure
-	 * added delay, so prefer `0` unless you have measured otherwise.
-	 *
-	 * `false` restores the pre-batching behaviour and sends every broadcast
-	 * synchronously, inside the same tick that applied the change.
-	 *
-	 * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
-	 * debounce and the Redis publish still run synchronously per change.
-	 *
-	 * @default 0 (coalesce within the current event loop turn)
-	 */
-	flushDelay: false | number;
+  /**
+   * Batch outgoing broadcasts per document over a window of this many
+   * milliseconds, instead of sending one message per connection per change.
+   * Updates within a window are merged into a single message and awareness
+   * collapses to the latest state of each changed client, so a document with
+   * many connected clients sends `connections` messages per window rather than
+   * `changes × connections`.
+   *
+   * The default `0` flushes at the end of the current event loop turn. It adds
+   * no delay — a burst of updates that arrived together is coalesced before
+   * anything is written to a socket — and with a single writer no merge happens
+   * at all, because there is only one buffered update to send. On a document
+   * with many writing clients the difference is large: 2000 clients each
+   * writing once produces 2000 broadcast messages per turn instead of
+   * 2000 × 2000.
+   *
+   * A positive value additionally merges across turns, trading up to that much
+   * latency for fewer messages. That is only a win when several changes
+   * genuinely land per window — with a handful of clients typing it is pure
+   * added delay, so prefer `0` unless you have measured otherwise.
+   *
+   * `false` restores the pre-batching behaviour and sends every broadcast
+   * synchronously, inside the same tick that applied the change.
+   *
+   * Applies to the WebSocket fan-out only. `onChange`, the `onStoreDocument`
+   * debounce and the Redis publish still run synchronously per change.
+   *
+   * @default 0 (coalesce within the current event loop turn)
+   */
+  flushDelay: false | number
 
-	/**
-	 * Flush a document's batched broadcasts early once this many bytes of updates
-	 * are buffered, bounding both the memory held per window and the cost of the
-	 * merge. Ignored when `flushDelay` is false.
-	 *
-	 * @default 1_048_576 (1 MiB)
-	 */
-	flushMaxBytes: number;
+  /**
+   * Flush a document's batched broadcasts early once this many bytes of updates
+   * are buffered, bounding both the memory held per window and the cost of the
+   * merge. Ignored when `flushDelay` is false.
+   *
+   * @default 1_048_576 (1 MiB)
+   */
+  flushMaxBytes: number
 }
 
-export interface Configuration<Context = any>
-	extends Extension<Context>,
-		FlushOptions {
-	/**
-	 * A name for the instance, used for logging.
-	 */
-	name: string | null;
-	/**
-	 * A list of hocuspocus extensions.
-	 */
-	extensions: Array<Extension>;
-	/**
-	 * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
-	 */
-	timeout: number;
-	/**
-	 * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
-	 * Otherwise every single update would be persisted.
-	 */
-	debounce: number;
-	/**
-	 * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
-	 */
-	maxDebounce: number;
-	/**
-	 * By default, the servers show a start screen. If passed false, the server will start quietly.
-	 */
-	quiet: boolean;
-	/**
-	 * If set to false, respects the debounce time of `onStoreDocument` before unloading a document.
-	 * Otherwise, the document will be unloaded immediately.
-	 *
-	 * This prevents a client from DOSing the server by repeatedly connecting and disconnecting when
-	 * your onStoreDocument is rate-limited.
-	 */
-	unloadImmediately: boolean;
+export interface Configuration<Context = any> extends Extension<Context>, FlushOptions {
+  /**
+   * A name for the instance, used for logging.
+   */
+  name: string | null
+  /**
+   * A list of hocuspocus extensions.
+   */
+  extensions: Array<Extension>
+  /**
+   * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
+   */
+  timeout: number
+  /**
+   * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
+   * Otherwise every single update would be persisted.
+   */
+  debounce: number
+  /**
+   * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
+   */
+  maxDebounce: number
+  /**
+   * By default, the servers show a start screen. If passed false, the server will start quietly.
+   */
+  quiet: boolean
+  /**
+   * If set to false, respects the debounce time of `onStoreDocument` before unloading a document.
+   * Otherwise, the document will be unloaded immediately.
+   *
+   * This prevents a client from DOSing the server by repeatedly connecting and disconnecting when
+   * your onStoreDocument is rate-limited.
+   */
+  unloadImmediately: boolean
 
-	/**
-	 * Maximum number of bytes that may be buffered, across all documents, for a single
-	 * connection while it is still unauthenticated. Messages received before authentication
-	 * completes are queued in memory; without a limit an unauthenticated client could exhaust
-	 * server memory (see GHSA-xwhh-v746-pj9m). When the limit is exceeded the connection is closed.
-	 *
-	 * @default 5_242_880 (5 MiB)
-	 */
-	maxUnauthenticatedQueueSize: number;
-	/**
-	 * Maximum number of messages that may be buffered, across all documents, for a single
-	 * connection while it is still unauthenticated. When the limit is exceeded the connection
-	 * is closed.
-	 *
-	 * @default 1_000
-	 */
-	maxUnauthenticatedQueueMessages: number;
-	/**
-	 * Maximum number of distinct documents a single connection may open before any of them is
-	 * authenticated. Each pending document holds its own queue and hook payload, so an
-	 * unauthenticated client fanning out across many document names could otherwise exhaust
-	 * memory even while staying under the per-connection queue limits. When the limit is
-	 * exceeded the connection is closed.
-	 *
-	 * @default 100
-	 */
-	maxPendingDocuments: number;
+  /**
+   * Maximum number of bytes that may be buffered, across all documents, for a single
+   * connection while it is still unauthenticated. Messages received before authentication
+   * completes are queued in memory; without a limit an unauthenticated client could exhaust
+   * server memory (see GHSA-xwhh-v746-pj9m). When the limit is exceeded the connection is closed.
+   *
+   * @default 5_242_880 (5 MiB)
+   */
+  maxUnauthenticatedQueueSize: number
+  /**
+   * Maximum number of messages that may be buffered, across all documents, for a single
+   * connection while it is still unauthenticated. When the limit is exceeded the connection
+   * is closed.
+   *
+   * @default 1_000
+   */
+  maxUnauthenticatedQueueMessages: number
+  /**
+   * Maximum number of distinct documents a single connection may open before any of them is
+   * authenticated. Each pending document holds its own queue and hook payload, so an
+   * unauthenticated client fanning out across many document names could otherwise exhaust
+   * memory even while staying under the per-connection queue limits. When the limit is
+   * exceeded the connection is closed.
+   *
+   * @default 100
+   */
+  maxPendingDocuments: number
 
-	/**
-	 * options to pass to the ydoc document
-	 */
-	yDocOptions: {
-		gc: boolean; // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
-		gcFilter: () => boolean; // will be called before garbage collecting ; return false to keep it
-	};
+  /**
+   * options to pass to the ydoc document
+   */
+  yDocOptions: {
+    gc: boolean // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
+    gcFilter: () => boolean // will be called before garbage collecting ; return false to keep it
+  }
 }
 
 export interface onStatelessPayload {
-	connection: Connection;
-	documentName: string;
-	document: Document;
-	payload: string;
+  connection: Connection
+  documentName: string
+  document: Document
+  payload: string
 }
 
 export interface onAuthenticatePayload<Context = any> {
-	context: Context;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	request: Request;
-	socketId: string;
-	token: string;
-	connectionConfig: ConnectionConfiguration;
-	providerVersion: string | null;
+  context: Context
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  request: Request
+  socketId: string
+  token: string
+  connectionConfig: ConnectionConfiguration
+  providerVersion: string | null
 }
 
 export interface onTokenSyncPayload<Context = any> {
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	token: string;
-	connectionConfig: ConnectionConfiguration;
-	connection: Connection<Context>;
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  token: string
+  connectionConfig: ConnectionConfiguration
+  connection: Connection<Context>
 }
 
 export interface onCreateDocumentPayload<Context = any> {
-	context: Context;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
+  context: Context
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
 }
 
 export interface onConnectPayload<Context = any> {
-	context: Context;
-	documentName: string;
-	instance: Hocuspocus;
-	request: Request;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-	providerVersion: string | null;
+  context: Context
+  documentName: string
+  instance: Hocuspocus
+  request: Request
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
+  providerVersion: string | null
 }
 
 export interface connectedPayload<Context = any> {
-	context: Context;
-	documentName: string;
-	instance: Hocuspocus;
-	request: Request;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
-	connection: Connection<Context>;
-	providerVersion: string | null;
+  context: Context
+  documentName: string
+  instance: Hocuspocus
+  request: Request
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
+  connection: Connection<Context>
+  providerVersion: string | null
 }
 
 export interface onLoadDocumentPayload<Context = any> {
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
 }
 
 export interface afterLoadDocumentPayload<Context = any> {
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
 }
 
 export interface onChangePayload<Context = any> {
-	clientsCount: number;
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	update: Uint8Array;
-	socketId: string;
-	transactionOrigin: unknown;
-	connection?: Connection<Context>;
+  clientsCount: number
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  update: Uint8Array
+  socketId: string
+  transactionOrigin: unknown
+  connection?: Connection<Context>
 }
 
 export interface beforeHandleMessagePayload<Context = any> {
-	clientsCount: number;
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	update: Uint8Array;
-	socketId: string;
-	connection: Connection<Context>;
+  clientsCount: number
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  update: Uint8Array
+  socketId: string
+  connection: Connection<Context>
 }
 
 export interface afterHandleMessagePayload<Context = any> {
-	clientsCount: number;
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	update: Uint8Array;
-	socketId: string;
-	connection: Connection<Context>;
+  clientsCount: number
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  update: Uint8Array
+  socketId: string
+  connection: Connection<Context>
 }
 
 export interface beforeHandleAwarenessPayload<Context = any> {
-	awareness: Awareness;
-	clientsCount: number;
-	/**
-	 * Connection context populated by `onAuthenticate`. `undefined` when the
-	 * update did not originate from a client connection (e.g. server-internal
-	 * writes via `DirectConnection`).
-	 */
-	context: Context | undefined;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	/**
-	 * Per-client awareness states decoded from the inbound update, keyed by
-	 * Yjs clientId. Mutate this map in place to rewrite the update: change
-	 * fields on a state object, `states.delete(clientId)` to drop a peer, or
-	 * `states.set(clientId, ...)` to add or replace one. The encoded update
-	 * sent to peers reflects whatever the map looks like after every hook in
-	 * the chain has run.
-	 */
-	states: Map<number, Record<string, any>>;
-	socketId: string;
-	/**
-	 * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
-	 * Use `isTransactionOrigin(origin)` to discriminate sources. Matches the
-	 * `transactionOrigin` shape of `onAwarenessUpdatePayload`.
-	 */
-	transactionOrigin: unknown;
-	/**
-	 * Convenience shortcut: `origin.connection` when `transactionOrigin` is a
-	 * `ConnectionTransactionOrigin`, otherwise `undefined`. Matches the
-	 * `connection?` shape of `onAwarenessUpdatePayload`.
-	 */
-	connection?: Connection<Context>;
+  awareness: Awareness
+  clientsCount: number
+  /**
+   * Connection context populated by `onAuthenticate`. `undefined` when the
+   * update did not originate from a client connection (e.g. server-internal
+   * writes via `DirectConnection`).
+   */
+  context: Context | undefined
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  /**
+   * Per-client awareness states decoded from the inbound update, keyed by
+   * Yjs clientId. Mutate this map in place to rewrite the update: change
+   * fields on a state object, `states.delete(clientId)` to drop a peer, or
+   * `states.set(clientId, ...)` to add or replace one. The encoded update
+   * sent to peers reflects whatever the map looks like after every hook in
+   * the chain has run.
+   */
+  states: Map<number, Record<string, any>>
+  socketId: string
+  /**
+   * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
+   * Use `isTransactionOrigin(origin)` to discriminate sources. Matches the
+   * `transactionOrigin` shape of `onAwarenessUpdatePayload`.
+   */
+  transactionOrigin: unknown
+  /**
+   * Convenience shortcut: `origin.connection` when `transactionOrigin` is a
+   * `ConnectionTransactionOrigin`, otherwise `undefined`. Matches the
+   * `connection?` shape of `onAwarenessUpdatePayload`.
+   */
+  connection?: Connection<Context>
 }
 
 export interface beforeSyncPayload<Context = any> {
-	clientsCount: number;
-	context: Context;
-	document: Document;
-	documentName: string;
-	connection: Connection<Context>;
-	/**
-	 * The y-protocols/sync message type
-	 * @example
-	 * 0: SyncStep1
-	 * 1: SyncStep2
-	 * 2: YjsUpdate
-	 *
-	 * @see https://github.com/yjs/y-protocols/blob/master/sync.js#L13-L40
-	 */
-	type: number;
-	/**
-	 * The payload of the y-sync message.
-	 */
-	payload: Uint8Array;
+  clientsCount: number
+  context: Context
+  document: Document
+  documentName: string
+  connection: Connection<Context>
+  /**
+   * The y-protocols/sync message type
+   * @example
+   * 0: SyncStep1
+   * 1: SyncStep2
+   * 2: YjsUpdate
+   *
+   * @see https://github.com/yjs/y-protocols/blob/master/sync.js#L13-L40
+   */
+  type: number
+  /**
+   * The payload of the y-sync message.
+   */
+  payload: Uint8Array
 }
 
 export interface beforeBroadcastStatelessPayload {
-	document: Document;
-	documentName: string;
-	payload: string;
+  document: Document
+  documentName: string
+  payload: string
 }
 
 export interface onStoreDocumentPayload<Context = any> {
-	clientsCount: number;
-	document: Document;
-	lastContext: Context;
-	lastTransactionOrigin: unknown;
-	documentName: string;
-	instance: Hocuspocus;
+  clientsCount: number
+  document: Document
+  lastContext: Context
+  lastTransactionOrigin: unknown
+  documentName: string
+  instance: Hocuspocus
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
-export interface afterStoreDocumentPayload<Context = any>
-	extends onStoreDocumentPayload<Context> {}
+export interface afterStoreDocumentPayload<Context = any> extends onStoreDocumentPayload<Context> {}
 
 export interface onAwarenessUpdatePayload<Context = any> {
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	transactionOrigin: unknown;
-	connection?: Connection<Context>;
-	added: number[];
-	updated: number[];
-	removed: number[];
-	awareness: Awareness;
-	states: StatesArray;
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  transactionOrigin: unknown
+  connection?: Connection<Context>
+  added: number[]
+  updated: number[]
+  removed: number[]
+  awareness: Awareness
+  states: StatesArray
 }
 
-export type StatesArray = { clientId: number; [key: string | number]: any }[];
+export type StatesArray = { clientId: number; [key: string | number]: any }[]
 
 export interface fetchPayload<Context = any> {
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
-	connectionConfig: ConnectionConfiguration;
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
+  connectionConfig: ConnectionConfiguration
 }
 
-export interface storePayload<Context = any>
-	extends onStoreDocumentPayload<Context> {
-	state: Buffer;
+export interface storePayload<Context = any> extends onStoreDocumentPayload<Context> {
+  state: Buffer
 }
 
 export interface onDisconnectPayload<Context = any> {
-	clientsCount: number;
-	context: Context;
-	document: Document;
-	documentName: string;
-	instance: Hocuspocus;
-	requestHeaders: Headers;
-	requestParameters: URLSearchParams;
-	socketId: string;
+  clientsCount: number
+  context: Context
+  document: Document
+  documentName: string
+  instance: Hocuspocus
+  requestHeaders: Headers
+  requestParameters: URLSearchParams
+  socketId: string
 }
 
 export interface onRequestPayload {
-	request: IncomingMessage;
-	response: ServerResponse;
-	instance: Hocuspocus;
+  request: IncomingMessage
+  response: ServerResponse
+  instance: Hocuspocus
 }
 
 export interface onUpgradePayload {
-	request: IncomingMessage;
-	socket: any;
-	head: any;
-	instance: Hocuspocus;
+  request: IncomingMessage
+  socket: any
+  head: any
+  instance: Hocuspocus
 }
 
 export interface onListenPayload {
-	instance: Hocuspocus;
-	configuration: Configuration;
-	port: number;
+  instance: Hocuspocus
+  configuration: Configuration
+  port: number
 }
 
 export interface onDestroyPayload {
-	instance: Hocuspocus;
+  instance: Hocuspocus
 }
 
 export interface onConfigurePayload {
-	instance: Hocuspocus;
-	configuration: Configuration;
-	version: string;
+  instance: Hocuspocus
+  configuration: Configuration
+  version: string
 }
 
 export interface afterUnloadDocumentPayload {
-	instance: Hocuspocus;
-	documentName: string;
+  instance: Hocuspocus
+  documentName: string
 }
 
 export interface beforeUnloadDocumentPayload {
-	instance: Hocuspocus;
-	documentName: string;
-	document: Document;
+  instance: Hocuspocus
+  documentName: string
+  document: Document
 }
 
 export interface DisconnectOptions {
-	/**
-	 * When `true` (the default) the document is persisted immediately (no debouncing)
-	 * and unloaded from memory as the connection closes. When `false` the store is
-	 * scheduled via the debounce timer and the document is kept warm in memory, so a
-	 * follow-up direct connection reuses it and repeated writes coalesce. With
-	 * `false`, persistence is no longer guaranteed by the time `disconnect()`
-	 * resolves.
-	 */
-	unloadImmediately?: boolean;
+  /**
+   * When `true` (the default) the document is persisted immediately (no debouncing)
+   * and unloaded from memory as the connection closes. When `false` the store is
+   * scheduled via the debounce timer and the document is kept warm in memory, so a
+   * follow-up direct connection reuses it and repeated writes coalesce. With
+   * `false`, persistence is no longer guaranteed by the time `disconnect()`
+   * resolves.
+   */
+  unloadImmediately?: boolean
 }
 
 export interface DirectConnection {
-	transact(transaction: (document: Document) => void): Promise<void>;
-	disconnect(options?: DisconnectOptions): Promise<void>;
+  transact(transaction: (document: Document) => void): Promise<void>
+  disconnect(options?: DisconnectOptions): Promise<void>
 }

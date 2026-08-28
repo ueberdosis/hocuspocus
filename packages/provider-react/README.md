@@ -1,4 +1,5 @@
 # @hocuspocus/provider-react
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/provider-react.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/provider-react)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/provider-react.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/provider-react.svg)](https://www.npmjs.com/package/@hocuspocus/provider-react)
@@ -24,7 +25,7 @@ import {
   HocuspocusRoom,
   useHocuspocusProvider,
   useHocuspocusConnectionStatus,
-} from "@hocuspocus/provider-react"
+} from '@hocuspocus/provider-react'
 
 function Editor() {
   const provider = useHocuspocusProvider()

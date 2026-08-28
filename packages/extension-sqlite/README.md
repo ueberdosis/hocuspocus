@@ -1,4 +1,5 @@
 # @hocuspocus/extension-sqlite
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-sqlite.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-sqlite)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-sqlite.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-sqlite.svg)](https://www.npmjs.com/package/@hocuspocus/extension-sqlite)
@@ -15,19 +16,18 @@ npm install @hocuspocus/extension-sqlite
 ## Usage
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { SQLite } from "@hocuspocus/extension-sqlite"
+import { Server } from '@hocuspocus/server'
+import { SQLite } from '@hocuspocus/extension-sqlite'
 
 const server = new Server({
-  extensions: [
-    new SQLite({ database: "db.sqlite" }),
-  ],
+  extensions: [new SQLite({ database: 'db.sqlite' })],
 })
 
 server.listen()
 ```
 
 `database` accepts:
+
 - a filename (persisted to disk, e.g. `"db.sqlite"`)
 - `":memory:"` for an in-memory database
 - `""` for an anonymous on-disk database

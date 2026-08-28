@@ -1,27 +1,30 @@
-import test from "ava";
-import { Server } from "@hocuspocus/server";
+import { describe, expect, onTestFinished, test } from 'vite-plus/test'
 
-test("destroy only runs once when called multiple times", async (t) => {
-	let destroyed = 0;
+import { Server } from '@hocuspocus/server'
 
-	const server = new Server({
-		port: 0,
-		quiet: true,
-		stopOnSignals: false,
-		async onDestroy() {
-			destroyed += 1;
-		},
-	});
+describe('destroy', () => {
+  test('destroy only runs once when called multiple times', async t => {
+    let destroyed = 0
 
-	t.teardown(() => server.httpServer.close());
+    const server = new Server({
+      port: 0,
+      quiet: true,
+      stopOnSignals: false,
+      async onDestroy() {
+        destroyed += 1
+      },
+    })
 
-	await server.listen();
+    onTestFinished(() => server.httpServer.close())
 
-	// Concurrent and subsequent calls (e.g. from repeated SIGINT signals)
-	// must not re-run the shutdown, which would close already-closed
-	// resources in extensions.
-	await Promise.all([server.destroy(), server.destroy()]);
-	await server.destroy();
+    await server.listen()
 
-	t.is(destroyed, 1);
-});
+    // Concurrent and subsequent calls (e.g. from repeated SIGINT signals)
+    // must not re-run the shutdown, which would close already-closed
+    // resources in extensions.
+    await Promise.all([server.destroy(), server.destroy()])
+    await server.destroy()
+
+    expect(destroyed).toBe(1)
+  })
+})

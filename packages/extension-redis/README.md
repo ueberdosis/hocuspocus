@@ -1,4 +1,5 @@
 # @hocuspocus/extension-redis
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-redis.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-redis)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-redis.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-redis.svg)](https://www.npmjs.com/package/@hocuspocus/extension-redis)
@@ -17,14 +18,14 @@ npm install @hocuspocus/extension-redis
 Point every Hocuspocus instance at the same Redis:
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { Redis } from "@hocuspocus/extension-redis"
+import { Server } from '@hocuspocus/server'
+import { Redis } from '@hocuspocus/extension-redis'
 
 const server = new Server({
   port: 1234,
   extensions: [
     new Redis({
-      host: "127.0.0.1",
+      host: '127.0.0.1',
       port: 6379,
     }),
   ],
@@ -38,10 +39,10 @@ server.listen()
 If you already have an `ioredis` client (including Cluster), pass it in directly instead of host/port:
 
 ```js
-import RedisClient from "ioredis"
+import RedisClient from 'ioredis'
 
 new Redis({
-  redis: new RedisClient({ host: "127.0.0.1", port: 6379 }),
+  redis: new RedisClient({ host: '127.0.0.1', port: 6379 }),
 })
 ```
 
@@ -61,7 +62,7 @@ The wait is bounded by `awaitInitialSyncTimeout` (ms, default `1000`). Set it to
 
 ```js
 new Redis({
-  host: "127.0.0.1",
+  host: '127.0.0.1',
   port: 6379,
   awaitInitialSyncTimeout: 1000,
 })

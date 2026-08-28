@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react'
 
-import type { HocuspocusProviderEvents } from "../types.ts";
-import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
+import type { HocuspocusProviderEvents } from '../types.ts'
+import { useHocuspocusProvider } from './useHocuspocusProvider.ts'
 
 /**
  * Subscribe to events from the HocuspocusProvider for the current room.
@@ -31,22 +31,22 @@ import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
  * ```
  */
 export function useHocuspocusEvent<E extends keyof HocuspocusProviderEvents>(
-	event: E,
-	handler: HocuspocusProviderEvents[E] extends undefined
-		? () => void
-		: (data: HocuspocusProviderEvents[E]) => void,
+  event: E,
+  handler: HocuspocusProviderEvents[E] extends undefined
+    ? () => void
+    : (data: HocuspocusProviderEvents[E]) => void,
 ): void {
-	const provider = useHocuspocusProvider();
-	const handlerRef = useRef(handler);
-	handlerRef.current = handler;
+  const provider = useHocuspocusProvider()
+  const handlerRef = useRef(handler)
+  handlerRef.current = handler
 
-	useEffect(() => {
-		const listener = (...args: unknown[]) => {
-			(handlerRef.current as (...a: unknown[]) => void)(...args);
-		};
-		provider.on(event, listener);
-		return () => {
-			provider.off(event, listener);
-		};
-	}, [provider, event]);
+  useEffect(() => {
+    const listener = (...args: unknown[]) => {
+      ;(handlerRef.current as (...a: unknown[]) => void)(...args)
+    }
+    provider.on(event, listener)
+    return () => {
+      provider.off(event, listener)
+    }
+  }, [provider, event])
 }

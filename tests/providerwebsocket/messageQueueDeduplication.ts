@@ -1,4 +1,5 @@
-import test from 'ava'
+import { describe, expect, onTestFinished, test } from 'vite-plus/test'
+
 import * as encoding from 'lib0/encoding'
 import { HocuspocusProviderWebsocket } from '@hocuspocus/provider'
 import { newHocuspocus } from '../utils/index.ts'
@@ -7,7 +8,11 @@ import { newHocuspocus } from '../utils/index.ts'
  * Helper to create a raw message Uint8Array with a given documentName and messageType,
  * matching the wire format: VarString(documentName) + VarUint(messageType) + optional payload.
  */
-function createRawMessage(documentName: string, messageType: number, payload?: Uint8Array): Uint8Array {
+function createRawMessage(
+  documentName: string,
+  messageType: number,
+  payload?: Uint8Array,
+): Uint8Array {
   const encoder = encoding.createEncoder()
   encoding.writeVarString(encoder, documentName)
   encoding.writeVarUint(encoder, messageType)
@@ -27,134 +32,136 @@ const MessageType = {
   CLOSE: 7,
 }
 
-test('deduplicates awareness messages for the same document in the queue', async t => {
-  const server = await newHocuspocus(t)
+describe('messageQueueDeduplication', () => {
+  test('deduplicates awareness messages for the same document in the queue', async t => {
+    const server = await newHocuspocus()
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
+
+    // Queue multiple awareness messages for the same document
+    const msg1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([1]))
+    const msg2 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([2]))
+    const msg3 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([3]))
+
+    ws.send(msg1)
+    ws.send(msg2)
+    ws.send(msg3)
+
+    // Access the private messageQueue via cast
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should only have the latest awareness message').toBe(1)
+    expect(queue[0], 'should keep the last queued awareness message').toStrictEqual(msg3)
   })
-  t.teardown(() => ws.destroy())
 
-  // Queue multiple awareness messages for the same document
-  const msg1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([1]))
-  const msg2 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([2]))
-  const msg3 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([3]))
+  test('deduplicates QueryAwareness messages for the same document in the queue', async t => {
+    const server = await newHocuspocus()
 
-  ws.send(msg1)
-  ws.send(msg2)
-  ws.send(msg3)
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
 
-  // Access the private messageQueue via cast
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 1, 'should only have the latest awareness message')
-  t.deepEqual(queue[0], msg3, 'should keep the last queued awareness message')
-})
+    const msg1 = createRawMessage('doc1', MessageType.QueryAwareness)
+    const msg2 = createRawMessage('doc1', MessageType.QueryAwareness)
 
-test('deduplicates QueryAwareness messages for the same document in the queue', async t => {
-  const server = await newHocuspocus(t)
+    ws.send(msg1)
+    ws.send(msg2)
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should only have the latest QueryAwareness message').toBe(1)
+    expect(queue[0]).toStrictEqual(msg2)
   })
-  t.teardown(() => ws.destroy())
 
-  const msg1 = createRawMessage('doc1', MessageType.QueryAwareness)
-  const msg2 = createRawMessage('doc1', MessageType.QueryAwareness)
+  test('does not deduplicate awareness messages for different documents', async t => {
+    const server = await newHocuspocus()
 
-  ws.send(msg1)
-  ws.send(msg2)
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
 
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 1, 'should only have the latest QueryAwareness message')
-  t.deepEqual(queue[0], msg2)
-})
+    const msg1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([1]))
+    const msg2 = createRawMessage('doc2', MessageType.Awareness, new Uint8Array([2]))
 
-test('does not deduplicate awareness messages for different documents', async t => {
-  const server = await newHocuspocus(t)
+    ws.send(msg1)
+    ws.send(msg2)
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should keep awareness messages for different documents').toBe(2)
   })
-  t.teardown(() => ws.destroy())
 
-  const msg1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([1]))
-  const msg2 = createRawMessage('doc2', MessageType.Awareness, new Uint8Array([2]))
+  test('does not deduplicate Sync messages', async t => {
+    const server = await newHocuspocus()
 
-  ws.send(msg1)
-  ws.send(msg2)
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
 
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 2, 'should keep awareness messages for different documents')
-})
+    const msg1 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([1]))
+    const msg2 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([2]))
+    const msg3 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([3]))
 
-test('does not deduplicate Sync messages', async t => {
-  const server = await newHocuspocus(t)
+    ws.send(msg1)
+    ws.send(msg2)
+    ws.send(msg3)
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should keep all Sync messages').toBe(3)
   })
-  t.teardown(() => ws.destroy())
 
-  const msg1 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([1]))
-  const msg2 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([2]))
-  const msg3 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([3]))
+  test('does not deduplicate Stateless messages', async t => {
+    const server = await newHocuspocus()
 
-  ws.send(msg1)
-  ws.send(msg2)
-  ws.send(msg3)
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
 
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 3, 'should keep all Sync messages')
-})
+    const msg1 = createRawMessage('doc1', MessageType.Stateless, new Uint8Array([1]))
+    const msg2 = createRawMessage('doc1', MessageType.Stateless, new Uint8Array([2]))
 
-test('does not deduplicate Stateless messages', async t => {
-  const server = await newHocuspocus(t)
+    ws.send(msg1)
+    ws.send(msg2)
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should keep all Stateless messages').toBe(2)
   })
-  t.teardown(() => ws.destroy())
 
-  const msg1 = createRawMessage('doc1', MessageType.Stateless, new Uint8Array([1]))
-  const msg2 = createRawMessage('doc1', MessageType.Stateless, new Uint8Array([2]))
+  test('deduplicates awareness but preserves sync messages in mixed queue', async t => {
+    const server = await newHocuspocus()
 
-  ws.send(msg1)
-  ws.send(msg2)
+    const ws = new HocuspocusProviderWebsocket({
+      url: server.server!.webSocketURL,
+      autoConnect: false,
+    })
+    onTestFinished(() => ws.destroy())
 
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 2, 'should keep all Stateless messages')
-})
+    const sync1 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([1]))
+    const awareness1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([10]))
+    const sync2 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([2]))
+    const awareness2 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([20]))
+    const sync3 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([3]))
 
-test('deduplicates awareness but preserves sync messages in mixed queue', async t => {
-  const server = await newHocuspocus(t)
+    ws.send(sync1)
+    ws.send(awareness1)
+    ws.send(sync2)
+    ws.send(awareness2)
+    ws.send(sync3)
 
-  const ws = new HocuspocusProviderWebsocket({
-    url: server.server!.webSocketURL,
-    autoConnect: false,
+    const queue = (ws as any).messageQueue as Uint8Array[]
+    expect(queue.length, 'should have 3 sync + 1 awareness').toBe(4)
+    expect(queue[0]).toStrictEqual(sync1)
+    expect(queue[1]).toStrictEqual(sync2)
+    expect(queue[2], 'should keep the latest awareness message').toStrictEqual(awareness2)
+    expect(queue[3]).toStrictEqual(sync3)
   })
-  t.teardown(() => ws.destroy())
-
-  const sync1 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([1]))
-  const awareness1 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([10]))
-  const sync2 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([2]))
-  const awareness2 = createRawMessage('doc1', MessageType.Awareness, new Uint8Array([20]))
-  const sync3 = createRawMessage('doc1', MessageType.Sync, new Uint8Array([3]))
-
-  ws.send(sync1)
-  ws.send(awareness1)
-  ws.send(sync2)
-  ws.send(awareness2)
-  ws.send(sync3)
-
-  const queue = (ws as any).messageQueue as Uint8Array[]
-  t.is(queue.length, 4, 'should have 3 sync + 1 awareness')
-  t.deepEqual(queue[0], sync1)
-  t.deepEqual(queue[1], sync2)
-  t.deepEqual(queue[2], awareness2, 'should keep the latest awareness message')
-  t.deepEqual(queue[3], sync3)
 })

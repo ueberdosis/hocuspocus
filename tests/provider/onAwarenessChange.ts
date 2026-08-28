@@ -1,169 +1,170 @@
-import test from "ava";
-import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
+import { describe, expect, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
 
-test("onAwarenessChange callback is executed", async (t) => {
-	await new Promise(async (resolve) => {
-		let resolved = false;
-		const server = await newHocuspocus(t);
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
-		const provider = newHocuspocusProvider(t, server, {
-			onConnect() {
-				provider.setAwarenessField("foo", "bar");
-			},
-			onAwarenessChange: ({ states }) => {
-				if (resolved) return;
-				resolved = true;
+describe('onAwarenessChange', () => {
+  test('onAwarenessChange callback is executed', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const server = await newHocuspocus()
 
-				t.is(states.length, 1);
-				t.is(states[0].foo, "bar");
+      const provider = newHocuspocusProvider(server, {
+        onConnect() {
+          provider.setAwarenessField('foo', 'bar')
+        },
+        onAwarenessChange: ({ states }) => {
+          if (resolved) return
+          resolved = true
 
-				resolve("done");
-			},
-		});
-	});
-});
+          expect(states.length).toBe(1)
+          expect(states[0].foo).toBe('bar')
 
-test("onAwarenessChange callback is executed, even when no awareness fields are set", async (t) => {
-	await new Promise(async (resolve) => {
-		let resolved = false;
-		const server = await newHocuspocus(t);
+          resolve('done')
+        },
+      })
+    })
+  })
 
-		const provider = newHocuspocusProvider(t, server, {
-			onAwarenessChange: ({ states }) => {
-				if (resolved) return;
-				resolved = true;
+  test('onAwarenessChange callback is executed, even when no awareness fields are set', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const server = await newHocuspocus()
 
-				t.is(states.length, 2);
+      const provider = newHocuspocusProvider(server, {
+        onAwarenessChange: ({ states }) => {
+          if (resolved) return
+          resolved = true
 
-				resolve("done");
-			},
-		});
+          expect(states.length).toBe(2)
 
-		const anotherProvider = newHocuspocusProvider(t, server, {
-			async onConnect() {
-				anotherProvider.setAwarenessField("foo", "bar");
-				provider.configuration.websocketProvider.connect();
-			},
-		});
-	});
+          resolve('done')
+        },
+      })
 
-	t.pass();
-});
+      const anotherProvider = newHocuspocusProvider(server, {
+        async onConnect() {
+          anotherProvider.setAwarenessField('foo', 'bar')
+          provider.configuration.websocketProvider.connect()
+        },
+      })
+    })
 
-test("onAwarenessChange callback is executed on provider destroy", async (t) => {
-	await new Promise(async (resolve) => {
-		let resolved = false;
-		const server = await newHocuspocus(t);
+    pass()
+  })
 
-		const provider = newHocuspocusProvider(t,
-			server,
-			{
-				onConnect() {
-					provider.destroy();
-				},
-				onAwarenessChange: ({ states }) => {
-					if (resolved) return;
-					resolved = true;
+  test('onAwarenessChange callback is executed on provider destroy', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const server = await newHocuspocus()
 
-					t.is(states.length, 0);
-					resolve("done");
-				},
-			},
-			{
-				maxAttempts: 1,
-			},
-		);
-	});
-});
+      const provider = newHocuspocusProvider(
+        server,
+        {
+          onConnect() {
+            provider.destroy()
+          },
+          onAwarenessChange: ({ states }) => {
+            if (resolved) return
+            resolved = true
 
-test("gets the current awareness states from the server", async (t) => {
-	await new Promise(async (resolve) => {
-		let resolved = false;
-		const server = await newHocuspocus(t);
+            expect(states.length).toBe(0)
+            resolve('done')
+          },
+        },
+        {
+          maxAttempts: 1,
+        },
+      )
+    })
+  })
 
-		const provider = newHocuspocusProvider(t, server);
-		const provider2 = newHocuspocusProvider(t, server, {
-			onAwarenessChange: ({ states }) => {
-				if (resolved) return;
-				const state = states.find((state) => state.foo === "bar");
+  test('gets the current awareness states from the server', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const server = await newHocuspocus()
 
-				if (state && state.foo === "bar") {
-					resolved = true;
-					t.pass();
-					resolve("done");
-				}
-			},
-		});
+      const provider = newHocuspocusProvider(server)
+      const provider2 = newHocuspocusProvider(server, {
+        onAwarenessChange: ({ states }) => {
+          if (resolved) return
+          const state = states.find(state => state.foo === 'bar')
 
-		provider.setAwarenessField("foo", "bar");
-	});
-});
+          if (state && state.foo === 'bar') {
+            resolved = true
+            pass()
+            resolve('done')
+          }
+        },
+      })
 
-test("shares awareness state with other users", async (t) => {
-	await new Promise(async (resolve) => {
-		let resolved = false;
-		const server = await newHocuspocus(t);
+      provider.setAwarenessField('foo', 'bar')
+    })
+  })
 
-		const provider = newHocuspocusProvider(t, server, {
-			onConnect() {
-				provider.setAwarenessField("name", "player1");
-			},
-			onAwarenessChange: ({ states }) => {
-				if (resolved) return;
-				const player2 = !!states.filter((state) => state.name === "player2")
-					.length;
+  test('shares awareness state with other users', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const server = await newHocuspocus()
 
-				if (player2) {
-					resolved = true;
-					t.is(player2, true);
-					resolve("done");
-				}
-			},
-		});
+      const provider = newHocuspocusProvider(server, {
+        onConnect() {
+          provider.setAwarenessField('name', 'player1')
+        },
+        onAwarenessChange: ({ states }) => {
+          if (resolved) return
+          const player2 = !!states.filter(state => state.name === 'player2').length
 
-		const anotherProvider = newHocuspocusProvider(t, server, {
-			onConnect() {
-				anotherProvider.setAwarenessField("name", "player2");
-			},
-			onAwarenessChange: ({ states }) => {
-				if (resolved) return;
-				const player1 = !!states.filter((state) => state.name === "player1")
-					.length;
+          if (player2) {
+            resolved = true
+            expect(player2).toBe(true)
+            resolve('done')
+          }
+        },
+      })
 
-				if (player1) {
-					t.is(player1, true);
-				}
-			},
-		});
-	});
-});
+      const anotherProvider = newHocuspocusProvider(server, {
+        onConnect() {
+          anotherProvider.setAwarenessField('name', 'player2')
+        },
+        onAwarenessChange: ({ states }) => {
+          if (resolved) return
+          const player1 = !!states.filter(state => state.name === 'player1').length
 
-test("does not share awareness state with users in other documents", async (t) => {
-	await new Promise(async (resolve) => {
-		const server = await newHocuspocus(t);
+          if (player1) {
+            expect(player1).toBe(true)
+          }
+        },
+      })
+    })
+  })
 
-		newHocuspocusProvider(t, server, {
-			async onConnect() {
-				await sleep(100);
+  test('does not share awareness state with users in other documents', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-				t.pass();
-				resolve("done");
-			},
-			onAwarenessChange: ({ states }) => {
-				const player2 = !!states.filter((state) => state.name === "player2")
-					.length;
+      newHocuspocusProvider(server, {
+        async onConnect() {
+          await sleep(100)
 
-				if (player2) {
-					t.fail("Awareness state leaked!");
-				}
-			},
-		});
+          pass()
+          resolve('done')
+        },
+        onAwarenessChange: ({ states }) => {
+          const player2 = !!states.filter(state => state.name === 'player2').length
 
-		const anotherProvider = newHocuspocusProvider(t, server, {
-			name: "completely-different-and-unrelated-document",
-			onConnect() {
-				anotherProvider.setAwarenessField("name", "player2");
-			},
-		});
-	});
-});
+          if (player2) {
+            expect.fail('Awareness state leaked!')
+          }
+        },
+      })
+
+      const anotherProvider = newHocuspocusProvider(server, {
+        name: 'completely-different-and-unrelated-document',
+        onConnect() {
+          anotherProvider.setAwarenessField('name', 'player2')
+        },
+      })
+    })
+  })
+})

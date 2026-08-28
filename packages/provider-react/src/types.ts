@@ -1,22 +1,22 @@
 import type {
-	HocuspocusProvider,
-	HocuspocusProviderWebsocket,
-	onAuthenticatedParameters,
-	onAuthenticationFailedParameters,
-	onAwarenessChangeParameters,
-	onAwarenessUpdateParameters,
-	onCloseParameters,
-	onDisconnectParameters,
-	onMessageParameters,
-	onOpenParameters,
-	onOutgoingMessageParameters,
-	onStatelessParameters,
-	onStatusParameters,
-	onSyncedParameters,
-	onUnsyncedChangesParameters,
-} from "@hocuspocus/provider";
-import type { ReactNode } from "react";
-import type * as Y from "yjs";
+  HocuspocusProvider,
+  HocuspocusProviderWebsocket,
+  onAuthenticatedParameters,
+  onAuthenticationFailedParameters,
+  onAwarenessChangeParameters,
+  onAwarenessUpdateParameters,
+  onCloseParameters,
+  onDisconnectParameters,
+  onMessageParameters,
+  onOpenParameters,
+  onOutgoingMessageParameters,
+  onStatelessParameters,
+  onStatusParameters,
+  onSyncedParameters,
+  onUnsyncedChangesParameters,
+} from '@hocuspocus/provider'
+import type { ReactNode } from 'react'
+import type * as Y from 'yjs'
 
 /**
  * Configuration for HocuspocusProvider component.
@@ -25,131 +25,131 @@ import type * as Y from "yjs";
  * or a `websocketProvider` instance for full control — but not both.
  */
 export type HocuspocusProviderWebsocketComponentProps = {
-	children: ReactNode;
+  children: ReactNode
 } & (
-	| {
-			/**
-			 * URL of your @hocuspocus/server instance
-			 */
-			url: string;
-			websocketProvider?: never;
-	  }
-	| {
-			url?: never;
-			/**
-			 * Provide your own websocket instance for full control
-			 */
-			websocketProvider: HocuspocusProviderWebsocket;
-	  }
-);
+  | {
+      /**
+       * URL of your @hocuspocus/server instance
+       */
+      url: string
+      websocketProvider?: never
+    }
+  | {
+      url?: never
+      /**
+       * Provide your own websocket instance for full control
+       */
+      websocketProvider: HocuspocusProviderWebsocket
+    }
+)
 
 /**
  * Map of HocuspocusProvider event names to their payload types.
  * Used by `useHocuspocusEvent` and the `HocuspocusRoom` event handler props.
  */
 export interface HocuspocusProviderEvents {
-	open: onOpenParameters;
-	connect: undefined;
-	close: onCloseParameters;
-	disconnect: onDisconnectParameters;
-	status: onStatusParameters;
-	synced: onSyncedParameters;
-	unsyncedChanges: onUnsyncedChangesParameters;
-	message: onMessageParameters;
-	outgoingMessage: onOutgoingMessageParameters;
-	stateless: onStatelessParameters;
-	authenticated: onAuthenticatedParameters;
-	authenticationFailed: onAuthenticationFailedParameters;
-	awarenessUpdate: onAwarenessUpdateParameters;
-	awarenessChange: onAwarenessChangeParameters;
-	destroy: undefined;
+  open: onOpenParameters
+  connect: undefined
+  close: onCloseParameters
+  disconnect: onDisconnectParameters
+  status: onStatusParameters
+  synced: onSyncedParameters
+  unsyncedChanges: onUnsyncedChangesParameters
+  message: onMessageParameters
+  outgoingMessage: onOutgoingMessageParameters
+  stateless: onStatelessParameters
+  authenticated: onAuthenticatedParameters
+  authenticationFailed: onAuthenticationFailedParameters
+  awarenessUpdate: onAwarenessUpdateParameters
+  awarenessChange: onAwarenessChangeParameters
+  destroy: undefined
 }
 
 /**
  * Configuration for HocuspocusRoom component
  */
 export interface HocuspocusRoomProps {
-	children: ReactNode;
-	/**
-	 * The document name (required)
-	 */
-	name: string;
-	/**
-	 * Optional: bring your own Y.Doc
-	 */
-	document?: Y.Doc;
-	/**
-	 * JWT token or function that returns a promise resolving to a token
-	 */
-	token?: string | (() => Promise<string>) | (() => string);
-	/**
-	 * Enable session-aware multiplexing. When true, the provider embeds a unique
-	 * sessionId in the documentName field of every message, allowing multiple
-	 * providers with the same document name on a single WebSocket connection.
-	 *
-	 * Only set this to `true` when connecting to a v4 server that does
-	 * support session awareness.
-	 *
-	 * Default: false
-	 */
-	sessionAwareness?: boolean;
+  children: ReactNode
+  /**
+   * The document name (required)
+   */
+  name: string
+  /**
+   * Optional: bring your own Y.Doc
+   */
+  document?: Y.Doc
+  /**
+   * JWT token or function that returns a promise resolving to a token
+   */
+  token?: string | (() => Promise<string>) | (() => string)
+  /**
+   * Enable session-aware multiplexing. When true, the provider embeds a unique
+   * sessionId in the documentName field of every message, allowing multiple
+   * providers with the same document name on a single WebSocket connection.
+   *
+   * Only set this to `true` when connecting to a v4 server that does
+   * support session awareness.
+   *
+   * Default: false
+   */
+  sessionAwareness?: boolean
 
-	/**
-	 * Batch outgoing document and awareness updates over a short window (in
-	 * milliseconds) instead of sending one message per change, to reduce the
-	 * number of websocket messages during heavy editing. The added latency is
-	 * capped at `flushDelay`, so keep it small (e.g. 500).
-	 *
-	 * Default: false (send every change immediately)
-	 */
-	flushDelay?: false | number;
+  /**
+   * Batch outgoing document and awareness updates over a short window (in
+   * milliseconds) instead of sending one message per change, to reduce the
+   * number of websocket messages during heavy editing. The added latency is
+   * capped at `flushDelay`, so keep it small (e.g. 500).
+   *
+   * Default: false (send every change immediately)
+   */
+  flushDelay?: false | number
 
-	// Event handlers — all optional, called when the provider emits the corresponding event.
-	onOpen?: (data: onOpenParameters) => void;
-	onConnect?: () => void;
-	onClose?: (data: onCloseParameters) => void;
-	onDisconnect?: (data: onDisconnectParameters) => void;
-	onStatus?: (data: onStatusParameters) => void;
-	onSynced?: (data: onSyncedParameters) => void;
-	onUnsyncedChanges?: (data: onUnsyncedChangesParameters) => void;
-	onMessage?: (data: onMessageParameters) => void;
-	onOutgoingMessage?: (data: onOutgoingMessageParameters) => void;
-	onStateless?: (data: onStatelessParameters) => void;
-	onAuthenticated?: (data: onAuthenticatedParameters) => void;
-	onAuthenticationFailed?: (data: onAuthenticationFailedParameters) => void;
-	onAwarenessUpdate?: (data: onAwarenessUpdateParameters) => void;
-	onAwarenessChange?: (data: onAwarenessChangeParameters) => void;
-	onDestroy?: () => void;
+  // Event handlers — all optional, called when the provider emits the corresponding event.
+  onOpen?: (data: onOpenParameters) => void
+  onConnect?: () => void
+  onClose?: (data: onCloseParameters) => void
+  onDisconnect?: (data: onDisconnectParameters) => void
+  onStatus?: (data: onStatusParameters) => void
+  onSynced?: (data: onSyncedParameters) => void
+  onUnsyncedChanges?: (data: onUnsyncedChangesParameters) => void
+  onMessage?: (data: onMessageParameters) => void
+  onOutgoingMessage?: (data: onOutgoingMessageParameters) => void
+  onStateless?: (data: onStatelessParameters) => void
+  onAuthenticated?: (data: onAuthenticatedParameters) => void
+  onAuthenticationFailed?: (data: onAuthenticationFailedParameters) => void
+  onAwarenessUpdate?: (data: onAwarenessUpdateParameters) => void
+  onAwarenessChange?: (data: onAwarenessChangeParameters) => void
+  onDestroy?: () => void
 }
 
 /**
  * Context value for the WebSocket provider
  */
 export interface HocuspocusContextValue {
-	websocketProvider: HocuspocusProviderWebsocket;
+  websocketProvider: HocuspocusProviderWebsocket
 }
 
 /**
  * Context value for the room/document provider
  */
 export interface HocuspocusRoomContextValue {
-	provider: HocuspocusProvider;
+  provider: HocuspocusProvider
 }
 
 /**
  * Connection status for the collaboration provider
  */
-export type ConnectionStatus = "connecting" | "connected" | "disconnected";
+export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected'
 
 /**
  * Sync status indicating whether local changes are synced with server
  */
-export type SyncStatus = "synced" | "syncing";
+export type SyncStatus = 'synced' | 'syncing'
 
 /**
  * User information from awareness
  */
 export interface CollabUser {
-	clientId: number;
-	[key: string]: unknown;
+  clientId: number
+  [key: string]: unknown
 }

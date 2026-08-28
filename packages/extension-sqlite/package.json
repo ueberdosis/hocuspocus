@@ -1,44 +1,48 @@
 {
-	"name": "@hocuspocus/extension-sqlite",
-	"description": "a generic Hocuspocus persistence driver for the sqlite",
-	"version": "4.6.0",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"yjs"
-	],
-	"license": "MIT",
-	"type": "module",
-	"main": "dist/hocuspocus-sqlite.cjs",
-	"module": "dist/hocuspocus-sqlite.esm.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
-			"import": "./dist/hocuspocus-sqlite.esm.js",
-			"require": "./dist/hocuspocus-sqlite.cjs",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"files": [
-		"src",
-		"dist"
-	],
-	"dependencies": {
-		"@hocuspocus/extension-database": "workspace:^",
-		"better-sqlite3": "^12.6.2",
-		"kleur": "^4.1.5"
-	},
-	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.13"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	}
+  "name": "@hocuspocus/extension-sqlite",
+  "version": "4.6.0",
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+  "description": "a generic Hocuspocus persistence driver for the sqlite",
+  "keywords": [
+    "hocuspocus",
+    "yjs"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-sqlite.cjs",
+  "module": "dist/hocuspocus-sqlite.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-sqlite.esm.js",
+      "require": "./dist/hocuspocus-sqlite.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-database": "workspace:^",
+    "better-sqlite3": "^12.6.2",
+    "kleur": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "vite-plus": "catalog:"
+  }
 }

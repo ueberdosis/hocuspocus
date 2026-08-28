@@ -1,22 +1,18 @@
-import type { ExecutionContext } from "ava";
-import type { HocuspocusProviderWebsocketConfiguration } from "@hocuspocus/provider";
-import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
-import type { Hocuspocus } from "@hocuspocus/server";
+import type { HocuspocusProviderWebsocketConfiguration } from '@hocuspocus/provider'
+import { HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import type { Hocuspocus } from '@hocuspocus/server'
+import { onTestFinished } from 'vite-plus/test'
 
 export const newHocuspocusProviderWebsocket = (
-	t: ExecutionContext,
-	hocuspocus: Hocuspocus,
-	options: Partial<Omit<HocuspocusProviderWebsocketConfiguration, "url">> = {},
+  hocuspocus: Hocuspocus,
+  options: Partial<Omit<HocuspocusProviderWebsocketConfiguration, 'url'>> = {},
 ) => {
-	const ws = new HocuspocusProviderWebsocket({
-		// We don't need which port the server is running on, but
-		// we can get the URL from the passed server instance.
-		url: hocuspocus.server!.webSocketURL,
-		// Node.js 22+ has native WebSocket support
-		...options,
-	});
+  const ws = new HocuspocusProviderWebsocket({
+    url: hocuspocus.server!.webSocketURL,
+    ...options,
+  })
 
-	t.teardown(() => ws.destroy());
+  onTestFinished(() => ws.destroy())
 
-	return ws;
-};
+  return ws
+}

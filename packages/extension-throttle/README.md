@@ -1,4 +1,5 @@
 # @hocuspocus/extension-throttle
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-throttle.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-throttle)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-throttle.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-throttle.svg)](https://www.npmjs.com/package/@hocuspocus/extension-throttle)
@@ -17,8 +18,8 @@ npm install @hocuspocus/extension-throttle
 With default thresholds (15 connection attempts per 60 seconds, 5 minute ban):
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { Throttle } from "@hocuspocus/extension-throttle"
+import { Server } from '@hocuspocus/server'
+import { Throttle } from '@hocuspocus/extension-throttle'
 
 const server = new Server({
   extensions: [new Throttle()],
@@ -31,9 +32,9 @@ server.listen()
 
 ```js
 new Throttle({
-  throttle: 30,          // allowed connection attempts per window
+  throttle: 30, // allowed connection attempts per window
   consideredSeconds: 60, // window length in seconds
-  banTime: 5,            // ban duration in minutes
+  banTime: 5, // ban duration in minutes
 })
 ```
 

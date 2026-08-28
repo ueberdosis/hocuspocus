@@ -11,10 +11,13 @@ const server = new Server({
     new S3({
       bucket: process.env.S3_BUCKET || 'my-hocuspocus-documents',
       region: process.env.S3_REGION || 'us-east-1',
-      credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      } : undefined
+      credentials:
+        process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            }
+          : undefined,
     }),
   ],
 })
@@ -33,8 +36,8 @@ const minioServer = new Server({
       forcePathStyle: true,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin'
-      }
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin',
+      },
     }),
   ],
 })
@@ -53,10 +56,13 @@ const iamServer = new Server({
       region: process.env.S3_REGION || 'us-east-1',
       prefix: process.env.S3_PREFIX || 'collaborative-docs/',
       // Use credentials from environment variables for local development
-      credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      } : undefined
+      credentials:
+        process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            }
+          : undefined,
     }),
   ],
 })
@@ -74,9 +80,13 @@ const spacesServer = new Server({
       region: process.env.S3_REGION || 'nyc3',
       endpoint: process.env.S3_ENDPOINT || 'https://nyc3.digitaloceanspaces.com',
       credentials: {
-        accessKeyId: process.env.SPACES_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID || 'your-spaces-key',
-        secretAccessKey: process.env.SPACES_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY || 'your-spaces-secret'
-      }
+        accessKeyId:
+          process.env.SPACES_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID || 'your-spaces-key',
+        secretAccessKey:
+          process.env.SPACES_SECRET_KEY ||
+          process.env.AWS_SECRET_ACCESS_KEY ||
+          'your-spaces-secret',
+      },
     }),
   ],
 })

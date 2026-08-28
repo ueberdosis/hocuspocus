@@ -1,42 +1,48 @@
 {
-	"name": "@hocuspocus/extension-database",
-	"description": "a generic Hocuspocus persistence driver for the database",
-	"version": "4.6.0",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"yjs"
-	],
-	"license": "MIT",
-	"type": "module",
-	"main": "dist/hocuspocus-database.cjs",
-	"module": "dist/hocuspocus-database.esm.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
-			"import": "./dist/hocuspocus-database.esm.js",
-			"require": "./dist/hocuspocus-database.cjs",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"files": [
-		"src",
-		"dist"
-	],
-	"dependencies": {
-		"@hocuspocus/server": "workspace:^"
-	},
-	"peerDependencies": {
-		"yjs": "^13.6.8"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	}
+  "name": "@hocuspocus/extension-database",
+  "version": "4.6.0",
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+  "description": "a generic Hocuspocus persistence driver for the database",
+  "keywords": [
+    "hocuspocus",
+    "yjs"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-database.cjs",
+  "module": "dist/hocuspocus-database.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-database.esm.js",
+      "require": "./dist/hocuspocus-database.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "workspace:^"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "yjs": "^13.6.8"
+  }
 }

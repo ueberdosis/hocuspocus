@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
-import { useEffect, useMemo, useRef } from "react";
+import { HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import { useEffect, useMemo, useRef } from 'react'
 
-import { HocuspocusContext } from "./context.ts";
-import type { HocuspocusProviderWebsocketComponentProps } from "./types.ts";
+import { HocuspocusContext } from './context.ts'
+import type { HocuspocusProviderWebsocketComponentProps } from './types.ts'
 
 /**
  * HocuspocusProviderWebsocketComponent manages the WebSocket connection that is shared across all rooms.
@@ -22,57 +22,52 @@ import type { HocuspocusProviderWebsocketComponentProps } from "./types.ts";
  * ```
  */
 export function HocuspocusProviderWebsocketComponent({
-	children,
-	url,
-	websocketProvider: externalWebsocketProvider,
+  children,
+  url,
+  websocketProvider: externalWebsocketProvider,
 }: HocuspocusProviderWebsocketComponentProps) {
-	const websocketRef = useRef<HocuspocusProviderWebsocket | null>(null);
-	const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const websocketRef = useRef<HocuspocusProviderWebsocket | null>(null)
+  const destroyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	// Create WebSocket provider once on mount.
-	// Safe in StrictMode: useRef persists across double-renders, so the instance
-	// is created only once. The deferred destruction in the effect below ensures
-	// the second mount cancels the pending destroy before it fires.
-	if (!websocketRef.current && !externalWebsocketProvider) {
-		websocketRef.current = new HocuspocusProviderWebsocket({
-			url: url!,
-		});
-	}
+  // Create WebSocket provider once on mount.
+  // Safe in StrictMode: useRef persists across double-renders, so the instance
+  // is created only once. The deferred destruction in the effect below ensures
+  // the second mount cancels the pending destroy before it fires.
+  if (!websocketRef.current && !externalWebsocketProvider) {
+    websocketRef.current = new HocuspocusProviderWebsocket({
+      url: url!,
+    })
+  }
 
-	const websocketProvider =
-		externalWebsocketProvider ??
-		(websocketRef.current as HocuspocusProviderWebsocket);
+  const websocketProvider =
+    externalWebsocketProvider ?? (websocketRef.current as HocuspocusProviderWebsocket)
 
-	// Cleanup on unmount with deferred destruction to handle StrictMode double-mount
-	useEffect(() => {
-		if (destroyTimeoutRef.current) {
-			clearTimeout(destroyTimeoutRef.current);
-			destroyTimeoutRef.current = null;
-		}
+  // Cleanup on unmount with deferred destruction to handle StrictMode double-mount
+  useEffect(() => {
+    if (destroyTimeoutRef.current) {
+      clearTimeout(destroyTimeoutRef.current)
+      destroyTimeoutRef.current = null
+    }
 
-		return () => {
-			// Only destroy if we created the websocket (not externally provided)
-			if (!externalWebsocketProvider) {
-				destroyTimeoutRef.current = setTimeout(() => {
-					if (websocketRef.current) {
-						websocketRef.current.destroy();
-						websocketRef.current = null;
-					}
-				}, 0);
-			}
-		};
-	}, [externalWebsocketProvider]);
+    return () => {
+      // Only destroy if we created the websocket (not externally provided)
+      if (!externalWebsocketProvider) {
+        destroyTimeoutRef.current = setTimeout(() => {
+          if (websocketRef.current) {
+            websocketRef.current.destroy()
+            websocketRef.current = null
+          }
+        }, 0)
+      }
+    }
+  }, [externalWebsocketProvider])
 
-	const contextValue = useMemo(
-		() => ({
-			websocketProvider,
-		}),
-		[websocketProvider],
-	);
+  const contextValue = useMemo(
+    () => ({
+      websocketProvider,
+    }),
+    [websocketProvider],
+  )
 
-	return (
-		<HocuspocusContext.Provider value={contextValue}>
-			{children}
-		</HocuspocusContext.Provider>
-	);
+  return <HocuspocusContext.Provider value={contextValue}>{children}</HocuspocusContext.Provider>
 }

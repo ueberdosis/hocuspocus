@@ -1,105 +1,108 @@
-import test from 'ava'
+import { describe, expect, onTestFinished, test } from 'vite-plus/test'
+
 import { Server } from '@hocuspocus/server'
 import { newHocuspocus } from '../utils/index.ts'
 
-test('should respond with OK', async t => {
-  const hocuspocus = await newHocuspocus(t)
+describe('listen', () => {
+  test('should respond with OK', async t => {
+    const hocuspocus = await newHocuspocus()
 
-  const response = await fetch(hocuspocus.server!.httpURL)
+    const response = await fetch(hocuspocus.server!.httpURL)
 
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
-
-test('should respond with status 200', async t => {
-  const hocuspocus = await newHocuspocus(t)
-
-  const response = await fetch(hocuspocus.server!.httpURL)
-
-  t.is(await response.status, 200)
-})
-
-test('should respond with OK on a custom port', async t => {
-  const hocuspocus = await newHocuspocus(t, {
-    port: 4000,
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
 
-  const response = await fetch(hocuspocus.server!.httpURL)
+  test('should respond with status 200', async t => {
+    const hocuspocus = await newHocuspocus()
 
-  t.is(hocuspocus.server!.address.port, 4000)
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
+    const response = await fetch(hocuspocus.server!.httpURL)
 
-test('should respond with OK on a custom port passed to listen()', async t => {
-  const server = new Server({
-    port: 0,
-    stopOnSignals: false,
+    expect(await response.status).toBe(200)
   })
 
-  t.teardown(() => server.httpServer.close())
-
-  server.listen(4001)
-
-  const response = await fetch(server.httpURL)
-
-  t.is(server.address.port, 4001)
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
-
-test('should take a custom port and a callback', async t => {
-  const server = new Server({
-    port: 0,
-    stopOnSignals: false,
-  })
-
-  t.teardown(() => server.httpServer.close())
-
-  await new Promise(async resolve => {
-    server.listen(4002, () => {
-      resolve('done')
+  test('should respond with OK on a custom port', async t => {
+    const hocuspocus = await newHocuspocus({
+      port: 4000,
     })
+
+    const response = await fetch(hocuspocus.server!.httpURL)
+
+    expect(hocuspocus.server!.address.port).toBe(4000)
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
 
-  const response = await fetch(server.httpURL)
-
-  t.is(server.address.port, 4002)
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
-
-test('should execute a callback', async t => {
-  const server = new Server({
-    port: 0,
-    stopOnSignals: false,
-  })
-
-  t.teardown(() => server.httpServer.close())
-
-  await new Promise(async resolve => {
-    server.listen(0, async () => {
-      resolve('done')
+  test('should respond with OK on a custom port passed to listen()', async t => {
+    const server = new Server({
+      port: 0,
+      stopOnSignals: false,
     })
+
+    onTestFinished(() => server.httpServer.close())
+
+    server.listen(4001)
+
+    const response = await fetch(server.httpURL)
+
+    expect(server.address.port).toBe(4001)
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
 
-  const response = await fetch(server.httpURL)
-
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
-
-test('should have the custom port as a parameter in the callback', async t => {
-  const server = new Server({
-    port: 0,
-    stopOnSignals: false,
-  })
-
-  t.teardown(() => server.httpServer.close())
-
-  await new Promise(async resolve => {
-    server.listen(0, async ({ port }: any) => {
-      t.is(port, server.address.port)
-      resolve('done')
+  test('should take a custom port and a callback', async t => {
+    const server = new Server({
+      port: 0,
+      stopOnSignals: false,
     })
+
+    onTestFinished(() => server.httpServer.close())
+
+    await new Promise(async resolve => {
+      server.listen(4002, () => {
+        resolve('done')
+      })
+    })
+
+    const response = await fetch(server.httpURL)
+
+    expect(server.address.port).toBe(4002)
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
 
-  const response = await fetch(server.httpURL)
+  test('should execute a callback', async t => {
+    const server = new Server({
+      port: 0,
+      stopOnSignals: false,
+    })
 
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
+    onTestFinished(() => server.httpServer.close())
+
+    await new Promise(async resolve => {
+      server.listen(0, async () => {
+        resolve('done')
+      })
+    })
+
+    const response = await fetch(server.httpURL)
+
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
+  })
+
+  test('should have the custom port as a parameter in the callback', async t => {
+    const server = new Server({
+      port: 0,
+      stopOnSignals: false,
+    })
+
+    onTestFinished(() => server.httpServer.close())
+
+    await new Promise(async resolve => {
+      server.listen(0, async ({ port }: any) => {
+        expect(port).toBe(server.address.port)
+        resolve('done')
+      })
+    })
+
+    const response = await fetch(server.httpURL)
+
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
+  })
 })

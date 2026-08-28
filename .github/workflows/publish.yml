@@ -1,6 +1,3 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
 name: Publish to NPM
 
 on:
@@ -11,6 +8,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   publish-npm:
@@ -18,22 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6.0.9
+      - uses: pnpm/action-setup@v7
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org/
           cache: 'pnpm'
 
-      - name: Set up npmrc
-        id: setup-npmrc
-        run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
-
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm publish:latest
-        if: "!contains(github.ref, '-rc.')"
+      - name: Build packages
+        run: pnpm build:packages
 
-      - run: pnpm publish:pre
-        if: "contains(github.ref, '-rc.')"
+      - name: Publish to npm
+        run: pnpm changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,90 +1,93 @@
-import test from "ava";
+import { describe, expect, test } from 'vite-plus/test'
+
 import {
-	newHocuspocus,
-	newHocuspocusProvider,
-	newHocuspocusProviderWebsocket,
-	sleep,
-} from "../utils/index.ts";
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+  sleep,
+} from '../utils/index.ts'
 
-test("provider retries auth with token function after initial failure", async (t) => {
-	const docName = "superSecretDoc";
-	const requiredToken = "SUPER-SECRET-TOKEN";
+describe('onAuthenticationFailedRetry', () => {
+  test('provider retries auth with token function after initial failure', async t => {
+    const docName = 'superSecretDoc'
+    const requiredToken = 'SUPER-SECRET-TOKEN'
 
-	const server = await newHocuspocus(t, {
-		async onAuthenticate({ token, documentName }) {
-			if (documentName !== docName) {
-				throw new Error();
-			}
+    const server = await newHocuspocus({
+      async onAuthenticate({ token, documentName }) {
+        if (documentName !== docName) {
+          throw new Error()
+        }
 
-			if (token !== requiredToken) {
-				throw new Error();
-			}
-		},
-	});
+        if (token !== requiredToken) {
+          throw new Error()
+        }
+      },
+    })
 
-	const socket = newHocuspocusProviderWebsocket(t, server);
+    const socket = newHocuspocusProviderWebsocket(server)
 
-	let tokenCallCount = 0;
+    let tokenCallCount = 0
 
-	const provider = newHocuspocusProvider(t, server, {
-		websocketProvider: socket,
-		name: docName,
-		token: () => {
-			tokenCallCount++;
-			return tokenCallCount === 1 ? "wrongToken" : requiredToken;
-		},
-		onAuthenticationFailed() {
-			provider.sendToken();
-			provider.startSync();
-		},
-	});
+    const provider = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      name: docName,
+      token: () => {
+        tokenCallCount++
+        return tokenCallCount === 1 ? 'wrongToken' : requiredToken
+      },
+      onAuthenticationFailed() {
+        provider.sendToken()
+        provider.startSync()
+      },
+    })
 
-	await sleep(2000);
+    await sleep(2000)
 
-	t.is(tokenCallCount, 2);
-	t.is(provider.isAuthenticated, true);
-});
+    expect(tokenCallCount).toBe(2)
+    expect(provider.isAuthenticated).toBe(true)
+  })
 
-test("second provider with same doc name succeeds after first fails auth", async (t) => {
-	const docName = "superSecretDoc";
-	const requiredToken = "SUPER-SECRET-TOKEN";
+  test('second provider with same doc name succeeds after first fails auth', async t => {
+    const docName = 'superSecretDoc'
+    const requiredToken = 'SUPER-SECRET-TOKEN'
 
-	const server = await newHocuspocus(t, {
-		async onAuthenticate({ token, documentName }) {
-			if (documentName !== docName) {
-				throw new Error();
-			}
+    const server = await newHocuspocus({
+      async onAuthenticate({ token, documentName }) {
+        if (documentName !== docName) {
+          throw new Error()
+        }
 
-			if (token !== requiredToken) {
-				throw new Error();
-			}
-		},
-	});
+        if (token !== requiredToken) {
+          throw new Error()
+        }
+      },
+    })
 
-	const socket = newHocuspocusProviderWebsocket(t, server);
+    const socket = newHocuspocusProviderWebsocket(server)
 
-	const providerFail = newHocuspocusProvider(t, server, {
-		websocketProvider: socket,
-		token: "wrongToken",
-		name: docName,
-		onAuthenticated() {
-			t.fail("providerFail should not authenticate");
-		},
-	});
+    const providerFail = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      token: 'wrongToken',
+      name: docName,
+      onAuthenticated() {
+        expect.fail('providerFail should not authenticate')
+      },
+    })
 
-	await sleep(1000);
+    await sleep(1000)
 
-	const providerOK = newHocuspocusProvider(t, server, {
-		websocketProvider: socket,
-		token: requiredToken,
-		name: docName,
-		onAuthenticationFailed() {
-			t.fail("providerOK should not fail auth");
-		},
-	});
+    const providerOK = newHocuspocusProvider(server, {
+      websocketProvider: socket,
+      token: requiredToken,
+      name: docName,
+      onAuthenticationFailed() {
+        expect.fail('providerOK should not fail auth')
+      },
+    })
 
-	await sleep(1000);
+    await sleep(1000)
 
-	t.is(providerFail.isAuthenticated, false);
-	t.is(providerOK.isAuthenticated, true);
-});
+    expect(providerFail.isAuthenticated).toBe(false)
+    expect(providerOK.isAuthenticated).toBe(true)
+  })
+})

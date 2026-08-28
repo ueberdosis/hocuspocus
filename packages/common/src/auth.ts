@@ -1,62 +1,51 @@
-import * as encoding from "lib0/encoding";
-import * as decoding from "lib0/decoding";
-import type {AuthorizedScope} from "../../provider/src"
+import * as encoding from 'lib0/encoding'
+import * as decoding from 'lib0/decoding'
+import type { AuthorizedScope } from '../../provider/src'
 
 export enum AuthMessageType {
-	Token = 0,
-	PermissionDenied = 1,
-	Authenticated = 2,
+  Token = 0,
+  PermissionDenied = 1,
+  Authenticated = 2,
 }
 
-export const writeAuthentication = (
-	encoder: encoding.Encoder,
-	auth: string,
-) => {
-	encoding.writeVarUint(encoder, AuthMessageType.Token);
-	encoding.writeVarString(encoder, auth);
-};
+export const writeAuthentication = (encoder: encoding.Encoder, auth: string) => {
+  encoding.writeVarUint(encoder, AuthMessageType.Token)
+  encoding.writeVarString(encoder, auth)
+}
 
-export const writePermissionDenied = (
-	encoder: encoding.Encoder,
-	reason: string,
-) => {
-	encoding.writeVarUint(encoder, AuthMessageType.PermissionDenied);
-	encoding.writeVarString(encoder, reason);
-};
+export const writePermissionDenied = (encoder: encoding.Encoder, reason: string) => {
+  encoding.writeVarUint(encoder, AuthMessageType.PermissionDenied)
+  encoding.writeVarString(encoder, reason)
+}
 
-export const writeAuthenticated = (
-	encoder: encoding.Encoder,
-	scope: AuthorizedScope,
-) => {
-	encoding.writeVarUint(encoder, AuthMessageType.Authenticated);
-	encoding.writeVarString(encoder, scope);
-};
+export const writeAuthenticated = (encoder: encoding.Encoder, scope: AuthorizedScope) => {
+  encoding.writeVarUint(encoder, AuthMessageType.Authenticated)
+  encoding.writeVarString(encoder, scope)
+}
 
-export const writeTokenSyncRequest = (
-	encoder: encoding.Encoder,
-) => {
-	encoding.writeVarUint(encoder, AuthMessageType.Token);
-};
+export const writeTokenSyncRequest = (encoder: encoding.Encoder) => {
+  encoding.writeVarUint(encoder, AuthMessageType.Token)
+}
 
 export const readAuthMessage = (
-	decoder: decoding.Decoder,
-	sendToken: () => void,
-	permissionDeniedHandler: (reason: string) => void,
-	authenticatedHandler: (scope: string) => void,
+  decoder: decoding.Decoder,
+  sendToken: () => void,
+  permissionDeniedHandler: (reason: string) => void,
+  authenticatedHandler: (scope: string) => void,
 ) => {
-	switch (decoding.readVarUint(decoder)) {
-		case AuthMessageType.Token: {
-			sendToken();
-			break;
-		}
-		case AuthMessageType.PermissionDenied: {
-			permissionDeniedHandler(decoding.readVarString(decoder));
-			break;
-		}
-		case AuthMessageType.Authenticated: {
-			authenticatedHandler(decoding.readVarString(decoder));
-			break;
-		}
-		default:
-	}
-};
+  switch (decoding.readVarUint(decoder)) {
+    case AuthMessageType.Token: {
+      sendToken()
+      break
+    }
+    case AuthMessageType.PermissionDenied: {
+      permissionDeniedHandler(decoding.readVarString(decoder))
+      break
+    }
+    case AuthMessageType.Authenticated: {
+      authenticatedHandler(decoding.readVarString(decoder))
+      break
+    }
+    default:
+  }
+}

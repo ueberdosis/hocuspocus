@@ -14,6 +14,7 @@ A clear and concise description of what the bug is.
 
 **Steps to reproduce the bug**
 Steps to reproduce the behavior:
+
 1. Go to …
 2. Type in …
 3. Click on …
@@ -26,10 +27,11 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment?**
- - operating system:
- - browser:
- - mobile/desktop:
- - Hocuspocus version:
+
+- operating system:
+- browser:
+- mobile/desktop:
+- Hocuspocus version:
 
 **Additional context**
 Add any other context about the problem here.

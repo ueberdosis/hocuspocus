@@ -31,25 +31,24 @@ const server = new Server({
   ],
 
   async onConnect(data) {
-    await new Promise(resolve => setTimeout(() => {
-      // @ts-expect-error
-      resolve()
-    }, 1337))
+    await new Promise(resolve =>
+      setTimeout(() => {
+        // @ts-expect-error
+        resolve()
+      }, 1337),
+    )
   },
 
   async onLoadDocument(data: onLoadDocumentPayload) {
     if (data.document.isEmpty('default')) {
-      const defaultField = TiptapTransformer.toYdoc(
-        getProseMirrorJSON('What is love?'),
-        'default',
-      )
+      const defaultField = TiptapTransformer.toYdoc(getProseMirrorJSON('What is love?'), 'default')
 
       data.document.merge(defaultField)
     }
 
     if (data.document.isEmpty('secondary')) {
       const secondaryField = TiptapTransformer.toYdoc(
-        getProseMirrorJSON('Baby don\'t hurt me…'),
+        getProseMirrorJSON("Baby don't hurt me…"),
         'secondary',
       )
 

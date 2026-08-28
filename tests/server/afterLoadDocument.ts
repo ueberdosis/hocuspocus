@@ -1,65 +1,67 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import type { HocuspocusProvider } from '@hocuspocus/provider'
 
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
-test('executes the afterLoadDocument callback', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      async afterLoadDocument() {
-        t.pass()
-        resolve('done')
-      },
-    })
+describe('afterLoadDocument', () => {
+  test('executes the afterLoadDocument callback', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async afterLoadDocument() {
+          pass()
+          resolve('done')
+        },
+      })
 
-    newHocuspocusProvider(t, server, {})
+      newHocuspocusProvider(server, {})
+    })
   })
-})
 
-test('executes the afterLoadDocument callback in an extension', async t => {
-  await new Promise(async resolve => {
-    let provider: HocuspocusProvider
+  test('executes the afterLoadDocument callback in an extension', async t => {
+    await new Promise(async resolve => {
+      let provider: HocuspocusProvider
 
-    class CustomExtension {
-      async afterLoadDocument() {
-        t.pass()
-        resolve('done')
+      class CustomExtension {
+        async afterLoadDocument() {
+          pass()
+          resolve('done')
+        }
       }
-    }
 
-    const server = await newHocuspocus(t, {
-      extensions: [new CustomExtension()],
+      const server = await newHocuspocus({
+        extensions: [new CustomExtension()],
+      })
+
+      newHocuspocusProvider(server)
     })
-
-    newHocuspocusProvider(t, server)
   })
-})
 
-test('does not execute the afterLoadDocument callback when document fails to load', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+  test('does not execute the afterLoadDocument callback when document fails to load', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    class CustomExtension {
-      async onLoadDocument() {
-        throw new Error('oops!')
+      class CustomExtension {
+        async onLoadDocument() {
+          throw new Error('oops!')
+        }
+
+        async afterLoadDocument() {
+          expect.fail('this should not be executed')
+          resolve('done')
+        }
       }
 
-      async afterLoadDocument() {
-        t.fail('this should not be executed')
-        resolve('done')
-      }
-    }
+      server.configure({
+        extensions: [new CustomExtension()],
+      })
 
-    server.configure({
-      extensions: [
-        new CustomExtension(),
-      ],
+      newHocuspocusProvider(server)
+
+      await sleep(300)
+      pass()
+      resolve('')
     })
-
-    newHocuspocusProvider(t, server)
-
-    await sleep(300)
-    t.pass()
-    resolve('')
   })
 })

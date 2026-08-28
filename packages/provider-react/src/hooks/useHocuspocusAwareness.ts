@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
 
-import type { CollabUser } from "../types.ts";
-import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
+import type { CollabUser } from '../types.ts'
+import { useHocuspocusProvider } from './useHocuspocusProvider.ts'
 
 /**
  * Subscribe to the list of connected users in the document.
@@ -33,57 +33,57 @@ import { useHocuspocusProvider } from "./useHocuspocusProvider.ts";
  * ```
  */
 export function useHocuspocusAwareness(): CollabUser[] {
-	const provider = useHocuspocusProvider();
+  const provider = useHocuspocusProvider()
 
-	const versionRef = useRef(0);
-	const cacheRef = useRef<{ users: CollabUser[]; version: number }>({
-		users: [],
-		version: -1,
-	});
+  const versionRef = useRef(0)
+  const cacheRef = useRef<{ users: CollabUser[]; version: number }>({
+    users: [],
+    version: -1,
+  })
 
-	// Reset cache when provider changes so we don't serve stale users
-	// from a previous provider instance.
-	useEffect(() => {
-		versionRef.current++;
-		cacheRef.current = { users: [], version: -1 };
-	}, [provider]);
+  // Reset cache when provider changes so we don't serve stale users
+  // from a previous provider instance.
+  useEffect(() => {
+    versionRef.current++
+    cacheRef.current = { users: [], version: -1 }
+  }, [provider])
 
-	const subscribe = useCallback(
-		(onStoreChange: () => void) => {
-			const onChange = () => {
-				versionRef.current++;
-				onStoreChange();
-			};
-			provider.awareness?.on("change", onChange);
-			return () => {
-				provider.awareness?.off("change", onChange);
-			};
-		},
-		[provider],
-	);
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const onChange = () => {
+        versionRef.current++
+        onStoreChange()
+      }
+      provider.awareness?.on('change', onChange)
+      return () => {
+        provider.awareness?.off('change', onChange)
+      }
+    },
+    [provider],
+  )
 
-	const getSnapshot = useCallback(() => {
-		const awareness = provider.awareness;
-		if (!awareness) {
-			return [];
-		}
+  const getSnapshot = useCallback(() => {
+    const awareness = provider.awareness
+    if (!awareness) {
+      return []
+    }
 
-		// Return cached value if awareness hasn't changed since last snapshot
-		if (cacheRef.current.version === versionRef.current) {
-			return cacheRef.current.users;
-		}
+    // Return cached value if awareness hasn't changed since last snapshot
+    if (cacheRef.current.version === versionRef.current) {
+      return cacheRef.current.users
+    }
 
-		const users: CollabUser[] = [];
-		awareness.getStates().forEach((state, clientId) => {
-			users.push({
-				clientId,
-				...state,
-			});
-		});
+    const users: CollabUser[] = []
+    awareness.getStates().forEach((state, clientId) => {
+      users.push({
+        clientId,
+        ...state,
+      })
+    })
 
-		cacheRef.current = { users, version: versionRef.current };
-		return users;
-	}, [provider]);
+    cacheRef.current = { users, version: versionRef.current }
+    return users
+  }, [provider])
 
-	return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }

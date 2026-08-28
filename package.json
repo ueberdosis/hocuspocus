@@ -1,79 +1,59 @@
 {
-	"private": true,
-	"packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee",
-	"browserslist": [
-		"defaults",
-		"not IE 11",
-		"maintained node versions"
-	],
-	"type": "module",
-	"ava": {
-		"files": [
-			"tests/**/*",
-			"!tests/utils/**/*",
-			"!database/**/*"
-		],
-		"extensions": {
-			"ts": "module"
-		},
-		"require": [
-			"./tests/utils/_force-exit.ts"
-		],
-		"nodeArguments": [
-			"--no-warnings",
-			"--conditions=source",
-			"--experimental-transform-types",
-			"--experimental-specifier-resolution=node"
-		],
-		"timeout": "30s",
-		"workerThreads": false
-	},
-	"scripts": {
-		"start": "pnpm playground",
-		"playground": "pnpm playground:default",
-		"playground:load-document": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/load-document.ts\"",
-		"playground:express": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/express.ts\"",
-		"playground:koa": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/koa.ts\"",
-		"playground:default": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/default.ts\"",
-		"playground:slow": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/slow.ts\"",
-		"playground:redis": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/redis.ts\"",
-		"playground:webhook": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/webhook.ts\"",
-		"lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
-		"lint": "biome lint && pnpm lint:ts",
-		"lint:fix": "biome lint --fix",
-		"test": "ava",
-		"test:watch": "ava --watch",
-		"build:packages": "pnpm clean:packages && rolldown -c",
-		"build:watch": "pnpm clean:packages && rolldown --watch -c",
-		"clean:packages": "rm -Rf ./packages/*/dist",
-		"release:major": "pnpm build:packages && lerna version major --force-publish --sign-git-tag --sign-git-commit",
-		"release:major:pre": "pnpm build:packages && lerna version premajor --force-publish --preid rc --sign-git-tag --sign-git-commit",
-		"release:minor": "pnpm build:packages && lerna version minor --force-publish --sign-git-tag --sign-git-commit",
-		"release:minor:pre": "pnpm build:packages && lerna version preminor --force-publish --preid rc --sign-git-tag --sign-git-commit",
-		"release:patch": "pnpm build:packages && lerna version patch --force-publish --sign-git-tag --sign-git-commit",
-		"release:patch:pre": "pnpm build:packages && lerna version prepatch --force-publish --preid rc --sign-git-tag --sign-git-commit",
-		"release:pre": "pnpm build:packages && lerna version prerelease --force-publish --preid rc --sign-git-tag --sign-git-commit",
-		"publish:latest": "pnpm build:packages && lerna publish from-package --yes",
-		"publish:pre": "pnpm build:packages && lerna publish from-package --yes --dist-tag next",
-		"reset": "pnpm clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./pnpm-lock.yaml && pnpm install",
-		"ncu": "ncu -i --deep && pnpm install"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.4.5",
-		"@types/bun": "^1.3.9",
-		"ava": "^7.0.0",
-		"concurrently": "^6.5.1",
-		"lerna": "^9.0.5",
-		"nx": "^22.7.8",
-		"rolldown": "1.0.0-rc.6",
-		"rolldown-plugin-dts": "^0.22.3",
-		"typescript": "5.8.2"
-	},
-	"engines": {
-		"node": ">=22"
-	},
-	"name": "hocuspocus",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	}
+  "name": "hocuspocus",
+  "private": true,
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "pnpm playground",
+    "playground": "pnpm playground:default",
+    "playground:load-document": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/load-document.ts\"",
+    "playground:express": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/express.ts\"",
+    "playground:koa": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/koa.ts\"",
+    "playground:default": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/default.ts\"",
+    "playground:slow": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/slow.ts\"",
+    "playground:redis": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/redis.ts\"",
+    "playground:webhook": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/webhook.ts\"",
+    "lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --check",
+    "format:fix": "oxfmt",
+    "check": "pnpm format && pnpm lint",
+    "lint:staged": "vp staged",
+    "test": "vp test",
+    "test:watch": "vp test watch",
+    "build:packages": "vp run --filter './packages/*' --fail-if-no-match build",
+    "check:package-exports": "node scripts/check-package-exports.mjs",
+    "clean:packages": "rm -Rf ./packages/*/dist",
+    "reset": "pnpm clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./pnpm-lock.yaml && pnpm install",
+    "ncu": "ncu -i --deep && pnpm install",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "publish:latest": "changeset publish",
+    "publish:pre": "changeset publish --tag next",
+    "release:pre": "changeset pre enter rc",
+    "release:pre:exit": "changeset pre exit",
+    "prepare": "vp config --no-agent"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.27.11",
+    "@types/bun": "^1.3.9",
+    "concurrently": "^6.5.1",
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "typescript": "5.8.2",
+    "vite-plus": "catalog:"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "maintained node versions"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
 }

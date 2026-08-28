@@ -1,81 +1,82 @@
-import type { HocuspocusProvider } from "@hocuspocus/provider";
-import test from "ava";
+import { describe, expect, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
 
-import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 
-test("executes the beforeUnloadDocument callback", async (t) => {
-	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
-	await new Promise(async (resolve) => {
-		const server = await newHocuspocus(t, {
-			async beforeUnloadDocument() {
-				t.pass();
-				resolve("done");
-			},
-		});
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
-		const p = newHocuspocusProvider(t, server, {
-			onSynced(data) {
-				p.destroy();
-			},
-		});
-	});
-});
+describe('beforeUnloadDocument', () => {
+  test('executes the beforeUnloadDocument callback', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async beforeUnloadDocument() {
+          pass()
+          resolve('done')
+        },
+      })
 
-test("executes the beforeUnloadDocument callback when all clients disconnect after a document was loaded", async (t) => {
-	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
-	await new Promise(async (resolve) => {
-		// eslint-disable-next-line prefer-const
-		let provider: HocuspocusProvider;
+      const p = newHocuspocusProvider(server, {
+        onSynced(data) {
+          p.destroy()
+        },
+      })
+    })
+  })
 
-		class CustomExtension {
-			async afterLoadDocument() {
-				provider.destroy();
-			}
+  test('executes the beforeUnloadDocument callback when all clients disconnect after a document was loaded', async t => {
+    await new Promise(async resolve => {
+      // eslint-disable-next-line prefer-const
+      let provider: HocuspocusProvider
 
-			async beforeUnloadDocument() {
-				t.pass();
-				resolve("done");
-			}
-		}
+      class CustomExtension {
+        async afterLoadDocument() {
+          provider.destroy()
+        }
 
-		const server = await newHocuspocus(t, {
-			extensions: [new CustomExtension()],
-		});
+        async beforeUnloadDocument() {
+          pass()
+          resolve('done')
+        }
+      }
 
-		provider = newHocuspocusProvider(t, server);
-	});
-});
+      const server = await newHocuspocus({
+        extensions: [new CustomExtension()],
+      })
 
-test("throwing an exception in beforeUnloadDocument prevents a document from being unloaded", async (t) => {
-	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
-	await new Promise(async (resolve) => {
-		// eslint-disable-next-line prefer-const
-		let provider: HocuspocusProvider;
+      provider = newHocuspocusProvider(server)
+    })
+  })
 
-		class CustomExtension {
-			async beforeUnloadDocument() {
-				throw new Error("my custom error");
-			}
+  test('throwing an exception in beforeUnloadDocument prevents a document from being unloaded', async t => {
+    await new Promise(async resolve => {
+      // eslint-disable-next-line prefer-const
+      let provider: HocuspocusProvider
 
-			async afterUnloadDocument() {
-				t.fail("should not be called");
-			}
-		}
+      class CustomExtension {
+        async beforeUnloadDocument() {
+          throw new Error('my custom error')
+        }
 
-		const server = await newHocuspocus(t, {
-			extensions: [new CustomExtension()],
-		});
+        async afterUnloadDocument() {
+          expect.fail('should not be called')
+        }
+      }
 
-		const p = newHocuspocusProvider(t, server, {
-			onSynced(data) {
-				p.destroy();
-			},
-		});
+      const server = await newHocuspocus({
+        extensions: [new CustomExtension()],
+      })
 
-		setTimeout(() => {
-			t.is(server.documents.size, 1);
-			t.pass();
-			resolve("done");
-		}, 500);
-	});
-});
+      const p = newHocuspocusProvider(server, {
+        onSynced(data) {
+          p.destroy()
+        },
+      })
+
+      setTimeout(() => {
+        expect(server.documents.size).toBe(1)
+        pass()
+        resolve('done')
+      }, 500)
+    })
+  })
+})

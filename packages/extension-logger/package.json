@@ -1,41 +1,47 @@
 {
-	"name": "@hocuspocus/extension-logger",
-	"version": "4.6.0",
-	"description": "hocuspocus logging extension",
-	"homepage": "https://hocuspocus.dev",
-	"keywords": [
-		"hocuspocus",
-		"logging",
-		"logger",
-		"yjs"
-	],
-	"license": "MIT",
-	"type": "module",
-	"main": "dist/hocuspocus-logger.cjs",
-	"module": "dist/hocuspocus-logger.esm.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
-			"import": "./dist/hocuspocus-logger.esm.js",
-			"require": "./dist/hocuspocus-logger.cjs",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"files": [
-		"src",
-		"dist"
-	],
-	"dependencies": {
-		"@hocuspocus/server": "workspace:^"
-	},
-	"gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
-	"repository": {
-		"url": "https://github.com/ueberdosis/hocuspocus"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@hocuspocus/extension-logger",
+  "version": "4.6.0",
+  "gitHead": "b3454a4ca289a84ddfb7fa5607a2d4b8d5c37e9d",
+  "description": "hocuspocus logging extension",
+  "keywords": [
+    "hocuspocus",
+    "logger",
+    "logging",
+    "yjs"
+  ],
+  "homepage": "https://hocuspocus.dev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ueberdosis/hocuspocus"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/hocuspocus-logger.cjs",
+  "module": "dist/hocuspocus-logger.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-logger.esm.js",
+      "require": "./dist/hocuspocus-logger.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "workspace:^"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
 }

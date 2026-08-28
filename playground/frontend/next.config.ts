@@ -1,20 +1,19 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-	serverExternalPackages: ["yjs"],
-	turbopack: {
-		root: "../../",
-		resolveAlias: {
-			"@hocuspocus/provider": "../../packages/provider/src/index.ts",
-			"@hocuspocus/common": "../../packages/common/src/index.ts",
-			"@hocuspocus/transformer": "../../packages/transformer/src/index.ts",
-			"@hocuspocus/provider-react":
-				"../../packages/provider-react/src/index.ts",
-		},
-	},
-	webpack: (config) => {
-		return config;
-	},
-};
+  serverExternalPackages: ['yjs'],
+  turbopack: {
+    root: '../../',
+    resolveAlias: {
+      '@hocuspocus/provider': '../../packages/provider/src/index.ts',
+      '@hocuspocus/common': '../../packages/common/src/index.ts',
+      '@hocuspocus/transformer': '../../packages/transformer/src/index.ts',
+      '@hocuspocus/provider-react': '../../packages/provider-react/src/index.ts',
+    },
+  },
+  webpack: config => {
+    return config
+  },
+}
 
-export default nextConfig;
+export default nextConfig

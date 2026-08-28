@@ -1,4 +1,5 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+
 import type { HocuspocusProvider } from '@hocuspocus/provider'
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
@@ -8,72 +9,74 @@ const AWARENESS_MESSAGE = 'Awareness states update'
 const hasAwarenessField = (provider: HocuspocusProvider) =>
   Array.from(provider.awareness?.getStates().values() ?? []).some(state => state.foo === 'bar')
 
-test('does not echo awareness received from the server back to it', async t => {
-  const server = await newHocuspocus(t)
+describe('awarenessEcho', () => {
+  test('does not echo awareness received from the server back to it', async t => {
+    const server = await newHocuspocus()
 
-  const first = newHocuspocusProvider(t, server, { name: 'awareness-echo' })
+    const first = newHocuspocusProvider(server, { name: 'awareness-echo' })
 
-  let outgoingAwarenessMessages = 0
-  const second = newHocuspocusProvider(t, server, {
-    name: 'awareness-echo',
-    onOutgoingMessage({ message }) {
-      if (message.description === AWARENESS_MESSAGE) {
-        outgoingAwarenessMessages += 1
-      }
-    },
+    let outgoingAwarenessMessages = 0
+    const second = newHocuspocusProvider(server, {
+      name: 'awareness-echo',
+      onOutgoingMessage({ message }) {
+        if (message.description === AWARENESS_MESSAGE) {
+          outgoingAwarenessMessages += 1
+        }
+      },
+    })
+
+    await new Promise(resolve => second.on('synced', () => resolve('done')))
+
+    // Ignore whatever the handshake produced; only the reaction to a remote
+    // change is under test here.
+    await sleep(100)
+    outgoingAwarenessMessages = 0
+
+    first.setAwarenessField('foo', 'bar')
+
+    // The remote state does arrive, so the assertion below is not vacuous.
+    await retryableAssertion(() => {
+      expect(hasAwarenessField(second)).toBe(true)
+    })
+
+    await sleep(100)
+
+    expect(outgoingAwarenessMessages).toBe(0)
   })
 
-  await new Promise(resolve => second.on('synced', () => resolve('done')))
+  test('still sends awareness changes that originate locally', async t => {
+    const server = await newHocuspocus()
 
-  // Ignore whatever the handshake produced; only the reaction to a remote
-  // change is under test here.
-  await sleep(100)
-  outgoingAwarenessMessages = 0
+    const first = newHocuspocusProvider(server, { name: 'awareness-local' })
+    const second = newHocuspocusProvider(server, { name: 'awareness-local' })
 
-  first.setAwarenessField('foo', 'bar')
+    await new Promise(resolve => second.on('synced', () => resolve('done')))
 
-  // The remote state does arrive, so the assertion below is not vacuous.
-  await retryableAssertion(t, tt => {
-    tt.true(hasAwarenessField(second))
+    second.setAwarenessField('foo', 'bar')
+
+    await retryableAssertion(() => {
+      expect(hasAwarenessField(first)).toBe(true)
+    })
   })
 
-  await sleep(100)
+  test('still tells the server when a client goes away', async t => {
+    const server = await newHocuspocus()
 
-  t.is(outgoingAwarenessMessages, 0)
-})
+    const first = newHocuspocusProvider(server, { name: 'awareness-destroy' })
+    const second = newHocuspocusProvider(server, { name: 'awareness-destroy' })
 
-test('still sends awareness changes that originate locally', async t => {
-  const server = await newHocuspocus(t)
+    await new Promise(resolve => second.on('synced', () => resolve('done')))
 
-  const first = newHocuspocusProvider(t, server, { name: 'awareness-local' })
-  const second = newHocuspocusProvider(t, server, { name: 'awareness-local' })
+    second.setAwarenessField('foo', 'bar')
 
-  await new Promise(resolve => second.on('synced', () => resolve('done')))
+    await retryableAssertion(() => {
+      expect(hasAwarenessField(first)).toBe(true)
+    })
 
-  second.setAwarenessField('foo', 'bar')
+    second.destroy()
 
-  await retryableAssertion(t, tt => {
-    tt.true(hasAwarenessField(first))
-  })
-})
-
-test('still tells the server when a client goes away', async t => {
-  const server = await newHocuspocus(t)
-
-  const first = newHocuspocusProvider(t, server, { name: 'awareness-destroy' })
-  const second = newHocuspocusProvider(t, server, { name: 'awareness-destroy' })
-
-  await new Promise(resolve => second.on('synced', () => resolve('done')))
-
-  second.setAwarenessField('foo', 'bar')
-
-  await retryableAssertion(t, tt => {
-    tt.true(hasAwarenessField(first))
-  })
-
-  second.destroy()
-
-  await retryableAssertion(t, tt => {
-    tt.false(hasAwarenessField(first))
+    await retryableAssertion(() => {
+      expect(hasAwarenessField(first)).toBe(false)
+    })
   })
 })

@@ -1,130 +1,142 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.ts'
+import {
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+} from '../utils/index.ts'
 
-test('returns 0 connections when there’s no one connected', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+describe('getConnectionsCount', () => {
+  test('returns 0 connections when there’s no one connected', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    t.is(server.getConnectionsCount(), 0)
+      expect(server.getConnectionsCount()).toBe(0)
 
-    resolve('done')
-  })
-})
-
-test('close connection open when it fails', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      async onConnect() {
-        throw new Error()
-      },
-    })
-
-    newHocuspocusProvider(t, server, {
-      onAuthenticationFailed() {
-        t.is(server.getConnectionsCount(), 0)
-        resolve('done')
-      },
+      resolve('done')
     })
   })
-})
 
-test('dont close connection open when it fails but socket is external', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      async onConnect() {
-        throw new Error()
-      },
-    })
+  test('close connection open when it fails', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async onConnect() {
+          throw new Error()
+        },
+      })
 
-    newHocuspocusProvider(t, server, {
-      onAuthenticationFailed() {
-        t.is(server.getConnectionsCount(), 0)
-        resolve('done')
-      },
-    })
-  })
-})
-
-test('outputs the total connections', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
-
-    newHocuspocusProvider(t, server, {
-      onSynced() {
-        t.is(server.getConnectionsCount(), 1)
-
-        newHocuspocusProvider(t, server, {
-          onSynced() {
-            t.is(server.getConnectionsCount(), 2)
-
-            resolve('done')
-          },
-        })
-      },
+      newHocuspocusProvider(server, {
+        onAuthenticationFailed() {
+          expect(server.getConnectionsCount()).toBe(0)
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test('total connections includes direct connections', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, { name: 'hocuspocus-test' })
+  test('dont close connection open when it fails but socket is external', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async onConnect() {
+          throw new Error()
+        },
+      })
 
-    await server.openDirectConnection('hocuspocus-test')
-    t.is(server.getConnectionsCount(), 1)
-
-    newHocuspocusProvider(t, server, {
-      onSynced() {
-        t.is(server.getConnectionsCount(), 2)
-
-        resolve('done')
-      },
+      newHocuspocusProvider(server, {
+        onAuthenticationFailed() {
+          expect(server.getConnectionsCount()).toBe(0)
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test('adds and removes connections properly', async t => {
-  const server = await newHocuspocus(t)
+  test('outputs the total connections', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-  const providers = [
-    newHocuspocusProvider(t, server),
-    newHocuspocusProvider(t, server),
-    newHocuspocusProvider(t, server),
-    newHocuspocusProvider(t, server),
-    newHocuspocusProvider(t, server),
-  ]
+      newHocuspocusProvider(server, {
+        onSynced() {
+          expect(server.getConnectionsCount()).toBe(1)
 
-  await retryableAssertion(t, tt => {
-    tt.is(server.getConnectionsCount(), 5)
+          newHocuspocusProvider(server, {
+            onSynced() {
+              expect(server.getConnectionsCount()).toBe(2)
+
+              resolve('done')
+            },
+          })
+        },
+      })
+    })
   })
 
-  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
+  test('total connections includes direct connections', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({ name: 'hocuspocus-test' })
 
-  await retryableAssertion(t, tt => {
-    tt.is(server.getConnectionsCount(), 0)
-  })
-})
+      await server.openDirectConnection('hocuspocus-test')
+      expect(server.getConnectionsCount()).toBe(1)
 
-test('multiplexed connections counts properly', async t => {
-  const server = await newHocuspocus(t)
-  const socket = newHocuspocusProviderWebsocket(t, server)
+      newHocuspocusProvider(server, {
+        onSynced() {
+          expect(server.getConnectionsCount()).toBe(2)
 
-  const providers = [
-    newHocuspocusProvider(t, server, { name: 'mux-1' }, {}, socket),
-    newHocuspocusProvider(t, server, { name: 'mux-2' }, {}, socket),
-    newHocuspocusProvider(t, server, { name: 'mux-3' }, {}, socket),
-    newHocuspocusProvider(t, server),
-    newHocuspocusProvider(t, server),
-
-  ]
-
-  await retryableAssertion(t, tt => {
-    tt.is(server.getConnectionsCount(), 3)
+          resolve('done')
+        },
+      })
+    })
   })
 
-  providers.forEach(provider => { provider.disconnect(); provider.configuration.websocketProvider.disconnect() })
+  test('adds and removes connections properly', async t => {
+    const server = await newHocuspocus()
 
-  await retryableAssertion(t, tt => {
-    tt.is(server.getConnectionsCount(), 0)
+    const providers = [
+      newHocuspocusProvider(server),
+      newHocuspocusProvider(server),
+      newHocuspocusProvider(server),
+      newHocuspocusProvider(server),
+      newHocuspocusProvider(server),
+    ]
+
+    await retryableAssertion(() => {
+      expect(server.getConnectionsCount()).toBe(5)
+    })
+
+    providers.forEach(provider => {
+      provider.disconnect()
+      provider.configuration.websocketProvider.disconnect()
+    })
+
+    await retryableAssertion(() => {
+      expect(server.getConnectionsCount()).toBe(0)
+    })
+  })
+
+  test('multiplexed connections counts properly', async t => {
+    const server = await newHocuspocus()
+    const socket = newHocuspocusProviderWebsocket(server)
+
+    const providers = [
+      newHocuspocusProvider(server, { name: 'mux-1' }, {}, socket),
+      newHocuspocusProvider(server, { name: 'mux-2' }, {}, socket),
+      newHocuspocusProvider(server, { name: 'mux-3' }, {}, socket),
+      newHocuspocusProvider(server),
+      newHocuspocusProvider(server),
+    ]
+
+    await retryableAssertion(() => {
+      expect(server.getConnectionsCount()).toBe(3)
+    })
+
+    providers.forEach(provider => {
+      provider.disconnect()
+      provider.configuration.websocketProvider.disconnect()
+    })
+
+    await retryableAssertion(() => {
+      expect(server.getConnectionsCount()).toBe(0)
+    })
   })
 })

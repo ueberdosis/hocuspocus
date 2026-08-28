@@ -1,61 +1,65 @@
-import test from 'ava'
+import { describe, expect, onTestFinished, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import { Server } from '@hocuspocus/server'
 import { newHocuspocus } from '../utils/index.ts'
 
-test('returns a dynamic HTTP/WebSocket address with the correct port', async t => {
-  const hocuspocus = await newHocuspocus(t, {
-    port: 4010,
+describe('address', () => {
+  test('returns a dynamic HTTP/WebSocket address with the correct port', async t => {
+    const hocuspocus = await newHocuspocus({
+      port: 4010,
+    })
+
+    expect(hocuspocus.server!.address.port).toBe(4010)
+    expect(hocuspocus.server!.httpURL).toBe('http://0.0.0.0:4010')
+    expect(hocuspocus.server!.webSocketURL).toBe('ws://0.0.0.0:4010')
+
+    pass()
   })
 
-  t.is(hocuspocus.server!.address.port, 4010)
-  t.is(hocuspocus.server!.httpURL, 'http://0.0.0.0:4010')
-  t.is(hocuspocus.server!.webSocketURL, 'ws://0.0.0.0:4010')
+  test('binds to the configured address', async t => {
+    const server = new Server({
+      port: 0,
+      address: '127.0.0.1',
+      stopOnSignals: false,
+    })
 
-  t.pass()
-})
+    onTestFinished(() => server.httpServer.close())
 
-test('binds to the configured address', async t => {
-  const server = new Server({
-    port: 0,
-    address: '127.0.0.1',
-    stopOnSignals: false,
+    await server.listen()
+
+    const addressInfo = server.httpServer.address()
+    expect(addressInfo && typeof addressInfo === 'object').toBeTruthy()
+    if (addressInfo && typeof addressInfo === 'object') {
+      expect(addressInfo.address).toBe('127.0.0.1')
+      expect(addressInfo.family).toBe('IPv4')
+    }
+
+    expect(server.httpURL).toBe(`http://127.0.0.1:${server.address.port}`)
+
+    const response = await fetch(server.httpURL)
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
 
-  t.teardown(() => server.httpServer.close())
+  test('binds to all interfaces when no address is configured', async t => {
+    const server = new Server({
+      port: 0,
+      stopOnSignals: false,
+    })
 
-  await server.listen()
+    onTestFinished(() => server.httpServer.close())
 
-  const addressInfo = server.httpServer.address()
-  t.truthy(addressInfo && typeof addressInfo === 'object')
-  if (addressInfo && typeof addressInfo === 'object') {
-    t.is(addressInfo.address, '127.0.0.1')
-    t.is(addressInfo.family, 'IPv4')
-  }
+    await server.listen()
 
-  t.is(server.httpURL, `http://127.0.0.1:${server.address.port}`)
+    const addressInfo = server.httpServer.address()
+    expect(addressInfo && typeof addressInfo === 'object').toBeTruthy()
+    if (addressInfo && typeof addressInfo === 'object') {
+      expect(['::', '0.0.0.0'].includes(addressInfo.address)).toBe(true)
+    }
 
-  const response = await fetch(server.httpURL)
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
-})
+    expect(server.httpURL).toBe(`http://0.0.0.0:${server.address.port}`)
 
-test('binds to all interfaces when no address is configured', async t => {
-  const server = new Server({
-    port: 0,
-    stopOnSignals: false,
+    const response = await fetch(server.httpURL)
+    expect(await response.text()).toBe('Welcome to Hocuspocus!')
   })
-
-  t.teardown(() => server.httpServer.close())
-
-  await server.listen()
-
-  const addressInfo = server.httpServer.address()
-  t.truthy(addressInfo && typeof addressInfo === 'object')
-  if (addressInfo && typeof addressInfo === 'object') {
-    t.true(['::', '0.0.0.0'].includes(addressInfo.address))
-  }
-
-  t.is(server.httpURL, `http://0.0.0.0:${server.address.port}`)
-
-  const response = await fetch(server.httpURL)
-  t.is(await response.text(), 'Welcome to Hocuspocus!')
 })

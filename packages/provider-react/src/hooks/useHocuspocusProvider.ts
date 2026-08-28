@@ -1,6 +1,6 @@
-import { useContext } from "react";
+import { useContext } from 'react'
 
-import { HocuspocusRoomContext } from "../context.ts";
+import { HocuspocusRoomContext } from '../context.ts'
 
 /**
  * Access the HocuspocusProvider instance for the current room.
@@ -27,11 +27,11 @@ import { HocuspocusRoomContext } from "../context.ts";
  * ```
  */
 export function useHocuspocusProvider() {
-	const context = useContext(HocuspocusRoomContext);
+  const context = useContext(HocuspocusRoomContext)
 
-	if (!context) {
-		throw new Error("useHocuspocusProvider must be used within a HocuspocusRoom");
-	}
+  if (!context) {
+    throw new Error('useHocuspocusProvider must be used within a HocuspocusRoom')
+  }
 
-	return context.provider;
+  return context.provider
 }

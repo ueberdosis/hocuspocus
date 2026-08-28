@@ -1,4 +1,5 @@
 # @hocuspocus/extension-database
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/extension-database.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/extension-database)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/extension-database.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/extension-database.svg)](https://www.npmjs.com/package/@hocuspocus/extension-database)
@@ -17,8 +18,8 @@ npm install @hocuspocus/extension-database
 Plug in any storage backend by implementing two async functions:
 
 ```js
-import { Server } from "@hocuspocus/server"
-import { Database } from "@hocuspocus/extension-database"
+import { Server } from '@hocuspocus/server'
+import { Database } from '@hocuspocus/extension-database'
 
 const server = new Server({
   extensions: [

@@ -1,124 +1,128 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
-	}
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-	background: var(--background);
-	color: var(--foreground);
-	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-		sans-serif;
-	font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-	line-height: 1.6;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  line-height: 1.6;
 }
 
 /* Modern editor styles */
 .tiptap {
-	:first-child {
-		margin-top: 0;
-	}
+  :first-child {
+    margin-top: 0;
+  }
 
-	/* Placeholder styling */
-	p.is-editor-empty:first-child::before {
-		color: rgb(148 163 184);
-		content: attr(data-placeholder);
-		float: left;
-		height: 0;
-		pointer-events: none;
-		font-style: italic;
-	}
+  /* Placeholder styling */
+  p.is-editor-empty:first-child::before {
+    color: rgb(148 163 184);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    font-style: italic;
+  }
 
-	p {
-		word-break: break-word;
-		line-height: 1.8;
-	}
+  p {
+    word-break: break-word;
+    line-height: 1.8;
+  }
 
-	/* Improved focus styles */
-	&:focus {
-		outline: none;
-		box-shadow: 0 0 0 2px rgb(59 130 246 / 0.1);
-	}
+  /* Improved focus styles */
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.1);
+  }
 
-	/* Better typography */
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-weight: 600;
-		color: rgb(15 23 42);
-	}
+  /* Better typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    color: rgb(15 23 42);
+  }
 
-	@media (prefers-color-scheme: dark) {
-		h1,
-		h2,
-		h3,
-		h4,
-		h5,
-		h6 {
-			color: rgb(248 250 252);
-		}
-		p.is-editor-empty:first-child::before {
-			color: rgb(100 116 139);
-		}
-	}
+  @media (prefers-color-scheme: dark) {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: rgb(248 250 252);
+    }
+    p.is-editor-empty:first-child::before {
+      color: rgb(100 116 139);
+    }
+  }
 
-	/* Modern collaboration cursor */
-	.collaboration-carets__caret {
-		border-left: 2px solid currentColor;
-		border-right: 2px solid currentColor;
-		margin-left: -1px;
-		margin-right: -1px;
-		pointer-events: none;
-		position: relative;
-		word-break: normal;
-		animation: blink 1s infinite;
-	}
+  /* Modern collaboration cursor */
+  .collaboration-carets__caret {
+    border-left: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    margin-left: -1px;
+    margin-right: -1px;
+    pointer-events: none;
+    position: relative;
+    word-break: normal;
+    animation: blink 1s infinite;
+  }
 
-	/* Smooth blinking animation */
-	@keyframes blink {
-		0%,
-		50% {
-			opacity: 1;
-		}
-		51%,
-		100% {
-			opacity: 0.3;
-		}
-	}
+  /* Smooth blinking animation */
+  @keyframes blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    51%,
+    100% {
+      opacity: 0.3;
+    }
+  }
 
-	/* Modern username label */
-	.collaboration-carets__label {
-		border-radius: 6px 6px 6px 2px;
-		color: white;
-		font-size: 11px;
-		font-style: normal;
-		font-weight: 500;
-		left: -1px;
-		line-height: normal;
-		padding: 0.25rem 0.5rem;
-		position: absolute;
-		top: -1.8em;
-		user-select: none;
-		white-space: nowrap;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-		backdrop-filter: blur(4px);
-	}
+  /* Modern username label */
+  .collaboration-carets__label {
+    border-radius: 6px 6px 6px 2px;
+    color: white;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 500;
+    left: -1px;
+    line-height: normal;
+    padding: 0.25rem 0.5rem;
+    position: absolute;
+    top: -1.8em;
+    user-select: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+  }
 }

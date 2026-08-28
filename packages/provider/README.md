@@ -1,4 +1,5 @@
 # @hocuspocus/provider
+
 [![Version](https://img.shields.io/npm/v/@hocuspocus/provider.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/provider)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/provider.svg)](https://npmcharts.com/compare/tiptap?minimal=true)
 [![License](https://img.shields.io/npm/l/@hocuspocus/provider.svg)](https://www.npmjs.com/package/@hocuspocus/provider)
@@ -17,14 +18,14 @@ npm install @hocuspocus/provider yjs
 ## Usage
 
 ```js
-import * as Y from "yjs"
-import { HocuspocusProvider } from "@hocuspocus/provider"
+import * as Y from 'yjs'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 
 const ydoc = new Y.Doc()
 
 const provider = new HocuspocusProvider({
-  url: "ws://127.0.0.1:1234",
-  name: "example-document",
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
   document: ydoc,
 })
 ```
@@ -37,10 +38,10 @@ Pass a `token` — it's forwarded to the server's `onAuthenticate` hook:
 
 ```js
 new HocuspocusProvider({
-  url: "wss://collab.example.com",
-  name: "example-document",
+  url: 'wss://collab.example.com',
+  name: 'example-document',
   document: ydoc,
-  token: "super-secret-token",
+  token: 'super-secret-token',
 })
 ```
 
@@ -49,15 +50,12 @@ new HocuspocusProvider({
 Create a `HocuspocusProviderWebsocket` once, then reuse it for multiple documents:
 
 ```js
-import {
-  HocuspocusProvider,
-  HocuspocusProviderWebsocket,
-} from "@hocuspocus/provider"
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
 
-const socket = new HocuspocusProviderWebsocket({ url: "ws://127.0.0.1:1234" })
+const socket = new HocuspocusProviderWebsocket({ url: 'ws://127.0.0.1:1234' })
 
-const doc1 = new HocuspocusProvider({ websocketProvider: socket, name: "doc-1" })
-const doc2 = new HocuspocusProvider({ websocketProvider: socket, name: "doc-2" })
+const doc1 = new HocuspocusProvider({ websocketProvider: socket, name: 'doc-1' })
+const doc2 = new HocuspocusProvider({ websocketProvider: socket, name: 'doc-2' })
 ```
 
 Call `provider.destroy()` to disconnect a single document. Call `socket.destroy()` to tear down the shared connection.

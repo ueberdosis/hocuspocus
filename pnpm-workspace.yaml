@@ -1,10 +1,15 @@
 packages:
-  - "playground/*"
-  - "packages/*"
-  - "tests"
+  - 'playground/*'
+  - 'packages/*'
+  - 'tests'
+catalog:
+  # vite is a vendored fork shipped with vite-plus. Keep both entries on the
+  # same version when upgrading.
+  vite: 'npm:@voidzero-dev/vite-plus-core@0.2.9'
+  vite-plus: '0.2.9'
 allowBuilds:
   better-sqlite3: true
-  nx: true
+  nx: set this to true or false
   sharp: true
 overrides:
   '@hono/node-server@<2.0.5': ^2.0.5

@@ -1,158 +1,159 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import type { onChangePayload } from '@hocuspocus/server'
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
-test('onChange callback receives updates', async t => {
-  await new Promise(async resolve => {
-    let resolved = false
-    const mockContext = {
-      user: 123,
-    }
-
-    const server = await newHocuspocus(t, {
-      async onConnect() {
-        return mockContext
-      },
-      async onChange({ document, context }) {
-        if (resolved) return
-        resolved = true
-
-        t.deepEqual(context, mockContext)
-
-        const value = document.getArray('foo').get(0)
-        t.is(value, 'bar')
-
-        resolve('done')
-      },
-    })
-
-    const provider = newHocuspocusProvider(t, server, {
-      onSynced() {
-        provider.document.getArray('foo').insert(0, ['bar'])
-      },
-    })
-  })
-})
-
-test('executes onChange callback from an extension', async t => {
-  await new Promise(async resolve => {
-    let resolved = false
-
-    class CustomExtension {
-      async onChange({ document }: onChangePayload) {
-        if (resolved) return
-        resolved = true
-
-        const value = document.getArray('foo').get(0)
-
-        t.is(value, 'bar')
-
-        resolve('done')
+describe('onChange', () => {
+  test('onChange callback receives updates', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+      const mockContext = {
+        user: 123,
       }
-    }
 
-    const server = await newHocuspocus(t, {
-      extensions: [
-        new CustomExtension(),
-      ],
-    })
+      const server = await newHocuspocus({
+        async onConnect() {
+          return mockContext
+        },
+        async onChange({ document, context }) {
+          if (resolved) return
+          resolved = true
 
-    const provider = newHocuspocusProvider(t, server, {
-      onSynced() {
-        provider.document.getArray('foo').insert(0, ['bar'])
-      },
-    })
-  })
-})
+          expect(context).toStrictEqual(mockContext)
 
-test('onChange callback is not called after onLoadDocument', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      async onChange(data) {
-        t.fail()
-      },
-      async onLoadDocument({ document }) {
-        document.getArray('foo').insert(0, ['bar'])
+          const value = document.getArray('foo').get(0)
+          expect(value).toBe('bar')
 
-        return document
-      },
-    })
+          resolve('done')
+        },
+      })
 
-    newHocuspocusProvider(t, server, {
-      onSynced() {
-        t.pass()
-        resolve('done')
-      },
+      const provider = newHocuspocusProvider(server, {
+        onSynced() {
+          provider.document.getArray('foo').insert(0, ['bar'])
+        },
+      })
     })
   })
-})
 
-test('has the server instance', async t => {
-  await new Promise(async resolve => {
-    let resolved = false
+  test('executes onChange callback from an extension', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
 
-    const server = await newHocuspocus(t, {
-      async onChange({ instance }) {
-        if (resolved) return
-        resolved = true
+      class CustomExtension {
+        async onChange({ document }: onChangePayload) {
+          if (resolved) return
+          resolved = true
 
-        t.is(instance, server)
+          const value = document.getArray('foo').get(0)
 
-        resolve('done')
-      },
-    })
+          expect(value).toBe('bar')
 
-    const provider = newHocuspocusProvider(t, server, {
-      onSynced() {
-        provider.document.getArray('foo').insert(0, ['bar'])
-      },
+          resolve('done')
+        }
+      }
+
+      const server = await newHocuspocus({
+        extensions: [new CustomExtension()],
+      })
+
+      const provider = newHocuspocusProvider(server, {
+        onSynced() {
+          provider.document.getArray('foo').insert(0, ['bar'])
+        },
+      })
     })
   })
-})
 
-test('onChange callback isn\'t called for every new client', async t => {
-  let onConnectCount = 0
-  let onChangeCount = 0
+  test('onChange callback is not called after onLoadDocument', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async onChange(data) {
+          expect.fail()
+        },
+        async onLoadDocument({ document }) {
+          document.getArray('foo').insert(0, ['bar'])
 
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      async onConnect() {
-        onConnectCount += 1
-      },
-      async onChange() {
-        onChangeCount += 1
-      },
+          return document
+        },
+      })
+
+      newHocuspocusProvider(server, {
+        onSynced() {
+          pass()
+          resolve('done')
+        },
+      })
     })
-
-    newHocuspocusProvider(t, server)
-    newHocuspocusProvider(t, server)
-
-    resolve('done')
   })
 
-  await retryableAssertion(t, tt => {
-    tt.is(onConnectCount, 2)
-    tt.is(onChangeCount, 0)
+  test('has the server instance', async t => {
+    await new Promise(async resolve => {
+      let resolved = false
+
+      const server = await newHocuspocus({
+        async onChange({ instance }) {
+          if (resolved) return
+          resolved = true
+
+          expect(instance).toBe(server)
+
+          resolve('done')
+        },
+      })
+
+      const provider = newHocuspocusProvider(server, {
+        onSynced() {
+          provider.document.getArray('foo').insert(0, ['bar'])
+        },
+      })
+    })
   })
 
-})
+  test("onChange callback isn't called for every new client", async t => {
+    let onConnectCount = 0
+    let onChangeCount = 0
 
-test('onChange works properly for changes from direct connections', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {
-      name: 'hocuspocus-test',
-      async onChange(data) {
-        resolve('')
-        t.pass()
-      },
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        async onConnect() {
+          onConnectCount += 1
+        },
+        async onChange() {
+          onChangeCount += 1
+        },
+      })
+
+      newHocuspocusProvider(server)
+      newHocuspocusProvider(server)
+
+      resolve('done')
     })
 
-    const conn = await server.openDirectConnection('hocuspocus-test')
-    t.is(server.getConnectionsCount(), 1)
+    await retryableAssertion(() => {
+      expect(onConnectCount).toBe(2)
+      expect(onChangeCount).toBe(0)
+    })
+  })
 
-    conn.transact(doc => {
-      doc.getMap('t').set('g', 'b')
+  test('onChange works properly for changes from direct connections', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({
+        name: 'hocuspocus-test',
+        async onChange(data) {
+          resolve('')
+          pass()
+        },
+      })
+
+      const conn = await server.openDirectConnection('hocuspocus-test')
+      expect(server.getConnectionsCount()).toBe(1)
+
+      conn.transact(doc => {
+        doc.getMap('t').set('g', 'b')
+      })
     })
   })
 })

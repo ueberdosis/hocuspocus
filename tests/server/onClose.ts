@@ -1,70 +1,77 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket } from '../utils/index.ts'
+import {
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+} from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
-test('server closes connection when receiving close event from provider', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {})
-    const socket = newHocuspocusProviderWebsocket(t, server, {})
+describe('onClose', () => {
+  test('server closes connection when receiving close event from provider', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({})
+      const socket = newHocuspocusProviderWebsocket(server, {})
 
-    const provider1 = newHocuspocusProvider(t, server, {
-      websocketProvider: socket,
-      name: 'hocuspocus-test',
-    })
+      const provider1 = newHocuspocusProvider(server, {
+        websocketProvider: socket,
+        name: 'hocuspocus-test',
+      })
 
-    await retryableAssertion(t, t2 => {
-      t2.is(server.getConnectionsCount(), 1)
-    })
+      await retryableAssertion(() => {
+        expect(server.getConnectionsCount()).toBe(1)
+      })
 
-    await retryableAssertion(t, t2 => {
-      provider1.destroy()
-      t2.is(server.getConnectionsCount(), 0)
-    })
-
-    resolve('ok')
-  })
-})
-
-test('server doesnt close connection after receiving close event from all connections', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t, {})
-    const socket = newHocuspocusProviderWebsocket(t, server, {})
-
-    const provider1 = newHocuspocusProvider(t, server, {
-      websocketProvider: socket,
-      name: 'hocuspocus-test',
-    })
-
-    const provider2 = newHocuspocusProvider(t, server, {
-      websocketProvider: socket,
-      name: 'hocuspocus-test2',
-    })
-
-    await retryableAssertion(t, t2 => {
-      t2.is(server.getConnectionsCount(), 1)
-    })
-
-    socket.shouldConnect = false
-    provider1.destroy()
-
-    t.is(provider1.configuration.websocketProvider.status, WebSocketStatus.Connected)
-    t.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Connected)
-
-    setTimeout(async () => {
-      t.is(server.getConnectionsCount(), 1)
-      provider2.destroy()
-
-      t.is(provider1.configuration.websocketProvider.status, WebSocketStatus.Connected)
-      t.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Connected)
-
-      await retryableAssertion(t, t2 => {
-        t2.is(server.getConnectionsCount(), 1)
-        t2.is(provider1.configuration.websocketProvider.status, WebSocketStatus.Connected)
-        t2.is(provider2.configuration.websocketProvider.status, WebSocketStatus.Connected)
+      await retryableAssertion(() => {
+        provider1.destroy()
+        expect(server.getConnectionsCount()).toBe(0)
       })
 
       resolve('ok')
-    }, 200)
+    })
+  })
+
+  test('server doesnt close connection after receiving close event from all connections', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus({})
+      const socket = newHocuspocusProviderWebsocket(server, {})
+
+      const provider1 = newHocuspocusProvider(server, {
+        websocketProvider: socket,
+        name: 'hocuspocus-test',
+      })
+
+      const provider2 = newHocuspocusProvider(server, {
+        websocketProvider: socket,
+        name: 'hocuspocus-test2',
+      })
+
+      await retryableAssertion(() => {
+        expect(server.getConnectionsCount()).toBe(1)
+      })
+
+      socket.shouldConnect = false
+      provider1.destroy()
+
+      expect(provider1.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+      expect(provider2.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+
+      setTimeout(async () => {
+        expect(server.getConnectionsCount()).toBe(1)
+        provider2.destroy()
+
+        expect(provider1.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+        expect(provider2.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+
+        await retryableAssertion(() => {
+          expect(server.getConnectionsCount()).toBe(1)
+          expect(provider1.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+          expect(provider2.configuration.websocketProvider.status).toBe(WebSocketStatus.Connected)
+        })
+
+        resolve('ok')
+      }, 200)
+    })
   })
 })

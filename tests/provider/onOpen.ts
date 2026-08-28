@@ -1,28 +1,32 @@
-import test from 'ava'
+import { describe, test } from 'vite-plus/test'
+import { pass } from '../utils/index.ts'
+
 import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
 
-test('onOpen callback is executed', async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+describe('onOpen', () => {
+  test('onOpen callback is executed', async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    newHocuspocusProvider(t, server, {
-      onOpen() {
-        t.pass()
-        resolve('done')
-      },
+      newHocuspocusProvider(server, {
+        onOpen() {
+          pass()
+          resolve('done')
+        },
+      })
     })
   })
-})
 
-test("on('open') callback is executed", async t => {
-  await new Promise(async resolve => {
-    const server = await newHocuspocus(t)
+  test("on('open') callback is executed", async t => {
+    await new Promise(async resolve => {
+      const server = await newHocuspocus()
 
-    const provider = newHocuspocusProvider(t, server)
+      const provider = newHocuspocusProvider(server)
 
-    provider.on('open', () => {
-      t.pass()
-      resolve('done')
+      provider.on('open', () => {
+        pass()
+        resolve('done')
+      })
     })
   })
 })

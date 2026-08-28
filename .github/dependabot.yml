@@ -3,7 +3,6 @@
 
 version: 2
 updates:
-
   - package-ecosystem: 'github-actions'
     directory: '/'
     open-pull-requests-limit: 10
@@ -11,68 +10,68 @@ updates:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/cli"
+  - package-ecosystem: 'npm'
+    directory: 'packages/cli'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/common"
+  - package-ecosystem: 'npm'
+    directory: 'packages/common'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-database"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-database'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-logger"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-logger'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-redis"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-redis'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-sqlite"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-sqlite'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-throttle"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-throttle'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/extension-webhook"
+  - package-ecosystem: 'npm'
+    directory: 'packages/extension-webhook'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/provider"
+  - package-ecosystem: 'npm'
+    directory: 'packages/provider'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/server"
+  - package-ecosystem: 'npm'
+    directory: 'packages/server'
     schedule:
       interval: 'weekly'
       day: 'monday'
 
-  - package-ecosystem: "npm"
-    directory: "packages/transformer"
+  - package-ecosystem: 'npm'
+    directory: 'packages/transformer'
     schedule:
       interval: 'weekly'
       day: 'monday'

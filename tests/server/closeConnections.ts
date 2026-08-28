@@ -1,16 +1,20 @@
-import test from 'ava'
+import { describe, expect, test } from 'vite-plus/test'
+
 import { WebSocketStatus } from '@hocuspocus/provider'
 import {
-  newHocuspocus, newHocuspocusProvider, newHocuspocusProviderWebsocket, sleep,
+  newHocuspocus,
+  newHocuspocusProvider,
+  newHocuspocusProviderWebsocket,
+  sleep,
 } from '../utils/index.ts'
 import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 // test('closes all connections', async t => {
-//   const server = await newHocuspocus(t)
-//   const socket = newHocuspocusProviderWebsocket(t, server)
-//   const socket2 = newHocuspocusProviderWebsocket(t, server)
+//   const server = await newHocuspocus()
+//   const socket = newHocuspocusProviderWebsocket(server)
+//   const socket2 = newHocuspocusProviderWebsocket(server)
 
-//   const provider = newHocuspocusProvider(t, server, {
+//   const provider = newHocuspocusProvider(server, {
 //     name: 'hocuspocus-test',
 //     onClose() {
 //       // Make sure it doesn’t reconnect.
@@ -19,7 +23,7 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 //     websocketProvider: socket,
 //   })
 
-//   const anotherProvider = newHocuspocusProvider(t, server, {
+//   const anotherProvider = newHocuspocusProvider(server, {
 //     name: 'hocuspocus-test-2',
 //     onClose() {
 //       // Make sure it doesn’t reconnect.
@@ -32,54 +36,56 @@ import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 //   server.closeConnections()
 
-//   t.is(server.documents.size, 1)
+//   expect(server.documents.size).toBe(1)
 // })
 
-test('closes a specific connection when a documentName is passed', async t => {
-  const server = await newHocuspocus(t)
-  const socket = newHocuspocusProviderWebsocket(t, server)
-  const socket2 = newHocuspocusProviderWebsocket(t, server)
+describe('closeConnections', () => {
+  test('closes a specific connection when a documentName is passed', async t => {
+    const server = await newHocuspocus()
+    const socket = newHocuspocusProviderWebsocket(server)
+    const socket2 = newHocuspocusProviderWebsocket(server)
 
-  const provider = newHocuspocusProvider(t, server, {
-    name: 'hocuspocus-test',
-    onClose() {
-      // Make sure it doesn’t reconnect.
-      socket.disconnect()
-    },
-    websocketProvider: socket,
+    const provider = newHocuspocusProvider(server, {
+      name: 'hocuspocus-test',
+      onClose() {
+        // Make sure it doesn’t reconnect.
+        socket.disconnect()
+      },
+      websocketProvider: socket,
+    })
+
+    const anotherProvider = newHocuspocusProvider(server, {
+      name: 'hocuspocus-test-2',
+      websocketProvider: socket2,
+    })
+
+    await sleep(100)
+
+    server.closeConnections('hocuspocus-test')
+
+    await retryableAssertion(() => {
+      expect(socket.status).toBe(WebSocketStatus.Disconnected)
+      expect(socket2.status).toBe(WebSocketStatus.Connected)
+    })
   })
 
-  const anotherProvider = newHocuspocusProvider(t, server, {
-    name: 'hocuspocus-test-2',
-    websocketProvider: socket2,
-  })
+  // test('uses a proper close event', async t => {
+  //   await new Promise(async resolve => {
+  //     const server = await newHocuspocus()
 
-  await sleep(100)
+  //     newHocuspocusProvider(server, {
+  //       name: 'hocuspocus-test',
+  //       onSynced() {
+  //         server.closeConnections()
+  //       },
+  //       onClose({ event }) {
+  //         // Make sure it doesn’t reconnect.
+  //         expect(event.code).toBe(1000)
+  //         expect(event.reason).toBe('Reset Connection')
 
-  server.closeConnections('hocuspocus-test')
-
-  await retryableAssertion(t, tt => {
-    tt.is(socket.status, WebSocketStatus.Disconnected)
-    tt.is(socket2.status, WebSocketStatus.Connected)
-  })
+  //         resolve('done')
+  //       },
+  //     })
+  //   })
+  // })
 })
-
-// test('uses a proper close event', async t => {
-//   await new Promise(async resolve => {
-//     const server = await newHocuspocus(t)
-
-//     newHocuspocusProvider(t, server, {
-//       name: 'hocuspocus-test',
-//       onSynced() {
-//         server.closeConnections()
-//       },
-//       onClose({ event }) {
-//         // Make sure it doesn’t reconnect.
-//         t.is(event.code, 1000)
-//         t.is(event.reason, 'Reset Connection')
-
-//         resolve('done')
-//       },
-//     })
-//   })
-// })
