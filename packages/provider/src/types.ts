@@ -102,6 +102,10 @@ export type onCloseParameters = {
 	event: CloseEvent;
 };
 
+export type onMaxAttemptsFailedParameters = {
+	error: unknown;
+};
+
 export type onAwarenessUpdateParameters = {
 	states: StatesArray;
 };
