@@ -158,6 +158,13 @@ export class Redis implements Extension {
 
 	messagePrefix: Buffer;
 
+	/**
+	 * Resolves once this instance is subscribed to its own reply channel.
+	 * Awaited before a document announces itself, so a peer's reply can never
+	 * arrive on a channel we are not listening to yet.
+	 */
+	private replySubscription: Promise<void>;
+
 	private pendingAfterStoreDocumentResolves = new Map<
 		string,
 		{ timeout: NodeJS.Timeout; resolve: () => void }
@@ -225,6 +232,31 @@ export class Redis implements Extension {
 			Buffer.from([identifierBuffer.length]),
 			identifierBuffer,
 		]);
+
+		// Subscribed once for the lifetime of the extension rather than per
+		// document: `handleIncomingMessage` resolves the document from the message
+		// payload, so a single channel per instance receives every reply addressed
+		// to us. Started here instead of in `onConfigure` because the server does
+		// not await that hook; `afterLoadDocument` awaits this promise, so no
+		// reply can be missed while the subscription is still pending.
+		this.replySubscription = new Promise<void>((resolve, reject) => {
+			this.sub.subscribe(
+				this.replyKey(this.configuration.identifier),
+				(error: any) => {
+					if (error) {
+						reject(error);
+						return;
+					}
+
+					resolve();
+				},
+			);
+		});
+
+		// The error is re-thrown to whoever awaits the promise in
+		// `afterLoadDocument`; this handler only keeps it from being reported as
+		// an unhandled rejection when no document is ever loaded.
+		this.replySubscription.catch(() => {});
 	}
 
 	async onConfigure({ instance }: onConfigurePayload) {
@@ -247,11 +279,22 @@ export class Redis implements Extension {
 		return `${this.getKey(documentName)}:lock`;
 	}
 
+	/**
+	 * The channel an instance receives replies to its own requests on.
+	 *
+	 * Separated from the prefix by `#` rather than `:`, so it can never collide
+	 * with the document channel of a document that happens to be named
+	 * `reply:<identifier>`.
+	 */
+	private replyKey(identifier: string) {
+		return `${this.configuration.prefix}#reply:${identifier}`;
+	}
+
 	private encodeMessage(message: Uint8Array) {
 		return Buffer.concat([this.messagePrefix, Buffer.from(message)]);
 	}
 
-	private decodeMessage(buffer: Buffer) {
+	private decodeMessage(buffer: Buffer): [identifier: string, message: Buffer] {
 		const identifierLength = buffer[0];
 		const identifier = buffer.toString("utf-8", 1, identifierLength + 1);
 
@@ -273,6 +316,11 @@ export class Redis implements Extension {
 		this.documents.set(documentName, document);
 
 		try {
+			// Replies to the SyncStep1 we are about to publish are addressed to
+			// this instance's reply channel, so that subscription has to be live
+			// first.
+			await this.replySubscription;
+
 			await new Promise<void>((resolve, reject) => {
 				// On document creation the node will connect to pub and sub channels
 				// for the document.
@@ -378,6 +426,10 @@ export class Redis implements Extension {
 	 * Peek whether a message carries another instance's document state
 	 * (SyncStep2 or Update) without consuming the decoder. A SyncStep1 only
 	 * *requests* state, so it must not release an initial-sync wait.
+	 *
+	 * Carrying state is necessary but not sufficient to release that wait: the
+	 * state also has to have been computed for *our* state vector, which is what
+	 * arriving on our reply channel means. See `handleIncomingMessage`.
 	 */
 	private messageCarriesPeerState(message: IncomingMessage): boolean {
 		const { pos } = message.decoder;
@@ -681,17 +733,31 @@ export class Redis implements Extension {
 
 		const carriesPeerState = this.messageCarriesPeerState(message);
 
+		// State that reached us on our own reply channel was computed for our
+		// state vector; state overheard anywhere else was computed for somebody
+		// else and says nothing about whether we have caught up.
+		const addressedToUs =
+			channel.toString("utf-8") ===
+			this.replyKey(this.configuration.identifier);
+
 		const receiver = new MessageReceiver(message, this.redisTransactionOrigin);
 		await receiver.apply(document, undefined, (reply) => {
+			// Replies go to the requester alone, never to the document channel.
+			// A SyncStep2 is `encodeStateAsUpdate(document, requesterStateVector)`:
+			// the structs that one requester is missing plus the *entire* delete
+			// set. An instance whose state is behind the requester's applies those
+			// deletes without receiving the structs that replaced the deleted
+			// content, leaving it with a document that never existed — which it
+			// then broadcasts to its own clients and can persist (#1151).
 			return this.pub.publish(
-				this.pubKey(document.name),
+				this.replyKey(identifier),
 				this.encodeMessage(reply),
 			);
 		});
 
 		// A peer answered our SyncStep1 with its state — the document has now
 		// caught up, so any blocking initial-sync wait can be released.
-		if (carriesPeerState) {
+		if (carriesPeerState && addressedToUs) {
 			this.resolveInitialSync(documentName);
 		}
 	};
