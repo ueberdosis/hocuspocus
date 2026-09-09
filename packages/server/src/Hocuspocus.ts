@@ -429,7 +429,10 @@ export class Hocuspocus<Context = any> {
 			);
 		} catch (e) {
 			this.closeConnections(documentName);
-			this.unloadDocument(document);
+			// the document is not in `this.documents` yet — `createDocument` only
+			// registers it once this promise resolves — so `unloadDocument` would
+			// bail out before destroying it
+			document.destroy();
 			throw e;
 		}
 
