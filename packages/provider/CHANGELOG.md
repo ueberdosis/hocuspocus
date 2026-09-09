@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.7.0](https://github.com/ueberdosis/hocuspocus/compare/v4.6.0...v4.7.0) (2026-09-09)
+
+
+### Bug Fixes
+
+* emit maxAttemptsFailed instead of unhandled rejection ([#1149](https://github.com/ueberdosis/hocuspocus/issues/1149)) ([0218bc0](https://github.com/ueberdosis/hocuspocus/commit/0218bc04aebd050946da2542e8f648ccf4f93d30))
+
+
+
+
+
 # [4.6.0](https://github.com/ueberdosis/hocuspocus/compare/v4.5.0...v4.6.0) (2026-08-10)
 
 **Note:** Version bump only for package @hocuspocus/provider
