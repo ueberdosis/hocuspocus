@@ -1,4 +1,5 @@
 import test from "ava";
+import * as Y from "yjs";
 import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -96,6 +97,69 @@ test("creates a new document in the onLoadDocument callback", async (t) => {
 			onSynced() {
 				const value = provider.document.getArray("foo").get(0);
 				t.is(value, "bar");
+
+				resolve("done");
+			},
+		});
+	});
+});
+
+test("does not apply the document to itself when onLoadDocument returns it", async (t) => {
+	const origins: unknown[] = [];
+
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus(t, {
+			async onLoadDocument({ document }) {
+				document.on("afterTransaction", (transaction) => {
+					origins.push(transaction.origin);
+				});
+
+				// the content this hook "loaded", written with an explicit origin so
+				// it doubles as a control: without it, a listener that never fires
+				// would satisfy the assertion below vacuously
+				document.transact(() => {
+					document.getArray("foo").insert(0, ["bar"]);
+				}, "loaded");
+
+				return document;
+			},
+		});
+
+		newHocuspocusProvider(t, server, {
+			onSynced() {
+				resolve("done");
+			},
+		});
+	});
+
+	t.true(origins.includes("loaded"), "the afterTransaction listener never fired");
+
+	// the self-apply calls applyUpdate() without an origin, and the client sync
+	// carries a ConnectionTransactionOrigin, so a null origin can only be the
+	// document having been applied to itself
+	const selfApplies = origins.filter((origin) => origin == null);
+
+	t.is(
+		selfApplies.length,
+		0,
+		`expected no null-origin transaction after onLoadDocument returned the same document, got ${selfApplies.length}`,
+	);
+});
+
+test("applies a document returned by the onLoadDocument callback", async (t) => {
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus(t, {
+			async onLoadDocument() {
+				const loaded = new Y.Doc();
+				loaded.getArray("foo").insert(0, ["bar"]);
+
+				return loaded;
+			},
+		});
+
+		const provider = newHocuspocusProvider(t, server, {
+			onSynced() {
+				t.is(provider.document.getArray("foo").get(0), "bar");
 
 				resolve("done");
 			},
