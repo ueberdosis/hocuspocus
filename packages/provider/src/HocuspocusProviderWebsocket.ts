@@ -302,9 +302,9 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 					}
 				},
 			}).catch((error: any) => {
-				// If we aborted the connection attempt then don’t throw an error
+				// If we aborted the connection attempt then don’t report a failure
 				// ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
-				if (error && error.code !== "ATTEMPT_ABORTED") {
+				if (error?.code !== "ATTEMPT_ABORTED") {
 					// connect() is fire-and-forget; rethrowing becomes an unhandled rejection.
 					this.emit("maxAttemptsFailed", { error });
 				}
@@ -443,8 +443,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.connectionAttempt = null;
 	}
 
-	rejectConnectionAttempt() {
-		this.connectionAttempt?.reject();
+	rejectConnectionAttempt(reason?: unknown) {
+		this.connectionAttempt?.reject(reason);
 		this.connectionAttempt = null;
 	}
 
@@ -568,8 +568,14 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.cleanupWebSocket();
 
 		if (this.connectionAttempt) {
-			// That connection attempt failed.
-			this.rejectConnectionAttempt();
+			// That connection attempt failed. The socket can close without ever
+			// emitting an error, so pass a reason along – it ends up as the error
+			// of the `maxAttemptsFailed` event once the retries are exhausted.
+			this.rejectConnectionAttempt(
+				new Error(
+					`WebSocket closed before the connection was established (code: ${event?.code}, reason: ${event?.reason || "none"})`,
+				),
+			);
 		}
 
 		// Let’s update the connection status.
