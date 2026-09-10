@@ -419,7 +419,11 @@ export class Hocuspocus<Context = any> {
 			await this.hooks(
 				"onLoadDocument",
 				hookPayload,
-				(loadedDocument: Doc | Uint8ArrayConstructor | undefined) => {
+				(loadedDocument: Doc | Uint8Array | undefined) => {
+					// the hook returned the document it was given, and encoding a
+					// document's own state to apply it back can never add content
+					if (loadedDocument === document) return;
+
 					if (loadedDocument instanceof Doc) {
 						applyUpdate(document, encodeStateAsUpdate(loadedDocument));
 					} else if (loadedDocument instanceof Uint8Array) {
