@@ -346,6 +346,36 @@ test("disconnects all clients related to the document when an error is thrown in
 	});
 });
 
+test("destroys the document when onLoadDocument throws", async (t) => {
+	let loadedDocument: Y.Doc | undefined;
+
+	await new Promise(async (resolve) => {
+		const server = await newHocuspocus(t, {
+			async onLoadDocument({ document }) {
+				loadedDocument = document;
+
+				throw new Error("Something went wrong");
+			},
+		});
+
+		newHocuspocusProvider(t, server, {
+			onAuthenticationFailed() {
+				resolve("done");
+			},
+		});
+	});
+
+	t.truthy(loadedDocument, "onLoadDocument never ran");
+
+	// Awareness starts a setInterval in its constructor that is only cleared by
+	// the document's destroy(), so a document that is never destroyed leaves a
+	// live timer behind for every failed load
+	t.true(
+		loadedDocument?.isDestroyed,
+		"the document created for the failed load was never destroyed",
+	);
+});
+
 test("if a new connection connects while the previous connection still fetches the document, it will just work properly", async (t) => {
 	t.plan(11);
 
