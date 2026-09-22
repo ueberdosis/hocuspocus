@@ -26,10 +26,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: 'pnpm'
 
-      - name: Set up npmrc
-        id: setup-npmrc
-        run: echo "@tiptap-cloud:registry=https://registry.tiptap.dev/" >> ~/.npmrc && echo "//registry.tiptap.dev/:_authToken=${{ secrets.TIPTAP_PRIVATE_REGISTRY_NPM_TOKEN }}" >> ~/.npmrc
-
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm publish:latest
