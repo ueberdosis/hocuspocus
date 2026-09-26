@@ -253,8 +253,14 @@ test('a client that clears its awareness state disappears for the other clients'
 
   leaving.awareness!.setLocalState(null)
 
-  // well below the 30s after which awareness drops a silent client anyway
-  await sleep(1000)
+  // Fail before the 30s silent-client timeout could mask a dropped removal.
+  const deadline = Date.now() + 5000
+  while (Date.now() < deadline && (
+    staying.awareness!.getStates().has(leaving.document.clientID) ||
+    server.documents.get('hocuspocus-test')!.awareness.getStates().has(leaving.document.clientID)
+  )) {
+    await sleep(50)
+  }
 
   t.false(staying.awareness!.getStates().has(leaving.document.clientID))
   t.false(

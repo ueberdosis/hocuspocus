@@ -141,7 +141,14 @@ test("removes a cleared awareness state on the other server", async (t) => {
 
 	leaving.awareness!.setLocalState(null);
 
-	await sleep(1000);
+	// Fail before the 30s silent-client timeout could mask a dropped removal.
+	const deadline = Date.now() + 5000;
+	while (
+		Date.now() < deadline &&
+		staying.awareness!.getStates().has(leaving.document.clientID)
+	) {
+		await sleep(50);
+	}
 
 	t.false(staying.awareness!.getStates().has(leaving.document.clientID));
 });
