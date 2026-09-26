@@ -5,7 +5,9 @@ import {
 	newHocuspocus,
 	newHocuspocusProvider,
 	redisConnectionSettings,
+	sleep,
 } from "../utils/index.ts";
+import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 test("syncs existing awareness state", async (t) => {
 	const documentName = `test-${crypto.randomUUID()}`;
@@ -103,4 +105,43 @@ test("syncs awareness between servers and clients", async (t) => {
 			},
 		});
 	});
+});
+
+test("removes a cleared awareness state on the other server", async (t) => {
+	const documentName = `test-${crypto.randomUUID()}`;
+
+	const server = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `server${crypto.randomUUID()}`,
+			}),
+		],
+	});
+
+	const anotherServer = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `anotherServer${crypto.randomUUID()}`,
+			}),
+		],
+	});
+
+	const leaving = newHocuspocusProvider(t, anotherServer, {
+		name: documentName,
+	});
+	const staying = newHocuspocusProvider(t, server, { name: documentName });
+
+	leaving.setAwarenessField("name", "leaving");
+
+	await retryableAssertion(t, (tt) => {
+		tt.true(staying.awareness!.getStates().has(leaving.document.clientID));
+	});
+
+	leaving.awareness!.setLocalState(null);
+
+	await sleep(1000);
+
+	t.false(staying.awareness!.getStates().has(leaving.document.clientID));
 });

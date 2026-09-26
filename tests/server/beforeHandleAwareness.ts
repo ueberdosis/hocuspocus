@@ -1,5 +1,6 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('beforeHandleAwareness is called before the awareness state is applied', async t => {
   await new Promise(async resolve => {
@@ -236,4 +237,30 @@ test('throwing aborts subsequent extensions and the config-level hook', async t 
       resolve('done')
     }, 400)
   })
+})
+
+test('a client that clears its awareness state disappears for the other clients', async t => {
+  const server = await newHocuspocus(t)
+
+  const leaving = newHocuspocusProvider(t, server)
+  const staying = newHocuspocusProvider(t, server)
+
+  leaving.setAwarenessField('user', 'leaving')
+
+  await retryableAssertion(t, tt => {
+    tt.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  })
+
+  leaving.awareness!.setLocalState(null)
+
+  // well below the 30s after which awareness drops a silent client anyway
+  await sleep(1000)
+
+  t.false(staying.awareness!.getStates().has(leaving.document.clientID))
+  t.false(
+    server.documents
+      .get('hocuspocus-test')!
+      .awareness.getStates()
+      .has(leaving.document.clientID),
+  )
 })
