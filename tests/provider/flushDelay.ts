@@ -136,3 +136,29 @@ test('collapses rapid awareness changes into a single outgoing message', async t
     })
   })
 })
+
+test('sends buffered changes right away when the page is hidden', async t => {
+  const server = await newHocuspocus(t)
+  const sent: Array<string | undefined> = []
+
+  const provider = newHocuspocusProvider(t, server, {
+    flushDelay: 1000,
+    onOutgoingMessage({ message }) {
+      sent.push(message.description)
+    },
+  })
+
+  await new Promise(resolve => {
+    provider.on('synced', () => resolve('done'))
+  })
+
+  provider.setAwarenessField('cursor', 1)
+  provider.document.getMap('test').set('a', 1)
+  sent.length = 0
+
+  provider.pageHide()
+
+  // The page is going away, so the flush timer will never fire.
+  t.true(sent.includes('A document update'))
+  t.true(sent.includes('Awareness states update'))
+})
