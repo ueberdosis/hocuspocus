@@ -354,6 +354,10 @@ export class HocuspocusProvider extends EventEmitter {
 				"page hide",
 			);
 		}
+
+		// With `flushDelay`, changes wait for a timer that never fires once the
+		// page is gone, so send them now.
+		this.flushPendingUpdates();
 	}
 
 	registerEventListeners() {
