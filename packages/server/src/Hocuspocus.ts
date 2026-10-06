@@ -607,9 +607,11 @@ export class Hocuspocus<Context = any> {
 	async unloadDocument(document: Document): Promise<any> {
 		const documentName = document.name;
 
-		if (!this.shouldUnloadDocument(document)) return;
+		// Only unload if this exact instance is still registered under the name.
+		// A late call for an already-unloaded instance must not delete a newer one.
+		if (this.documents.get(documentName) !== document) return;
 
-		if (!this.documents.has(documentName)) return;
+		if (!this.shouldUnloadDocument(document)) return;
 
 		if (this.unloadingDocuments.has(documentName))
 			return this.unloadingDocuments.get(documentName);
@@ -628,6 +630,9 @@ export class Hocuspocus<Context = any> {
 
 			// need sync check here as well, to avoid timing problems
 			if (!this.shouldUnloadDocument(document)) return;
+
+			// Re-check instance identity before delete (hooks / races may have replaced it)
+			if (this.documents.get(documentName) !== document) return;
 
 			this.documents.delete(documentName);
 			document.destroy();
