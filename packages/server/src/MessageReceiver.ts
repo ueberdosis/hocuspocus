@@ -88,6 +88,16 @@ export class MessageReceiver {
 				const scratchDoc = new Y.Doc();
 				const scratch = new Awareness(scratchDoc);
 				try {
+					// y-protocols Awareness constructor calls setLocalState({}), so
+					// the map also holds the scratch's own random clientID with
+					// state {}. Drop it before applying the inbound update so
+					// beforeHandleAwareness only sees entries from that update.
+					// Prefer delete over setLocalState(null): that leaves meta
+					// (clock 1) which #1162 would re-encode as a removal of an
+					// unknown client on every awareness message.
+					scratch.states.delete(scratch.clientID);
+					scratch.meta.delete(scratch.clientID);
+
 					applyAwarenessUpdate(scratch, update, null);
 
 					await document.callbacks.beforeHandleAwareness(
