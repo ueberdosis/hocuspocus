@@ -63,6 +63,18 @@ export class Server<Context = any> {
 						peer.request as Request,
 					);
 					(peer as any)._hocuspocus = clientConnection;
+
+					// Count WebSocket pongs as connection activity: crossws filters
+					// its own heartbeat pongs out of its pong hook, so listen on the
+					// raw socket instead. Otherwise a healthy client that sends no
+					// messages (e.g. awareness disabled) hits the idle timeout.
+					(
+						peer.websocket as unknown as {
+							on?: (event: string, listener: () => void) => void;
+						}
+					).on?.("pong", () => {
+						clientConnection.touch();
+					});
 				},
 				message: (peer, message) => {
 					(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
