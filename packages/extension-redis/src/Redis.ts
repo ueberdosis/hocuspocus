@@ -536,12 +536,12 @@ export class Redis implements Extension {
 			publishes.push(this.publishFirstSyncStep(documentName, pending.document));
 		}
 
-		// Same guard as the uncoalesced path: publishing awareness for a document
-		// nobody is connected to throws (see hocuspocus#1027).
+		// Skip only once the document is destroyed. Checking the connection count
+		// here would drop the awareness removal of the last connection (#1173).
 		if (
 			pending.awarenessClients.size > 0 &&
 			pending.awareness &&
-			pending.document.connections.size > 0
+			!pending.document.isDestroyed
 		) {
 			const message = new OutgoingMessage(
 				documentName,
@@ -689,10 +689,10 @@ export class Redis implements Extension {
 		removed,
 		document,
 	}: onAwarenessUpdatePayload) {
-		// Do not publish if there is no connection: it fixes this issue: "https://github.com/ueberdosis/hocuspocus/issues/1027"
-		const connections = document?.connections.size || 0;
-		if (connections === 0) {
-			return; // avoids exception
+		// Still publish after the last connection closed, so its awareness
+		// removal reaches other instances (#1173). Only skip destroyed documents.
+		if (!document || document.isDestroyed) {
+			return;
 		}
 
 		const pending = this.schedulePublish(documentName, document);
