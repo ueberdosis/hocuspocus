@@ -90,7 +90,7 @@ export class MessageReceiver {
 				// The Awareness constructor seeds the scratch's own random clientID
 				// with `{}` at clock 0. Drop it so the hook and the re-encoded
 				// update only ever see the clients from the inbound update.
-				scratch.setLocalState(null);
+				scratch.getStates().delete(scratch.clientID);
 				try {
 					applyAwarenessUpdate(scratch, update, null);
 
