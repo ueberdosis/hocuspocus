@@ -160,8 +160,9 @@ export class Redis implements Extension {
 
 	/**
 	 * Resolves once this instance is subscribed to its own reply channel.
-	 * Awaited before a document announces itself, so a peer's reply can never
-	 * arrive on a channel we are not listening to yet.
+	 * Awaited (via `awaitReplySubscription`) before a document announces itself,
+	 * so a peer's reply can never arrive on a channel we are not listening to yet.
+	 * Replaced with a fresh subscribe promise if a prior attempt rejected.
 	 */
 	private replySubscription: Promise<void>;
 
@@ -239,24 +240,13 @@ export class Redis implements Extension {
 		// to us. Started here instead of in `onConfigure` because the server does
 		// not await that hook; `afterLoadDocument` awaits this promise, so no
 		// reply can be missed while the subscription is still pending.
-		this.replySubscription = new Promise<void>((resolve, reject) => {
-			this.sub.subscribe(
-				this.replyKey(this.configuration.identifier),
-				(error: any) => {
-					if (error) {
-						reject(error);
-						return;
-					}
-
-					resolve();
-				},
-			);
-		});
-
-		// The error is re-thrown to whoever awaits the promise in
-		// `afterLoadDocument`; this handler only keeps it from being reported as
-		// an unhandled rejection when no document is ever loaded.
-		this.replySubscription.catch(() => {});
+		//
+		// If Redis is unreachable at construct time, ioredis rejects the queued
+		// SUBSCRIBE after maxRetriesPerRequest. A permanently rejected promise
+		// would poison every later afterLoadDocument even after Redis is healthy
+		// again — `awaitReplySubscription` replaces a rejected promise with a
+		// fresh subscribe before awaiting.
+		this.replySubscription = this.subscribeToReplyChannel();
 	}
 
 	async onConfigure({ instance }: onConfigurePayload) {
@@ -290,6 +280,58 @@ export class Redis implements Extension {
 		return `${this.configuration.prefix}#reply:${identifier}`;
 	}
 
+	/**
+	 * Subscribe the sub client to this instance's reply channel.
+	 *
+	 * The catch on the returned promise keeps a reject from being reported as
+	 * an unhandled rejection when no document is ever loaded (or while a load
+	 * has not yet awaited it). Callers that need the outcome still `await` and
+	 * observe the error.
+	 */
+	private subscribeToReplyChannel(): Promise<void> {
+		const subscription = new Promise<void>((resolve, reject) => {
+			this.sub.subscribe(
+				this.replyKey(this.configuration.identifier),
+				(error: any) => {
+					if (error) {
+						reject(error);
+						return;
+					}
+
+					resolve();
+				},
+			);
+		});
+
+		subscription.catch(() => {});
+
+		return subscription;
+	}
+
+	/**
+	 * Await the reply-channel subscription, retrying if a previous attempt
+	 * rejected (e.g. Redis was down at construct time and SUBSCRIBE failed
+	 * after maxRetriesPerRequest). Concurrent callers share one in-flight
+	 * retry by replacing `replySubscription` only while it still points at
+	 * the rejected promise.
+	 */
+	private async awaitReplySubscription(): Promise<void> {
+		const current = this.replySubscription;
+
+		try {
+			await current;
+		} catch {
+			// Capture before await so concurrent afterLoadDocument callers that
+			// hit the same rejection share one retry instead of each starting a
+			// fresh SUBSCRIBE.
+			if (this.replySubscription === current) {
+				this.replySubscription = this.subscribeToReplyChannel();
+			}
+
+			await this.replySubscription;
+		}
+	}
+
 	private encodeMessage(message: Uint8Array) {
 		return Buffer.concat([this.messagePrefix, Buffer.from(message)]);
 	}
@@ -318,8 +360,8 @@ export class Redis implements Extension {
 		try {
 			// Replies to the SyncStep1 we are about to publish are addressed to
 			// this instance's reply channel, so that subscription has to be live
-			// first.
-			await this.replySubscription;
+			// first. Retries if an earlier SUBSCRIBE rejected while Redis was down.
+			await this.awaitReplySubscription();
 
 			await new Promise<void>((resolve, reject) => {
 				// On document creation the node will connect to pub and sub channels
