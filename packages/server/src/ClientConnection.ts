@@ -80,6 +80,16 @@ export class ClientConnection<Context = any> {
 
 	lastMessageReceivedAt = Date.now();
 
+	/**
+	 * Report out-of-band activity on this connection, e.g. a WebSocket pong.
+	 * This keeps healthy but otherwise silent clients from hitting the idle
+	 * timeout. Integrations that run Hocuspocus behind their own WebSocket
+	 * server can call this from their pong handler.
+	 */
+	touch() {
+		this.lastMessageReceivedAt = Date.now();
+	}
+
 	// When the connection was opened. Used to enforce a pre-authentication
 	// deadline that inbound traffic cannot refresh.
 	private readonly connectionEstablishedAt = Date.now();
