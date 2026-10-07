@@ -15,31 +15,37 @@ test("accepts a clock-1 awareness update that reuses the scratch client ID", asy
 		.callsFake(getRandomValues);
 
 	try {
-		const [Y, awarenessProtocol, encoding, incomingModule, receiverModule, types] =
+		const [encoding, incomingModule, receiverModule, types] =
 			await Promise.all([
-				import("yjs"),
-				import(
-					"../../packages/server/node_modules/y-protocols/awareness.js"
-				),
 				import("lib0/encoding"),
 				import("../../packages/server/src/IncomingMessage.ts"),
 				import("../../packages/server/src/MessageReceiver.ts"),
 				import("../../packages/server/src/types.ts"),
 			]);
 
-		const senderDoc = new Y.Doc();
-		const sender = new awarenessProtocol.Awareness(senderDoc);
-		sender.setLocalState({ edge: true });
+		const updateEncoder = encoding.createEncoder();
+		encoding.writeVarUint(updateEncoder, 1);
+		encoding.writeVarUint(updateEncoder, clientID);
+		encoding.writeVarUint(updateEncoder, 1);
+		encoding.writeVarString(updateEncoder, JSON.stringify({ edge: true }));
 
 		const encoder = encoding.createEncoder();
 		encoding.writeVarUint(encoder, types.MessageType.Awareness);
 		encoding.writeVarUint8Array(
 			encoder,
-			awarenessProtocol.encodeAwarenessUpdate(sender, [clientID]),
+			encoding.toUint8Array(updateEncoder),
 		);
 
-		const targetDoc = new Y.Doc();
-		const target = new awarenessProtocol.Awareness(targetDoc);
+		const targetStates = new Map<number, Record<string, unknown>>([
+			[clientID, {}],
+		]);
+		const target = {
+			clientID,
+			states: targetStates,
+			meta: new Map([[clientID, { clock: 0, lastUpdated: Date.now() }]]),
+			getLocalState: () => targetStates.get(clientID) ?? null,
+			emit: () => undefined,
+		};
 		let hookState: Record<string, unknown> | undefined;
 		const document = {
 			awareness: target,
@@ -59,12 +65,7 @@ test("accepts a clock-1 awareness update that reuses the scratch client ID", asy
 		await new receiverModule.MessageReceiver(message).apply(document as never);
 
 		t.deepEqual(hookState, { edge: true });
-		t.deepEqual(target.getStates().get(clientID), { edge: true });
-
-		sender.destroy();
-		senderDoc.destroy();
-		target.destroy();
-		targetDoc.destroy();
+		t.deepEqual(targetStates.get(clientID), { edge: true });
 	} finally {
 		randomStub.restore();
 	}
