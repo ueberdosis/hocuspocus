@@ -87,6 +87,10 @@ export class MessageReceiver {
 				// update entirely.
 				const scratchDoc = new Y.Doc();
 				const scratch = new Awareness(scratchDoc);
+				// The Awareness constructor seeds the scratch's own random clientID
+				// with `{}` at clock 0. Drop it so the hook and the re-encoded
+				// update only ever see the clients from the inbound update.
+				scratch.setLocalState(null);
 				try {
 					applyAwarenessUpdate(scratch, update, null);
 
