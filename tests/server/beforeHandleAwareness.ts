@@ -7,7 +7,10 @@ test('beforeHandleAwareness is called before the awareness state is applied', as
 
     const server = await newHocuspocus(t, {
       async beforeHandleAwareness({ awareness, states, connection }) {
-        if (resolved) return
+        // The client first syncs an empty awareness update (removals only),
+        // which legitimately decodes to zero states. Skip those and wait for
+        // the update that carries the client's state.
+        if (resolved || states.size === 0) return
         resolved = true
 
         // The decoded states from the inbound update are exposed as a
@@ -235,5 +238,37 @@ test('throwing aborts subsequent extensions and the config-level hook', async t 
       t.is(configCalls, 0, 'config-level hook does not run')
       resolve('done')
     }, 400)
+  })
+})
+
+test('beforeHandleAwareness does not see the scratch Awareness\'s own {} entry', async t => {
+  await new Promise(async resolve => {
+    let resolved = false
+
+    const server = await newHocuspocus(t, {
+      async beforeHandleAwareness({ states }) {
+        // Skip empty initial sync updates (removals only); they carry no
+        // client states to inspect.
+        if (resolved || states.size === 0) return
+        resolved = true
+
+        // Every entry must originate from the inbound update: no phantom
+        // client with an empty `{}` state (the scratch Awareness's own
+        // clientID) may leak into the hook.
+        for (const [clientId, state] of states.entries()) {
+          t.truthy(Object.keys(state).length > 0, `state of client ${clientId} is not empty`)
+          t.truthy(state.foo, `state of client ${clientId} carries the sent field`)
+        }
+        t.is(states.size, 1, 'only the sender\'s client is present')
+
+        resolve('done')
+      },
+    })
+
+    const provider = newHocuspocusProvider(t, server, {
+      onConnect() {
+        provider.setAwarenessField('foo', 'bar')
+      },
+    })
   })
 })
