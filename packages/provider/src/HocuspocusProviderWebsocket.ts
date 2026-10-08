@@ -269,10 +269,21 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	cancelWebsocketRetry?: () => void;
 
+	reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	clearReconnectTimeout() {
+		if (this.reconnectTimeout) {
+			clearTimeout(this.reconnectTimeout);
+			this.reconnectTimeout = null;
+		}
+	}
+
 	async connect() {
 		if (this.status === WebSocketStatus.Connected) {
 			return;
 		}
+
+		this.clearReconnectTimeout();
 
 		// Always cancel any previously initiated connection retryer instances
 		if (this.cancelWebsocketRetry) {
@@ -508,6 +519,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	disconnect() {
 		this.shouldConnect = false;
+		this.clearReconnectTimeout();
 
 		if (this.webSocket === null) {
 			return;
@@ -585,7 +597,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		// trigger connect if no retry is running and we want to have a connection
 		if (!this.cancelWebsocketRetry && this.shouldConnect) {
-			setTimeout(() => {
+			this.reconnectTimeout = setTimeout(() => {
+				this.reconnectTimeout = null;
 				this.connect();
 			}, this.configuration.delay);
 		}
