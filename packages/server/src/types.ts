@@ -463,6 +463,14 @@ export interface beforeHandleAwarenessPayload<Context = any> {
 	 * the chain has run.
 	 */
 	states: Map<number, Record<string, any>>;
+	/**
+	 * Yjs clientIds that the inbound update removes (a client that called
+	 * `setLocalState(null)`). A removal has no entry in `states`, so it is
+	 * exposed here instead. `removedClients.delete(clientId)` drops that
+	 * removal from the update, for example when the connection is not allowed
+	 * to remove another client's presence.
+	 */
+	removedClients: Set<number>;
 	socketId: string;
 	/**
 	 * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
