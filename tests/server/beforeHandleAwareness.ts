@@ -270,3 +270,44 @@ test('a client that clears its awareness state disappears for the other clients'
       .has(leaving.document.clientID),
   )
 })
+
+test('beforeHandleAwareness sees a removal and can drop it', async t => {
+  let leavingId: number | undefined
+  const seenRemovals: number[][] = []
+
+  const server = await newHocuspocus(t, {
+    async beforeHandleAwareness({ removedClients }) {
+      seenRemovals.push([...removedClients])
+      // An authorization hook: this connection may not remove the client.
+      if (leavingId !== undefined) {
+        removedClients.delete(leavingId)
+      }
+    },
+  })
+
+  const leaving = newHocuspocusProvider(t, server)
+  const staying = newHocuspocusProvider(t, server)
+  leavingId = leaving.document.clientID
+
+  leaving.setAwarenessField('user', 'leaving')
+
+  await retryableAssertion(t, tt => {
+    tt.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  })
+
+  leaving.awareness!.setLocalState(null)
+
+  await retryableAssertion(t, tt => {
+    tt.true(seenRemovals.some(ids => ids.includes(leaving.document.clientID)))
+  })
+  // Give a dropped removal time to arrive anyway; it must not.
+  await sleep(500)
+
+  t.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  t.true(
+    server.documents
+      .get('hocuspocus-test')!
+      .awareness.getStates()
+      .has(leaving.document.clientID),
+  )
+})

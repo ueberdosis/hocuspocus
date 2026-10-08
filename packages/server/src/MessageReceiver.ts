@@ -91,15 +91,20 @@ export class MessageReceiver {
 					applyAwarenessUpdate(scratch, update, null);
 
 					// A client that cleared its state has no entry in the map, but its
-					// removal still has to reach the document's awareness.
-					const removedClients = Array.from(scratch.meta.keys()).filter(
-						(clientId) => !scratch.getStates().has(clientId),
+					// removal still has to reach the document's awareness. The hooks
+					// get these removals as their own set, so they can inspect them
+					// and drop any they don't allow.
+					const removedClients = new Set(
+						Array.from(scratch.meta.keys()).filter(
+							(clientId) => !scratch.getStates().has(clientId),
+						),
 					);
 
 					await document.callbacks.beforeHandleAwareness(
 						document,
 						scratch.getStates(),
 						origin,
+						removedClients,
 					);
 
 					update = encodeAwarenessUpdate(scratch, [
