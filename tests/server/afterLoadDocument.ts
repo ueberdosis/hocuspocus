@@ -1,5 +1,6 @@
 import test from 'ava'
 import type { HocuspocusProvider } from '@hocuspocus/provider'
+import type * as Y from 'yjs'
 
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
@@ -62,4 +63,28 @@ test('does not execute the afterLoadDocument callback when document fails to loa
     t.pass()
     resolve('')
   })
+})
+
+test('destroys the document and runs afterUnloadDocument when afterLoadDocument throws', async t => {
+  let loadedDocument: Y.Doc | undefined
+  const unloaded: string[] = []
+
+  const server = await newHocuspocus(t, {
+    async onLoadDocument({ document }) {
+      loadedDocument = document
+    },
+    async afterLoadDocument() {
+      throw new Error('refused')
+    },
+    async afterUnloadDocument({ documentName }) {
+      unloaded.push(documentName)
+    },
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'))
+
+  t.truthy(loadedDocument, 'onLoadDocument never ran')
+  t.true(loadedDocument?.isDestroyed, 'the document of the failed load was not destroyed')
+  t.deepEqual(unloaded, ['doc'])
+  t.is(server.getDocumentsCount(), 0)
 })

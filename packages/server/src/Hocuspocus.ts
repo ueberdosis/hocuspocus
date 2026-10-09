@@ -450,7 +450,22 @@ export class Hocuspocus<Context = any> {
 			},
 		);
 
-		await this.hooks("afterLoadDocument", hookPayload);
+		try {
+			await this.hooks("afterLoadDocument", hookPayload);
+		} catch (e) {
+			// As above, the document is not registered yet, so destroy it here.
+			// Earlier afterLoadDocument hooks may already have set things up for
+			// it (the redis extension subscribes there), so let extensions tear
+			// that down. This runs while the failed load still holds the
+			// `loadingDocuments` entry, so no other load of this name can have
+			// started yet.
+			document.destroy();
+			await this.hooks("afterUnloadDocument", {
+				instance: this,
+				documentName,
+			}).catch(() => {});
+			throw e;
+		}
 
 		document.beforeBroadcastStateless(
 			(document: Document, stateless: string) => {
