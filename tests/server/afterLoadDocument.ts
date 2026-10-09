@@ -88,3 +88,30 @@ test('destroys the document and runs afterUnloadDocument when afterLoadDocument 
   t.deepEqual(unloaded, ['doc'])
   t.is(server.getDocumentsCount(), 0)
 })
+
+test('runs every afterUnloadDocument hook when afterLoadDocument throws, even if one of them fails', async t => {
+  const unloaded: string[] = []
+
+  const server = await newHocuspocus(t, {
+    extensions: [
+      {
+        async afterLoadDocument() {
+          throw new Error('refused')
+        },
+        async afterUnloadDocument() {
+          unloaded.push('first')
+          throw new Error('cleanup failed')
+        },
+      },
+      {
+        async afterUnloadDocument() {
+          unloaded.push('second')
+        },
+      },
+    ],
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'), { message: 'refused' })
+
+  t.deepEqual(unloaded, ['first', 'second'])
+})

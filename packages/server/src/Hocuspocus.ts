@@ -459,11 +459,22 @@ export class Hocuspocus<Context = any> {
 			// that down. This runs while the failed load still holds the
 			// `loadingDocuments` entry, so no other load of this name can have
 			// started yet.
-			document.destroy();
-			await this.hooks("afterUnloadDocument", {
-				instance: this,
-				documentName,
-			}).catch(() => {});
+			// Cleanup is best effort: neither a throwing destroy listener nor a
+			// failing cleanup hook may skip the remaining cleanup or replace the
+			// original load error.
+			try {
+				document.destroy();
+			} catch (error) {
+				console.error(error);
+			}
+			for (const extension of this.configuration.extensions) {
+				if (typeof extension.afterUnloadDocument !== "function") continue;
+				try {
+					await extension.afterUnloadDocument({ instance: this, documentName });
+				} catch (error: any) {
+					console.error("[afterUnloadDocument]", error?.message ?? error);
+				}
+			}
 			throw e;
 		}
 
