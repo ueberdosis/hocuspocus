@@ -72,4 +72,16 @@ test("connect() cancels the retry chain of a socket closed before its first mess
 	t.is(FakeSocket.created.length, 2);
 	t.not(second.readyState, 3);
 	t.is(ws.status, WebSocketStatus.Connected);
+
+	// An established socket that closes still reconnects.
+	second.readyState = 3;
+	second.emit("close", { code: 1006, reason: "" });
+	await sleep(400);
+
+	t.is(FakeSocket.created.length, 3);
+	const third = FakeSocket.created[2];
+	third.readyState = 1;
+	third.emit("open", {});
+	third.emit("message", { data: new Uint8Array([9]).buffer });
+	t.is(ws.status, WebSocketStatus.Connected);
 });
