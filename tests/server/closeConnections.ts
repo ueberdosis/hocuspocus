@@ -83,3 +83,36 @@ test('closes a specific connection when a documentName is passed', async t => {
 //     })
 //   })
 // })
+
+test('closes sockets whose document is still loading', async t => {
+  let loadStarted: () => void
+  const started = new Promise<void>(resolve => { loadStarted = resolve })
+
+  const server = await newHocuspocus(t, {
+    async onLoadDocument() {
+      loadStarted()
+      await sleep(300)
+    },
+  })
+  const socket = newHocuspocusProviderWebsocket(t, server, {
+    // Make sure it doesn’t reconnect.
+    onClose() {
+      socket.disconnect()
+    },
+  })
+  newHocuspocusProvider(t, server, {
+    name: 'hocuspocus-test',
+    websocketProvider: socket,
+  })
+
+  await started
+  server.closeConnections()
+
+  await retryableAssertion(t, tt => {
+    tt.is(socket.status, WebSocketStatus.Disconnected)
+  })
+
+  // the load finishes after the close; it must not attach the closed client
+  await sleep(400)
+  t.is(server.documents.get('hocuspocus-test')?.getConnectionsCount() ?? 0, 0)
+})

@@ -221,13 +221,20 @@ export class Server<Context = any> {
 				});
 
 				// Close all existing connections - this will trigger the close hook
-				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
-
 				this.hocuspocus.closeConnections();
 
 				// Flush any remaining debounced stores so documents unload
 				// promptly, even when unloadImmediately is false.
 				this.hocuspocus.flushPendingStores();
+
+				// A document still loading is not counted yet. Let in-flight loads
+				// settle first: a load that completes for a closed socket is
+				// unloaded again, which resolves through afterUnloadDocument.
+				Promise.allSettled(this.hocuspocus.loadingDocuments.values()).then(
+					() => {
+						if (this.hocuspocus.getDocumentsCount() === 0) resolve();
+					},
+				);
 			} catch (error) {
 				console.error(error);
 			}
