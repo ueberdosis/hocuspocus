@@ -320,7 +320,7 @@ test('beforeHandleAwareness does not see the scratch Awareness\'s own {} entry',
     let resolved = false
 
     const server = await newHocuspocus(t, {
-      async beforeHandleAwareness({ states }) {
+      async beforeHandleAwareness({ states, removedClients }) {
         // Skip empty initial sync updates (removals only); they carry no
         // client states to inspect.
         if (resolved || states.size === 0) return
@@ -334,6 +334,7 @@ test('beforeHandleAwareness does not see the scratch Awareness\'s own {} entry',
           t.truthy(state.foo, `state of client ${clientId} carries the sent field`)
         }
         t.is(states.size, 1, 'only the sender\'s client is present')
+        t.is(removedClients.size, 0, 'the scratch\'s own client is not reported as removed')
 
         resolve('done')
       },
