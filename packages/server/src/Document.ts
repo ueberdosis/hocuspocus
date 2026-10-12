@@ -26,6 +26,7 @@ export class Document extends Doc {
 			document: Document,
 			states: Map<number, Record<string, any>>,
 			transactionOrigin: unknown,
+			removedClients: Set<number>,
 		) => Promise.resolve(),
 	};
 
@@ -138,13 +139,15 @@ export class Document extends Doc {
 	 * `TransactionOrigin` that will be forwarded to `applyAwarenessUpdate`.
 	 * Use `isTransactionOrigin(origin)` to discriminate sources. Mutate the
 	 * map in place (set/delete/field changes) to rewrite the update, or throw
-	 * to reject it entirely.
+	 * to reject it entirely. The clientIds the update removes are passed as a
+	 * separate mutable `Set`; delete an id from it to drop that removal.
 	 */
 	beforeHandleAwareness(
 		callback: (
 			document: Document,
 			states: Map<number, Record<string, any>>,
 			transactionOrigin: unknown,
+			removedClients: Set<number>,
 		) => Promise<any>,
 	): Document {
 		this.callbacks.beforeHandleAwareness = callback;
