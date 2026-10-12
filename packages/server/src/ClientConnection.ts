@@ -24,6 +24,17 @@ import type {
 import { MessageType } from "./types.ts";
 import { getParameters } from "./util/getParameters.ts";
 
+type HookPayload<Context> = {
+	instance: Hocuspocus;
+	request: Request;
+	requestHeaders: Headers;
+	requestParameters: URLSearchParams;
+	socketId: string;
+	connectionConfig: ConnectionConfiguration;
+	context: Context;
+	providerVersion: string | null;
+};
+
 /**
  * The `ClientConnection` class is responsible for handling an incoming WebSocket
  *
@@ -47,19 +58,7 @@ export class ClientConnection<Context = any> {
 	private readonly documentConnectionsEstablished = new Set<string>();
 
 	// Hook payloads keyed by rawKey (composite or plain)
-	private readonly hookPayloads: Record<
-		string,
-		{
-			instance: Hocuspocus;
-			request: Request;
-			requestHeaders: Headers;
-			requestParameters: URLSearchParams;
-			socketId: string;
-			connectionConfig: ConnectionConfiguration;
-			context: Context;
-			providerVersion: string | null;
-		}
-	> = {};
+	private readonly hookPayloads: Record<string, HookPayload<Context>> = {};
 
 	private readonly callbacks = {
 		onClose: [(document: Document, payload: onDisconnectPayload) => {}],
@@ -363,8 +362,12 @@ export class ClientConnection<Context = any> {
 	}
 
 	// Once all hooks are run, we'll fully establish the connection:
-	private setUpNewConnection = async (rawKey: string, documentName: string, sessionId: string | null) => {
-		const hookPayload = this.hookPayloads[rawKey];
+	private setUpNewConnection = async (
+		rawKey: string,
+		documentName: string,
+		sessionId: string | null,
+		hookPayload: HookPayload<Context>,
+	) => {
 		// If no hook interrupts, create a document and connection
 		const document = await this.documentProvider.createDocument(
 			documentName,
@@ -499,8 +502,9 @@ export class ClientConnection<Context = any> {
 			// Response uses rawKey so session-aware clients can route correctly
 			const responseAddress = rawKey;
 
+			const hookPayload = this.hookPayloads[rawKey];
+
 			try {
-				const hookPayload = this.hookPayloads[rawKey];
 				hookPayload.providerVersion = providerVersion;
 
 				await this.hooks(
@@ -528,6 +532,12 @@ export class ClientConnection<Context = any> {
 						};
 					},
 				);
+				// The connection was closed (or this document reset) while the hooks
+				// were running. Its state is gone, so there is nothing to set up.
+				if (this.hookPayloads[rawKey] !== hookPayload) {
+					return;
+				}
+
 				// All `onAuthenticate` hooks passed.
 				hookPayload.connectionConfig.isAuthenticated = true;
 				this.hasAuthenticated = true;
@@ -540,8 +550,14 @@ export class ClientConnection<Context = any> {
 				this.websocket.send(message.toUint8Array());
 
 				// Time to actually establish the connection.
-				await this.setUpNewConnection(rawKey, documentName, sessionId);
+				await this.setUpNewConnection(rawKey, documentName, sessionId, hookPayload);
 			} catch (err: any) {
+				// Same as above: a closed connection has nobody to tell, and its
+				// state is already gone.
+				if (this.hookPayloads[rawKey] !== hookPayload) {
+					return;
+				}
+
 				const error = err || Forbidden;
 				const message = new OutgoingMessage(responseAddress).writePermissionDenied(
 					error.reason ?? "permission-denied",
