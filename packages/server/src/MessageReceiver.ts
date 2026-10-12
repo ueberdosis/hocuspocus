@@ -87,6 +87,12 @@ export class MessageReceiver {
 				// update entirely.
 				const scratchDoc = new Y.Doc();
 				const scratch = new Awareness(scratchDoc);
+				// The Awareness constructor seeds the scratch's own random clientID
+				// with `{}` at clock 0. Drop it so the hook and the re-encoded
+				// update only ever see the clients from the inbound update. Its meta
+				// entry has to go too, or it would show up as a removed client.
+				scratch.getStates().delete(scratch.clientID);
+				scratch.meta.delete(scratch.clientID);
 				try {
 					applyAwarenessUpdate(scratch, update, null);
 
