@@ -215,7 +215,6 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.status = WebSocketStatus.Connected;
 		this.emit("status", { status: WebSocketStatus.Connected });
 
-		this.cancelWebsocketRetry = undefined;
 		this.receivedOnOpenPayload = event;
 	}
 
@@ -428,6 +427,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	resolveConnectionAttempt() {
 		if (this.connectionAttempt) {
+			this.cancelWebsocketRetry = undefined;
 			this.connectionAttempt.resolve();
 			this.connectionAttempt = null;
 
