@@ -502,8 +502,9 @@ export class ClientConnection<Context = any> {
 			// Response uses rawKey so session-aware clients can route correctly
 			const responseAddress = rawKey;
 
+			const hookPayload = this.hookPayloads[rawKey];
+
 			try {
-				const hookPayload = this.hookPayloads[rawKey];
 				hookPayload.providerVersion = providerVersion;
 
 				await this.hooks(
@@ -551,6 +552,12 @@ export class ClientConnection<Context = any> {
 				// Time to actually establish the connection.
 				await this.setUpNewConnection(rawKey, documentName, sessionId, hookPayload);
 			} catch (err: any) {
+				// Same as above: a closed connection has nobody to tell, and its
+				// state is already gone.
+				if (this.hookPayloads[rawKey] !== hookPayload) {
+					return;
+				}
+
 				const error = err || Forbidden;
 				const message = new OutgoingMessage(responseAddress).writePermissionDenied(
 					error.reason ?? "permission-denied",

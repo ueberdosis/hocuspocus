@@ -28,8 +28,13 @@ const fakeWebSocket = () => {
 	return websocket;
 };
 
-for (const hook of ["onConnect", "onAuthenticate"] as const) {
-	test(`ignores a connection that closed while ${hook} was running`, async (t) => {
+for (const [hook, outcome] of [
+	["onConnect", "resolves"],
+	["onConnect", "rejects"],
+	["onAuthenticate", "resolves"],
+	["onAuthenticate", "rejects"],
+] as const) {
+	test(`ignores a connection that closed while ${hook} was running and then ${outcome}`, async (t) => {
 		let hookStarted!: () => void;
 		const started = new Promise<void>((resolve) => {
 			hookStarted = resolve;
@@ -44,6 +49,10 @@ for (const hook of ["onConnect", "onAuthenticate"] as const) {
 			async [hook]() {
 				hookStarted();
 				await finished;
+
+				if (outcome === "rejects") {
+					throw new Error("rejected after the connection closed");
+				}
 			},
 			async onLoadDocument() {
 				t.fail("must not load a document for a closed connection");
