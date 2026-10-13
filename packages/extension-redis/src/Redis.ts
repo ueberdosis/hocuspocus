@@ -36,7 +36,11 @@ import type {
 } from "ioredis";
 import RedisClient from "ioredis";
 import type { Awareness } from "y-protocols/awareness";
-import { messageYjsSyncStep2, messageYjsUpdate } from "y-protocols/sync";
+import {
+	messageYjsSyncStep1,
+	messageYjsSyncStep2,
+	messageYjsUpdate,
+} from "y-protocols/sync";
 export type RedisInstance = RedisClient | Cluster;
 export interface Configuration {
 	/**
@@ -84,15 +88,16 @@ export interface Configuration {
 	 */
 	disconnectDelay: number;
 	/**
-	 * The maximum time (in ms) `afterLoadDocument` waits for another instance to
-	 * send its state when loading a document that is already open elsewhere.
+	 * The maximum time (in ms) to wait for the other instances that have a
+	 * document open to send their state, both when loading the document
+	 * (`afterLoadDocument`) and in {@link Redis.syncWithPeers}.
 	 *
-	 * When a document is loaded on this instance while another instance already
-	 * has it open (and possibly modified in memory, not yet persisted), we
-	 * publish a SyncStep1 and block the load until the peer replies with its
-	 * state (SyncStep2) — or this timeout elapses. This guarantees that callers
-	 * (most importantly a `DirectConnection`) observe the latest collaborative
-	 * state instead of just what was loaded from storage.
+	 * When a document is loaded on this instance while other instances already
+	 * have it open (and possibly modified in memory, not yet persisted), we
+	 * publish a SyncStep1 and block the load until every one of them has
+	 * answered with its state — or this timeout elapses. This guarantees that
+	 * callers (most importantly a `DirectConnection`) observe the latest
+	 * collaborative state instead of just what was loaded from storage.
 	 *
 	 * If no other instance is subscribed to the document, the wait is skipped
 	 * entirely, so a cold/lone load is not delayed.
@@ -183,10 +188,11 @@ export class Redis implements Extension {
 	private documents = new Map<string, Document>();
 
 	/**
-	 * Resolvers for in-flight `afterLoadDocument` waits, keyed by document name.
-	 * Invoked by `handleIncomingMessage` as soon as a peer's state arrives.
+	 * In-flight waits for peers' state (`afterLoadDocument`, `syncWithPeers`),
+	 * keyed by document name. Fed by `handleIncomingMessage`. See
+	 * `requestStateFromPeers`.
 	 */
-	private pendingInitialSyncResolves = new Map<string, () => void>();
+	private peerStateWaits = new Map<string, Set<PeerStateWait>>();
 
 	/**
 	 * Publishes coalesced into the current event loop turn, keyed by document
@@ -334,114 +340,156 @@ export class Redis implements Extension {
 				});
 			});
 
-			await this.syncInitialStateFromPeers(documentName, document);
+			await this.requestStateFromPeers(documentName, document, {
+				queryAwareness: true,
+			});
 		} catch (error) {
 			// Loading failed: stop tracking the document so future messages aren't
 			// applied to a doc that never finished loading, release any pending
 			// wait, and best-effort unsubscribe (afterUnloadDocument does not run
 			// for a load that never completed).
 			this.documents.delete(documentName);
-			this.pendingInitialSyncResolves.delete(documentName);
+			this.releasePeerStateWaits(documentName);
 			this.sub.unsubscribe(this.subKey(documentName), () => {});
 			throw error;
 		}
 	}
 
 	/**
-	 * Announce our state to other instances and — when another instance already
-	 * has this document open — block until it has sent us its state (or the
-	 * configured timeout elapses). See {@link Configuration.awaitInitialSyncTimeout}.
+	 * Bring a document this instance has loaded up to date with every other
+	 * instance that has it open.
+	 *
+	 * An edit made on another instance reaches a loaded document one sync round
+	 * trip later: that instance publishes its state vector, this one asks back,
+	 * and the changes follow. Reading straight after an edit made elsewhere can
+	 * therefore return the state from before it. `afterLoadDocument` covers
+	 * the load; call this before reading or diffing a document that was
+	 * already loaded, e.g. when serving an API request. It waits at most
+	 * {@link Configuration.awaitInitialSyncTimeout} and returns right away when
+	 * no other instance has the document open.
 	 */
-	private async syncInitialStateFromPeers(
+	public async syncWithPeers(
 		documentName: string,
 		document: Document,
-	) {
-		const timeout = this.configuration.awaitInitialSyncTimeout;
-
-		const waitForPeers =
-			timeout > 0 && (await this.hasOtherSubscribers(documentName));
-
-		// Announce our state and request awareness. Awaited so a Redis publish
-		// failure surfaces as a load error instead of an unhandled rejection.
-		await Promise.all([
-			this.publishFirstSyncStep(documentName, document),
-			this.requestAwarenessFromOtherInstances(documentName),
-		]);
-
-		// Skip the wait when it's disabled or nobody else has the document open:
-		// there is no peer to sync from, so blocking would only add latency.
-		if (!waitForPeers) {
+	): Promise<void> {
+		// Only a document this instance is subscribed to is counted among the
+		// receivers of our own SyncStep1, and only it can be caught up.
+		if (this.documents.get(documentName) !== document) {
 			return;
 		}
 
-		// A peer has the document open. Block until it replies with its state
-		// (a SyncStep2/Update applied via handleIncomingMessage resolves this) or
-		// the timeout elapses. The reply cannot arrive before the SyncStep1 we
-		// just published is delivered, so registering the resolver now — right
-		// after the awaited publish, before yielding to the event loop — cannot
-		// miss it.
-		await new Promise<void>((resolve) => {
-			const timer = setTimeout(() => {
-				this.pendingInitialSyncResolves.delete(documentName);
-				resolve();
-			}, timeout);
-
-			this.pendingInitialSyncResolves.set(documentName, () => {
-				clearTimeout(timer);
-				this.pendingInitialSyncResolves.delete(documentName);
-				resolve();
-			});
-		});
+		await this.replySubscription;
+		await this.requestStateFromPeers(documentName, document);
 	}
 
 	/**
-	 * Whether another instance is currently subscribed to a document's channel.
-	 * We are subscribed ourselves, so a subscriber count greater than one means
-	 * at least one peer has the document open.
+	 * Announce our state to other instances and — when other instances have this
+	 * document open — block until every one of them has answered with its state
+	 * (or the configured timeout elapses). See
+	 * {@link Configuration.awaitInitialSyncTimeout}.
+	 *
+	 * - **Every peer, not the first.** Only the instance that took an edit may
+	 *   have it yet, and another instance that has not heard about it can answer
+	 *   first. PUBLISH returns how many subscribers received our SyncStep1,
+	 *   which includes this instance, so it tells how many answers to wait for
+	 *   without an extra round trip.
+	 * - **Only answers to our SyncStep1 count.** A peer answers one as a
+	 *   SyncReply with its own state vector, followed by a SyncStep2. A SyncStep2
+	 *   on its own answers a SyncReply we sent during a sync the peer started,
+	 *   and it may have been computed before the edit we are waiting for.
+	 * - **Waits are independent.** Concurrent calls for one document each get
+	 *   their own wait.
 	 */
-	private async hasOtherSubscribers(documentName: string): Promise<boolean> {
+	private async requestStateFromPeers(
+		documentName: string,
+		document: Document,
+		{ queryAwareness = false } = {},
+	) {
+		const timeout = this.configuration.awaitInitialSyncTimeout;
+
+		const announce = () =>
+			Promise.all([
+				this.publishFirstSyncStep(documentName, document),
+				queryAwareness
+					? this.requestAwarenessFromOtherInstances(documentName)
+					: undefined,
+			]);
+
+		if (timeout <= 0) {
+			// Awaited so a Redis publish failure surfaces as an error instead of
+			// an unhandled rejection.
+			await announce();
+			return;
+		}
+
+		// Registered before publishing, so an answer cannot slip past us.
+		const wait = new PeerStateWait();
+		let waits = this.peerStateWaits.get(documentName);
+		if (!waits) {
+			waits = new Set();
+			this.peerStateWaits.set(documentName, waits);
+		}
+		waits.add(wait);
+
+		let timer: ReturnType<typeof setTimeout> | undefined;
+
 		try {
-			const result = (await this.pub.pubsub(
-				"NUMSUB",
-				this.subKey(documentName),
-			)) as [string, number | string];
-			return Number(result?.[1] ?? 0) > 1;
-		} catch {
-			// NUMSUB may be unavailable in some setups (e.g. certain clusters).
-			// Assume peers might exist so correctness is preserved; the timeout
-			// still bounds the wait.
-			return true;
+			const [receivers] = await announce();
+
+			// We are subscribed ourselves, so with any other count than at least
+			// one (Redis Cluster counts per node) the number of peers is unknown:
+			// wait for one answer, bounded by the timeout.
+			wait.expect(receivers >= 1 ? receivers - 1 : 1);
+
+			await Promise.race([
+				wait.done,
+				new Promise<void>((resolve) => {
+					timer = setTimeout(resolve, timeout);
+				}),
+			]);
+		} finally {
+			clearTimeout(timer);
+			waits.delete(wait);
+			if (waits.size === 0) {
+				this.peerStateWaits.delete(documentName);
+			}
 		}
 	}
 
 	/**
-	 * Resolve a pending `afterLoadDocument` wait once a peer's state has been
-	 * applied.
+	 * Release every wait for a document, e.g. because it is unloaded.
 	 */
-	private resolveInitialSync(documentName: string) {
-		this.pendingInitialSyncResolves.get(documentName)?.();
+	private releasePeerStateWaits(documentName: string) {
+		for (const wait of this.peerStateWaits.get(documentName) ?? []) {
+			wait.release();
+		}
+		this.peerStateWaits.delete(documentName);
 	}
 
 	/**
-	 * Peek whether a message carries another instance's document state
-	 * (SyncStep2 or Update) without consuming the decoder. A SyncStep1 only
-	 * *requests* state, so it must not release an initial-sync wait.
-	 *
-	 * Carrying state is necessary but not sufficient to release that wait: the
-	 * state also has to have been computed for *our* state vector, which is what
-	 * arriving on our reply channel means. See `handleIncomingMessage`.
+	 * Classify a message that arrived on our reply channel without consuming
+	 * the decoder: a peer's state vector (the SyncReply that opens its answer to
+	 * our SyncStep1) or its state (SyncStep2 or Update). Anything else does not
+	 * count towards a wait.
 	 */
-	private messageCarriesPeerState(message: IncomingMessage): boolean {
+	private peekPeerAnswer(
+		message: IncomingMessage,
+	): "stateVector" | "state" | null {
 		const { pos } = message.decoder;
 		try {
 			const type = message.readVarUint();
 			if (type !== MessageType.Sync && type !== MessageType.SyncReply) {
-				return false;
+				return null;
 			}
 			const syncType = message.readVarUint();
-			return syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate;
+			if (type === MessageType.SyncReply && syncType === messageYjsSyncStep1) {
+				return "stateVector";
+			}
+			return syncType === messageYjsSyncStep2 || syncType === messageYjsUpdate
+				? "state"
+				: null;
 		} catch {
-			return false;
+			return null;
 		} finally {
 			message.decoder.pos = pos;
 		}
@@ -731,14 +779,13 @@ export class Redis implements Extension {
 			return;
 		}
 
-		const carriesPeerState = this.messageCarriesPeerState(message);
-
 		// State that reached us on our own reply channel was computed for our
 		// state vector; state overheard anywhere else was computed for somebody
 		// else and says nothing about whether we have caught up.
 		const addressedToUs =
 			channel.toString("utf-8") ===
 			this.replyKey(this.configuration.identifier);
+		const peerAnswer = addressedToUs ? this.peekPeerAnswer(message) : null;
 
 		const receiver = new MessageReceiver(message, this.redisTransactionOrigin);
 		await receiver.apply(document, undefined, (reply) => {
@@ -755,10 +802,12 @@ export class Redis implements Extension {
 			);
 		});
 
-		// A peer answered our SyncStep1 with its state — the document has now
-		// caught up, so any blocking initial-sync wait can be released.
-		if (carriesPeerState && addressedToUs) {
-			this.resolveInitialSync(documentName);
+		// Only after the message was applied: a wait released by a peer's state
+		// must find that state in the document.
+		if (peerAnswer) {
+			for (const wait of this.peerStateWaits.get(documentName) ?? []) {
+				wait.receive(identifier, peerAnswer);
+			}
 		}
 	};
 
@@ -791,7 +840,7 @@ export class Redis implements Extension {
 	async afterUnloadDocument(data: afterUnloadDocumentPayload) {
 		if (data.instance.documents.has(data.documentName)) return; // skip unsubscribe if the document is already loaded again (maybe fast reconnect)
 
-		this.resolveInitialSync(data.documentName);
+		this.releasePeerStateWaits(data.documentName);
 		this.documents.delete(data.documentName);
 		// Nothing should be pending: the coalescing window is a single event loop
 		// turn and `beforeUnloadDocument` already waits `disconnectDelay` to let
@@ -835,5 +884,48 @@ export class Redis implements Extension {
 		await this.redlock.quit();
 		this.pub.disconnect(false);
 		this.sub.disconnect(false);
+	}
+}
+
+/**
+ * One wait for the other instances' answers to a SyncStep1 we published. See
+ * `Redis.requestStateFromPeers`.
+ */
+class PeerStateWait {
+	private expected = Number.POSITIVE_INFINITY;
+
+	/** Peers whose state vector arrived, i.e. whose answer has begun. */
+	private answering = new Set<string>();
+
+	private answered = new Set<string>();
+
+	public release: () => void = () => {};
+
+	public readonly done = new Promise<void>((resolve) => {
+		this.release = resolve;
+	});
+
+	/** Set once PUBLISH has told how many peers received the SyncStep1. */
+	expect(peers: number) {
+		this.expected = peers;
+		this.releaseIfComplete();
+	}
+
+	receive(identifier: string, answer: "stateVector" | "state") {
+		if (answer === "stateVector") {
+			this.answering.add(identifier);
+			return;
+		}
+
+		if (this.answering.delete(identifier)) {
+			this.answered.add(identifier);
+			this.releaseIfComplete();
+		}
+	}
+
+	private releaseIfComplete() {
+		if (this.answered.size >= this.expected) {
+			this.release();
+		}
 	}
 }
