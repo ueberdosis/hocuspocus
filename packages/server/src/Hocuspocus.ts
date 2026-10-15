@@ -582,9 +582,14 @@ export class Hocuspocus<Context = any> {
 				chain = chain
 					.then(() => (extension[name] as any)?.(payload))
 					.catch((error) => {
-						// make sure to log error messages
+						// Log the error itself, so its stack shows where it was thrown. A
+						// SkipFurtherHooksError ends the chain on purpose, so its message is
+						// enough.
 						if (error?.message) {
-							console.error(`[${name}]`, error.message);
+							console.error(
+								`[${name}]`,
+								error instanceof SkipFurtherHooksError ? error.message : error,
+							);
 						}
 
 						throw error;
