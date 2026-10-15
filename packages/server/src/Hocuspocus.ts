@@ -14,6 +14,7 @@ import type {
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
+	LocalTransactionOrigin,
 	onChangePayload,
 	onDisconnectPayload,
 	onStoreDocumentPayload,
@@ -73,6 +74,13 @@ export class Hocuspocus<Context = any> {
 	documents: Map<string, Document> = new Map();
 
 	server?: Server;
+
+	/**
+	 * Set when the server shuts down. A document whose store fails is then
+	 * unloaded instead of kept in memory, because nothing would store it again
+	 * or unload it later.
+	 */
+	isShuttingDown = false;
 
 	debouncer = useDebounce();
 
@@ -182,6 +190,38 @@ export class Hocuspocus<Context = any> {
 			if (!document.isLoading && this.debouncer.isDebounced(debounceId)) {
 				this.debouncer.executeNow(debounceId);
 			}
+		});
+	}
+
+	/**
+	 * Store documents that stay in memory only because their last store
+	 * failed: no connection is left and no store is scheduled, so nothing else
+	 * would store or unload them.
+	 */
+	retryFailedStores() {
+		this.documents.forEach((document: Document) => {
+			if (
+				document.isLoading ||
+				this.unloadingDocuments.has(document.name) ||
+				!this.shouldUnloadDocument(document)
+			) {
+				return;
+			}
+
+			this.storeDocumentHooks(
+				document,
+				{
+					clientsCount: 0,
+					document,
+					documentName: document.name,
+					instance: this,
+					lastContext: {},
+					lastTransactionOrigin: {
+						source: "local",
+					} satisfies LocalTransactionOrigin,
+				},
+				true,
+			);
 		});
 	}
 
@@ -531,6 +571,19 @@ export class Hocuspocus<Context = any> {
 				} catch (error: any) {
 					if (error instanceof SkipFurtherHooksError) {
 						// Another extension handled this — proceed to unload
+						setTimeout(() => {
+							if (this.shouldUnloadDocument(document)) {
+								this.unloadDocument(document);
+							}
+						}, 0);
+						return;
+					}
+
+					if (this.isShuttingDown) {
+						console.error(
+							"Caught error during storeDocumentHooks while shutting down. The document is unloaded with its unsaved changes",
+							error,
+						);
 						setTimeout(() => {
 							if (this.shouldUnloadDocument(document)) {
 								this.unloadDocument(document);
