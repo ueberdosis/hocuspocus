@@ -14,7 +14,6 @@ import type {
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
-	LocalTransactionOrigin,
 	onChangePayload,
 	onDisconnectPayload,
 	onStoreDocumentPayload,
@@ -81,6 +80,12 @@ export class Hocuspocus<Context = any> {
 	 * or unload it later.
 	 */
 	isShuttingDown = false;
+
+	/**
+	 * The payload of each document's last store, by document name, while that
+	 * store has failed and no later store has succeeded.
+	 */
+	failedStores: Map<string, onStoreDocumentPayload> = new Map();
 
 	debouncer = useDebounce();
 
@@ -199,29 +204,17 @@ export class Hocuspocus<Context = any> {
 	 * would store or unload them.
 	 */
 	retryFailedStores() {
-		this.documents.forEach((document: Document) => {
+		this.failedStores.forEach((hookPayload, documentName) => {
+			const document = this.documents.get(documentName);
 			if (
-				document.isLoading ||
-				this.unloadingDocuments.has(document.name) ||
+				!document ||
+				this.unloadingDocuments.has(documentName) ||
 				!this.shouldUnloadDocument(document)
 			) {
 				return;
 			}
 
-			this.storeDocumentHooks(
-				document,
-				{
-					clientsCount: 0,
-					document,
-					documentName: document.name,
-					instance: this,
-					lastContext: {},
-					lastTransactionOrigin: {
-						source: "local",
-					} satisfies LocalTransactionOrigin,
-				},
-				true,
-			);
+			this.storeDocumentHooks(document, hookPayload, true);
 		});
 	}
 
@@ -568,8 +561,10 @@ export class Hocuspocus<Context = any> {
 						await this.hooks("onStoreDocument", hookPayload);
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
+					this.failedStores.delete(document.name);
 				} catch (error: any) {
 					if (error instanceof SkipFurtherHooksError) {
+						this.failedStores.delete(document.name);
 						// Another extension handled this — proceed to unload
 						setTimeout(() => {
 							if (this.shouldUnloadDocument(document)) {
@@ -592,6 +587,7 @@ export class Hocuspocus<Context = any> {
 						return;
 					}
 
+					this.failedStores.set(document.name, hookPayload);
 					console.error(
 						"Caught error during storeDocumentHooks. Document stays in memory to avoid data loss",
 						error,
@@ -686,6 +682,7 @@ export class Hocuspocus<Context = any> {
 			if (!this.shouldUnloadDocument(document)) return;
 
 			this.documents.delete(documentName);
+			this.failedStores.delete(documentName);
 			document.destroy();
 			await this.hooks("afterUnloadDocument", { instance: this, documentName });
 		};

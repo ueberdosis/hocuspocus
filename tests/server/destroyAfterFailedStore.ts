@@ -6,6 +6,7 @@ import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
 async function editAndLeave(t: ExecutionContext, server: Hocuspocus) {
 	const provider = newHocuspocusProvider(t, server, {
 		name: `test-${crypto.randomUUID()}`,
+		token: "secret",
 	});
 
 	await new Promise<void>((resolve) => provider.on("synced", () => resolve()));
@@ -67,4 +68,30 @@ test("destroy finishes when a document cannot be stored", async (t) => {
 
 	t.true(await finishesWithin(5000, server.server!.destroy()));
 	t.is(server.getDocumentsCount(), 0);
+});
+
+test("destroy retries a failed store with the context of that store", async (t) => {
+	const storeUsers: string[] = [];
+
+	const server = await newHocuspocus(t, {
+		async onAuthenticate() {
+			return { user: "alice" };
+		},
+		async onStoreDocument({ lastContext }) {
+			storeUsers.push(lastContext.user);
+
+			if (storeUsers.length === 1) {
+				throw new Error("storage is unavailable");
+			}
+		},
+	});
+
+	await editAndLeave(t, server);
+
+	while (storeUsers.length === 0) {
+		await sleep(50);
+	}
+
+	t.true(await finishesWithin(5000, server.server!.destroy()));
+	t.deepEqual(storeUsers, ["alice", "alice"]);
 });
