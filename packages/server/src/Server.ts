@@ -222,6 +222,10 @@ export class Server<Context = any> {
 	}
 
 	private async runDestroy(): Promise<void> {
+		// From now on, a document whose store fails is unloaded, so the wait
+		// below for all documents to unload can end.
+		this.hocuspocus.isShuttingDown = true;
+
 		await new Promise<void>((resolve) => {
 			this.httpServer.close();
 
@@ -234,6 +238,10 @@ export class Server<Context = any> {
 
 				// Close all existing connections - this will trigger the close hook
 				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
+
+				// A document whose last store failed has no connection to close and
+				// no store to flush, so store it once more before it can unload.
+				this.hocuspocus.retryFailedStores();
 
 				this.hocuspocus.closeConnections();
 

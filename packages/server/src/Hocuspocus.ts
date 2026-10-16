@@ -74,6 +74,19 @@ export class Hocuspocus<Context = any> {
 
 	server?: Server;
 
+	/**
+	 * Set when the server shuts down. A document whose store fails is then
+	 * unloaded instead of kept in memory, because nothing would store it again
+	 * or unload it later.
+	 */
+	isShuttingDown = false;
+
+	/**
+	 * The payload of each document's last store, by document name, while that
+	 * store has failed and no later store has succeeded.
+	 */
+	failedStores: Map<string, onStoreDocumentPayload> = new Map();
+
 	debouncer = useDebounce();
 
 	constructor(configuration?: Partial<Configuration<Context>>) {
@@ -182,6 +195,26 @@ export class Hocuspocus<Context = any> {
 			if (!document.isLoading && this.debouncer.isDebounced(debounceId)) {
 				this.debouncer.executeNow(debounceId);
 			}
+		});
+	}
+
+	/**
+	 * Store documents that stay in memory only because their last store
+	 * failed: no connection is left and no store is scheduled, so nothing else
+	 * would store or unload them.
+	 */
+	retryFailedStores() {
+		this.failedStores.forEach((hookPayload, documentName) => {
+			const document = this.documents.get(documentName);
+			if (
+				!document ||
+				this.unloadingDocuments.has(documentName) ||
+				!this.shouldUnloadDocument(document)
+			) {
+				return;
+			}
+
+			this.storeDocumentHooks(document, hookPayload, true);
 		});
 	}
 
@@ -528,8 +561,10 @@ export class Hocuspocus<Context = any> {
 						await this.hooks("onStoreDocument", hookPayload);
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
+					this.failedStores.delete(document.name);
 				} catch (error: any) {
 					if (error instanceof SkipFurtherHooksError) {
+						this.failedStores.delete(document.name);
 						// Another extension handled this — proceed to unload
 						setTimeout(() => {
 							if (this.shouldUnloadDocument(document)) {
@@ -539,6 +574,20 @@ export class Hocuspocus<Context = any> {
 						return;
 					}
 
+					if (this.isShuttingDown) {
+						console.error(
+							"Caught error during storeDocumentHooks while shutting down. The document is unloaded with its unsaved changes",
+							error,
+						);
+						setTimeout(() => {
+							if (this.shouldUnloadDocument(document)) {
+								this.unloadDocument(document);
+							}
+						}, 0);
+						return;
+					}
+
+					this.failedStores.set(document.name, hookPayload);
 					console.error(
 						"Caught error during storeDocumentHooks. Document stays in memory to avoid data loss",
 						error,
@@ -638,6 +687,7 @@ export class Hocuspocus<Context = any> {
 			if (!this.shouldUnloadDocument(document)) return;
 
 			this.documents.delete(documentName);
+			this.failedStores.delete(documentName);
 			document.destroy();
 			await this.hooks("afterUnloadDocument", { instance: this, documentName });
 		};
