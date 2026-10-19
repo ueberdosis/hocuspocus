@@ -67,6 +67,24 @@ new Redis({
 })
 ```
 
+### Store lock
+
+Before a document is stored, the extension takes a lock in Redis so only one
+instance stores it at a time. If another instance holds the lock, the store is
+skipped. The lock expires after `lockTimeout` (ms, default `1000`).
+
+If your persistence cannot conflict across instances (for example, it appends
+each instance's updates instead of overwriting the stored state), set
+`lockTimeout` to `0` to store without taking the lock:
+
+```js
+new Redis({
+  host: "127.0.0.1",
+  port: 6379,
+  lockTimeout: 0,
+})
+```
+
 ## Documentation
 
 Full scaling architecture and multi-instance deployment guide: [tiptap.dev/docs/hocuspocus/server/extensions/redis](https://tiptap.dev/docs/hocuspocus/server/extensions/redis).

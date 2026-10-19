@@ -76,6 +76,11 @@ export interface Configuration {
 	prefix: string;
 	/**
 	 * The maximum time for the Redis lock in ms (in case it can’t be released).
+	 *
+	 * Set to `0` to store without taking the lock, for persistence that cannot
+	 * conflict across instances (e.g. appending updates instead of overwriting
+	 * the document state). A store is then never skipped because another
+	 * instance is storing the same document.
 	 */
 	lockTimeout: number;
 	/**
@@ -598,6 +603,11 @@ export class Redis implements Extension {
 		// to avoid conflict with other instances storing the same document.
 		const resource = this.lockKey(documentName);
 		const ttl = this.configuration.lockTimeout;
+
+		if (ttl <= 0) {
+			return;
+		}
+
 		try {
 			const lock = await this.redlock.acquire([resource], ttl);
 			const oldLock = this.locks.get(resource);
