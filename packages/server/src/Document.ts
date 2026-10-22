@@ -143,8 +143,8 @@ export class Document extends Doc {
 	 * to reject it entirely. The clientIds the update removes are passed as a
 	 * separate mutable `Set`; delete an id from it to drop that removal.
 	 *
-	 * `isActive` is asked for every update. While it returns false, the update
-	 * is applied as it is, without decoding it or calling the callback.
+	 * `isActive` is asked for every update. While it returns false, a plain
+	 * update is applied as it is, without a scratch Awareness or the callback.
 	 */
 	beforeHandleAwareness(
 		callback: (

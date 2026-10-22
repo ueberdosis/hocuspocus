@@ -489,9 +489,8 @@ export class Hocuspocus<Context = any> {
 					removedClients,
 				});
 			},
-			// Asked for every update, as extensions can still be added after the
-			// document is loaded. beforeHandleAwareness has no default no-op, so
-			// this finds only configured hooks, the same way `hooks()` picks them.
+			// Asked per update, as extensions can be added later. There is no default
+			// no-op, so this finds only configured hooks, as `hooks()` does.
 			() =>
 				this.configuration.extensions.some(
 					(extension) => typeof extension.beforeHandleAwareness === "function",

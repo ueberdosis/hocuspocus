@@ -354,7 +354,8 @@ test('without a beforeHandleAwareness hook, a state, its changes and the client 
   const leaving = newHocuspocusProvider(t, server)
   const staying = newHocuspocusProvider(t, server)
   const leavingId = leaving.document.clientID
-  const leavingState = () => staying.awareness!.getStates().get(leavingId)
+  const leavingState = () => staying.awareness?.getStates().get(leavingId)
+  const document = () => server.documents.get('hocuspocus-test')
 
   leaving.setAwarenessField('user', 'leaving')
 
@@ -369,8 +370,7 @@ test('without a beforeHandleAwareness hook, a state, its changes and the client 
     tt.deepEqual(leavingState(), { user: 'leaving', cursor: 1 })
   })
 
-  const document = server.documents.get('hocuspocus-test')!
-  t.false(document.callbacks.isBeforeHandleAwarenessActive(), 'the updates are applied as they are')
+  t.false(document()?.callbacks.isBeforeHandleAwarenessActive(), 'no hook is configured')
 
   // The server removes the clients a connection added once it closes, which
   // only works if the updates were applied with the connection as origin.
@@ -380,13 +380,13 @@ test('without a beforeHandleAwareness hook, a state, its changes and the client 
   const deadline = Date.now() + 5000
   while (Date.now() < deadline && (
     leavingState() !== undefined ||
-    document.awareness.getStates().has(leavingId)
+    document()?.awareness.getStates().has(leavingId)
   )) {
     await sleep(50)
   }
 
   t.is(leavingState(), undefined)
-  t.false(document.awareness.getStates().has(leavingId))
+  t.false(document()?.awareness.getStates().has(leavingId))
 })
 
 test('a beforeHandleAwareness hook added after the document is loaded still runs', async t => {
@@ -394,7 +394,7 @@ test('a beforeHandleAwareness hook added after the document is loaded still runs
 
   const sending = newHocuspocusProvider(t, server)
   const receiving = newHocuspocusProvider(t, server)
-  const sentState = () => receiving.awareness!.getStates().get(sending.document.clientID)
+  const sentState = () => receiving.awareness?.getStates().get(sending.document.clientID)
 
   sending.setAwarenessField('user', 'Spoofed')
 

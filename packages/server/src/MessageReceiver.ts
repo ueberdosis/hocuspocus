@@ -25,6 +25,31 @@ import {
 	type TransactionOrigin,
 } from "./types.ts";
 
+/**
+ * Whether the update applies the same directly as through a scratch Awareness:
+ * each entry names another client, with null or an object. Decodes all of it
+ * first, so a malformed update throws before anything is applied.
+ */
+const isPlainAwarenessUpdate = (update: Uint8Array): boolean => {
+	const decoder = decoding.createDecoder(update);
+	const length = decoding.readVarUint(decoder);
+	const clientIds = new Set<number>();
+
+	for (let i = 0; i < length; i++) {
+		const clientId = decoding.readVarUint(decoder);
+		decoding.readVarUint(decoder);
+		const state = JSON.parse(decoding.readVarString(decoder));
+
+		if (clientIds.has(clientId) || typeof state !== "object") {
+			return false;
+		}
+
+		clientIds.add(clientId);
+	}
+
+	return true;
+};
+
 export class MessageReceiver {
 	message: IncomingMessage;
 
@@ -79,12 +104,12 @@ export class MessageReceiver {
 						} satisfies ConnectionTransactionOrigin)
 					: (this.defaultTransactionOrigin ?? { source: "local" });
 
-				// Without a beforeHandleAwareness hook to run, the round trip through
-				// a scratch Awareness below ends in the same awareness state as
-				// applying the update directly, so do that. Clients send one on every
-				// cursor move, and each scratch Y.Doc and Awareness costs two random
-				// IDs, a timer and the garbage they leave.
-				if (!document.callbacks.isBeforeHandleAwarenessActive()) {
+				// With no hook to rewrite or reject it, a plain update can skip the
+				// scratch Awareness.
+				if (
+					!document.callbacks.isBeforeHandleAwarenessActive() &&
+					isPlainAwarenessUpdate(update)
+				) {
 					applyAwarenessUpdate(document.awareness, update, origin);
 
 					break;
