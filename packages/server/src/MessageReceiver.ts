@@ -79,6 +79,17 @@ export class MessageReceiver {
 						} satisfies ConnectionTransactionOrigin)
 					: (this.defaultTransactionOrigin ?? { source: "local" });
 
+				// Without a beforeHandleAwareness hook to run, the round trip through
+				// a scratch Awareness below ends in the same awareness state as
+				// applying the update directly, so do that. Clients send one on every
+				// cursor move, and each scratch Y.Doc and Awareness costs two random
+				// IDs, a timer and the garbage they leave.
+				if (!document.callbacks.isBeforeHandleAwarenessActive()) {
+					applyAwarenessUpdate(document.awareness, update, origin);
+
+					break;
+				}
+
 				// Decode the inbound update into a scratch Awareness so the hook
 				// chain sees a high-level Map<clientId, state>. Mutations to that
 				// map (including `set`, `delete`, and field changes on each state

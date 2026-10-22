@@ -28,6 +28,7 @@ export class Document extends Doc {
 			transactionOrigin: unknown,
 			removedClients: Set<number>,
 		) => Promise.resolve(),
+		isBeforeHandleAwarenessActive: () => false,
 	};
 
 	connections: Map<
@@ -141,6 +142,9 @@ export class Document extends Doc {
 	 * map in place (set/delete/field changes) to rewrite the update, or throw
 	 * to reject it entirely. The clientIds the update removes are passed as a
 	 * separate mutable `Set`; delete an id from it to drop that removal.
+	 *
+	 * `isActive` is asked for every update. While it returns false, the update
+	 * is applied as it is, without decoding it or calling the callback.
 	 */
 	beforeHandleAwareness(
 		callback: (
@@ -149,8 +153,10 @@ export class Document extends Doc {
 			transactionOrigin: unknown,
 			removedClients: Set<number>,
 		) => Promise<any>,
+		isActive: () => boolean = () => true,
 	): Document {
 		this.callbacks.beforeHandleAwareness = callback;
+		this.callbacks.isBeforeHandleAwarenessActive = isActive;
 
 		return this;
 	}

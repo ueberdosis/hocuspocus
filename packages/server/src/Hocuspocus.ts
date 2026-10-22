@@ -52,7 +52,6 @@ export class Hocuspocus<Context = any> {
 		connected: () => new Promise((r) => r(null)),
 		beforeHandleMessage: () => new Promise((r) => r(null)),
 		afterHandleMessage: () => new Promise((r) => r(null)),
-		beforeHandleAwareness: () => new Promise<void>((r) => r()),
 		beforeSync: () => new Promise((r) => r(null)),
 		beforeBroadcastStateless: () => new Promise((r) => r(null)),
 		onStateless: () => new Promise((r) => r(null)),
@@ -490,6 +489,13 @@ export class Hocuspocus<Context = any> {
 					removedClients,
 				});
 			},
+			// Asked for every update, as extensions can still be added after the
+			// document is loaded. beforeHandleAwareness has no default no-op, so
+			// this finds only configured hooks, the same way `hooks()` picks them.
+			() =>
+				this.configuration.extensions.some(
+					(extension) => typeof extension.beforeHandleAwareness === "function",
+				),
 		);
 
 		document.awareness.on(
