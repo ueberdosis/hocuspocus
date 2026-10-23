@@ -159,12 +159,16 @@ export class ClientConnection<Context = any> {
 	}
 
 	/**
-	 * Whether a document on this socket has no `Connection` yet: it is still
-	 * in `onConnect` / `onAuthenticate`, or waiting for its document to load.
+	 * Whether this socket has no `Connection` for some document yet: it has
+	 * not requested a document, a document is still in `onConnect` /
+	 * `onAuthenticate`, or it is waiting for its document to load.
 	 */
 	public hasPendingDocuments(): boolean {
-		return Object.keys(this.hookPayloads).some(
-			(rawKey) => !this.documentConnections[rawKey],
+		const rawKeys = Object.keys(this.hookPayloads);
+
+		return (
+			rawKeys.length === 0 ||
+			rawKeys.some((rawKey) => !this.documentConnections[rawKey])
 		);
 	}
 

@@ -76,3 +76,41 @@ test("destroy waits for documents that are still loading", async (t) => {
 	t.deepEqual(events, ["loaded", "unloaded", "destroyed"]);
 	t.is(server.hocuspocus.getDocumentsCount(), 0);
 });
+
+test("destroy resolves when a direct connection opened during shutdown disconnects", async (t) => {
+	let loadStarted: () => void = () => {};
+	const started = new Promise<void>((resolve) => {
+		loadStarted = resolve;
+	});
+	const events: string[] = [];
+
+	const server = new Server({
+		port: 0,
+		quiet: true,
+		stopOnSignals: false,
+		async onLoadDocument() {
+			loadStarted();
+			await sleep(300);
+		},
+		async afterUnloadDocument() {
+			events.push("unloaded");
+		},
+		async onDestroy() {
+			events.push("destroyed");
+		},
+	});
+
+	t.teardown(() => server.httpServer.close());
+
+	const hocuspocus = await server.listen();
+
+	const direct = hocuspocus.openDirectConnection("hocuspocus-test");
+	await started;
+	const destroyed = server.destroy();
+
+	await (await direct).disconnect();
+	await destroyed;
+
+	t.deepEqual(events, ["unloaded", "destroyed"]);
+	t.is(server.hocuspocus.getDocumentsCount(), 0);
+});

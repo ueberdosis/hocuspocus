@@ -207,9 +207,9 @@ export class Hocuspocus<Context = any> {
 
 		if (documentName) return;
 
-		// Sockets that are still authenticating, or waiting for their document
-		// to load, have no `Connection` on any document yet, so the loop above
-		// misses them.
+		// Sockets that have not requested a document yet, are still
+		// authenticating, or are waiting for their document to load have no
+		// `Connection` for it, so the loop above misses them.
 		this.clientConnections.forEach((clientConnection) => {
 			if (clientConnection.hasPendingDocuments()) {
 				clientConnection.forceClose(ResetConnection);
