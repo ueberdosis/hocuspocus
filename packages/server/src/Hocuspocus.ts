@@ -464,30 +464,33 @@ export class Hocuspocus<Context = any> {
 			},
 		);
 
-		document.beforeHandleAwareness((document, states, transactionOrigin) => {
-			const connection =
-				isTransactionOrigin(transactionOrigin) &&
-				transactionOrigin.source === "connection"
-					? transactionOrigin.connection
-					: undefined;
-			const request = connection?.request;
-			return this.hooks("beforeHandleAwareness", {
-				awareness: document.awareness,
-				clientsCount: document.getConnectionsCount(),
-				context: connection?.context,
-				document,
-				documentName: document.name,
-				instance: this,
-				requestHeaders: request?.headers ?? new Headers(),
-				requestParameters: request
-					? getParameters(request)
-					: new URLSearchParams(),
-				socketId: connection?.socketId ?? "",
-				transactionOrigin,
-				connection,
-				states,
-			});
-		});
+		document.beforeHandleAwareness(
+			(document, states, transactionOrigin, removedClients) => {
+				const connection =
+					isTransactionOrigin(transactionOrigin) &&
+					transactionOrigin.source === "connection"
+						? transactionOrigin.connection
+						: undefined;
+				const request = connection?.request;
+				return this.hooks("beforeHandleAwareness", {
+					awareness: document.awareness,
+					clientsCount: document.getConnectionsCount(),
+					context: connection?.context,
+					document,
+					documentName: document.name,
+					instance: this,
+					requestHeaders: request?.headers ?? new Headers(),
+					requestParameters: request
+						? getParameters(request)
+						: new URLSearchParams(),
+					socketId: connection?.socketId ?? "",
+					transactionOrigin,
+					connection,
+					states,
+					removedClients,
+				});
+			},
+		);
 
 		document.awareness.on(
 			"update",
@@ -579,9 +582,14 @@ export class Hocuspocus<Context = any> {
 				chain = chain
 					.then(() => (extension[name] as any)?.(payload))
 					.catch((error) => {
-						// make sure to log error messages
+						// Log the error itself, so its stack shows where it was thrown. A
+						// SkipFurtherHooksError ends the chain on purpose, so its message is
+						// enough.
 						if (error?.message) {
-							console.error(`[${name}]`, error.message);
+							console.error(
+								`[${name}]`,
+								error instanceof SkipFurtherHooksError ? error.message : error,
+							);
 						}
 
 						throw error;

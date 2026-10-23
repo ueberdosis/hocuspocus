@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.7.1](https://github.com/ueberdosis/hocuspocus/compare/v4.7.0...v4.7.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **provider:** cancel the pending reconnect on disconnect() and destroy() ([#1183](https://github.com/ueberdosis/hocuspocus/issues/1183)) ([52dffba](https://github.com/ueberdosis/hocuspocus/commit/52dffbacdf1fbd94cded3c35c4c6ab10ccd09185)), closes [#1182](https://github.com/ueberdosis/hocuspocus/issues/1182)
+* **provider:** keep retry cancel handle until the connection attempt resolves ([#1185](https://github.com/ueberdosis/hocuspocus/issues/1185)) ([f82939c](https://github.com/ueberdosis/hocuspocus/commit/f82939c6e1b6c7b4c60a66377502e23b9370b3d8))
+* **provider:** send batched changes when the page is hidden ([#1163](https://github.com/ueberdosis/hocuspocus/issues/1163)) ([c7e372e](https://github.com/ueberdosis/hocuspocus/commit/c7e372e77d43c1bc6cf2d0d61252c9c815a5b327))
+
+
+
+
+
 # [4.7.0](https://github.com/ueberdosis/hocuspocus/compare/v4.6.0...v4.7.0) (2026-09-09)
 
 

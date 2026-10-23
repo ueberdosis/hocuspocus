@@ -87,17 +87,34 @@ export class MessageReceiver {
 				// update entirely.
 				const scratchDoc = new Y.Doc();
 				const scratch = new Awareness(scratchDoc);
+				// The Awareness constructor seeds the scratch's own random clientID
+				// with `{}` at clock 0. Drop it so the hook and the re-encoded
+				// update only ever see the clients from the inbound update. Its meta
+				// entry has to go too, or it would show up as a removed client.
+				scratch.getStates().delete(scratch.clientID);
+				scratch.meta.delete(scratch.clientID);
 				try {
 					applyAwarenessUpdate(scratch, update, null);
+
+					// A client that cleared its state has no entry in the map, but its
+					// removal still has to reach the document's awareness. The hooks
+					// get these removals as their own set, so they can inspect them
+					// and drop any they don't allow.
+					const removedClients = new Set(
+						Array.from(scratch.meta.keys()).filter(
+							(clientId) => !scratch.getStates().has(clientId),
+						),
+					);
 
 					await document.callbacks.beforeHandleAwareness(
 						document,
 						scratch.getStates(),
 						origin,
+						removedClients,
 					);
 
 					update = encodeAwarenessUpdate(scratch, [
-						...scratch.getStates().keys(),
+						...new Set([...scratch.getStates().keys(), ...removedClients]),
 					]);
 				} finally {
 					scratch.destroy();

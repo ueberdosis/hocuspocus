@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.7.1](https://github.com/ueberdosis/hocuspocus/compare/v4.7.0...v4.7.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* correct the onLoadDocument callback type and skip the document self-apply ([#1155](https://github.com/ueberdosis/hocuspocus/issues/1155)) ([136816d](https://github.com/ueberdosis/hocuspocus/commit/136816d37ae4b5cb2c7e74dde96cb0c0a8452ee6)), closes [#849](https://github.com/ueberdosis/hocuspocus/issues/849) [#848](https://github.com/ueberdosis/hocuspocus/issues/848)
+* destroy the document when onLoadDocument throws ([#1157](https://github.com/ueberdosis/hocuspocus/issues/1157)) ([cf3cfa3](https://github.com/ueberdosis/hocuspocus/commit/cf3cfa355b4d3bb61c6b6c80071f71783e32470e))
+* **server:** apply awareness removals again ([#1162](https://github.com/ueberdosis/hocuspocus/issues/1162)) ([dda0015](https://github.com/ueberdosis/hocuspocus/commit/dda0015cfd5fa1824a76b8c1a27bc79d702cbd55)), closes [#1096](https://github.com/ueberdosis/hocuspocus/issues/1096)
+* **server:** count websocket pongs as activity for the idle timeout ([#1179](https://github.com/ueberdosis/hocuspocus/issues/1179)) ([98d5f62](https://github.com/ueberdosis/hocuspocus/commit/98d5f62a71227fa3fd9a4d06fdb98fa1aeb1f267)), closes [#1171](https://github.com/ueberdosis/hocuspocus/issues/1171)
+* **server:** don't set up a connection that closed during authentication ([#1188](https://github.com/ueberdosis/hocuspocus/issues/1188)) ([e6b1972](https://github.com/ueberdosis/hocuspocus/commit/e6b19722443ca2d7d960568f3fac5082bf8b1968))
+* **server:** drop the scratch Awareness's own {} entry before beforeHandleAwareness hooks ([#1178](https://github.com/ueberdosis/hocuspocus/issues/1178)) ([f5707c5](https://github.com/ueberdosis/hocuspocus/commit/f5707c5376c87a9f2062ca40e70e4de6783b75f5)), closes [#1172](https://github.com/ueberdosis/hocuspocus/issues/1172)
+
+
+
+
+
 # [4.7.0](https://github.com/ueberdosis/hocuspocus/compare/v4.6.0...v4.7.0) (2026-09-09)
 
 **Note:** Version bump only for package @hocuspocus/server

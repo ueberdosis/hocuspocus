@@ -1,5 +1,6 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
+import { retryableAssertion } from '../utils/retryableAssertion.ts'
 
 test('beforeHandleAwareness is called before the awareness state is applied', async t => {
   await new Promise(async resolve => {
@@ -7,7 +8,10 @@ test('beforeHandleAwareness is called before the awareness state is applied', as
 
     const server = await newHocuspocus(t, {
       async beforeHandleAwareness({ awareness, states, connection }) {
-        if (resolved) return
+        // The client first syncs an empty awareness update (removals only),
+        // which legitimately decodes to zero states. Skip those and wait for
+        // the update that carries the client's state.
+        if (resolved || states.size === 0) return
         resolved = true
 
         // The decoded states from the inbound update are exposed as a
@@ -235,5 +239,111 @@ test('throwing aborts subsequent extensions and the config-level hook', async t 
       t.is(configCalls, 0, 'config-level hook does not run')
       resolve('done')
     }, 400)
+  })
+})
+
+test('a client that clears its awareness state disappears for the other clients', async t => {
+  const server = await newHocuspocus(t)
+
+  const leaving = newHocuspocusProvider(t, server)
+  const staying = newHocuspocusProvider(t, server)
+
+  leaving.setAwarenessField('user', 'leaving')
+
+  await retryableAssertion(t, tt => {
+    tt.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  })
+
+  leaving.awareness!.setLocalState(null)
+
+  // Fail before the 30s silent-client timeout could mask a dropped removal.
+  const deadline = Date.now() + 5000
+  while (Date.now() < deadline && (
+    staying.awareness!.getStates().has(leaving.document.clientID) ||
+    server.documents.get('hocuspocus-test')!.awareness.getStates().has(leaving.document.clientID)
+  )) {
+    await sleep(50)
+  }
+
+  t.false(staying.awareness!.getStates().has(leaving.document.clientID))
+  t.false(
+    server.documents
+      .get('hocuspocus-test')!
+      .awareness.getStates()
+      .has(leaving.document.clientID),
+  )
+})
+
+test('beforeHandleAwareness sees a removal and can drop it', async t => {
+  let leavingId: number | undefined
+  const seenRemovals: number[][] = []
+
+  const server = await newHocuspocus(t, {
+    async beforeHandleAwareness({ removedClients }) {
+      seenRemovals.push([...removedClients])
+      // An authorization hook: this connection may not remove the client.
+      if (leavingId !== undefined) {
+        removedClients.delete(leavingId)
+      }
+    },
+  })
+
+  const leaving = newHocuspocusProvider(t, server)
+  const staying = newHocuspocusProvider(t, server)
+  leavingId = leaving.document.clientID
+
+  leaving.setAwarenessField('user', 'leaving')
+
+  await retryableAssertion(t, tt => {
+    tt.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  })
+
+  leaving.awareness!.setLocalState(null)
+
+  await retryableAssertion(t, tt => {
+    tt.true(seenRemovals.some(ids => ids.includes(leaving.document.clientID)))
+  })
+  // Give a dropped removal time to arrive anyway; it must not.
+  await sleep(500)
+
+  t.true(staying.awareness!.getStates().has(leaving.document.clientID))
+  t.true(
+    server.documents
+      .get('hocuspocus-test')!
+      .awareness.getStates()
+      .has(leaving.document.clientID),
+  )
+})
+
+test('beforeHandleAwareness does not see the scratch Awareness\'s own {} entry', async t => {
+  await new Promise(async resolve => {
+    let resolved = false
+
+    const server = await newHocuspocus(t, {
+      async beforeHandleAwareness({ states, removedClients }) {
+        // Skip empty initial sync updates (removals only); they carry no
+        // client states to inspect.
+        if (resolved || states.size === 0) return
+        resolved = true
+
+        // Every entry must originate from the inbound update: no phantom
+        // client with an empty `{}` state (the scratch Awareness's own
+        // clientID) may leak into the hook.
+        for (const [clientId, state] of states.entries()) {
+          t.truthy(Object.keys(state).length > 0, `state of client ${clientId} is not empty`)
+          t.truthy(state.foo, `state of client ${clientId} carries the sent field`)
+        }
+        t.is(states.size, 1, 'only the sender\'s client is present')
+        t.is(removedClients.size, 0, 'the scratch\'s own client is not reported as removed')
+
+        resolve('done')
+      },
+    })
+
+    const provider = newHocuspocusProvider(t, server, {
+      onConnect() {
+        provider.setAwarenessField('foo', 'bar')
+      },
+    })
   })
 })
