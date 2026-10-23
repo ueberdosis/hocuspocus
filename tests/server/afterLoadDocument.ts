@@ -115,3 +115,31 @@ test('runs every afterUnloadDocument hook when afterLoadDocument throws, even if
 
   t.deepEqual(unloaded, ['first', 'second'])
 })
+
+test('does not store the document of a failed load when an afterLoadDocument hook changed it', async t => {
+  let stored = 0
+
+  const server = await newHocuspocus(t, {
+    debounce: 50,
+    extensions: [
+      {
+        async afterLoadDocument({ document }) {
+          document.getMap('meta').set('touched', true)
+        },
+      },
+      {
+        async afterLoadDocument() {
+          throw new Error('refused')
+        },
+      },
+    ],
+    async onStoreDocument() {
+      stored += 1
+    },
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'), { message: 'refused' })
+  await sleep(200)
+
+  t.is(stored, 0)
+})

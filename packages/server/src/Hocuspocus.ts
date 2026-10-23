@@ -462,6 +462,10 @@ export class Hocuspocus<Context = any> {
 			// Cleanup is best effort: neither a throwing destroy listener nor a
 			// failing cleanup hook may skip the remaining cleanup or replace the
 			// original load error.
+			// An earlier afterLoadDocument hook may have changed the document and
+			// scheduled onStoreDocument; drop that store so the failed document is
+			// never persisted.
+			this.debouncer.cancel(`onStoreDocument-${documentName}`);
 			try {
 				document.destroy();
 			} catch (error) {
