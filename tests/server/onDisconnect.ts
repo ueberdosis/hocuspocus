@@ -1,5 +1,5 @@
 import test from 'ava'
-import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
 test('executes the onDisconnect callback', async t => {
   await new Promise(async resolve => {
@@ -111,4 +111,34 @@ test('the connections count is correct', async t => {
       },
     })
   })
+})
+
+test('runs onDisconnect only once when a client disconnects with awareness set and flushDelay is false', async t => {
+  // Regression test for #1199: removing the connection while its awareness
+  // states broadcast immediately (flushDelay: false) used to reach the
+  // still-registered closing connection, whose `send` then called `close()`
+  // again and fired `onDisconnect` a second time.
+  const calls: number[] = []
+
+  const server = await newHocuspocus(t, {
+    flushDelay: false,
+    async onDisconnect() {
+      calls.push(1)
+    },
+  })
+
+  const provider = newHocuspocusProvider(t, server)
+
+  await new Promise(resolve => provider.on('synced', resolve))
+
+  provider.setAwarenessField('user', { name: 'a' })
+  // Give the server a moment to apply the awareness update.
+  await sleep(100)
+
+  provider.configuration.websocketProvider.disconnect()
+  // Keep waiting longer than the whole close sequence so a second
+  // onDisconnect call would be caught.
+  await sleep(300)
+
+  t.is(calls.length, 1)
 })

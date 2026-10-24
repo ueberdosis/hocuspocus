@@ -178,12 +178,18 @@ export class Document extends Doc {
 	 * Remove the given connection from this document
 	 */
 	removeConnection(connection: Connection): Document {
+		// Delete the connection before dropping its awareness states: removing
+		// awareness states broadcasts the removal, and with
+		// `flushDelay: false` that broadcast is immediate. If the closing
+		// connection were still registered, it would receive the removal,
+		// `Connection.send` would see a closing socket and call `close()`
+		// again, firing `onClose` (and with it `onDisconnect`) twice for a
+		// single disconnect.
 		const entry = this.connections.get(connection);
+		this.connections.delete(connection);
 		if (entry) {
 			removeAwarenessStates(this.awareness, Array.from(entry.clients), null);
 		}
-
-		this.connections.delete(connection);
 
 		return this;
 	}
