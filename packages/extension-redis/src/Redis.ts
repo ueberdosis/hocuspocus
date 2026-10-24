@@ -162,7 +162,7 @@ export class Redis implements Extension {
 	 * Resolves once this instance is subscribed to its own reply channel.
 	 * Awaited (via `awaitReplySubscription`) before a document announces itself,
 	 * so a peer's reply can never arrive on a channel we are not listening to yet.
-	 * Replaced with a fresh subscribe promise if a prior attempt rejected.
+	 * See `awaitReplySubscription` for what happens if the subscribe rejects.
 	 */
 	private replySubscription: Promise<void>;
 
@@ -239,13 +239,9 @@ export class Redis implements Extension {
 		// payload, so a single channel per instance receives every reply addressed
 		// to us. Started here instead of in `onConfigure` because the server does
 		// not await that hook; `afterLoadDocument` awaits this promise, so no
-		// reply can be missed while the subscription is still pending.
-		//
-		// If Redis is unreachable at construct time, ioredis rejects the queued
-		// SUBSCRIBE after maxRetriesPerRequest. A permanently rejected promise
-		// would poison every later afterLoadDocument even after Redis is healthy
-		// again — `awaitReplySubscription` replaces a rejected promise with a
-		// fresh subscribe before awaiting.
+		// reply can be missed while the subscription is still pending. See
+		// `awaitReplySubscription` for retry behavior if this initial subscribe
+		// rejects (e.g. Redis unreachable at construct time).
 		this.replySubscription = this.subscribeToReplyChannel();
 	}
 
