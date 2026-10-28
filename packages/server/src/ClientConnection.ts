@@ -139,6 +139,8 @@ export class ClientConnection<Context = any> {
 		this.pingInterval = setInterval(this.check, this.timeout);
 	}
 
+	private readonly socketClosedCallbacks: Array<() => void> = [];
+
 	/**
 	 * Handle WebSocket close event. Call this from your integration
 	 * when the WebSocket connection closes.
@@ -146,6 +148,44 @@ export class ClientConnection<Context = any> {
 	handleClose(event?: CloseEvent) {
 		this.close(event);
 		clearInterval(this.pingInterval);
+		this.notifySocketClosed();
+	}
+
+	/**
+	 * Set a callback that runs once the socket is closed or torn down.
+	 */
+	public onSocketClosed(callback: () => void): ClientConnection {
+		this.socketClosedCallbacks.push(callback);
+
+		return this;
+	}
+
+	private notifySocketClosed() {
+		const callbacks = this.socketClosedCallbacks.splice(0);
+		for (const callback of callbacks) {
+			callback();
+		}
+	}
+
+	/**
+	 * Whether this socket has no `Connection` for some document yet: it has
+	 * not requested a document, a document is still in `onConnect` /
+	 * `onAuthenticate`, or it is waiting for its document to load.
+	 */
+	public hasPendingDocuments(): boolean {
+		const rawKeys = Object.keys(this.hookPayloads);
+
+		return (
+			rawKeys.length === 0 ||
+			rawKeys.some((rawKey) => !this.documentConnections[rawKey])
+		);
+	}
+
+	/**
+	 * Tear down the connection and close the underlying socket.
+	 */
+	public forceClose(event: CloseEvent = ResetConnection) {
+		this.terminate(event);
 	}
 
 	private close(event?: CloseEvent) {
@@ -188,6 +228,7 @@ export class ClientConnection<Context = any> {
 		}
 
 		clearInterval(this.pingInterval);
+		this.notifySocketClosed();
 	}
 
 	/**
