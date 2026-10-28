@@ -27,6 +27,7 @@ import {
 	type ExecutionResult,
 	type Lock,
 	Redlock,
+	ResourceLockedError,
 } from "@sesamecare-oss/redlock";
 import type {
 	Cluster,
@@ -660,11 +661,23 @@ export class Redis implements Extension {
 				error.message ===
 					"The operation was unable to achieve a quorum during its retry window."
 			) {
-				// Expected behavior: Could not acquire lock, another instance locked it already.
-				// Skip further hooks and retry — the data is safe on the other instance.
-				throw new SkipFurtherHooksError(
-					"Another instance is already storing this document",
-				);
+				const attempts = await Promise.all(error.attempts);
+				const errors = attempts.flatMap((attempt) => [
+					...attempt.votesAgainst.values(),
+				]);
+				if (errors.some((cause) => cause instanceof ResourceLockedError)) {
+					throw new SkipFurtherHooksError(
+						"Another instance is already storing this document",
+					);
+				}
+				// Only bypass the lock when Redis is disconnected, not on command errors.
+				if (errors.length > 0 && this.pub.status !== "ready") {
+					console.warn(
+						`Redis is unavailable for "${documentName}", storing anyway:`,
+						error.message,
+					);
+					return;
+				}
 			}
 			//unexpected error
 			console.error("unexpected error:", error);
