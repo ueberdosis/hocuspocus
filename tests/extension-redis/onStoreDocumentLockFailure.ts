@@ -1,58 +1,101 @@
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import { Redis } from "@hocuspocus/extension-redis";
 import type { onStoreDocumentPayload } from "@hocuspocus/server";
 import test from "ava";
 import { createClient } from "redis";
-import { newHocuspocus, redisConnectionSettings, sleep } from "../utils/index.ts";
+import sinon from "sinon";
+import { newHocuspocus, redisConnectionSettings } from "../utils/index.ts";
 
-// Regression test for #1167: when the Redlock acquisition fails with a quorum
-// ExecutionError (another instance holds the store lock, or Redis itself is
-// having trouble), the remaining onStoreDocument hooks must still run, so the
-// instance's changes are persisted instead of the document being unloaded
-// unsaved.
-test("a held store lock does not skip the remaining onStoreDocument hooks", async (t) => {
+async function setup(t: Parameters<typeof newHocuspocus>[0]) {
 	const prefix = `extension-redis/onStoreDocumentLockFailure-${crypto.randomUUID()}`;
 	const ran: string[] = [];
-
-	class CustomStorageExtension {
-		async onStoreDocument(_payload: onStoreDocumentPayload) {
-			ran.push("db");
-		}
-	}
-
-	const server = await newHocuspocus(t, {
-		extensions: [
-			new Redis({
-				...redisConnectionSettings,
-				identifier: `server${crypto.randomUUID()}`,
-				prefix,
-				disconnectDelay: 100,
-			}),
-			new CustomStorageExtension(),
-		],
+	const redis = new Redis({
+		...redisConnectionSettings,
+		prefix,
+		disconnectDelay: 0,
 	});
+	t.teardown(() => {
+		redis.pub.disconnect();
+		redis.sub.disconnect();
+	});
+	const server = await newHocuspocus(t, {
+		extensions: [redis],
+		onStoreDocument: async () => {
+			ran.push("db");
+		},
+	});
+	const connection = await server.openDirectConnection("doc");
+	if (!connection.document) {
+		throw new Error("document not loaded");
+	}
+	const payload: onStoreDocumentPayload = {
+		documentName: "doc",
+		document: connection.document,
+		instance: server,
+		clientsCount: 1,
+		lastContext: {},
+		lastTransactionOrigin: undefined,
+	};
+	return { redis, server, prefix, ran, payload };
+}
 
-	const redisClient = createClient({
+// Regression for #1167: a reachable Redis must still enforce the store lock.
+test("a held store lock skips the remaining store hooks", async (t) => {
+	const { server, prefix, ran, payload } = await setup(t);
+	const client = createClient({
 		url: `redis://${redisConnectionSettings.host}:${redisConnectionSettings.port}`,
 	});
-	await redisClient.connect();
-	t.teardown(() => redisClient.disconnect());
-
-	const connection = await server.openDirectConnection("doc");
-	await connection.transact((document) => {
-		document.getMap("m").set("k", "v");
+	await client.connect();
+	t.teardown(() => client.disconnect());
+	t.is(
+		await client.set(`${prefix}:doc:lock`, "other-instance", {
+			PX: 10_000,
+			NX: true,
+		}),
+		"OK",
+	);
+	await t.throwsAsync(server.hooks("onStoreDocument", payload), {
+		instanceOf: SkipFurtherHooksError,
 	});
+	t.deepEqual(ran, []);
+});
 
-	// Simulate another instance holding the store lock.
-	const locked = await redisClient.set(`${prefix}:doc:lock`, "other-instance", {
-		PX: 10_000,
-		NX: true,
-	});
-	t.is(locked, "OK");
-
-	await connection.disconnect();
-
-	// The last close executes the scheduled store immediately; give the hooks a
-	// moment to finish before asserting.
-	await sleep(500);
+test("unavailable Redis allows the remaining store hooks to run", async (t) => {
+	const { redis, server, ran, payload } = await setup(t);
+	redis.pub.disconnect();
+	await server.hooks("onStoreDocument", payload);
 	t.deepEqual(ran, ["db"]);
+	t.is(redis.locks.size, 0);
+});
+
+test("an acquired store lock is kept until afterStoreDocument", async (t) => {
+	const { redis, server, ran, payload } = await setup(t);
+	await server.hooks("onStoreDocument", payload);
+	t.deepEqual(ran, ["db"]);
+	t.is(redis.locks.size, 1);
+	await redis.afterStoreDocument(payload);
+	t.is(redis.locks.size, 0);
+});
+
+test("Redis command errors do not bypass the store lock", async (t) => {
+	const { redis, server, ran, payload } = await setup(t);
+	const command = sinon
+		.stub(redis.pub, "sendCommand")
+		.rejects(new Error("NOPERM"));
+	t.teardown(() => command.restore());
+	await t.throwsAsync(server.hooks("onStoreDocument", payload), {
+		name: "ExecutionError",
+	});
+	t.deepEqual(ran, []);
+});
+
+test("unexpected lock errors propagate without running later hooks", async (t) => {
+	const { redis, server, ran, payload } = await setup(t);
+	const error = new Error("unexpected lock error");
+	const acquire = sinon.stub(redis.redlock, "acquire").rejects(error);
+	t.teardown(() => acquire.restore());
+	await t.throwsAsync(server.hooks("onStoreDocument", payload), {
+		is: error,
+	});
+	t.deepEqual(ran, []);
 });

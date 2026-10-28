@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { SkipFurtherHooksError } from "@hocuspocus/common";
 import type {
 	afterLoadDocumentPayload,
 	afterStoreDocumentPayload,
@@ -26,6 +27,7 @@ import {
 	type ExecutionResult,
 	type Lock,
 	Redlock,
+	ResourceLockedError,
 } from "@sesamecare-oss/redlock";
 import type {
 	Cluster,
@@ -611,17 +613,23 @@ export class Redis implements Extension {
 				error.message ===
 					"The operation was unable to achieve a quorum during its retry window."
 			) {
-				// Could not acquire the lock: either another instance is
-				// storing this document, or Redis itself is having trouble (a
-				// single client reports its errors as a quorum failure). Don't
-				// skip the remaining onStoreDocument hooks: this instance's
-				// changes must still be persisted instead of the document being
-				// unloaded unsaved. See #1167.
-				console.warn(
-					`Could not acquire the store lock for "${documentName}", storing anyway:`,
-					error.message,
-				);
-				return;
+				const attempts = await Promise.all(error.attempts);
+				const errors = attempts.flatMap((attempt) => [
+					...attempt.votesAgainst.values(),
+				]);
+				if (errors.some((cause) => cause instanceof ResourceLockedError)) {
+					throw new SkipFurtherHooksError(
+						"Another instance is already storing this document",
+					);
+				}
+				// Only bypass the lock when Redis is disconnected, not on command errors.
+				if (errors.length > 0 && this.pub.status !== "ready") {
+					console.warn(
+						`Redis is unavailable for "${documentName}", storing anyway:`,
+						error.message,
+					);
+					return;
+				}
 			}
 			//unexpected error
 			console.error("unexpected error:", error);
