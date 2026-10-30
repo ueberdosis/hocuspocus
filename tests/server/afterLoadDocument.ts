@@ -1,5 +1,6 @@
 import test from 'ava'
 import type { HocuspocusProvider } from '@hocuspocus/provider'
+import type * as Y from 'yjs'
 
 import { newHocuspocus, newHocuspocusProvider, sleep } from '../utils/index.ts'
 
@@ -62,4 +63,83 @@ test('does not execute the afterLoadDocument callback when document fails to loa
     t.pass()
     resolve('')
   })
+})
+
+test('destroys the document and runs afterUnloadDocument when afterLoadDocument throws', async t => {
+  let loadedDocument: Y.Doc | undefined
+  const unloaded: string[] = []
+
+  const server = await newHocuspocus(t, {
+    async onLoadDocument({ document }) {
+      loadedDocument = document
+    },
+    async afterLoadDocument() {
+      throw new Error('refused')
+    },
+    async afterUnloadDocument({ documentName }) {
+      unloaded.push(documentName)
+    },
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'))
+
+  t.truthy(loadedDocument, 'onLoadDocument never ran')
+  t.true(loadedDocument?.isDestroyed, 'the document of the failed load was not destroyed')
+  t.deepEqual(unloaded, ['doc'])
+  t.is(server.getDocumentsCount(), 0)
+})
+
+test('runs every afterUnloadDocument hook when afterLoadDocument throws, even if one of them fails', async t => {
+  const unloaded: string[] = []
+
+  const server = await newHocuspocus(t, {
+    extensions: [
+      {
+        async afterLoadDocument() {
+          throw new Error('refused')
+        },
+        async afterUnloadDocument() {
+          unloaded.push('first')
+          throw new Error('cleanup failed')
+        },
+      },
+      {
+        async afterUnloadDocument() {
+          unloaded.push('second')
+        },
+      },
+    ],
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'), { message: 'refused' })
+
+  t.deepEqual(unloaded, ['first', 'second'])
+})
+
+test('does not store the document of a failed load when an afterLoadDocument hook changed it', async t => {
+  let stored = 0
+
+  const server = await newHocuspocus(t, {
+    debounce: 50,
+    extensions: [
+      {
+        async afterLoadDocument({ document }) {
+          document.getMap('meta').set('touched', true)
+        },
+      },
+      {
+        async afterLoadDocument() {
+          throw new Error('refused')
+        },
+      },
+    ],
+    async onStoreDocument() {
+      stored += 1
+    },
+  })
+
+  await t.throwsAsync(() => server.openDirectConnection('doc'), { message: 'refused' })
+  await sleep(200)
+
+  t.is(stored, 0)
 })
