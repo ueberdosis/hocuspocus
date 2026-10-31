@@ -76,6 +76,11 @@ export interface Configuration {
 	prefix: string;
 	/**
 	 * The maximum time for the Redis lock in ms (in case it can’t be released).
+	 *
+	 * Set to `0` to store without taking the lock, for persistence that cannot
+	 * conflict across instances (e.g. appending updates instead of overwriting
+	 * the document state). A store is then never skipped because another
+	 * instance is storing the same document.
 	 */
 	lockTimeout: number;
 	/**
@@ -160,8 +165,9 @@ export class Redis implements Extension {
 
 	/**
 	 * Resolves once this instance is subscribed to its own reply channel.
-	 * Awaited before a document announces itself, so a peer's reply can never
-	 * arrive on a channel we are not listening to yet.
+	 * Awaited (via `awaitReplySubscription`) before a document announces itself,
+	 * so a peer's reply can never arrive on a channel we are not listening to yet.
+	 * See `awaitReplySubscription` for what happens if the subscribe rejects.
 	 */
 	private replySubscription: Promise<void>;
 
@@ -238,25 +244,10 @@ export class Redis implements Extension {
 		// payload, so a single channel per instance receives every reply addressed
 		// to us. Started here instead of in `onConfigure` because the server does
 		// not await that hook; `afterLoadDocument` awaits this promise, so no
-		// reply can be missed while the subscription is still pending.
-		this.replySubscription = new Promise<void>((resolve, reject) => {
-			this.sub.subscribe(
-				this.replyKey(this.configuration.identifier),
-				(error: any) => {
-					if (error) {
-						reject(error);
-						return;
-					}
-
-					resolve();
-				},
-			);
-		});
-
-		// The error is re-thrown to whoever awaits the promise in
-		// `afterLoadDocument`; this handler only keeps it from being reported as
-		// an unhandled rejection when no document is ever loaded.
-		this.replySubscription.catch(() => {});
+		// reply can be missed while the subscription is still pending. See
+		// `awaitReplySubscription` for retry behavior if this initial subscribe
+		// rejects (e.g. Redis unreachable at construct time).
+		this.replySubscription = this.subscribeToReplyChannel();
 	}
 
 	async onConfigure({ instance }: onConfigurePayload) {
@@ -290,6 +281,58 @@ export class Redis implements Extension {
 		return `${this.configuration.prefix}#reply:${identifier}`;
 	}
 
+	/**
+	 * Subscribe the sub client to this instance's reply channel.
+	 *
+	 * The catch on the returned promise keeps a reject from being reported as
+	 * an unhandled rejection when no document is ever loaded (or while a load
+	 * has not yet awaited it). Callers that need the outcome still `await` and
+	 * observe the error.
+	 */
+	private subscribeToReplyChannel(): Promise<void> {
+		const subscription = new Promise<void>((resolve, reject) => {
+			this.sub.subscribe(
+				this.replyKey(this.configuration.identifier),
+				(error: any) => {
+					if (error) {
+						reject(error);
+						return;
+					}
+
+					resolve();
+				},
+			);
+		});
+
+		subscription.catch(() => {});
+
+		return subscription;
+	}
+
+	/**
+	 * Await the reply-channel subscription, retrying if a previous attempt
+	 * rejected (e.g. Redis was down at construct time and SUBSCRIBE failed
+	 * after maxRetriesPerRequest). Concurrent callers share one in-flight
+	 * retry by replacing `replySubscription` only while it still points at
+	 * the rejected promise.
+	 */
+	private async awaitReplySubscription(): Promise<void> {
+		const current = this.replySubscription;
+
+		try {
+			await current;
+		} catch {
+			// Capture before await so concurrent afterLoadDocument callers that
+			// hit the same rejection share one retry instead of each starting a
+			// fresh SUBSCRIBE.
+			if (this.replySubscription === current) {
+				this.replySubscription = this.subscribeToReplyChannel();
+			}
+
+			await this.replySubscription;
+		}
+	}
+
 	private encodeMessage(message: Uint8Array) {
 		return Buffer.concat([this.messagePrefix, Buffer.from(message)]);
 	}
@@ -318,8 +361,8 @@ export class Redis implements Extension {
 		try {
 			// Replies to the SyncStep1 we are about to publish are addressed to
 			// this instance's reply channel, so that subscription has to be live
-			// first.
-			await this.replySubscription;
+			// first. Retries if an earlier SUBSCRIBE rejected while Redis was down.
+			await this.awaitReplySubscription();
 
 			await new Promise<void>((resolve, reject) => {
 				// On document creation the node will connect to pub and sub channels
@@ -536,12 +579,12 @@ export class Redis implements Extension {
 			publishes.push(this.publishFirstSyncStep(documentName, pending.document));
 		}
 
-		// Same guard as the uncoalesced path: publishing awareness for a document
-		// nobody is connected to throws (see hocuspocus#1027).
+		// Skip only once the document is destroyed. Checking the connection count
+		// here would drop the awareness removal of the last connection (#1173).
 		if (
 			pending.awarenessClients.size > 0 &&
 			pending.awareness &&
-			pending.document.connections.size > 0
+			!pending.document.isDestroyed
 		) {
 			const message = new OutgoingMessage(
 				documentName,
@@ -598,6 +641,11 @@ export class Redis implements Extension {
 		// to avoid conflict with other instances storing the same document.
 		const resource = this.lockKey(documentName);
 		const ttl = this.configuration.lockTimeout;
+
+		if (ttl <= 0) {
+			return;
+		}
+
 		try {
 			const lock = await this.redlock.acquire([resource], ttl);
 			const oldLock = this.locks.get(resource);
@@ -689,10 +737,10 @@ export class Redis implements Extension {
 		removed,
 		document,
 	}: onAwarenessUpdatePayload) {
-		// Do not publish if there is no connection: it fixes this issue: "https://github.com/ueberdosis/hocuspocus/issues/1027"
-		const connections = document?.connections.size || 0;
-		if (connections === 0) {
-			return; // avoids exception
+		// Still publish after the last connection closed, so its awareness
+		// removal reaches other instances (#1173). Only skip destroyed documents.
+		if (!document || document.isDestroyed) {
+			return;
 		}
 
 		const pending = this.schedulePublish(documentName, document);

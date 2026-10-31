@@ -19,7 +19,10 @@ export interface ServerConfiguration<Context = any>
 	stopOnSignals?: boolean;
 	/**
 	 * Options passed to the underlying WebSocket server (ws).
-	 * Supports all ws ServerOptions, e.g. { maxPayload: 1024 * 1024 }
+	 * Supports all ws ServerOptions, e.g. { maxPayload: 1024 * 1024 }.
+	 * These apply before authentication, so lower `maxPayload`,
+	 * `maxFragments` and `maxBufferedChunks` to limit how much memory a
+	 * single unauthenticated connection can make the server buffer.
 	 */
 	websocketOptions?: Record<string, any>;
 }

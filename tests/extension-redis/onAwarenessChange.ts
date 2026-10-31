@@ -4,6 +4,7 @@ import test from "ava";
 import {
 	newHocuspocus,
 	newHocuspocusProvider,
+	newHocuspocusProviderWebsocket,
 	redisConnectionSettings,
 	sleep,
 } from "../utils/index.ts";
@@ -234,4 +235,54 @@ test("removes a cleared awareness state on the other server", async (t) => {
 	}
 
 	t.false(staying.awareness!.getStates().has(leaving.document.clientID));
+});
+
+test("removes the state of the last client whose connection drops on the other server", async (t) => {
+	const documentName = `test-${crypto.randomUUID()}`;
+
+	const server = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `server${crypto.randomUUID()}`,
+			}),
+		],
+	});
+	const anotherServer = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `anotherServer${crypto.randomUUID()}`,
+			}),
+		],
+	});
+
+	const leavingSocket = newHocuspocusProviderWebsocket(t, anotherServer);
+	const leaving = newHocuspocusProvider(
+		t,
+		anotherServer,
+		{ name: documentName },
+		{},
+		leavingSocket,
+	);
+	const staying = newHocuspocusProvider(t, server, { name: documentName });
+
+	leaving.setAwarenessField("name", "leaving");
+	await retryableAssertion(t, (tt) => {
+		tt.true(staying.awareness?.getStates().has(leaving.document.clientID));
+	});
+
+	// Close the socket without clearing the state first, as when a tab crashes
+	// or the network drops.
+	leavingSocket.destroy();
+
+	const deadline = Date.now() + 5000;
+	while (
+		Date.now() < deadline &&
+		staying.awareness?.getStates().has(leaving.document.clientID)
+	) {
+		await sleep(50);
+	}
+
+	t.false(staying.awareness?.getStates().has(leaving.document.clientID));
 });

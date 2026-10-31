@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
+
+
+### Bug Fixes
+
+* **extension-redis:** publish awareness removals on last connection close ([#1175](https://github.com/ueberdosis/hocuspocus/issues/1175)) ([0750fc5](https://github.com/ueberdosis/hocuspocus/commit/0750fc5673cd5bb579cb1549c6c61eb0fcce307d))
+* **extension-redis:** retry reply-channel subscribe after startup failure ([#1177](https://github.com/ueberdosis/hocuspocus/issues/1177)) ([9ae1c6d](https://github.com/ueberdosis/hocuspocus/commit/9ae1c6d31133af58b0b21530d2693cfbfb941f80)), closes [#1170](https://github.com/ueberdosis/hocuspocus/issues/1170)
+
+
+### Features
+
+* **extension-redis:** store without the lock when lockTimeout is 0 ([#1196](https://github.com/ueberdosis/hocuspocus/issues/1196)) ([0bb78a6](https://github.com/ueberdosis/hocuspocus/commit/0bb78a67271c7fd6295ec4bc42dc4d34555a2a3c))
+
+
+
+
+
 ## [4.7.1](https://github.com/ueberdosis/hocuspocus/compare/v4.7.0...v4.7.1) (2026-10-12)
 
 **Note:** Version bump only for package @hocuspocus/extension-redis

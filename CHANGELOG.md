@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
+
+
+### Bug Fixes
+
+* **extension-redis:** publish awareness removals on last connection close ([#1175](https://github.com/ueberdosis/hocuspocus/issues/1175)) ([0750fc5](https://github.com/ueberdosis/hocuspocus/commit/0750fc5673cd5bb579cb1549c6c61eb0fcce307d))
+* **extension-redis:** retry reply-channel subscribe after startup failure ([#1177](https://github.com/ueberdosis/hocuspocus/issues/1177)) ([9ae1c6d](https://github.com/ueberdosis/hocuspocus/commit/9ae1c6d31133af58b0b21530d2693cfbfb941f80)), closes [#1170](https://github.com/ueberdosis/hocuspocus/issues/1170)
+* **server:** bump crossws to 0.4.16 ([#1201](https://github.com/ueberdosis/hocuspocus/issues/1201)) ([31082b6](https://github.com/ueberdosis/hocuspocus/commit/31082b6fca3ae35f1398043d888e0b54521d9494))
+* **server:** delete the connection before removing its awareness states ([#1200](https://github.com/ueberdosis/hocuspocus/issues/1200)) ([c065eba](https://github.com/ueberdosis/hocuspocus/commit/c065eba2d285e9464445179abcf8219ed0eab4fc)), closes [#1199](https://github.com/ueberdosis/hocuspocus/issues/1199)
+* **server:** log the whole error when a hook fails ([#1195](https://github.com/ueberdosis/hocuspocus/issues/1195)) ([9def046](https://github.com/ueberdosis/hocuspocus/commit/9def0469c9cd6e9c09d3f51bd4ee282637929c9a))
+
+
+### Features
+
+* **extension-redis:** store without the lock when lockTimeout is 0 ([#1196](https://github.com/ueberdosis/hocuspocus/issues/1196)) ([0bb78a6](https://github.com/ueberdosis/hocuspocus/commit/0bb78a67271c7fd6295ec4bc42dc4d34555a2a3c))
+
+
+
+
+
 ## [4.7.1](https://github.com/ueberdosis/hocuspocus/compare/v4.7.0...v4.7.1) (2026-10-12)
 
 
