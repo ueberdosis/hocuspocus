@@ -15,20 +15,28 @@ import type {
 } from "./types.ts";
 import { isTransactionOrigin } from "./types.ts";
 
+// The default beforeHandleAwareness callback; while it is set, no hook runs.
+const noAwarenessHook: Parameters<Document["beforeHandleAwareness"]>[0] = () =>
+	Promise.resolve();
+
 export class Document extends Doc {
 	awareness: Awareness;
 
-	callbacks = {
+	callbacks: {
+		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => void;
+		beforeBroadcastStateless: (document: Document, stateless: string) => void;
+		beforeHandleAwareness: Parameters<Document["beforeHandleAwareness"]>[0];
+		// Optional, so callbacks replaced as a whole keep compiling; without it the
+		// scratch path runs.
+		isBeforeHandleAwarenessActive?: () => boolean;
+	} = {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => {},
 		beforeBroadcastStateless: (document: Document, stateless: string) => {},
-		beforeHandleAwareness: (
-			document: Document,
-			states: Map<number, Record<string, any>>,
-			transactionOrigin: unknown,
-			removedClients: Set<number>,
-		) => Promise.resolve(),
-		isBeforeHandleAwarenessActive: () => false,
+		beforeHandleAwareness: noAwarenessHook,
+		// Replaced by beforeHandleAwareness(); active once the no-op is replaced.
+		isBeforeHandleAwarenessActive: (): boolean =>
+			this.callbacks.beforeHandleAwareness !== noAwarenessHook,
 	};
 
 	connections: Map<
@@ -37,6 +45,9 @@ export class Document extends Doc {
 			clients: Set<any>;
 		}
 	> = new Map();
+
+	// The connection each awareness client belongs to, see handleAwarenessUpdate.
+	private awarenessClientConnections: Map<number, Connection> = new Map();
 
 	// The number of direct (non-websocket) connections to this document
 	directConnectionsCount = 0;
@@ -143,8 +154,8 @@ export class Document extends Doc {
 	 * to reject it entirely. The clientIds the update removes are passed as a
 	 * separate mutable `Set`; delete an id from it to drop that removal.
 	 *
-	 * `isActive` is asked for every update. While it returns false, a plain
-	 * update is applied as it is, without a scratch Awareness or the callback.
+	 * `isActive` is asked per update: while false, the callback is skipped, and so is
+	 * the scratch Awareness where it can be. A callback assigned over this one runs.
 	 */
 	beforeHandleAwareness(
 		callback: (
@@ -156,7 +167,8 @@ export class Document extends Doc {
 		isActive: () => boolean = () => true,
 	): Document {
 		this.callbacks.beforeHandleAwareness = callback;
-		this.callbacks.isBeforeHandleAwarenessActive = isActive;
+		this.callbacks.isBeforeHandleAwarenessActive = () =>
+			this.callbacks.beforeHandleAwareness !== callback || isActive();
 
 		return this;
 	}
@@ -265,12 +277,45 @@ export class Document extends Doc {
 				? origin.connection
 				: null;
 
-		if (originConnection !== null) {
-			const entry = this.connections.get(originConnection);
+		const originEntry =
+			originConnection === null
+				? undefined
+				: this.connections.get(originConnection);
 
-			if (entry) {
-				added.forEach((clientId: any) => entry.clients.add(clientId));
-				removed.forEach((clientId: any) => entry.clients.delete(clientId));
+		const fromOtherInstance =
+			isTransactionOrigin(origin) && origin.source === "redis";
+
+		// A client belongs to the connection that last left it with a state and
+		// leaves with it. A removal, or a state from another instance (the client
+		// moved there), releases it; any other state, such as one set by server
+		// code or sent by a connection that has closed, leaves it where it is.
+		for (const clientId of changedClients) {
+			// The document's own client is the server's, never a connection's.
+			if (clientId === this.awareness.clientID) {
+				continue;
+			}
+
+			const hasState = this.awareness.getStates().has(clientId);
+
+			if (hasState && originEntry === undefined && !fromOtherInstance) {
+				continue;
+			}
+
+			const owner = this.awarenessClientConnections.get(clientId) ?? null;
+			const newOwner = hasState ? originConnection : null;
+
+			if (owner === newOwner) {
+				continue;
+			}
+
+			if (owner !== null) {
+				this.connections.get(owner)?.clients.delete(clientId);
+				this.awarenessClientConnections.delete(clientId);
+			}
+
+			if (newOwner !== null) {
+				originEntry?.clients.add(clientId);
+				this.awarenessClientConnections.set(clientId, newOwner);
 			}
 		}
 

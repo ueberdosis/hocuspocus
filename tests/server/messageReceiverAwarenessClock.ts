@@ -56,7 +56,6 @@ test("accepts a clock-1 awareness update that reuses the scratch client ID", asy
 				) => {
 					hookState = states.get(clientID);
 				},
-				isBeforeHandleAwarenessActive: () => true,
 			},
 		};
 

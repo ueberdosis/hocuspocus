@@ -1,10 +1,12 @@
 import { AuthMessageType } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
 import { readVarString } from "lib0/decoding";
+import * as encoding from "lib0/encoding";
 import {
 	Awareness,
 	applyAwarenessUpdate,
 	encodeAwarenessUpdate,
+	modifyAwarenessUpdate,
 } from "y-protocols/awareness";
 import {
 	messageYjsSyncStep1,
@@ -25,29 +27,61 @@ import {
 	type TransactionOrigin,
 } from "./types.ts";
 
-/**
- * Whether the update applies the same directly as through a scratch Awareness:
- * each entry names another client, with null or an object. Decodes all of it
- * first, so a malformed update throws before anything is applied.
- */
-const isPlainAwarenessUpdate = (update: Uint8Array): boolean => {
+// Updates that name a client twice keep the scratch Awareness, which collapses
+// the entries into one; so do updates this check cannot read.
+const needsScratchAwareness = (update: Uint8Array): boolean => {
 	const decoder = decoding.createDecoder(update);
-	const length = decoding.readVarUint(decoder);
 	const clientIds = new Set<number>();
 
-	for (let i = 0; i < length; i++) {
-		const clientId = decoding.readVarUint(decoder);
-		decoding.readVarUint(decoder);
-		const state = JSON.parse(decoding.readVarString(decoder));
+	try {
+		for (let i = decoding.readVarUint(decoder); i > 0; i--) {
+			const clientId = decoding.readVarUint(decoder);
 
-		if (clientIds.has(clientId) || typeof state !== "object") {
-			return false;
+			if (clientIds.has(clientId)) {
+				return true;
+			}
+
+			clientIds.add(clientId);
+			decoding.readVarUint(decoder);
+			decoding.readVarUint8Array(decoder);
 		}
-
-		clientIds.add(clientId);
+	} catch {
+		return true;
 	}
 
-	return true;
+	return false;
+};
+
+// The removals of an update, the entries whose state re-encodes to null as on
+// the scratch path, or null if it has none.
+const awarenessRemovals = (update: Uint8Array): Uint8Array | null => {
+	const decoder = decoding.createDecoder(update);
+	const removals: [clientId: number, clock: number][] = [];
+
+	for (let i = decoding.readVarUint(decoder); i > 0; i--) {
+		const clientId = decoding.readVarUint(decoder);
+		const clock = decoding.readVarUint(decoder);
+
+		const state = JSON.parse(decoding.readVarString(decoder));
+
+		if (JSON.stringify(state || null) === "null") {
+			removals.push([clientId, clock]);
+		}
+	}
+
+	if (removals.length === 0) {
+		return null;
+	}
+
+	const encoder = encoding.createEncoder();
+	encoding.writeVarUint(encoder, removals.length);
+	for (const [clientId, clock] of removals) {
+		encoding.writeVarUint(encoder, clientId);
+		encoding.writeVarUint(encoder, clock);
+		encoding.writeVarString(encoder, "null");
+	}
+
+	return encoding.toUint8Array(encoder);
 };
 
 export class MessageReceiver {
@@ -95,7 +129,21 @@ export class MessageReceiver {
 				break;
 			}
 			case MessageType.Awareness: {
-				let update = message.readVarUint8Array();
+				// The clients of a closed connection left with it. Of an update it sent
+				// before closing, still queued or waiting in a hook, only the removals
+				// apply: its states would bring those clients back.
+				const applicable = (received: Uint8Array) =>
+					connection !== undefined && !document.hasConnection(connection)
+						? awarenessRemovals(received)
+						: received;
+
+				const received = applicable(message.readVarUint8Array());
+
+				if (received === null) {
+					break;
+				}
+
+				let update = received;
 
 				const origin: TransactionOrigin = connection
 					? ({
@@ -104,13 +152,18 @@ export class MessageReceiver {
 						} satisfies ConnectionTransactionOrigin)
 					: (this.defaultTransactionOrigin ?? { source: "local" });
 
-				// With no hook to rewrite or reject it, a plain update can skip the
-				// scratch Awareness.
-				if (
-					!document.callbacks.isBeforeHandleAwarenessActive() &&
-					isPlainAwarenessUpdate(update)
-				) {
-					applyAwarenessUpdate(document.awareness, update, origin);
+				// A Document of an older @hocuspocus/server copy has no predicate.
+				const hookActive =
+					document.callbacks.isBeforeHandleAwarenessActive?.() ?? true;
+
+				// No hook to run: skip the scratch Awareness, but re-encode as it does,
+				// which also throws on a malformed update before any of it is applied.
+				if (!hookActive && !needsScratchAwareness(update)) {
+					applyAwarenessUpdate(
+						document.awareness,
+						modifyAwarenessUpdate(update, (state) => state || null),
+						origin,
+					);
 
 					break;
 				}
@@ -142,12 +195,14 @@ export class MessageReceiver {
 						),
 					);
 
-					await document.callbacks.beforeHandleAwareness(
-						document,
-						scratch.getStates(),
-						origin,
-						removedClients,
-					);
+					if (hookActive) {
+						await document.callbacks.beforeHandleAwareness(
+							document,
+							scratch.getStates(),
+							origin,
+							removedClients,
+						);
+					}
 
 					update = encodeAwarenessUpdate(scratch, [
 						...new Set([...scratch.getStates().keys(), ...removedClients]),
@@ -157,7 +212,13 @@ export class MessageReceiver {
 					scratchDoc.destroy();
 				}
 
-				applyAwarenessUpdate(document.awareness, update, origin);
+				const result = applicable(update);
+
+				if (result === null) {
+					break;
+				}
+
+				applyAwarenessUpdate(document.awareness, result, origin);
 
 				break;
 			}

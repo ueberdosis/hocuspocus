@@ -23,6 +23,9 @@ import { isTransactionOrigin, shouldSkipStoreHooks } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
 
+// The configuration's default beforeHandleAwareness, which is not a hook.
+const defaultBeforeHandleAwareness = () => new Promise<void>((r) => r());
+
 export const defaultConfiguration = {
 	name: null,
 	timeout: 60_000,
@@ -52,6 +55,7 @@ export class Hocuspocus<Context = any> {
 		connected: () => new Promise((r) => r(null)),
 		beforeHandleMessage: () => new Promise((r) => r(null)),
 		afterHandleMessage: () => new Promise((r) => r(null)),
+		beforeHandleAwareness: defaultBeforeHandleAwareness,
 		beforeSync: () => new Promise((r) => r(null)),
 		beforeBroadcastStateless: () => new Promise((r) => r(null)),
 		onStateless: () => new Promise((r) => r(null)),
@@ -489,11 +493,13 @@ export class Hocuspocus<Context = any> {
 					removedClients,
 				});
 			},
-			// Asked per update, as extensions can be added later. There is no default
-			// no-op, so this finds only configured hooks, as `hooks()` does.
+			// Asked per update, as extensions can be added later. The default no-op
+			// is not a hook.
 			() =>
 				this.configuration.extensions.some(
-					(extension) => typeof extension.beforeHandleAwareness === "function",
+					(extension) =>
+						typeof extension.beforeHandleAwareness === "function" &&
+						extension.beforeHandleAwareness !== defaultBeforeHandleAwareness,
 				),
 		);
 

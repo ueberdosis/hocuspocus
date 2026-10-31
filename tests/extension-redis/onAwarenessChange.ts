@@ -107,6 +107,89 @@ test("syncs awareness between servers and clients", async (t) => {
 	});
 });
 
+test("a client that moves to another server stays when its old connection closes, and leaves with its new one", async (t) => {
+	const documentName = `test-${crypto.randomUUID()}`;
+
+	const server = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `server${crypto.randomUUID()}`,
+			}),
+		],
+	});
+
+	const anotherServer = await newHocuspocus(t, {
+		extensions: [
+			new Redis({
+				...redisConnectionSettings,
+				identifier: `anotherServer${crypto.randomUUID()}`,
+			}),
+		],
+	});
+
+	const moving = newHocuspocusProvider(t, server, { name: documentName });
+	// Its state reaches anotherServer after any removal the first server
+	// publishes before it.
+	const witness = newHocuspocusProvider(t, server, { name: documentName });
+	const staying = newHocuspocusProvider(t, anotherServer, {
+		name: documentName,
+	});
+	const clientId = moving.document.clientID;
+	const seen = () => staying.awareness?.getStates().get(clientId);
+
+	moving.setAwarenessField("name", "moving");
+
+	await retryableAssertion(t, (tt) => {
+		tt.is(seen()?.name, "moving");
+	});
+
+	// The client comes back on anotherServer. Its old connection stays open but
+	// silent, as a half-open socket does, until the server sees it close.
+	moving.send = () => {};
+	const moved = newHocuspocusProvider(t, anotherServer, {
+		name: documentName,
+		document: moving.document,
+	});
+	moved.setAwarenessField("name", "moving");
+	moved.setAwarenessField("cursor", 1);
+
+	await retryableAssertion(t, (tt) => {
+		tt.is(
+			server.documents.get(documentName)?.awareness.getStates().get(clientId)
+				?.cursor,
+			1,
+		);
+	});
+
+	moving.configuration.websocketProvider.disconnect();
+
+	await retryableAssertion(t, (tt) => {
+		tt.is(server.documents.get(documentName)?.getConnectionsCount(), 1);
+	});
+
+	witness.setAwarenessField("name", "witness");
+
+	await retryableAssertion(t, (tt) => {
+		tt.is(
+			staying.awareness?.getStates().get(witness.document.clientID)?.name,
+			"witness",
+		);
+	});
+
+	t.is(seen()?.cursor, 1);
+
+	moved.configuration.websocketProvider.disconnect();
+
+	// Fail before the 30s silent-client timeout could mask a missing removal.
+	const deadline = Date.now() + 5000;
+	while (Date.now() < deadline && seen() !== undefined) {
+		await sleep(50);
+	}
+
+	t.is(seen(), undefined);
+});
+
 test("removes a cleared awareness state on the other server", async (t) => {
 	const documentName = `test-${crypto.randomUUID()}`;
 
