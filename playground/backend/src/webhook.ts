@@ -47,13 +47,17 @@ class WebhookReceiver {
     })
   }
 
-  verifySignature(body: string, header: string): boolean {
+  verifySignature(body: string, header: string | string[] | undefined): boolean {
+    if (typeof header !== 'string') {
+      return false
+    }
+
     const signature = Buffer.from(header)
 
     const hmac = createHmac('sha256', this.secret)
     const digest = Buffer.from(`sha256=${hmac.update(body).digest('hex')}`)
 
-    return signature.length !== digest.length || timingSafeEqual(digest, signature)
+    return signature.length === digest.length && timingSafeEqual(digest, signature)
   }
 
   handleRequest(request: IncomingMessage, response: ServerResponse) {
@@ -64,8 +68,9 @@ class WebhookReceiver {
     })
 
     request.on('end', () => {
-      if (!this.verifySignature(data, <string> request.headers['x-hocuspocus-signature-256'])) {
+      if (!this.verifySignature(data, request.headers['x-hocuspocus-signature-256'])) {
         response.writeHead(403, 'signature not valid')
+        return response.end()
       }
 
       const { event, payload } = <{ event: string, payload: any }> JSON.parse(data)
