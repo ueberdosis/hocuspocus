@@ -28,7 +28,7 @@
 	],
 	"dependencies": {
 		"@hocuspocus/extension-database": "workspace:^",
-		"better-sqlite3": "^12.6.2",
+		"better-sqlite3": "^13.0.3",
 		"kleur": "^4.1.5"
 	},
 	"devDependencies": {
