@@ -86,6 +86,9 @@ export interface Configuration {
 	/**
 	 * A delay before onDisconnect is executed. This allows last minute updates'
 	 * sync messages to be received by the subscription before it's closed.
+	 *
+	 * The delay is skipped when no other instance is subscribed to the
+	 * document, as there is nobody left to sync with.
 	 */
 	disconnectDelay: number;
 	/**
@@ -707,6 +710,12 @@ export class Redis implements Extension {
 				this.pendingAfterStoreDocumentResolves.delete(documentName);
 			}
 
+			// The delay only gives other instances time to sync with us before we
+			// unsubscribe; without any, it would only add latency.
+			if (!(await this.hasOtherSubscribers(documentName))) {
+				return;
+			}
+
 			let resolveFunction: () => void = () => {};
 			const delayedPromise = new Promise<void>((resolve) => {
 				resolveFunction = resolve;
@@ -826,9 +835,14 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Delay unloading to allow syncs to finish
+	 * Delay unloading to allow syncs to finish, unless no other instance is
+	 * subscribed to the document.
 	 */
 	async beforeUnloadDocument(data: beforeUnloadDocumentPayload) {
+		if (!(await this.hasOtherSubscribers(data.documentName))) {
+			return;
+		}
+
 		return new Promise<void>((resolve) => {
 			setTimeout(() => {
 				resolve();
@@ -843,8 +857,8 @@ export class Redis implements Extension {
 		this.documents.delete(data.documentName);
 		// Nothing should be pending: the coalescing window is a single event loop
 		// turn and `beforeUnloadDocument` already waits `disconnectDelay` to let
-		// syncs finish. This is a safety net so a timer cannot fire against a
-		// document that is on its way out.
+		// syncs with subscribed peers finish. This is a safety net so a timer
+		// cannot fire against a document that is on its way out.
 		this.cancelPendingPublish(data.documentName);
 
 		this.sub.unsubscribe(this.subKey(data.documentName), (error: any) => {
