@@ -440,6 +440,11 @@ export class Hocuspocus<Context = any> {
 			throw e;
 		}
 
+		// State applied in onLoadDocument (e.g. by the Database extension) sits in
+		// the broadcast buffer. Nobody is connected yet, so flush it now; left for
+		// the scheduled flush it would reach the first client as a full update
+		// after that client has already been synced.
+		document.flush();
 		document.isLoading = false;
 
 		document.onUpdate(
