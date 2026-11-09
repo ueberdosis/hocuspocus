@@ -486,7 +486,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.closeTries += 1;
 		// https://bugs.webkit.org/show_bug.cgi?id=247943
 		if (this.closeTries > 2) {
-			this.onClose({
+			// Go through the close event instead of calling onClose() directly:
+			// listeners bound to "close" (the provider's own onClose resets
+			// isAuthenticated/synced) must run exactly like a normal close, and
+			// the reconnect must be scheduled the same way.
+			this.emit("close", {
 				event: {
 					code: 4408,
 					reason: "forced",
