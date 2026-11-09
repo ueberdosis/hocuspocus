@@ -73,9 +73,18 @@ test.serial(
 		socket.emit("open", {});
 		t.is(websocket.status, WebSocketStatus.Connected);
 
-		// Pretend the provider had synced before the socket went silent.
+		// In production checkConnection() only runs once a message has been
+		// received, and the first message resolves the connection attempt.
+		// Resolve it here too so the forced close happens with no pending
+		// attempt, exactly as on a live connection.
+		websocket.resolveConnectionAttempt();
+
+		// Pretend the provider had authenticated and synced before the socket
+		// went silent.
 		provider.synced = true;
+		provider.isAuthenticated = true;
 		t.true(provider.synced);
+		t.true(provider.isAuthenticated);
 
 		let closeEvents = 0;
 		provider.on("close", () => {
@@ -94,6 +103,10 @@ test.serial(
 		t.is(websocket.status, WebSocketStatus.Disconnected);
 		t.is(closeEvents, 1, "the forced close must emit close");
 		t.false(provider.synced, "the provider must reset synced");
-		t.false(provider.isAuthenticated);
+		t.false(provider.isAuthenticated, "the provider must reset isAuthenticated");
+		t.truthy(
+			websocket.reconnectTimeout,
+			"the forced close must schedule a reconnect like a normal close",
+		);
 	},
 );
