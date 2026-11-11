@@ -1,8 +1,56 @@
 import test from "ava";
+import { MessageType } from "@hocuspocus/server";
 import * as Y from "yjs";
 import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Wire-level sync message type (mirrors y-protocols/sync `messageYjsUpdate`).
+const messageYjsUpdate = 2;
+
+for (const hook of ["onLoadDocument", "afterLoadDocument"] as const) {
+	test(`does not broadcast the state applied in ${hook} to the first client`, async (t) => {
+		const stored = new Y.Doc();
+		stored.getMap("test").set("stored", "x".repeat(10_000));
+		const storedState = Y.encodeStateAsUpdate(stored);
+
+		// Default flushDelay: the loaded state used to land in the broadcast buffer
+		// and get flushed after the first connection was attached.
+		const server = await newHocuspocus(t, {
+			async [hook]({ document }: { document: Y.Doc }) {
+				Y.applyUpdate(document, storedState);
+			},
+		});
+
+		// The client already holds the stored state, e.g. restored from a local
+		// cache, so sync alone has nothing to send it.
+		const clientDocument = new Y.Doc();
+		Y.applyUpdate(clientDocument, storedState);
+
+		let updatesReceived = 0;
+		const provider = newHocuspocusProvider(t, server, {
+			document: clientDocument,
+			awareness: null,
+			onMessage({ message }) {
+				message.readVarString(); // document name
+				const type: number = message.readVarUint();
+
+				if (type !== MessageType.Sync && type !== MessageType.SyncReply) {
+					return;
+				}
+
+				if (message.readVarUint() === messageYjsUpdate) {
+					updatesReceived += 1;
+				}
+			},
+		});
+
+		await new Promise((resolve) => provider.on("synced", () => resolve("done")));
+		await sleep(50);
+
+		t.is(updatesReceived, 0);
+	});
+}
 
 test("executes the onLoadDocument callback", async (t) => {
 	await new Promise(async (resolve) => {
