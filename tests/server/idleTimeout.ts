@@ -45,6 +45,59 @@ test("idle timeout does not close a connection that keeps sending pongs", async 
 	t.true(provider.isSynced);
 });
 
+test("authenticationTimeout closes an unauthenticated connection before the idle timeout", async (t) => {
+	const server = await newHocuspocus(t, {
+		timeout: 60_000,
+		authenticationTimeout: 300,
+		// Never resolves, so the connection stays unauthenticated.
+		onAuthenticate: () => new Promise(() => {}),
+	});
+
+	const websocketProvider = newHocuspocusProviderWebsocket(t, server, {
+		WebSocketPolyfill: WebSocket,
+	});
+	newHocuspocusProvider(t, server, {}, {}, websocketProvider);
+
+	const closeCode: number | undefined = await Promise.race([
+		new Promise<number>((resolve) => {
+			websocketProvider.on("close", ({ event }: { event: { code: number } }) =>
+				resolve(event.code),
+			);
+		}),
+		sleep(2_000).then(() => undefined),
+	]);
+
+	t.is(closeCode, 4408);
+});
+
+test("idle timeout starts after authentication succeeds", async (t) => {
+	const server = await newHocuspocus(t, {
+		timeout: 300,
+		authenticationTimeout: 1_500,
+		// Authentication takes longer than the idle timeout, but still succeeds
+		// before the separate authentication deadline.
+		onAuthenticate: async () => sleep(450),
+	});
+
+	const websocketProvider = newHocuspocusProviderWebsocket(t, server, {
+		WebSocketPolyfill: WebSocket,
+	});
+	const provider = newHocuspocusProvider(t, server, {}, {}, websocketProvider);
+
+	let closeCode: number | undefined;
+	websocketProvider.on("close", ({ event }: { event: { code: number } }) => {
+		closeCode = event.code;
+	});
+
+	await new Promise<void>((resolve) => provider.on("synced", resolve));
+	// Let the next check from the pre-authentication interval run. It must not
+	// treat time spent authenticating as idle time after authentication.
+	await sleep(200);
+
+	t.is(closeCode, undefined);
+	t.true(provider.isSynced);
+});
+
 test("idle timeout still closes a connection that sends nothing", async (t) => {
 	const server = await newHocuspocus(t, { timeout: 300 });
 

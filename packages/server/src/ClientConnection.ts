@@ -69,6 +69,8 @@ export class ClientConnection<Context = any> {
 
 	timeout: number;
 
+	private readonly authenticationTimeout: number;
+
 	private readonly maxUnauthenticatedQueueSize: number;
 
 	private readonly maxUnauthenticatedQueueMessages: number;
@@ -124,6 +126,7 @@ export class ClientConnection<Context = any> {
 		private readonly hooks: Hocuspocus["hooks"],
 		private readonly opts: {
 			timeout: number;
+			authenticationTimeout?: number;
 			maxUnauthenticatedQueueSize?: number;
 			maxUnauthenticatedQueueMessages?: number;
 			maxPendingDocuments?: number;
@@ -131,12 +134,17 @@ export class ClientConnection<Context = any> {
 		private readonly defaultContext: Context = {} as Context,
 	) {
 		this.timeout = opts.timeout;
+		this.authenticationTimeout = opts.authenticationTimeout ?? opts.timeout;
 		this.maxUnauthenticatedQueueSize =
 			opts.maxUnauthenticatedQueueSize ?? 5 * 1024 * 1024;
 		this.maxUnauthenticatedQueueMessages =
 			opts.maxUnauthenticatedQueueMessages ?? 1_000;
 		this.maxPendingDocuments = opts.maxPendingDocuments ?? 100;
-		this.pingInterval = setInterval(this.check, this.timeout);
+		// Check often enough to enforce the shorter of the two deadlines.
+		this.pingInterval = setInterval(
+			this.check,
+			Math.min(this.timeout, this.authenticationTimeout),
+		);
 	}
 
 	/**
@@ -204,11 +212,14 @@ export class ClientConnection<Context = any> {
 		// Once authenticated, fall back to the normal idle behavior — even if the
 		// client later closes all of its documents — so an established client that
 		// keeps its socket open is not closed based on the original open time.
-		const referenceTime = this.hasAuthenticated
-			? this.lastMessageReceivedAt
-			: this.connectionEstablishedAt;
-
-		if (Date.now() - referenceTime > this.timeout) {
+		if (this.hasAuthenticated) {
+			if (Date.now() - this.lastMessageReceivedAt > this.timeout) {
+				this.terminate(ConnectionTimeout);
+			}
+		} else if (
+			Date.now() - this.connectionEstablishedAt >
+			this.authenticationTimeout
+		) {
 			this.terminate(ConnectionTimeout);
 		}
 	};
@@ -550,7 +561,17 @@ export class ClientConnection<Context = any> {
 
 				// All `onAuthenticate` hooks passed.
 				hookPayload.connectionConfig.isAuthenticated = true;
+				if (!this.hasAuthenticated) {
+					this.touch();
+				}
 				this.hasAuthenticated = true;
+
+				// From now on only the idle timeout applies, so check at its cadence
+				// instead of the (possibly much shorter) authentication deadline.
+				if (!this.terminated) {
+					clearInterval(this.pingInterval);
+					this.pingInterval = setInterval(this.check, this.timeout);
+				}
 
 				// Let the client know that authentication was successful.
 				const message = new OutgoingMessage(responseAddress).writeAuthenticated(
