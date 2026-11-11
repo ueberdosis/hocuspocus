@@ -20,6 +20,10 @@ import type {
 	WebSocketLike,
 } from "./types.ts";
 import { isTransactionOrigin, shouldSkipStoreHooks } from "./types.ts";
+import {
+	activeContextFromPayload,
+	runWithActiveContext,
+} from "./util/asyncContext.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
 
@@ -574,11 +578,22 @@ export class Hocuspocus<Context = any> {
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve
 		let chain = Promise.resolve();
 
-		extensions
-			// get me all extensions which have the given hook
-			.filter((extension) => typeof extension[name] === "function")
+		// get me all extensions which have the given hook
+		const hookExtensions = extensions.filter(
+			(extension) => typeof extension[name] === "function",
+		);
+
+		if (hookExtensions.length === 0) {
+			return chain;
+		}
+
+		// Every hook runs with the connection it belongs to as active context (see
+		// getActiveContext), or with none. Setting it here, and clearing it for
+		// hooks without a connection, keeps a context from leaking in from
+		// whatever scheduled the hook (e.g. a debounced onStoreDocument).
+		runWithActiveContext(activeContextFromPayload(payload), () => {
 			// run through all the configured hooks
-			.forEach((extension) => {
+			for (const extension of hookExtensions) {
 				chain = chain
 					.then(() => (extension[name] as any)?.(payload))
 					.catch((error) => {
@@ -598,7 +613,8 @@ export class Hocuspocus<Context = any> {
 				if (callback) {
 					chain = chain.then((...args: any[]) => callback(...args));
 				}
-			});
+			}
+		});
 
 		return chain;
 	}

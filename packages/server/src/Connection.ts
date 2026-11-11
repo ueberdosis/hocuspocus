@@ -283,15 +283,24 @@ export class Connection<Context = any> {
 						);
 					}
 				}
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			} catch (e: any) {
+			} catch (e: unknown) {
 				console.error(
 					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 					e,
 				);
+				// Hooks can reject with anything (a string, undefined, …), so only
+				// read code/reason from objects.
+				const error =
+					typeof e === "object" && e !== null
+						? (e as { code?: unknown; reason?: unknown })
+						: {};
 				this.close({
-					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
-					reason: "reason" in e ? e.reason : ResetConnection.reason,
+					code:
+						typeof error.code === "number" ? error.code : ResetConnection.code,
+					reason:
+						typeof error.reason === "string"
+							? error.reason
+							: ResetConnection.reason,
 				});
 				this.messageQueue.length = 0;
 				return;
