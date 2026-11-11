@@ -561,6 +561,9 @@ export class ClientConnection<Context = any> {
 
 				// All `onAuthenticate` hooks passed.
 				hookPayload.connectionConfig.isAuthenticated = true;
+				if (!this.hasAuthenticated) {
+					this.touch();
+				}
 				this.hasAuthenticated = true;
 
 				// From now on only the idle timeout applies, so check at its cadence
