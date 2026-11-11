@@ -412,6 +412,10 @@ export class ClientConnection<Context = any> {
 							...hookPayload.context,
 							...contextAdditions,
 						};
+						// Keep the connection in sync, so hooks that read the context
+						// from the connection (onChange, getActiveContext, …) see the
+						// refreshed values.
+						connection.context = hookPayload.context;
 					},
 				);
 			} catch (err: any) {
