@@ -457,6 +457,10 @@ export class Hocuspocus<Context = any> {
 
 		await this.hooks("afterLoadDocument", hookPayload);
 
+		// Same for changes made in afterLoadDocument: still nobody connected, so
+		// flush before the first client is attached.
+		document.flush();
+
 		document.beforeBroadcastStateless(
 			(document: Document, stateless: string) => {
 				const hookPayload: beforeBroadcastStatelessPayload = {
