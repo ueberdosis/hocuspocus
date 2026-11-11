@@ -65,6 +65,14 @@ export const useDebounce = () => {
 		}
 	};
 
+	const cancel = (id: string) => {
+		const old = timers.get(id);
+		if (old) {
+			clearTimeout(old.timeout);
+			timers.delete(id);
+		}
+	};
+
 	const isDebounced = (id: string): boolean => {
 		return timers.has(id);
 	};
@@ -73,5 +81,5 @@ export const useDebounce = () => {
 		return runningExecutions.has(id);
 	};
 
-	return { debounce, isDebounced, isCurrentlyExecuting, executeNow };
+	return { debounce, isDebounced, isCurrentlyExecuting, executeNow, cancel };
 };
