@@ -45,6 +45,31 @@ test("idle timeout does not close a connection that keeps sending pongs", async 
 	t.true(provider.isSynced);
 });
 
+test("authenticationTimeout closes an unauthenticated connection before the idle timeout", async (t) => {
+	const server = await newHocuspocus(t, {
+		timeout: 60_000,
+		authenticationTimeout: 300,
+		// Never resolves, so the connection stays unauthenticated.
+		onAuthenticate: () => new Promise(() => {}),
+	});
+
+	const websocketProvider = newHocuspocusProviderWebsocket(t, server, {
+		WebSocketPolyfill: WebSocket,
+	});
+	newHocuspocusProvider(t, server, {}, {}, websocketProvider);
+
+	const closeCode: number | undefined = await Promise.race([
+		new Promise<number>((resolve) => {
+			websocketProvider.on("close", ({ event }: { event: { code: number } }) =>
+				resolve(event.code),
+			);
+		}),
+		sleep(2_000).then(() => undefined),
+	]);
+
+	t.is(closeCode, 4408);
+});
+
 test("idle timeout still closes a connection that sends nothing", async (t) => {
 	const server = await newHocuspocus(t, { timeout: 300 });
 
