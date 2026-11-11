@@ -486,7 +486,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		this.closeTries += 1;
 		// https://bugs.webkit.org/show_bug.cgi?id=247943
 		if (this.closeTries > 2) {
-			this.onClose({
+			this.emit("close", {
 				event: {
 					code: 4408,
 					reason: "forced",
