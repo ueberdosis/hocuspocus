@@ -563,6 +563,13 @@ export class ClientConnection<Context = any> {
 				hookPayload.connectionConfig.isAuthenticated = true;
 				this.hasAuthenticated = true;
 
+				// From now on only the idle timeout applies, so check at its cadence
+				// instead of the (possibly much shorter) authentication deadline.
+				if (!this.terminated) {
+					clearInterval(this.pingInterval);
+					this.pingInterval = setInterval(this.check, this.timeout);
+				}
+
 				// Let the client know that authentication was successful.
 				const message = new OutgoingMessage(responseAddress).writeAuthenticated(
 					hookPayload.connectionConfig.readOnly,
