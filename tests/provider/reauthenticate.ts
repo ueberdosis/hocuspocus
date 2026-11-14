@@ -100,3 +100,49 @@ test("reauthenticate() keeps an authenticated provider as it is", async (t) => {
 	t.true(provider.isAuthenticated);
 	t.is(tokenCalls, callsAfterAuth);
 });
+
+test("reauthenticate() from authenticationFailed sends a token after a failed token refresh", async (t) => {
+	const syncedTokens: string[] = [];
+	const server = await newHocuspocus(t, {
+		async onTokenSync({ token }) {
+			syncedTokens.push(token);
+		},
+	});
+
+	let tokenCalls = 0;
+	let failNextToken = false;
+	let authenticationFailedCount = 0;
+
+	const provider = newHocuspocusProvider(t, server, {
+		token: () => {
+			tokenCalls++;
+			if (failNextToken) {
+				failNextToken = false;
+				throw new Error("token refresh failed");
+			}
+			return "token";
+		},
+		onAuthenticationFailed() {
+			authenticationFailedCount++;
+			provider.reauthenticate();
+		},
+	});
+
+	await retryableAssertion(t, (tt) => {
+		tt.true(provider.isAuthenticated);
+	});
+	const callsAfterAuth = tokenCalls;
+
+	// The server asks an authenticated provider for a token (the provider
+	// answers with sendToken()) and the token function throws, so the provider
+	// reports authenticationFailed. A listener that calls reauthenticate()
+	// right away must get through and send a fresh token.
+	failNextToken = true;
+	await provider.sendToken();
+
+	t.is(authenticationFailedCount, 1);
+	t.is(tokenCalls, callsAfterAuth + 2);
+	await retryableAssertion(t, (tt) => {
+		tt.deepEqual(syncedTokens, ["token"]);
+	});
+});

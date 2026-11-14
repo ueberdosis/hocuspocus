@@ -773,8 +773,8 @@ export class HocuspocusProvider extends EventEmitter {
 	}
 
 	permissionDeniedHandler(reason: string) {
-		this.emit("authenticationFailed", { reason });
 		this.isAuthenticated = false;
+		this.emit("authenticationFailed", { reason });
 	}
 
 	authenticatedHandler(scope: string) {
