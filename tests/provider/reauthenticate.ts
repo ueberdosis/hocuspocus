@@ -5,6 +5,7 @@ import {
 	newHocuspocusProvider,
 	newHocuspocusProviderWebsocket,
 } from "../utils/index.ts";
+import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 test("reauthenticate() sends a fresh token and syncs on the same socket", async (t) => {
 	const server = await newHocuspocus(t, {
@@ -75,4 +76,27 @@ test("reauthenticate() does nothing when the socket is not connected", async (t)
 
 	t.is(tokenCalls, 0);
 	t.false(provider.isAuthenticated);
+});
+
+test("reauthenticate() keeps an authenticated provider as it is", async (t) => {
+	const server = await newHocuspocus(t);
+
+	let tokenCalls = 0;
+
+	const provider = newHocuspocusProvider(t, server, {
+		token: () => {
+			tokenCalls++;
+			return "token";
+		},
+	});
+
+	await retryableAssertion(t, (tt) => {
+		tt.true(provider.isAuthenticated);
+	});
+	const callsAfterAuth = tokenCalls;
+
+	await provider.reauthenticate();
+
+	t.true(provider.isAuthenticated);
+	t.is(tokenCalls, callsAfterAuth);
 });

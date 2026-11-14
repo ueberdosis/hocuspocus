@@ -555,18 +555,19 @@ export class HocuspocusProvider extends EventEmitter {
 	 * doesn't limit or delay these calls, so keep your own attempt count to
 	 * avoid a loop when the server keeps rejecting the token.
 	 *
-	 * Does nothing if the provider is detached or the socket is not connected:
-	 * the provider asks for a token by itself once the socket opens.
+	 * Does nothing if the provider is detached or the socket is not connected
+	 * (the provider asks for a token by itself once the socket opens), or if it
+	 * is already authenticated (for example when a delayed retry runs after an
+	 * earlier one succeeded).
 	 */
 	async reauthenticate() {
 		if (
 			!this._isAttached ||
+			this.isAuthenticated ||
 			this.configuration.websocketProvider.status !== WebSocketStatus.Connected
 		) {
 			return;
 		}
-
-		this.isAuthenticated = false;
 
 		await this.authenticateAndSync();
 	}
