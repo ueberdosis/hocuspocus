@@ -33,6 +33,7 @@ import type {
 	onSyncedParameters,
 	onUnsyncedChangesParameters,
 } from "./types.ts";
+import { WebSocketStatus } from "./types.ts";
 
 export type HocuspocusProviderConfiguration = Required<
 	Pick<CompleteHocuspocusProviderConfiguration, "name">
@@ -542,6 +543,35 @@ export class HocuspocusProvider extends EventEmitter {
 		this.isAuthenticated = false;
 
 		this.emit("open", { event });
+		await this.authenticateAndSync();
+	}
+
+	/**
+	 * Send a fresh token and restart the sync on the socket that is already
+	 * open, without reconnecting. If `token` is a function, it is called again.
+	 *
+	 * Safe to call from `onAuthenticationFailed`, for example when a
+	 * short-lived token expired while the socket stayed open. The provider
+	 * doesn't limit or delay these calls, so keep your own attempt count to
+	 * avoid a loop when the server keeps rejecting the token.
+	 *
+	 * Does nothing if the provider is detached or the socket is not connected:
+	 * the provider asks for a token by itself once the socket opens.
+	 */
+	async reauthenticate() {
+		if (
+			!this._isAttached ||
+			this.configuration.websocketProvider.status !== WebSocketStatus.Connected
+		) {
+			return;
+		}
+
+		this.isAuthenticated = false;
+
+		await this.authenticateAndSync();
+	}
+
+	private async authenticateAndSync() {
 		await this.sendToken();
 		this.startSync();
 	}

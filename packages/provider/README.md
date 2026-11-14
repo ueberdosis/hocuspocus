@@ -44,6 +44,25 @@ new HocuspocusProvider({
 })
 ```
 
+If authentication fails while the socket stays open (for example, a short-lived token expired), call `provider.reauthenticate()` to send a fresh token and sync again without reconnecting. When `token` is a function, it is called again:
+
+```js
+let attempts = 0
+
+const provider = new HocuspocusProvider({
+  url: "wss://collab.example.com",
+  name: "example-document",
+  document: ydoc,
+  token: () => fetchFreshToken(),
+  onAuthenticationFailed() {
+    if (attempts++ < 3) provider.reauthenticate()
+  },
+  onAuthenticated() {
+    attempts = 0
+  },
+})
+```
+
 ### Sharing a socket across documents
 
 Create a `HocuspocusProviderWebsocket` once, then reuse it for multiple documents:
