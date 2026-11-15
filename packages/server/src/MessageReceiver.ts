@@ -202,32 +202,40 @@ export class MessageReceiver {
 				const meta: Awareness["meta"] = new Map();
 				scratch.states = states;
 				scratch.meta = meta;
-				applyAwarenessUpdate(scratch, update, null);
+				try {
+					applyAwarenessUpdate(scratch, update, null);
 
-				// A client that cleared its state has no entry in the map, but its
-				// removal still has to reach the document's awareness. The hooks
-				// get these removals as their own set, so they can inspect them
-				// and drop any they don't allow.
-				const removedClients = new Set(
-					Array.from(meta.keys()).filter((clientId) => !states.has(clientId)),
-				);
-
-				if (hookActive) {
-					await document.callbacks.beforeHandleAwareness(
-						document,
-						states,
-						origin,
-						removedClients,
+					// A client that cleared its state has no entry in the map, but its
+					// removal still has to reach the document's awareness. The hooks
+					// get these removals as their own set, so they can inspect them
+					// and drop any they don't allow.
+					const removedClients = new Set(
+						Array.from(meta.keys()).filter((clientId) => !states.has(clientId)),
 					);
-				}
 
-				// Another message may have taken the scratch while the hooks ran.
-				scratch.meta = meta;
-				update = encodeAwarenessUpdate(
-					scratch,
-					[...new Set([...states.keys(), ...removedClients])],
-					states,
-				);
+					if (hookActive) {
+						await document.callbacks.beforeHandleAwareness(
+							document,
+							states,
+							origin,
+							removedClients,
+						);
+					}
+
+					// Another message may have taken the scratch while the hooks ran.
+					scratch.meta = meta;
+					update = encodeAwarenessUpdate(
+						scratch,
+						[...new Set([...states.keys(), ...removedClients])],
+						states,
+					);
+				} finally {
+					// Let go of this message's maps, even when a hook threw, so an
+					// idle server keeps no presence state alive. A later message
+					// may already have replaced them.
+					if (scratch.states === states) scratch.states = new Map();
+					if (scratch.meta === meta) scratch.meta = new Map();
+				}
 
 				const result = applicable(update);
 
