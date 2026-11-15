@@ -60,6 +60,8 @@ test("decodes awareness updates without drawing random values, and a waiting hoo
 
 		// The first message may build the scratch the process keeps.
 		await apply(1, 1, { n: 0 });
+		// Building that scratch draws random values, so the spy sees the source.
+		t.true(random.callCount > 0);
 		random.resetHistory();
 
 		const waiting = apply(1, 2, { n: 1 });

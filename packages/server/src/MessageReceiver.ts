@@ -89,8 +89,9 @@ const awarenessRemovals = (update: Uint8Array): Uint8Array | null => {
  * every message in the process. A new Y.Doc and Awareness per message would
  * draw a client ID and a guid from the crypto random source and start an
  * interval each time, which costs far more than decoding a small update.
- * The scratch holds no local state, so its interval, which renews the local
- * state and times out stale ones, has nothing to do.
+ * Every message replaces its maps, so it never keeps a local state, and its
+ * interval, which renews the local state and times out stale ones, has
+ * nothing to do.
  */
 let scratchAwareness: Awareness | undefined;
 
