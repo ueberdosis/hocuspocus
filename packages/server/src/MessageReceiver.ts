@@ -84,6 +84,24 @@ const awarenessRemovals = (update: Uint8Array): Uint8Array | null => {
 	return encoding.toUint8Array(encoder);
 };
 
+/**
+ * The Awareness that inbound awareness updates are decoded into, shared by
+ * every message in the process. A new Y.Doc and Awareness per message would
+ * draw a client ID and a guid from the crypto random source and start an
+ * interval each time, which costs far more than decoding a small update.
+ * The scratch holds no local state, so its interval, which renews the local
+ * state and times out stale ones, has nothing to do.
+ */
+let scratchAwareness: Awareness | undefined;
+
+function getScratchAwareness(): Awareness {
+	if (!scratchAwareness) {
+		scratchAwareness = new Awareness(new Y.Doc());
+		clearInterval(scratchAwareness._checkInterval);
+	}
+	return scratchAwareness;
+}
+
 export class MessageReceiver {
 	message: IncomingMessage;
 
@@ -174,43 +192,41 @@ export class MessageReceiver {
 				// object) are picked up by the re-encode below and forwarded as
 				// the broadcast payload. Hooks may also throw to reject the
 				// update entirely.
-				const scratchDoc = new Y.Doc();
-				const scratch = new Awareness(scratchDoc);
-				// The Awareness constructor seeds the scratch's own random clientID
-				// with `{}` at clock 0. Drop it so the hook and the re-encoded
-				// update only ever see the clients from the inbound update. Its meta
-				// entry has to go too, or it would show up as a removed client.
-				scratch.getStates().delete(scratch.clientID);
-				scratch.meta.delete(scratch.clientID);
-				try {
-					applyAwarenessUpdate(scratch, update, null);
+				// Each message gets its own empty states and meta maps on the
+				// shared scratch, so the hook and the re-encoded update only ever
+				// see the clients from the inbound update, and a hook that awaits
+				// while other messages use the scratch keeps its own map.
+				const scratch = getScratchAwareness();
+				const states: Awareness["states"] = new Map();
+				const meta: Awareness["meta"] = new Map();
+				scratch.states = states;
+				scratch.meta = meta;
+				applyAwarenessUpdate(scratch, update, null);
 
-					// A client that cleared its state has no entry in the map, but its
-					// removal still has to reach the document's awareness. The hooks
-					// get these removals as their own set, so they can inspect them
-					// and drop any they don't allow.
-					const removedClients = new Set(
-						Array.from(scratch.meta.keys()).filter(
-							(clientId) => !scratch.getStates().has(clientId),
-						),
+				// A client that cleared its state has no entry in the map, but its
+				// removal still has to reach the document's awareness. The hooks
+				// get these removals as their own set, so they can inspect them
+				// and drop any they don't allow.
+				const removedClients = new Set(
+					Array.from(meta.keys()).filter((clientId) => !states.has(clientId)),
+				);
+
+				if (hookActive) {
+					await document.callbacks.beforeHandleAwareness(
+						document,
+						states,
+						origin,
+						removedClients,
 					);
-
-					if (hookActive) {
-						await document.callbacks.beforeHandleAwareness(
-							document,
-							scratch.getStates(),
-							origin,
-							removedClients,
-						);
-					}
-
-					update = encodeAwarenessUpdate(scratch, [
-						...new Set([...scratch.getStates().keys(), ...removedClients]),
-					]);
-				} finally {
-					scratch.destroy();
-					scratchDoc.destroy();
 				}
+
+				// Another message may have taken the scratch while the hooks ran.
+				scratch.meta = meta;
+				update = encodeAwarenessUpdate(
+					scratch,
+					[...new Set([...states.keys(), ...removedClients])],
+					states,
+				);
 
 				const result = applicable(update);
 
