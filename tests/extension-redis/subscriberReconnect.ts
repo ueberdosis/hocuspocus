@@ -71,8 +71,15 @@ const waitUntil = async (condition: () => boolean, timeout: number) => {
  * With `holdSubscribes`, every SUBSCRIBE B's subscriber sends after a
  * reconnect (including ioredis' automatic re-subscribe) is held back for that
  * many ms, so Redis confirms it late.
+ *
+ * With `rejectSubscribes`, that many SUBSCRIBE calls with a callback after a
+ * reconnect fail without being sent, like a `commandTimeout` that leaves the
+ * connection up.
  */
-const setup = async (t: ExecutionContext, holdSubscribes = 0) => {
+const setup = async (
+	t: ExecutionContext,
+	{ holdSubscribes = 0, rejectSubscribes = 0 } = {},
+) => {
 	const prefix = `extension-redis/subscriberReconnect-${crypto.randomUUID()}`;
 	const proxy = await newRedisProxy(t);
 
@@ -105,9 +112,17 @@ const setup = async (t: ExecutionContext, holdSubscribes = 0) => {
 
 			const subscribe = client.subscribe.bind(client);
 			client.subscribe = (...args: unknown[]) => {
-				if (!holdSubscribes || !reconnected) {
+				if (!reconnected) {
 					return subscribe(...args);
 				}
+
+				const callback = args.at(-1);
+				if (rejectSubscribes > 0 && typeof callback === "function") {
+					rejectSubscribes--;
+					queueMicrotask(() => callback(new Error("Command timed out")));
+					return;
+				}
+
 				setTimeout(() => subscribe(...args), holdSubscribes);
 			};
 
@@ -224,10 +239,9 @@ test("awareness is exchanged again after the subscriber reconnects to Redis", as
 test("replies sent before Redis confirms the re-subscribe are not lost", async (t) => {
 	// Redis confirms B's re-subscribes only 1s after B is ready again. A resync
 	// started on `ready` would get its replies before B listens again.
-	const { proxy, directA, append, reconnected, converged } = await setup(
-		t,
-		1000,
-	);
+	const { proxy, directA, append, reconnected, converged } = await setup(t, {
+		holdSubscribes: 1000,
+	});
 
 	await proxy.cut();
 	await append(directA, "A;");
@@ -240,10 +254,9 @@ test("replies sent before Redis confirms the re-subscribe are not lost", async (
 });
 
 test("instances converge when the connection drops again during the resync", async (t) => {
-	const { proxy, directA, append, reconnected, converged } = await setup(
-		t,
-		1000,
-	);
+	const { proxy, directA, append, reconnected, converged } = await setup(t, {
+		holdSubscribes: 1000,
+	});
 
 	await proxy.cut();
 	await append(directA, "A1;");
@@ -259,4 +272,20 @@ test("instances converge when the connection drops again during the resync", asy
 	t.true(await reconnected(), "B reconnects to Redis again");
 
 	t.true(await converged("A1;", "A2;"), "B catches up");
+});
+
+test("the resync is retried when a re-subscribe fails without a disconnect", async (t) => {
+	// The failure leaves the connection up, so no further `ready` follows.
+	const { proxy, directA, append, reconnected, converged } = await setup(t, {
+		rejectSubscribes: 2,
+	});
+
+	await proxy.cut();
+	await append(directA, "A;");
+	await sleep(500);
+
+	await proxy.restore();
+	t.true(await reconnected(), "B reconnects to Redis");
+
+	t.true(await converged("A;"), "B catches up");
 });

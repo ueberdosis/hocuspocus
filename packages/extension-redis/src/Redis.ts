@@ -201,8 +201,9 @@ export class Redis implements Extension {
 	private pendingPublishes = new Map<string, PendingPublish>();
 
 	/**
-	 * Bumped on every reconnect. A resync that finds a newer generation stops:
-	 * the connection it subscribed on is gone, and the newer one resyncs itself.
+	 * Bumped on every reconnect and on destroy. A resync that finds a newer
+	 * generation stops: the connection it subscribed on is gone, and the newer
+	 * one resyncs itself.
 	 */
 	private resyncGeneration = 0;
 
@@ -348,6 +349,10 @@ export class Redis implements Extension {
 	/**
 	 * Resync whenever the client is ready again after a reconnect. The first
 	 * `ready` is the initial connection, which `afterLoadDocument` covers.
+	 *
+	 * With Redis Cluster, ioredis replaces the dedicated subscriber connection
+	 * internally and emits no public event for it, so only reconnects of the
+	 * cluster client itself are covered there.
 	 */
 	private resyncOnReconnect(client: {
 		status: string;
@@ -379,71 +384,96 @@ export class Redis implements Extension {
 	/**
 	 * Catch up on everything published while a Redis client was disconnected.
 	 *
-	 * ioredis emits `ready` before Redis has acknowledged its automatic
-	 * re-SUBSCRIBE, and our SyncStep1 goes out on the other client, so the
-	 * replies could arrive before we listen again. Subscribing once more with a
-	 * callback is the barrier: the resync starts only after Redis has confirmed
-	 * the reply channel and every document channel on this connection.
+	 * A command can also fail while the connection stays up (e.g. with
+	 * `commandTimeout`), and then no further `ready` follows. So a failed
+	 * attempt is retried with backoff for as long as this generation is current
+	 * and both clients are ready; after a disconnect the next `ready` starts a
+	 * new generation instead.
 	 */
 	private async resyncAfterReconnect() {
 		const generation = ++this.resyncGeneration;
 
-		try {
-			this.replySubscription = this.subscribeToReplyChannel();
-			await this.replySubscription;
+		for (let attempt = 0; ; attempt++) {
+			try {
+				await this.resync(generation);
+				return;
+			} catch (error) {
+				if (
+					generation !== this.resyncGeneration ||
+					this.pub.status !== "ready" ||
+					this.sub.status !== "ready"
+				) {
+					return;
+				}
 
-			await Promise.all(
-				Array.from(this.documents.keys(), async (documentName) => {
-					await this.subscribeToDocument(documentName);
+				console.error(error);
+			}
 
-					// Unloaded while we were subscribing: undo, so the channel does
-					// not outlive the document.
-					if (!this.documents.has(documentName)) {
-						this.sub.unsubscribe(this.subKey(documentName), () => {});
-					}
-				}),
+			await new Promise((resolve) =>
+				setTimeout(resolve, Math.min(100 * 2 ** attempt, 5000)),
 			);
-		} catch {
-			// The connection dropped again; its next `ready` starts a new resync.
-			return;
+
+			if (generation !== this.resyncGeneration) {
+				return;
+			}
 		}
+	}
+
+	/**
+	 * ioredis emits `ready` before Redis has acknowledged its automatic
+	 * re-SUBSCRIBE, and our SyncStep1 goes out on the other client, so the
+	 * replies could arrive before we listen again. Subscribing once more with a
+	 * callback is the barrier: the state exchange starts only after Redis has
+	 * confirmed the reply channel and every document channel on this connection.
+	 */
+	private async resync(generation: number) {
+		this.replySubscription = this.subscribeToReplyChannel();
+		await this.replySubscription;
+
+		await Promise.all(
+			Array.from(this.documents.keys(), async (documentName) => {
+				await this.subscribeToDocument(documentName);
+
+				// Unloaded while we were subscribing: undo, so the channel does
+				// not outlive the document.
+				if (!this.documents.has(documentName)) {
+					this.sub.unsubscribe(this.subKey(documentName), () => {});
+				}
+			}),
+		);
 
 		// A newer reconnect happened meanwhile and runs its own resync.
 		if (generation !== this.resyncGeneration) {
 			return;
 		}
 
-		const publishes = Array.from(this.documents, ([documentName, document]) => {
-			const messages = [
-				// Peers answer with what we missed, followed by their own SyncStep1,
-				// which we answer with what they missed.
-				this.publishFirstSyncStep(documentName, document),
-				// Peers answer with their awareness states...
-				this.requestAwarenessFromOtherInstances(documentName),
-			];
+		await Promise.all(
+			Array.from(this.documents, ([documentName, document]) => {
+				const messages = [
+					// Peers answer with what we missed, followed by their own SyncStep1,
+					// which we answer with what they missed.
+					this.publishFirstSyncStep(documentName, document),
+					// Peers answer with their awareness states...
+					this.requestAwarenessFromOtherInstances(documentName),
+				];
 
-			// ...and learn ours.
-			if (document.awareness.getStates().size > 0) {
-				const message = new OutgoingMessage(
-					documentName,
-				).createAwarenessUpdateMessage(document.awareness);
+				// ...and learn ours.
+				if (document.awareness.getStates().size > 0) {
+					const message = new OutgoingMessage(
+						documentName,
+					).createAwarenessUpdateMessage(document.awareness);
 
-				messages.push(
-					this.pub.publish(
-						this.pubKey(documentName),
-						this.encodeMessage(message.toUint8Array()),
-					),
-				);
-			}
+					messages.push(
+						this.pub.publish(
+							this.pubKey(documentName),
+							this.encodeMessage(message.toUint8Array()),
+						),
+					);
+				}
 
-			return Promise.all(messages);
-		});
-
-		try {
-			await Promise.all(publishes);
-		} catch (error) {
-			console.error(error);
-		}
+				return Promise.all(messages);
+			}),
+		);
 	}
 
 	private encodeMessage(message: Uint8Array) {
@@ -973,6 +1003,9 @@ export class Redis implements Extension {
 	 * Kill the Redlock connection immediately.
 	 */
 	async onDestroy() {
+		// Stop any resync still retrying.
+		this.resyncGeneration++;
+
 		// Cancelled rather than flushed, because flushing could not achieve
 		// anything: a pending publish is a SyncStep1, i.e. a state vector, which
 		// only *asks* peers to reply. Our own changes reach them one round trip
