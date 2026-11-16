@@ -391,10 +391,11 @@ export class Redis implements Extension {
 	 * Catch up on everything published while a Redis client was disconnected.
 	 *
 	 * A command can also fail while the connection stays up (e.g. with
-	 * `commandTimeout`), and then no further `ready` follows. So a failed
-	 * attempt is retried with backoff for as long as this generation is current
-	 * and both clients are ready; after a disconnect the next `ready` starts a
-	 * new generation instead.
+	 * `commandTimeout` or a channel the ACL denies), and then no further `ready`
+	 * follows. So whatever failed is retried with backoff for as long as this
+	 * generation is current and both clients are ready; after a disconnect the
+	 * next `ready` starts a new generation instead. Documents are independent:
+	 * one that keeps failing does not hold back the others.
 	 */
 	private async resyncAfterReconnect() {
 		const generation = ++this.resyncGeneration;
@@ -407,15 +408,37 @@ export class Redis implements Extension {
 			this.pub.status === "ready" &&
 			this.sub.status === "ready";
 
+		let replySubscribed = false;
+		let pending = new Set(this.documents.keys());
+
 		for (let attempt = 0; ; attempt++) {
+			let errors: unknown[];
+
 			try {
-				await this.resync(generation);
-				return;
-			} catch (error) {
-				if (!shouldRetry()) {
+				// Replies to every SyncStep1 below arrive on the reply channel.
+				if (!replySubscribed) {
+					this.replySubscription = this.subscribeToReplyChannel();
+					await this.replySubscription;
+					replySubscribed = true;
+				}
+
+				const failed = await this.resyncDocuments(generation, pending);
+
+				if (failed.size === 0) {
 					return;
 				}
 
+				pending = new Set(failed.keys());
+				errors = Array.from(failed.values());
+			} catch (error) {
+				errors = [error];
+			}
+
+			if (!shouldRetry()) {
+				return;
+			}
+
+			for (const error of errors) {
 				console.error(error);
 			}
 
@@ -436,60 +459,73 @@ export class Redis implements Extension {
 	}
 
 	/**
+	 * Exchange state for each of the given documents that is still loaded, and
+	 * return the ones that failed, with their errors.
+	 *
 	 * ioredis emits `ready` before Redis has acknowledged its automatic
 	 * re-SUBSCRIBE, and our SyncStep1 goes out on the other client, so the
 	 * replies could arrive before we listen again. Subscribing once more with a
-	 * callback is the barrier: the state exchange starts only after Redis has
-	 * confirmed the reply channel and every document channel on this connection.
+	 * callback is the barrier: a document's state exchange starts only after
+	 * Redis has confirmed its channel on this connection.
 	 */
-	private async resync(generation: number) {
-		this.replySubscription = this.subscribeToReplyChannel();
-		await this.replySubscription;
+	private async resyncDocuments(
+		generation: number,
+		documentNames: Set<string>,
+	): Promise<Map<string, unknown>> {
+		const failed = new Map<string, unknown>();
 
 		await Promise.all(
-			Array.from(this.documents.keys(), async (documentName) => {
-				await this.subscribeToDocument(documentName);
+			Array.from(documentNames, async (documentName) => {
+				try {
+					if (!this.documents.has(documentName)) {
+						return;
+					}
 
-				// Unloaded while we were subscribing: undo, so the channel does
-				// not outlive the document.
-				if (!this.documents.has(documentName)) {
-					this.sub.unsubscribe(this.subKey(documentName), () => {});
+					await this.subscribeToDocument(documentName);
+
+					// Unloaded while we were subscribing: undo, so the channel does
+					// not outlive the document.
+					const document = this.documents.get(documentName);
+					if (!document) {
+						this.sub.unsubscribe(this.subKey(documentName), () => {});
+						return;
+					}
+
+					// A newer reconnect happened meanwhile and runs its own resync.
+					if (generation !== this.resyncGeneration) {
+						return;
+					}
+
+					const messages = [
+						// Peers answer with what we missed, followed by their own
+						// SyncStep1, which we answer with what they missed.
+						this.publishFirstSyncStep(documentName, document),
+						// Peers answer with their awareness states...
+						this.requestAwarenessFromOtherInstances(documentName),
+					];
+
+					// ...and learn ours.
+					if (document.awareness.getStates().size > 0) {
+						const message = new OutgoingMessage(
+							documentName,
+						).createAwarenessUpdateMessage(document.awareness);
+
+						messages.push(
+							this.pub.publish(
+								this.pubKey(documentName),
+								this.encodeMessage(message.toUint8Array()),
+							),
+						);
+					}
+
+					await Promise.all(messages);
+				} catch (error) {
+					failed.set(documentName, error);
 				}
 			}),
 		);
 
-		// A newer reconnect happened meanwhile and runs its own resync.
-		if (generation !== this.resyncGeneration) {
-			return;
-		}
-
-		await Promise.all(
-			Array.from(this.documents, ([documentName, document]) => {
-				const messages = [
-					// Peers answer with what we missed, followed by their own SyncStep1,
-					// which we answer with what they missed.
-					this.publishFirstSyncStep(documentName, document),
-					// Peers answer with their awareness states...
-					this.requestAwarenessFromOtherInstances(documentName),
-				];
-
-				// ...and learn ours.
-				if (document.awareness.getStates().size > 0) {
-					const message = new OutgoingMessage(
-						documentName,
-					).createAwarenessUpdateMessage(document.awareness);
-
-					messages.push(
-						this.pub.publish(
-							this.pubKey(documentName),
-							this.encodeMessage(message.toUint8Array()),
-						),
-					);
-				}
-
-				return Promise.all(messages);
-			}),
-		);
+		return failed;
 	}
 
 	private encodeMessage(message: Uint8Array) {

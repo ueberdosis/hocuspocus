@@ -75,10 +75,13 @@ const waitUntil = async (condition: () => boolean, timeout: number) => {
  * With `rejectSubscribes`, that many SUBSCRIBE calls with a callback after a
  * reconnect fail without being sent, like a `commandTimeout` that leaves the
  * connection up.
+ *
+ * With `denyDocument`, every such SUBSCRIBE to that document's channel fails,
+ * like a channel the ACL no longer permits.
  */
 const setup = async (
 	t: ExecutionContext,
-	{ holdSubscribes = 0, rejectSubscribes = 0 } = {},
+	{ holdSubscribes = 0, rejectSubscribes = 0, denyDocument = "" } = {},
 ) => {
 	const prefix = `extension-redis/subscriberReconnect-${crypto.randomUUID()}`;
 	const proxy = await newRedisProxy(t);
@@ -117,10 +120,19 @@ const setup = async (
 				}
 
 				const callback = args.at(-1);
-				if (rejectSubscribes > 0 && typeof callback === "function") {
-					rejectSubscribes--;
-					queueMicrotask(() => callback(new Error("Command timed out")));
-					return;
+				if (typeof callback === "function") {
+					if (denyDocument && args[0] === `${prefix}:${denyDocument}`) {
+						queueMicrotask(() =>
+							callback(new Error("NOPERM No permissions to access a channel")),
+						);
+						return;
+					}
+
+					if (rejectSubscribes > 0) {
+						rejectSubscribes--;
+						queueMicrotask(() => callback(new Error("Command timed out")));
+						return;
+					}
 				}
 
 				setTimeout(() => subscribe(...args), holdSubscribes);
@@ -288,4 +300,26 @@ test("the resync is retried when a re-subscribe fails without a disconnect", asy
 	t.true(await reconnected(), "B reconnects to Redis");
 
 	t.true(await converged("A;"), "B catches up");
+});
+
+test("one document that cannot re-subscribe does not hold back the others", async (t) => {
+	const { proxy, serverA, serverB, directA, append, reconnected, converged } =
+		await setup(t, { denyDocument: "denied" });
+
+	// Loaded on both instances, but B can never subscribe to it again.
+	const deniedA = await serverA.openDirectConnection("denied");
+	const deniedB = await serverB.openDirectConnection("denied");
+	t.teardown(async () => {
+		await deniedA.disconnect();
+		await deniedB.disconnect();
+	});
+
+	await proxy.cut();
+	await append(directA, "A;");
+	await sleep(500);
+
+	await proxy.restore();
+	t.true(await reconnected(), "B reconnects to Redis");
+
+	t.true(await converged("A;"), "B catches up on the other document");
 });
