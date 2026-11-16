@@ -207,6 +207,12 @@ export class Redis implements Extension {
 	 */
 	private resyncGeneration = 0;
 
+	/**
+	 * Ends the backoff wait of a retrying resync right away, so a newer
+	 * generation or `onDestroy` does not leave a pending timer behind.
+	 */
+	private cancelResyncRetry?: () => void;
+
 	public constructor(configuration: Partial<Configuration>) {
 		this.configuration = {
 			...this.configuration,
@@ -392,6 +398,7 @@ export class Redis implements Extension {
 	 */
 	private async resyncAfterReconnect() {
 		const generation = ++this.resyncGeneration;
+		this.cancelResyncRetry?.();
 
 		for (let attempt = 0; ; attempt++) {
 			try {
@@ -409,9 +416,15 @@ export class Redis implements Extension {
 				console.error(error);
 			}
 
-			await new Promise((resolve) =>
-				setTimeout(resolve, Math.min(100 * 2 ** attempt, 5000)),
-			);
+			await new Promise<void>((resolve) => {
+				const timer = setTimeout(resolve, Math.min(100 * 2 ** attempt, 5000));
+				// Calling a stale canceller later is harmless: the timer has fired
+				// and the promise is settled.
+				this.cancelResyncRetry = () => {
+					clearTimeout(timer);
+					resolve();
+				};
+			});
 
 			if (generation !== this.resyncGeneration) {
 				return;
@@ -1005,6 +1018,7 @@ export class Redis implements Extension {
 	async onDestroy() {
 		// Stop any resync still retrying.
 		this.resyncGeneration++;
+		this.cancelResyncRetry?.();
 
 		// Cancelled rather than flushed, because flushing could not achieve
 		// anything: a pending publish is a SyncStep1, i.e. a state vector, which
