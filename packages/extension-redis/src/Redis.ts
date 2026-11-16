@@ -400,16 +400,19 @@ export class Redis implements Extension {
 		const generation = ++this.resyncGeneration;
 		this.cancelResyncRetry?.();
 
+		// Checked after a failure and again after the backoff, since a client can
+		// disconnect while we wait.
+		const shouldRetry = () =>
+			generation === this.resyncGeneration &&
+			this.pub.status === "ready" &&
+			this.sub.status === "ready";
+
 		for (let attempt = 0; ; attempt++) {
 			try {
 				await this.resync(generation);
 				return;
 			} catch (error) {
-				if (
-					generation !== this.resyncGeneration ||
-					this.pub.status !== "ready" ||
-					this.sub.status !== "ready"
-				) {
+				if (!shouldRetry()) {
 					return;
 				}
 
@@ -426,7 +429,7 @@ export class Redis implements Extension {
 				};
 			});
 
-			if (generation !== this.resyncGeneration) {
+			if (!shouldRetry()) {
 				return;
 			}
 		}
