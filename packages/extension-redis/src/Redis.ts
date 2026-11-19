@@ -200,6 +200,19 @@ export class Redis implements Extension {
 	 */
 	private pendingPublishes = new Map<string, PendingPublish>();
 
+	/**
+	 * Bumped on every reconnect and on destroy. A resync that finds a newer
+	 * generation stops: the connection it subscribed on is gone, and the newer
+	 * one resyncs itself.
+	 */
+	private resyncGeneration = 0;
+
+	/**
+	 * Ends the backoff wait of a retrying resync right away, so a newer
+	 * generation or `onDestroy` does not leave a pending timer behind.
+	 */
+	private cancelResyncRetry?: () => void;
+
 	public constructor(configuration: Partial<Configuration>) {
 		this.configuration = {
 			...this.configuration,
@@ -225,6 +238,12 @@ export class Redis implements Extension {
 		}
 
 		this.sub.on("messageBuffer", this.handleIncomingMessage);
+
+		// ioredis reconnects on its own, but Redis pub/sub keeps no backlog:
+		// whatever was published while a client was disconnected is gone for
+		// good. Once a client is back, exchange state for every loaded document.
+		this.resyncOnReconnect(this.pub);
+		this.resyncOnReconnect(this.sub);
 
 		this.redlock = new Redlock([this.pub], {
 			retryCount: 0,
@@ -333,6 +352,182 @@ export class Redis implements Extension {
 		}
 	}
 
+	/**
+	 * Resync whenever the client is ready again after a reconnect. The first
+	 * `ready` is the initial connection, which `afterLoadDocument` covers.
+	 *
+	 * With Redis Cluster, ioredis replaces the dedicated subscriber connection
+	 * internally and emits no public event for it, so only reconnects of the
+	 * cluster client itself are covered there.
+	 */
+	private resyncOnReconnect(client: {
+		status: string;
+		on(event: "ready", listener: () => void): unknown;
+	}) {
+		let connectedBefore = client.status === "ready";
+
+		client.on("ready", () => {
+			if (connectedBefore) {
+				this.resyncAfterReconnect();
+			}
+			connectedBefore = true;
+		});
+	}
+
+	private subscribeToDocument(documentName: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			this.sub.subscribe(this.subKey(documentName), (error: any) => {
+				if (error) {
+					reject(error);
+					return;
+				}
+
+				resolve();
+			});
+		});
+	}
+
+	/**
+	 * Catch up on everything published while a Redis client was disconnected.
+	 *
+	 * A command can also fail while the connection stays up (e.g. with
+	 * `commandTimeout` or a channel the ACL denies), and then no further `ready`
+	 * follows. So whatever failed is retried with backoff for as long as this
+	 * generation is current and both clients are ready; after a disconnect the
+	 * next `ready` starts a new generation instead. Documents are independent:
+	 * one that keeps failing does not hold back the others.
+	 */
+	private async resyncAfterReconnect() {
+		const generation = ++this.resyncGeneration;
+		this.cancelResyncRetry?.();
+
+		// Checked after a failure and again after the backoff, since a client can
+		// disconnect while we wait.
+		const shouldRetry = () =>
+			generation === this.resyncGeneration &&
+			this.pub.status === "ready" &&
+			this.sub.status === "ready";
+
+		let replySubscribed = false;
+		let pending = new Set(this.documents.keys());
+
+		for (let attempt = 0; ; attempt++) {
+			let errors: unknown[];
+
+			try {
+				// Replies to every SyncStep1 below arrive on the reply channel.
+				if (!replySubscribed) {
+					this.replySubscription = this.subscribeToReplyChannel();
+					await this.replySubscription;
+					replySubscribed = true;
+				}
+
+				const failed = await this.resyncDocuments(generation, pending);
+
+				if (failed.size === 0) {
+					return;
+				}
+
+				pending = new Set(failed.keys());
+				errors = Array.from(failed.values());
+			} catch (error) {
+				errors = [error];
+			}
+
+			if (!shouldRetry()) {
+				return;
+			}
+
+			for (const error of errors) {
+				console.error(error);
+			}
+
+			await new Promise<void>((resolve) => {
+				const timer = setTimeout(resolve, Math.min(100 * 2 ** attempt, 5000));
+				// Calling a stale canceller later is harmless: the timer has fired
+				// and the promise is settled.
+				this.cancelResyncRetry = () => {
+					clearTimeout(timer);
+					resolve();
+				};
+			});
+
+			if (!shouldRetry()) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Exchange state for each of the given documents that is still loaded, and
+	 * return the ones that failed, with their errors.
+	 *
+	 * ioredis emits `ready` before Redis has acknowledged its automatic
+	 * re-SUBSCRIBE, and our SyncStep1 goes out on the other client, so the
+	 * replies could arrive before we listen again. Subscribing once more with a
+	 * callback is the barrier: a document's state exchange starts only after
+	 * Redis has confirmed its channel on this connection.
+	 */
+	private async resyncDocuments(
+		generation: number,
+		documentNames: Set<string>,
+	): Promise<Map<string, unknown>> {
+		const failed = new Map<string, unknown>();
+
+		await Promise.all(
+			Array.from(documentNames, async (documentName) => {
+				try {
+					if (!this.documents.has(documentName)) {
+						return;
+					}
+
+					await this.subscribeToDocument(documentName);
+
+					// Unloaded while we were subscribing: undo, so the channel does
+					// not outlive the document.
+					const document = this.documents.get(documentName);
+					if (!document) {
+						this.sub.unsubscribe(this.subKey(documentName), () => {});
+						return;
+					}
+
+					// A newer reconnect happened meanwhile and runs its own resync.
+					if (generation !== this.resyncGeneration) {
+						return;
+					}
+
+					const messages = [
+						// Peers answer with what we missed, followed by their own
+						// SyncStep1, which we answer with what they missed.
+						this.publishFirstSyncStep(documentName, document),
+						// Peers answer with their awareness states...
+						this.requestAwarenessFromOtherInstances(documentName),
+					];
+
+					// ...and learn ours.
+					if (document.awareness.getStates().size > 0) {
+						const message = new OutgoingMessage(
+							documentName,
+						).createAwarenessUpdateMessage(document.awareness);
+
+						messages.push(
+							this.pub.publish(
+								this.pubKey(documentName),
+								this.encodeMessage(message.toUint8Array()),
+							),
+						);
+					}
+
+					await Promise.all(messages);
+				} catch (error) {
+					failed.set(documentName, error);
+				}
+			}),
+		);
+
+		return failed;
+	}
+
 	private encodeMessage(message: Uint8Array) {
 		return Buffer.concat([this.messagePrefix, Buffer.from(message)]);
 	}
@@ -364,18 +559,9 @@ export class Redis implements Extension {
 			// first. Retries if an earlier SUBSCRIBE rejected while Redis was down.
 			await this.awaitReplySubscription();
 
-			await new Promise<void>((resolve, reject) => {
-				// On document creation the node will connect to pub and sub channels
-				// for the document.
-				this.sub.subscribe(this.subKey(documentName), (error: any) => {
-					if (error) {
-						reject(error);
-						return;
-					}
-
-					resolve();
-				});
-			});
+			// On document creation the node will connect to pub and sub channels
+			// for the document.
+			await this.subscribeToDocument(documentName);
 
 			await this.syncInitialStateFromPeers(documentName, document);
 		} catch (error) {
@@ -869,6 +1055,10 @@ export class Redis implements Extension {
 	 * Kill the Redlock connection immediately.
 	 */
 	async onDestroy() {
+		// Stop any resync still retrying.
+		this.resyncGeneration++;
+		this.cancelResyncRetry?.();
+
 		// Cancelled rather than flushed, because flushing could not achieve
 		// anything: a pending publish is a SyncStep1, i.e. a state vector, which
 		// only *asks* peers to reply. Our own changes reach them one round trip
