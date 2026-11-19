@@ -660,8 +660,14 @@ export class Hocuspocus<Context = any> {
 			// need sync check here as well, to avoid timing problems
 			if (!this.shouldUnloadDocument(document)) return;
 
-			// Re-check instance identity before delete (hooks / races may have replaced it)
-			if (this.documents.get(documentName) !== document) return;
+			// Re-check instance identity before delete (hooks / races may have replaced it).
+			// If the name no longer points at this instance, nothing can reach it any
+			// more, so destroy it. Leave the registered instance and the name's
+			// afterUnloadDocument alone.
+			if (this.documents.get(documentName) !== document) {
+				document.destroy();
+				return;
+			}
 
 			this.documents.delete(documentName);
 			document.destroy();
