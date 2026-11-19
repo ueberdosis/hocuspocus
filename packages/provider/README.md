@@ -44,7 +44,7 @@ new HocuspocusProvider({
 })
 ```
 
-If authentication fails while the socket stays open (for example, a short-lived token expired), call `provider.reauthenticate()` to send a fresh token and sync again without reconnecting. When `token` is a function, it is called again:
+If authentication fails while the socket stays open (for example, a short-lived token expired), call `provider.authenticate()` to send a fresh token and sync again without reconnecting. When `token` is a function, it is called again. You don't need to call `authenticate()` after creating the provider: it sends the token by itself when the socket opens.
 
 ```js
 let attempts = 0
@@ -55,7 +55,7 @@ const provider = new HocuspocusProvider({
   document: ydoc,
   token: () => fetchFreshToken(),
   onAuthenticationFailed() {
-    if (attempts++ < 3) provider.reauthenticate()
+    if (attempts++ < 3) provider.authenticate()
   },
   onAuthenticated() {
     attempts = 0

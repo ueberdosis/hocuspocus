@@ -560,7 +560,7 @@ export class HocuspocusProvider extends EventEmitter {
 	 * is already authenticated (for example when a delayed retry runs after an
 	 * earlier one succeeded).
 	 */
-	async reauthenticate() {
+	async authenticate() {
 		if (
 			!this._isAttached ||
 			this.isAuthenticated ||

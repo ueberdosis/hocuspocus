@@ -7,7 +7,7 @@ import {
 } from "../utils/index.ts";
 import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
-test("reauthenticate() sends a fresh token and syncs on the same socket", async (t) => {
+test("authenticate() sends a fresh token and syncs on the same socket", async (t) => {
 	const server = await newHocuspocus(t, {
 		async onAuthenticate({ token }) {
 			if (token !== "valid-token") {
@@ -37,7 +37,7 @@ test("reauthenticate() sends a fresh token and syncs on the same socket", async 
 			onAuthenticationFailed() {
 				authenticationFailedCount++;
 				socketAtFailure = socket.webSocket;
-				provider.reauthenticate();
+				provider.authenticate();
 			},
 			onSynced() {
 				resolve(provider);
@@ -55,7 +55,7 @@ test("reauthenticate() sends a fresh token and syncs on the same socket", async 
 	t.is(socket.webSocket, socketAtFailure);
 });
 
-test("reauthenticate() does nothing when the socket is not connected", async (t) => {
+test("authenticate() does nothing when the socket is not connected", async (t) => {
 	const server = await newHocuspocus(t);
 
 	let tokenCalls = 0;
@@ -72,13 +72,13 @@ test("reauthenticate() does nothing when the socket is not connected", async (t)
 		{ autoConnect: false },
 	);
 
-	await t.notThrowsAsync(() => provider.reauthenticate());
+	await t.notThrowsAsync(() => provider.authenticate());
 
 	t.is(tokenCalls, 0);
 	t.false(provider.isAuthenticated);
 });
 
-test("reauthenticate() keeps an authenticated provider as it is", async (t) => {
+test("authenticate() keeps an authenticated provider as it is", async (t) => {
 	const server = await newHocuspocus(t);
 
 	let tokenCalls = 0;
@@ -95,13 +95,13 @@ test("reauthenticate() keeps an authenticated provider as it is", async (t) => {
 	});
 	const callsAfterAuth = tokenCalls;
 
-	await provider.reauthenticate();
+	await provider.authenticate();
 
 	t.true(provider.isAuthenticated);
 	t.is(tokenCalls, callsAfterAuth);
 });
 
-test("reauthenticate() from authenticationFailed sends a token after a failed token refresh", async (t) => {
+test("authenticate() from authenticationFailed sends a token after a failed token refresh", async (t) => {
 	const syncedTokens: string[] = [];
 	const server = await newHocuspocus(t, {
 		async onTokenSync({ token }) {
@@ -124,7 +124,7 @@ test("reauthenticate() from authenticationFailed sends a token after a failed to
 		},
 		onAuthenticationFailed() {
 			authenticationFailedCount++;
-			provider.reauthenticate();
+			provider.authenticate();
 		},
 	});
 
@@ -135,7 +135,7 @@ test("reauthenticate() from authenticationFailed sends a token after a failed to
 
 	// The server asks an authenticated provider for a token (the provider
 	// answers with sendToken()) and the token function throws, so the provider
-	// reports authenticationFailed. A listener that calls reauthenticate()
+	// reports authenticationFailed. A listener that calls authenticate()
 	// right away must get through and send a fresh token.
 	failNextToken = true;
 	await provider.sendToken();
