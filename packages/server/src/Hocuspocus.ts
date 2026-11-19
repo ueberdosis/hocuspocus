@@ -226,6 +226,7 @@ export class Hocuspocus<Context = any> {
 			this.hooks.bind(this),
 			{
 				timeout: this.configuration.timeout,
+				authenticationTimeout: this.configuration.authenticationTimeout,
 				maxUnauthenticatedQueueSize:
 					this.configuration.maxUnauthenticatedQueueSize,
 				maxUnauthenticatedQueueMessages:

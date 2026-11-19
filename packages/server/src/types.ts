@@ -252,6 +252,11 @@ export interface Configuration<Context = any>
 	 */
 	timeout: number;
 	/**
+	 * Maximum time in ms a connection may stay open without authenticating any document.
+	 * Defaults to `timeout`. Lets unauthenticated sockets be closed sooner than idle clients.
+	 */
+	authenticationTimeout?: number;
+	/**
 	 * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
 	 * Otherwise every single update would be persisted.
 	 */
