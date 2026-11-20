@@ -73,6 +73,8 @@ export class Hocuspocus<Context = any> {
 	loadingDocuments: Map<string, Promise<Document>> = new Map();
 	unloadingDocuments: Map<string, Promise<void>> = new Map();
 
+	clientConnections: Set<ClientConnection> = new Set();
+
 	documents: Map<string, Document> = new Map();
 
 	server?: Server;
@@ -205,6 +207,17 @@ export class Hocuspocus<Context = any> {
 				connection.close(ResetConnection);
 			});
 		});
+
+		if (documentName) return;
+
+		// Sockets that have not requested a document yet, are still
+		// authenticating, or are waiting for their document to load have no
+		// `Connection` for it, so the loop above misses them.
+		this.clientConnections.forEach((clientConnection) => {
+			if (clientConnection.hasPendingDocuments()) {
+				clientConnection.forceClose(ResetConnection);
+			}
+		});
 	}
 
 	/**
@@ -238,6 +251,10 @@ export class Hocuspocus<Context = any> {
 			},
 			defaultContext,
 		);
+		this.clientConnections.add(clientConnection);
+		clientConnection.onSocketClosed(() => {
+			this.clientConnections.delete(clientConnection);
+		});
 		clientConnection.onClose(
 			(document: Document, hookPayload: onDisconnectPayload) => {
 				// Check if there are still no connections to the document, as these hooks
