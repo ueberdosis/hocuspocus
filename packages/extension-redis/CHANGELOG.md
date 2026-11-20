@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.9.0](https://github.com/ueberdosis/hocuspocus/compare/v4.8.0...v4.9.0) (2026-11-20)
+
+
+### Bug Fixes
+
+* **extension-redis:** resync loaded documents after a Redis reconnect ([#1217](https://github.com/ueberdosis/hocuspocus/issues/1217)) ([4c3d930](https://github.com/ueberdosis/hocuspocus/commit/4c3d9303808439ec9133adca7f5a93970beb129f))
+
+
+
+
+
 # [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
 
 

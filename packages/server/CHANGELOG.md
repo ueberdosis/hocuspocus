@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.9.0](https://github.com/ueberdosis/hocuspocus/compare/v4.8.0...v4.9.0) (2026-11-20)
+
+
+### Bug Fixes
+
+* **server:** awareness clients leave with their connection, no scratch awareness without a hook ([#1198](https://github.com/ueberdosis/hocuspocus/issues/1198)) ([5b97c02](https://github.com/ueberdosis/hocuspocus/commit/5b97c02464426e6b9e930be92f62db72857ce47a))
+* **server:** don't broadcast the state applied while a document is loading ([#1206](https://github.com/ueberdosis/hocuspocus/issues/1206)) ([265c11a](https://github.com/ueberdosis/hocuspocus/commit/265c11aa742cbb9bbe229211c15267261c91aec5)), closes [#1204](https://github.com/ueberdosis/hocuspocus/issues/1204)
+* unloadDocument only deletes matching document instance ([#1174](https://github.com/ueberdosis/hocuspocus/issues/1174)) ([ccb097f](https://github.com/ueberdosis/hocuspocus/commit/ccb097f057a101816bbeeafa8834168b2281be7e)), closes [#1169](https://github.com/ueberdosis/hocuspocus/issues/1169)
+
+
+### Performance Improvements
+
+* **server:** decode awareness messages into one reused scratch Awareness ([#1215](https://github.com/ueberdosis/hocuspocus/issues/1215)) ([473bb7b](https://github.com/ueberdosis/hocuspocus/commit/473bb7bb426e1243ae66ba80c93a411a232a5b8e))
+
+
+
+
+
 # [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
 
 

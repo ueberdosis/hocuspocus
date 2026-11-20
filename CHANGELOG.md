@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.9.0](https://github.com/ueberdosis/hocuspocus/compare/v4.8.0...v4.9.0) (2026-11-20)
+
+
+### Bug Fixes
+
+* **extension-redis:** resync loaded documents after a Redis reconnect ([#1217](https://github.com/ueberdosis/hocuspocus/issues/1217)) ([4c3d930](https://github.com/ueberdosis/hocuspocus/commit/4c3d9303808439ec9133adca7f5a93970beb129f))
+* **playground:** reject invalid webhook signatures in the example receiver ([#1203](https://github.com/ueberdosis/hocuspocus/issues/1203)) ([576fa10](https://github.com/ueberdosis/hocuspocus/commit/576fa1064742cb18018b00e12da804285050ce84))
+* **provider:** emit close on the forced 4408 close ([#1208](https://github.com/ueberdosis/hocuspocus/issues/1208)) ([9b73a00](https://github.com/ueberdosis/hocuspocus/commit/9b73a00435ac1c212a9353793b8e82fafe70fd1c))
+* **server:** awareness clients leave with their connection, no scratch awareness without a hook ([#1198](https://github.com/ueberdosis/hocuspocus/issues/1198)) ([5b97c02](https://github.com/ueberdosis/hocuspocus/commit/5b97c02464426e6b9e930be92f62db72857ce47a))
+* **server:** don't broadcast the state applied while a document is loading ([#1206](https://github.com/ueberdosis/hocuspocus/issues/1206)) ([265c11a](https://github.com/ueberdosis/hocuspocus/commit/265c11aa742cbb9bbe229211c15267261c91aec5)), closes [#1204](https://github.com/ueberdosis/hocuspocus/issues/1204)
+* unloadDocument only deletes matching document instance ([#1174](https://github.com/ueberdosis/hocuspocus/issues/1174)) ([ccb097f](https://github.com/ueberdosis/hocuspocus/commit/ccb097f057a101816bbeeafa8834168b2281be7e)), closes [#1169](https://github.com/ueberdosis/hocuspocus/issues/1169)
+
+
+### Performance Improvements
+
+* **server:** decode awareness messages into one reused scratch Awareness ([#1215](https://github.com/ueberdosis/hocuspocus/issues/1215)) ([473bb7b](https://github.com/ueberdosis/hocuspocus/commit/473bb7bb426e1243ae66ba80c93a411a232a5b8e))
+
+
+
+
+
 # [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
 
 

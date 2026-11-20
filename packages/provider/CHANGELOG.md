@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.9.0](https://github.com/ueberdosis/hocuspocus/compare/v4.8.0...v4.9.0) (2026-11-20)
+
+
+### Bug Fixes
+
+* **provider:** emit close on the forced 4408 close ([#1208](https://github.com/ueberdosis/hocuspocus/issues/1208)) ([9b73a00](https://github.com/ueberdosis/hocuspocus/commit/9b73a00435ac1c212a9353793b8e82fafe70fd1c))
+
+
+
+
+
 # [4.8.0](https://github.com/ueberdosis/hocuspocus/compare/v4.7.1...v4.8.0) (2026-10-28)
 
 **Note:** Version bump only for package @hocuspocus/provider
