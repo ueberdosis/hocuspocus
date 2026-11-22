@@ -401,11 +401,14 @@ class Session implements WebSocketLike {
 		}
 
 		let text = this.pendingText;
-		for (const entry of this.outbox) {
-			if (entry.seq > this.written) {
-				text += `id: ${entry.seq}\ndata: ${encodeMessage(entry.data)}\n\n`;
-				this.written = entry.seq;
-			}
+		// Sequence numbers in the outbox are contiguous, so the first unwritten
+		// entry is found by arithmetic; written entries wait there for their ack.
+		const first = this.outbox[0];
+		const start = first ? Math.max(0, this.written - first.seq + 1) : 0;
+		for (let index = start; index < this.outbox.length; index++) {
+			const entry = this.outbox[index];
+			text += `id: ${entry.seq}\ndata: ${encodeMessage(entry.data)}\n\n`;
+			this.written = entry.seq;
 		}
 		if (this.closeEvent) {
 			text += `event: ${HttpTransportEvent.Close}\ndata: ${JSON.stringify(this.closeEvent)}\n\n`;
