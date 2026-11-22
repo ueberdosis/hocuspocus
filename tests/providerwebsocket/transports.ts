@@ -4,9 +4,9 @@ import {
 } from "@hocuspocus/provider";
 import test from "ava";
 import {
-	newHocuspocus,
 	newHocuspocusProvider,
 	newHocuspocusProviderWebsocket,
+	newHocuspocusWithHttpFallback,
 	newHttpProxy,
 	sleep,
 	waitForSynced,
@@ -106,7 +106,7 @@ const proxyCases = [
 
 for (const { eventStreams, expected } of proxyCases) {
 	test(`blocked WebSockets, event streams ${eventStreams}: connects over ${expected}`, async (t) => {
-		const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+		const hocuspocus = await newHocuspocusWithHttpFallback(t);
 		const proxy = await newHttpProxy(t, hocuspocus, { eventStreams });
 		const provider = newHocuspocusProvider(
 			t,
@@ -121,7 +121,7 @@ for (const { eventStreams, expected } of proxyCases) {
 }
 
 test("a WebSocket that works stays the transport", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	let closed = false;
 	const provider = newHocuspocusProvider(
 		t,
@@ -148,7 +148,7 @@ test("a WebSocket that works stays the transport", async (t) => {
 });
 
 test("a WebSocket nothing is sent through is not taken for a broken one", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	let closed = false;
 	// Without a provider attached, neither side has anything to say.
 	const websocketProvider = newHocuspocusProviderWebsocket(t, hocuspocus, {
@@ -171,7 +171,7 @@ test("a WebSocket nothing is sent through is not taken for a broken one", async 
 });
 
 test("a WebSocket that never opens falls back to sse", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const provider = newHocuspocusProvider(
 		t,
 		hocuspocus,
@@ -184,7 +184,7 @@ test("a WebSocket that never opens falls back to sse", async (t) => {
 });
 
 test("falling back is part of one connection attempt", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const sockets = counting(ClosingWebSocket);
 	let maxAttemptsFailed = false;
 	const provider = newHocuspocusProvider(
@@ -208,7 +208,7 @@ test("falling back is part of one connection attempt", async (t) => {
 });
 
 test("a transport that failed is not tried again when the connection drops", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const sockets = counting(NeverOpeningWebSocket);
 	const provider = newHocuspocusProvider(
 		t,
@@ -241,7 +241,7 @@ test("a transport that failed is not tried again when the connection drops", asy
 });
 
 test("disconnect() while the WebSocket is connecting stops the fallback", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const proxy = await newHttpProxy(t, hocuspocus);
 	const sockets = counting(NeverOpeningWebSocket);
 	const provider = newHocuspocusProvider(
@@ -265,7 +265,7 @@ test("disconnect() while the WebSocket is connecting stops the fallback", async 
 });
 
 test("a WebSocket closed by disconnect() while connecting is tried first again on connect()", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const sockets = counting(AbortedWebSocket);
 	const { websocketProvider } = newHocuspocusProvider(
 		t,
@@ -285,7 +285,7 @@ test("a WebSocket closed by disconnect() while connecting is tried first again o
 });
 
 test("a WebSocket that opens but delivers nothing falls back to sse", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const provider = newHocuspocusProvider(
 		t,
 		hocuspocus,
@@ -302,7 +302,7 @@ test("a WebSocket that opens but delivers nothing falls back to sse", async (t) 
 });
 
 test("a WebSocket that opens but delivers nothing does not lock out HTTP transports that failed once", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const proxy = await newHttpProxy(t, hocuspocus);
 	const sockets = counting(SwallowingWebSocket);
 	// The HTTP transports do not get through either, at first.

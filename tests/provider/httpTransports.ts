@@ -1,8 +1,8 @@
 import test from "ava";
 import * as Y from "yjs";
 import {
-	newHocuspocus,
 	newHocuspocusProvider,
+	newHocuspocusWithHttpFallback,
 	newHttpProxy,
 	sleep,
 	waitForSynced,
@@ -11,7 +11,7 @@ import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 for (const transport of ["sse", "polling"] as const) {
 	test(`${transport}: syncs changes in both directions`, async (t) => {
-		const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+		const hocuspocus = await newHocuspocusWithHttpFallback(t);
 		const provider = newHocuspocusProvider(
 			t,
 			hocuspocus,
@@ -45,8 +45,7 @@ for (const transport of ["sse", "polling"] as const) {
 	});
 
 	test(`${transport}: an authentication timeout reaches the provider as 4408`, async (t) => {
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			authenticationTimeout: 300,
 			onAuthenticate: () => new Promise(() => {}),
 		});
@@ -66,8 +65,7 @@ for (const transport of ["sse", "polling"] as const) {
 	});
 
 	test(`${transport}: a session without traffic stays open`, async (t) => {
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			timeout: 1000,
 		});
 		let closed = false;
@@ -93,8 +91,7 @@ for (const transport of ["sse", "polling"] as const) {
 
 	test(`${transport}: a downstream response that gets lost is sent again`, async (t) => {
 		let disconnects = 0;
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			async onDisconnect() {
 				disconnects += 1;
 			},
@@ -133,8 +130,7 @@ for (const transport of ["sse", "polling"] as const) {
 
 	test(`${transport}: a batch whose response gets lost is delivered once`, async (t) => {
 		const received: string[] = [];
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			async onStateless({ payload }) {
 				received.push(payload);
 			},
@@ -174,8 +170,7 @@ for (const transport of ["sse", "polling"] as const) {
 
 	test(`${transport}: messages arrive in order, batched while a POST is in flight`, async (t) => {
 		const received: string[] = [];
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			async onStateless({ payload }) {
 				received.push(payload);
 			},
@@ -214,8 +209,7 @@ for (const transport of ["sse", "polling"] as const) {
 
 	test(`${transport}: disconnect() ends the session on the server at once`, async (t) => {
 		let disconnects = 0;
-		const hocuspocus = await newHocuspocus(t, {
-			httpFallback: true,
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 			async onDisconnect() {
 				disconnects += 1;
 			},
@@ -237,7 +231,7 @@ for (const transport of ["sse", "polling"] as const) {
 
 test("sse: messages are split over POSTs of at most maxPayload, a message over it closes with 1009", async (t) => {
 	const received: string[] = [];
-	const hocuspocus = await newHocuspocus(t, {
+	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 		httpFallback: { maxPayload: 1000 },
 		async onStateless({ payload }) {
 			received.push(payload);
@@ -272,7 +266,7 @@ test("sse: messages are split over POSTs of at most maxPayload, a message over i
 });
 
 test("sse: an event stream that arrives a few bytes at a time is put together", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const proxy = await newHttpProxy(t, hocuspocus, { eventStreams: "trickle" });
 	// About two thousand pieces, with every line and event split somewhere.
 	const text = "The quick brown fox jumps over the lazy dog. ".repeat(40);
@@ -292,7 +286,7 @@ test("sse: an event stream that arrives a few bytes at a time is put together", 
 });
 
 test("polling: a server that stops serving the transports is not flooded with requests", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	const proxy = await newHttpProxy(t, hocuspocus);
 	const codes: number[] = [];
 	const provider = newHocuspocusProvider(
@@ -319,8 +313,7 @@ test("polling: a server that stops serving the transports is not flooded with re
 
 test("sse: a read-only session receives changes and sends stateless messages, but cannot write", async (t) => {
 	const received: string[] = [];
-	const hocuspocus = await newHocuspocus(t, {
-		httpFallback: true,
+	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
 		async onAuthenticate({ connectionConfig }) {
 			connectionConfig.readOnly = true;
 		},
@@ -355,7 +348,7 @@ test("sse: a read-only session receives changes and sends stateless messages, bu
 });
 
 test("sse: a reconnect only transfers the difference", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const hocuspocus = await newHocuspocusWithHttpFallback(t);
 	// Keeps the document loaded while the provider is away.
 	const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
 	t.teardown(() => direct.disconnect());
