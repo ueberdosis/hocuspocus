@@ -68,7 +68,7 @@ export interface HttpFallbackSessionOptions {
 	/**
 	 * Largest POST body the server accepts; the client is told on open. A
 	 * backlog behind a response on its way that is larger than both this and
-	 * the response means the client falls behind.
+	 * the messages in that response means the client falls behind.
 	 */
 	maxPayload: number;
 	/**
@@ -97,13 +97,15 @@ interface Downstream {
 	interval?: ReturnType<typeof setInterval>;
 	/**
 	 * The text on its way to the client and how much of it was enqueued.
-	 * `upTo` is the highest message id written once it was encoded, `closes`
-	 * tells whether it ends with the close event.
+	 * `upTo` is the highest message id written once it was encoded,
+	 * `messageBytes` the base64 length of the messages in it, `closes` tells
+	 * whether it ends with the close event.
 	 */
 	pending?: {
 		bytes: Uint8Array;
 		offset: number;
 		upTo: number;
+		messageBytes: number;
 		closes: boolean;
 	};
 }
@@ -126,7 +128,7 @@ interface Downstream {
  * option, and a client that takes nothing for that long while messages wait
  * for it is closed as well: the time a slow client spends downloading does
  * not count. A client that reads slower than its documents change is closed
- * once its backlog has outgrown the response on its way, and `maxPayload`,
+ * once its backlog has outgrown the messages on their way, and `maxPayload`,
  * for that long.
  */
 export class HttpFallbackSession implements WebSocketLike {
@@ -246,8 +248,9 @@ export class HttpFallbackSession implements WebSocketLike {
 	 * acknowledgement. One the client has not taken yet waits for the client
 	 * to take it, and every slice the client takes is progress, so a slow
 	 * download does not count. While a text is on its way, though, what waits
-	 * behind it must not outgrow both the text and `maxPayload`: a client
-	 * slower than its documents change falls further behind with every text.
+	 * behind it must not outgrow both the messages in the text and
+	 * `maxPayload`: a client slower than its documents change falls further
+	 * behind with every text.
 	 */
 	private fallenBehind(now: number): boolean {
 		if (this.outbox.length === 0) {
@@ -265,13 +268,15 @@ export class HttpFallbackSession implements WebSocketLike {
 
 		// Everything waiting is written to a text as soon as there is no other
 		// on its way, so the backlog is younger than the text it waits behind.
+		// Both sides count messages without their framing, which can be as long
+		// as a small message and would hide a client that falls behind slowly.
 		const pending = this.downstream?.pending;
 		const next = this.written - this.acked;
 		return (
 			pending !== undefined &&
 			next < this.outbox.length &&
 			now - this.waitingSince[next] > timeout &&
-			this.backlog > Math.max(maxPayload, pending.bytes.length)
+			this.backlog > Math.max(maxPayload, pending.messageBytes)
 		);
 	}
 
@@ -443,12 +448,14 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 
 		let text = this.control;
+		let messageBytes = 0;
 		for (
 			let index = this.written - this.acked;
 			index < this.outbox.length;
 			index += 1
 		) {
 			this.written += 1;
+			messageBytes += this.outbox[index].length;
 			text += `id: ${this.written}\ndata: ${this.outbox[index]}\n\n`;
 		}
 		this.backlog = 0;
@@ -464,6 +471,7 @@ export class HttpFallbackSession implements WebSocketLike {
 			bytes: textEncoder.encode(text),
 			offset: 0,
 			upTo: this.written,
+			messageBytes,
 			closes: this.closeEvent !== null,
 		};
 		this.feed(downstream);

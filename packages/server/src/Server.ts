@@ -41,7 +41,7 @@ export interface ServerConfiguration<Context = any>
 	 *   request that opens a session, not for the requests of an open session.
 	 * - `timeout` also bounds how long a client may leave a delivered message
 	 *   unacknowledged, take nothing while messages wait for it, or keep a
-	 *   backlog larger than `maxPayload` and the response on its way, before
+	 *   backlog larger than `maxPayload` and the messages on their way, before
 	 *   its session is closed with 4408; the time a slow client spends
 	 *   downloading does not count. Resuming a cut stream needs it to be
 	 *   longer than `heartbeatInterval` plus the provider's `connectTimeout`.

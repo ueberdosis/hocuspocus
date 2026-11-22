@@ -384,6 +384,42 @@ test("a client that reads slower than its document changes is closed with 4408",
 	t.regex(text, /\n\nevent: hp-close\ndata: \{"code":4408,[^\n]*\n\n$/);
 });
 
+test("a client that falls behind on small messages is closed with 4408", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: { maxPayload: 1000 },
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("small-doc")]);
+	const cursor = await settle(session);
+	const document = hocuspocus.documents.get("small-doc")!;
+	const burst = (count: number) => {
+		for (let index = 0; index < count; index += 1) {
+			document.broadcastStateless("z");
+		}
+	};
+
+	// Eight slices of messages that are about as long as their framing.
+	// While the client takes them, half as much again arrives: more than it
+	// takes, but less than it takes framing included.
+	burst(14_000);
+	const reader = (await session.poll(cursor)).body!.getReader();
+	const decoder = new TextDecoder();
+	let text = "";
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+		text += decoder.decode(value, { stream: true });
+		burst(3_000);
+		await session.ping(cursor);
+		await sleep(400);
+	}
+
+	t.regex(text, /\n\nevent: hp-close\ndata: \{"code":4408,[^\n]*\n\n$/);
+});
+
 test("a session that closes while a long text is on its way sends the close event after it", async (t) => {
 	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: true,
