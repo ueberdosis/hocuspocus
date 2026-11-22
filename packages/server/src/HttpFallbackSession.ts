@@ -127,9 +127,10 @@ interface Downstream {
  * message the client took has to be acknowledged within the `timeout`
  * option, and a client that takes nothing for that long while messages wait
  * for it is closed as well: the time a slow client spends downloading does
- * not count. A client that reads slower than its documents change is closed
- * once its backlog has outgrown the messages on their way, and `maxPayload`,
- * for that long.
+ * not count, unless a proxy on the way buffers whole responses and so takes
+ * them at once. A client that reads slower than its documents change is
+ * closed once its backlog has outgrown the messages on their way, and
+ * `maxPayload`, for that long.
  */
 export class HttpFallbackSession implements WebSocketLike {
 	readonly key: string;
@@ -398,10 +399,14 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 
 		return new Response(stream, {
-			headers:
-				mode === "sse"
-					? { "Content-Type": "text/event-stream", "X-Accel-Buffering": "no" }
-					: { "Content-Type": "text/plain; charset=utf-8" },
+			headers: {
+				"Content-Type":
+					mode === "sse" ? "text/event-stream" : "text/plain; charset=utf-8",
+				// nginx buffers responses unless told not to: an event stream would
+				// not stream, and a poll would be taken at once, whatever the speed
+				// of the client, so its download would count against `timeout`.
+				"X-Accel-Buffering": "no",
+			},
 		});
 	}
 
