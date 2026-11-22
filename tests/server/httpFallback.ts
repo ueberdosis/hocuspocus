@@ -798,6 +798,26 @@ test("a request without hp_sid is left to the server, whatever its URL", async (
 	t.is(await response.text(), "Welcome to Hocuspocus!");
 });
 
+test("event streams and polls ask nginx not to buffer them", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	// Through the Node.js server, as a proxy in front of it sees them.
+	const open = (transport: string) =>
+		fetch(
+			`${hocuspocus.server!.httpURL}/?hp_transport=${transport}&hp_sid=${randomUUID()}`,
+		);
+
+	// Buffered, an event stream would not stream, and a poll would be taken at
+	// once, whatever the speed of the client, so its download would count
+	// against the timeout.
+	const stream = await open("sse");
+	t.is(stream.headers.get("x-accel-buffering"), "no");
+	await stream.body?.cancel();
+
+	const poll = await open("polling");
+	t.is(poll.headers.get("x-accel-buffering"), "no");
+	t.regex(await poll.text(), /event: hp-open\n/);
+});
+
 test("a transport request with a malformed Host header gets 400", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const { port } = hocuspocus.server!.address;
