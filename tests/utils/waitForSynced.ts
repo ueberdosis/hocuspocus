@@ -13,13 +13,10 @@ export const waitForSynced = async (
 	const deadline = Date.now() + timeout;
 	while (!provider.isSynced) {
 		if (Date.now() > deadline) {
-			const websocketProvider = provider.configuration.websocketProvider;
-			// Private; read for the failure message only.
-			const { failedTransports } = websocketProvider as unknown as {
-				failedTransports: Map<string, number>;
-			};
+			const { status, transport, webSocket } =
+				provider.configuration.websocketProvider;
 			throw new Error(
-				`Not synced after ${timeout} ms: status ${websocketProvider.status}, transport ${websocketProvider.transport}, socket readyState ${websocketProvider.webSocket?.readyState}, failed transports ${JSON.stringify([...failedTransports.keys()])}`,
+				`Not synced after ${timeout} ms: status ${status}, transport ${transport}, socket readyState ${webSocket?.readyState}`,
 			);
 		}
 		await sleep(50);

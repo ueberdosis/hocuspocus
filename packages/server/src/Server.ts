@@ -39,9 +39,10 @@ export interface ServerConfiguration<Context = any>
 	 *   cookie).
 	 * - `onUpgrade` hooks do not run for HTTP sessions. `onRequest` runs for the
 	 *   request that opens a session, not for the requests of an open session.
-	 * - Resuming a cut stream needs `timeout` to be longer than
-	 *   `heartbeatInterval` plus the provider's `connectTimeout`; otherwise a cut
-	 *   ends in a reconnect.
+	 * - `timeout` also is the time a message has to reach its client and be
+	 *   acknowledged. Resuming a cut stream needs it to be longer than
+	 *   `heartbeatInterval` plus the provider's `connectTimeout`; large
+	 *   documents on slow connections need more.
 	 */
 	httpFallback?: boolean | Partial<HttpFallbackConfiguration>;
 }
@@ -157,23 +158,22 @@ export class Server<Context = any> {
 		response: ServerResponse,
 	) => {
 		try {
-			const transportRequest = this.httpFallback?.matches(request) ?? false;
+			const fallback = this.httpFallback?.matches(request)
+				? this.httpFallback
+				: undefined;
 
-			// Requests of an open session carry its key and skip the hooks, as
-			// WebSocket frames do.
-			if (transportRequest && request.method !== "GET") {
-				await this.httpFallback?.handleNodeRequest(request, response);
-				return;
+			// The requests of an open session carry its key and skip the hook, as
+			// WebSocket frames do; the request that opens one is a GET.
+			if (!fallback || request.method === "GET") {
+				await this.hocuspocus.hooks("onRequest", {
+					request,
+					response,
+					instance: this.hocuspocus,
+				});
 			}
 
-			await this.hocuspocus.hooks("onRequest", {
-				request,
-				response,
-				instance: this.hocuspocus,
-			});
-
-			if (transportRequest) {
-				await this.httpFallback?.handleNodeRequest(request, response);
+			if (fallback) {
+				await fallback.handleNodeRequest(request, response);
 				return;
 			}
 

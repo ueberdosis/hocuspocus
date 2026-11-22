@@ -1,22 +1,26 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 
-// While waiting for `drain`, how often the response's write buffer is sampled.
-// A buffer that did not shrink between two samples belongs to a client that
+// A response body is written in slices of at most this size, and the client
+// has WRITE_TIMEOUT to take each of them. `drain` only reports whole writes: a
+// large message written in one piece could not be told from a client that
 // stopped reading.
-const DRAIN_STALL_TIMEOUT = 10_000;
+const WRITE_SLICE = 64 * 1024;
+const WRITE_TIMEOUT = 30_000;
 
 // How long an ended response may take to flush before its socket is destroyed.
 const END_DESTROY_DELAY = 5_000;
 
-// `Readable.toWeb` exists since Node 17; the repo's @types/node predates it.
+// `Readable.toWeb` exists since Node 17. The type check at the repository
+// root resolves `node:stream` from @types/node 16, which does not declare it.
 const ReadableWithToWeb = Readable as unknown as {
 	toWeb(readable: Readable): ReadableStream<Uint8Array>;
 };
 
 /**
  * Convert a Node.js request into a web `Request`. The body is streamed, not
- * buffered. Throws on a malformed `Host` header.
+ * buffered. Throws on a malformed `Host` header and on a method the fetch API
+ * refuses.
  */
 export function toWebRequest(request: IncomingMessage): Request {
 	const { socket } = request;
@@ -66,34 +70,39 @@ export async function writeWebResponse(
 		return;
 	}
 
-	const headers: Record<string, string> = {};
+	// A flat list of names and values keeps headers that occur more than once.
+	const headers: string[] = [];
 	webResponse.headers.forEach((value, name) => {
-		headers[name] = value;
+		headers.push(name, value);
 	});
 	response.writeHead(webResponse.status, headers);
 
-	if (!webResponse.body) {
-		response.end();
-		return;
-	}
-
-	const reader = webResponse.body.getReader();
+	const reader = webResponse.body?.getReader();
 	let closed = false;
 	response.once("close", () => {
 		closed = true;
-		reader.cancel().catch(() => {});
+		reader?.cancel().catch(() => {});
 	});
 
-	while (!closed) {
+	while (reader && !closed) {
 		const { done, value } = await reader.read();
-		if (done || closed) {
+		if (done) {
 			break;
 		}
 
-		if (!response.write(value) && !(await waitForDrain(response))) {
-			reader.cancel().catch(() => {});
-			response.destroy();
-			return;
+		for (
+			let offset = 0;
+			offset < value.byteLength && !closed;
+			offset += WRITE_SLICE
+		) {
+			const taken =
+				response.write(value.subarray(offset, offset + WRITE_SLICE)) ||
+				(await waitForDrain(response));
+			if (!taken) {
+				// The client stopped reading; `close` cancels the body.
+				response.destroy();
+				return;
+			}
 		}
 	}
 
@@ -103,37 +112,27 @@ export async function writeWebResponse(
 
 	response.end();
 	const timer = setTimeout(() => response.destroy(), END_DESTROY_DELAY);
-	timer.unref?.();
+	timer.unref();
 	response.once("close", () => clearTimeout(timer));
 }
 
 /**
- * Resolve once the response drained or closed (true), or with false once its
- * write buffer stopped shrinking.
+ * Resolves with true once the response drained or closed, with false when it
+ * did neither within WRITE_TIMEOUT.
  */
 function waitForDrain(response: ServerResponse): Promise<boolean> {
-	const { promise, resolve } = Promise.withResolvers<boolean>();
-	let previousLength = response.writableLength;
+	return new Promise((resolve) => {
+		const settle = (drained: boolean) => {
+			clearTimeout(timer);
+			response.off("drain", onDrain);
+			response.off("close", onDrain);
+			resolve(drained);
+		};
+		const onDrain = () => settle(true);
+		const timer = setTimeout(() => settle(false), WRITE_TIMEOUT);
+		timer.unref();
 
-	const finish = (drained: boolean) => {
-		clearInterval(interval);
-		response.off("drain", onDrain);
-		response.off("close", onDrain);
-		resolve(drained);
-	};
-	const onDrain = () => finish(true);
-	const interval = setInterval(() => {
-		const length = response.writableLength;
-		if (length >= previousLength) {
-			finish(false);
-			return;
-		}
-		previousLength = length;
-	}, DRAIN_STALL_TIMEOUT);
-	interval.unref?.();
-
-	response.once("drain", onDrain);
-	response.once("close", onDrain);
-
-	return promise;
+		response.once("drain", onDrain);
+		response.once("close", onDrain);
+	});
 }

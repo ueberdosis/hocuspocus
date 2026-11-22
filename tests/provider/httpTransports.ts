@@ -1,9 +1,4 @@
-import {
-	type HocuspocusProviderConfiguration,
-	HocuspocusProviderWebsocket,
-} from "@hocuspocus/provider";
-import type { Hocuspocus } from "@hocuspocus/server";
-import test, { type ExecutionContext } from "ava";
+import test from "ava";
 import * as Y from "yjs";
 import {
 	newHocuspocus,
@@ -14,28 +9,7 @@ import {
 } from "../utils/index.ts";
 import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
-const transports = ["sse", "polling"] as const;
-
-type Transport = (typeof transports)[number];
-
-// A provider that connects through the given URL, e.g. a proxy's.
-const newProviderVia = (
-	t: ExecutionContext,
-	hocuspocus: Hocuspocus,
-	url: string,
-	transport: Transport,
-	options: Partial<HocuspocusProviderConfiguration> = {},
-) => {
-	const websocketProvider = new HocuspocusProviderWebsocket({
-		url,
-		transports: [transport],
-	});
-	t.teardown(() => websocketProvider.destroy());
-
-	return newHocuspocusProvider(t, hocuspocus, options, {}, websocketProvider);
-};
-
-for (const transport of transports) {
+for (const transport of ["sse", "polling"] as const) {
 	test(`${transport}: syncs changes in both directions`, async (t) => {
 		const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 		const provider = newHocuspocusProvider(
@@ -50,12 +24,16 @@ for (const transport of transports) {
 		provider.document.getArray("client").push(["from client"]);
 		await retryableAssertion(t, (tt) =>
 			tt.deepEqual(
-				hocuspocus.documents.get("hocuspocus-test")?.getArray("client").toJSON(),
+				hocuspocus.documents
+					.get("hocuspocus-test")
+					?.getArray("client")
+					.toJSON(),
 				["from client"],
 			),
 		);
 
 		const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
+		t.teardown(() => direct.disconnect());
 		await direct.transact((document) =>
 			document.getArray("server").push(["from server"]),
 		);
@@ -64,7 +42,6 @@ for (const transport of transports) {
 				"from server",
 			]),
 		);
-		await direct.disconnect();
 	});
 
 	test(`${transport}: an authentication timeout reaches the provider as 4408`, async (t) => {
@@ -91,7 +68,7 @@ for (const transport of transports) {
 	test(`${transport}: a session without traffic stays open`, async (t) => {
 		const hocuspocus = await newHocuspocus(t, {
 			httpFallback: true,
-			timeout: 500,
+			timeout: 1000,
 		});
 		let closed = false;
 		const provider = newHocuspocusProvider(
@@ -107,13 +84,14 @@ for (const transport of transports) {
 		);
 		await waitForSynced(provider);
 
-		await sleep(1500);
+		// More than twice the idle timeout of the server.
+		await sleep(2500);
 
 		t.true(provider.isSynced);
 		t.false(closed);
 	});
 
-	test(`${transport}: a cut downstream resumes without losing messages`, async (t) => {
+	test(`${transport}: a downstream response that gets lost is sent again`, async (t) => {
 		let disconnects = 0;
 		const hocuspocus = await newHocuspocus(t, {
 			httpFallback: true,
@@ -122,37 +100,38 @@ for (const transport of transports) {
 			},
 		});
 		const proxy = await newHttpProxy(t, hocuspocus);
+		const received: string[] = [];
 		let closed = false;
-		const provider = newProviderVia(
+		const provider = newHocuspocusProvider(
 			t,
 			hocuspocus,
-			proxy.webSocketURL,
-			transport,
 			{
+				onStateless: ({ payload }) => {
+					received.push(payload);
+				},
 				onClose: () => {
 					closed = true;
 				},
 			},
+			{ url: proxy.webSocketURL, transports: [transport] },
 		);
 		await waitForSynced(provider);
-		const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
+		const document = hocuspocus.documents.get("hocuspocus-test")!;
 
-		proxy.holdDownstreams();
-		await direct.transact((document) =>
-			document.getArray("held").push(["change"]),
-		);
-		await sleep(300);
-		proxy.releaseDownstreams();
+		// The connection breaks. The server writes the messages into the response
+		// to the next request, which never arrives.
+		proxy.loseNextResponse("downstream");
+		proxy.cutDownstreams();
+		document.broadcastStateless("first");
+		document.broadcastStateless("second");
 
-		await retryableAssertion(t, (tt) =>
-			tt.deepEqual(provider.document.getArray("held").toJSON(), ["change"]),
-		);
+		await retryableAssertion(t, (tt) => tt.true(received.includes("second")));
+		t.deepEqual(received, ["first", "second"]);
 		t.false(closed);
 		t.is(disconnects, 0);
-		await direct.disconnect();
 	});
 
-	test(`${transport}: messages arrive once and in order while POSTs are slow`, async (t) => {
+	test(`${transport}: a batch whose response gets lost is delivered once`, async (t) => {
 		const received: string[] = [];
 		const hocuspocus = await newHocuspocus(t, {
 			httpFallback: true,
@@ -160,23 +139,183 @@ for (const transport of transports) {
 				received.push(payload);
 			},
 		});
-		const proxy = await newHttpProxy(t, hocuspocus, { postDelay: 100 });
-		const provider = newProviderVia(t, hocuspocus, proxy.webSocketURL, transport);
+		const proxy = await newHttpProxy(t, hocuspocus);
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{ awareness: null },
+			{ url: proxy.webSocketURL, transports: [transport] },
+		);
 		await waitForSynced(provider);
 
-		for (let group = 0; group < 5; group += 1) {
+		// Once this one arrived, no POST of the handshake is left in flight: the
+		// next POST is the batch with the two messages after it.
+		provider.sendStateless("first");
+		await retryableAssertion(t, (tt) => tt.deepEqual(received, ["first"]));
+
+		proxy.loseNextResponse("post");
+		provider.sendStateless("second");
+		provider.sendStateless("third");
+		await retryableAssertion(t, (tt) => tt.true(received.includes("third")));
+
+		// The server had the batch at the first go. The provider sends it again,
+		// under the same sequence number, and the numbers still line up after.
+		await retryableAssertion(t, (tt) => {
+			const sequences = proxy.requests.flatMap(
+				(request) => /hp_seq=(\d+)/.exec(request)?.[1] ?? [],
+			);
+			tt.true(sequences.length > new Set(sequences).size);
+		});
+
+		provider.sendStateless("fourth");
+		await retryableAssertion(t, (tt) => tt.true(received.includes("fourth")));
+		t.deepEqual(received, ["first", "second", "third", "fourth"]);
+	});
+
+	test(`${transport}: messages arrive in order, batched while a POST is in flight`, async (t) => {
+		const received: string[] = [];
+		const hocuspocus = await newHocuspocus(t, {
+			httpFallback: true,
+			async onStateless({ payload }) {
+				received.push(payload);
+			},
+		});
+		// A POST takes longer than it takes to send all the messages below.
+		const proxy = await newHttpProxy(t, hocuspocus, { postDelay: 300 });
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{ awareness: null },
+			{ url: proxy.webSocketURL, transports: [transport] },
+		);
+		await waitForSynced(provider);
+
+		// Once this one arrived, no POST of the handshake is left in flight.
+		provider.sendStateless("start");
+		await retryableAssertion(t, (tt) => tt.deepEqual(received, ["start"]));
+		const batches = () =>
+			proxy.requests.filter((request) => request.includes("hp_seq=")).length;
+		const batchesBefore = batches();
+
+		const groups = 5;
+		for (let group = 0; group < groups; group += 1) {
 			for (let index = 0; index < 4; index += 1) {
 				provider.sendStateless(String(group * 4 + index));
 			}
-			await sleep(30);
+			await sleep(10);
 		}
 
 		const expected = Array.from({ length: 20 }, (_, index) => String(index));
-		await retryableAssertion(t, (tt) => tt.deepEqual(received, expected));
-		await sleep(300);
-		t.deepEqual(received, expected);
+		await retryableAssertion(t, (tt) => tt.true(received.includes("19")));
+		t.deepEqual(received, ["start", ...expected]);
+		// The groups that had to wait for the first POST left together.
+		t.true(batches() - batchesBefore < groups);
+	});
+
+	test(`${transport}: disconnect() ends the session on the server at once`, async (t) => {
+		let disconnects = 0;
+		const hocuspocus = await newHocuspocus(t, {
+			httpFallback: true,
+			async onDisconnect() {
+				disconnects += 1;
+			},
+		});
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{},
+			{ transports: [transport] },
+		);
+		await waitForSynced(provider);
+
+		provider.configuration.websocketProvider.disconnect();
+
+		// Left to itself, the server would only notice at its idle timeout.
+		await retryableAssertion(t, (tt) => tt.is(disconnects, 1));
 	});
 }
+
+test("sse: messages are split over POSTs of at most maxPayload, a message over it closes with 1009", async (t) => {
+	const received: string[] = [];
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: { maxPayload: 1000 },
+		async onStateless({ payload }) {
+			received.push(payload);
+		},
+	});
+	const codes: number[] = [];
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{
+			awareness: null,
+			onClose: ({ event }) => {
+				codes.push(event.code);
+			},
+		},
+		{ transports: ["sse"] },
+	);
+	await waitForSynced(provider);
+
+	// Ten messages of about 300 bytes each do not fit into one body.
+	const messages = Array.from({ length: 10 }, (_, index) =>
+		String(index).repeat(200),
+	);
+	for (const message of messages) {
+		provider.sendStateless(message);
+	}
+	await retryableAssertion(t, (tt) => tt.deepEqual(received, messages));
+	t.deepEqual(codes, []);
+
+	provider.sendStateless("x".repeat(2000));
+	await retryableAssertion(t, (tt) => tt.true(codes.includes(1009)));
+});
+
+test("sse: an event stream that arrives a few bytes at a time is put together", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const proxy = await newHttpProxy(t, hocuspocus, { eventStreams: "trickle" });
+	// About two thousand pieces, with every line and event split somewhere.
+	const text = "The quick brown fox jumps over the lazy dog. ".repeat(40);
+	const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
+	t.teardown(() => direct.disconnect());
+	await direct.transact((document) => document.getText("text").insert(0, text));
+
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{ url: proxy.webSocketURL, transports: ["sse"] },
+	);
+	await waitForSynced(provider);
+
+	t.is(provider.document.getText("text").toString(), text);
+});
+
+test("polling: a server that stops serving the transports is not flooded with requests", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const proxy = await newHttpProxy(t, hocuspocus);
+	const codes: number[] = [];
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{
+			awareness: null,
+			onClose: ({ event }) => {
+				codes.push(event.code);
+			},
+		},
+		{ url: proxy.webSocketURL, transports: ["polling"], connectTimeout: 500 },
+	);
+	await waitForSynced(provider);
+
+	// As if a deployment without `httpFallback` had taken over: every poll is
+	// answered at once, with a greeting instead of messages.
+	proxy.stopServingTransports();
+	const requestsBefore = proxy.requests.length;
+
+	await retryableAssertion(t, (tt) => tt.true(codes.includes(1006)));
+	t.true(proxy.requests.length - requestsBefore < 30);
+});
 
 test("sse: a read-only session receives changes and sends stateless messages, but cannot write", async (t) => {
 	const received: string[] = [];
@@ -190,7 +329,13 @@ test("sse: a read-only session receives changes and sends stateless messages, bu
 		},
 	});
 	const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
-	const provider = newHocuspocusProvider(t, hocuspocus, {}, { transports: ["sse"] });
+	t.teardown(() => direct.disconnect());
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{ transports: ["sse"] },
+	);
 	await waitForSynced(provider);
 
 	await direct.transact((document) =>
@@ -207,8 +352,6 @@ test("sse: a read-only session receives changes and sends stateless messages, bu
 	provider.sendStateless("after write");
 	await retryableAssertion(t, (tt) => tt.deepEqual(received, ["after write"]));
 	t.deepEqual(direct.document?.getArray("client").toJSON(), []);
-
-	await direct.disconnect();
 });
 
 test("sse: a reconnect only transfers the difference", async (t) => {
@@ -217,7 +360,12 @@ test("sse: a reconnect only transfers the difference", async (t) => {
 	const direct = await hocuspocus.openDirectConnection("hocuspocus-test");
 	t.teardown(() => direct.disconnect());
 
-	const provider = newHocuspocusProvider(t, hocuspocus, {}, { transports: ["sse"] });
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{ transports: ["sse"] },
+	);
 	const websocketProvider = provider.configuration.websocketProvider;
 	await waitForSynced(provider);
 

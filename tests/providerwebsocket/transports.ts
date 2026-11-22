@@ -1,12 +1,12 @@
 import {
-	HocuspocusProviderWebsocket,
 	type HocuspocusProviderWebsocketConfiguration,
+	WebSocketStatus,
 } from "@hocuspocus/provider";
-import type { Hocuspocus } from "@hocuspocus/server";
-import test, { type ExecutionContext } from "ava";
+import test from "ava";
 import {
 	newHocuspocus,
 	newHocuspocusProvider,
+	newHocuspocusProviderWebsocket,
 	newHttpProxy,
 	sleep,
 	waitForSynced,
@@ -69,21 +69,33 @@ class SwallowingWebSocket extends FakeWebSocket {
 	}
 }
 
-const connect = (
-	t: ExecutionContext,
-	hocuspocus: Hocuspocus,
-	options: HocuspocusProviderWebsocketConfiguration,
-) => {
-	const websocketProvider = new HocuspocusProviderWebsocket(options);
-	t.teardown(() => websocketProvider.destroy());
-	const provider = newHocuspocusProvider(
-		t,
-		hocuspocus,
-		{},
-		{},
-		websocketProvider,
-	);
-	return { provider, websocketProvider };
+// A WebSocket that, like a real one, reports a failed handshake when it is
+// closed while connecting.
+class AbortedWebSocket extends FakeWebSocket {
+	reported = false;
+
+	close() {
+		super.close();
+		setTimeout(() => {
+			this.emit("error", new Error("closed while connecting"));
+			this.emit("close", { code: 1006, reason: "" });
+			this.reported = true;
+		}, 0);
+	}
+}
+
+// A WebSocketPolyfill that counts the sockets it creates.
+const counting = (Polyfill: typeof FakeWebSocket) => {
+	const sockets = {
+		created: 0,
+		Polyfill: class extends Polyfill {
+			constructor() {
+				super();
+				sockets.created += 1;
+			}
+		},
+	};
+	return sockets;
 };
 
 const proxyCases = [
@@ -96,139 +108,226 @@ for (const { eventStreams, expected } of proxyCases) {
 	test(`blocked WebSockets, event streams ${eventStreams}: connects over ${expected}`, async (t) => {
 		const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 		const proxy = await newHttpProxy(t, hocuspocus, { eventStreams });
-		const { provider, websocketProvider } = connect(t, hocuspocus, {
-			url: proxy.webSocketURL,
-			...chain,
-		});
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{},
+			{ url: proxy.webSocketURL, ...chain },
+		);
 
 		await waitForSynced(provider);
-		t.is(websocketProvider.transport, expected);
+		t.is(provider.configuration.websocketProvider.transport, expected);
 	});
 }
 
+test("a WebSocket that works stays the transport", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	let closed = false;
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{
+			onClose: () => {
+				closed = true;
+			},
+		},
+		{ ...chain, connectTimeout: 300, messageReconnectTimeout: 2000 },
+	);
+	await waitForSynced(provider);
+
+	// Longer than both timeouts. The messages keep the connection from
+	// counting as dead.
+	const document = hocuspocus.documents.get("hocuspocus-test")!;
+	for (let tick = 0; tick < 25; tick += 1) {
+		document.broadcastStateless("tick");
+		await sleep(100);
+	}
+
+	t.is(provider.configuration.websocketProvider.transport, "websocket");
+	t.false(closed);
+});
+
+test("a WebSocket nothing is sent through is not taken for a broken one", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	let closed = false;
+	// Without a provider attached, neither side has anything to say.
+	const websocketProvider = newHocuspocusProviderWebsocket(t, hocuspocus, {
+		...chain,
+		connectTimeout: 300,
+		messageReconnectTimeout: 300,
+		onClose: () => {
+			closed = true;
+		},
+	});
+	await retryableAssertion(t, (tt) =>
+		tt.is(websocketProvider.status, WebSocketStatus.Connected),
+	);
+
+	await sleep(900);
+
+	t.is(websocketProvider.status, WebSocketStatus.Connected);
+	t.is(websocketProvider.transport, "websocket");
+	t.false(closed);
+});
+
 test("a WebSocket that never opens falls back to sse", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
-	const { provider, websocketProvider } = connect(t, hocuspocus, {
-		url: hocuspocus.server!.webSocketURL,
-		WebSocketPolyfill: NeverOpeningWebSocket,
-		...chain,
-	});
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{ WebSocketPolyfill: NeverOpeningWebSocket, ...chain },
+	);
 
 	await waitForSynced(provider);
-	t.is(websocketProvider.transport, "sse");
+	t.is(provider.configuration.websocketProvider.transport, "sse");
 });
 
 test("falling back is part of one connection attempt", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const sockets = counting(ClosingWebSocket);
 	let maxAttemptsFailed = false;
-	const { provider, websocketProvider } = connect(t, hocuspocus, {
-		url: hocuspocus.server!.webSocketURL,
-		WebSocketPolyfill: ClosingWebSocket,
-		maxAttempts: 1,
-		onMaxAttemptsFailed: () => {
-			maxAttemptsFailed = true;
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{
+			WebSocketPolyfill: sockets.Polyfill,
+			transports: chain.transports,
+			maxAttempts: 1,
+			onMaxAttemptsFailed: () => {
+				maxAttemptsFailed = true;
+			},
 		},
-		...chain,
-		// With a single attempt nothing retries a slow first HTTP request, and
-		// this test does not wait on the connect timeout.
-		connectTimeout: 5000,
-	});
+	);
 
 	await waitForSynced(provider);
-	t.is(websocketProvider.transport, "sse");
+	t.is(sockets.created, 1);
+	t.is(provider.configuration.websocketProvider.transport, "sse");
 	t.false(maxAttemptsFailed);
+});
+
+test("a transport that failed is not tried again when the connection drops", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const sockets = counting(NeverOpeningWebSocket);
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{
+			WebSocketPolyfill: sockets.Polyfill,
+			...chain,
+			connectTimeout: 300,
+			// The provider waits this long before it connects again.
+			delay: 50,
+			minDelay: 50,
+		},
+	);
+	const websocketProvider = provider.configuration.websocketProvider;
+	await waitForSynced(provider);
+
+	// The provider connects again by itself, and does not wait for the
+	// WebSocket a second time.
+	let reopened = false;
+	websocketProvider.on("open", () => {
+		reopened = true;
+	});
+	websocketProvider.webSocket?.close();
+	await retryableAssertion(t, (tt) => tt.true(reopened));
+	await waitForSynced(provider);
+
+	t.is(sockets.created, 1);
+	t.is(websocketProvider.transport, "sse");
 });
 
 test("disconnect() while the WebSocket is connecting stops the fallback", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const proxy = await newHttpProxy(t, hocuspocus);
-	const { websocketProvider } = connect(t, hocuspocus, {
-		url: proxy.webSocketURL,
-		WebSocketPolyfill: NeverOpeningWebSocket,
-		...chain,
-	});
+	const sockets = counting(NeverOpeningWebSocket);
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{
+			url: proxy.webSocketURL,
+			WebSocketPolyfill: sockets.Polyfill,
+			...chain,
+			connectTimeout: 200,
+		},
+	);
 
-	await sleep(10);
-	websocketProvider.disconnect();
-	await sleep(1500);
+	await retryableAssertion(t, (tt) => tt.is(sockets.created, 1));
+	provider.configuration.websocketProvider.disconnect();
+	// Three times as long as the WebSocket had to open.
+	await sleep(600);
 
 	t.deepEqual(proxy.requests, []);
 });
 
 test("a WebSocket closed by disconnect() while connecting is tried first again on connect()", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
-	let created = 0;
-	// Closed while connecting, a WebSocket reports a failed handshake.
-	class AbortedWebSocket extends FakeWebSocket {
-		constructor() {
-			super();
-			created += 1;
-		}
+	const sockets = counting(AbortedWebSocket);
+	const { websocketProvider } = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{ WebSocketPolyfill: sockets.Polyfill, ...chain },
+	).configuration;
 
-		close() {
-			super.close();
-			setTimeout(() => {
-				this.emit("error", new Error("closed while connecting"));
-				this.emit("close", { code: 1006, reason: "" });
-			}, 0);
-		}
-	}
-	const { websocketProvider } = connect(t, hocuspocus, {
-		url: hocuspocus.server!.webSocketURL,
-		WebSocketPolyfill: AbortedWebSocket,
-		...chain,
-	});
-
-	await sleep(10);
+	await retryableAssertion(t, (tt) => tt.is(sockets.created, 1));
+	const socket = websocketProvider.webSocket as unknown as AbortedWebSocket;
 	websocketProvider.disconnect();
-	await sleep(50);
+	await retryableAssertion(t, (tt) => tt.true(socket.reported));
 	websocketProvider.connect();
-	await sleep(10);
 
-	t.is(created, 2);
+	await retryableAssertion(t, (tt) => tt.is(sockets.created, 2));
 	t.is(websocketProvider.transport, "websocket");
 });
 
 test("a WebSocket that opens but delivers nothing falls back to sse", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
-	const { provider, websocketProvider } = connect(t, hocuspocus, {
-		url: hocuspocus.server!.webSocketURL,
-		WebSocketPolyfill: SwallowingWebSocket,
-		messageReconnectTimeout: 500,
-		...chain,
-	});
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{
+			WebSocketPolyfill: SwallowingWebSocket,
+			messageReconnectTimeout: 500,
+			...chain,
+		},
+	);
 
 	await waitForSynced(provider);
-	t.is(websocketProvider.transport, "sse");
+	t.is(provider.configuration.websocketProvider.transport, "sse");
 });
 
 test("a WebSocket that opens but delivers nothing does not lock out HTTP transports that failed once", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const proxy = await newHttpProxy(t, hocuspocus);
-	// The HTTP transports fail at first, so every transport has failed once.
+	const sockets = counting(SwallowingWebSocket);
+	// The HTTP transports do not get through either, at first.
 	proxy.holdDownstreams();
-	const { provider, websocketProvider } = connect(t, hocuspocus, {
-		url: proxy.webSocketURL,
-		WebSocketPolyfill: SwallowingWebSocket,
-		messageReconnectTimeout: 300,
-		transports: ["websocket", "sse", "polling"],
-		connectTimeout: 300,
-		delay: 50,
-		minDelay: 50,
-		maxDelay: 100,
-		jitter: false,
-	});
-
-	await retryableAssertion(t, (tt) =>
-		tt.true(
-			proxy.requests.some((request) =>
-				request.includes("hp_transport=polling"),
-			),
-		),
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{},
+		{
+			url: proxy.webSocketURL,
+			WebSocketPolyfill: sockets.Polyfill,
+			transports: chain.transports,
+			connectTimeout: 300,
+			messageReconnectTimeout: 300,
+			delay: 50,
+			minDelay: 50,
+			maxDelay: 100,
+			jitter: false,
+		},
 	);
-	await sleep(400);
+
+	// The WebSocket gets its second turn once every transport has failed.
+	await retryableAssertion(t, (tt) => tt.true(sockets.created >= 2));
 	proxy.releaseDownstreams();
 
 	await waitForSynced(provider);
-	t.is(websocketProvider.transport, "sse");
+	t.not(provider.configuration.websocketProvider.transport, "websocket");
 });

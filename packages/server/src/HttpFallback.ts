@@ -1,19 +1,12 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
 	type CloseEvent,
-	ConnectionTimeout,
-	HTTP_TRANSPORT_PROBE,
-	HttpTransportEvent,
 	type HttpTransportName,
-	type HttpTransportOpenPayload,
 	HttpTransportParameter,
 	ResetConnection,
-	WsReadyStates,
 } from "@hocuspocus/common";
-import { fromBase64, toBase64 } from "lib0/buffer";
-import type { ClientConnection } from "./ClientConnection.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
-import type { WebSocketLike } from "./types.ts";
+import { HttpFallbackSession } from "./HttpFallbackSession.ts";
 import { toWebRequest, writeWebResponse } from "./util/nodeHttp.ts";
 
 export interface HttpFallbackConfiguration {
@@ -28,11 +21,15 @@ export interface HttpFallbackConfiguration {
 	allowCredentials: boolean;
 	/** Interval of SSE keep-alive comments and longest time a poll is held, in ms. */
 	heartbeatInterval: number;
-	/** Largest accepted POST body in bytes. */
+	/**
+	 * Largest accepted POST body in bytes. It applies before authentication,
+	 * like the `maxPayload` of `websocketOptions`.
+	 */
 	maxPayload: number;
 	/**
-	 * Sessions held in memory. At the limit a new session replaces the oldest
-	 * one that has not authenticated; if all have, it is refused with 503.
+	 * Sessions held in memory, of all clients together. At the limit a new
+	 * session replaces the oldest one that has not authenticated; if all have,
+	 * it is refused with 503.
 	 */
 	maxSessions: number;
 }
@@ -45,16 +42,7 @@ export const defaultHttpFallbackConfiguration: HttpFallbackConfiguration = {
 	maxSessions: 10_000,
 };
 
-// Written first on every event stream, so proxies that buffer small responses
-// flush the headers and the stream starts moving.
-const SSE_PADDING = `:${" ".repeat(2048)}\n\n`;
-
-// Delay of the probe comment after an event stream attaches. A client only
-// opens once the probe arrived, which proves the path delivers data written
-// after the first chunk while the response is still open.
-const SSE_PROBE_DELAY = 50;
-
-// How long a closed session still answers 410 with its close event.
+// How long a session the server closed still answers 410 with its close event.
 const CLOSED_SESSION_TTL = 60_000;
 
 const SESSION_ID = /^[A-Za-z0-9_-]{16,64}$/;
@@ -69,19 +57,16 @@ const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
 // Session keys are UUIDs; a longer first line is never a key.
 const MAX_KEY_LENGTH = 64;
 
-const textEncoder = new TextEncoder();
+const RESPONSE_HEADERS = {
+	"Cache-Control": "no-store, no-transform",
+	"X-Content-Type-Options": "nosniff",
+};
 
-// `Document.broadcast` hands the same buffer to every connection, so a
-// broadcast is encoded once, not once per session.
-const encodedMessages = new WeakMap<Uint8Array, string>();
-
-function encodeMessage(data: Uint8Array): string {
-	let encoded = encodedMessages.get(data);
-	if (encoded === undefined) {
-		encoded = toBase64(data);
-		encodedMessages.set(data, encoded);
-	}
-	return encoded;
+/** What is left of a session the server closed. */
+interface ClosedSession {
+	key: string;
+	closeEvent: CloseEvent;
+	timer: ReturnType<typeof setTimeout>;
 }
 
 function isTransport(value: string | null): value is HttpTransportName {
@@ -99,6 +84,10 @@ function isOrigin(entry: unknown): boolean {
 	}
 }
 
+function isBase64(line: string): boolean {
+	return line !== "" && line.length % 4 === 0 && BASE64.test(line);
+}
+
 // Compare without returning early, so the time taken does not reveal how many
 // leading characters of a guessed key were right.
 function keysEqual(candidate: string, key: string): boolean {
@@ -112,380 +101,139 @@ function keysEqual(candidate: string, key: string): boolean {
 	return difference === 0;
 }
 
-function textResponse(
+function text(
 	status: number,
 	body: string,
-	headers: Headers,
-	contentType = "text/plain; charset=utf-8",
+	headers?: Record<string, string>,
 ): Response {
-	headers.set("Content-Type", contentType);
-	return new Response(body, { status, headers });
+	return new Response(body, {
+		status,
+		headers: { "Content-Type": "text/plain; charset=utf-8", ...headers },
+	});
+}
+
+function noContent(): Response {
+	return new Response(null, { status: 204 });
+}
+
+// The answer to an unknown session and to a wrong key, indistinguishable on
+// purpose.
+function notFound(): Response {
+	return text(404, "Session not found");
+}
+
+function withHeaders(
+	response: Response,
+	headers: Record<string, string>,
+): Response {
+	for (const [name, value] of Object.entries(headers)) {
+		response.headers.set(name, value);
+	}
+	return response;
+}
+
+function validate(configuration: HttpFallbackConfiguration): void {
+	const { allowedOrigins, allowCredentials } = configuration;
+	if (
+		allowedOrigins !== "*" &&
+		!(
+			Array.isArray(allowedOrigins) &&
+			allowedOrigins.length > 0 &&
+			allowedOrigins.every(isOrigin)
+		)
+	) {
+		throw new Error(
+			'httpFallback.allowedOrigins must be "*" or a non-empty array of origins such as "https://app.example.com"',
+		);
+	}
+
+	if (allowCredentials && allowedOrigins === "*") {
+		throw new Error(
+			"httpFallback.allowCredentials requires an explicit allowedOrigins list",
+		);
+	}
+
+	for (const [key, minimum] of [
+		["heartbeatInterval", 1000],
+		["maxPayload", 1],
+		["maxSessions", 1],
+	] as const) {
+		const value = configuration[key];
+		if (!Number.isInteger(value) || value < minimum) {
+			throw new Error(
+				`httpFallback.${key} must be an integer of at least ${minimum}`,
+			);
+		}
+	}
 }
 
 /**
- * Read a POST body of at most `limit` bytes, split into lines. The first line
- * (the session key) is checked as soon as it is complete, so a sender without
- * the key cannot make the server buffer a large body. `lines` excludes it.
+ * Read the body of a POST: the session key on the first line, then one
+ * message per line. Returns the message lines, or the response for a body
+ * that is refused. The key is checked as soon as its line is complete, so a
+ * sender without it cannot make the server buffer `limit` bytes.
  */
 async function readBody(
 	request: Request,
 	limit: number,
-	acceptFirstLine: (line: string) => boolean,
-): Promise<{ status: 200; lines: string[] } | { status: 404 | 413 }> {
-	const declaredLength = request.headers.get("content-length");
-	if (declaredLength !== null && Number(declaredLength) > limit) {
-		return { status: 413 };
-	}
+	isKey: (line: string) => boolean,
+): Promise<string[] | Response> {
+	const reader = request.body?.getReader();
+	const decoder = new TextDecoder();
+	let body = "";
+	let size = 0;
+	let keyAccepted = false;
 
-	let text = "";
-	let firstLineAccepted = false;
+	// Whether the first line is not the key. It is judged once it is complete
+	// (`final`: the body has ended) or too long to be a key.
+	const keyRefused = (final: boolean): boolean => {
+		const end = body.indexOf("\n");
+		const line = end === -1 ? body : body.slice(0, end);
+		if (line.length > MAX_KEY_LENGTH) {
+			return true;
+		}
+		if (end === -1 && !final) {
+			return false;
+		}
+		keyAccepted = isKey(line);
+		return !keyAccepted;
+	};
 
-	if (request.body) {
-		const reader = request.body.getReader();
-		const decoder = new TextDecoder();
-		let byteLength = 0;
+	// The rest of a refused body is not read.
+	const refuse = (response: Response): Response => {
+		reader?.cancel().catch(() => {});
+		return response;
+	};
 
-		while (true) {
+	try {
+		while (reader) {
 			const { done, value } = await reader.read();
 			if (done) {
 				break;
 			}
 
-			byteLength += value.byteLength;
-			if (byteLength > limit) {
-				reader.cancel().catch(() => {});
-				return { status: 413 };
+			// The key is judged before the size, so that a sender without it
+			// only ever gets the answer an unknown session gets.
+			size += value.byteLength;
+			body += decoder.decode(value, { stream: true });
+			if (!keyAccepted && keyRefused(false)) {
+				return refuse(notFound());
 			}
-
-			text += decoder.decode(value, { stream: true });
-
-			if (!firstLineAccepted) {
-				const end = text.indexOf("\n");
-				const firstLine = end === -1 ? text : text.slice(0, end);
-				if (
-					firstLine.length > MAX_KEY_LENGTH ||
-					(end !== -1 && !acceptFirstLine(firstLine))
-				) {
-					reader.cancel().catch(() => {});
-					return { status: 404 };
-				}
-				firstLineAccepted = end !== -1;
+			if (size > limit) {
+				return refuse(text(413, "Payload too large"));
 			}
 		}
-
-		text += decoder.decode();
+	} catch {
+		// The client went away in the middle of its request.
+		return text(400, "Incomplete request");
 	}
 
-	const lines = text.split("\n");
-	if (
-		!firstLineAccepted &&
-		(lines[0].length > MAX_KEY_LENGTH || !acceptFirstLine(lines[0]))
-	) {
-		return { status: 404 };
+	body += decoder.decode();
+	if (!keyAccepted && keyRefused(true)) {
+		return notFound();
 	}
 
-	return { status: 200, lines: lines.slice(1) };
-}
-
-interface OutboxEntry {
-	seq: number;
-	data: Uint8Array;
-	at: number;
-}
-
-interface Downstream {
-	mode: HttpTransportName;
-	controller: ReadableStreamDefaultController<Uint8Array>;
-	timeout?: ReturnType<typeof setTimeout>;
-	interval?: ReturnType<typeof setInterval>;
-}
-
-interface ClosedSession {
-	key: string;
-	closeEvent: CloseEvent;
-	timer: ReturnType<typeof setTimeout>;
-}
-
-/**
- * One client of the HTTP transports, presented to Hocuspocus as a WebSocket.
- * Outgoing messages are numbered and kept until the client acknowledges them,
- * so a cut event stream or a lost poll response is replayed.
- */
-class Session implements WebSocketLike {
-	readonly key = crypto.randomUUID();
-
-	readyState: number = WsReadyStates.Open;
-
-	clientConnection!: ClientConnection;
-
-	nextSeq = 1;
-
-	acked = 0;
-
-	received = 0;
-
-	private outbox: OutboxEntry[] = [];
-
-	private written = 0;
-
-	private pendingText = "";
-
-	private downstream: Downstream | null = null;
-
-	private flushScheduled = false;
-
-	private closeEvent: CloseEvent | null = null;
-
-	private readonly heartbeat: number;
-
-	private readonly unackedTimeout: number;
-
-	constructor(
-		readonly id: string,
-		private readonly maxPayload: number,
-		heartbeatInterval: number,
-		timeout: number,
-		private readonly onClosed: (
-			session: Session,
-			closeEvent: CloseEvent | null,
-		) => void,
-	) {
-		// Clients ping on every heartbeat, so a heartbeat of at most half the
-		// idle timeout keeps a healthy session alive.
-		this.heartbeat = Math.min(
-			heartbeatInterval,
-			Math.max(1, Math.floor(timeout / 2)),
-		);
-		this.unackedTimeout = timeout;
-	}
-
-	send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
-		if (this.readyState !== WsReadyStates.Open) {
-			return;
-		}
-
-		let bytes: Uint8Array;
-		if (data instanceof Uint8Array) {
-			bytes = data;
-		} else if (ArrayBuffer.isView(data)) {
-			bytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-		} else if (data instanceof ArrayBuffer) {
-			bytes = new Uint8Array(data);
-		} else {
-			throw new TypeError("HttpFallback only sends binary messages");
-		}
-
-		// A client that stays alive but never acknowledges, or never reads, must
-		// not grow the outbox forever.
-		const oldest = this.outbox[0];
-		if (oldest && Date.now() - oldest.at > this.unackedTimeout) {
-			this.close(ConnectionTimeout.code, ConnectionTimeout.reason);
-			return;
-		}
-
-		this.outbox.push({ seq: this.nextSeq, data: bytes, at: Date.now() });
-		this.nextSeq += 1;
-
-		if (!this.flushScheduled) {
-			this.flushScheduled = true;
-			queueMicrotask(() => {
-				this.flushScheduled = false;
-				this.flush();
-			});
-		}
-	}
-
-	/** Drop every message up to and including `cursor`. */
-	ack(cursor: number): void {
-		let count = 0;
-		while (count < this.outbox.length && this.outbox[count].seq <= cursor) {
-			count += 1;
-		}
-		if (count > 0) {
-			this.outbox.splice(0, count);
-		}
-		this.acked = Math.max(this.acked, cursor);
-	}
-
-	/**
-	 * Start a downstream response after `cursor`, replacing any previous one.
-	 * Messages after `cursor` that were already written are written again.
-	 */
-	attach(
-		mode: HttpTransportName,
-		cursor: number,
-		isOpen: boolean,
-		headers: Headers,
-	): Response {
-		if (this.downstream) {
-			this.endDownstream(this.downstream);
-		}
-
-		this.ack(cursor);
-		this.written = cursor;
-
-		const openPayload: HttpTransportOpenPayload = {
-			key: this.key,
-			heartbeatInterval: this.heartbeat,
-			maxPayload: this.maxPayload,
-		};
-		this.pendingText =
-			(mode === "sse" ? SSE_PADDING : "") +
-			(isOpen
-				? `event: ${HttpTransportEvent.Open}\ndata: ${JSON.stringify(openPayload)}\n\n`
-				: "");
-
-		let downstream: Downstream | undefined;
-		const stream = new ReadableStream<Uint8Array>({
-			start: (controller) => {
-				downstream = { mode, controller };
-				this.downstream = downstream;
-			},
-			pull: () => {
-				if (this.downstream === downstream) {
-					this.flush();
-				}
-			},
-			cancel: () => {
-				if (downstream) {
-					this.detach(downstream);
-				}
-			},
-		});
-
-		this.flush();
-
-		if (downstream && this.downstream === downstream) {
-			const attached = downstream;
-			if (mode === "sse") {
-				attached.timeout = setTimeout(() => {
-					this.pendingText += `:${HTTP_TRANSPORT_PROBE}\n\n`;
-					this.flush();
-				}, SSE_PROBE_DELAY);
-				attached.interval = setInterval(() => {
-					if (this.pendingText === "") {
-						this.pendingText = ":\n\n";
-					}
-					this.flush();
-				}, this.heartbeat);
-				attached.interval.unref?.();
-			} else {
-				attached.timeout = setTimeout(
-					() => this.endDownstream(attached),
-					this.heartbeat,
-				);
-			}
-			attached.timeout.unref?.();
-		}
-
-		headers.set(
-			"Content-Type",
-			mode === "sse" ? "text/event-stream" : "text/plain; charset=utf-8",
-		);
-		if (mode === "sse") {
-			headers.set("X-Accel-Buffering", "no");
-		}
-
-		return new Response(stream, { status: 200, headers });
-	}
-
-	/**
-	 * Write control text, unwritten messages and the close event to the
-	 * attached downstream, as far as it has room. A client that stops reading
-	 * leaves no room; its messages wait in the outbox.
-	 */
-	private flush(): void {
-		const downstream = this.downstream;
-		if (!downstream || (downstream.controller.desiredSize ?? 0) <= 0) {
-			return;
-		}
-
-		let text = this.pendingText;
-		// Sequence numbers in the outbox are contiguous, so the first unwritten
-		// entry is found by arithmetic; written entries wait there for their ack.
-		const first = this.outbox[0];
-		const start = first ? Math.max(0, this.written - first.seq + 1) : 0;
-		for (let index = start; index < this.outbox.length; index++) {
-			const entry = this.outbox[index];
-			text += `id: ${entry.seq}\ndata: ${encodeMessage(entry.data)}\n\n`;
-			this.written = entry.seq;
-		}
-		if (this.closeEvent) {
-			text += `event: ${HttpTransportEvent.Close}\ndata: ${JSON.stringify(this.closeEvent)}\n\n`;
-		}
-		if (text === "") {
-			return;
-		}
-
-		this.pendingText = "";
-		try {
-			downstream.controller.enqueue(textEncoder.encode(text));
-		} catch {
-			this.detach(downstream);
-			return;
-		}
-
-		if (downstream.mode === "polling" || this.closeEvent) {
-			this.endDownstream(downstream);
-		}
-	}
-
-	private detach(downstream: Downstream): void {
-		clearTimeout(downstream.timeout);
-		clearInterval(downstream.interval);
-		if (this.downstream === downstream) {
-			this.downstream = null;
-		}
-	}
-
-	private endDownstream(downstream: Downstream): void {
-		this.detach(downstream);
-		try {
-			downstream.controller.close();
-		} catch {
-			// The client already went away.
-		}
-	}
-
-	/**
-	 * Close the session from the server side (Hocuspocus, eviction, shutdown).
-	 * The client receives the close event at the end of its stream, or as a
-	 * 410 on its next request.
-	 */
-	close(code = 1000, reason = ""): void {
-		if (this.readyState !== WsReadyStates.Open) {
-			return;
-		}
-
-		const closeEvent = { code, reason };
-		this.readyState = WsReadyStates.Closed;
-		this.closeEvent = closeEvent;
-		this.onClosed(this, closeEvent);
-
-		this.flush();
-		if (this.downstream) {
-			this.endDownstream(this.downstream);
-		}
-
-		queueMicrotask(() => this.clientConnection?.handleClose(closeEvent));
-	}
-
-	/** The client closed the session. */
-	closedByClient(): void {
-		if (this.readyState !== WsReadyStates.Open) {
-			return;
-		}
-
-		this.readyState = WsReadyStates.Closed;
-		if (this.downstream) {
-			this.endDownstream(this.downstream);
-		}
-		this.onClosed(this, null);
-
-		queueMicrotask(() =>
-			this.clientConnection?.handleClose({ code: 1005, reason: "" }),
-		);
-	}
+	return body.split("\n").slice(1);
 }
 
 /**
@@ -505,15 +253,17 @@ class Session implements WebSocketLike {
  * - `onUpgrade` hooks do not run for HTTP sessions; gates implemented there
  *   must be repeated in front of `fetch`. The built-in `Server` runs
  *   `onRequest` for the request that opens a session.
- * - Resuming a cut stream needs Hocuspocus' `timeout` to be longer than
- *   `heartbeatInterval` plus the provider's `connectTimeout`; otherwise a cut
- *   ends in a reconnect.
+ * - Hocuspocus' `timeout` also is the time a message has to reach its client
+ *   and be acknowledged, or the session is closed with 4408. Resuming a cut
+ *   stream needs it to be longer than `heartbeatInterval` plus the provider's
+ *   `connectTimeout`; large documents on slow connections need more.
  */
 export class HttpFallback<Context = any> {
 	readonly configuration: HttpFallbackConfiguration;
 
-	private readonly sessions = new Map<string, Session>();
+	private readonly sessions = new Map<string, HttpFallbackSession>();
 
+	// Not counted against `maxSessions`, but not more of them either.
 	private readonly closedSessions = new Map<string, ClosedSession>();
 
 	private destroyed = false;
@@ -526,39 +276,7 @@ export class HttpFallback<Context = any> {
 			...defaultHttpFallbackConfiguration,
 			...configuration,
 		};
-
-		const { allowedOrigins, allowCredentials } = this.configuration;
-		if (
-			allowedOrigins !== "*" &&
-			!(
-				Array.isArray(allowedOrigins) &&
-				allowedOrigins.length > 0 &&
-				allowedOrigins.every(isOrigin)
-			)
-		) {
-			throw new Error(
-				'httpFallback.allowedOrigins must be "*" or a non-empty array of origins such as "https://app.example.com"',
-			);
-		}
-
-		if (allowCredentials && allowedOrigins === "*") {
-			throw new Error(
-				"httpFallback.allowCredentials requires an explicit allowedOrigins list",
-			);
-		}
-
-		for (const [key, minimum] of [
-			["heartbeatInterval", 1000],
-			["maxPayload", 1],
-			["maxSessions", 1],
-		] as const) {
-			const value = this.configuration[key];
-			if (!Number.isInteger(value) || value < minimum) {
-				throw new Error(
-					`httpFallback.${key} must be an integer of at least ${minimum}`,
-				);
-			}
-		}
+		validate(this.configuration);
 	}
 
 	/**
@@ -566,18 +284,16 @@ export class HttpFallback<Context = any> {
 	 * IncomingMessage. Never throws.
 	 */
 	matches(request: { url?: string }): boolean {
-		const { url } = request;
-		if (typeof url !== "string") {
-			return false;
-		}
-
+		// Not `new URL`: the URL of a Node.js request is a path, and one that
+		// contains "://" would be taken for a full URL.
+		const url = request.url ?? "";
 		const queryStart = url.indexOf("?");
-		if (queryStart === -1) {
-			return false;
-		}
 
-		return new URLSearchParams(url.slice(queryStart + 1)).has(
-			HttpTransportParameter.SessionId,
+		return (
+			queryStart !== -1 &&
+			new URLSearchParams(url.slice(queryStart + 1)).has(
+				HttpTransportParameter.SessionId,
+			)
 		);
 	}
 
@@ -586,193 +302,15 @@ export class HttpFallback<Context = any> {
 	 * errors included.
 	 */
 	async fetch(request: Request, defaultContext?: Context): Promise<Response> {
-		const headers = new Headers({
-			"Cache-Control": "no-store, no-transform",
-			"X-Content-Type-Options": "nosniff",
-		});
+		const cors = this.corsHeaders(request);
+		const response = cors
+			? await this.route(request, defaultContext).catch((error) => {
+					console.error(error);
+					return text(500, "Internal server error");
+				})
+			: text(403, "Origin not allowed");
 
-		try {
-			const { allowedOrigins, allowCredentials } = this.configuration;
-			const origin = request.headers.get("origin");
-			if (allowedOrigins === "*") {
-				headers.set("Access-Control-Allow-Origin", "*");
-			} else if (origin !== null) {
-				if (!allowedOrigins.includes(origin)) {
-					return textResponse(403, "Origin not allowed", headers);
-				}
-				headers.set("Access-Control-Allow-Origin", origin);
-				headers.set("Vary", "Origin");
-				if (allowCredentials) {
-					headers.set("Access-Control-Allow-Credentials", "true");
-				}
-			} else {
-				// Cross-site navigations and no-cors requests carry cookies but no
-				// Origin header.
-				const site = request.headers.get("sec-fetch-site");
-				if (site !== null && site !== "same-origin" && site !== "none") {
-					return textResponse(403, "Origin not allowed", headers);
-				}
-			}
-
-			if (this.destroyed) {
-				return textResponse(503, "Server is shutting down", headers);
-			}
-
-			if (request.method !== "GET" && request.method !== "POST") {
-				headers.set("Allow", "GET, POST");
-				return textResponse(405, "Method not allowed", headers);
-			}
-
-			const parameters = new URL(request.url).searchParams;
-			const id = parameters.get(HttpTransportParameter.SessionId);
-			if (id === null || !SESSION_ID.test(id)) {
-				return textResponse(400, "Invalid session id", headers);
-			}
-
-			const transport = parameters.get(HttpTransportParameter.Transport);
-
-			if (request.method === "GET") {
-				if (
-					!isTransport(transport) ||
-					parameters.has(HttpTransportParameter.Cursor) ||
-					parameters.has(HttpTransportParameter.Sequence) ||
-					parameters.has(HttpTransportParameter.Close)
-				) {
-					return textResponse(400, "Invalid open request", headers);
-				}
-
-				if (this.sessions.has(id) || this.closedSessions.has(id)) {
-					return textResponse(409, "Session exists", headers);
-				}
-
-				if (!this.makeRoom()) {
-					return textResponse(503, "Too many sessions", headers);
-				}
-
-				return this.createSession(id, request, defaultContext).attach(
-					transport,
-					0,
-					true,
-					headers,
-				);
-			}
-
-			const known = this.sessions.get(id) ?? this.closedSessions.get(id);
-			if (!known) {
-				return textResponse(404, "Session not found", headers);
-			}
-
-			const { key } = known;
-			const body = await readBody(
-				request,
-				this.configuration.maxPayload,
-				(line) => keysEqual(line, key),
-			);
-			if (body.status !== 200) {
-				return body.status === 413
-					? textResponse(413, "Payload too large", headers)
-					: textResponse(404, "Session not found", headers);
-			}
-
-			// From here on everything runs synchronously, so a session that closed
-			// while the body was read is seen as closed.
-			const session = this.sessions.get(id);
-			if (!session) {
-				const closed = this.closedSessions.get(id);
-				if (!closed || closed.key !== key) {
-					return textResponse(404, "Session not found", headers);
-				}
-				return textResponse(
-					410,
-					JSON.stringify(closed.closeEvent),
-					headers,
-					"application/json",
-				);
-			}
-			if (session.key !== key) {
-				return textResponse(404, "Session not found", headers);
-			}
-
-			// Liveness and acknowledgements only count once the key matched.
-			session.clientConnection.touch();
-
-			const cursorParameter = parameters.get(HttpTransportParameter.Cursor);
-			let cursor: number | null = null;
-			if (cursorParameter !== null) {
-				cursor = Number(cursorParameter);
-				if (!INTEGER.test(cursorParameter) || cursor >= session.nextSeq) {
-					return textResponse(400, "Invalid cursor", headers);
-				}
-				// A retried POST may carry an older cursor.
-				if (transport === null && cursor >= session.acked) {
-					session.ack(cursor);
-				}
-			}
-
-			if (parameters.get(HttpTransportParameter.Close) === "1") {
-				session.closedByClient();
-				return new Response(null, { status: 204, headers });
-			}
-
-			const { lines } = body;
-
-			if (transport !== null) {
-				if (!isTransport(transport) || cursor === null || lines.length > 0) {
-					return textResponse(400, "Invalid attach request", headers);
-				}
-				if (cursor < session.acked) {
-					return textResponse(409, "Cursor already acknowledged", headers);
-				}
-				return session.attach(transport, cursor, false, headers);
-			}
-
-			if (lines.length === 0) {
-				return new Response(null, { status: 204, headers });
-			}
-
-			const sequenceParameter = parameters.get(
-				HttpTransportParameter.Sequence,
-			);
-			if (
-				sequenceParameter === null ||
-				!INTEGER.test(sequenceParameter) ||
-				Number(sequenceParameter) === 0
-			) {
-				return textResponse(400, "Invalid sequence number", headers);
-			}
-
-			const sequence = Number(sequenceParameter);
-			if (sequence <= session.received) {
-				// Duplicate of a batch whose response was lost.
-				return new Response(null, { status: 204, headers });
-			}
-			if (sequence !== session.received + 1) {
-				return textResponse(400, "Sequence gap", headers);
-			}
-
-			if (
-				lines.some(
-					(line) => line === "" || line.length % 4 !== 0 || !BASE64.test(line),
-				)
-			) {
-				return textResponse(400, "Invalid message", headers);
-			}
-
-			session.received = sequence;
-			for (const line of lines) {
-				// A malformed message makes Hocuspocus close the connection; the rest
-				// of the batch must not keep hitting it.
-				if (session.readyState !== WsReadyStates.Open) {
-					break;
-				}
-				session.clientConnection.handleMessage(fromBase64(line));
-			}
-
-			return new Response(null, { status: 204, headers });
-		} catch (error) {
-			console.error(error);
-			return textResponse(500, "Internal server error", headers);
-		}
+		return withHeaders(response, { ...RESPONSE_HEADERS, ...cors });
 	}
 
 	/**
@@ -783,23 +321,19 @@ export class HttpFallback<Context = any> {
 		response: ServerResponse,
 		defaultContext?: Context,
 	): Promise<void> {
-		let webRequest: Request;
 		try {
-			webRequest = toWebRequest(request);
-		} catch {
-			response.writeHead(400, {
-				"Content-Type": "text/plain; charset=utf-8",
-				"Cache-Control": "no-store, no-transform",
-				"X-Content-Type-Options": "nosniff",
-			});
-			response.end("Bad request");
-			return;
-		}
+			let webRequest: Request | undefined;
+			try {
+				webRequest = toWebRequest(request);
+			} catch {
+				// A malformed Host header, or a method the fetch API refuses.
+			}
 
-		try {
 			await writeWebResponse(
 				response,
-				await this.fetch(webRequest, defaultContext),
+				webRequest
+					? await this.fetch(webRequest, defaultContext)
+					: withHeaders(text(400, "Bad request"), RESPONSE_HEADERS),
 			);
 		} catch (error) {
 			console.error(error);
@@ -813,15 +347,186 @@ export class HttpFallback<Context = any> {
 	destroy(): void {
 		this.destroyed = true;
 
-		for (const session of [...this.sessions.values()]) {
+		for (const session of this.sessions.values()) {
 			session.close(1001, "Going Away");
 		}
-
 		for (const closed of this.closedSessions.values()) {
 			clearTimeout(closed.timer);
 		}
-		this.sessions.clear();
 		this.closedSessions.clear();
+	}
+
+	/**
+	 * The CORS headers for a response to the request, or null when the request
+	 * comes from an origin that is not allowed.
+	 */
+	private corsHeaders(request: Request): Record<string, string> | null {
+		const { allowedOrigins, allowCredentials } = this.configuration;
+		if (allowedOrigins === "*") {
+			return { "Access-Control-Allow-Origin": "*" };
+		}
+
+		const origin = request.headers.get("origin");
+		if (origin === null) {
+			// Cross-site navigations and no-cors requests carry cookies but no
+			// Origin header.
+			const site = request.headers.get("sec-fetch-site");
+			return site === null || site === "same-origin" || site === "none"
+				? {}
+				: null;
+		}
+		if (!allowedOrigins.includes(origin)) {
+			return null;
+		}
+
+		return {
+			"Access-Control-Allow-Origin": origin,
+			Vary: "Origin",
+			...(allowCredentials && { "Access-Control-Allow-Credentials": "true" }),
+		};
+	}
+
+	private async route(
+		request: Request,
+		defaultContext?: Context,
+	): Promise<Response> {
+		if (this.destroyed) {
+			return text(503, "Server is shutting down");
+		}
+
+		if (request.method !== "GET" && request.method !== "POST") {
+			return text(405, "Method not allowed", { Allow: "GET, POST" });
+		}
+
+		const parameters = new URL(request.url).searchParams;
+		const id = parameters.get(HttpTransportParameter.SessionId);
+		if (id === null || !SESSION_ID.test(id)) {
+			return text(400, "Invalid session id");
+		}
+
+		return request.method === "GET"
+			? this.open(id, parameters, request, defaultContext)
+			: this.post(id, parameters, request);
+	}
+
+	/** A GET opens a session and is its first downstream response. */
+	private open(
+		id: string,
+		parameters: URLSearchParams,
+		request: Request,
+		defaultContext?: Context,
+	): Response {
+		const transport = parameters.get(HttpTransportParameter.Transport);
+		if (
+			!isTransport(transport) ||
+			parameters.has(HttpTransportParameter.Cursor) ||
+			parameters.has(HttpTransportParameter.Sequence) ||
+			parameters.has(HttpTransportParameter.Close)
+		) {
+			return text(400, "Invalid open request");
+		}
+
+		if (this.find(id)) {
+			return text(409, "Session exists");
+		}
+
+		if (!this.makeRoom()) {
+			return text(503, "Too many sessions");
+		}
+
+		return this.createSession(id, request, defaultContext).open(transport);
+	}
+
+	/**
+	 * A POST is a request of an open session, proven by the key in its body: a
+	 * batch of messages, a ping, a new downstream response, or the close.
+	 */
+	private async post(
+		id: string,
+		parameters: URLSearchParams,
+		request: Request,
+	): Promise<Response> {
+		const known = this.find(id);
+		if (!known) {
+			return notFound();
+		}
+
+		const { key } = known;
+		const lines = await readBody(
+			request,
+			this.configuration.maxPayload,
+			(line) => keysEqual(line, key),
+		);
+		if (lines instanceof Response) {
+			return lines;
+		}
+
+		// From here on everything runs synchronously. While the body was read,
+		// the session may have closed, and its id may even have been used again.
+		const session = this.find(id);
+		if (session?.key !== key) {
+			return notFound();
+		}
+		if (!(session instanceof HttpFallbackSession)) {
+			return new Response(JSON.stringify(session.closeEvent), {
+				status: 410,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		// Liveness and acknowledgements only count once the key matched.
+		session.clientConnection.touch();
+
+		const cursorParameter = parameters.get(HttpTransportParameter.Cursor);
+		let cursor: number | null = null;
+		if (cursorParameter !== null) {
+			cursor = Number(cursorParameter);
+			if (!INTEGER.test(cursorParameter) || !session.acknowledge(cursor)) {
+				return text(400, "Invalid cursor");
+			}
+		}
+
+		if (parameters.get(HttpTransportParameter.Close) === "1") {
+			session.closedByClient();
+			return noContent();
+		}
+
+		const transport = parameters.get(HttpTransportParameter.Transport);
+		if (transport !== null) {
+			if (!isTransport(transport) || cursor === null || lines.length > 0) {
+				return text(400, "Invalid attach request");
+			}
+			return (
+				session.attach(transport, cursor) ??
+				text(409, "Cursor already acknowledged")
+			);
+		}
+
+		// A ping: the key and the cursor were all it had to say.
+		if (lines.length === 0) {
+			return noContent();
+		}
+
+		const sequence = parameters.get(HttpTransportParameter.Sequence);
+		if (
+			sequence === null ||
+			!INTEGER.test(sequence) ||
+			Number(sequence) === 0
+		) {
+			return text(400, "Invalid sequence number");
+		}
+		if (!lines.every(isBase64)) {
+			return text(400, "Invalid message");
+		}
+		if (!session.receive(Number(sequence), lines)) {
+			return text(400, "Sequence gap");
+		}
+
+		return noContent();
+	}
+
+	private find(id: string): HttpFallbackSession | ClosedSession | undefined {
+		return this.sessions.get(id) ?? this.closedSessions.get(id);
 	}
 
 	/**
@@ -831,77 +536,81 @@ export class HttpFallback<Context = any> {
 	 * user out.
 	 */
 	private makeRoom(): boolean {
+		if (this.sessions.size < this.configuration.maxSessions) {
+			return true;
+		}
+
 		for (const session of this.sessions.values()) {
-			if (this.sessions.size < this.configuration.maxSessions) {
-				break;
-			}
 			if (!session.clientConnection.authenticated) {
 				session.close(ResetConnection.code, ResetConnection.reason);
+				return true;
 			}
 		}
 
-		return this.sessions.size < this.configuration.maxSessions;
+		return false;
 	}
 
 	private createSession(
 		id: string,
 		request: Request,
 		defaultContext?: Context,
-	): Session {
-		const session = new Session(
-			id,
-			this.configuration.maxPayload,
-			this.configuration.heartbeatInterval,
-			this.hocuspocus.configuration.timeout,
-			(closedSession, closeEvent) =>
-				this.retire(closedSession, closeEvent),
-		);
-		this.sessions.set(id, session);
-
-		// Hooks see the open request without the transport parameters.
+	): HttpFallbackSession {
+		// Hooks see the request that opened the session, without the transport
+		// parameters.
 		const url = new URL(request.url);
 		for (const name of [...url.searchParams.keys()]) {
 			if (name.startsWith("hp_")) {
 				url.searchParams.delete(name);
 			}
 		}
+		const hookRequest = new Request(url, { headers: request.headers });
 
-		session.clientConnection = this.hocuspocus.handleConnection(
-			session,
-			new Request(url, { headers: request.headers }),
-			defaultContext ?? ({} as Context),
-		);
+		const key = crypto.randomUUID();
+		const { timeout } = this.hocuspocus.configuration;
+		const session = new HttpFallbackSession({
+			key,
+			// Clients send a request on every heartbeat, so a heartbeat of at most
+			// half the idle timeout keeps a healthy session alive.
+			heartbeat: Math.min(
+				this.configuration.heartbeatInterval,
+				Math.max(1, Math.floor(timeout / 2)),
+			),
+			maxPayload: this.configuration.maxPayload,
+			timeout,
+			connect: (socket) =>
+				this.hocuspocus.handleConnection(socket, hookRequest, defaultContext),
+			onClose: (closeEvent) => this.retire(id, key, closeEvent),
+		});
+		this.sessions.set(id, session);
 
 		return session;
 	}
 
 	/**
-	 * Remove a closed session. One the server closed keeps answering 410 with
-	 * its close event for a while.
+	 * Forget a session that closed. One the server closed keeps answering 410
+	 * with its close event for a while.
 	 */
-	private retire(session: Session, closeEvent: CloseEvent | null): void {
-		this.sessions.delete(session.id);
+	private retire(id: string, key: string, closeEvent: CloseEvent | null): void {
+		this.sessions.delete(id);
 
 		if (!closeEvent || this.destroyed) {
 			return;
 		}
 
+		// At the limit the oldest entry makes room; its client gets 404 instead.
 		if (this.closedSessions.size >= this.configuration.maxSessions) {
-			const [oldestId, oldest] = this.closedSessions.entries().next()
-				.value as [string, ClosedSession];
-			clearTimeout(oldest.timer);
-			this.closedSessions.delete(oldestId);
+			for (const [oldestId, oldest] of this.closedSessions) {
+				clearTimeout(oldest.timer);
+				this.closedSessions.delete(oldestId);
+				break;
+			}
 		}
 
 		const timer = setTimeout(
-			() => this.closedSessions.delete(session.id),
+			() => this.closedSessions.delete(id),
 			CLOSED_SESSION_TTL,
 		);
 		timer.unref?.();
-		this.closedSessions.set(session.id, {
-			key: session.key,
-			closeEvent,
-			timer,
-		});
+		this.closedSessions.set(id, { key, closeEvent, timer });
 	}
 }

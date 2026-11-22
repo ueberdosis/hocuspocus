@@ -15,7 +15,10 @@ export const HttpTransportParameter = {
 } as const;
 
 /** Named events of the downstream event stream. */
-export const HttpTransportEvent = { Open: "hp-open", Close: "hp-close" } as const;
+export const HttpTransportEvent = {
+	Open: "hp-open",
+	Close: "hp-close",
+} as const;
 
 /** Text of the comment the server writes shortly after an event stream attaches. */
 export const HTTP_TRANSPORT_PROBE = "probe";

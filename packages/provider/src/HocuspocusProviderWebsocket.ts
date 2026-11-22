@@ -28,9 +28,8 @@ const FAILED_TRANSPORT_TTL = 300_000;
 
 const TRANSPORTS: HocuspocusTransport[] = ["websocket", "sse", "polling"];
 
-const DEFAULT_TRANSPORTS: HocuspocusTransport[] = ["websocket"];
-
-const DEFAULT_CONNECT_TIMEOUT = 10_000;
+// A longer delay overflows setTimeout, which then fires at once.
+const MAX_TIMEOUT = 2_147_483_647;
 
 export type HocuspocusWebSocket = WebSocket & { identifier: string };
 export type HocusPocusWebSocket = HocuspocusWebSocket;
@@ -146,8 +145,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		WebSocketPolyfill: undefined,
 		// TODO: this should depend on awareness.outdatedTime
 		messageReconnectTimeout: 30000,
-		transports: DEFAULT_TRANSPORTS,
-		connectTimeout: DEFAULT_CONNECT_TIMEOUT,
+		// WebSocket only
+		transports: ["websocket"],
+		// 10 seconds
+		connectTimeout: 10000,
 		// 1 second
 		delay: 1000,
 		// instant
@@ -189,6 +190,9 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	// Transport → time until which it is skipped.
 	private failedTransports = new Map<HocuspocusTransport, number>();
 
+	// Bounds the time a WebSocket takes to open and, once something was sent
+	// through it, to deliver its first message. Only used when there are other
+	// transports to turn to.
 	private connectTimer: ReturnType<typeof setTimeout> | null = null;
 
 	webSocketHandlers: { [key: string]: any } = {};
@@ -294,34 +298,30 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	public setConfiguration(
 		configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {},
 	): void {
-		this.configuration = { ...this.configuration, ...configuration };
+		const next = { ...this.configuration, ...configuration };
+		// An option that is passed as `undefined` keeps its value.
+		next.transports ??= this.configuration.transports;
+		next.connectTimeout ??= this.configuration.connectTimeout;
 
-		if (this.configuration.transports === undefined) {
-			this.configuration.transports = DEFAULT_TRANSPORTS;
-		}
-		if (this.configuration.connectTimeout === undefined) {
-			this.configuration.connectTimeout = DEFAULT_CONNECT_TIMEOUT;
-		}
-
-		const { transports, connectTimeout } = this.configuration;
 		if (
-			!Array.isArray(transports) ||
-			transports.length === 0 ||
-			!transports.every((transport) => TRANSPORTS.includes(transport))
+			!Array.isArray(next.transports) ||
+			next.transports.length === 0 ||
+			!next.transports.every((transport) => TRANSPORTS.includes(transport))
 		) {
 			throw new Error(
-				"transports must list at least one of: websocket, sse, polling",
+				`transports must list at least one of: ${TRANSPORTS.join(", ")}`,
 			);
 		}
-		// A larger delay overflows setTimeout and fires at once.
 		if (
-			typeof connectTimeout !== "number" ||
-			!Number.isFinite(connectTimeout) ||
-			connectTimeout < 1 ||
-			connectTimeout > 2147483647
+			typeof next.connectTimeout !== "number" ||
+			!(next.connectTimeout >= 1 && next.connectTimeout <= MAX_TIMEOUT)
 		) {
-			throw new Error("connectTimeout must be a number between 1 and 2147483647");
+			throw new Error(
+				`connectTimeout must be a number between 1 and ${MAX_TIMEOUT}`,
+			);
 		}
+
+		this.configuration = next;
 
 		if (!this.configuration.autoConnect) {
 			this.shouldConnect = false;
@@ -411,14 +411,17 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		const { identifier } = ws;
 		let opened = false;
 		let receivedMessage = false;
-		let connectTimerArmed = false;
 
+		// The socket failed. Returns whether the connection attempt moved on to
+		// the next transport; if not, the caller reports the failure.
 		const failOver = () => {
+			if (!receivedMessage) {
+				this.markTransportFailed(transport);
+			}
 			if (opened || remaining.length === 0 || !this.shouldConnect) {
 				return false;
 			}
 
-			this.markTransportFailed(transport);
 			this.cleanupWebSocket();
 			try {
 				this.openTransport(remaining, reject);
@@ -428,58 +431,30 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			return true;
 		};
 
-		const armConnectTimer = (delay: number) => {
-			this.clearConnectTimer();
-			connectTimerArmed = true;
-			this.connectTimer = setTimeout(() => {
-				this.connectTimer = null;
-				connectTimerArmed = false;
-				if (failOver()) {
-					return;
-				}
-				this.markTransportFailed(transport);
-				this.emit("close", {
-					event: { code: 1006, reason: "Connect timeout" },
-				});
-			}, delay);
-		};
-
 		const onMessageHandler = (payload: any) => {
 			if (!receivedMessage) {
 				receivedMessage = true;
-				if (connectTimerArmed) {
-					this.clearConnectTimer();
-				}
+				this.clearConnectTimer();
 				this.failedTransports.delete(transport);
 			}
 			this.emit("message", payload);
 		};
 		const onCloseHandler = (payload: any) => {
-			if (payload?.code === 1006) {
-				if (failOver()) {
-					return;
-				}
-				if (!receivedMessage) {
-					this.markTransportFailed(transport);
-				}
+			// 1006 says that the connection failed. Any other code is a decision
+			// of the server, which the next transport would get as well.
+			if (payload?.code === 1006 && failOver()) {
+				return;
 			}
 			this.emit("close", { event: payload });
 		};
 		const onOpenHandler = (payload: any) => {
 			opened = true;
+			this.clearConnectTimer();
 			this.emit("open", payload);
-			// A WebSocket whose upgrade passes but whose frames are dropped never
-			// delivers a message and would otherwise hang forever.
-			if (connectTimerArmed) {
-				armConnectTimer(this.configuration.messageReconnectTimeout);
-			}
 		};
 		const onErrorHandler = (err: any) => {
 			if (failOver()) {
 				return;
-			}
-			if (!receivedMessage) {
-				this.markTransportFailed(transport);
 			}
 			reject(err);
 		};
@@ -499,11 +474,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		// HTTP sockets enforce their own deadline; a WebSocket-only configuration
 		// waits for the socket as long as it takes.
-		if (
-			transport === "websocket" &&
-			this.configuration.transports.length > 1
-		) {
-			armConnectTimer(this.configuration.connectTimeout);
+		if (transport === "websocket" && this.configuration.transports.length > 1) {
+			this.armConnectTimer(this.configuration.connectTimeout);
 		}
 	}
 
@@ -515,6 +487,41 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			return;
 		}
 		this.failedTransports.set(transport, Date.now() + FAILED_TRANSPORT_TTL);
+	}
+
+	/**
+	 * Give the current WebSocket `delay` ms, after which it counts as failed:
+	 * its `close` listener is called as if it had closed with 1006. The timer
+	 * never outlives its socket, `cleanupWebSocket` clears it.
+	 */
+	private armConnectTimer(delay: number) {
+		this.clearConnectTimer();
+		this.connectTimer = setTimeout(() => {
+			this.connectTimer = null;
+			if (this.webSocket) {
+				this.webSocketHandlers[this.webSocket.identifier]?.close({
+					code: 1006,
+					reason: "Connect timeout",
+				});
+			}
+		}, delay);
+	}
+
+	/**
+	 * A WebSocket whose upgrade passes but whose frames are dropped never
+	 * answers, and would be waited for forever. So with other transports to
+	 * turn to, a WebSocket that was sent something has `messageReconnectTimeout`
+	 * to deliver its first message.
+	 */
+	private expectFirstMessage() {
+		if (
+			this.connectionAttempt &&
+			!this.connectTimer &&
+			this.transport === "websocket" &&
+			this.configuration.transports.length > 1
+		) {
+			this.armConnectTimer(this.configuration.messageReconnectTimeout);
+		}
 	}
 
 	private clearConnectTimer() {
@@ -793,6 +800,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	send(message: any) {
 		if (this.webSocket?.readyState === WsReadyStates.Open) {
 			this.webSocket.send(message);
+			this.expectFirstMessage();
 		} else {
 			this.addToQueue(message);
 		}

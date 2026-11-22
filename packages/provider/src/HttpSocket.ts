@@ -15,82 +15,123 @@ const RETRY_MAX_DELAY = 5_000;
 // Browsers cap the bodies of all in-flight keepalive requests at 64 KiB.
 const KEEPALIVE_MAX_BODY = 60_000;
 
+// The slowest upload a POST is given time for, in bytes per second.
+const MIN_UPLOAD_RATE = 16 * 1024;
+
 type Listener = (event: unknown) => void;
 
-type StreamItem =
-	| { comment: string }
-	| { event: string | null; id: string | null; data: string | null };
+interface StreamEvent {
+	event: string | null;
+	id: string | null;
+	data: string | null;
+}
 
+type StreamItem = { comment: string } | StreamEvent;
+
+/** Replaces the deadline of a request with one `timeout` ms from now. */
+type Watchdog = (timeout: number) => void;
+
+/** Receives the response of a request. */
+type Consume<T> = (response: Response, watchdog: Watchdog) => Promise<T>;
+
+/** A run of failed requests in one direction. */
 interface RetryState {
 	failingSince: number | null;
 	attempt: number;
 }
 
-interface PendingPost {
-	/** Batch sequence number, null for a ping. */
-	seq: number | null;
-	body: string;
-}
-
-/** A request the server answered with a status that ends the socket. */
-class StatusError extends Error {}
-
 /**
- * Parse `text/event-stream` text that arrives in arbitrary chunks. Comments
- * and events are reported in order; an incomplete block waits for the next
- * chunk.
+ * Parse what `HttpFallback` writes downstream, which is valid
+ * `text/event-stream` with `\n` line endings. The text arrives in arbitrary
+ * chunks; comments and events are reported in order.
  */
 function createEventStreamParser(
 	onItem: (item: StreamItem) => void,
 ): (text: string) => void {
-	let buffer = "";
-	let searchFrom = 0;
+	// The line that has not ended yet, in the pieces it arrived in. They are
+	// joined once the line ends: appending each chunk to one string would copy
+	// a large message again with every chunk.
+	const pieces: string[] = [];
+	let event: string | null = null;
+	let id: string | null = null;
+	let data: string | null = null;
 
-	return (text) => {
-		buffer += text;
-		let end = buffer.indexOf("\n\n", searchFrom);
-		while (end !== -1) {
-			const block = buffer.slice(0, end);
-			buffer = buffer.slice(end + 2);
-
-			let event: string | null = null;
-			let id: string | null = null;
-			let data: string | null = null;
-			let hasField = false;
-			for (const rawLine of block.split("\n")) {
-				const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
-				if (line.startsWith(":")) {
-					onItem({ comment: line.slice(1) });
-					continue;
-				}
-
-				const colon = line.indexOf(":");
-				const field = colon === -1 ? line : line.slice(0, colon);
-				let value = colon === -1 ? "" : line.slice(colon + 1);
-				if (value.startsWith(" ")) {
-					value = value.slice(1);
-				}
-
-				if (field === "event") {
-					event = value;
-					hasField = true;
-				} else if (field === "id") {
-					id = value;
-					hasField = true;
-				} else if (field === "data") {
-					data = data === null ? value : `${data}\n${value}`;
-					hasField = true;
-				}
-			}
-			if (hasField) {
+	const parseLine = (line: string) => {
+		// A blank line ends an event.
+		if (line === "") {
+			if (event !== null || id !== null || data !== null) {
 				onItem({ event, id, data });
 			}
-
-			end = buffer.indexOf("\n\n");
+			event = null;
+			id = null;
+			data = null;
+			return;
 		}
-		// A block separator may straddle two chunks.
-		searchFrom = Math.max(0, buffer.length - 1);
+
+		if (line.startsWith(":")) {
+			onItem({ comment: line.slice(1) });
+			return;
+		}
+
+		const colon = line.indexOf(":");
+		const field = colon === -1 ? line : line.slice(0, colon);
+		// A space after the colon belongs to the syntax, not to the value.
+		const value =
+			colon === -1
+				? ""
+				: line.slice(line[colon + 1] === " " ? colon + 2 : colon + 1);
+
+		if (field === "event") {
+			event = value;
+		} else if (field === "id") {
+			id = value;
+		} else if (field === "data") {
+			data = data === null ? value : `${data}\n${value}`;
+		}
 	};
+
+	return (text) => {
+		let start = 0;
+		for (
+			let end = text.indexOf("\n");
+			end !== -1;
+			end = text.indexOf("\n", start)
+		) {
+			pieces.push(text.slice(start, end));
+			parseLine(pieces.join(""));
+			pieces.length = 0;
+			start = end + 1;
+		}
+		if (start < text.length) {
+			pieces.push(text.slice(start));
+		}
+	};
+}
+
+/**
+ * Read the body of a downstream response to its end and report its items.
+ * `onChunk` runs after every chunk of the body.
+ */
+async function readItems(
+	response: Response,
+	onItem: (item: StreamItem) => void,
+	onChunk: () => void,
+): Promise<void> {
+	if (!response.body) {
+		throw new Error("Response without a body");
+	}
+
+	const parse = createEventStreamParser(onItem);
+	const reader = response.body.getReader();
+	const decoder = new TextDecoder();
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			return;
+		}
+		parse(decoder.decode(value, { stream: true }));
+		onChunk();
+	}
 }
 
 function parseCloseEvent(text: string): { code: number; reason: string } {
@@ -105,6 +146,20 @@ function parseCloseEvent(text: string): { code: number; reason: string } {
 	return { code: 1006, reason: "Invalid close event" };
 }
 
+function isPositive(value: unknown): value is number {
+	return typeof value === "number" && value > 0 && Number.isFinite(value);
+}
+
+/** Why a request failed. `fetch` often keeps the actual reason in `cause`. */
+function reasonOf(error: unknown): string {
+	if (!(error instanceof Error)) {
+		return String(error);
+	}
+	return error.cause instanceof Error
+		? `${error.message}: ${error.cause.message}`
+		: error.message;
+}
+
 /**
  * Client side of the HTTP fallback transports of `@hocuspocus/server`
  * (`HttpFallback`): server-sent events or long-polling downstream, POST
@@ -113,6 +168,9 @@ function parseCloseEvent(text: string): { code: number; reason: string } {
  *
  * Uses `fetch` with a stream reader instead of `EventSource`, which cannot
  * POST, hides the status code and is not a global in Node.js.
+ *
+ * Nothing here runs on a timer of its own: browsers throttle timers in
+ * background tabs. Timers only bound how long a request or a retry may take.
  */
 export class HttpSocket {
 	binaryType = "arraybuffer";
@@ -120,6 +178,8 @@ export class HttpSocket {
 	identifier = 0;
 
 	readyState: number = WsReadyStates.Connecting;
+
+	private readonly url: string;
 
 	private readonly transport: HttpTransportName;
 
@@ -129,14 +189,14 @@ export class HttpSocket {
 
 	private readonly listeners = new Map<string, Set<Listener>>();
 
+	/** The requests in flight; aborted when the socket closes. */
 	private readonly controllers = new Set<AbortController>();
 
-	private readonly timers = new Set<ReturnType<typeof setTimeout>>();
+	/** The retries that wait for their delay; dropped when the socket closes. */
+	private readonly retryTimers = new Set<ReturnType<typeof setTimeout>>();
 
-	// Assigned in the constructor; a socket without it never sends a request.
-	private baseUrl!: URL;
-
-	private key: string | null = null;
+	/** The secret of the session; empty until the server has told it. */
+	private key = "";
 
 	private heartbeatInterval = 0;
 
@@ -148,15 +208,13 @@ export class HttpSocket {
 	/** Sequence number of the last batch the server accepted. */
 	private sendSeq = 0;
 
+	/** The messages that wait for the next POST, base64 encoded. */
 	private queue: string[] = [];
 
 	private flushScheduled = false;
 
-	private pendingPost: PendingPost | null = null;
-
-	private upstreamBusy = false;
-
-	private pingWanted = false;
+	/** A POST is in flight or waits to be repeated. */
+	private posting = false;
 
 	private readonly downstreamRetry: RetryState = {
 		failingSince: null,
@@ -168,29 +226,18 @@ export class HttpSocket {
 		attempt: 0,
 	};
 
-	private finished = false;
-
 	constructor(
 		url: string,
 		options: { transport: HttpTransportName; connectTimeout: number },
 	) {
+		this.url = url.replace(/^ws/i, "http");
 		this.transport = options.transport;
 		this.connectTimeout = options.connectTimeout;
 
-		try {
-			if (typeof fetch !== "function") {
-				throw new Error("fetch is not available");
-			}
-			this.baseUrl = new URL(url.replace(/^ws/i, "http"));
-		} catch (error) {
-			this.finish(1006, error instanceof Error ? error.message : String(error), true);
-			return;
-		}
-
 		if (this.transport === "sse") {
-			void this.attachEventStream();
+			void this.stream();
 		} else {
-			void this.openPolling();
+			void this.poll();
 		}
 	}
 
@@ -216,11 +263,12 @@ export class HttpSocket {
 			toBase64(data instanceof Uint8Array ? data : new Uint8Array(data)),
 		);
 
+		// One POST for all the messages of this tick.
 		if (!this.flushScheduled) {
 			this.flushScheduled = true;
 			queueMicrotask(() => {
 				this.flushScheduled = false;
-				this.pumpUpstream();
+				this.pump();
 			});
 		}
 	}
@@ -229,53 +277,101 @@ export class HttpSocket {
 		this.finish(code ?? 1005, reason ?? "", true);
 	}
 
+	private get closed(): boolean {
+		return this.readyState === WsReadyStates.Closed;
+	}
+
 	private dispatch(type: string, event: unknown): void {
-		const listeners = this.listeners.get(type);
-		if (!listeners) {
-			return;
-		}
-		for (const listener of [...listeners]) {
-			// A listener removed by an earlier one is not called anymore.
-			if (listeners.has(listener)) {
+		for (const listener of this.listeners.get(type) ?? []) {
+			try {
 				listener(event);
+			} catch (error) {
+				// As with a WebSocket, a listener that throws is reported and does
+				// not break the socket.
+				queueMicrotask(() => {
+					throw error;
+				});
 			}
 		}
 	}
 
-	private setTimer(callback: () => void, delay: number) {
-		const timer = setTimeout(() => {
-			this.timers.delete(timer);
-			callback();
-		}, delay);
-		this.timers.add(timer);
-		return timer;
-	}
-
-	private clearTimer(timer: ReturnType<typeof setTimeout> | undefined): void {
-		if (timer !== undefined) {
-			clearTimeout(timer);
-			this.timers.delete(timer);
-		}
-	}
-
-	private requestUrl(parameters: Record<string, string>): URL {
-		const url = new URL(this.baseUrl);
+	private requestUrl(parameters: Record<string, string | number>): URL {
+		const url = new URL(this.url);
 		url.searchParams.set(HttpTransportParameter.SessionId, this.sessionId);
 		for (const [name, value] of Object.entries(parameters)) {
-			url.searchParams.set(name, value);
+			url.searchParams.set(name, String(value));
 		}
 		return url;
 	}
 
 	/**
-	 * End the socket once: abort every request, optionally tell the server, then
-	 * dispatch `error` (only for a socket that failed to open) and `close`.
+	 * Send a request and hand its response to `consume`. The request, with its
+	 * response body, is aborted when the socket closes and when its deadline
+	 * passes: `timeout` ms from now, unless `consume` moves it.
+	 */
+	private async request<T>(
+		parameters: Record<string, string | number>,
+		init: RequestInit,
+		timeout: number,
+		consume: Consume<T>,
+	): Promise<T> {
+		const controller = new AbortController();
+		this.controllers.add(controller);
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const watchdog = (delay: number) => {
+			clearTimeout(timer);
+			timer = setTimeout(
+				() => controller.abort(new Error("Request timed out")),
+				delay,
+			);
+		};
+		watchdog(timeout);
+
+		try {
+			const response = await fetch(this.requestUrl(parameters), {
+				...init,
+				// A redirect would hand the key, and the token that travels with
+				// it, to another address.
+				redirect: "error",
+				signal: controller.signal,
+			});
+			return await consume(response, watchdog);
+		} finally {
+			clearTimeout(timer);
+			// Releases a response body that was not read to its end.
+			controller.abort();
+			this.controllers.delete(controller);
+		}
+	}
+
+	/**
+	 * Request a downstream response: with the GET that opens the session, or
+	 * with a POST that proves the key and resumes after the cursor.
+	 */
+	private requestDownstream<T>(
+		timeout: number,
+		consume: Consume<T>,
+	): Promise<T> {
+		const transport = { [HttpTransportParameter.Transport]: this.transport };
+
+		return this.key === ""
+			? this.request(transport, {}, timeout, consume)
+			: this.request(
+					{ ...transport, [HttpTransportParameter.Cursor]: this.cursor },
+					{ method: "POST", body: this.key },
+					timeout,
+					consume,
+				);
+	}
+
+	/**
+	 * Close the socket, once: abort every request, optionally tell the server,
+	 * then dispatch `error` (only for a socket that failed to open) and `close`.
 	 */
 	private finish(code: number, reason: string, notifyServer: boolean): void {
-		if (this.finished) {
+		if (this.closed) {
 			return;
 		}
-		this.finished = true;
 
 		const wasConnecting = this.readyState === WsReadyStates.Connecting;
 		this.readyState = WsReadyStates.Closed;
@@ -283,17 +379,17 @@ export class HttpSocket {
 		for (const controller of this.controllers) {
 			controller.abort();
 		}
-		this.controllers.clear();
-		for (const timer of this.timers) {
+		for (const timer of this.retryTimers) {
 			clearTimeout(timer);
 		}
-		this.timers.clear();
+		this.retryTimers.clear();
 
-		if (notifyServer && this.key !== null) {
-			fetch(this.requestUrl({ [HttpTransportParameter.Close]: "1" }), {
+		if (notifyServer && this.key !== "") {
+			fetch(this.requestUrl({ [HttpTransportParameter.Close]: 1 }), {
 				method: "POST",
 				body: this.key,
 				keepalive: true,
+				redirect: "error",
 			}).catch(() => {});
 		}
 
@@ -306,22 +402,35 @@ export class HttpSocket {
 	}
 
 	/**
-	 * Delay before the next attempt of a failed request, or null once failures
-	 * have lasted `connectTimeout`.
+	 * A request failed. Before the socket has opened that is final, so the
+	 * provider can move on to its next transport. Afterwards the request is
+	 * repeated, with growing delays, until requests have been failing for
+	 * `connectTimeout`.
 	 */
-	private nextRetryDelay(state: RetryState): number | null {
+	private retry(state: RetryState, error: unknown, again: () => void): void {
+		if (this.closed) {
+			return;
+		}
+
 		const now = Date.now();
-		if (state.failingSince === null) {
-			state.failingSince = now;
-		} else if (now - state.failingSince >= this.connectTimeout) {
-			return null;
+		state.failingSince ??= now;
+		if (
+			this.readyState !== WsReadyStates.Open ||
+			now - state.failingSince >= this.connectTimeout
+		) {
+			this.finish(1006, reasonOf(error), true);
+			return;
 		}
 
 		const delay =
 			Math.random() *
 			Math.min(RETRY_MAX_DELAY, RETRY_BASE_DELAY * 2 ** state.attempt);
 		state.attempt += 1;
-		return delay;
+		const timer = setTimeout(() => {
+			this.retryTimers.delete(timer);
+			again();
+		}, delay);
+		this.retryTimers.add(timer);
 	}
 
 	private resetRetry(state: RetryState): void {
@@ -330,32 +439,35 @@ export class HttpSocket {
 	}
 
 	/**
-	 * Apply the status of a request made after open. Throws a `StatusError`
-	 * after ending the socket for a 4xx; returns for 2xx; throws a plain error
-	 * (retried) otherwise.
+	 * Throws unless the response has the expected status. A status that says
+	 * the session of an open socket is over closes the socket first; any other
+	 * failure is left to `retry`.
 	 */
-	private async checkStatus(response: Response, expected: number): Promise<void> {
+	private async checkStatus(
+		response: Response,
+		expected: number,
+	): Promise<void> {
 		const { status } = response;
 		if (status === expected) {
 			return;
 		}
 
-		if (status === 404) {
-			this.finish(1006, "Session not found", false);
-		} else if (status === 410) {
-			const { code, reason } = parseCloseEvent(
-				await response.text().catch(() => ""),
-			);
-			this.finish(code, reason, false);
-		} else if (status === 413) {
-			this.finish(1009, "Message Too Big", true);
-		} else if (status >= 400 && status < 500) {
-			this.finish(1006, `Unexpected status ${status}`, true);
-		} else {
-			throw new Error(`Unexpected status ${status}`);
+		if (this.readyState === WsReadyStates.Open) {
+			if (status === 404) {
+				this.finish(1006, "Session not found", false);
+			} else if (status === 410) {
+				const { code, reason } = parseCloseEvent(
+					await response.text().catch(() => ""),
+				);
+				this.finish(code, reason, false);
+			} else if (status === 413) {
+				this.finish(1009, "Message Too Big", true);
+			} else if (status >= 400 && status < 500) {
+				this.finish(1006, `Unexpected status ${status}`, true);
+			}
 		}
 
-		throw new StatusError(`Status ${status}`);
+		throw new Error(`Unexpected status ${status}`);
 	}
 
 	private open(): void {
@@ -364,19 +476,16 @@ export class HttpSocket {
 	}
 
 	private readOpenPayload(data: string | null): void {
-		const payload: Partial<HttpTransportOpenPayload> = JSON.parse(
-			data ?? "null",
-		) ?? {};
-		const { key, heartbeatInterval, maxPayload } = payload;
+		const {
+			key,
+			heartbeatInterval,
+			maxPayload,
+		}: Partial<HttpTransportOpenPayload> = JSON.parse(data ?? "null") ?? {};
 		if (
 			typeof key !== "string" ||
 			key === "" ||
-			typeof heartbeatInterval !== "number" ||
-			!Number.isFinite(heartbeatInterval) ||
-			heartbeatInterval <= 0 ||
-			typeof maxPayload !== "number" ||
-			!Number.isFinite(maxPayload) ||
-			maxPayload <= 0
+			!isPositive(heartbeatInterval) ||
+			!isPositive(maxPayload)
 		) {
 			throw new Error("Invalid open event");
 		}
@@ -387,415 +496,241 @@ export class HttpSocket {
 	}
 
 	/**
-	 * Handle one item of a downstream body. Throws when the stream is invalid;
-	 * the caller fails the request.
+	 * Handle an event of a downstream response. Throws when it breaks the
+	 * protocol; the request then counts as failed.
 	 */
-	private handleItem(item: StreamItem): void {
-		if (this.finished) {
+	private handleEvent({ event, id, data }: StreamEvent): void {
+		// Nothing is dispatched after the socket closed, be it by a close event.
+		if (this.closed) {
 			return;
 		}
 
-		if ("comment" in item) {
-			return;
-		}
-
-		if (item.event === HttpTransportEvent.Open) {
-			if (this.key === null) {
-				this.readOpenPayload(item.data);
+		if (event === HttpTransportEvent.Open) {
+			if (this.key === "") {
+				this.readOpenPayload(data);
+				// An event stream has to deliver its probe first.
+				if (this.transport === "polling") {
+					this.open();
+				}
 			}
 			return;
 		}
 
-		if (item.event === HttpTransportEvent.Close) {
-			const { code, reason } = parseCloseEvent(item.data ?? "");
+		if (event === HttpTransportEvent.Close) {
+			const { code, reason } = parseCloseEvent(data ?? "");
 			this.finish(code, reason, false);
 			return;
 		}
 
-		if (
-			item.event !== null ||
-			item.id === null ||
-			item.data === null ||
-			this.readyState !== WsReadyStates.Open
-		) {
+		// Not a message: an event this version does not know.
+		if (event !== null || id === null || data === null) {
 			return;
 		}
 
-		const id = Number(item.id);
-		// Replay of a message already processed.
-		if (!(id > this.cursor)) {
+		if (this.readyState !== WsReadyStates.Open) {
+			throw new Error("Message before the session opened");
+		}
+
+		// Processed before: the server repeats what a lost response carried.
+		const messageId = Number(id);
+		if (!(messageId > this.cursor)) {
 			return;
 		}
 
-		let data: Uint8Array;
+		let message: Uint8Array;
 		try {
-			data = fromBase64(item.data);
+			message = fromBase64(data);
 		} catch {
 			this.finish(1006, "Invalid message", true);
 			return;
 		}
 
-		this.cursor = id;
-		this.dispatch("message", { type: "message", data: data.buffer });
+		this.cursor = messageId;
+		this.dispatch("message", { type: "message", data: message.buffer });
 	}
 
 	/**
-	 * Open (first call) or resume (later calls) the event stream. The socket
-	 * opens once the stream delivered both the open event and the probe
-	 * comment, which proves that the path does not buffer the response.
+	 * Keep an event stream open. The first one opens the session, later ones
+	 * resume it after the cursor.
 	 */
-	private async attachEventStream(): Promise<void> {
-		const opening = this.key === null;
-		const controller = new AbortController();
-		this.controllers.add(controller);
-		const deadline = this.setTimer(
-			() => controller.abort(),
-			this.connectTimeout,
-		);
-		let silence: ReturnType<typeof setTimeout> | undefined;
-		let probed = false;
+	private async stream(): Promise<void> {
+		try {
+			await this.requestDownstream(this.connectTimeout, (response, watchdog) =>
+				this.readStream(response, watchdog),
+			);
+		} catch (error) {
+			this.retry(this.downstreamRetry, error, () => this.stream());
+		}
+	}
 
-		const parse = createEventStreamParser((item) => {
-			if (this.finished) {
-				return;
-			}
+	/**
+	 * Process an event stream until it fails; it does not end otherwise.
+	 *
+	 * The socket only opens once the stream has delivered the probe, which the
+	 * server writes a moment after the start: a proxy that buffers the response
+	 * never gets there, and the provider moves on to long-polling.
+	 */
+	private async readStream(
+		response: Response,
+		watchdog: Watchdog,
+	): Promise<never> {
+		await this.checkStatus(response, 200);
+		// A server without the HTTP transports answers with a greeting.
+		if (
+			!response.headers.get("content-type")?.startsWith("text/event-stream")
+		) {
+			throw new Error("Not an event stream");
+		}
 
-			if ("comment" in item && item.comment === HTTP_TRANSPORT_PROBE) {
-				probed = true;
-				this.clearTimer(deadline);
-				this.resetRetry(this.downstreamRetry);
-				if (this.readyState === WsReadyStates.Connecting) {
-					if (this.key === null) {
-						throw new Error("Event stream did not open a session");
+		// How long the stream may stay silent. Once its probe proved that nothing
+		// buffers it, that is the time between two heartbeats.
+		let patience = this.connectTimeout;
+
+		await readItems(
+			response,
+			(item) => {
+				if (!("comment" in item)) {
+					this.handleEvent(item);
+				} else if (item.comment === HTTP_TRANSPORT_PROBE) {
+					if (this.readyState === WsReadyStates.Connecting) {
+						if (this.key === "") {
+							throw new Error("Event stream did not open a session");
+						}
+						this.open();
 					}
-					this.open();
+					patience = this.heartbeatInterval + this.connectTimeout;
+					this.resetRetry(this.downstreamRetry);
+				} else if (item.comment === "") {
+					// A heartbeat. The answer tells the server that the client is
+					// alive, and what it has processed.
+					this.pump(true);
 				}
-				return;
-			}
-
-			if ("comment" in item && item.comment === "") {
-				this.requestPing();
-				return;
-			}
-
-			this.handleItem(item);
-		});
-
-		try {
-			const response = await fetch(
-				this.requestUrl(
-					opening
-						? { [HttpTransportParameter.Transport]: "sse" }
-						: {
-								[HttpTransportParameter.Transport]: "sse",
-								[HttpTransportParameter.Cursor]: String(this.cursor),
-							},
-				),
-				opening
-					? { signal: controller.signal }
-					: {
-							method: "POST",
-							body: this.key as string,
-							signal: controller.signal,
-						},
-			);
-			if (this.finished) {
-				return;
-			}
-
-			if (!opening) {
-				await this.checkStatus(response, 200);
-			}
-			if (
-				response.status !== 200 ||
-				!response.body ||
-				!response.headers.get("content-type")?.startsWith("text/event-stream")
-			) {
-				throw new Error(`Unexpected event stream response (${response.status})`);
-			}
-
-			const reader = response.body.getReader();
-			const decoder = new TextDecoder();
-			while (true) {
-				const { done, value } = await reader.read();
-				if (this.finished) {
-					return;
-				}
-				if (done) {
-					throw new Error("Event stream ended");
-				}
-
-				parse(decoder.decode(value, { stream: true }));
-
-				if (probed && !this.finished) {
-					this.clearTimer(silence);
-					silence = this.setTimer(
-						() => controller.abort(),
-						this.heartbeatInterval + this.connectTimeout,
-					);
-				}
-			}
-		} catch (error) {
-			if (this.finished || error instanceof StatusError) {
-				return;
-			}
-
-			const reason = error instanceof Error ? error.message : String(error);
-			if (this.readyState === WsReadyStates.Connecting) {
-				this.finish(1006, reason, true);
-				return;
-			}
-
-			const delay = this.nextRetryDelay(this.downstreamRetry);
-			if (delay === null) {
-				this.finish(1006, reason, true);
-				return;
-			}
-			this.setTimer(() => this.attachEventStream(), delay);
-		} finally {
-			this.clearTimer(deadline);
-			this.clearTimer(silence);
-			controller.abort();
-			this.controllers.delete(controller);
-		}
-	}
-
-	private async openPolling(): Promise<void> {
-		const controller = new AbortController();
-		this.controllers.add(controller);
-		const deadline = this.setTimer(
-			() => controller.abort(),
-			this.connectTimeout,
+			},
+			() => watchdog(patience),
 		);
 
-		try {
-			const response = await fetch(
-				this.requestUrl({ [HttpTransportParameter.Transport]: "polling" }),
-				{ signal: controller.signal },
-			);
-			if (this.finished) {
-				return;
-			}
-			if (response.status !== 200) {
-				throw new Error(`Unexpected status ${response.status}`);
-			}
-
-			const text = await response.text();
-			if (this.finished) {
-				return;
-			}
-
-			createEventStreamParser((item) => {
-				this.handleItem(item);
-				if (
-					!this.finished &&
-					this.key !== null &&
-					this.readyState === WsReadyStates.Connecting
-				) {
-					this.open();
-				}
-			})(text);
-
-			if (this.finished) {
-				return;
-			}
-			if (this.key === null) {
-				throw new Error("Poll did not open a session");
-			}
-		} catch (error) {
-			this.finish(
-				1006,
-				error instanceof Error ? error.message : String(error),
-				true,
-			);
-			return;
-		} finally {
-			this.clearTimer(deadline);
-			controller.abort();
-			this.controllers.delete(controller);
-		}
-
-		void this.poll();
+		throw new Error("Event stream ended");
 	}
 
+	/**
+	 * Request the messages after the cursor, again and again. The server holds
+	 * a poll until it has something to say, a heartbeat at the least. The first
+	 * poll opens the session.
+	 */
 	private async poll(): Promise<void> {
-		const controller = new AbortController();
-		this.controllers.add(controller);
-		const deadline = this.setTimer(
-			() => controller.abort(),
-			this.heartbeatInterval + this.connectTimeout,
-		);
-
 		try {
-			const response = await fetch(
-				this.requestUrl({
-					[HttpTransportParameter.Transport]: "polling",
-					[HttpTransportParameter.Cursor]: String(this.cursor),
-				}),
-				{
-					method: "POST",
-					body: this.key as string,
-					signal: controller.signal,
-				},
+			await this.requestDownstream(
+				this.key === ""
+					? this.connectTimeout
+					: this.heartbeatInterval + this.connectTimeout,
+				(response, watchdog) => this.readPoll(response, watchdog),
 			);
-			if (this.finished) {
-				return;
-			}
-			await this.checkStatus(response, 200);
-
-			const text = await response.text();
-			if (this.finished) {
-				return;
-			}
-
 			this.resetRetry(this.downstreamRetry);
-			createEventStreamParser((item) => this.handleItem(item))(text);
 		} catch (error) {
-			if (this.finished || error instanceof StatusError) {
-				return;
-			}
-
-			const delay = this.nextRetryDelay(this.downstreamRetry);
-			if (delay === null) {
-				this.finish(
-					1006,
-					error instanceof Error ? error.message : String(error),
-					true,
-				);
-				return;
-			}
-			this.setTimer(() => this.poll(), delay);
+			this.retry(this.downstreamRetry, error, () => this.poll());
 			return;
-		} finally {
-			this.clearTimer(deadline);
-			controller.abort();
-			this.controllers.delete(controller);
 		}
 
-		if (!this.finished) {
+		if (!this.closed) {
 			void this.poll();
 		}
 	}
 
-	/**
-	 * Acknowledge and prove liveness after a heartbeat, unless a POST is in
-	 * flight: that POST is the same proof.
-	 */
-	private requestPing(): void {
-		if (this.upstreamBusy || this.readyState !== WsReadyStates.Open) {
-			return;
-		}
-		this.pingWanted = true;
-		this.pumpUpstream();
-	}
+	private async readPoll(
+		response: Response,
+		watchdog: Watchdog,
+	): Promise<void> {
+		await this.checkStatus(response, 200);
 
-	/**
-	 * Start the next POST: the batch that failed, else queued messages, else a
-	 * requested ping. One POST is in flight at a time.
-	 */
-	private pumpUpstream(): void {
-		if (
-			this.finished ||
-			this.upstreamBusy ||
-			this.readyState !== WsReadyStates.Open
-		) {
-			return;
-		}
-
-		const key = this.key as string;
-
-		if (!this.pendingPost) {
-			if (this.queue.length > 0) {
-				let length = key.length;
-				let count = 0;
-				for (const line of this.queue) {
-					if (length + 1 + line.length > this.maxPayload) {
-						break;
-					}
-					length += 1 + line.length;
-					count += 1;
+		let items = 0;
+		await readItems(
+			response,
+			(item) => {
+				items += 1;
+				if (!("comment" in item)) {
+					this.handleEvent(item);
 				}
-				if (count === 0) {
-					this.finish(1009, "Message Too Big", true);
-					return;
-				}
-
-				const lines = this.queue.splice(0, count);
-				this.pendingPost = {
-					seq: this.sendSeq + 1,
-					body: [key, ...lines].join("\n"),
-				};
-			} else if (this.pingWanted) {
-				this.pendingPost = { seq: null, body: key };
-			} else {
-				return;
-			}
-			this.pingWanted = false;
-		}
-
-		this.upstreamBusy = true;
-		void this.post(this.pendingPost);
-	}
-
-	private async post(pending: PendingPost): Promise<void> {
-		const controller = new AbortController();
-		this.controllers.add(controller);
-		const deadline = this.setTimer(
-			() => controller.abort(),
-			this.connectTimeout,
+			},
+			// The hold is over: from here on the body has to keep arriving.
+			() => watchdog(this.connectTimeout),
 		);
 
-		const parameters: Record<string, string> = {
-			[HttpTransportParameter.Cursor]: String(this.cursor),
-		};
-		if (pending.seq !== null) {
-			parameters[HttpTransportParameter.Sequence] = String(pending.seq);
+		// What a server without the HTTP transports, or a proxy, answers.
+		if (items === 0) {
+			throw new Error("Not a poll response");
 		}
+		if (this.readyState === WsReadyStates.Connecting) {
+			throw new Error("Poll did not open a session");
+		}
+	}
+
+	/**
+	 * Start a POST, unless one is in flight: with the queued messages, or with
+	 * none if a `ping` is wanted.
+	 */
+	private pump(ping = false): void {
+		if (this.posting || this.readyState !== WsReadyStates.Open) {
+			return;
+		}
+
+		// As many of the queued messages as fit into one body.
+		let size = this.key.length;
+		let count = 0;
+		while (
+			count < this.queue.length &&
+			size + 1 + this.queue[count].length <= this.maxPayload
+		) {
+			size += 1 + this.queue[count].length;
+			count += 1;
+		}
+
+		if (count === 0) {
+			if (this.queue.length > 0) {
+				this.finish(1009, "Message Too Big", true);
+				return;
+			}
+			if (!ping) {
+				return;
+			}
+		}
+
+		this.posting = true;
+		void this.post(this.queue.splice(0, count));
+	}
+
+	/**
+	 * POST a batch of messages, or a ping if there are none, until the server
+	 * has accepted it. Then send what has been queued in the meantime.
+	 */
+	private async post(lines: string[]): Promise<void> {
+		const body = [this.key, ...lines].join("\n");
 
 		try {
-			const response = await fetch(this.requestUrl(parameters), {
-				method: "POST",
-				body: pending.body,
-				keepalive: pending.body.length <= KEEPALIVE_MAX_BODY,
-				signal: controller.signal,
-			});
-			if (this.finished) {
-				return;
-			}
-			await this.checkStatus(response, 204);
+			await this.request(
+				{
+					[HttpTransportParameter.Cursor]: this.cursor,
+					// The server ignores a sequence number it has processed, so a
+					// batch that is repeated because its response got lost is not
+					// delivered twice.
+					...(lines.length > 0 && {
+						[HttpTransportParameter.Sequence]: this.sendSeq + 1,
+					}),
+				},
+				{ method: "POST", body, keepalive: body.length <= KEEPALIVE_MAX_BODY },
+				// A large body takes its time on a slow connection.
+				this.connectTimeout + (body.length / MIN_UPLOAD_RATE) * 1000,
+				(response) => this.checkStatus(response, 204),
+			);
 		} catch (error) {
-			if (this.finished || error instanceof StatusError) {
-				return;
-			}
-
-			const delay = this.nextRetryDelay(this.upstreamRetry);
-			if (delay === null) {
-				this.finish(
-					1006,
-					error instanceof Error ? error.message : String(error),
-					true,
-				);
-				return;
-			}
-			// Retry the identical batch: the server drops a duplicate sequence
-			// number, so every batch is processed exactly once.
-			this.setTimer(() => {
-				this.upstreamBusy = false;
-				this.pumpUpstream();
-			}, delay);
+			this.retry(this.upstreamRetry, error, () => this.post(lines));
 			return;
-		} finally {
-			this.clearTimer(deadline);
-			controller.abort();
-			this.controllers.delete(controller);
 		}
 
-		if (pending.seq !== null) {
-			this.sendSeq = pending.seq;
+		if (lines.length > 0) {
+			this.sendSeq += 1;
 		}
-		this.pendingPost = null;
 		this.resetRetry(this.upstreamRetry);
-		this.upstreamBusy = false;
-		this.pumpUpstream();
+		this.posting = false;
+		this.pump();
 	}
 }
