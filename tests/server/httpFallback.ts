@@ -257,7 +257,9 @@ test("a client that stays alive but acknowledges nothing is closed with 4408", a
 
 test("a message that takes longer than the timeout to download does not cost the session", async (t) => {
 	const hocuspocus = await newHocuspocus(t, {
-		httpFallback: true,
+		// What arrives during the download outgrows `maxPayload`, but not the
+		// message on its way: the client does not fall behind.
+		httpFallback: { maxPayload: 200 },
 		timeout: 1000,
 	});
 	const session = await openSession(hocuspocus);
@@ -349,6 +351,37 @@ test("a client that stays alive but takes nothing while a message waits is close
 	const response = await session.ping(cursor);
 	t.is(response.status, 410);
 	t.is((await response.json()).code, 4408);
+});
+
+test("a client that reads slower than its document changes is closed with 4408", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: { maxPayload: 1000 },
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("behind-doc")]);
+	const cursor = await settle(session);
+	const document = hocuspocus.documents.get("behind-doc")!;
+
+	// Seven slices, one taken every 400 ms. Meanwhile the document produces
+	// more than the client takes.
+	document.broadcastStateless("x".repeat(300_000));
+	const reader = (await session.poll(cursor)).body!.getReader();
+	const decoder = new TextDecoder();
+	let text = "";
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+		text += decoder.decode(value, { stream: true });
+		document.broadcastStateless("y".repeat(100_000));
+		// Alive, and acknowledging what it has: only the backlog grows.
+		await session.ping(cursor);
+		await sleep(400);
+	}
+
+	t.regex(text, /\n\nevent: hp-close\ndata: \{"code":4408,[^\n]*\n\n$/);
 });
 
 test("a session that closes while a long text is on its way sends the close event after it", async (t) => {

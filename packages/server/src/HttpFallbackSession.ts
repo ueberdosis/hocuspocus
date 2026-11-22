@@ -65,11 +65,16 @@ export interface HttpFallbackSessionOptions {
 	 * held, in ms.
 	 */
 	heartbeat: number;
-	/** Largest POST body the server accepts; the client is told on open. */
+	/**
+	 * Largest POST body the server accepts; the client is told on open. A
+	 * backlog behind a response on its way that is larger than both this and
+	 * the response means the client falls behind.
+	 */
 	maxPayload: number;
 	/**
-	 * How long a delivered message may wait for its acknowledgement, and the
-	 * client may take nothing while messages wait for it, in ms.
+	 * How long a delivered message may wait for its acknowledgement, the
+	 * client may take nothing while messages wait for it, or a client that
+	 * falls behind may stay behind, in ms.
 	 */
 	timeout: number;
 	/** Hands the session to Hocuspocus, as the socket of a new connection. */
@@ -120,7 +125,9 @@ interface Downstream {
  * message the client took has to be acknowledged within the `timeout`
  * option, and a client that takes nothing for that long while messages wait
  * for it is closed as well: the time a slow client spends downloading does
- * not count.
+ * not count. A client that reads slower than its documents change is closed
+ * once its backlog has outgrown the response on its way, and `maxPayload`,
+ * for that long.
  */
 export class HttpFallbackSession implements WebSocketLike {
 	readonly key: string;
@@ -154,6 +161,12 @@ export class HttpFallbackSession implements WebSocketLike {
 	/** When the client last took a slice of a response. */
 	private tookAt = Date.now();
 
+	/**
+	 * Base64 length of the messages not written to a response yet: what waits
+	 * behind the text on its way.
+	 */
+	private backlog = 0;
+
 	/** Sequence number of the last batch received from the client. */
 	private received = 0;
 
@@ -177,24 +190,19 @@ export class HttpFallbackSession implements WebSocketLike {
 			return;
 		}
 
-		// A client that does not acknowledge what it has received, or does not
-		// read, must not grow the outbox forever. The oldest message waits for
-		// its acknowledgement once the client took it; until then, for the
-		// client to take it, and every slice the client takes is progress.
+		// A client that does not acknowledge what it has received, does not
+		// read, or reads slower than its documents change must not grow the
+		// outbox forever.
 		const now = Date.now();
-		if (this.outbox.length > 0) {
-			const since =
-				this.delivered > this.acked
-					? this.waitingSince[0]
-					: Math.max(this.waitingSince[0], this.tookAt);
-			if (now - since > this.options.timeout) {
-				this.close(ConnectionTimeout.code, ConnectionTimeout.reason);
-				return;
-			}
+		if (this.fallenBehind(now)) {
+			this.close(ConnectionTimeout.code, ConnectionTimeout.reason);
+			return;
 		}
 
-		this.outbox.push(encodeMessage(data));
+		const message = encodeMessage(data);
+		this.outbox.push(message);
 		this.waitingSince.push(now);
+		this.backlog += message.length;
 
 		// One write for all the messages of this tick.
 		if (!this.flushScheduled) {
@@ -218,6 +226,11 @@ export class HttpFallbackSession implements WebSocketLike {
 
 		// A request that arrives late carries an older cursor.
 		if (count > 0) {
+			// Messages the client acknowledges before they were written leave the
+			// backlog too; only a client that makes ids up does that.
+			for (let index = this.written - this.acked; index < count; index += 1) {
+				this.backlog -= this.outbox[index].length;
+			}
 			this.outbox.splice(0, count);
 			this.waitingSince.splice(0, count);
 			this.acked = cursor;
@@ -225,6 +238,41 @@ export class HttpFallbackSession implements WebSocketLike {
 			this.delivered = Math.max(this.delivered, cursor);
 		}
 		return true;
+	}
+
+	/**
+	 * Whether the client has fallen too far behind to keep the session; each
+	 * rule gives it `timeout`. A delivered message waits for its
+	 * acknowledgement. One the client has not taken yet waits for the client
+	 * to take it, and every slice the client takes is progress, so a slow
+	 * download does not count. While a text is on its way, though, what waits
+	 * behind it must not outgrow both the text and `maxPayload`: a client
+	 * slower than its documents change falls further behind with every text.
+	 */
+	private fallenBehind(now: number): boolean {
+		if (this.outbox.length === 0) {
+			return false;
+		}
+		const { timeout, maxPayload } = this.options;
+
+		const since =
+			this.delivered > this.acked
+				? this.waitingSince[0]
+				: Math.max(this.waitingSince[0], this.tookAt);
+		if (now - since > timeout) {
+			return true;
+		}
+
+		// Everything waiting is written to a text as soon as there is no other
+		// on its way, so the backlog is younger than the text it waits behind.
+		const pending = this.downstream?.pending;
+		const next = this.written - this.acked;
+		return (
+			pending !== undefined &&
+			next < this.outbox.length &&
+			now - this.waitingSince[next] > timeout &&
+			this.backlog > Math.max(maxPayload, pending.bytes.length)
+		);
 	}
 
 	/**
@@ -403,6 +451,7 @@ export class HttpFallbackSession implements WebSocketLike {
 			this.written += 1;
 			text += `id: ${this.written}\ndata: ${this.outbox[index]}\n\n`;
 		}
+		this.backlog = 0;
 		if (this.closeEvent) {
 			text += `event: ${HttpTransportEvent.Close}\ndata: ${JSON.stringify(this.closeEvent)}\n\n`;
 		}
@@ -521,6 +570,7 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 		this.outbox = [];
 		this.waitingSince = [];
+		this.backlog = 0;
 		this.control = "";
 
 		this.options.onClose(tellClient ? closeEvent : null);

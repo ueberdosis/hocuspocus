@@ -23,7 +23,11 @@ export interface HttpFallbackConfiguration {
 	heartbeatInterval: number;
 	/**
 	 * Largest accepted POST body in bytes. It applies before authentication,
-	 * like the `maxPayload` of `websocketOptions`.
+	 * like the `maxPayload` of `websocketOptions`. It also bounds how far a
+	 * client may fall behind: once the messages queued behind the response on
+	 * its way outgrow both this and that response, and the oldest of them has
+	 * waited longer than Hocuspocus' `timeout`, the client reads slower than
+	 * its documents change and is closed with 4408.
 	 */
 	maxPayload: number;
 	/**
@@ -254,8 +258,9 @@ async function readBody(
  *   must be repeated in front of `fetch`. The built-in `Server` runs
  *   `onRequest` for the request that opens a session.
  * - Hocuspocus' `timeout` also bounds how long a client may leave a delivered
- *   message unacknowledged, or take nothing while messages wait for it,
- *   before its session is closed with 4408; the time a slow client spends
+ *   message unacknowledged, take nothing while messages wait for it, or keep
+ *   a backlog larger than `maxPayload` and the response on its way, before
+ *   its session is closed with 4408; the time a slow client spends
  *   downloading does not count. Resuming a cut stream needs it to be longer
  *   than `heartbeatInterval` plus the provider's `connectTimeout`.
  * - A POST, i.e. one batch of messages, has to arrive within the HTTP
