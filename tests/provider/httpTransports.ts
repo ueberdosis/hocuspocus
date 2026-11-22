@@ -1,4 +1,5 @@
-import test from "ava";
+import type { HocuspocusProvider } from "@hocuspocus/provider";
+import test, { type ExecutionContext } from "ava";
 import * as Y from "yjs";
 import {
 	newHocuspocusProvider,
@@ -8,6 +9,17 @@ import {
 	waitForSynced,
 } from "../utils/index.ts";
 import { retryableAssertion } from "../utils/retryableAssertion.ts";
+
+// Sends a stateless message and waits until the server has it. After that no
+// POST of the handshake is left in flight: the provider sends one at a time.
+const settle = async (
+	t: ExecutionContext,
+	provider: HocuspocusProvider,
+	received: string[],
+) => {
+	provider.sendStateless("settled");
+	await retryableAssertion(t, (tt) => tt.deepEqual(received, ["settled"]));
+};
 
 for (const transport of ["sse", "polling"] as const) {
 	test(`${transport}: syncs changes in both directions`, async (t) => {
@@ -143,16 +155,13 @@ for (const transport of ["sse", "polling"] as const) {
 			{ url: proxy.webSocketURL, transports: [transport] },
 		);
 		await waitForSynced(provider);
+		await settle(t, provider, received);
 
-		// Once this one arrived, no POST of the handshake is left in flight: the
-		// next POST is the batch with the two messages after it.
-		provider.sendStateless("first");
-		await retryableAssertion(t, (tt) => tt.deepEqual(received, ["first"]));
-
+		// The next POST is the batch with these two messages.
 		proxy.loseNextResponse("post");
+		provider.sendStateless("first");
 		provider.sendStateless("second");
-		provider.sendStateless("third");
-		await retryableAssertion(t, (tt) => tt.true(received.includes("third")));
+		await retryableAssertion(t, (tt) => tt.true(received.includes("second")));
 
 		// The server had the batch at the first go. The provider sends it again,
 		// under the same sequence number, and the numbers still line up after.
@@ -163,9 +172,9 @@ for (const transport of ["sse", "polling"] as const) {
 			tt.true(sequences.length > new Set(sequences).size);
 		});
 
-		provider.sendStateless("fourth");
-		await retryableAssertion(t, (tt) => tt.true(received.includes("fourth")));
-		t.deepEqual(received, ["first", "second", "third", "fourth"]);
+		provider.sendStateless("third");
+		await retryableAssertion(t, (tt) => tt.true(received.includes("third")));
+		t.deepEqual(received, ["settled", "first", "second", "third"]);
 	});
 
 	test(`${transport}: messages arrive in order, batched while a POST is in flight`, async (t) => {
@@ -175,8 +184,7 @@ for (const transport of ["sse", "polling"] as const) {
 				received.push(payload);
 			},
 		});
-		// A POST takes longer than it takes to send all the messages below.
-		const proxy = await newHttpProxy(t, hocuspocus, { postDelay: 300 });
+		const proxy = await newHttpProxy(t, hocuspocus);
 		const provider = newHocuspocusProvider(
 			t,
 			hocuspocus,
@@ -184,13 +192,12 @@ for (const transport of ["sse", "polling"] as const) {
 			{ url: proxy.webSocketURL, transports: [transport] },
 		);
 		await waitForSynced(provider);
-
-		// Once this one arrived, no POST of the handshake is left in flight.
-		provider.sendStateless("start");
-		await retryableAssertion(t, (tt) => tt.deepEqual(received, ["start"]));
+		await settle(t, provider, received);
 		const batches = () =>
 			proxy.requests.filter((request) => request.includes("hp_seq=")).length;
 		const batchesBefore = batches();
+		// From here on a POST takes longer than sending all the messages below.
+		proxy.delayBatches(300);
 
 		const groups = 5;
 		for (let group = 0; group < groups; group += 1) {
@@ -202,9 +209,48 @@ for (const transport of ["sse", "polling"] as const) {
 
 		const expected = Array.from({ length: 20 }, (_, index) => String(index));
 		await retryableAssertion(t, (tt) => tt.true(received.includes("19")));
-		t.deepEqual(received, ["start", ...expected]);
+		t.deepEqual(received, ["settled", ...expected]);
 		// The groups that had to wait for the first POST left together.
 		t.true(batches() - batchesBefore < groups);
+	});
+
+	test(`${transport}: a POST that takes longer than the idle timeout does not cost the session`, async (t) => {
+		const received: string[] = [];
+		const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+			timeout: 1000,
+			async onStateless({ payload }) {
+				received.push(payload);
+			},
+		});
+		const proxy = await newHttpProxy(t, hocuspocus);
+		const codes: number[] = [];
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{
+				awareness: null,
+				onClose: ({ event }) => {
+					codes.push(event.code);
+				},
+			},
+			{ url: proxy.webSocketURL, transports: [transport] },
+		);
+		await waitForSynced(provider);
+		await settle(t, provider, received);
+		const document = hocuspocus.documents.get("hocuspocus-test")!;
+
+		// As if the upload took two and a half idle timeouts.
+		proxy.delayBatches(2500);
+		provider.sendStateless("slow");
+
+		// Meanwhile the client receives messages, which it has to acknowledge.
+		for (let elapsed = 0; elapsed < 3500; elapsed += 250) {
+			document.broadcastStateless("tick");
+			await sleep(250);
+		}
+
+		t.deepEqual(received, ["settled", "slow"]);
+		t.deepEqual(codes, []);
 	});
 
 	test(`${transport}: disconnect() ends the session on the server at once`, async (t) => {

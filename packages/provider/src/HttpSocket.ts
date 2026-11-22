@@ -213,8 +213,11 @@ export class HttpSocket {
 
 	private flushScheduled = false;
 
-	/** A POST is in flight or waits to be repeated. */
+	/** A batch of messages is on its way, or waits to be sent again. */
 	private posting = false;
+
+	/** A ping is on its way. */
+	private pinging = false;
 
 	private readonly downstreamRetry: RetryState = {
 		failingSince: null,
@@ -601,9 +604,8 @@ export class HttpSocket {
 					patience = this.heartbeatInterval + this.connectTimeout;
 					this.resetRetry(this.downstreamRetry);
 				} else if (item.comment === "") {
-					// A heartbeat. The answer tells the server that the client is
-					// alive, and what it has processed.
-					this.pump(true);
+					// A heartbeat.
+					void this.ping();
 				}
 			},
 			() => watchdog(patience),
@@ -664,11 +666,8 @@ export class HttpSocket {
 		}
 	}
 
-	/**
-	 * Start a POST, unless one is in flight: with the queued messages, or with
-	 * none if a `ping` is wanted.
-	 */
-	private pump(ping = false): void {
+	/** Start a POST with the queued messages, unless one is on its way. */
+	private pump(): void {
 		if (this.posting || this.readyState !== WsReadyStates.Open) {
 			return;
 		}
@@ -687,11 +686,8 @@ export class HttpSocket {
 		if (count === 0) {
 			if (this.queue.length > 0) {
 				this.finish(1009, "Message Too Big", true);
-				return;
 			}
-			if (!ping) {
-				return;
-			}
+			return;
 		}
 
 		this.posting = true;
@@ -699,8 +695,8 @@ export class HttpSocket {
 	}
 
 	/**
-	 * POST a batch of messages, or a ping if there are none, until the server
-	 * has accepted it. Then send what has been queued in the meantime.
+	 * POST a batch of messages until the server has accepted it. Then send
+	 * what has been queued in the meantime.
 	 */
 	private async post(lines: string[]): Promise<void> {
 		const body = [this.key, ...lines].join("\n");
@@ -712,9 +708,7 @@ export class HttpSocket {
 					// The server ignores a sequence number it has processed, so a
 					// batch that is repeated because its response got lost is not
 					// delivered twice.
-					...(lines.length > 0 && {
-						[HttpTransportParameter.Sequence]: this.sendSeq + 1,
-					}),
+					[HttpTransportParameter.Sequence]: this.sendSeq + 1,
 				},
 				{ method: "POST", body, keepalive: body.length <= KEEPALIVE_MAX_BODY },
 				// A large body takes its time on a slow connection.
@@ -726,11 +720,35 @@ export class HttpSocket {
 			return;
 		}
 
-		if (lines.length > 0) {
-			this.sendSeq += 1;
-		}
+		this.sendSeq += 1;
 		this.resetRetry(this.upstreamRetry);
 		this.posting = false;
 		this.pump();
+	}
+
+	/**
+	 * Answer a heartbeat of the event stream: the request tells the server
+	 * that the client is alive, and what it has processed. It does not wait for
+	 * a batch that is on its way, which can take long on a slow connection.
+	 */
+	private async ping(): Promise<void> {
+		if (this.pinging || this.readyState !== WsReadyStates.Open) {
+			return;
+		}
+
+		this.pinging = true;
+		try {
+			await this.request(
+				{ [HttpTransportParameter.Cursor]: this.cursor },
+				{ method: "POST", body: this.key },
+				this.connectTimeout,
+				(response) => this.checkStatus(response, 204),
+			);
+		} catch {
+			// The next heartbeat brings the next ping. A session that gets none
+			// through is closed by the server.
+		} finally {
+			this.pinging = false;
+		}
 	}
 }

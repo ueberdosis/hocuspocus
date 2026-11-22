@@ -10,8 +10,6 @@ export interface HttpProxyOptions {
 	 * or forwarded a few bytes at a time (`trickle`).
 	 */
 	eventStreams?: "pass" | "buffer" | "stall" | "trickle";
-	/** Delay of POSTs without `hp_transport` (message batches, pings), in ms. */
-	postDelay?: number;
 }
 
 export interface HttpProxy {
@@ -30,6 +28,11 @@ export interface HttpProxy {
 	 */
 	loseNextResponse(kind: "downstream" | "post"): void;
 	/**
+	 * Hold every POST that carries messages for `delay` ms before it is
+	 * forwarded, as if it took that long to upload.
+	 */
+	delayBatches(delay: number): void;
+	/**
 	 * Answer every request from now on like a Hocuspocus server that does not
 	 * serve the HTTP transports.
 	 */
@@ -46,13 +49,14 @@ export const newHttpProxy = async (
 	hocuspocus: Hocuspocus,
 	options: HttpProxyOptions = {},
 ): Promise<HttpProxy> => {
-	const { eventStreams = "pass", postDelay = 0 } = options;
+	const { eventStreams = "pass" } = options;
 	const target = new URL(hocuspocus.server!.httpURL);
 	const requests: string[] = [];
 	const downstreams = new Set<http.ServerResponse>();
 	let parked: (() => void)[] = [];
 	let holding = false;
 	let losing: "downstream" | "post" | null = null;
+	let batchDelay = 0;
 	let servingTransports = true;
 
 	const forward = (
@@ -145,10 +149,9 @@ export const newHttpProxy = async (
 			return;
 		}
 
-		const isDownstream = new URL(
-			request.url ?? "/",
-			"http://localhost",
-		).searchParams.has("hp_transport");
+		const parameters = new URL(request.url ?? "/", "http://localhost")
+			.searchParams;
+		const isDownstream = parameters.has("hp_transport");
 		const kind = isDownstream
 			? "downstream"
 			: request.method === "POST"
@@ -166,8 +169,8 @@ export const newHttpProxy = async (
 				parked.push(() => forward(request, response, lose));
 				return;
 			}
-		} else if (kind === "post" && postDelay > 0) {
-			setTimeout(() => forward(request, response, lose), postDelay);
+		} else if (batchDelay > 0 && parameters.has("hp_seq")) {
+			setTimeout(() => forward(request, response, lose), batchDelay);
 			return;
 		}
 
@@ -204,6 +207,9 @@ export const newHttpProxy = async (
 			for (const run of released) {
 				run();
 			}
+		},
+		delayBatches(delay) {
+			batchDelay = delay;
 		},
 		loseNextResponse(kind) {
 			losing = kind;
