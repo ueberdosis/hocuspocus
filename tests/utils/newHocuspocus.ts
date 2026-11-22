@@ -12,6 +12,10 @@ export const newHocuspocus = (
 		// Binding something port 0 will end up on a random free port.
 		// That's helpful to run tests concurrently.
 		port: 0,
+		// Only on the loopback interface. A server on all interfaces can be given a
+		// port that another program already holds on 127.0.0.1 (macOS allows it),
+		// and the test's requests then reach that program.
+		address: "127.0.0.1",
 		// Ava 6+ considers process.exit() in workers an error.
 		// Disable signal handlers to prevent that.
 		stopOnSignals: false,

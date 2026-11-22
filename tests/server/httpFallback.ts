@@ -5,8 +5,8 @@ import { type Hocuspocus, HttpFallback } from "@hocuspocus/server";
 import test from "ava";
 import * as encoding from "lib0/encoding";
 import {
+	newHocuspocus,
 	newHocuspocusProvider,
-	newHocuspocusWithHttpFallback,
 	sleep,
 	waitForSynced,
 } from "../utils/index.ts";
@@ -117,7 +117,8 @@ const statusOf = async (response: Promise<Response>) => (await response).status;
 
 test("a batch posted twice with the same hp_seq is processed once", async (t) => {
 	const received: string[] = [];
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		async onStateless({ payload }) {
 			received.push(payload);
 		},
@@ -139,7 +140,7 @@ test("a batch posted twice with the same hp_seq is processed once", async (t) =>
 });
 
 test("messages are replayed until the client acknowledges them", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const session = await openSession(hocuspocus);
 	await session.post(1, [authFrame("replay-doc")]);
 
@@ -157,7 +158,8 @@ test("messages are replayed until the client acknowledges them", async (t) => {
 
 test("a session that stops sending requests times out with 4408", async (t) => {
 	let disconnected = false;
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		timeout: 300,
 		async onDisconnect() {
 			disconnected = true;
@@ -174,7 +176,8 @@ test("a session that stops sending requests times out with 4408", async (t) => {
 });
 
 test("a client that stays alive but acknowledges nothing is closed with 4408", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		timeout: 1000,
 	});
 	const session = await openSession(hocuspocus);
@@ -201,7 +204,8 @@ test("a client that stays alive but acknowledges nothing is closed with 4408", a
 test("hooks see the open request's parameters and cookies, without transport parameters", async (t) => {
 	let parameters: URLSearchParams | undefined;
 	let cookie: string | null | undefined;
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		async onConnect({ requestParameters, requestHeaders }) {
 			parameters = requestParameters;
 			cookie = requestHeaders.get("cookie");
@@ -219,7 +223,7 @@ test("hooks see the open request's parameters and cookies, without transport par
 });
 
 test("a second open for a live session id gets 409 and leaves the session working", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const session = await openSession(hocuspocus);
 
 	t.is(
@@ -232,7 +236,7 @@ test("a second open for a live session id gets 409 and leaves the session workin
 });
 
 test("origins outside allowedOrigins are refused before a session is created", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: { allowedOrigins: ["https://app.example"] },
 	});
 	const open = { hp_transport: "polling", hp_sid: randomUUID() };
@@ -262,7 +266,7 @@ test("origins outside allowedOrigins are refused before a session is created", a
 });
 
 test("an invalid configuration is rejected", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 
 	const invalid: [object, RegExp][] = [
 		[{ allowCredentials: true }, /allowCredentials/],
@@ -281,7 +285,8 @@ test("an invalid configuration is rejected", async (t) => {
 
 test("a POST without the session key gets 404 and neither authenticates nor keeps the session alive", async (t) => {
 	let authentications = 0;
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		timeout: 300,
 		async onAuthenticate() {
 			authentications += 1;
@@ -316,7 +321,7 @@ test("a POST without the session key gets 404 and neither authenticates nor keep
 });
 
 test("at maxSessions a new session replaces the oldest one that has not authenticated", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: { maxSessions: 2 },
 	});
 	const first = await openSession(hocuspocus);
@@ -332,7 +337,7 @@ test("at maxSessions a new session replaces the oldest one that has not authenti
 });
 
 test("at maxSessions a new session is refused when every session has authenticated", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: { maxSessions: 2 },
 	});
 	for (const documentName of ["full-doc-1", "full-doc-2"]) {
@@ -355,7 +360,7 @@ test("at maxSessions a new session is refused when every session has authenticat
 
 test("requests that break the protocol are refused and nothing of them is processed", async (t) => {
 	const received: string[] = [];
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: { maxPayload: 1000 },
 		async onStateless({ payload }) {
 			received.push(payload);
@@ -471,7 +476,8 @@ test("requests that break the protocol are refused and nothing of them is proces
 
 test("a session the client closes is gone at once", async (t) => {
 	let disconnects = 0;
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		async onDisconnect() {
 			disconnects += 1;
 		},
@@ -492,7 +498,7 @@ test("a session the client closes is gone at once", async (t) => {
 });
 
 test("destroy() ends event streams with 1001 and refuses further requests", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const open = () =>
 		call(hocuspocus, "GET", { hp_transport: "sse", hp_sid: randomUUID() });
 	const decoder = new TextDecoder();
@@ -511,7 +517,7 @@ test("destroy() ends event streams with 1001 and refuses further requests", asyn
 });
 
 test("a request without hp_sid is left to the server, whatever its URL", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 
 	// A path-only URL that contains "://" must not be mistaken for a full URL.
 	const response = await fetch(
@@ -521,7 +527,7 @@ test("a request without hp_sid is left to the server, whatever its URL", async (
 });
 
 test("a transport request with a malformed Host header gets 400", async (t) => {
-	const hocuspocus = await newHocuspocusWithHttpFallback(t);
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const { port } = hocuspocus.server!.address;
 
 	const response = await new Promise<string>((resolve, reject) => {
@@ -548,7 +554,8 @@ test("a transport request with a malformed Host header gets 400", async (t) => {
 
 test("onRequest runs for the request that opens a session, not for its POSTs", async (t) => {
 	const requests: string[] = [];
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		async onRequest({ request }) {
 			requests.push(`${request.method} ${request.url}`);
 		},
@@ -568,7 +575,8 @@ test("onRequest runs for the request that opens a session, not for its POSTs", a
 
 test("an onRequest hook that rejects leaves no session", async (t) => {
 	let refuse = true;
-	const hocuspocus = await newHocuspocusWithHttpFallback(t, {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
 		async onRequest({ response }) {
 			if (!refuse) {
 				return;
