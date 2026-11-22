@@ -1,6 +1,9 @@
 "use client";
 
-import { HocuspocusProviderWebsocket } from "@hocuspocus/provider";
+import {
+	type HocuspocusTransport,
+	HocuspocusProviderWebsocket,
+} from "@hocuspocus/provider";
 // import {
 // 	TiptapCollabProvider,
 // 	TiptapCollabProviderWebsocket,
@@ -22,11 +25,22 @@ export default function Layout({
 	);
 
 	useEffect(() => {
+		// `?transports=sse` or `?transports=websocket,sse,polling` selects the
+		// transports (the server needs `httpFallback`, see src/http-fallback.ts).
+		const transports = new URLSearchParams(window.location.search).get(
+			"transports",
+		);
+		const transportOptions = transports
+			? { transports: transports.split(",") as HocuspocusTransport[] }
+			: {};
+
 		const newlyCreatedSocket1 = new HocuspocusProviderWebsocket({
 			url: "ws://localhost:8000",
+			...transportOptions,
 		});
 		const newlyCreatedSocket2 = new HocuspocusProviderWebsocket({
 			url: "ws://localhost:8000",
+			...transportOptions,
 		});
 		// const newlyCreatedSocket = new TiptapCollabProviderWebsocket({
 		// 	appId: "",

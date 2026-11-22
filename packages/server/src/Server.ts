@@ -10,6 +10,10 @@ import crossws from "crossws/adapters/node";
 import kleur from "kleur";
 import meta from "../package.json" assert { type: "json" };
 import { Hocuspocus, defaultConfiguration } from "./Hocuspocus.ts";
+import {
+	HttpFallback,
+	type HttpFallbackConfiguration,
+} from "./HttpFallback.ts";
 import type { Configuration, WebSocketLike, onListenPayload } from "./types.ts";
 
 export interface ServerConfiguration<Context = any>
@@ -25,6 +29,21 @@ export interface ServerConfiguration<Context = any>
 	 * single unauthenticated connection can make the server buffer.
 	 */
 	websocketOptions?: Record<string, any>;
+	/**
+	 * Serve the HTTP fallback transports (server-sent events and long-polling)
+	 * on the WebSocket URL, for clients whose network blocks WebSockets. Off by
+	 * default; `true` uses the defaults of `HttpFallbackConfiguration`.
+	 *
+	 * - Sessions live in this instance's memory. With several instances, the
+	 *   load balancer has to route by the `hp_sid` query parameter (or a sticky
+	 *   cookie).
+	 * - `onUpgrade` hooks do not run for HTTP sessions. `onRequest` runs for the
+	 *   request that opens a session, not for the requests of an open session.
+	 * - Resuming a cut stream needs `timeout` to be longer than
+	 *   `heartbeatInterval` plus the provider's `connectTimeout`; otherwise a cut
+	 *   ends in a reconnect.
+	 */
+	httpFallback?: boolean | Partial<HttpFallbackConfiguration>;
 }
 
 export const defaultServerConfiguration = {
@@ -38,6 +57,8 @@ export class Server<Context = any> {
 	private crossws: ReturnType<typeof crossws>;
 
 	hocuspocus: Hocuspocus<Context>;
+
+	httpFallback?: HttpFallback<Context>;
 
 	configuration: ServerConfiguration<Context> = {
 		...defaultConfiguration,
@@ -55,6 +76,15 @@ export class Server<Context = any> {
 
 		this.hocuspocus = new Hocuspocus(this.configuration);
 		this.hocuspocus.server = this;
+
+		if (this.configuration.httpFallback) {
+			this.httpFallback = new HttpFallback(
+				this.hocuspocus,
+				this.configuration.httpFallback === true
+					? {}
+					: this.configuration.httpFallback,
+			);
+		}
 
 		this.httpServer = createServer(this.requestHandler);
 		this.crossws = crossws({
@@ -127,11 +157,25 @@ export class Server<Context = any> {
 		response: ServerResponse,
 	) => {
 		try {
+			const transportRequest = this.httpFallback?.matches(request) ?? false;
+
+			// Requests of an open session carry its key and skip the hooks, as
+			// WebSocket frames do.
+			if (transportRequest && request.method !== "GET") {
+				await this.httpFallback?.handleNodeRequest(request, response);
+				return;
+			}
+
 			await this.hocuspocus.hooks("onRequest", {
 				request,
 				response,
 				instance: this.hocuspocus,
 			});
+
+			if (transportRequest) {
+				await this.httpFallback?.handleNodeRequest(request, response);
+				return;
+			}
 
 			// default response if all prior hooks don't interfere
 			response.writeHead(200, { "Content-Type": "text/plain" });
@@ -239,6 +283,10 @@ export class Server<Context = any> {
 				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
 
 				this.hocuspocus.closeConnections();
+
+				// End every HTTP transport session with 1001 once the CLOSE
+				// messages above are queued; later requests get 503.
+				this.httpFallback?.destroy();
 
 				// Flush any remaining debounced stores so documents unload
 				// promptly, even when unloadImmediately is false.

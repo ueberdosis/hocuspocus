@@ -43,7 +43,7 @@ export type HocuspocusProviderConfiguration = Required<
 				Partial<
 					Pick<
 						CompleteHocuspocusProviderWebsocketConfiguration,
-						"preserveTrailingSlash"
+						"preserveTrailingSlash" | "transports" | "connectTimeout"
 					>
 				>)
 		| Required<

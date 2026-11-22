@@ -101,6 +101,13 @@ export class ClientConnection<Context = any> {
 	// of its documents.
 	private hasAuthenticated = false;
 
+	/**
+	 * Whether any document on this connection has authenticated.
+	 */
+	get authenticated(): boolean {
+		return this.hasAuthenticated;
+	}
+
 	// Set once the connection has been proactively torn down (timeout or a limit
 	// breach). Guards against processing — and re-logging — frames that were
 	// already in flight when we decided to close the socket.
