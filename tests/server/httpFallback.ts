@@ -192,6 +192,43 @@ test("a session that stops sending requests times out with 4408", async (t) => {
 	t.is((await response.json()).code, 4408);
 });
 
+test("an event stream that is read but never answered times out with 4408", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const sessionId = randomUUID();
+	const reader = (
+		await call(hocuspocus, "GET", { hp_transport: "sse", hp_sid: sessionId })
+	).body!.getReader();
+	const decoder = new TextDecoder();
+	let text = decoder.decode((await reader.read()).value, { stream: true });
+	const key = JSON.parse(/event: hp-open\ndata: (.*)\n/.exec(text)![1]).key;
+	t.is(
+		await statusOf(
+			call(
+				hocuspocus,
+				"POST",
+				{ hp_sid: sessionId, hp_seq: 1, hp_cursor: 0 },
+				{ body: [key, base64(authFrame("silent-doc"))].join("\n") },
+			),
+		),
+		204,
+	);
+
+	// Like a socket whose peer is gone: whatever is written is taken, nothing
+	// is answered. Taking heartbeats does not keep the session alive.
+	const deadline = Date.now() + 5000;
+	while (!text.includes("event: hp-close") && Date.now() < deadline) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+		text += decoder.decode(value, { stream: true });
+	}
+	t.regex(text, /event: hp-close\ndata: \{"code":4408,/);
+});
+
 test("a client that stays alive but acknowledges nothing is closed with 4408", async (t) => {
 	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: true,

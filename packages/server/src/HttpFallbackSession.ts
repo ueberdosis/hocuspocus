@@ -313,17 +313,21 @@ export class HttpFallbackSession implements WebSocketLike {
 			start: (controller) => {
 				downstream = { mode, controller };
 			},
-			// The client took what it was given. That proves it alive, like a
-			// request does: a long download holds back the heartbeats that the
-			// client would answer.
+			// The client took what it was given. While a long text goes out, the
+			// heartbeats wait behind it and the client cannot answer them, so a
+			// slice taken from the middle of one counts as a sign of life. Not a
+			// short text: the socket takes that even when the peer is gone.
 			pull: () => {
 				this.tookAt = Date.now();
-				this.clientConnection.touch();
-				if (downstream.pending) {
-					this.feed(downstream);
-				} else {
+				const { pending } = downstream;
+				if (!pending) {
 					this.flush();
+					return;
 				}
+				if (pending.offset < pending.bytes.length) {
+					this.clientConnection.touch();
+				}
+				this.feed(downstream);
 			},
 			// The client went away.
 			cancel: () => this.detach(downstream),
