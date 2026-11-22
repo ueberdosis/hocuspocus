@@ -351,6 +351,59 @@ test("a client that stays alive but takes nothing while a message waits is close
 	t.is((await response.json()).code, 4408);
 });
 
+test("a session that closes while a long text is on its way sends the close event after it", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("closing-doc")]);
+	const cursor = await settle(session);
+	const payload = "x".repeat(1_000_000);
+	hocuspocus.documents.get("closing-doc")!.broadcastStateless(payload);
+
+	// The server shuts down after the client took the first slice.
+	const reader = (await session.poll(cursor)).body!.getReader();
+	const decoder = new TextDecoder();
+	let text = decoder.decode((await reader.read()).value, { stream: true });
+	hocuspocus.server!.httpFallback!.destroy();
+
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+		text += decoder.decode(value, { stream: true });
+	}
+	t.is(
+		text,
+		`id: ${cursor + 1}\ndata: ${base64(statelessFrame("closing-doc", payload))}\n\n` +
+			`event: hp-close\ndata: {"code":1001,"reason":"Going Away"}\n\n`,
+	);
+});
+
+test("a long message reaches a reader that waits for it whole", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("whole-doc")]);
+	const cursor = await settle(session);
+
+	// The poll is held and its reader waits, so every slice is taken as soon
+	// as it is written.
+	const body = session.poll(cursor).then((response) => response.text());
+	await sleep(100);
+	const payload = "x".repeat(200_000);
+	hocuspocus.documents.get("whole-doc")!.broadcastStateless(payload);
+
+	t.is(
+		await body,
+		`id: ${cursor + 1}\ndata: ${base64(statelessFrame("whole-doc", payload))}\n\n`,
+	);
+});
+
 test("hooks see the open request's parameters and cookies, without transport parameters", async (t) => {
 	let parameters: URLSearchParams | undefined;
 	let cookie: string | null | undefined;
