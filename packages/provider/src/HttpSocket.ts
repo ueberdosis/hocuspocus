@@ -219,6 +219,12 @@ export class HttpSocket {
 	/** A ping is on its way. */
 	private pinging = false;
 
+	/**
+	 * When the last ping went out, or the event stream that is read began: the
+	 * request for it acknowledged the cursor too.
+	 */
+	private pingedAt = 0;
+
 	private readonly downstreamRetry: RetryState = {
 		failingSince: null,
 		attempt: 0,
@@ -588,6 +594,7 @@ export class HttpSocket {
 		// How long the stream may stay silent. Once its probe proved that nothing
 		// buffers it, that is the time between two heartbeats.
 		let patience = this.connectTimeout;
+		this.pingedAt = Date.now();
 
 		await readItems(
 			response,
@@ -608,7 +615,15 @@ export class HttpSocket {
 					void this.ping();
 				}
 			},
-			() => watchdog(patience),
+			() => {
+				watchdog(patience);
+				// The heartbeats written during a long message wait behind it, and
+				// with them the pings that acknowledge the messages before it.
+				// Ping as often as heartbeats arrive otherwise.
+				if (Date.now() - this.pingedAt >= this.heartbeatInterval) {
+					void this.ping();
+				}
+			},
 		);
 
 		throw new Error("Event stream ended");
@@ -737,6 +752,7 @@ export class HttpSocket {
 		}
 
 		this.pinging = true;
+		this.pingedAt = Date.now();
 		try {
 			await this.request(
 				{ [HttpTransportParameter.Cursor]: this.cursor },
