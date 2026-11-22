@@ -20,6 +20,12 @@ const SSE_PADDING = `:${" ".repeat(2048)}\n\n`;
 // after the first chunk while the response is still open.
 const SSE_PROBE_DELAY = 50;
 
+// A response goes to the client in slices of this size, each once the client
+// took the previous one. That tells the session when the client took a
+// message, which its acknowledgement is due from, and that a slow client
+// still makes progress.
+const DOWNSTREAM_SLICE = 64 * 1024;
+
 const PROBE = `:${HTTP_TRANSPORT_PROBE}\n\n`;
 
 const HEARTBEAT = ":\n\n";
@@ -61,7 +67,10 @@ export interface HttpFallbackSessionOptions {
 	heartbeat: number;
 	/** Largest POST body the server accepts; the client is told on open. */
 	maxPayload: number;
-	/** How long a message may wait for its acknowledgement, in ms. */
+	/**
+	 * How long a delivered message may wait for its acknowledgement, and the
+	 * client may take nothing while messages wait for it, in ms.
+	 */
 	timeout: number;
 	/** Hands the session to Hocuspocus, as the socket of a new connection. */
 	connect: (socket: WebSocketLike) => ClientConnection;
@@ -81,6 +90,17 @@ interface Downstream {
 	timeout?: ReturnType<typeof setTimeout>;
 	/** Event stream: writes the heartbeats. */
 	interval?: ReturnType<typeof setInterval>;
+	/**
+	 * The text on its way to the client and how much of it was enqueued.
+	 * `upTo` is the highest message id written once it was encoded, `closes`
+	 * tells whether it ends with the close event.
+	 */
+	pending?: {
+		bytes: Uint8Array;
+		offset: number;
+		upTo: number;
+		closes: boolean;
+	};
 }
 
 /**
@@ -95,6 +115,12 @@ interface Downstream {
  *
  * Upstream, the client numbers its batches of messages. A batch that arrives
  * again, because its response got lost, is not processed twice.
+ *
+ * A response goes out slice by slice, as fast as the client takes it. A
+ * message the client took has to be acknowledged within the `timeout`
+ * option, and a client that takes nothing for that long while messages wait
+ * for it is closed as well: the time a slow client spends downloading does
+ * not count.
  */
 export class HttpFallbackSession implements WebSocketLike {
 	readonly key: string;
@@ -105,18 +131,28 @@ export class HttpFallbackSession implements WebSocketLike {
 
 	// The messages the client has not acknowledged, base64 encoded and oldest
 	// first: `outbox[i]` has the id `acked + 1 + i` and waits since
-	// `queuedAt[i]`. Two arrays rather than one of objects, because a client
-	// that only listens acknowledges once per heartbeat: hundreds of messages
-	// can wait per session.
+	// `waitingSince[i]`, the time it was queued and, once the client took it,
+	// the time it was delivered. Two arrays rather than one of objects, because
+	// a client that only listens acknowledges once per heartbeat: hundreds of
+	// messages can wait per session.
 	private outbox: string[] = [];
 
-	private queuedAt: number[] = [];
+	private waitingSince: number[] = [];
 
 	/** Highest message id the client has acknowledged. */
 	private acked = 0;
 
 	/** Highest message id written to the current downstream. */
 	private written = 0;
+
+	/**
+	 * Highest message id the client has taken from a response: every slice of
+	 * the text that carried it was read.
+	 */
+	private delivered = 0;
+
+	/** When the client last took a slice of a response. */
+	private tookAt = Date.now();
 
 	/** Sequence number of the last batch received from the client. */
 	private received = 0;
@@ -141,19 +177,24 @@ export class HttpFallbackSession implements WebSocketLike {
 			return;
 		}
 
-		// A client that stays alive but does not acknowledge, or does not read,
-		// must not grow the outbox forever.
+		// A client that does not acknowledge what it has received, or does not
+		// read, must not grow the outbox forever. The oldest message waits for
+		// its acknowledgement once the client took it; until then, for the
+		// client to take it, and every slice the client takes is progress.
 		const now = Date.now();
-		if (
-			this.outbox.length > 0 &&
-			now - this.queuedAt[0] > this.options.timeout
-		) {
-			this.close(ConnectionTimeout.code, ConnectionTimeout.reason);
-			return;
+		if (this.outbox.length > 0) {
+			const since =
+				this.delivered > this.acked
+					? this.waitingSince[0]
+					: Math.max(this.waitingSince[0], this.tookAt);
+			if (now - since > this.options.timeout) {
+				this.close(ConnectionTimeout.code, ConnectionTimeout.reason);
+				return;
+			}
 		}
 
 		this.outbox.push(encodeMessage(data));
-		this.queuedAt.push(now);
+		this.waitingSince.push(now);
 
 		// One write for all the messages of this tick.
 		if (!this.flushScheduled) {
@@ -178,9 +219,10 @@ export class HttpFallbackSession implements WebSocketLike {
 		// A request that arrives late carries an older cursor.
 		if (count > 0) {
 			this.outbox.splice(0, count);
-			this.queuedAt.splice(0, count);
+			this.waitingSince.splice(0, count);
 			this.acked = cursor;
 			this.written = Math.max(this.written, cursor);
+			this.delivered = Math.max(this.delivered, cursor);
 		}
 		return true;
 	}
@@ -237,6 +279,10 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 
 		// Messages after the cursor that an earlier response carried go again.
+		// Those the client took keep waiting since they were first delivered: a
+		// client that comes back without acknowledging what it received gets no
+		// more time. One that did acknowledge it did so with the cursor of this
+		// request, which `post` has applied through `acknowledge` already.
 		this.written = cursor;
 		return this.startDownstream(mode, "");
 	}
@@ -267,16 +313,30 @@ export class HttpFallbackSession implements WebSocketLike {
 			start: (controller) => {
 				downstream = { mode, controller };
 			},
-			// The client took the previous chunk.
-			pull: () => this.flush(),
+			// The client took what it was given. That proves it alive, like a
+			// request does: a long download holds back the heartbeats that the
+			// client would answer.
+			pull: () => {
+				this.tookAt = Date.now();
+				this.clientConnection.touch();
+				if (downstream.pending) {
+					this.feed(downstream);
+				} else {
+					this.flush();
+				}
+			},
 			// The client went away.
 			cancel: () => this.detach(downstream),
 		});
 		this.downstream = downstream;
 		this.flush();
 
-		// A poll that had something to carry has ended by now.
-		if (this.downstream === downstream) {
+		// A poll that carries something ends once the client took it; it needs
+		// no timers. An event stream needs its probe either way.
+		if (
+			this.downstream === downstream &&
+			(mode === "sse" || !downstream.pending)
+		) {
 			this.startTimers(downstream);
 		}
 
@@ -320,14 +380,13 @@ export class HttpFallbackSession implements WebSocketLike {
 	}
 
 	/**
-	 * Write what is waiting to the downstream, if the client keeps up with it:
-	 * control text, the messages it has not been sent, the close event. A
-	 * client that stopped reading leaves no room, and its messages wait in the
-	 * outbox.
+	 * Encode what is waiting for the downstream: control text, the messages
+	 * the client has not been sent, the close event. It goes out slice by
+	 * slice, as the client takes it; nothing more is encoded until it has.
 	 */
 	private flush(): void {
 		const downstream = this.downstream;
-		if (!downstream || (downstream.controller.desiredSize ?? 0) <= 0) {
+		if (!downstream || downstream.pending) {
 			return;
 		}
 
@@ -348,18 +407,75 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 
 		this.control = "";
-		try {
-			downstream.controller.enqueue(textEncoder.encode(text));
-		} catch {
-			// The client went away.
-			this.detach(downstream);
+		downstream.pending = {
+			bytes: textEncoder.encode(text),
+			offset: 0,
+			upTo: this.written,
+			closes: this.closeEvent !== null,
+		};
+		this.feed(downstream);
+	}
+
+	/**
+	 * Hand the client the next slice of the pending text. Once it took the
+	 * last one, the messages in the text are delivered, and the downstream
+	 * ends or goes on with what waits next.
+	 */
+	private feed(downstream: Downstream): void {
+		const { pending, controller } = downstream;
+		if (!pending) {
 			return;
 		}
 
-		// A poll carries a single write, and nothing follows the close event.
-		if (downstream.mode === "polling" || this.closeEvent) {
-			this.endDownstream(downstream);
+		if (pending.offset < pending.bytes.length) {
+			// One slice per pull: the next one goes out once the client took
+			// this one.
+			if ((controller.desiredSize ?? 0) <= 0) {
+				return;
+			}
+			const slice = pending.bytes.subarray(
+				pending.offset,
+				pending.offset + DOWNSTREAM_SLICE,
+			);
+			// Before the enqueue: a reader that is waiting takes the slice at
+			// once, and the stream pulls the next one from inside `enqueue`.
+			pending.offset += DOWNSTREAM_SLICE;
+			try {
+				controller.enqueue(slice);
+			} catch {
+				// The client went away.
+				this.detach(downstream);
+			}
+			return;
 		}
+
+		// The client took the last slice: the messages in it are delivered, and
+		// wait for their acknowledgement from now on.
+		downstream.pending = undefined;
+		const now = Date.now();
+		const upTo = Math.min(pending.upTo, this.acked + this.outbox.length);
+		for (let id = this.delivered + 1; id <= upTo; id += 1) {
+			this.waitingSince[id - this.acked - 1] = now;
+		}
+		this.delivered = Math.max(this.delivered, upTo);
+
+		if (this.readyState !== WsReadyStates.Open) {
+			// Nothing follows the close event. A session that closed while the
+			// text was on its way sends the close event after it, unless it was
+			// the client that closed it.
+			if (this.closeEvent && !pending.closes) {
+				this.flush();
+			} else {
+				this.endDownstream(downstream);
+			}
+			return;
+		}
+		// A poll carries a single write.
+		if (downstream.mode === "polling") {
+			this.endDownstream(downstream);
+			return;
+		}
+		this.flush();
 	}
 
 	private detach(downstream: Downstream): void {
@@ -389,11 +505,18 @@ export class HttpFallbackSession implements WebSocketLike {
 			this.closeEvent = closeEvent;
 			this.flush();
 		}
-		if (this.downstream) {
-			this.endDownstream(this.downstream);
+		// A downstream still feeding its text goes on until the client took it,
+		// and the close event after it; one the client does not read is
+		// released when the bridge gives up on it.
+		const downstream = this.downstream;
+		if (downstream?.pending) {
+			clearTimeout(downstream.timeout);
+			clearInterval(downstream.interval);
+		} else if (downstream) {
+			this.endDownstream(downstream);
 		}
 		this.outbox = [];
-		this.queuedAt = [];
+		this.waitingSince = [];
 		this.control = "";
 
 		this.options.onClose(tellClient ? closeEvent : null);

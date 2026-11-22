@@ -39,10 +39,14 @@ export interface ServerConfiguration<Context = any>
 	 *   cookie).
 	 * - `onUpgrade` hooks do not run for HTTP sessions. `onRequest` runs for the
 	 *   request that opens a session, not for the requests of an open session.
-	 * - `timeout` also is the time a message has to reach its client and be
-	 *   acknowledged. Resuming a cut stream needs it to be longer than
-	 *   `heartbeatInterval` plus the provider's `connectTimeout`; large
-	 *   documents on slow connections need more.
+	 * - `timeout` also bounds how long a client may leave a delivered message
+	 *   unacknowledged, or take nothing while messages wait for it, before its
+	 *   session is closed with 4408; the time a slow client spends downloading
+	 *   does not count. Resuming a cut stream needs it to be longer than
+	 *   `heartbeatInterval` plus the provider's `connectTimeout`.
+	 * - A POST, i.e. one batch of messages, has to arrive within the HTTP
+	 *   server's request timeout (Node.js: `requestTimeout` of `http.Server`,
+	 *   5 minutes by default).
 	 */
 	httpFallback?: boolean | Partial<HttpFallbackConfiguration>;
 }

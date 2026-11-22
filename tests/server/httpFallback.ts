@@ -115,6 +115,23 @@ const messageIds = async (response: Response | Promise<Response>) =>
 
 const statusOf = async (response: Promise<Response>) => (await response).status;
 
+/**
+ * Take what the handshake sends, until a poll ends with a mere heartbeat.
+ * Returns the cursor after it.
+ */
+const settle = async (session: {
+	poll: (cursor: number) => Promise<Response>;
+}) => {
+	let cursor = 0;
+	while (true) {
+		const ids = await messageIds(session.poll(cursor));
+		if (ids.length === 0) {
+			return cursor;
+		}
+		cursor = Math.max(...ids);
+	}
+};
+
 test("a batch posted twice with the same hp_seq is processed once", async (t) => {
 	const received: string[] = [];
 	const hocuspocus = await newHocuspocus(t, {
@@ -197,6 +214,102 @@ test("a client that stays alive but acknowledges nothing is closed with 4408", a
 		.broadcastStateless("one more");
 
 	const response = await session.ping(0);
+	t.is(response.status, 410);
+	t.is((await response.json()).code, 4408);
+});
+
+test("a message that takes longer than the timeout to download does not cost the session", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("slow-doc")]);
+
+	const cursor = await settle(session);
+	const document = hocuspocus.documents.get("slow-doc")!;
+
+	// About 2 MB of base64: 31 slices of 64 KiB.
+	document.broadcastStateless("x".repeat(1_500_000));
+	const response = await session.poll(cursor);
+	t.is(response.status, 200);
+
+	// Read it over about three seconds, while messages keep arriving.
+	const reader = response.body!.getReader();
+	const decoder = new TextDecoder();
+	let text = "";
+	let ticks = 0;
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+		text += decoder.decode(value, { stream: true });
+		document.broadcastStateless(`tick ${ticks}`);
+		ticks += 1;
+		await sleep(100);
+	}
+	text += decoder.decode();
+
+	const ids = [...text.matchAll(/^id: (\d+)$/gm)].map((match) =>
+		Number(match[1]),
+	);
+	t.is(ids.length, 1);
+	t.true(text.length > 1_500_000);
+	// The slow download was not held against the session.
+	t.is(await statusOf(session.ping(ids[0])), 204);
+	// The messages that arrived meanwhile come with the next poll.
+	t.is((await messageIds(session.poll(ids[0]))).length, ticks);
+});
+
+test("acknowledgements that lag behind steady traffic do not cost the session", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("lagging-doc")]);
+	let cursor = await settle(session);
+	const document = hocuspocus.documents.get("lagging-doc")!;
+
+	// Every poll acknowledges all but the last message the previous one
+	// carried. For longer than the timeout, a delivered message is always
+	// waiting, but no single one for long.
+	for (let round = 0; round < 25; round += 1) {
+		document.broadcastStateless(`round ${round}`);
+		const ids = await messageIds(session.poll(cursor));
+		t.true(ids.length > 0, `round ${round}`);
+		cursor = Math.max(...ids) - 1;
+		await sleep(100);
+	}
+
+	t.is(await statusOf(session.ping(cursor + 1)), 204);
+});
+
+test("a client that stays alive but takes nothing while a message waits is closed with 4408", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("stalled-doc")]);
+	const cursor = await settle(session);
+	const document = hocuspocus.documents.get("stalled-doc")!;
+
+	// A poll whose response the client does not read.
+	document.broadcastStateless("never taken");
+	t.is((await session.poll(cursor)).status, 200);
+
+	// Its requests keep the session alive for longer than a message may wait.
+	for (let round = 0; round < 6; round += 1) {
+		await sleep(250);
+		t.is(await statusOf(session.ping(cursor)), 204);
+	}
+
+	// The next message finds the first one still waiting to be taken.
+	document.broadcastStateless("one more");
+
+	const response = await session.ping(cursor);
 	t.is(response.status, 410);
 	t.is((await response.json()).code, 4408);
 });
