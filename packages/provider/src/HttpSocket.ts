@@ -12,8 +12,13 @@ import { uuidv4 } from "lib0/random";
 const RETRY_BASE_DELAY = 250;
 const RETRY_MAX_DELAY = 5_000;
 
-// Browsers cap the bodies of all in-flight keepalive requests at 64 KiB.
+// Browsers cap the bodies of all in-flight keepalive requests of a page at
+// 64 KiB together. The batches of all sockets share this much of it; the
+// rest is for the requests that close sessions.
 const KEEPALIVE_MAX_BODY = 60_000;
+
+/** Bytes of batches on their way with `keepalive`, of all sockets. */
+let keepaliveBytes = 0;
 
 // The slowest upload a POST is given time for, in bytes per second.
 const MIN_UPLOAD_RATE = 16 * 1024;
@@ -755,6 +760,13 @@ export class HttpSocket {
 	 */
 	private async post(lines: string[]): Promise<void> {
 		const body = [this.key, ...lines].join("\n");
+		// With `keepalive` a batch outlives the page, e.g. the one `pagehide`
+		// sends. Without room for it in the page's limit the browser would
+		// refuse the request, so the batch goes without.
+		const keepalive = keepaliveBytes + body.length <= KEEPALIVE_MAX_BODY;
+		if (keepalive) {
+			keepaliveBytes += body.length;
+		}
 
 		try {
 			await this.request(
@@ -765,7 +777,7 @@ export class HttpSocket {
 					// delivered twice.
 					[HttpTransportParameter.Sequence]: this.sendSeq + 1,
 				},
-				{ method: "POST", body, keepalive: body.length <= KEEPALIVE_MAX_BODY },
+				{ method: "POST", body, keepalive },
 				// A large body takes its time on a slow connection.
 				this.connectTimeout + (body.length / MIN_UPLOAD_RATE) * 1000,
 				(response) => this.checkStatus(response, 204),
@@ -773,6 +785,10 @@ export class HttpSocket {
 		} catch (error) {
 			this.retry(this.upstreamRetry, error, () => this.post(lines));
 			return;
+		} finally {
+			if (keepalive) {
+				keepaliveBytes -= body.length;
+			}
 		}
 
 		this.sendSeq += 1;
