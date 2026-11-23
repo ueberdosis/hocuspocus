@@ -4,10 +4,28 @@ import {
 	newHocuspocusProvider,
 	waitForSynced,
 } from "../utils/index.ts";
+import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 // What the HTTP transports take from a browser. Here: the page a relative
-// URL is relative to. `location` is set for the whole process, which is why
-// these tests have a file of their own.
+// URL is relative to, and the credentials mode of `fetch`, which Node.js
+// accepts but has no cookies to apply to. `location` and a `fetch` that keeps
+// a record are set for the whole process, which is why these tests have a
+// file of their own.
+
+const sent: { port: string; credentials: RequestCredentials }[] = [];
+const nativeFetch = globalThis.fetch;
+const recordingFetch = (
+	input: string | URL | Request,
+	init?: RequestInit,
+): Promise<Response> => {
+	const request = new Request(input, init);
+	sent.push({
+		port: new URL(request.url).port,
+		credentials: request.credentials,
+	});
+	return nativeFetch(input, init);
+};
+globalThis.fetch = recordingFetch as typeof fetch;
 
 test("sse: a relative URL is resolved against the page, as a WebSocket does", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
@@ -24,3 +42,36 @@ test("sse: a relative URL is resolved against the page, as a WebSocket does", as
 	await waitForSynced(provider);
 	t.is(provider.configuration.websocketProvider.transport, "sse");
 });
+
+for (const withCredentials of [false, true]) {
+	test(`polling: ${withCredentials ? "withCredentials sends" : "by default no request sends"} cookies to another origin`, async (t) => {
+		let disconnects = 0;
+		const hocuspocus = await newHocuspocus(t, {
+			httpFallback: true,
+			async onDisconnect() {
+				disconnects += 1;
+			},
+		});
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{},
+			{ transports: ["polling"], withCredentials },
+		);
+		await waitForSynced(provider);
+		provider.configuration.websocketProvider.disconnect();
+		// The request that closes the session is the last one.
+		await retryableAssertion(t, (tt) => tt.is(disconnects, 1));
+
+		const port = String(hocuspocus.server!.address.port);
+		const modes = sent
+			.filter((request) => request.port === port)
+			.map((request) => request.credentials);
+		// The open, polls, batches and the close.
+		t.true(modes.length >= 4);
+		t.deepEqual(
+			[...new Set(modes)],
+			[withCredentials ? "include" : "same-origin"],
+		);
+	});
+}

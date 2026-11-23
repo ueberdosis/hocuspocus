@@ -188,6 +188,9 @@ export class HttpSocket {
 
 	private readonly connectTimeout: number;
 
+	/** Whether requests to another origin carry cookies. */
+	private readonly credentials: RequestCredentials;
+
 	private readonly sessionId = uuidv4();
 
 	private readonly listeners = new Map<string, Set<Listener>>();
@@ -240,7 +243,11 @@ export class HttpSocket {
 
 	constructor(
 		url: string,
-		options: { transport: HttpTransportName; connectTimeout: number },
+		options: {
+			transport: HttpTransportName;
+			connectTimeout: number;
+			withCredentials: boolean;
+		},
 	) {
 		// As a WebSocket does, resolve a relative URL against the page, in a
 		// worker against its script. Elsewhere there is neither, and the URL has
@@ -257,6 +264,7 @@ export class HttpSocket {
 		this.url = resolved.href;
 		this.transport = options.transport;
 		this.connectTimeout = options.connectTimeout;
+		this.credentials = options.withCredentials ? "include" : "same-origin";
 
 		if (this.transport === "sse") {
 			void this.stream();
@@ -356,6 +364,7 @@ export class HttpSocket {
 		try {
 			const response = await fetch(this.requestUrl(parameters), {
 				...init,
+				credentials: this.credentials,
 				// A redirect would hand the key, and the token that travels with
 				// it, to another address.
 				redirect: "error",
@@ -414,6 +423,7 @@ export class HttpSocket {
 			fetch(this.requestUrl({ [HttpTransportParameter.Close]: 1 }), {
 				method: "POST",
 				body: this.key,
+				credentials: this.credentials,
 				keepalive: true,
 				redirect: "error",
 			}).catch(() => {});

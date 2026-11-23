@@ -75,6 +75,14 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	 */
 	connectTimeout: number;
 	/**
+	 * Send cookies and HTTP authentication with the requests of the HTTP
+	 * transports to another origin, as a WebSocket handshake does anyway. The
+	 * server needs `allowCredentials` and a list of `allowedOrigins` in its
+	 * `httpFallback` options. Requests to the page's own origin carry them
+	 * either way. Default=false
+	 */
+	withCredentials: boolean;
+	/**
 	 * The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.
 	 */
 	delay: number;
@@ -146,6 +154,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		transports: ["websocket"],
 		// 10 seconds
 		connectTimeout: 10000,
+		// no cookies for another origin
+		withCredentials: false,
 		// 1 second
 		delay: 1000,
 		// instant
@@ -572,6 +582,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 					? new this.configuration.WebSocketPolyfill(this.url)
 					: new HttpSocket(this.url, {
 							transport,
+							withCredentials: this.configuration.withCredentials,
 							connectTimeout: this.configuration.connectTimeout,
 						});
 		} catch (error) {

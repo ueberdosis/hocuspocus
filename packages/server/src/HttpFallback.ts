@@ -17,7 +17,10 @@ export interface HttpFallbackConfiguration {
 	 * authenticate with cookies.
 	 */
 	allowedOrigins: "*" | string[];
-	/** Send Access-Control-Allow-Credentials. Requires a list in allowedOrigins. */
+	/**
+	 * Send Access-Control-Allow-Credentials, which a provider on another origin
+	 * needs for its `withCredentials` option. Requires a list in allowedOrigins.
+	 */
 	allowCredentials: boolean;
 	/** Interval of SSE keep-alive comments and longest time a poll is held, in ms. */
 	heartbeatInterval: number;

@@ -551,7 +551,10 @@ test("a second open for a live session id gets 409 and leaves the session workin
 
 test("origins outside allowedOrigins are refused before a session is created", async (t) => {
 	const hocuspocus = await newHocuspocus(t, {
-		httpFallback: { allowedOrigins: ["https://app.example"] },
+		httpFallback: {
+			allowedOrigins: ["https://app.example"],
+			allowCredentials: true,
+		},
 	});
 	const open = { hp_transport: "polling", hp_sid: randomUUID() };
 
@@ -576,6 +579,7 @@ test("origins outside allowedOrigins are refused before a session is created", a
 		allowed.headers.get("access-control-allow-origin"),
 		"https://app.example",
 	);
+	t.is(allowed.headers.get("access-control-allow-credentials"), "true");
 	await allowed.text();
 });
 
