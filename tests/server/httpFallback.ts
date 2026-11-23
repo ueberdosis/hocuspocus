@@ -519,13 +519,20 @@ test("hooks see the open request's parameters and cookies, without transport par
 		},
 	});
 	const session = await openSession(hocuspocus, {
-		parameters: { token: "abc" },
+		// `hp_account` belongs to the application, whatever its prefix.
+		parameters: { token: "abc", hp_account: "7" },
 		headers: { cookie: "session=xyz" },
 	});
 	await session.post(1, [authFrame("hook-doc")]);
 
 	await retryableAssertion(t, (tt) => tt.truthy(parameters));
-	t.deepEqual([...(parameters?.entries() ?? [])], [["token", "abc"]]);
+	t.deepEqual(
+		[...(parameters?.entries() ?? [])],
+		[
+			["token", "abc"],
+			["hp_account", "7"],
+		],
+	);
 	t.is(cookie, "session=xyz");
 });
 

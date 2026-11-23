@@ -595,10 +595,8 @@ export class HttpFallback<Context = any> {
 		// Hooks see the request that opened the session, without the transport
 		// parameters.
 		const url = new URL(request.url);
-		for (const name of [...url.searchParams.keys()]) {
-			if (name.startsWith("hp_")) {
-				url.searchParams.delete(name);
-			}
+		for (const name of Object.values(HttpTransportParameter)) {
+			url.searchParams.delete(name);
 		}
 		const hookRequest = new Request(url, { headers: request.headers });
 
