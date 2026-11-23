@@ -6,11 +6,13 @@ import {
 } from "../utils/index.ts";
 import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
-// What the HTTP transports take from a browser. Here: the page a relative
-// URL is relative to, and the credentials mode of `fetch`, which Node.js
-// accepts but has no cookies to apply to. `location` and a `fetch` that keeps
-// a record are set for the whole process, which is why these tests have a
-// file of their own.
+// What the HTTP transports take from the runtime they run in. Here: the page
+// a relative URL is relative to, which Deno makes every read of `location`
+// throw for unless it runs with `--location`, and the credentials mode of
+// `fetch`, which Node.js accepts but has no cookies to apply to. `location`
+// and a `fetch` that keeps a record are set for the whole process, which is
+// why these tests have a file of their own, and why the test with a
+// `location` that throws runs on its own, before the others.
 
 const sent: { port: string; credentials: RequestCredentials }[] = [];
 const nativeFetch = globalThis.fetch;
@@ -26,6 +28,32 @@ const recordingFetch = (
 	return nativeFetch(input, init);
 };
 globalThis.fetch = recordingFetch as typeof fetch;
+
+test.serial("sse: an absolute URL works where location throws", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	// As in Deno, unless it runs with `--location`.
+	Object.defineProperty(globalThis, "location", {
+		configurable: true,
+		get() {
+			throw new ReferenceError(
+				'Access to "location", run again with --location <href>.',
+			);
+		},
+	});
+	try {
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{},
+			{ transports: ["sse"] },
+		);
+
+		await waitForSynced(provider);
+		t.is(provider.configuration.websocketProvider.transport, "sse");
+	} finally {
+		Reflect.deleteProperty(globalThis, "location");
+	}
+});
 
 test("sse: a relative URL is resolved against the page, as a WebSocket does", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
