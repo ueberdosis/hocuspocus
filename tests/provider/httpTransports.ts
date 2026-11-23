@@ -364,6 +364,39 @@ test("polling: a server that stops serving the transports is not flooded with re
 	t.true(proxy.requests.length - requestsBefore < 30);
 });
 
+test("polling: the largest connectTimeout does not overflow the deadlines of the requests", async (t) => {
+	const received: string[] = [];
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		async onStateless({ payload }) {
+			received.push(payload);
+		},
+	});
+	const proxy = await newHttpProxy(t, hocuspocus);
+	const provider = newHocuspocusProvider(
+		t,
+		hocuspocus,
+		{ awareness: null },
+		{
+			url: proxy.webSocketURL,
+			transports: ["polling"],
+			// The hold of a poll and the time for an upload come on top of it.
+			connectTimeout: 2_147_483_647,
+		},
+	);
+	await waitForSynced(provider);
+	await settle(t, provider, received);
+
+	// The server holds a poll, and the provider leaves it alone.
+	await sleep(300);
+	const polls = () =>
+		proxy.requests.filter((request) => request.includes("hp_transport=polling"))
+			.length;
+	const before = polls();
+	await sleep(1200);
+	t.is(polls(), before);
+});
+
 test("sse: a read-only session receives changes and sends stateless messages, but cannot write", async (t) => {
 	const received: string[] = [];
 	const hocuspocus = await newHocuspocus(t, {

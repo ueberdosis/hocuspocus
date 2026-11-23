@@ -18,6 +18,9 @@ const KEEPALIVE_MAX_BODY = 60_000;
 // The slowest upload a POST is given time for, in bytes per second.
 const MIN_UPLOAD_RATE = 16 * 1024;
 
+// A longer delay overflows setTimeout, which then fires at once.
+export const MAX_TIMEOUT = 2_147_483_647;
+
 type Listener = (event: unknown) => void;
 
 interface StreamEvent {
@@ -343,7 +346,9 @@ export class HttpSocket {
 			clearTimeout(timer);
 			timer = setTimeout(
 				() => controller.abort(new Error("Request timed out")),
-				delay,
+				// `connectTimeout` may be the longest delay there is, and the hold
+				// of a poll or the time for an upload comes on top of it.
+				Math.min(delay, MAX_TIMEOUT),
 			);
 		};
 		watchdog(timeout);

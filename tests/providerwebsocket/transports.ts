@@ -1,5 +1,7 @@
 import {
+	HocuspocusProviderWebsocket,
 	type HocuspocusProviderWebsocketConfiguration,
+	type HocuspocusTransport,
 	WebSocketStatus,
 } from "@hocuspocus/provider";
 import test from "ava";
@@ -331,4 +333,24 @@ test("a WebSocket that opens but delivers nothing does not lock out HTTP transpo
 
 	await waitForSynced(provider);
 	t.not(provider.configuration.websocketProvider.transport, "websocket");
+});
+
+test("an invalid list of transports is refused", (t) => {
+	const invalid: unknown[] = [
+		[],
+		["websocket", "carrier-pigeon"],
+		// An empty slot, which `every` skips.
+		new Array(1),
+		"sse",
+	];
+	for (const transports of invalid) {
+		t.throws(
+			() =>
+				new HocuspocusProviderWebsocket({
+					url: "ws://127.0.0.1",
+					transports: transports as HocuspocusTransport[],
+				}),
+			{ message: /transports must list/ },
+		);
+	}
 });

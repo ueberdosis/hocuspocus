@@ -5,7 +5,7 @@ import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
 import EventEmitter from "./EventEmitter.ts";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
-import { HttpSocket } from "./HttpSocket.ts";
+import { HttpSocket, MAX_TIMEOUT } from "./HttpSocket.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
 import {
@@ -27,9 +27,6 @@ import {
 const FAILED_TRANSPORT_TTL = 300_000;
 
 const TRANSPORTS: HocuspocusTransport[] = ["websocket", "sse", "polling"];
-
-// A longer delay overflows setTimeout, which then fires at once.
-const MAX_TIMEOUT = 2_147_483_647;
 
 export type HocuspocusWebSocket = WebSocket & { identifier: string };
 export type HocusPocusWebSocket = HocuspocusWebSocket;
@@ -303,15 +300,20 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		next.transports ??= this.configuration.transports;
 		next.connectTimeout ??= this.configuration.connectTimeout;
 
+		// A copy: an empty slot of the list shows in it as `undefined`, which
+		// `every` would skip otherwise.
+		const transports = Array.isArray(next.transports)
+			? [...next.transports]
+			: [];
 		if (
-			!Array.isArray(next.transports) ||
-			next.transports.length === 0 ||
-			!next.transports.every((transport) => TRANSPORTS.includes(transport))
+			transports.length === 0 ||
+			!transports.every((transport) => TRANSPORTS.includes(transport))
 		) {
 			throw new Error(
 				`transports must list at least one of: ${TRANSPORTS.join(", ")}`,
 			);
 		}
+		next.transports = transports;
 		if (
 			typeof next.connectTimeout !== "number" ||
 			!(next.connectTimeout >= 1 && next.connectTimeout <= MAX_TIMEOUT)
