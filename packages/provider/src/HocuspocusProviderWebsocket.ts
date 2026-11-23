@@ -60,6 +60,8 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 
 	/**
 	 * Disconnect when no message is received for the defined amount of milliseconds.
+	 * WebSocket only: the HTTP transports have heartbeats, and a request that
+	 * goes without one past its deadline fails the socket.
 	 */
 	messageReconnectTimeout: number;
 	/**
@@ -709,6 +711,14 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	checkConnection() {
 		// Don’t check the connection when it’s not even established
 		if (this.status !== WebSocketStatus.Connected) {
+			return;
+		}
+
+		// An HTTP transport watches its own requests: a stream or a poll that
+		// goes silent past its deadline fails, and the socket closes with 1006.
+		// Heartbeats are no messages, so this check would take an idle session
+		// for a dead one.
+		if (this.transport !== "websocket") {
 			return;
 		}
 

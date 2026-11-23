@@ -92,15 +92,49 @@ for (const transport of ["sse", "polling"] as const) {
 					closed = true;
 				},
 			},
-			{ transports: [transport] },
+			{
+				transports: [transport],
+				// What the provider gives a WebSocket to deliver a message. Without
+				// awareness the server sends none; heartbeats are no messages.
+				messageReconnectTimeout: 1000,
+			},
 		);
 		await waitForSynced(provider);
 
-		// More than twice the idle timeout of the server.
+		// More than twice the idle timeout of the server and the time the
+		// provider waits for a message.
 		await sleep(2500);
 
 		t.true(provider.isSynced);
 		t.false(closed);
+	});
+
+	test(`${transport}: a session whose requests go unanswered closes with 1006`, async (t) => {
+		const hocuspocus = await newHocuspocus(t, {
+			httpFallback: true,
+			timeout: 1000,
+		});
+		const proxy = await newHttpProxy(t, hocuspocus);
+		const codes: number[] = [];
+		const provider = newHocuspocusProvider(
+			t,
+			hocuspocus,
+			{
+				awareness: null,
+				onClose: ({ event }) => {
+					codes.push(event.code);
+				},
+			},
+			{ url: proxy.webSocketURL, transports: [transport], connectTimeout: 500 },
+		);
+		await waitForSynced(provider);
+
+		// The connection breaks, and no request gets through any more. Only the
+		// deadlines of the socket's requests can tell: there are no messages
+		// to miss.
+		proxy.holdDownstreams();
+
+		await retryableAssertion(t, (tt) => tt.true(codes.includes(1006)));
 	});
 
 	test(`${transport}: a downstream response that gets lost is sent again`, async (t) => {
