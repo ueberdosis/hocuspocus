@@ -39,19 +39,9 @@ export interface ServerConfiguration<Context = any>
 	 *   cookie).
 	 * - `onUpgrade` hooks do not run for HTTP sessions. `onRequest` runs for the
 	 *   request that opens a session, not for the requests of an open session.
-	 * - `timeout` also bounds how long a client may leave a delivered message
-	 *   unacknowledged, take nothing while messages wait for it, or keep a
-	 *   backlog larger than `maxPayload` and the messages on their way, before
-	 *   its session is closed with 4408. The time a slow client spends
-	 *   downloading does not count, as long as nothing on the way buffers
-	 *   whole responses: a message counts as delivered once the next hop took
-	 *   it. Responses ask nginx not to buffer (`X-Accel-Buffering: no`); behind
-	 *   a proxy that buffers anyway, a slow last hop needs a larger `timeout`.
-	 *   Resuming a cut stream needs it to be longer than `heartbeatInterval`
-	 *   plus the provider's `connectTimeout`.
-	 * - A POST, i.e. one batch of messages, has to arrive within the HTTP
-	 *   server's request timeout (Node.js: `requestTimeout` of `http.Server`,
-	 *   5 minutes by default).
+	 * - `timeout` also closes HTTP sessions whose client falls behind, and a
+	 *   POST has to arrive within the HTTP server's request timeout: the class
+	 *   `HttpFallback` documents these rules.
 	 */
 	httpFallback?: boolean | Partial<HttpFallbackConfiguration>;
 }

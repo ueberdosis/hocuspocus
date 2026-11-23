@@ -130,7 +130,8 @@ interface Downstream {
  * not count, unless a proxy on the way buffers whole responses and so takes
  * them at once. A client that reads slower than its documents change is
  * closed once its backlog has outgrown the messages on their way, and
- * `maxPayload`, for that long.
+ * `maxPayload`, for that long. All of this is judged in `send`, where the
+ * outbox grows: a session that is sent nothing is left alone.
  */
 export class HttpFallbackSession implements WebSocketLike {
 	readonly key: string;

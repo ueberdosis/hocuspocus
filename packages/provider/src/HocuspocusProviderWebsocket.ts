@@ -66,12 +66,18 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	 * Transports tried in order on every connection attempt.
 	 * `["websocket", "sse", "polling"]` enables the HTTP fallbacks, `["sse"]`
 	 * uses server-sent events only. The HTTP transports need `httpFallback` on
-	 * the server. Default=["websocket"]
+	 * the server. A WebSocket that fails to open is replaced within the
+	 * attempt; one that opens but stays silent only with the next attempt, so
+	 * with `maxAttempts: 1` it ends in `maxAttemptsFailed`.
+	 * Default=["websocket"]
 	 */
 	transports: HocuspocusTransport[];
 	/**
 	 * Milliseconds a transport gets to open before the next one is tried. Also
-	 * bounds the retries of HTTP transport requests. Default=10000
+	 * bounds the retries of HTTP transport requests. `timeout`, if set, has to
+	 * leave room for every transport: once it runs out, `maxAttemptsFailed` is
+	 * emitted while the transport in flight still gets its turn.
+	 * Default=10000
 	 */
 	connectTimeout: number;
 	/**
