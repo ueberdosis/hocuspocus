@@ -302,6 +302,40 @@ test("a message that takes longer than the timeout to download does not cost the
 	t.is((await messageIds(session.poll(ids[0]))).length, ticks);
 });
 
+test("a message waits for its acknowledgement once the client has taken its last slice", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 1000,
+	});
+	const session = await openSession(hocuspocus);
+	await session.post(1, [authFrame("taken-doc")]);
+	const cursor = await settle(session);
+	const document = hocuspocus.documents.get("taken-doc")!;
+	// Its requests keep the session alive.
+	const idle = async (rounds: number) => {
+		for (let round = 0; round < rounds; round += 1) {
+			await sleep(250);
+			t.is(await statusOf(session.ping(cursor)), 204);
+		}
+	};
+
+	// Two slices.
+	document.broadcastStateless("x".repeat(60_000));
+	const reader = (await session.poll(cursor)).body!.getReader();
+	await reader.read();
+	await reader.read();
+	// The client has the last slice in hand. That it took it shows when it
+	// asks for what follows: the Node.js bridge does once the socket took the
+	// slice, here 750 ms later.
+	await idle(3);
+	t.true((await reader.read()).done);
+
+	// 1250 ms after the last slice was handed over, 500 ms after it was taken.
+	await idle(2);
+	document.broadcastStateless("one more");
+	t.is(await statusOf(session.ping(cursor + 1)), 204);
+});
+
 test("acknowledgements that lag behind steady traffic do not cost the session", async (t) => {
 	const hocuspocus = await newHocuspocus(t, {
 		httpFallback: true,

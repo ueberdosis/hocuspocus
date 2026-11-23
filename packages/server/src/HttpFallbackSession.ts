@@ -123,7 +123,7 @@ interface Downstream {
  * Upstream, the client numbers its batches of messages. A batch that arrives
  * again, because its response got lost, is not processed twice.
  *
- * A response goes out slice by slice, as fast as the client takes it. A
+ * A response goes out slice by slice, each once the client asks for it. A
  * message the client took has to be acknowledged within the `timeout`
  * option, and a client that takes nothing for that long while messages wait
  * for it is closed as well: the time a slow client spends downloading does
@@ -156,12 +156,12 @@ export class HttpFallbackSession implements WebSocketLike {
 	private written = 0;
 
 	/**
-	 * Highest message id the client has taken from a response: every slice of
-	 * the text that carried it was read.
+	 * Highest message id the client has taken from a response: it took every
+	 * slice of the text that carried it and asked for what follows.
 	 */
 	private delivered = 0;
 
-	/** When the client last took a slice of a response. */
+	/** When the client last asked for the next slice of a response. */
 	private tookAt = Date.now();
 
 	/**
@@ -363,29 +363,37 @@ export class HttpFallbackSession implements WebSocketLike {
 
 		// `start` runs synchronously, inside the constructor.
 		let downstream!: Downstream;
-		const stream = new ReadableStream<Uint8Array>({
-			start: (controller) => {
-				downstream = { mode, controller };
+		const stream = new ReadableStream<Uint8Array>(
+			{
+				start: (controller) => {
+					downstream = { mode, controller };
+				},
+				// The client asks for more: it took what it was given. While a long
+				// text goes out, the heartbeats wait behind it and the client cannot
+				// answer them, so a slice taken from the middle of one counts as a
+				// sign of life. Not a short text: the socket takes that even when
+				// the peer is gone.
+				pull: () => {
+					this.tookAt = Date.now();
+					const { pending } = downstream;
+					if (!pending) {
+						this.flush();
+						return;
+					}
+					if (pending.offset < pending.bytes.length) {
+						this.clientConnection.touch();
+					}
+					this.feed(downstream);
+				},
+				// The client went away.
+				cancel: () => this.detach(downstream),
 			},
-			// The client took what it was given. While a long text goes out, the
-			// heartbeats wait behind it and the client cannot answer them, so a
-			// slice taken from the middle of one counts as a sign of life. Not a
-			// short text: the socket takes that even when the peer is gone.
-			pull: () => {
-				this.tookAt = Date.now();
-				const { pending } = downstream;
-				if (!pending) {
-					this.flush();
-					return;
-				}
-				if (pending.offset < pending.bytes.length) {
-					this.clientConnection.touch();
-				}
-				this.feed(downstream);
-			},
-			// The client went away.
-			cancel: () => this.detach(downstream),
-		});
+			// Nothing is read ahead: `pull` only runs when the consumer asks for
+			// a chunk and none is queued. The Node.js bridge asks once the socket
+			// took the previous chunk, so a slice counts as taken when it is on
+			// its way to the client, not when the bridge picked it up.
+			{ highWaterMark: 0 },
+		);
 		this.downstream = downstream;
 		this.flush();
 
@@ -494,17 +502,14 @@ export class HttpFallbackSession implements WebSocketLike {
 		}
 
 		if (pending.offset < pending.bytes.length) {
-			// One slice per pull: the next one goes out once the client took
-			// this one.
-			if ((controller.desiredSize ?? 0) <= 0) {
+			// One slice at a time: none follows while one waits to be taken.
+			if ((controller.desiredSize ?? 0) < 0) {
 				return;
 			}
 			const slice = pending.bytes.subarray(
 				pending.offset,
 				pending.offset + DOWNSTREAM_SLICE,
 			);
-			// Before the enqueue: a reader that is waiting takes the slice at
-			// once, and the stream pulls the next one from inside `enqueue`.
 			pending.offset += DOWNSTREAM_SLICE;
 			try {
 				controller.enqueue(slice);
@@ -515,8 +520,8 @@ export class HttpFallbackSession implements WebSocketLike {
 			return;
 		}
 
-		// The client took the last slice: the messages in it are delivered, and
-		// wait for their acknowledgement from now on.
+		// The client asked for what follows the last slice: the messages in the
+		// text are delivered, and wait for their acknowledgement from now on.
 		downstream.pending = undefined;
 		const now = Date.now();
 		const upTo = Math.min(pending.upTo, this.acked + this.outbox.length);
