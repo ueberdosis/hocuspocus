@@ -239,7 +239,19 @@ export class HttpSocket {
 		url: string,
 		options: { transport: HttpTransportName; connectTimeout: number },
 	) {
-		this.url = url.replace(/^ws/i, "http");
+		// As a WebSocket does, resolve a relative URL against the page, in a
+		// worker against its script. Elsewhere there is neither, and the URL has
+		// to be absolute.
+		const page: {
+			document?: { baseURI?: string };
+			location?: { href?: string };
+		} = globalThis;
+		const resolved = new URL(
+			url,
+			page.document?.baseURI ?? page.location?.href,
+		);
+		resolved.protocol = resolved.protocol.replace("ws", "http");
+		this.url = resolved.href;
 		this.transport = options.transport;
 		this.connectTimeout = options.connectTimeout;
 
