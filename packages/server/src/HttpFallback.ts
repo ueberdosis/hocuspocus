@@ -247,22 +247,37 @@ async function readBody(
  * Read what is left of a request body and drop it. A request that is
  * answered while its body waits unread leaves the connection in a state in
  * which Node.js loses the answer, or the next request on it. Nothing is
- * buffered, and the request timeout of the HTTP server bounds the read.
+ * buffered. Node.js closes a connection that stays silent after its answer
+ * (`keepAliveTimeout`), which ends the read; other runtimes need not, so a
+ * body that stops arriving for `patience` ms is given up.
  */
-function discard(body: ReadableStream<Uint8Array> | null): void {
+function discard(
+	body: ReadableStream<Uint8Array> | null,
+	patience: number,
+): void {
 	// Locked: the caller reads it itself.
 	if (!body || body.locked) {
 		return;
 	}
 
 	const reader = body.getReader();
+	let timer: ReturnType<typeof setTimeout> | undefined;
 	const drain = async () => {
 		try {
-			while (!(await reader.read()).done) {
-				// Dropped.
+			while (true) {
+				clearTimeout(timer);
+				timer = setTimeout(() => {
+					reader.cancel().catch(() => {});
+				}, patience);
+				timer.unref?.();
+				if ((await reader.read()).done) {
+					return;
+				}
 			}
 		} catch {
 			// The client went away.
+		} finally {
+			clearTimeout(timer);
 		}
 	};
 	void drain();
@@ -353,7 +368,8 @@ export class HttpFallback<Context = any> {
 				})
 			: text(403, "Origin not allowed");
 
-		discard(request.body);
+		// A client may stay silent for `timeout`, in the middle of a body too.
+		discard(request.body, this.hocuspocus.configuration.timeout);
 		return withHeaders(response, { ...RESPONSE_HEADERS, ...cors });
 	}
 

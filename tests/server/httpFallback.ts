@@ -819,6 +819,36 @@ test("a POST that is refused gets its answer, whatever the size of its body", as
 	t.is(await post(session.sessionId, session.key), 204);
 });
 
+test("the rest of a refused body is given up once it stops arriving for the timeout", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		timeout: 300,
+	});
+	// A client that sends the start of a body, and then nothing.
+	let givenUp = false;
+	const body = new ReadableStream<Uint8Array>({
+		start(controller) {
+			controller.enqueue(new TextEncoder().encode("A".repeat(100)));
+		},
+		cancel() {
+			givenUp = true;
+		},
+	});
+	const init: RequestInit & { duplex: "half" } = {
+		method: "POST",
+		body,
+		duplex: "half",
+	};
+	const response = await hocuspocus.server!.httpFallback!.fetch(
+		new Request(`http://hocuspocus.test/?hp_sid=${randomUUID()}`, init),
+	);
+	t.is(response.status, 404);
+
+	// Three times the timeout.
+	await sleep(900);
+	t.true(givenUp);
+});
+
 test("a session the client closes is gone at once", async (t) => {
 	let disconnects = 0;
 	const hocuspocus = await newHocuspocus(t, {
