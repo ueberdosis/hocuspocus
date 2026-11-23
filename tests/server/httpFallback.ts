@@ -801,12 +801,18 @@ test("a POST that is refused gets its answer, whatever the size of its body", as
 	// Through the Node.js server. A body of this size is refused before it was
 	// read to its end, yet fits into the buffers of the connection: left
 	// unread, it costs every other request its answer.
+	let closed = 0;
+	hocuspocus.server!.httpServer.on("connection", (socket) => {
+		socket.on("close", () => {
+			closed += 1;
+		});
+	});
 	const post = async (sessionId: string, body: string) => {
 		const response = await fetch(
 			`${hocuspocus.server!.httpURL}/?hp_sid=${sessionId}&hp_cursor=0`,
 			{ method: "POST", body },
 		);
-		// Read to its end, so that the next request uses the same connection.
+		// Read to its end, so that the next request can use the same connection.
 		await response.text();
 		return response.status;
 	};
@@ -817,6 +823,8 @@ test("a POST that is refused gets its answer, whatever the size of its body", as
 		t.is(await post(randomUUID(), body), 404);
 	}
 	t.is(await post(session.sessionId, session.key), 204);
+	// Nor does a refusal cost the connection it came on.
+	t.is(closed, 0);
 });
 
 test("the rest of a refused body is given up once it stops arriving for the timeout", async (t) => {

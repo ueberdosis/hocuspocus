@@ -204,19 +204,23 @@ for (const transport of ["sse", "polling"] as const) {
 		// The server had the batch at the first go. The provider sends it again,
 		// in the same session and under the same sequence number, and the
 		// numbers still line up after.
-		await retryableAssertion(t, (tt) => {
-			const batches = proxy.requests.flatMap((request) => {
-				const { searchParams } = new URL(
-					request.split(" ")[1],
-					"http://localhost",
-				);
-				const sequence = searchParams.get("hp_seq");
-				return sequence === null
-					? []
-					: `${searchParams.get("hp_sid")} ${sequence}`;
-			});
-			tt.true(batches.length > new Set(batches).size);
-		});
+		const batchOf = (request: string) => {
+			const { searchParams } = new URL(
+				request.split(" ")[1],
+				"http://localhost",
+			);
+			return `${searchParams.get("hp_sid")} ${searchParams.get("hp_seq")}`;
+		};
+		t.is(proxy.lost.length, 1);
+		const [lost] = proxy.lost;
+		const lostBatch = batchOf(proxy.requests[lost]);
+		await retryableAssertion(t, (tt) =>
+			tt.true(
+				proxy.requests
+					.slice(lost + 1)
+					.some((request) => batchOf(request) === lostBatch),
+			),
+		);
 
 		provider.sendStateless("third");
 		await retryableAssertion(t, (tt) => tt.true(received.includes("third")));
@@ -318,10 +322,15 @@ for (const transport of ["sse", "polling"] as const) {
 		);
 		await waitForSynced(provider);
 
+		const disconnectedAt = Date.now();
 		provider.configuration.websocketProvider.disconnect();
 
-		// Left to itself, the server would only notice at its idle timeout.
-		await retryableAssertion(t, (tt) => tt.is(disconnects, 1));
+		// Left to itself, the server would only notice at its idle timeout of
+		// 30 s, so the wait ends well before that.
+		await retryableAssertion(t, (tt) =>
+			tt.true(disconnects === 1 || Date.now() - disconnectedAt > 5000),
+		);
+		t.is(disconnects, 1);
 		// It was the provider that told it.
 		t.true(proxy.requests.some((request) => request.includes("hp_close=1")));
 	});

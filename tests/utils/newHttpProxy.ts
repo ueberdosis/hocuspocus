@@ -17,6 +17,8 @@ export interface HttpProxy {
 	webSocketURL: string;
 	/** `METHOD url` of every HTTP request received. */
 	requests: string[];
+	/** Where in `requests` those are whose responses were lost. */
+	lost: number[];
 	/** Break the connections of the downstream requests in flight. */
 	cutDownstreams(): void;
 	/** `cutDownstreams`, and park the downstream requests that follow. */
@@ -53,6 +55,7 @@ export const newHttpProxy = async (
 	const { eventStreams = "pass" } = options;
 	const target = new URL(hocuspocus.server!.httpURL);
 	const requests: string[] = [];
+	const lost: number[] = [];
 	const downstreams = new Set<http.ServerResponse>();
 	let parked: (() => void)[] = [];
 	let holding = false;
@@ -188,12 +191,13 @@ export const newHttpProxy = async (
 		const isDownstream = parameters.has("hp_transport");
 		const kind = isDownstream
 			? "downstream"
-			: parameters.has("hp_seq")
+			: request.method === "POST" && parameters.has("hp_seq")
 				? "batch"
 				: null;
 		const lose = kind !== null && kind === losing;
 		if (lose) {
 			losing = null;
+			lost.push(requests.length - 1);
 		}
 
 		if (isDownstream) {
@@ -229,6 +233,7 @@ export const newHttpProxy = async (
 	return {
 		webSocketURL: `ws://127.0.0.1:${(server.address() as AddressInfo).port}`,
 		requests,
+		lost,
 		cutDownstreams,
 		holdDownstreams() {
 			holding = true;

@@ -17,7 +17,8 @@ import { retryableAssertion } from "../utils/retryableAssertion.ts";
 // tests that depend on what else is going on run on their own, before the
 // others.
 
-const sent: { port: string; credentials: RequestCredentials }[] = [];
+const sent: { method: string; url: URL; credentials: RequestCredentials }[] =
+	[];
 // Bytes of keepalive bodies on their way, and the most there were at once.
 let keepaliveBytes = 0;
 let mostKeepaliveBytes = 0;
@@ -28,7 +29,8 @@ const recordingFetch = async (
 ): Promise<Response> => {
 	const request = new Request(input, init);
 	sent.push({
-		port: new URL(request.url).port,
+		method: request.method,
+		url: new URL(request.url),
 		credentials: request.credentials,
 	});
 	const size = request.keepalive ? String(init?.body ?? "").length : 0;
@@ -125,6 +127,17 @@ test("sse: a relative URL is resolved against the page, as a WebSocket does", as
 
 	await waitForSynced(provider);
 	t.is(provider.configuration.websocketProvider.transport, "sse");
+	// The server takes the requests of a session on any path, so it is the
+	// URL of the requests that tells where the provider went.
+	const port = String(hocuspocus.server!.address.port);
+	const requests = sent.filter((request) => request.url.port === port);
+	const opening = requests.find((request) => request.method === "GET");
+	t.is(opening?.url.origin, hocuspocus.server!.httpURL);
+	t.is(opening?.url.pathname, "/collaboration");
+	t.deepEqual(
+		[...new Set(requests.map((request) => request.url.pathname))],
+		["/collaboration"],
+	);
 });
 
 for (const withCredentials of [false, true]) {
@@ -148,13 +161,19 @@ for (const withCredentials of [false, true]) {
 		await retryableAssertion(t, (tt) => tt.is(disconnects, 1));
 
 		const port = String(hocuspocus.server!.address.port);
-		const modes = sent
-			.filter((request) => request.port === port)
-			.map((request) => request.credentials);
-		// The open, polls, batches and the close.
-		t.true(modes.length >= 4);
+		const requests = sent.filter((request) => request.url.port === port);
+		// The provider closed the session, rather than the server timing it
+		// out, and that request carries the mode too.
+		t.is(
+			requests.filter(
+				(request) =>
+					request.method === "POST" &&
+					request.url.searchParams.get("hp_close") === "1",
+			).length,
+			1,
+		);
 		t.deepEqual(
-			[...new Set(modes)],
+			[...new Set(requests.map((request) => request.credentials))],
 			[withCredentials ? "include" : "same-origin"],
 		);
 	});
