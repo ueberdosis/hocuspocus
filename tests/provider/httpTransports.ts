@@ -326,7 +326,7 @@ for (const transport of ["sse", "polling"] as const) {
 		provider.configuration.websocketProvider.disconnect();
 
 		// Left to itself, the server would only notice at its idle timeout of
-		// 30 s, so the wait ends well before that.
+		// 60 s, so the wait ends well before that.
 		await retryableAssertion(t, (tt) =>
 			tt.true(disconnects === 1 || Date.now() - disconnectedAt > 5000),
 		);
