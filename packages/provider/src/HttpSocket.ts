@@ -628,7 +628,12 @@ export class HttpSocket {
 				}
 			},
 			() => {
-				watchdog(patience);
+				// A transport has `connectTimeout` to open, however its bytes
+				// arrive: until then the deadline of the request stands. After
+				// that the stream only has to keep arriving.
+				if (this.readyState === WsReadyStates.Open) {
+					watchdog(patience);
+				}
 				// The heartbeats written during a long message wait behind it, and
 				// with them the pings that acknowledge the messages before it.
 				// Ping as often as heartbeats arrive otherwise.
@@ -680,8 +685,13 @@ export class HttpSocket {
 					this.handleEvent(item);
 				}
 			},
-			// The hold is over: from here on the body has to keep arriving.
-			() => watchdog(this.connectTimeout),
+			// The hold is over: from here on the body has to keep arriving. The
+			// poll that opens the session keeps its deadline until it has.
+			() => {
+				if (this.readyState === WsReadyStates.Open) {
+					watchdog(this.connectTimeout);
+				}
+			},
 		);
 
 		// What a server without the HTTP transports, or a proxy, answers.

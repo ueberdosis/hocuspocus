@@ -102,6 +102,7 @@ const proxyCases = [
 	{ eventStreams: "pass", expected: "sse" },
 	{ eventStreams: "buffer", expected: "polling" },
 	{ eventStreams: "stall", expected: "polling" },
+	{ eventStreams: "drip", expected: "polling" },
 ] as const;
 
 for (const { eventStreams, expected } of proxyCases) {

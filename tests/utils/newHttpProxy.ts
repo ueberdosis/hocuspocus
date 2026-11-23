@@ -7,9 +7,10 @@ export interface HttpProxyOptions {
 	/**
 	 * What happens to event streams: forwarded as they come (`pass`), never
 	 * forwarded (`buffer`), forwarded up to the probe and no further (`stall`),
-	 * or forwarded a few bytes at a time (`trickle`).
+	 * forwarded a few bytes at a time (`trickle`), or a byte at a time, too
+	 * slowly for a transport to open (`drip`).
 	 */
-	eventStreams?: "pass" | "buffer" | "stall" | "trickle";
+	eventStreams?: "pass" | "buffer" | "stall" | "trickle" | "drip";
 }
 
 export interface HttpProxy {
@@ -118,14 +119,29 @@ export const newHttpProxy = async (
 					return;
 				}
 
-				// Three bytes at a time, each in a chunk of its own, so that lines
-				// and events are split in every possible place.
+				// `trickle`: three bytes at a time, each in a chunk of its own, so
+				// that lines and events are split in every possible place. `drip`:
+				// a byte every 20 ms, so that the stream keeps arriving and gets
+				// nowhere.
+				const step = eventStreams === "drip" ? 1 : 3;
+				const pause = () =>
+					new Promise<void>((resolve) => {
+						if (eventStreams === "drip") {
+							setTimeout(resolve, 20).unref();
+						} else {
+							setImmediate(resolve);
+						}
+					});
 				let written = Promise.resolve();
 				upstreamResponse.on("data", (chunk: Buffer) => {
 					written = written.then(async () => {
-						for (let offset = 0; offset < chunk.length; offset += 3) {
-							response.write(chunk.subarray(offset, offset + 3));
-							await new Promise((resolve) => setImmediate(resolve));
+						for (
+							let offset = 0;
+							offset < chunk.length && !response.destroyed;
+							offset += step
+						) {
+							response.write(chunk.subarray(offset, offset + step));
+							await pause();
 						}
 					});
 				});
