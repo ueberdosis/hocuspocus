@@ -175,7 +175,8 @@ function validate(configuration: HttpFallbackConfiguration): void {
  * Read the body of a POST: the session key on the first line, then one
  * message per line. Returns the message lines, or the response for a body
  * that is refused. The key is checked as soon as its line is complete, so a
- * sender without it cannot make the server buffer `limit` bytes.
+ * sender without it cannot make the server buffer `limit` bytes. A body that
+ * is refused is left where it is; `fetch` drops the rest.
  */
 async function readBody(
 	request: Request,
@@ -203,12 +204,6 @@ async function readBody(
 		return !keyAccepted;
 	};
 
-	// The rest of a refused body is not read.
-	const refuse = (response: Response): Response => {
-		reader?.cancel().catch(() => {});
-		return response;
-	};
-
 	try {
 		while (reader) {
 			const { done, value } = await reader.read();
@@ -221,15 +216,18 @@ async function readBody(
 			size += value.byteLength;
 			body += decoder.decode(value, { stream: true });
 			if (!keyAccepted && keyRefused(false)) {
-				return refuse(notFound());
+				return notFound();
 			}
 			if (size > limit) {
-				return refuse(text(413, "Payload too large"));
+				return text(413, "Payload too large");
 			}
 		}
 	} catch {
 		// The client went away in the middle of its request.
 		return text(400, "Incomplete request");
+	} finally {
+		// What is left of a refused body is for `discard`.
+		reader?.releaseLock();
 	}
 
 	body += decoder.decode();
@@ -238,6 +236,31 @@ async function readBody(
 	}
 
 	return body.split("\n").slice(1);
+}
+
+/**
+ * Read what is left of a request body and drop it. A request that is
+ * answered while its body waits unread leaves the connection in a state in
+ * which Node.js loses the answer, or the next request on it. Nothing is
+ * buffered, and the request timeout of the HTTP server bounds the read.
+ */
+function discard(body: ReadableStream<Uint8Array> | null): void {
+	// Locked: the caller reads it itself.
+	if (!body || body.locked) {
+		return;
+	}
+
+	const reader = body.getReader();
+	const drain = async () => {
+		try {
+			while (!(await reader.read()).done) {
+				// Dropped.
+			}
+		} catch {
+			// The client went away.
+		}
+	};
+	void drain();
 }
 
 /**
@@ -323,6 +346,7 @@ export class HttpFallback<Context = any> {
 				})
 			: text(403, "Origin not allowed");
 
+		discard(request.body);
 		return withHeaders(response, { ...RESPONSE_HEADERS, ...cors });
 	}
 

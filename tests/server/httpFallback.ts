@@ -86,6 +86,7 @@ const openSession = async (
 	const key = JSON.parse(openEvent[1]).key as string;
 
 	return {
+		sessionId,
 		key,
 		request,
 		/** Deliver the batch with the given sequence number. */
@@ -744,6 +745,32 @@ test("requests that break the protocol are refused and nothing of them is proces
 		204,
 	);
 	await retryableAssertion(t, (tt) => tt.deepEqual(received, ["accepted"]));
+});
+
+test("a POST that is refused gets its answer, whatever the size of its body", async (t) => {
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: { maxPayload: 1000 },
+	});
+	const session = await openSession(hocuspocus);
+	// Through the Node.js server. A body of this size is refused before it was
+	// read to its end, yet fits into the buffers of the connection: left
+	// unread, it costs every other request its answer.
+	const post = async (sessionId: string, body: string) => {
+		const response = await fetch(
+			`${hocuspocus.server!.httpURL}/?hp_sid=${sessionId}&hp_cursor=0`,
+			{ method: "POST", body },
+		);
+		// Read to its end, so that the next request uses the same connection.
+		await response.text();
+		return response.status;
+	};
+	const body = "A".repeat(200_000);
+
+	for (let round = 0; round < 4; round += 1) {
+		t.is(await post(session.sessionId, `${session.key}\n${body}`), 413);
+		t.is(await post(randomUUID(), body), 404);
+	}
+	t.is(await post(session.sessionId, session.key), 204);
 });
 
 test("a session the client closes is gone at once", async (t) => {
