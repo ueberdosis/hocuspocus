@@ -24,10 +24,10 @@ export interface HttpProxy {
 	/** Forward the parked requests. */
 	releaseDownstreams(): void;
 	/**
-	 * Lose the response to the next downstream request, or to the next POST of
-	 * another kind: the server answers, the client sees a broken connection.
+	 * Lose the response to the next downstream request, or to the next batch
+	 * of messages: the server answers, the client sees a broken connection.
 	 */
-	loseNextResponse(kind: "downstream" | "post"): void;
+	loseNextResponse(kind: "downstream" | "batch"): void;
 	/**
 	 * Hold every POST that carries messages for `delay` ms before it is
 	 * forwarded, as if it took that long to upload.
@@ -56,7 +56,7 @@ export const newHttpProxy = async (
 	const downstreams = new Set<http.ServerResponse>();
 	let parked: (() => void)[] = [];
 	let holding = false;
-	let losing: "downstream" | "post" | null = null;
+	let losing: "downstream" | "batch" | null = null;
 	let batchDelay = 0;
 	let servingTransports = true;
 
@@ -106,15 +106,33 @@ export const newHttpProxy = async (
 				}
 
 				if (eventStreams === "stall") {
+					// The probe can arrive split over two chunks: the end of what
+					// was read is held back while it could be its beginning.
+					const probe = ":probe";
+					let held = "";
 					let stalled = false;
 					upstreamResponse.on("data", (chunk: Buffer) => {
 						if (stalled) {
 							return;
 						}
-						const text = chunk.toString();
-						const probe = text.indexOf(":probe");
-						stalled = probe !== -1;
-						response.write(stalled ? text.slice(0, probe) : text);
+						held += chunk.toString();
+						const found = held.indexOf(probe);
+						stalled = found !== -1;
+						let end = stalled ? found : held.length;
+						for (
+							let keep = Math.min(held.length, probe.length - 1);
+							!stalled && keep > 0;
+							keep -= 1
+						) {
+							if (held.endsWith(probe.slice(0, keep))) {
+								end = held.length - keep;
+								break;
+							}
+						}
+						if (end > 0) {
+							response.write(held.slice(0, end));
+						}
+						held = held.slice(end);
 					});
 					return;
 				}
@@ -170,8 +188,8 @@ export const newHttpProxy = async (
 		const isDownstream = parameters.has("hp_transport");
 		const kind = isDownstream
 			? "downstream"
-			: request.method === "POST"
-				? "post"
+			: parameters.has("hp_seq")
+				? "batch"
 				: null;
 		const lose = kind !== null && kind === losing;
 		if (lose) {

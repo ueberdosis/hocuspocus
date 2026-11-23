@@ -161,19 +161,27 @@ for (const transport of ["sse", "polling"] as const) {
 		await waitForSynced(provider);
 		await settle(t, provider, received);
 
-		// The next POST is the batch with these two messages.
-		proxy.loseNextResponse("post");
+		// The next batch carries these two messages.
+		proxy.loseNextResponse("batch");
 		provider.sendStateless("first");
 		provider.sendStateless("second");
 		await retryableAssertion(t, (tt) => tt.true(received.includes("second")));
 
 		// The server had the batch at the first go. The provider sends it again,
-		// under the same sequence number, and the numbers still line up after.
+		// in the same session and under the same sequence number, and the
+		// numbers still line up after.
 		await retryableAssertion(t, (tt) => {
-			const sequences = proxy.requests.flatMap(
-				(request) => /hp_seq=(\d+)/.exec(request)?.[1] ?? [],
-			);
-			tt.true(sequences.length > new Set(sequences).size);
+			const batches = proxy.requests.flatMap((request) => {
+				const { searchParams } = new URL(
+					request.split(" ")[1],
+					"http://localhost",
+				);
+				const sequence = searchParams.get("hp_seq");
+				return sequence === null
+					? []
+					: `${searchParams.get("hp_sid")} ${sequence}`;
+			});
+			tt.true(batches.length > new Set(batches).size);
 		});
 
 		provider.sendStateless("third");
@@ -267,11 +275,12 @@ for (const transport of ["sse", "polling"] as const) {
 				disconnects += 1;
 			},
 		});
+		const proxy = await newHttpProxy(t, hocuspocus);
 		const provider = newHocuspocusProvider(
 			t,
 			hocuspocus,
 			{},
-			{ transports: [transport] },
+			{ url: proxy.webSocketURL, transports: [transport] },
 		);
 		await waitForSynced(provider);
 
@@ -279,6 +288,8 @@ for (const transport of ["sse", "polling"] as const) {
 
 		// Left to itself, the server would only notice at its idle timeout.
 		await retryableAssertion(t, (tt) => tt.is(disconnects, 1));
+		// It was the provider that told it.
+		t.true(proxy.requests.some((request) => request.includes("hp_close=1")));
 	});
 }
 
