@@ -294,7 +294,7 @@ export class Server<Context = any> {
 				this.hocuspocus.closeConnections();
 
 				// End every HTTP transport session with 1001 once the CLOSE
-				// messages above are queued; later requests get 503.
+				// messages above are queued; new sessions get 503.
 				this.httpFallback?.destroy();
 
 				// Flush any remaining debounced stores so documents unload

@@ -381,7 +381,9 @@ export class HttpFallback<Context = any> {
 	}
 
 	/**
-	 * Close every session with 1001 and refuse further requests with 503.
+	 * Close every session with 1001 and refuse new ones with 503. A session
+	 * without a response to carry the close event gets it with its next
+	 * request.
 	 */
 	destroy(): void {
 		this.destroyed = true;
@@ -389,10 +391,6 @@ export class HttpFallback<Context = any> {
 		for (const session of this.sessions.values()) {
 			session.close(1001, "Going Away");
 		}
-		for (const closed of this.closedSessions.values()) {
-			clearTimeout(closed.timer);
-		}
-		this.closedSessions.clear();
 	}
 
 	/**
@@ -429,7 +427,15 @@ export class HttpFallback<Context = any> {
 		request: Request,
 		defaultContext?: Context,
 	): Promise<Response> {
-		if (this.destroyed) {
+		const parameters = new URL(request.url).searchParams;
+		const id = parameters.get(HttpTransportParameter.SessionId);
+
+		// During a shutdown only the sessions the server closed get an answer:
+		// their close code.
+		if (
+			this.destroyed &&
+			!(request.method === "POST" && id !== null && this.closedSessions.has(id))
+		) {
 			return text(503, "Server is shutting down");
 		}
 
@@ -437,8 +443,6 @@ export class HttpFallback<Context = any> {
 			return text(405, "Method not allowed", { Allow: "GET, POST" });
 		}
 
-		const parameters = new URL(request.url).searchParams;
-		const id = parameters.get(HttpTransportParameter.SessionId);
 		if (id === null || !SESSION_ID.test(id)) {
 			return text(400, "Invalid session id");
 		}
@@ -630,7 +634,7 @@ export class HttpFallback<Context = any> {
 	private retire(id: string, key: string, closeEvent: CloseEvent | null): void {
 		this.sessions.delete(id);
 
-		if (!closeEvent || this.destroyed) {
+		if (!closeEvent) {
 			return;
 		}
 

@@ -838,7 +838,7 @@ test("a session the client closes is gone at once", async (t) => {
 	t.is(await statusOf(session.poll(0)), 404);
 });
 
-test("destroy() ends event streams with 1001 and refuses further requests", async (t) => {
+test("destroy() closes sessions with 1001 and refuses new ones", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 	const open = () =>
 		call(hocuspocus, "GET", { hp_transport: "sse", hp_sid: randomUUID() });
@@ -846,6 +846,8 @@ test("destroy() ends event streams with 1001 and refuses further requests", asyn
 
 	const reader = (await open()).body!.getReader();
 	t.regex(decoder.decode((await reader.read()).value), /event: hp-open\n/);
+	// Between two polls: there is no response to carry the close event.
+	const polling = await openSession(hocuspocus);
 
 	hocuspocus.server!.httpFallback!.destroy();
 
@@ -854,6 +856,9 @@ test("destroy() ends event streams with 1001 and refuses further requests", asyn
 		/event: hp-close\ndata: \{"code":1001,"reason":"Going Away"\}\n\n$/,
 	);
 	t.true((await reader.read()).done);
+	const gone = await polling.poll(0);
+	t.is(gone.status, 410);
+	t.is((await gone.json()).code, 1001);
 	t.is(await statusOf(open()), 503);
 });
 
