@@ -22,12 +22,14 @@ export interface HttpFallbackConfiguration {
 	/** Interval of SSE keep-alive comments and longest time a poll is held, in ms. */
 	heartbeatInterval: number;
 	/**
-	 * Largest accepted POST body in bytes. It applies before authentication,
-	 * like the `maxPayload` of `websocketOptions`. It also bounds how far a
-	 * client may fall behind: once the messages queued behind the response on
-	 * its way outgrow both this and the messages in that response, and the
-	 * oldest of them has waited longer than Hocuspocus' `timeout`, the client
-	 * reads slower than its documents change and is closed with 4408.
+	 * Largest accepted POST body in bytes: the session key on the first line,
+	 * then one base64 encoded message per line. At least 64, so that the key
+	 * fits. It applies before authentication, like the `maxPayload` of
+	 * `websocketOptions`. It also bounds how far a client may fall behind:
+	 * once the messages queued behind the response on its way outgrow both
+	 * this and the messages in that response, and the oldest of them has
+	 * waited longer than Hocuspocus' `timeout`, the client reads slower than
+	 * its documents change and is closed with 4408.
 	 */
 	maxPayload: number;
 	/**
@@ -159,7 +161,7 @@ function validate(configuration: HttpFallbackConfiguration): void {
 
 	for (const [key, minimum] of [
 		["heartbeatInterval", 1000],
-		["maxPayload", 1],
+		["maxPayload", MAX_KEY_LENGTH],
 		["maxSessions", 1],
 	] as const) {
 		const value = configuration[key];

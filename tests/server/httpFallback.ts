@@ -589,7 +589,8 @@ test("an invalid configuration is rejected", async (t) => {
 		[{ allowedOrigins: [] }, /allowedOrigins/],
 		[{ allowedOrigins: ["https://app.example/"] }, /allowedOrigins/],
 		[{ heartbeatInterval: 10 }, /heartbeatInterval/],
-		[{ maxPayload: 0 }, /maxPayload/],
+		// Every POST starts with the session key.
+		[{ maxPayload: 63 }, /maxPayload/],
 		[{ maxSessions: 1.5 }, /maxSessions/],
 	];
 	for (const [configuration, message] of invalid) {
