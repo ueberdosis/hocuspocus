@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { ServerResponse } from "node:http";
 import net from "node:net";
 import { writeAuthentication } from "@hocuspocus/common";
 import { type Hocuspocus, HttpFallback } from "@hocuspocus/server";
@@ -902,6 +903,111 @@ test("destroy() closes sessions with 1001 and refuses new ones", async (t) => {
 	t.is(gone.status, 410);
 	t.is((await gone.json()).code, 1001);
 	t.is(await statusOf(open()), 503);
+});
+
+/**
+ * Open an event stream through the Node.js server, authenticate a document
+ * on it and put a long message on its way: a response a shutdown has to
+ * let finish.
+ */
+const openLongDownload = async (hocuspocus: Hocuspocus) => {
+	const base = hocuspocus.server!.httpURL;
+	const sessionId = randomUUID();
+	const response = await fetch(`${base}/?hp_sid=${sessionId}&hp_transport=sse`);
+	const reader = response.body!.getReader();
+	const decoder = new TextDecoder();
+	let text = "";
+	const readUntil = async (seen: (text: string) => boolean) => {
+		while (!seen(text)) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+			text += decoder.decode(value, { stream: true });
+		}
+	};
+	await readUntil((seen) => seen.includes(":probe"));
+	const key = JSON.parse(/event: hp-open\ndata: (.*)\n/.exec(text)![1]).key;
+	await fetch(`${base}/?hp_sid=${sessionId}&hp_cursor=0&hp_seq=1`, {
+		method: "POST",
+		body: `${key}\n${base64(authFrame("shutdown-doc"))}`,
+	});
+	await readUntil((seen) => /^id: \d+$/m.test(seen));
+
+	// About 10 MB of base64: more than the socket buffers hold, so the server
+	// can only go on once the client takes it.
+	hocuspocus.documents
+		.get("shutdown-doc")!
+		.broadcastStateless("x".repeat(8_000_000));
+	await reader.read();
+
+	return {
+		reader,
+		/** Take the rest of the stream, as fast as it comes. */
+		readRest: async () => {
+			let rest = "";
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) {
+					return rest;
+				}
+				rest += decoder.decode(value, { stream: true });
+			}
+		},
+	};
+};
+
+test("destroy() waits for the close event to reach a client that is still downloading", async (t) => {
+	let stream: ServerResponse | undefined;
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		// Runs for the request that opens the session: the event stream.
+		async onRequest({ response }) {
+			stream = response;
+		},
+	});
+	const { readRest } = await openLongDownload(hocuspocus);
+	// The end of the stream was handed to the OS.
+	let finished = false;
+	stream!.once("finish", () => {
+		finished = true;
+	});
+
+	let destroyed = false;
+	let finishedBefore = false;
+	const started = Date.now();
+	const destroy = hocuspocus.server!.destroy().then(() => {
+		destroyed = true;
+		// A signal handler exits here, and the process takes along what it has
+		// not handed to the OS yet.
+		finishedBefore = finished;
+	});
+	// The client takes nothing for a second: the message is stuck in the
+	// socket buffers, and the close event waits behind it.
+	await sleep(1000);
+	t.false(destroyed);
+
+	// Then everything. The shutdown goes on once the close event went out.
+	t.regex(
+		await readRest(),
+		/event: hp-close\ndata: \{"code":1001,"reason":"Going Away"\}\n\n$/,
+	);
+	await destroy;
+	t.true(finishedBefore);
+	// Well within the grace period: it was the client that ended the wait.
+	t.true(Date.now() - started < 4000);
+});
+
+test("destroy() gives up on a client that stops reading, after a while", async (t) => {
+	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
+	const { reader } = await openLongDownload(hocuspocus);
+
+	const started = Date.now();
+	await hocuspocus.server!.destroy();
+	const elapsed = Date.now() - started;
+	t.true(elapsed >= 4900 && elapsed < 8000, `${elapsed} ms`);
+
+	await reader.cancel();
 });
 
 test("a request without hp_sid is left to the server, whatever its URL", async (t) => {

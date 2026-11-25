@@ -54,6 +54,11 @@ export const defaultHttpFallbackConfiguration: HttpFallbackConfiguration = {
 // How long a session the server closed still answers 410 with its close event.
 const CLOSED_SESSION_TTL = 60_000;
 
+// How long `destroy` waits for the responses on their way to finish, so
+// that the close event reaches clients that are still downloading. The
+// time the Node.js bridge gives an ended response to flush, too.
+const DESTROY_GRACE = 5_000;
+
 const SESSION_ID = /^[A-Za-z0-9_-]{16,64}$/;
 const INTEGER = /^\d{1,15}$/;
 
@@ -324,6 +329,9 @@ export class HttpFallback<Context = any> {
 	// Not counted against `maxSessions`, but not more of them either.
 	private readonly closedSessions = new Map<string, ClosedSession>();
 
+	/** The responses on their way through `handleNodeRequest`. */
+	private readonly writes = new Set<Promise<void>>();
+
 	private destroyed = false;
 
 	constructor(
@@ -381,6 +389,20 @@ export class HttpFallback<Context = any> {
 		response: ServerResponse,
 		defaultContext?: Context,
 	): Promise<void> {
+		const write = this.writeNodeResponse(request, response, defaultContext);
+		this.writes.add(write);
+		try {
+			await write;
+		} finally {
+			this.writes.delete(write);
+		}
+	}
+
+	private async writeNodeResponse(
+		request: IncomingMessage,
+		response: ServerResponse,
+		defaultContext?: Context,
+	): Promise<void> {
 		try {
 			let webRequest: Request | undefined;
 			try {
@@ -404,14 +426,28 @@ export class HttpFallback<Context = any> {
 	/**
 	 * Close every session with 1001 and refuse new ones with 503. A session
 	 * without a response to carry the close event gets it with its next
-	 * request.
+	 * request. Resolves once the responses on their way through
+	 * `handleNodeRequest` have been written, or after a grace period of 5 s.
+	 * Responses served through `fetch` by another runtime are not waited for.
 	 */
-	destroy(): void {
+	async destroy(): Promise<void> {
 		this.destroyed = true;
 
 		for (const session of this.sessions.values()) {
 			session.close(1001, "Going Away");
 		}
+
+		// The close event is the last thing a response on its way carries. A
+		// client that reads slowly gets it; one that stopped reading does not
+		// hold the shutdown.
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		await Promise.race([
+			Promise.all(this.writes),
+			new Promise<void>((resolve) => {
+				timer = setTimeout(resolve, DESTROY_GRACE);
+			}),
+		]);
+		clearTimeout(timer);
 	}
 
 	/**

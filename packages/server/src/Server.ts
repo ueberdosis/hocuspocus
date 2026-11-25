@@ -268,32 +268,38 @@ export class Server<Context = any> {
 	}
 
 	private async runDestroy(): Promise<void> {
-		await new Promise<void>((resolve) => {
-			this.httpServer.close();
+		this.httpServer.close();
 
-			try {
-				this.configuration.extensions.push({
-					async afterUnloadDocument({ instance }) {
-						if (instance.getDocumentsCount() === 0) resolve();
-					},
-				});
+		const unloaded = new Promise<void>((resolve) => {
+			this.configuration.extensions.push({
+				async afterUnloadDocument({ instance }) {
+					if (instance.getDocumentsCount() === 0) resolve();
+				},
+			});
 
-				// Close all existing connections - this will trigger the close hook
-				if (this.hocuspocus.getDocumentsCount() === 0) resolve();
-
-				this.hocuspocus.closeConnections();
-
-				// End every HTTP transport session with 1001 once the CLOSE
-				// messages above are queued; new sessions get 503.
-				this.httpFallback?.destroy();
-
-				// Flush any remaining debounced stores so documents unload
-				// promptly, even when unloadImmediately is false.
-				this.hocuspocus.flushPendingStores();
-			} catch (error) {
-				console.error(error);
-			}
+			// Close all existing connections - this will trigger the close hook
+			if (this.hocuspocus.getDocumentsCount() === 0) resolve();
 		});
+
+		let fallbackDestroyed: Promise<void> | undefined;
+		try {
+			this.hocuspocus.closeConnections();
+
+			// End every HTTP transport session with 1001 once the CLOSE
+			// messages above are queued; new sessions get 503.
+			fallbackDestroyed = this.httpFallback?.destroy();
+
+			// Flush any remaining debounced stores so documents unload
+			// promptly, even when unloadImmediately is false.
+			this.hocuspocus.flushPendingStores();
+		} catch (error) {
+			console.error(error);
+		}
+
+		await unloaded;
+		// The responses on their way carry the close events: wait, for a
+		// while, until they went out, before the process may exit.
+		await fallbackDestroyed;
 
 		await this.hocuspocus.hooks("onDestroy", { instance: this.hocuspocus });
 	}
