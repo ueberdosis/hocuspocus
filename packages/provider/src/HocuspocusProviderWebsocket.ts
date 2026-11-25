@@ -5,9 +5,11 @@ import * as encoding from "lib0/encoding";
 import * as time from "lib0/time";
 import EventEmitter from "./EventEmitter.ts";
 import type { HocuspocusProvider } from "./HocuspocusProvider.ts";
+import { HttpSocket, MAX_TIMEOUT } from "./HttpSocket.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { CloseMessage } from "./OutgoingMessages/CloseMessage.ts";
 import {
+	type HocuspocusTransport,
 	MessageType,
 	type onAwarenessChangeParameters,
 	type onAwarenessUpdateParameters,
@@ -20,6 +22,11 @@ import {
 	type onStatusParameters,
 	WebSocketStatus,
 } from "./types.ts";
+
+// How long a transport that failed to connect is skipped.
+const FAILED_TRANSPORT_TTL = 300_000;
+
+const TRANSPORTS: HocuspocusTransport[] = ["websocket", "sse", "polling"];
 
 export type HocuspocusWebSocket = WebSocket & { identifier: string };
 export type HocusPocusWebSocket = HocuspocusWebSocket;
@@ -53,8 +60,36 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 
 	/**
 	 * Disconnect when no message is received for the defined amount of milliseconds.
+	 * WebSocket only: the HTTP transports have heartbeats, and a request that
+	 * goes without one past its deadline fails the socket.
 	 */
 	messageReconnectTimeout: number;
+	/**
+	 * Transports tried in order on every connection attempt.
+	 * `["websocket", "sse", "polling"]` enables the HTTP fallbacks, `["sse"]`
+	 * uses server-sent events only. The HTTP transports need `httpFallback` on
+	 * the server. A WebSocket that fails to open is replaced within the
+	 * attempt; one that opens but stays silent only with the next attempt, so
+	 * with `maxAttempts: 1` it ends in `maxAttemptsFailed`.
+	 * Default=["websocket"]
+	 */
+	transports: HocuspocusTransport[];
+	/**
+	 * Milliseconds a transport gets to open before the next one is tried. Also
+	 * bounds the retries of HTTP transport requests. `timeout`, if set, has to
+	 * leave room for every transport: once it runs out, `maxAttemptsFailed` is
+	 * emitted while the transport in flight still gets its turn.
+	 * Default=10000
+	 */
+	connectTimeout: number;
+	/**
+	 * Send cookies and HTTP authentication with the requests of the HTTP
+	 * transports to another origin, as a WebSocket handshake does anyway. The
+	 * server needs `allowCredentials` and a list of `allowedOrigins` in its
+	 * `httpFallback` options. Requests to the page's own origin carry them
+	 * either way. Default=false
+	 */
+	withCredentials: boolean;
 	/**
 	 * The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.
 	 */
@@ -123,6 +158,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		WebSocketPolyfill: undefined,
 		// TODO: this should depend on awareness.outdatedTime
 		messageReconnectTimeout: 30000,
+		// WebSocket only
+		transports: ["websocket"],
+		// 10 seconds
+		connectTimeout: 10000,
+		// no cookies for another origin
+		withCredentials: false,
 		// 1 second
 		delay: 1000,
 		// instant
@@ -156,6 +197,19 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 	webSocket: HocusPocusWebSocket | null = null;
 
+	/**
+	 * Transport of the current socket.
+	 */
+	transport: HocuspocusTransport | null = null;
+
+	// Transport → time until which it is skipped.
+	private failedTransports = new Map<HocuspocusTransport, number>();
+
+	// Bounds the time a WebSocket takes to open and, once something was sent
+	// through it, to deliver its first message. Only used when there are other
+	// transports to turn to.
+	private connectTimer: ReturnType<typeof setTimeout> | null = null;
+
 	webSocketHandlers: { [key: string]: any } = {};
 
 	shouldConnect = true;
@@ -181,7 +235,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		this.configuration.WebSocketPolyfill = configuration.WebSocketPolyfill
 			? configuration.WebSocketPolyfill
-			: WebSocket;
+			: globalThis.WebSocket;
 
 		this.on("open", this.configuration.onOpen);
 		this.on("open", this.onOpen.bind(this));
@@ -259,7 +313,35 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	public setConfiguration(
 		configuration: Partial<HocuspocusProviderWebsocketConfiguration> = {},
 	): void {
-		this.configuration = { ...this.configuration, ...configuration };
+		const next = { ...this.configuration, ...configuration };
+		// An option that is passed as `undefined` keeps its value.
+		next.transports ??= this.configuration.transports;
+		next.connectTimeout ??= this.configuration.connectTimeout;
+
+		// A copy: an empty slot of the list shows in it as `undefined`, which
+		// `every` would skip otherwise.
+		const transports = Array.isArray(next.transports)
+			? [...next.transports]
+			: [];
+		if (
+			transports.length === 0 ||
+			!transports.every((transport) => TRANSPORTS.includes(transport))
+		) {
+			throw new Error(
+				`transports must list at least one of: ${TRANSPORTS.join(", ")}`,
+			);
+		}
+		next.transports = transports;
+		if (
+			typeof next.connectTimeout !== "number" ||
+			!(next.connectTimeout >= 1 && next.connectTimeout <= MAX_TIMEOUT)
+		) {
+			throw new Error(
+				`connectTimeout must be a number between 1 and ${MAX_TIMEOUT}`,
+			);
+		}
+
+		this.configuration = next;
 
 		if (!this.configuration.autoConnect) {
 			this.shouldConnect = false;
@@ -334,14 +416,66 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		return retryPromise;
 	}
 
+	/**
+	 * Listen to the given socket. Before it opens, a socket that fails moves the
+	 * connection attempt on to the `remaining` transports without emitting
+	 * `close`, `disconnect` or `status`.
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-	attachWebSocketListeners(ws: HocusPocusWebSocket, reject: Function) {
+	attachWebSocketListeners(
+		ws: HocusPocusWebSocket,
+		reject: Function,
+		transport: HocuspocusTransport = "websocket",
+		remaining: HocuspocusTransport[] = [],
+	) {
 		const { identifier } = ws;
-		const onMessageHandler = (payload: any) => this.emit("message", payload);
-		const onCloseHandler = (payload: any) =>
+		let opened = false;
+		let receivedMessage = false;
+
+		// The socket failed. Returns whether the connection attempt moved on to
+		// the next transport; if not, the caller reports the failure.
+		const failOver = () => {
+			if (!receivedMessage) {
+				this.markTransportFailed(transport);
+			}
+			if (opened || remaining.length === 0 || !this.shouldConnect) {
+				return false;
+			}
+
+			this.cleanupWebSocket();
+			try {
+				this.openTransport(remaining, reject);
+			} catch (error) {
+				reject(error);
+			}
+			return true;
+		};
+
+		const onMessageHandler = (payload: any) => {
+			if (!receivedMessage) {
+				receivedMessage = true;
+				this.clearConnectTimer();
+				this.failedTransports.delete(transport);
+			}
+			this.emit("message", payload);
+		};
+		const onCloseHandler = (payload: any) => {
+			// 1006 says that the connection failed. Any other code is a decision
+			// of the server, which the next transport would get as well.
+			if (payload?.code === 1006 && failOver()) {
+				return;
+			}
 			this.emit("close", { event: payload });
-		const onOpenHandler = (payload: any) => this.emit("open", payload);
+		};
+		const onOpenHandler = (payload: any) => {
+			opened = true;
+			this.clearConnectTimer();
+			this.emit("open", payload);
+		};
 		const onErrorHandler = (err: any) => {
+			if (failOver()) {
+				return;
+			}
 			reject(err);
 		};
 
@@ -357,9 +491,129 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		Object.keys(handlers).forEach((name) => {
 			ws.addEventListener(name, handlers[name]);
 		});
+
+		// HTTP sockets enforce their own deadline; a WebSocket-only configuration
+		// waits for the socket as long as it takes.
+		if (transport === "websocket" && this.configuration.transports.length > 1) {
+			this.armConnectTimer(this.configuration.connectTimeout);
+		}
+	}
+
+	private markTransportFailed(transport: HocuspocusTransport) {
+		// A socket that fails because of disconnect() (e.g. a WebSocket closed
+		// while connecting reports 1006) says nothing about the transport, and
+		// must not undo the reset disconnect() did.
+		if (!this.shouldConnect) {
+			return;
+		}
+		this.failedTransports.set(transport, Date.now() + FAILED_TRANSPORT_TTL);
+	}
+
+	/**
+	 * Give the current WebSocket `delay` ms, after which it counts as failed:
+	 * its `close` listener is called as if it had closed with 1006. The timer
+	 * never outlives its socket, `cleanupWebSocket` clears it.
+	 */
+	private armConnectTimer(delay: number) {
+		this.clearConnectTimer();
+		this.connectTimer = setTimeout(() => {
+			this.connectTimer = null;
+			if (this.webSocket) {
+				this.webSocketHandlers[this.webSocket.identifier]?.close({
+					code: 1006,
+					reason: "Connect timeout",
+				});
+			}
+		}, delay);
+	}
+
+	/**
+	 * A WebSocket whose upgrade passes but whose frames are dropped never
+	 * answers, and would be waited for forever. So with other transports to
+	 * turn to, a WebSocket that was sent something has `messageReconnectTimeout`
+	 * to deliver its first message.
+	 */
+	private expectFirstMessage() {
+		if (
+			this.connectionAttempt &&
+			!this.connectTimer &&
+			this.transport === "websocket" &&
+			this.configuration.transports.length > 1
+		) {
+			this.armConnectTimer(this.configuration.messageReconnectTimeout);
+		}
+	}
+
+	private clearConnectTimer() {
+		if (this.connectTimer) {
+			clearTimeout(this.connectTimer);
+			this.connectTimer = null;
+		}
+	}
+
+	/**
+	 * Transports for one connection attempt: the configured ones, without those
+	 * that failed recently. If every one failed recently, all of them, the one
+	 * that failed longest ago first: a WebSocket that opens but delivers nothing
+	 * cannot fail over within its attempt, and must not be retried first
+	 * forever while the HTTP transports wait behind it.
+	 */
+	private transportCandidates(): HocuspocusTransport[] {
+		const now = Date.now();
+		const candidates = this.configuration.transports.filter(
+			(transport) => (this.failedTransports.get(transport) ?? 0) <= now,
+		);
+		if (candidates.length > 0) {
+			return candidates;
+		}
+
+		return [...this.configuration.transports].sort(
+			(a, b) =>
+				(this.failedTransports.get(a) ?? 0) -
+				(this.failedTransports.get(b) ?? 0),
+		);
+	}
+
+	/**
+	 * Create a socket for the first candidate. A constructor that throws moves
+	 * on to the next candidate; with none left the error propagates.
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+	private openTransport(candidates: HocuspocusTransport[], reject: Function) {
+		const [transport, ...rest] = candidates;
+		this.identifier += 1;
+
+		let ws: any;
+		try {
+			ws =
+				transport === "websocket"
+					? new this.configuration.WebSocketPolyfill(this.url)
+					: new HttpSocket(this.url, {
+							transport,
+							withCredentials: this.configuration.withCredentials,
+							connectTimeout: this.configuration.connectTimeout,
+						});
+		} catch (error) {
+			if (rest.length === 0) {
+				throw error;
+			}
+			this.markTransportFailed(transport);
+			this.openTransport(rest, reject);
+			return;
+		}
+
+		ws.binaryType = "arraybuffer";
+		ws.identifier = this.identifier;
+		this.transport = transport;
+
+		this.attachWebSocketListeners(ws, reject, transport, rest);
+
+		this.webSocket = ws;
 	}
 
 	cleanupWebSocket() {
+		this.clearConnectTimer();
+
 		if (!this.webSocket) {
 			return;
 		}
@@ -372,6 +626,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		});
 		this.webSocket.close();
 		this.webSocket = null;
+		this.transport = null;
 	}
 
 	createWebSocketConnection() {
@@ -381,16 +636,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 				this.cleanupWebSocket();
 			}
 			this.lastMessageReceived = 0;
-			this.identifier += 1;
 
-			// Init the WebSocket connection
-			const ws = new this.configuration.WebSocketPolyfill(this.url);
-			ws.binaryType = "arraybuffer";
-			ws.identifier = this.identifier;
-
-			this.attachWebSocketListeners(ws, reject);
-
-			this.webSocket = ws;
+			this.openTransport(this.transportCandidates(), reject);
 
 			// Reset the status
 			this.status = WebSocketStatus.Connecting;
@@ -467,6 +714,14 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			return;
 		}
 
+		// An HTTP transport watches its own requests: a stream or a poll that
+		// goes silent past its deadline fails, and the socket closes with 1006.
+		// Heartbeats are no messages, so this check would take an idle session
+		// for a dead one.
+		if (this.transport !== "websocket") {
+			return;
+		}
+
 		// Don’t close the connection while waiting for the first message
 		if (!this.lastMessageReceived) {
 			return;
@@ -518,6 +773,10 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	}
 
 	disconnect() {
+		// An explicit reconnect starts from the first transport again.
+		this.clearConnectTimer();
+		this.failedTransports.clear();
+
 		this.shouldConnect = false;
 		this.clearReconnectTimeout();
 
@@ -570,6 +829,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	send(message: any) {
 		if (this.webSocket?.readyState === WsReadyStates.Open) {
 			this.webSocket.send(message);
+			this.expectFirstMessage();
 		} else {
 			this.addToQueue(message);
 		}

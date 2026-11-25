@@ -1,6 +1,7 @@
 export * from "./Connection.ts";
 export * from "./Document.ts";
 export * from "./Hocuspocus.ts";
+export * from "./HttpFallback.ts";
 export * from "./IncomingMessage.ts";
 export * from "./MessageReceiver.ts";
 export * from "./OutgoingMessage.ts";

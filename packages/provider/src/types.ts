@@ -1,7 +1,7 @@
 import type { Encoder } from "lib0/encoding";
 import type { Awareness } from "y-protocols/awareness";
 import type * as Y from "yjs";
-import type { CloseEvent } from "@hocuspocus/common";
+import type { CloseEvent, HttpTransportName } from "@hocuspocus/common";
 import type { IncomingMessage } from "./IncomingMessage.ts";
 import type { OutgoingMessage } from "./OutgoingMessage.ts";
 import type { AuthenticationMessage } from "./OutgoingMessages/AuthenticationMessage.ts";
@@ -28,6 +28,9 @@ export enum WebSocketStatus {
 	Connected = "connected",
 	Disconnected = "disconnected",
 }
+
+/** Transports `HocuspocusProviderWebsocket` can connect with. */
+export type HocuspocusTransport = "websocket" | HttpTransportName;
 
 export type AuthorizedScope = "read-write" | "readonly";
 

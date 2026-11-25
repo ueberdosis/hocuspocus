@@ -35,6 +35,7 @@
 		"playground:express": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/express.ts\"",
 		"playground:koa": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/koa.ts\"",
 		"playground:default": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/default.ts\"",
+		"playground:http-fallback": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/http-fallback.ts\"",
 		"playground:slow": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/slow.ts\"",
 		"playground:redis": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/redis.ts\"",
 		"playground:webhook": "concurrently --kill-others \"pnpm -C ./playground/frontend dev\" \"pnpm -C ./playground/backend dev src/webhook.ts\"",
