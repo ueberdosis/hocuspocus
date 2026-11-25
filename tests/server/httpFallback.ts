@@ -3,7 +3,7 @@ import type { ServerResponse } from "node:http";
 import net from "node:net";
 import { writeAuthentication } from "@hocuspocus/common";
 import { type Hocuspocus, HttpFallback } from "@hocuspocus/server";
-import test from "ava";
+import test, { type ExecutionContext } from "ava";
 import * as encoding from "lib0/encoding";
 import {
 	newHocuspocus,
@@ -906,11 +906,20 @@ test("destroy() closes sessions with 1001 and refuses new ones", async (t) => {
 });
 
 /**
- * Open an event stream through the Node.js server, authenticate a document
- * on it and put a long message on its way: a response a shutdown has to
- * let finish.
+ * Start a server, open an event stream through it and authenticate a
+ * document on the stream. Then send the client long messages until the
+ * server has to wait for it: the socket buffers are full, and the rest is
+ * still on its way. A response a shutdown has to let finish.
  */
-const openLongDownload = async (hocuspocus: Hocuspocus) => {
+const openLongDownload = async (t: ExecutionContext) => {
+	let stream: ServerResponse | undefined;
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		// Runs for the request that opens the session: the event stream.
+		async onRequest({ response }) {
+			stream = response;
+		},
+	});
 	const base = hocuspocus.server!.httpURL;
 	const sessionId = randomUUID();
 	const response = await fetch(`${base}/?hp_sid=${sessionId}&hp_transport=sse`);
@@ -934,14 +943,32 @@ const openLongDownload = async (hocuspocus: Hocuspocus) => {
 	});
 	await readUntil((seen) => /^id: \d+$/m.test(seen));
 
-	// About 10 MB of base64: more than the socket buffers hold, so the server
-	// can only go on once the client takes it.
-	hocuspocus.documents
-		.get("shutdown-doc")!
-		.broadcastStateless("x".repeat(8_000_000));
-	await reader.read();
+	// The server waits for the client once it waits for `drain` and none
+	// comes, whatever the size of the socket buffers. About 10 MB of base64
+	// per message.
+	const server = stream!;
+	const document = hocuspocus.documents.get("shutdown-doc")!;
+	let drains = 0;
+	server.on("drain", () => {
+		drains += 1;
+	});
+	for (let round = 1; ; round += 1) {
+		if (!server.writableNeedDrain) {
+			document.broadcastStateless("x".repeat(8_000_000));
+		}
+		const before = drains;
+		await sleep(200);
+		if (server.writableNeedDrain && drains === before) {
+			break;
+		}
+		if (round === 10) {
+			throw new Error("The server never had to wait for the client");
+		}
+	}
 
 	return {
+		hocuspocus,
+		stream: server,
 		reader,
 		/** Take the rest of the stream, as fast as it comes. */
 		readRest: async () => {
@@ -958,18 +985,10 @@ const openLongDownload = async (hocuspocus: Hocuspocus) => {
 };
 
 test("destroy() waits for the close event to reach a client that is still downloading", async (t) => {
-	let stream: ServerResponse | undefined;
-	const hocuspocus = await newHocuspocus(t, {
-		httpFallback: true,
-		// Runs for the request that opens the session: the event stream.
-		async onRequest({ response }) {
-			stream = response;
-		},
-	});
-	const { readRest } = await openLongDownload(hocuspocus);
+	const { hocuspocus, stream, readRest } = await openLongDownload(t);
 	// The end of the stream was handed to the OS.
 	let finished = false;
-	stream!.once("finish", () => {
+	stream.once("finish", () => {
 		finished = true;
 	});
 
@@ -982,8 +1001,8 @@ test("destroy() waits for the close event to reach a client that is still downlo
 		// not handed to the OS yet.
 		finishedBefore = finished;
 	});
-	// The client takes nothing for a second: the message is stuck in the
-	// socket buffers, and the close event waits behind it.
+	// The client takes nothing for a second: the server waits for it, and the
+	// close event waits behind the message.
 	await sleep(1000);
 	t.false(destroyed);
 
@@ -999,13 +1018,16 @@ test("destroy() waits for the close event to reach a client that is still downlo
 });
 
 test("destroy() gives up on a client that stops reading, after a while", async (t) => {
-	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
-	const { reader } = await openLongDownload(hocuspocus);
+	const { hocuspocus, stream, reader } = await openLongDownload(t);
+	const connection = stream.socket!;
 
 	const started = Date.now();
 	await hocuspocus.server!.destroy();
 	const elapsed = Date.now() - started;
 	t.true(elapsed >= 4900 && elapsed < 8000, `${elapsed} ms`);
+	// Nor does its connection keep the process alive until the write times
+	// out.
+	t.true(connection.destroyed);
 
 	await reader.cancel();
 });

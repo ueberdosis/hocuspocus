@@ -329,8 +329,8 @@ export class HttpFallback<Context = any> {
 	// Not counted against `maxSessions`, but not more of them either.
 	private readonly closedSessions = new Map<string, ClosedSession>();
 
-	/** The responses on their way through `handleNodeRequest`. */
-	private readonly writes = new Set<Promise<void>>();
+	/** The responses on their way through `handleNodeRequest`, and their writes. */
+	private readonly writes = new Map<ServerResponse, Promise<void>>();
 
 	private destroyed = false;
 
@@ -390,11 +390,11 @@ export class HttpFallback<Context = any> {
 		defaultContext?: Context,
 	): Promise<void> {
 		const write = this.writeNodeResponse(request, response, defaultContext);
-		this.writes.add(write);
+		this.writes.set(response, write);
 		try {
 			await write;
 		} finally {
-			this.writes.delete(write);
+			this.writes.delete(response);
 		}
 	}
 
@@ -427,8 +427,9 @@ export class HttpFallback<Context = any> {
 	 * Close every session with 1001 and refuse new ones with 503. A session
 	 * without a response to carry the close event gets it with its next
 	 * request. Resolves once the responses on their way through
-	 * `handleNodeRequest` have been written, or after a grace period of 5 s.
-	 * Responses served through `fetch` by another runtime are not waited for.
+	 * `handleNodeRequest` have been written, or after a grace period of 5 s,
+	 * which destroys the ones still on their way. Responses served through
+	 * `fetch` by another runtime are not waited for.
 	 */
 	async destroy(): Promise<void> {
 		this.destroyed = true;
@@ -438,16 +439,21 @@ export class HttpFallback<Context = any> {
 		}
 
 		// The close event is the last thing a response on its way carries. A
-		// client that reads slowly gets it; one that stopped reading does not
-		// hold the shutdown.
+		// client that reads slowly gets it; one that stopped reading holds
+		// neither the shutdown nor, with its connection, the process.
 		let timer: ReturnType<typeof setTimeout> | undefined;
-		await Promise.race([
-			Promise.all(this.writes),
-			new Promise<void>((resolve) => {
-				timer = setTimeout(resolve, DESTROY_GRACE);
+		const expired = await Promise.race([
+			Promise.all(this.writes.values()).then(() => false),
+			new Promise<boolean>((resolve) => {
+				timer = setTimeout(() => resolve(true), DESTROY_GRACE);
 			}),
 		]);
 		clearTimeout(timer);
+		if (expired) {
+			for (const response of this.writes.keys()) {
+				response.destroy();
+			}
+		}
 	}
 
 	/**
