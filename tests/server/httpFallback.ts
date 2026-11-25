@@ -943,9 +943,9 @@ const openLongDownload = async (t: ExecutionContext) => {
 	});
 	await readUntil((seen) => /^id: \d+$/m.test(seen));
 
-	// The server waits for the client once it waits for `drain` and none
-	// comes, whatever the size of the socket buffers. About 10 MB of base64
-	// per message.
+	// The server waits for the client once text waits in Node's buffers, which
+	// the OS does not take, and no `drain` comes: whatever the size of the
+	// socket buffers. About 10 MB of base64 per message.
 	const server = stream!;
 	const document = hocuspocus.documents.get("shutdown-doc")!;
 	let drains = 0;
@@ -953,12 +953,12 @@ const openLongDownload = async (t: ExecutionContext) => {
 		drains += 1;
 	});
 	for (let round = 1; ; round += 1) {
-		if (!server.writableNeedDrain) {
+		if (server.writableLength === 0) {
 			document.broadcastStateless("x".repeat(8_000_000));
 		}
 		const before = drains;
 		await sleep(200);
-		if (server.writableNeedDrain && drains === before) {
+		if (server.writableLength > 0 && drains === before) {
 			break;
 		}
 		if (round === 10) {
