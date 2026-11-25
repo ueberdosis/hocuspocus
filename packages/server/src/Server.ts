@@ -300,6 +300,9 @@ export class Server<Context = any> {
 		// The responses on their way carry the close events: wait, for a
 		// while, until they went out, before the process may exit.
 		await fallbackDestroyed;
+		// A document that is still loading is not counted above, and its hooks
+		// may use what `onDestroy` releases.
+		await Promise.allSettled(this.hocuspocus.loadingDocuments.values());
 
 		await this.hocuspocus.hooks("onDestroy", { instance: this.hocuspocus });
 	}

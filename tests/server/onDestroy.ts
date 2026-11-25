@@ -1,5 +1,5 @@
 import test from "ava";
-import { newHocuspocus, newHocuspocusProvider } from "../utils/index.ts";
+import { newHocuspocus, newHocuspocusProvider, sleep } from "../utils/index.ts";
 import { retryableAssertion } from "../utils/retryableAssertion.ts";
 
 test("executes the onDestroy hook and has the instance", async (t) => {
@@ -272,4 +272,34 @@ test("destroy calls onStoreDocument before returning, with multiple docs if debo
 
 		resolve("");
 	});
+});
+
+test("destroy waits for a document that is still loading before onDestroy", async (t) => {
+	let finishLoading!: () => void;
+	const loading = new Promise<void>((resolve) => {
+		finishLoading = resolve;
+	});
+	const events: string[] = [];
+	const hocuspocus = await newHocuspocus(t, {
+		async onLoadDocument() {
+			events.push("load started");
+			await loading;
+			events.push("load finished");
+		},
+		async onDestroy() {
+			events.push("destroy");
+		},
+	});
+	newHocuspocusProvider(t, hocuspocus);
+	await retryableAssertion(t, (t2) => t2.deepEqual(events, ["load started"]));
+
+	// No document is loaded yet, so none has to unload: only the load holds
+	// onDestroy back, whose extensions it may still use.
+	const destroyed = hocuspocus.server!.destroy();
+	await sleep(100);
+	t.deepEqual(events, ["load started"]);
+
+	finishLoading();
+	await destroyed;
+	t.deepEqual(events, ["load started", "load finished", "destroy"]);
 });
