@@ -1010,6 +1010,41 @@ test("destroy() gives up on a client that stops reading, after a while", async (
 	await reader.cancel();
 });
 
+test("answers queued behind another on a connection that went away do not hold a later shutdown", async (t) => {
+	let requests = 0;
+	const hocuspocus = await newHocuspocus(t, {
+		httpFallback: true,
+		async onRequest() {
+			requests += 1;
+		},
+	});
+	const { port } = hocuspocus.server!.address;
+
+	// An event stream, and right behind it on the same connection, requests
+	// whose answers wait for the stream to end (pipelining).
+	const socket = net.connect(port, "127.0.0.1");
+	socket.on("error", () => {});
+	await new Promise((resolve) => socket.once("connect", resolve));
+	const request = (query: string) =>
+		`GET /?${query} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n`;
+	socket.write(
+		request(`hp_transport=sse&hp_sid=${randomUUID()}`) +
+			Array.from({ length: 10 }, () =>
+				request(`hp_sid=${randomUUID()}&hp_cursor=0`),
+			).join(""),
+	);
+	await retryableAssertion(t, (tt) => tt.is(requests, 11));
+	// The connection goes away before they could be sent. Node 22 does not
+	// tell their responses: they are given up once they had the time to flush.
+	socket.destroy();
+	await sleep(5500);
+
+	const started = Date.now();
+	await hocuspocus.server!.destroy();
+	const elapsed = Date.now() - started;
+	t.true(elapsed < 1000, `${elapsed} ms`);
+});
+
 test("a request without hp_sid is left to the server, whatever its URL", async (t) => {
 	const hocuspocus = await newHocuspocus(t, { httpFallback: true });
 

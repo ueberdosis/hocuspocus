@@ -56,7 +56,8 @@ export function toWebRequest(request: IncomingMessage): Request {
  * Write a web `Response` to a Node.js response, honouring backpressure in both
  * directions: the body is read only as fast as the client accepts it, and the
  * body stream is cancelled once the client goes away. Resolves once the end
- * of the response was handed to the OS, or the response was destroyed.
+ * of the response was handed to the OS, or the response was destroyed; a
+ * response that is not done END_DESTROY_DELAY after its end is given up.
  */
 export async function writeWebResponse(
 	response: ServerResponse,
@@ -113,9 +114,15 @@ export async function writeWebResponse(
 
 	// Not done before the end was handed to the OS (`close` follows `finish`):
 	// a process that exits right after this, at shutdown, would drop what is
-	// still queued, such as the close event of an HTTP session.
+	// still queued, such as the close event of an HTTP session. Done once the
+	// response is given up, though: Node 22 emits no `close` for a response
+	// queued behind another on a connection that went away, and destroys no
+	// response without a socket.
 	await new Promise<void>((resolve) => {
-		const timer = setTimeout(() => response.destroy(), END_DESTROY_DELAY);
+		const timer = setTimeout(() => {
+			response.destroy();
+			resolve();
+		}, END_DESTROY_DELAY);
 		timer.unref();
 		response.once("close", () => {
 			clearTimeout(timer);
